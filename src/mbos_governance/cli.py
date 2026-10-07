@@ -9,6 +9,7 @@
   mbos-gov render egress|litellm [--out FILE]   (generators; stdout if no --out; no network)
   mbos-gov freeze-requests apply FILE.jsonl     (B-04: apply lane B's side-channel freeze requests)
   mbos-gov reconcile [--older-than SECONDS]      (E-05: stuck claims; provider lookup, never re-send)
+  mbos-gov sandbox check [--spec FILE] [--host]  (E-08: sandbox spec invariants; --host reports runtimes, installs nothing)
   mbos-gov alerts [--since-hours 24] [--ntfy]    (E-09: read-only alert queries; exit 2 on any CRITICAL; sends nothing)
 
 Connection: --dsn, or env MBOS_GOV_DSN (one login for every role), or per role
@@ -60,6 +61,10 @@ def main(argv: list[str] | None = None) -> int:
     fr = sub.add_parser("freeze-requests")
     fr.add_argument("action", choices=["apply"])
     fr.add_argument("file")
+    sb = sub.add_parser("sandbox")
+    sb.add_argument("action", choices=["check"])
+    sb.add_argument("--spec")
+    sb.add_argument("--host", action="store_true")
     al = sub.add_parser("alerts")
     al.add_argument("--since-hours", type=float, default=24.0)
     al.add_argument("--ntfy", action="store_true")
@@ -91,6 +96,22 @@ def main(argv: list[str] | None = None) -> int:
         print(f"policy ok: {pol.version} mode={pol.data['system_mode']} delegation={pol.data['delegation_enabled']}")
         return 0
 
+    if a.cmd == "sandbox":
+        from . import sandbox
+        spec_path = a.spec or str(Path(policy_path).with_name("sandbox.v1.json"))
+        try:
+            data = PolicyStore(policy_path).current().data
+        except PolicyUnavailable:
+            data = None
+        try:
+            problems = sandbox.check(sandbox.load(spec_path), data)
+        except Exception as exc:  # noqa: BLE001
+            problems = [f"spec unreadable: {exc}"]
+        out = {"spec": spec_path, "ok": not problems, "problems": problems}
+        if a.host:
+            out["host"] = sandbox.host_readiness()
+        print(json.dumps(out, indent=2))
+        return 0 if not problems else 1
     if a.cmd == "alerts":
         from datetime import datetime, timedelta, timezone
         from .alerts import collect, to_ntfy

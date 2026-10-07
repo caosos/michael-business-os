@@ -1,0 +1,56 @@
+{
+  "sandbox_schema": "mbos.governance.sandbox/1",
+  "version": "2026.10.07-e08",
+  "description": "E-08 (ADR-0005 §7): how each MBOS process is isolated. gVisor (runsc) is the baseline; model-generated code runs only in self-hosted E2B with no network and no secrets. This is a SPEC + checker: the EliteDesk host has no Podman/runsc today (UNKNOWN when installed — a Michael/host decision), so nothing here is deployed.",
+  "components": [
+    { "id": "action-gateway",      "kind": "gateway",              "owner": "agent-05-governance",
+      "runtime": "gvisor", "network": "egress_proxy", "uid": "mbos-gateway",
+      "db_login": "mbos_gateway", "db_roles": ["gateway"],
+      "secrets": ["effector:*"], "untrusted_input": false,
+      "rootfs_readonly": true, "writable_paths": ["/var/lib/mbos/gateway"], "drop_all_capabilities": true,
+      "privileged": false, "host_network": false, "mounts_container_socket": false,
+      "limits": { "memory_mb": 512, "cpus": 1, "pids": 256 } },
+
+    { "id": "spine-dbos",          "kind": "orchestrator",         "owner": "agent-01-coordinator",
+      "runtime": "gvisor", "network": "none_except_db", "uid": "mbos-dbos",
+      "db_login": "mbos_dbos", "db_roles": ["agent_write", "approver"],
+      "secrets": [], "untrusted_input": false,
+      "rootfs_readonly": true, "writable_paths": ["/var/lib/mbos/dbos"], "drop_all_capabilities": true,
+      "privileged": false, "host_network": false, "mounts_container_socket": false,
+      "limits": { "memory_mb": 1024, "cpus": 2, "pids": 512 },
+      "note": "Lane D RECOMMENDATION applied: no `gateway` role once the gateway runs as its own process." },
+
+    { "id": "operator-ui",         "kind": "operator_ui",          "owner": "agent-06-communications",
+      "runtime": "gvisor", "network": "loopback_only", "uid": "mbos-ui",
+      "db_login": "mbos_operator_ui", "db_roles": ["approver"],
+      "secrets": ["ui:session_key", "ui:pin_hash"], "untrusted_input": false,
+      "rootfs_readonly": true, "writable_paths": [], "drop_all_capabilities": true,
+      "privileged": false, "host_network": false, "mounts_container_socket": false,
+      "limits": { "memory_mb": 256, "cpus": 1, "pids": 128 } },
+
+    { "id": "discovery-adapters",  "kind": "source_adapter",       "owner": "agent-02-opportunity",
+      "runtime": "gvisor", "network": "egress_proxy", "uid": "mbos-discovery",
+      "db_login": "mbos_state_mcp", "db_roles": ["agent_write"],
+      "secrets": ["source:ebay_browse"], "untrusted_input": true,
+      "rootfs_readonly": true, "writable_paths": ["/var/lib/mbos/raw"], "drop_all_capabilities": true,
+      "privileged": false, "host_network": false, "mounts_container_socket": false,
+      "limits": { "memory_mb": 1024, "cpus": 1, "pids": 256 } },
+
+    { "id": "llm-agents",          "kind": "llm_agent",            "owner": "agent-01-coordinator",
+      "runtime": "gvisor", "network": "egress_proxy", "uid": "mbos-agents",
+      "db_login": "mbos_state_mcp", "db_roles": ["agent_write"],
+      "secrets": ["llm:litellm_virtual_key"], "untrusted_input": true,
+      "rootfs_readonly": true, "writable_paths": [], "drop_all_capabilities": true,
+      "privileged": false, "host_network": false, "mounts_container_socket": false,
+      "limits": { "memory_mb": 1024, "cpus": 1, "pids": 256 } },
+
+    { "id": "model-generated-code", "kind": "model_generated_code", "owner": "agent-05-governance",
+      "runtime": "e2b", "network": "none", "uid": "e2b-sandbox",
+      "db_login": null, "db_roles": [],
+      "secrets": [], "untrusted_input": true,
+      "rootfs_readonly": false, "writable_paths": ["/tmp"], "drop_all_capabilities": true,
+      "privileged": false, "host_network": false, "mounts_container_socket": false,
+      "limits": { "memory_mb": 512, "cpus": 1, "pids": 64, "timeout_s": 60 },
+      "note": "No path exists in wave one; spec reserved so the first such feature starts from no-network/no-secrets." }
+  ]
+}

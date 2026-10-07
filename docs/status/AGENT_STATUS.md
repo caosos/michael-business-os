@@ -4,12 +4,12 @@ Agent: 05
 Role: Governance / Action Gateway / PANIC — "controlled autonomy"
 Branch: research/agent-05-governance
 Worktree: /home/michaelos/business-os-worktrees/agent-05-governance
-State: WORKING
+State: WAITING — every queued lane-E task is DONE (E-01..E-10). Proposed E-11 below; A-03 (01) consumes E-10.
 Done: E-10 @ ebae275 (spine_adapter: Gateway/KillSwitch/PDP over 01's mbos.interfaces on lane D; reconcile(); R4 contract docs/integration/05-spine-adapter-R4-contract.md)
 Done: E-06 @ e957680 (policy publish -> mbos.policy, receipted; PgPolicyStore reads policy_current, pinned schema, row-drift/tamper => fail closed; same decisions as file)
 Done: E-09 @ c68f3b2 (alerts.collect read-only over lane D: freeze/unreadable/stuck/chain/A7/budget/injection/dry-run/reconciled; ntfy-ready JSON, never sent; CLI exit 2 on critical)
 Done: E-07 @ 2d65401 (egress.catalog as policy data, all disabled in wave one; check_catalog in the fail-closed loader; effective_allow feeds render_egress)
-Claimed: E-08 (sandbox spec + config checker; doc + checker only)
+Done: E-08 @ <E08> (sandbox spec as data + I1–I8 checker; host has no runsc/podman/docker/e2b — report only)
 Done: B-04 lane-E half @ d3b9948 (02's fixture applies + blocks exactly that source; auto-apply decided, release human-only)
 Done: E-04 @ 4fadbe7 (secret scan refuses + never stores; injection tripwire => tier 0, needs_review, step-up; 205 tests)
 Done: E-02 @ 1c554cb (gateway + PANIC on lane D Postgres via mbos.* API; no SQLite in prod path; R4 role-enforced; 211 tests on PG16)
@@ -18,7 +18,7 @@ Done: E-01 @ df826c3 (interop row 05 = 10/10; vectors receipt_chain verifies; 14
 Done: E-03 @ e12caa3 (L3 DBOS cancel verified on real dbos 3.2.0; deny-all egress + LiteLLM budget generators; 157 tests)
 Current phase: ROUND TWO — wave two (foreman loop, docs/COORDINATION.md)
 Started: 2026-10-06
-Last updated: 2026-10-07 (E-07 done; claimed E-08)
+Last updated: 2026-10-07 (E-08 done; lane E queue empty)
 
 ## Current objective
 **SUPERSEDED by ADR-0010 (E-01):** Agent 01 binding rulings for lane E
@@ -96,6 +96,8 @@ Package `src/mbos_governance/` (Python 3.12, only dependency `jsonschema`):
 None for wave one.
 
 ## Needs Michael decision
+- (E-08, host) Install gVisor (runsc) + Podman on the EliteDesk to run the sandbox spec. Not needed for the
+  dry-run MVP; until then isolation = per-process Unix users + Postgres roles. Host change => Michael.
 Unchanged; wave one ships conservative defaults as data (`MICHAEL_DECISIONS.md` #1, #3, #5):
 dollar caps (dry-run shadow caps $1,500/deal, comms $5/day, publishing $50/day; live $0),
 step-up method, no delegation.
@@ -119,6 +121,9 @@ step-up method, no delegation.
 - docs/receipts/2026-10-07-round-two-gateway-build.md
 
 ## Proposed tasks
+- E-11 (P2) Re-pin lane D to 341c5d2+ (migrations 0008–0013) and switch the money ACTION-count velocity to
+  0013's caps.velocity_actions_per_hour (D-11 DONE); delete the in-Python count. 0010 needs the superuser to
+  create the vector extension in schema mbos_ext before migrating (harness change).
 - E-06 (P1) Policy data into lane D: publish policy/policy.v1.json + content_rules into mbos.policy via
   publish_policy (policy_admin), PDP reads policy_current; file stays as the signed source. Fail closed if
   no current row. (Lane-E + 04 API, no DDL change expected.)
