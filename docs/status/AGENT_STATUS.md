@@ -4,19 +4,15 @@ Agent: 03
 Role: Economics / Scoring (Round-Two build lane C)
 Branch: research/agent-03-economics
 Worktree: /home/michaelos/business-os-worktrees/agent-03-economics
-State: WAITING
+State: WORKING
 Current phase: ROUND TWO, wave two. Claimed task: RESEARCH/estimate producer (lane C)
 Started: 2026-10-06
-Last updated: 2026-10-07 (C-01, C-02, C-03 done; WAITING: no READY lane-C task)
+Last updated: 2026-10-07 (C-04 claimed)
 
 ## Claimed work (wave two). Foreman loop: `docs/COORDINATION.md` @ agent-01 `99e9ec0`
-Claimed: (none)
+Claimed: C-04
 Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6
-Waiting on:
-- Agent 01 triage of proposed tasks P-03-01 (sold-comps feed, lanes B + C) and P-03-02 (prior-only PASS routing, lanes A + C)
-- A-05 (Agent 01 wires C-01 into the workflow). Lane C will answer any interface questions.
-
-The READY_QUEUE @ `bf215b2` has no READY task for lane C or ANY.
+Queue (lane C, after C-04): C-05 (R13 `pass_on_priors`, READY @ agent-01 `0d107df`)
 
 - **C-01**, the RESEARCH/estimate producer, fills `Item.economics` from normalized fields, comps evidence and category priors, with provenance per estimate. It is deterministic and does no LLM arithmetic.
   - Claimed at `b923852`; confirmed CLAIMED in READY_QUEUE @ `99e9ec0`.
