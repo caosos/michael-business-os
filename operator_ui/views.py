@@ -158,7 +158,7 @@ def queue(store, now):
         d = sc.get("derived") or {}
         rec = item.get("recommendation") or {}
         rows.append({
-            "areq_id": a["action_request_id"], "status": a["status"], "lane": item["type"],
+            "areq_id": a["action_request_id"], "item_id": a["item_id"], "status": a["status"], "lane": item["type"],
             "category": item["category"], "title": item["normalized"]["title"], "verdict": rec.get("verdict"),
             "confidence": rec.get("confidence", d.get("confidence")), "ev": d.get("ev_net_profit"),
             "pph": d.get("ev_profit_per_hour"), "capability": a["capability"],

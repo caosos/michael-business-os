@@ -24,6 +24,11 @@ else:
     collect_ignore = ["lane_d"]
 
 FIXTURE = Path(__file__).parent / "fixtures" / "illustrative.json"
+# Contracts for mbos's schema validator (a non-editable install cannot find them): this branch's vendored copy,
+# which includes card.schema.json (ADR-0011) byte-identical to the coordinator's.
+os.environ.setdefault("MBOS_CONTRACTS_DIR", str(Path(__file__).resolve().parent.parent / "docs" / "research" / "contracts"))
+# Lane A's operator profile, from the pinned mbos checkout (a non-editable install cannot find it; see backend.py).
+os.environ.setdefault("MBOS_OPERATOR_PROFILE", str(Path(__file__).resolve().parent.parent / ".tools" / "mbos-d2ef52f" / "config" / "operator_profile.v1.json"))
 PIN = "4321"
 
 
@@ -70,12 +75,14 @@ def discover(rt):
     from mbos.reference.fixture_adapter import FixtureSourceAdapter
     from mbos.runtime import components
 
-    def _run(*ids: str) -> dict[str, str]:
+    def _run(*ids: str, titles: dict | None = None) -> dict[str, str]:
         tag = uuid.uuid4().hex[:8]
         data = json.loads(FIXTURE.read_text())
         out = []
         for rec in data["listings"]:
             if rec["source_listing_id"] in ids:
+                if titles and rec["source_listing_id"] in titles:  # hostile-text tests
+                    rec["record"]["normalized"]["title"] = titles[rec["source_listing_id"]]
                 rec["source_listing_id"] = f"{rec['source_listing_id']}-{tag}"
                 rec["url"] = f"{rec['url']}?t={tag}"
                 rec["record"]["dedup_key"] = f"{rec['record']['dedup_key']}|{tag}"

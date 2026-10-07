@@ -30,6 +30,14 @@ _LD = {"item": ("mbos.v_item_documents", "item_id"), "areq": ("mbos.v_action_req
        "prov": ("mbos.v_provenance_documents", "provenance_id"), "outc": ("mbos.v_outcome_documents", "outcome_id")}
 
 
+class ProfileUnavailable(RuntimeError):
+    pass
+
+
+class ItemNotFound(Exception):
+    """Unknown item id. Deliberately NOT a LookupError: a KeyError from the card builder must surface as a failure."""
+
+
 class SpineBackend:
     def __init__(self, engine: sa.Engine, components: Optional[Components] = None, notify=None, lane: str = "reference"):
         if lane not in ("reference", "lane_d"):
@@ -155,6 +163,31 @@ class SpineBackend:
             return mbos_canonical.verify_chain(chain)
         except Exception as e:  # noqa: BLE001 — a value the reference rejects is a failed verification
             return False, f"reference rejected the chain: {type(e).__name__}: {e}"
+
+    def opportunity_card(self, item_id: str) -> dict:
+        """F-13: the ADR-0011 card for one Item, from Agent 01's API only (works on both backends). Returns
+        {'card', 'errors', 'areqs'}; raises ItemNotFound for an unknown item. Nothing here adds data."""
+        import os
+
+        from mbos import card as mc
+
+        # Michael's capability profile (trailer owned? ...) is lane A's data. A non-editable mbos install cannot find
+        # its default location (repo-relative), so MBOS_OPERATOR_PROFILE may point at it. Missing = a clear error,
+        # never a made-up profile.
+        profile_path = os.environ.get("MBOS_OPERATOR_PROFILE") or None
+        try:
+            profile = mc.load_profile(profile_path)
+        except OSError as ex:
+            raise ProfileUnavailable(f"operator profile not found ({ex.filename or profile_path}); set MBOS_OPERATOR_PROFILE "
+                                     "to config/operator_profile.v1.json from the mbos checkout") from ex
+        try:
+            with self.engine.connect() as c:
+                item, receipts, areqs = mc.load_inputs(c, item_id)
+                enr = mc.enrichment_from_item(c, item)
+        except sa.exc.NoResultFound:
+            raise ItemNotFound(item_id) from None
+        card = mc.build_card(item, receipts, areqs, enr, profile=profile)
+        return {"card": card, "errors": mc.validate_card(card), "areqs": areqs}
 
     def held(self) -> list[dict]:
         """HOLD backlog: held requests with their item and the HOLD in force (approval row)."""

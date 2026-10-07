@@ -102,3 +102,6 @@ Every page keeps the loopback, Host-check, CSRF and CSP guards (R14: human chann
 
 ## 9. Lane D + lane E (task F-04)
 `SpineBackend(..., lane="lane_d")` reads lane D's contract-document views and writes only through `mbos.spine_d`. `MBOS_STATE_BACKEND=lane_d python -m operator_ui serve` builds the UI with the worker's Components (`lane_e_components`: Agent 05's gateway, PDP and kill switch). Tests: `tools/run_tests.sh` (reference suite and lane D suite in separate processes).
+
+## 10. The opportunity card (task F-13)
+`/item/<id>` is the primary view (the queue links here). It renders `mbos.card.build_card(...)` and adds no data. UNKNOWN stays UNKNOWN with its reason; all text is escaped; a card failing `validate_card` shows a red banner. The YES/NO/MODIFY/HOLD controls sit beneath the RECOMMENDATION block and return to the card. Config: `MBOS_OPERATOR_PROFILE` (lane A's `config/operator_profile.v1.json`) and `MBOS_CONTRACTS_DIR` (includes the vendored `card.schema.json`).

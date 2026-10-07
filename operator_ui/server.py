@@ -18,7 +18,8 @@ from urllib.parse import parse_qs, quote, urlparse
 from mbos.clock import iso, utcnow
 from mbos.spine import DecisionRefused
 
-from . import ux, views
+from . import card_view, ux, views
+from .backend import ItemNotFound, ProfileUnavailable
 from .sources import load_health
 from .ux import InputError
 
@@ -50,6 +51,8 @@ button{font:inherit;font-weight:700;border:0;border-radius:6px;padding:8px 14px;
 input,textarea,select{font:inherit;width:100%;margin:4px 0 8px;padding:6px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink)}
 input[type=checkbox],input[type=radio]{width:auto;margin-right:6px}textarea{min-height:120px;font-family:ui-monospace,monospace;font-size:13px}
 .flash{padding:10px 14px;border-radius:8px;margin-bottom:14px;border:1px solid var(--line);background:var(--card)}.err{border-color:var(--no);color:var(--no)}
+.unk{color:var(--mod)}.tag{display:inline-block;padding:0 6px;border-radius:99px;font-size:11px;font-weight:700;border:1px solid currentColor}
+.tag.fact{color:var(--yes)}.tag.inf{color:var(--hold)}.tag.rec{color:var(--mod)}.rec{border-color:var(--acc)}
 .q a.rowlink{display:block;text-decoration:none;color:inherit}.bad{color:var(--no);font-weight:600}.ok{color:var(--yes);font-weight:600}
 """
 
@@ -94,7 +97,7 @@ def render_queue(q):
         for r in lst:
             extra = f' · held until {e(r["hold_until"])}' if r.get("hold_until") else ""
             extra += f' · modified from {e(r["derived_from"][:13])}…' if r.get("derived_from") else ""
-            out.append(f"""<div class="card q"><a class="rowlink" href="/areq/{e(r['areq_id'])}">
+            out.append(f"""<div class="card q"><a class="rowlink" href="/item/{e(r['item_id'])}">
 <div class="row">{_lane(r['lane'])}<span class="mut small">{e(r['category'])}</span>{_verdict(r['verdict'])}
 <span class="grow"></span><span class="small mut">{e(r['status'])} · expires in {e(r['expires_in_hours'])}h{extra}</span></div>
 <h1>{e(r['title'])}</h1>
@@ -106,6 +109,58 @@ def render_queue(q):
     return (f"<h2>Needs your decision ({len(q['pending'])})</h2>{rows(q['pending'], 'Nothing waiting.')}"
             f"<h2>On hold ({len(q['held'])})</h2>{rows(q['held'], 'Nothing parked.')}"
             f"<h2>Closed / executed ({len(q['closed'])})</h2>{rows(q['closed'], 'None yet.')}")
+
+
+def _ret(ret):
+    return '<input type="hidden" name="return" value="item">' if ret else ""
+
+
+def render_decide(c, csrf, ret=False):
+    """YES / NO / MODIFY / HOLD forms for one open request. Human channel only (R14): CSRF + frozen payload hash.
+    `ret` makes the POST come back to the opportunity card (/item/<id>) instead of the technical request page."""
+    a = c["areq"]
+    common = (f'<input type="hidden" name="csrf" value="{e(csrf)}">{_ret(ret)}'
+              f'<input type="hidden" name="payload_hash_seen" value="{e(a["payload_hash"])}">')
+    presets = "".join(
+        f'<label><input type="radio" name="hold_preset" value="{e(k)}"{" checked" if k == "24h" else ""}>{e(v["label"])}</label><br>'
+        for k, v in c["hold_presets"].items())
+    decide = "<p class='mut'>This request is closed — no decision possible.</p>"
+    if c["decidable"]:
+        pin = ('<label>Step-up PIN (irreversible / money)<input name="pin" type="password" autocomplete="off" required></label>'
+               if c["step_up"] else "")
+        yes = (f"""<form method="post" action="/areq/{e(a['action_request_id'])}/decide">{common}<input type="hidden" name="decision" value="YES">
+<p class="small">Executes <b>exactly</b> the frozen payload above (hash <code>{e(a['payload_hash'][7:19])}</code>). Dry-run only.</p>{pin}
+<button class="b-YES">YES</button></form>""" if c["payload_hash_verified"] else
+               "<div class='flash err'>YES unavailable: the payload shown does not hash to this request's payload_hash "
+               "(ADR-0010 check). Use NO, MODIFY or HOLD, and report it.</div>")
+        decide = f"""<div class="decide">
+{yes}
+<form method="post" action="/areq/{e(a['action_request_id'])}/decide">{common}<input type="hidden" name="decision" value="NO">
+<label>Reason (required)<input name="reason" required maxlength="500"></label>
+<p class="small mut">The opportunity is archived; the reason feeds LEARN.</p>
+<button class="b-NO">NO</button></form>
+<form method="post" action="/areq/{e(a['action_request_id'])}/decide">{common}<input type="hidden" name="decision" value="MODIFY">
+<label>Edited payload (creates a NEW request that needs its own YES)<textarea name="new_payload">{e(json.dumps(a['payload'], indent=2))}</textarea></label>
+<label>Note<input name="note" maxlength="500"></label><button class="b-MODIFY">MODIFY</button></form>
+<form method="post" action="/areq/{e(a['action_request_id'])}/decide">{common}<input type="hidden" name="decision" value="HOLD">
+{presets}<label>…or custom time (local)<input type="datetime-local" name="hold_until"></label>
+<label>Reason<input name="reason" maxlength="500"></label><button class="b-HOLD">HOLD</button></form></div>"""
+    return decide
+
+
+def render_hold_notice(c, csrf, ret=False):
+    a = c["areq"]
+    hold = ""
+    if c["hold"]:
+        h = c["hold"]
+        hold = (f"<p><b>On HOLD</b> until {e(h.get('hold_until'))} · wakes on {e(', '.join(h.get('wake_on') or []))}"
+                f" · reminder every {e(h.get('renotify_after'))}"
+                f"{' · escalates after ' + e(h['escalate_after']) if h.get('escalate_after') else ''}."
+                " The item workflow owns this timer; it re-presents the request and never executes it.</p>")
+        if "michael_ping" in (h.get("wake_on") or []):
+            hold += (f'<form method="post" action="/areq/{e(a["action_request_id"])}/wake"><input type="hidden" name="csrf" value="{e(csrf)}">{_ret(ret)}'
+                     '<button class="b-HOLD" style="width:auto">Wake now (re-present for a decision)</button></form>')
+    return hold
 
 
 def render_card(c, csrf):
@@ -150,43 +205,8 @@ def render_card(c, csrf):
         lineage += f"<p>Modified from <a href='/areq/{e(a['derived_from'])}'>{e(a['derived_from'])}</a></p>"
     for s in c["successors"]:
         lineage += f"<p>Superseded by <a href='/areq/{e(s)}'>{e(s)}</a></p>"
-    hold = ""
-    if c["hold"]:
-        h = c["hold"]
-        hold = (f"<p><b>On HOLD</b> until {e(h.get('hold_until'))} · wakes on {e(', '.join(h.get('wake_on') or []))}"
-                f" · reminder every {e(h.get('renotify_after'))}"
-                f"{' · escalates after ' + e(h['escalate_after']) if h.get('escalate_after') else ''}."
-                " The item workflow owns this timer; it re-presents the request and never executes it.</p>")
-        if "michael_ping" in (h.get("wake_on") or []):
-            hold += (f'<form method="post" action="/areq/{e(a["action_request_id"])}/wake"><input type="hidden" name="csrf" value="{e(csrf)}">'
-                     '<button class="b-HOLD" style="width:auto">Wake now (re-present for a decision)</button></form>')
-
-    common = (f'<input type="hidden" name="csrf" value="{e(csrf)}">'
-              f'<input type="hidden" name="payload_hash_seen" value="{e(a["payload_hash"])}">')
-    presets = "".join(
-        f'<label><input type="radio" name="hold_preset" value="{e(k)}"{" checked" if k == "24h" else ""}>{e(v["label"])}</label><br>'
-        for k, v in c["hold_presets"].items())
-    decide = "<p class='mut'>This request is closed — no decision possible.</p>"
-    if c["decidable"]:
-        pin = ('<label>Step-up PIN (irreversible / money)<input name="pin" type="password" autocomplete="off" required></label>'
-               if c["step_up"] else "")
-        yes = (f"""<form method="post" action="/areq/{e(a['action_request_id'])}/decide">{common}<input type="hidden" name="decision" value="YES">
-<p class="small">Executes <b>exactly</b> the frozen payload above (hash <code>{e(a['payload_hash'][7:19])}</code>). Dry-run only.</p>{pin}
-<button class="b-YES">YES</button></form>""" if c["payload_hash_verified"] else
-               "<div class='flash err'>YES unavailable: the payload shown does not hash to this request's payload_hash "
-               "(ADR-0010 check). Use NO, MODIFY or HOLD, and report it.</div>")
-        decide = f"""<div class="decide">
-{yes}
-<form method="post" action="/areq/{e(a['action_request_id'])}/decide">{common}<input type="hidden" name="decision" value="NO">
-<label>Reason (required)<input name="reason" required maxlength="500"></label>
-<p class="small mut">The opportunity is archived; the reason feeds LEARN.</p>
-<button class="b-NO">NO</button></form>
-<form method="post" action="/areq/{e(a['action_request_id'])}/decide">{common}<input type="hidden" name="decision" value="MODIFY">
-<label>Edited payload (creates a NEW request that needs its own YES)<textarea name="new_payload">{e(json.dumps(a['payload'], indent=2))}</textarea></label>
-<label>Note<input name="note" maxlength="500"></label><button class="b-MODIFY">MODIFY</button></form>
-<form method="post" action="/areq/{e(a['action_request_id'])}/decide">{common}<input type="hidden" name="decision" value="HOLD">
-{presets}<label>…or custom time (local)<input type="datetime-local" name="hold_until"></label>
-<label>Reason<input name="reason" maxlength="500"></label><button class="b-HOLD">HOLD</button></form></div>"""
+    hold = render_hold_notice(c, csrf)
+    decide = render_decide(c, csrf)
 
     return f"""<div class="card"><div class="row">{_lane(c['lane'])}<span class="mut">{e(c['category'])} · {e(c['subcategory'])}</span>
 {_verdict(c['verdict'])}<span class="grow"></span><span class="small mut">item {e(item['state'])} · request {e(a['status'])} · expires in {e(c['expires_in_hours'])}h</span></div>
@@ -235,7 +255,15 @@ def _pva(o):
     return ", ".join(f"{p['field']}: {_num(p.get('predicted'))} → {_num(p.get('actual'))}" for p in o.get("predicted_vs_actual") or [])
 
 
-def render_outcome_section(c, csrf):
+def render_outcome_card_section(app, item_id, open_areq, areqs):
+    """Outcome entry/history under the opportunity card. Keyed by the item's latest request (outcomes belong to the item)."""
+    latest = open_areq or (areqs[-1] if areqs else None)
+    if latest is None:
+        return ""
+    return render_outcome_section(views.card(app.store, latest["action_request_id"], utcnow()), app.csrf, ret=True)
+
+
+def render_outcome_section(c, csrf, ret=False):
     """F-09: outcomes already recorded for this item, and, once the item has settled, the entry form."""
     item, a = c["item"], c["areq"]
     rows = "".join(
@@ -249,7 +277,7 @@ def render_outcome_section(c, csrf):
     if item["state"] in ux.OUTCOME_STATES:
         kinds = "".join(f"<option value='{e(k)}'>{e(k)}</option>" for k in ux.outcome_kinds(item["type"]))
         form = f"""<form method="post" action="/areq/{e(a['action_request_id'])}/outcome">
-<input type="hidden" name="csrf" value="{e(csrf)}">
+<input type="hidden" name="csrf" value="{e(csrf)}">{_ret(ret)}
 <div class="decide"><label>What happened<select name="kind">{kinds}</select></label>
 <label>Revenue $<input name="revenue" inputmode="decimal"></label><label>Total cost $<input name="total_cost" inputmode="decimal"></label>
 <label>Hours spent<input name="hours" inputmode="decimal"></label><label>Days to cash<input name="days_to_cash" inputmode="decimal"></label></div>
@@ -476,6 +504,8 @@ def make_handler(app):
                 from . import digest as digest_view
 
                 return self._send(200, page("Morning digest", render_digest(digest_view.build(app.store, iso(now))), app.state()))
+            if u.path.startswith("/item/"):
+                return self._item_page(u.path.split("/")[2], now, flash or err, bool(err))
             if u.path == "/summary":
                 from . import summary as summary_view
 
@@ -508,6 +538,26 @@ def make_handler(app):
                 return self._send(200, json.dumps({k: v for k, v in c.items() if k != "hold_presets"}, default=str), "application/json")
             return self._send(404, page("Not found", "<p>Not found.</p>", app.state()))
 
+        def _item_page(self, item_id, now, flash, is_err):
+            """F-13: the opportunity card is the primary view of an item."""
+            try:
+                res = app.store.opportunity_card(item_id)
+            except ItemNotFound:
+                return self._send(404, page("Not found", "<p>No such opportunity.</p>", app.state()))
+            except ProfileUnavailable as ex:
+                return self._send(503, page("Card unavailable", f"<div class='card'><h2>Card unavailable</h2><p class='bad'>{e(ex)}</p>"
+                                            "<p>The technical request pages still work.</p></div>", app.state()))
+            card = res["card"]
+            open_areq = next((a for a in reversed(res["areqs"]) if a["status"] in ("pending_approval", "held")), None)
+            controls = hold = ""
+            if open_areq:
+                v = views.card(app.store, open_areq["action_request_id"], now)
+                controls, hold = render_decide(v, app.csrf, ret=True), render_hold_notice(v, app.csrf, ret=True)
+                controls += f"<p class='small'><a href='/areq/{e(open_areq['action_request_id'])}'>Technical view of this request (payload, hashes)</a></p>"
+            body = card_view.render_item_card(card, res["errors"], controls, hold)
+            body += render_outcome_card_section(app, item_id, open_areq, res["areqs"])
+            return self._send(200, page(card["item"]["title"], body, app.state(), flash, is_err))
+
         def do_POST(self):
             if not self._host_ok():
                 return
@@ -527,8 +577,12 @@ def make_handler(app):
                     msg, out = app.decide(areq_id, f)
                     target = out.get("new_action_request_id") or areq_id
                 loc, key = f"/areq/{target}", "msg"
+                if f.get("return") == "item":
+                    loc = f"/item/{app.store.action_request(target)['item_id']}"
             except (InputError, DecisionRefused) as ex:
                 loc, key, msg = f"/areq/{areq_id}", "err", str(ex)
+                if f.get("return") == "item" and app.store.action_request(areq_id):
+                    loc = f"/item/{app.store.action_request(areq_id)['item_id']}"
             self.send_response(303)
             self.send_header("Location", f"{loc}?{key}={quote(msg)}")
             self.send_header("Content-Length", "0")

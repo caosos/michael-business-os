@@ -4,17 +4,22 @@ Agent: 06
 Role: Communications + Operator UI / Approval UX (build lane F)
 Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
-State: WORKING
-Claimed: F-13
-Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe · F-04 @ 46c961c
+State: WAITING
+Claimed: none
+Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe · F-04 @ 46c961c · F-13 @ HEADPH
 Blocked: F-11 on A-15
 Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
 Last updated: 2026-10-07
 
 ## Current objective
-**F-13** (P0, Michael's request; READY_QUEUE @ `d2ef52f`): render the Deal Sniffer opportunity card (ADR-0011, `card.schema.json`) as the primary opportunity view at `/item/<id>`, built only from `mbos.card.load_inputs / enrichment_from_item / build_card / validate_card`. YES/NO/MODIFY/HOLD controls sit beneath the RECOMMENDATION block (human channel, R14). All listing text escaped; UNKNOWN shown as UNKNOWN; must work with zero enrichment. F-11 is still BLOCKED on A-15.
+WAITING. **F-11** (follow-up / offer / quote buttons on the card) is BLOCKED on **A-15**. The card page (`/item/<id>`) is ready to host them. Next: claim F-11 when A-15 is DONE, flip my pinned freeze test when 05's E-12 lands (R20), or take any new F-/ANY task.
 
 ## Done
+- **F-13 @ HEADPH:** the ADR-0011 opportunity card is the primary view at `/item/<id>`, built only from `mbos.card` (Agent 01's API).
+  - All sections, UNKNOWN shown as UNKNOWN, escaped text, validate_card banner, every receipt in the trail.
+  - Decision controls beneath the RECOMMENDATION block (human channel, R14) return to the card.
+  - Works with zero enrichment, on both backends. 118 + 11 tests pass.
+  - Receipt: `docs/receipts/2026-10-07-f13-opportunity-card.md`.
 - **F-04 @ 46c961c:** the UI runs on lane D with lane E's real Components (`lane_e_components`).
   - Reads come from lane D's document views; writes only through `spine_d`.
   - Reference suite 108 passed; lane D + lane E suite 9 passed (`tools/run_tests.sh`).
@@ -108,6 +113,8 @@ None. Live comms stay disabled (MICHAEL_DECISIONS #4).
 - The comms policy values in `comms_spec/data/comms_policy.v1.json` are PROPOSED (conservative). Loosening any of them is a version bump.
 
 ## Proposed tasks
+- **P-06-13 (lane A):** `mbos.card.load_profile()` defaults to a repo-relative path, and `card.schema.json` is not found by a non-editable install without `MBOS_CONTRACTS_DIR` (same class as A-10). The UI works around it with `MBOS_OPERATOR_PROFILE` and `MBOS_CONTRACTS_DIR`.
+- R20: P-06-11 is resolved by 05's E-12 (`cancelled_by_freeze`); my pinned test must flip when it lands.
 - **P-06-11 (lane A/E):** after a global freeze, a YES leaves the ActionRequest `approved` (ACTION_FAILED, item FAILED) on lane D + lane E, whereas the reference gateway used `cancelled_by_freeze`. Is that intended? Pinned as observed behaviour.
 - **P-06-12 (lane D/F):** run the UI with a least-privilege approver DSN (R14) and add a test that exercises lane D's role grants (the pgserver user is a superuser).
 - P-06-4 became F-05 (DONE) and P-06-5 became F-06 (DONE).

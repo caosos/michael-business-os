@@ -204,3 +204,32 @@ def test_comms_ledger_schema_is_owner_managed_on_lane_d(rtd):
     from comms_spec import ledger as L
 
     assert L.ensure_schema(rtd.engine) == "skipped"                          # migration 0011 owns mbos_comms
+
+
+# ---------------------------------------------------------------- F-13: the opportunity card on lane D + lane E
+def test_opportunity_card_on_lane_d_with_zero_enrichment(rtd, discover_d, ui_d):
+    item_id, areq = ready(ui_d, discover_d)
+    s, _, body = req(ui_d, "GET", f"/item/{item_id}")
+    assert s == 200
+    for h in ("Listing activity", "Seller", "Why it is interesting", "Estimated numbers", "Value-add plan", "Seasonality",
+              "Transport", "System status", "Recommendation", "Your decision", "Activity trail", "UNKNOWN ("):
+        assert h in body, h
+    res = ui_d.store.opportunity_card(item_id)
+    assert res["errors"] == [] and res["card"]["unknowns"]
+    for r in ui_d.store.receipts(item_id=item_id):                   # R17: every receipt is in the trail
+        assert r["receipt_id"] in body, r["type"]
+    assert body.index("<h2>Recommendation</h2>") < body.index(">YES<") and 'name="return" value="item"' in body
+    assert f'href="/item/{item_id}"' in req(ui_d, "GET", "/")[2]
+
+
+def test_decide_from_the_card_on_lane_d_returns_to_the_card_and_executes_once(rtd, discover_d, ui_d):
+    item_id, areq = ready(ui_d, discover_d)
+    _, loc, _ = post(ui_d, areq, "YES", pin=PIN, **{"return": "item"})
+    assert loc.startswith(f"/item/{item_id}?msg=YES recorded"), loc
+    wait(lambda: state(ui_d, item_id) == "ACTED")
+    body = req(ui_d, "GET", f"/item/{item_id}")[2]
+    assert "ACTION_EXECUTED" in body or "executed" in body.lower()
+    assert q(rtd, "SELECT count(*) FROM mbos.effector_calls WHERE action_request_id = :a", a=areq["action_request_id"])[0][0] == 1
+    for r in ui_d.store.receipts(item_id=item_id):
+        assert r["receipt_id"] in body
+    assert req(ui_d, "GET", "/item/itm_01JA0000000000000000009999")[0] == 404
