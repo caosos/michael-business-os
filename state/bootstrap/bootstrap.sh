@@ -27,6 +27,12 @@ GRANT CONNECT ON DATABASE mbos TO agent_read, agent_write, gateway, approver, po
 REVOKE ALL ON DATABASE mbos_dbos FROM PUBLIC;
 SQL
 "${PSQL[@]}" -d mbos -c "REVOKE ALL ON SCHEMA public FROM PUBLIC"
+# pgvector (not a trusted extension): superuser installs it in its own schema; roles may use it (D-08).
+"${PSQL[@]}" -d mbos <<SQL
+CREATE SCHEMA IF NOT EXISTS mbos_ext;
+CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA mbos_ext;
+GRANT USAGE ON SCHEMA mbos_ext TO agent_read, agent_write, gateway, approver, policy_admin, mbos_owner;
+SQL
 # DBOS @DBOS.transaction checkpoints live in schema dbos of the app DB (same txn as the state write).
 "${PSQL[@]}" -d mbos -c "CREATE SCHEMA IF NOT EXISTS dbos AUTHORIZATION mbos_dbos"
 "${PSQL[@]}" -d postgres -c "GRANT CONNECT ON DATABASE mbos TO mbos_dbos"

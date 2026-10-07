@@ -117,6 +117,16 @@ systemctl --user enable --now mbos-postgres.service mbos-chain-check.timer
 - **PITR:** `wal_level=replica` is already set. pgBackRest (`archive_command`, a repo on off-box storage)
   lands once an off-box target exists. **UNKNOWN:** the target (NAS, USB or cloud).
 
+## 5b. Vector index (D-08 / D3)
+- `mbos.item_embeddings` is a projection. It may be dropped at any time.
+- Routine maintenance:
+  - `vector_index.refresh()`: incremental; only missing or stale rows are embedded.
+  - `vector_index.verify()`: reports missing, stale and orphan rows.
+  - `vector_index.rebuild()` (owner): drops and regenerates the rows and the HNSW index in one transaction.
+- **FACT:** D3 passes. Drop, then rebuild, gives byte-identical rows and identical exact and HNSW results, and the HNSW path is proven with EXPLAIN. A live rebuild on the scratch DB gave identical results.
+- pgvector is installed by the superuser bootstrap in schema `mbos_ext`.
+- `HashEmbedder` is the offline default (no network, no LLM spend). Switching to a model embedder means a new (model_id, model_version) and a rebuild.
+
 ## 6. Tamper response
 
 `verify_chain` reports `first_bad_seq` and one of these reasons:

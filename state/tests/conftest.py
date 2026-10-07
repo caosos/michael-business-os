@@ -54,6 +54,8 @@ def cluster():
             c.execute(f"CREATE DATABASE {TEMPLATE_DB} OWNER mbos_owner")
         with psycopg.connect(f"{base} dbname={TEMPLATE_DB} user=postgres", autocommit=True) as c:
             c.execute("CREATE SCHEMA dbos AUTHORIZATION mbos_dbos")   # as bootstrap.sh does
+            c.execute("CREATE SCHEMA mbos_ext; CREATE EXTENSION vector WITH SCHEMA mbos_ext; "
+                      "GRANT USAGE ON SCHEMA mbos_ext TO agent_read, agent_write, gateway, approver, policy_admin, mbos_owner")
         migrate.migrate(f"{base} dbname={TEMPLATE_DB} user=postgres", log=lambda *_: None)
         yield {"base": base, "pg_bin": pg_bin, "root": root}
     finally:
