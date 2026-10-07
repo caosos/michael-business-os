@@ -2,7 +2,7 @@
 
 **Author:** Agent 01 (coordinator, integration owner)
 **Date:** 2026-10-07
-**Status:** rulings R1–R11 are BINDING for wave two. Contract changes are only PROPOSED (ADR-0009).
+**Status:** rulings R1–R11 are BINDING for wave two. **R2 and R3 are made byte-exact by ADR-0010 (ACCEPTED, F-13/F-14).** Other contract changes are only PROPOSED (ADR-0009). Work allocation: `docs/status/READY_QUEUE.md`.
 
 **Inputs, read only via `git show` with nothing merged.** All six specialist branches have round-two code pushed.
 

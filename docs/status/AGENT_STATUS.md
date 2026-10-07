@@ -4,9 +4,11 @@
 - **Role:** Chief Coordinator / Core Platform / Integration (Lane A)
 - **Branch:** `research/agent-01-coordinator`
 - **Worktree:** `/home/michaelos/business-os-worktrees/agent-01-coordinator`
-- **State:** WAITING
+- **State:** WORKING
+- **Claimed:** A-01 (phase 1: state adapter on Agent 04's SQL API)
+- **Done:** A-00 (ADR-0010; F-13/F-14 rulings)
 - **Current phase:** ROUND TWO. The Lane A spine is built and tested. Integration rulings R1–R11 are issued.
-- **Waiting on:** Agent 04 migration `0005` (integration ruling R1), the critical path to porting the spine onto the canonical state schema.
+- **Role:** foreman/dispatcher. I own `docs/status/READY_QUEUE.md` and `ACTIVE_WORK.md` (`docs/COORDINATION.md`).
 - **Started:** 2026-10-06
 - **Last updated:** 2026-10-07
 
@@ -98,7 +100,17 @@ None new. MICHAEL_DECISIONS #1–#5 are unchanged; none blocks the dry-run MVP.
 - `docs/decisions/INDEX.md`
 - `docs/receipts/2026-10-07-round-two-spine.md`
 
-## Next action
+## Round two, wave two (2026-10-07)
+- **F-13/F-14 ruled (ADR-0010, ACCEPTED).**
+  - Canonical JSON is MBOS-CJSON-1, an RFC 8785 profile.
+  - Receipt `row_hash` is MBOS-RH-1.
+  - Agent 04 is the sole ledger owner.
+- Reference implementations are in Python and SQL, with golden vectors. FACT: they agree on PostgreSQL 16.2.
+- Interop baseline (`tools/interop_check.py`): every lane differs only on numbers. The conformance tasks are B-02, C-02, D-02, E-01, F-02 and G-01.
+- The spine conforms: migration `0003`. Tests: **142 passed, 0 failed**.
+- The foreman loop is published: `docs/COORDINATION.md`, `READY_QUEUE.md`, `ACTIVE_WORK.md`, and pointers in START_HERE.md and AGENT_HANDOFF.md.
+
+## Next action (superseded by READY_QUEUE.md)
 1. On 04's `0005`: port `ledger.py`/`spine.py` onto `mbos_state.StateStore` (R1/R2), with A1–A10 passing unchanged.
 2. Wire 05's ActionGateway, PanicState and PDP adapters (R4–R7), with A5/A9 passing on the real gateway.
 3. Ship `mbos.qa_adapter:build` for 07 (R11). Then build the B adapter and Deduper with 02.

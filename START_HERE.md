@@ -124,6 +124,14 @@ research/agent-07-marketing
 
 Each worktree has a pinned local Git identity. The launcher reasserts that identity at startup.
 
+## Work allocation: the foreman loop (Round Two onward; mandatory)
+Read `docs/COORDINATION.md`. In short:
+1. Read `docs/status/READY_QUEUE.md` and `docs/status/ACTIVE_WORK.md` from `origin/research/agent-01-coordinator`.
+2. Claim the highest-priority READY task assigned to you, by pushing `Claimed: <ID>` in your `AGENT_STATUS.md`.
+3. Finish it, push, and claim the next one.
+
+Enter WAITING only when no compatible READY task exists. Every hash follows ADR-0010 (`docs/research/contracts/canonical/`).
+
 ## Reporting protocol
 Every agent must maintain:
 

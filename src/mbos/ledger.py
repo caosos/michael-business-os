@@ -15,7 +15,7 @@ from typing import Any, Iterable, Optional
 import sqlalchemy as sa
 
 from mbos import __version__
-from mbos.clock import now_iso
+from mbos.clock import now_iso, receipt_ts
 from mbos.contracts import schemas
 from mbos.contracts.models import Receipt
 from mbos.ids import new_id
@@ -70,7 +70,7 @@ def append_receipt(conn: sa.Connection, *, type: str, intent: str, provenance_id
     subject = fields.get("action_request_id") or fields.get("item_id") or fields.get("entity_id") or "system"
     body = {
         "receipt_id": new_id("rcpt"),
-        "ts": now_iso(),
+        "ts": receipt_ts(),
         "schema_version": "1.0.0",
         "type": type,
         "actor": actor or SYSTEM_ACTOR,
@@ -92,6 +92,14 @@ def load_receipts(conn: sa.Connection, where: str = "true", params: Optional[dic
     rows = conn.execute(sa.text(f"SELECT seq, body, prev_hash, row_hash FROM mbos.receipts WHERE {where} ORDER BY seq"),
                         params or {}).all()
     return [{**r.body, "seq": r.seq, "prev_hash": r.prev_hash, "row_hash": r.row_hash} for r in rows]
+
+
+def verify_exported_chain(receipts: list[dict]) -> tuple[bool, str]:
+    """Verify receipts (full Receipt v1 documents, seq order) with ONLY the ADR-0010 reference code —
+    the check any lane, or an auditor, can run on an export without trusting this database."""
+    from mbos.hashing import reference
+
+    return reference().verify_chain(receipts)
 
 
 def verify_chain(conn: sa.Connection) -> dict:

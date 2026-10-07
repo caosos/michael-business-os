@@ -18,3 +18,9 @@ def now_iso() -> str:
 
 def parse(ts: str) -> datetime:
     return datetime.fromisoformat(ts.replace("Z", "+00:00"))
+
+
+def receipt_ts(dt: datetime | None = None) -> str:
+    """ADR-0010: receipt `ts` is always `YYYY-MM-DDTHH:MM:SS.ffffffZ` (UTC, exactly 6 fractional digits),
+    so a ledger that re-renders it from a timestamptz reproduces the hashed bytes."""
+    return (dt or utcnow()).astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")

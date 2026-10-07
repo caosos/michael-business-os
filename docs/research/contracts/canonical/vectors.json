@@ -1,0 +1,167 @@
+{
+  "spec": "MBOS-CJSON-1 / MBOS-RH-1 (ADR-0010)",
+  "cjson": [
+    {
+      "name": "ints + strings (07 F-14 baseline)",
+      "input": "{\"offer\": 850, \"template_id\": \"seller_inquiry_v1\", \"to_ref\": \"relay:QA-1\"}",
+      "canonical": "{\"offer\":850,\"template_id\":\"seller_inquiry_v1\",\"to_ref\":\"relay:QA-1\"}",
+      "sha256": "sha256:5b1ac2b759545ea0d801fe0dd424e7392885531aa7f28eac7f9df9edc971a8c3"
+    },
+    {
+      "name": "integral float 850.0 (F-14)",
+      "input": "{\"offer\": 850.0, \"to_ref\": \"relay:QA-1\"}",
+      "canonical": "{\"offer\":850,\"to_ref\":\"relay:QA-1\"}",
+      "sha256": "sha256:9012925c7cd24c65bf5c1562234063edd7c872e96ea7d9fc80f59ec64fdb2c2c"
+    },
+    {
+      "name": "decimal float 3.20",
+      "input": "{\"fuel_price_per_gal\": 3.20, \"to_ref\": \"relay:QA-1\"}",
+      "canonical": "{\"fuel_price_per_gal\":3.2,\"to_ref\":\"relay:QA-1\"}",
+      "sha256": "sha256:0705d072017ce07f45620ef9dfea860adf533e27c50e55aed91fb26b734f01a9"
+    },
+    {
+      "name": "money with cents",
+      "input": "{\"amount\": 1049.95, \"currency\": \"USD\", \"fee\": 12.50}",
+      "canonical": "{\"amount\":1049.95,\"currency\":\"USD\",\"fee\":12.5}",
+      "sha256": "sha256:05f4a90d92fbd9a5b1de1f24316f6379bedd5e446d07c35abc24b2de4f4c7363"
+    },
+    {
+      "name": "number edge cases",
+      "input": "{\"a\": 0.1, \"b\": -0.0, \"d\": 1e-7, \"e\": 1e-6, \"g\": 0.30000000000000004, \"h\": -12.50, \"i\": 1e15, \"j\": 5e-324, \"l\": 100, \"m\": 1E2, \"n\": 0.000123}",
+      "canonical": "{\"a\":0.1,\"b\":0,\"d\":1e-7,\"e\":0.000001,\"g\":0.30000000000000004,\"h\":-12.5,\"i\":1000000000000000,\"j\":5e-324,\"l\":100,\"m\":100,\"n\":0.000123}",
+      "sha256": "sha256:6d9dc9ae10de4bc919b3619c77c59245720b654584b9726f47d671227aceaa6d"
+    },
+    {
+      "name": "safe integer bounds",
+      "input": "{\"max\": 9007199254740991, \"min\": -9007199254740991, \"zero\": 0}",
+      "canonical": "{\"max\":9007199254740991,\"min\":-9007199254740991,\"zero\":0}",
+      "sha256": "sha256:b7b2401ddca2165824e98c61890c0aaec470258d3119dd265d02be9438bf47e6"
+    },
+    {
+      "name": "unicode + nested + bool/null (07 vector)",
+      "input": "{\"body\": \"H\\u00e9llo \\u2014 ok\", \"meta\": {\"b\": true, \"z\": null, \"list\": [2, 1]}}",
+      "canonical": "{\"body\":\"Héllo — ok\",\"meta\":{\"b\":true,\"list\":[2,1],\"z\":null}}",
+      "sha256": "sha256:3512f7d7ecd7e38d5e1c0bc4717fd2b6eac9a3a8bbe03360e645a037a7f905c0"
+    },
+    {
+      "name": "string escapes",
+      "input": "{\"s\": \"quote\\\" back\\\\ nl\\n tab\\t cr\\r bs\\b ff\\f ctl\\u0001\\u001f del\\u007f ls\\u2028 emoji\\ud83d\\ude00 slash/\"}",
+      "canonical": "{\"s\":\"quote\\\" back\\\\ nl\\n tab\\t cr\\r bs\\b ff\\f ctl\\u0001\\u001f del ls  emoji😀 slash/\"}",
+      "sha256": "sha256:2a9f0449597a511f19447066ba4a9a6b80427199e5da915ba54cf2a2dd255588"
+    },
+    {
+      "name": "member ordering",
+      "input": "{\"b\": 1, \"a\": 2, \"B\": 3, \"aa\": 4, \"\\u00e9\": 5, \"_\": 6, \"\": 7, \"\\uffff\": 8, \"Z\": 9}",
+      "canonical": "{\"\":7,\"B\":3,\"Z\":9,\"_\":6,\"a\":2,\"aa\":4,\"b\":1,\"é\":5,\"￿\":8}",
+      "sha256": "sha256:8791db23c1b1636034e230caf38c439c4b863a0e00b3ed39e055360b81b3d59d"
+    },
+    {
+      "name": "top-level array, empties",
+      "input": "[3, \"x\", {\"k\": []}, {}, [], null, false]",
+      "canonical": "[3,\"x\",{\"k\":[]},{},[],null,false]",
+      "sha256": "sha256:35614257fd42ae4c01a196f80e031805fa95ad2b722f1503b29bb0bd3d1e566d"
+    }
+  ],
+  "reject": [
+    {
+      "name": "integer above 2**53-1",
+      "input": "{\"n\": 9007199254740993}"
+    },
+    {
+      "name": "integral float above 2**53-1 (1e21)",
+      "input": "{\"n\": 1e21}"
+    },
+    {
+      "name": "NaN",
+      "input": "{\"n\": NaN}"
+    },
+    {
+      "name": "non-BMP member name",
+      "input": "{\"\\ud83d\\ude00\": 1}"
+    },
+    {
+      "name": "U+0000 in string",
+      "input": "{\"s\": \"a\\u0000\"}"
+    },
+    {
+      "name": "lone surrogate",
+      "input": "{\"s\": \"\\ud800\"}"
+    }
+  ],
+  "receipt_chain": [
+    {
+      "receipt_id": "rcpt_01JA0000000000000000000001",
+      "seq": 1,
+      "ts": "2026-10-07T12:00:00.000000Z",
+      "schema_version": "1.0.0",
+      "type": "ITEM_STATE_CHANGED",
+      "actor": {
+        "type": "system",
+        "id": "mbos-spine"
+      },
+      "intent": "discovered via fixture",
+      "item_id": "itm_01JA0000000000000000000001",
+      "entity_type": "item",
+      "entity_id": "itm_01JA0000000000000000000001",
+      "effect": "create",
+      "idempotency_key": "itm_01JA0000000000000000000001:state:1",
+      "before_state": null,
+      "after_state": {
+        "state": "DISCOVERED"
+      },
+      "provenance_ids": [
+        "prov_01JA0000000000000000000001"
+      ],
+      "prev_hash": null,
+      "row_hash": "sha256:d4e38b2344e0829b2f24e7bd18e3010b90f6a25bd870156f5e90726361960436"
+    },
+    {
+      "receipt_id": "rcpt_01JA0000000000000000000002",
+      "seq": 2,
+      "ts": "2026-10-07T12:00:01.250000Z",
+      "schema_version": "1.0.0",
+      "type": "ACTION_EXECUTED",
+      "actor": {
+        "type": "system",
+        "id": "action-gateway"
+      },
+      "intent": "DRY-RUN comms.email.send",
+      "item_id": "itm_01JA0000000000000000000001",
+      "action_request_id": "areq_01JA0000000000000000000001",
+      "approval_id": "appr_01JA0000000000000000000001",
+      "capability": "comms.email.send",
+      "effect": "send",
+      "payload_hash": "sha256:9012925c7cd24c65bf5c1562234063edd7c872e96ea7d9fc80f59ec64fdb2c2c",
+      "idempotency_key": "act:areq_01JA0000000000000000000001",
+      "budget_effect": {
+        "category": "comms",
+        "amount": 0.0,
+        "currency": "USD"
+      },
+      "llm_cost": {
+        "usd": 0.0012,
+        "prompt_tokens": 100,
+        "completion_tokens": 20
+      },
+      "effector_response": {
+        "provider": "dry-run",
+        "provider_msg_id": "dry_x",
+        "status": "simulated",
+        "dry_run": true
+      },
+      "details": {
+        "kind": "comms",
+        "dry_run": true
+      },
+      "provenance_ids": [
+        "prov_01JA0000000000000000000002"
+      ],
+      "prev_hash": "sha256:d4e38b2344e0829b2f24e7bd18e3010b90f6a25bd870156f5e90726361960436",
+      "row_hash": "sha256:dd0c43ac52d9ca05ec433a5d634cd1938adff85b1a864a5e0d429d662c65a6c4"
+    }
+  ],
+  "receipt_chain_hash_documents": [
+    "{\"actor\":{\"id\":\"mbos-spine\",\"type\":\"system\"},\"after_state\":{\"state\":\"DISCOVERED\"},\"effect\":\"create\",\"entity_id\":\"itm_01JA0000000000000000000001\",\"entity_type\":\"item\",\"idempotency_key\":\"itm_01JA0000000000000000000001:state:1\",\"intent\":\"discovered via fixture\",\"item_id\":\"itm_01JA0000000000000000000001\",\"prev_hash\":null,\"provenance_ids\":[\"prov_01JA0000000000000000000001\"],\"receipt_id\":\"rcpt_01JA0000000000000000000001\",\"schema_version\":\"1.0.0\",\"seq\":1,\"ts\":\"2026-10-07T12:00:00.000000Z\",\"type\":\"ITEM_STATE_CHANGED\"}",
+    "{\"action_request_id\":\"areq_01JA0000000000000000000001\",\"actor\":{\"id\":\"action-gateway\",\"type\":\"system\"},\"approval_id\":\"appr_01JA0000000000000000000001\",\"budget_effect\":{\"amount\":0,\"category\":\"comms\",\"currency\":\"USD\"},\"capability\":\"comms.email.send\",\"details\":{\"dry_run\":true,\"kind\":\"comms\"},\"effect\":\"send\",\"effector_response\":{\"dry_run\":true,\"provider\":\"dry-run\",\"provider_msg_id\":\"dry_x\",\"status\":\"simulated\"},\"idempotency_key\":\"act:areq_01JA0000000000000000000001\",\"intent\":\"DRY-RUN comms.email.send\",\"item_id\":\"itm_01JA0000000000000000000001\",\"llm_cost\":{\"completion_tokens\":20,\"prompt_tokens\":100,\"usd\":0.0012},\"payload_hash\":\"sha256:9012925c7cd24c65bf5c1562234063edd7c872e96ea7d9fc80f59ec64fdb2c2c\",\"prev_hash\":\"sha256:d4e38b2344e0829b2f24e7bd18e3010b90f6a25bd870156f5e90726361960436\",\"provenance_ids\":[\"prov_01JA0000000000000000000002\"],\"receipt_id\":\"rcpt_01JA0000000000000000000002\",\"schema_version\":\"1.0.0\",\"seq\":2,\"ts\":\"2026-10-07T12:00:01.250000Z\",\"type\":\"ACTION_EXECUTED\"}"
+  ]
+}

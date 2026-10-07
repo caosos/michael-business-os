@@ -68,6 +68,14 @@ Owns voice/SMS/email architecture, seller/customer workflows, call/SMS/email rec
 ### Agent 07 — Marketing
 Owns local SEO/AEO, GBP/Apple/Bing strategy, website/schema, reviews, attribution, contractor/referral outreach, content automation, and anti-spam rules.
 
+## Work allocation: the foreman loop (Round Two onward; mandatory)
+Read `docs/COORDINATION.md`. In short:
+1. Read `docs/status/READY_QUEUE.md` and `docs/status/ACTIVE_WORK.md` from `origin/research/agent-01-coordinator`.
+2. Claim the highest-priority READY task assigned to you, by pushing `Claimed: <ID>` in your `AGENT_STATUS.md`.
+3. Finish it, push, and claim the next one.
+
+Enter WAITING only when no compatible READY task exists. Every hash follows ADR-0010 (`docs/research/contracts/canonical/`).
+
 ## Durable reporting
 Every agent:
 - writes research to docs/research/
@@ -216,9 +224,10 @@ Before continuing work:
 - inspect relevant ADRs
 - inspect latest research reports
 - verify no uncommitted work exists
-- update own status to WORKING
+- read docs/COORDINATION.md, READY_QUEUE.md and ACTIVE_WORK.md
+- claim a READY task in your own status (State: WORKING, Claimed: <ID>)
 - commit and push that status
-- continue the next recorded action
+- do the task; on completion push, then claim the next READY task
 
 ## End-of-session checklist
 Before ending:
