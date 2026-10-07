@@ -1,13 +1,16 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://michael-business-os/schemas/scorecard.schema.json",
-  "title": "Opportunity Scorecard",
-  "description": "The reconstructable output of the economics engine for one opportunity. Stores inputs-derived intermediates, sub-scores, composite, decision, and reasons so the score can be replayed by hand under its scoring_config_version.",
+  "title": "Opportunity Scorecard (v1.1.0)",
+  "description": "The reconstructable output of the economics engine for one opportunity. Stores inputs-derived intermediates, sub-scores, composite, decision, and reasons so the score can be replayed by hand under its scoring_config_version. v1.1.0 (round two, additive): engine_version, config_hash, lane, yes_conditions, alert_checks, evidence, evidence_search, walk_away_price, min_quote_for_yes, and further derived fields (expected_revenue, branches, trips, fees, p_waste, travel_burden...). The derived object is open: every intermediate the engine computes is stored.",
   "type": "object",
   "required": ["scoring_config_version", "derived", "sub_scores", "composite", "decision", "reasons"],
   "properties": {
     "scoring_config_version": { "type": "string" },
-    "computed_at": { "type": "string", "format": "date-time" },
+    "computed_at": { "type": "string", "format": "date-time", "description": "Caller-supplied scoring time; the engine never reads the clock. Seeds scorecard_id." },
+    "engine_version": { "type": "string" },
+    "config_hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$", "description": "Content hash of the scoring-config file used; replay detects edits made without a version bump." },
+    "lane": { "enum": ["flip", "service"] },
     "derived": {
       "type": "object",
       "description": "Intermediate economic quantities (all in $ or hours or days).",
@@ -32,7 +35,13 @@
         "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
         "confidence_haircut": { "type": "number" },
         "skill_fit": { "type": "number", "minimum": 0, "maximum": 1 },
-        "scarcity": { "type": "number", "minimum": 0, "maximum": 1 }
+        "scarcity": { "type": "number", "minimum": 0, "maximum": 1 },
+        "expected_revenue": { "type": "number" },
+        "ev_hours": { "type": "number" },
+        "vehicle_cost_per_mile": { "type": "number" },
+        "p_waste": { "type": "number" },
+        "branches": { "type": "array", "items": { "type": "object", "required": ["name", "prob", "value", "revenue"] } },
+        "trips": { "type": "array", "items": { "type": "object" } }
       }
     },
     "sub_scores": {
@@ -66,6 +75,12 @@
       "description": "Human-readable justification lines; must be sufficient to explain the decision.",
       "items": { "type": "string" }
     },
+    "yes_conditions": { "type": "object", "additionalProperties": { "type": "boolean" }, "description": "Step-2 YES conditions; all true (and all gates true) => YES." },
+    "alert_checks": { "type": "object", "additionalProperties": { "type": "boolean" } },
+    "evidence": { "type": "object", "additionalProperties": { "type": "boolean" }, "description": "Evidence checklist as evaluated (including derived items)." },
+    "evidence_search": { "type": ["object", "null"], "description": "EVPI-lite result: {target, items[], reaches}." },
+    "walk_away_price": { "type": ["integer", "null"], "description": "FLIP: highest whole-dollar expected_buy_price that still scores YES." },
+    "min_quote_for_yes": { "type": ["integer", "null"], "description": "SERVICE: lowest whole-dollar quoted_revenue that scores YES." },
     "cheapest_decisive_evidence": {
       "type": "string",
       "description": "For MAYBE-on-evidence: the lowest-cost missing item that would most move the decision (EVPI, §15)."

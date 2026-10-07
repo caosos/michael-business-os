@@ -1,0 +1,20 @@
+[project]
+name = "mbos-economics"
+version = "0.1.0"
+description = "Michael Business OS — deterministic economics and scoring engine (Agent 03, lane C)"
+requires-python = ">=3.10"
+dependencies = []  # stdlib only: the arithmetic must not depend on third-party numerics
+
+[project.optional-dependencies]
+test = ["pytest>=8", "jsonschema>=4.18"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

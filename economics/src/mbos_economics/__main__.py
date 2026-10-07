@@ -1,0 +1,49 @@
+"""CLI.
+
+    python -m mbos_economics score  ITEM.json --scored-at 2026-10-07T12:00:00Z [--config-version V]
+    python -m mbos_economics replay ITEM.json        # ITEM.json must carry a `scores` block
+
+``score`` prints {scores, recommendation, provenance, receipt_drafts}. It writes nothing.
+Exit codes: 0 ok / replay match, 1 replay mismatch, 2 invalid input.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+from .config import load_config
+from .engine import score_item
+from .inputs import InputError
+from .replay import replay_item
+
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(prog="mbos_economics")
+    sub = ap.add_subparsers(dest="cmd", required=True)
+    s = sub.add_parser("score")
+    s.add_argument("item", type=Path)
+    s.add_argument("--scored-at", required=True, help="RFC 3339 timestamp; the engine never reads the clock")
+    s.add_argument("--config-version")
+    r = sub.add_parser("replay")
+    r.add_argument("item", type=Path)
+    args = ap.parse_args(argv)
+
+    item = json.loads(args.item.read_text(encoding="utf-8"))
+    if args.cmd == "score":
+        try:
+            out = score_item(item, load_config(args.config_version), args.scored_at)
+        except InputError as e:
+            print(json.dumps({"error": "invalid_input", "problems": e.problems}, indent=2))
+            return 2
+        print(json.dumps(out, indent=2))
+        return 0
+    res = replay_item(item)
+    print(json.dumps(res, indent=2))
+    return 0 if res["match"] else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
