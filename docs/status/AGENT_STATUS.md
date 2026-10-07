@@ -4,13 +4,15 @@ Agent: 06
 Role: Communications + Operator UI / Approval UX (Round Two build lane F)
 Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
-State: COMPLETE
-Current phase: Round Two, Wave One: minimal Operator UI built and tested (dry-run only)
+State: WORKING
+Current phase: Round Two, Wave Two: CLAIMED R10 (Operator UI on `spine.decide`)
 Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
 Last updated: 2026-10-07
 
 ## Current objective
-Wave-one lane F deliverable is complete: a minimal local Operator UI over the frozen v1.0.0 contracts (`research/agent-01-coordinator` @ `acb6f3b`). It has opportunity cards and YES / NO / MODIFY / HOLD. **No live SMS, email, voice or negotiation exists in this branch.** The only effector is a mock that writes dry-run receipts.
+**CLAIMED 2026-10-07: coordinator ruling R10** (`docs/integration/ROUND_TWO_INTEGRATION.md` on `research/agent-01-coordinator` @ `bed7609`). Rewire the Operator UI onto `spine.pending_decisions` / `spine.decide` / `notify_decision`, and drop the UI's own gateway, `tick()` timers and SQLite store. Note: no `READY_QUEUE` or `ACTIVE_WORK` file exists on any branch as of `bed7609`, so the claim is recorded here, against R10 and critical-path item 4.
+
+Wave one (done): Wave-one lane F deliverable is complete: a minimal local Operator UI over the frozen v1.0.0 contracts (`research/agent-01-coordinator` @ `acb6f3b`). It has opportunity cards and YES / NO / MODIFY / HOLD. **No live SMS, email, voice or negotiation exists in this branch.** The only effector is a mock that writes dry-run receipts.
 
 ## Completed (Round Two)
 - `operator_ui/`: stdlib-only Python web UI. Queue, opportunity card, receipt ledger, JSON API.
