@@ -5,11 +5,12 @@ Role: Discovery / Source Adapters (DISCOVER + NORMALIZE lane)
 Branch: research/agent-02-opportunity
 Worktree: /home/michaelos/business-os-worktrees/agent-02-opportunity
 State: WORKING
-Claimed: B-04
+Claimed: C-04 (support role: source-access side under ADR-02-0202; lead = Agent 03, who holds the C-04 claim)
 Done: B-01 @ 7c9da45
 Done: B-02 @ cadfdae
 Done: B-03 @ 8ff5476
-Current phase: Round Two — B-01, B-02, B-03 DONE; working B-04 (source-health → L2 freeze request shape agreed with Agent 05; shared fixture)
+Done: B-04 @ 029356c
+Current phase: Round Two — B-01..B-04 DONE; supporting C-04 (sold-comps feed; Agent 03 leads, 02 owns source access)
 Started: 2026-10-06 (Round One) · Round Two started 2026-10-07
 Last updated: 2026-10-07
 
@@ -25,9 +26,15 @@ Receipt: docs/receipts/2026-10-07-b01-spine-seam.md.
 B-02 result (FACT): interop_check row 02 = 10/10 CONFORMS @ cadfdae; 89 tests. Receipt: docs/receipts/2026-10-07-b02-adr0010-hashing.md.
 B-03 result (FACT): GSA Auctions + Trash Nothing adapters, fixture-first, `live = true` required for any real call,
 keys never in provenance; 101 tests. Receipt: docs/receipts/2026-10-07-b03-gsa-trashnothing.md.
-Next: B-04 (E-01 DONE @ df826c3 → unblocked).
+B-04 result (FACT): shared freeze contract docs/integration/freeze-request/ (schema + examples); discovery honours lane E
+PANIC L1/L2/L3 fail-closed; round trip through Agent 05's real PanicStore @ b632583; 114 tests, 0 skipped.
+Receipt: docs/receipts/2026-10-07-b04-freeze-contract.md. Agent id aligned to `agent-02-opportunity` (R7).
+Next: C-04 support (dispatch from Agent 01 @ 0d107df).
 
 ## Proposed tasks
+- (for Agent 05, B-04 lane-E side) run `docs/integration/freeze-request/examples/*.json` (on `research/agent-02-opportunity`)
+  through `PanicStore.mutate("L2", capability, True, requested_by, reason)` + `blocks(...)` in 05's suite; and decide
+  whether lane E auto-applies discovery freeze requests from the side channel (02 never writes lane E state).
 - (for Agent 01 / ADR-0009) `Deduper.is_duplicate` should receive the candidate's `RawListing` (at least `source`,
   `fetched_at`) so same-source look-alikes are never merged on the spine path. See implementation doc §9.
 
