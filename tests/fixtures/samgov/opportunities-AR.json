@@ -1,0 +1,21 @@
+{"totalRecords": 5, "limit": 50, "offset": 0, "opportunitiesData": [
+ {"noticeId": "fx0001aa", "title": "Maintenance and repair of grounds equipment (mowers, generators)",
+  "solicitationNumber": "W9127S26Q0001", "fullParentPathName": "DEPT OF DEFENSE.DEPT OF THE ARMY.USACE",
+  "postedDate": "2026-10-01", "type": "Combined Synopsis/Solicitation", "baseType": "Combined Synopsis/Solicitation",
+  "responseDeadLine": "2026-10-20T14:00:00-05:00", "naicsCode": "811310", "typeOfSetAside": "SBA",
+  "typeOfSetAsideDescription": "Total Small Business Set-Aside (FAR 19.5)", "active": "Yes",
+  "description": "https://api.sam.gov/prod/opportunities/v1/noticedesc?noticeid=fx0001aa",
+  "uiLink": "https://sam.gov/opp/fx0001aa/view",
+  "placeOfPerformance": {"city": {"code": "15190", "name": "Conway"}, "state": {"code": "AR", "name": "Arkansas"}, "zip": "72034"},
+  "pointOfContact": [{"fullName": "Fixture Officer", "email": "co@example.invalid", "phone": "5015550100"}]},
+ {"noticeId": "fx0002bb", "title": "Drywall repair and painting, Building 12", "postedDate": "2026-10-03",
+  "type": "Solicitation", "responseDeadLine": "2026-10-08T06:00:00-05:00", "naicsCode": "238310", "active": "Yes",
+  "uiLink": "https://sam.gov/opp/fx0002bb/view",
+  "placeOfPerformance": {"city": {"name": "Little Rock"}, "state": {"code": "AR"}, "zip": "72201"}},
+ {"noticeId": "fx0003cc", "title": "Install smart thermostats and video doorbells, VA clinic", "postedDate": "2026-10-04",
+  "type": "Sources Sought", "responseDeadLine": "2026-11-01T12:00:00-06:00", "naicsCode": "999999", "active": "Yes",
+  "uiLink": "https://sam.gov/opp/fx0003cc/view", "placeOfPerformance": {"state": {"code": "AR"}}},
+ {"noticeId": "fx0004dd", "title": "Janitorial services", "postedDate": "2026-09-30", "type": "Solicitation",
+  "naicsCode": "561720", "active": "No", "uiLink": "https://sam.gov/opp/fx0004dd/view"},
+ {"title": "Missing notice id", "naicsCode": "811310"}
+]}

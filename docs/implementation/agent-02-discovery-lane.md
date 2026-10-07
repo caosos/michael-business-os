@@ -221,3 +221,22 @@ Mutation check: with the `notify_event` call removed, the item stays HELD.
   - the place: "City, ST [zip]"
 - **Estate sales** are events, so they map to `other_asset`, subcategory `estate sale`, with `needs_review`. They are never keyword-classified.
 - **UNKNOWN:** real alert layouts per origin. The fixtures are hand-built. Re-record real alerts on the first live run and tighten each parser.
+
+## 15. SAM.gov Get Opportunities v2 — READY_QUEUE B-07 (service lane, `gov_contract`)
+
+`src/mbos_discovery/adapters/samgov.py` targets the endpoint documented at open.gsa.gov (FACT): `GET https://api.sam.gov/opportunities/v2/search`.
+
+- **Request.**
+  - Parameters: `api_key` (query, per spec; **redacted** from every recorded URL), `postedFrom`/`postedTo` (MM/dd/yyyy, default 14-day lookback), `ptype=o,k,p,r`, `state`, `limit` ≤ 1000.
+  - One call per configured state (default AR).
+  - Runs only with `live=True` and `SAMGOV_API_KEY` set.
+- **Mapping.**
+  - Every lead is `type: service` and `opportunity_kind: gov_contract`.
+  - The category comes from the NAICS table first (e.g. 811310 → `equipment_repair`, 238310 → `drywall_repair`, 5415xx → `technical_service`), then service keyword rules, else `other_service` with `needs_review`. The NAICS table is an INFERENCE fitted to Michael's service lines.
+  - `responseDeadLine` → `ends_at` (UTC).
+  - `price` is `quote_requested`.
+  - The agency path becomes the counterparty name. `active` → `open` / `closed`.
+  - The description summarises notice type, NAICS, solicitation number and set-aside.
+- **Not fetched:** `description`, a link that needs the key. Points of contact stay in the raw artifact only.
+- **Later:** `ptype=g` (sale of surplus property) could feed the flip lane. That's not part of this task.
+- **Fixed while testing:** the smart-home keyword rules didn't match plurals ("thermostats", "doorbells"), so such leads fell to `handyman`. They now classify as `smart_home_install`.
