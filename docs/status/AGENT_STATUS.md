@@ -7,10 +7,10 @@ Worktree: /home/michaelos/business-os-worktrees/agent-07-marketing
 State: WAITING
 Done: G-01 @ 9cbce70
 Done: G-02 @ a1700d9
-Blocked: G-03 on P-07-6 (F-19) and P-07-7 (F-20), lane 01. G1 is green @ 46ac715
+Blocked: G-03 on P-07-8 (F-21, G4 provenance clause) — needs an Agent 01 change or ruling. Everything else is green @ c713cbf
 Claimed: (none)
-Waiting on: P-07-6, P-07-7 (01; finish G-03) · A-01 phase 2 + A-03 (01; P-07-5 re-run of `mbos_qa spine` on lane D/E). Queue checked @ 8c3e4fd: no other READY task for 07 or ANY.
-Current phase: Round Two — foreman loop; G-01 + G-02 DONE; G-03 partial (G1 green), blocked on F-19/F-20
+Waiting on: P-07-8 / Agent 01 ruling on F-21 (finish G-03) · A-03 (P-07-5 re-run of `mbos_qa spine` on state_backend=lane_d + 05's real gateway).
+Current phase: Round Two — foreman loop; G-01 + G-02 DONE; G-03 green except F-21 (G4 provenance clause)
 Started: 2026-10-06 (round one) · 2026-10-07 (round two)
 Last updated: 2026-10-07
 
@@ -19,13 +19,11 @@ Last updated: 2026-10-07
   - ADR-0010 interop matrix: `docs/qa/INTEROP_REPORT.md`. Receipt: `docs/receipts/2026-10-07-G-01-adr0010-interop.md`.
   - F-14 and F-13 are RULED. Conformance is open only for lane 03 (C-02), lane 04 (D-02) and the second `mbos.receipts` (A-01 phase 2). Every other lane and SQL twin passes `vectors.json`.
 - **Done: G-02 @ a1700d9.** `qa/` A1–A10 run against Agent 01's REAL spine (`mbos` @ `c5c7c1c`, PostgreSQL 16 + DBOS): **90/90 pass**, stable across 3 runs. Report: `docs/qa/SPINE_ACCEPTANCE.md`. Receipt: `docs/receipts/2026-10-07-G-02-spine-acceptance.md`.
-- **G-03 @ 46ac715: BLOCKED (partial).**
-  - G1 is green on the real spine with the lane-07 `MarketingPlanner`.
-  - G4 is a strict xfail on F-19 and G2 a strict xfail on F-20. G3 is not applicable (no review-request path).
-  - Receipt: `docs/receipts/2026-10-07-G-03-marketing-on-spine.md`.
-- **Next:** no other READY task is assigned to 07. I'm waiting on:
-  - P-07-6 and P-07-7 (01), to finish G-03;
-  - A-01 phase 2 and A-03 (01), for the P-07-5 re-run of `mbos_qa spine` on lane D/E components.
+- **G-03 @ c713cbf** (re-pinned to `a910ad9`):
+  - G1, G2 and G4 (draft frozen into the approved payload) are green on the real spine. F-18, F-19 and F-20 are verified fixed.
+  - **Residual F-21:** the G4 clause "prompt version and model in provenance" is not met. It is a strict xfail, and I've proposed P-07-8.
+  - G3 is not applicable. Real-spine suite: 96 passed, 0 failed (`docs/qa/SPINE_ACCEPTANCE.md`).
+- **Next:** finish G-03 when P-07-8 lands or Agent 01 rules on it. Then P-07-5, after A-03.
 
 ## Proposed tasks (for Agent 01 to triage)
 - **P-07-1 (01), F-16:** ship the contracts as package data, or fail clearly. A non-editable install of `mbos` fails 94 of 109 tests without `MBOS_CONTRACTS_DIR` (`docs/qa/BUILD_VERIFICATION.md`).
@@ -34,6 +32,7 @@ Last updated: 2026-10-07
 - **P-07-5 (07, after A-03/E-02 and A-01 phase 2):** re-run `python -m mbos_qa spine` once lane E's real gateway, PANIC and budget, and Agent 04's store, are wired. A5/A8/A9 currently exercise 01's reference stand-ins.
 - **P-07-6 (01), F-19, approval integrity:** let `ActionPlanner` return an optional `draft` (content, content_hash, template_version, prompt_hash, model_id). `_propose` copies it into the hash-frozen payload, and the Operator UI shows it. `mbos_qa.marketing_planner` already emits it. Unblocks G4.
 - **P-07-7 (01), F-20:** add `attribution=` to `spine.record_outcome` (or record attribution at intake for `service_lead`). Unblocks G2.
+- **P-07-8 (01), F-21:** when a proposed action carries `draft`, record a provenance row (drafting agent; `model_id`, `model_version`=template version, `prompt_hash`; `inputs_used`=content_hash) and cite it in the request's `provenance_ids`. Or rule that payload freezing satisfies G4. Note: P-07-4, P-07-6 and P-07-7 are verified fixed at a910ad9.
 - **P-07-3 (01):** refresh the test-count claims in ALL_AGENTS from `docs/qa/BUILD_VERIFICATION.md`. Collected counts: 01 has 109 vs 111 claimed, 03 has 114 vs 75, 05 has 121 vs 114.
 
 ## Current objective
