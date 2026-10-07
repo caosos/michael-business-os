@@ -1,7 +1,7 @@
 # READY QUEUE: Michael Business OS, Round Two
 
 - **Owner:** Agent 01 (coordinator / dispatcher). **Protocol:** `docs/COORDINATION.md`. Read it before claiming.
-- **Last synced:** 2026-10-07 14:10 -0500, against branch heads 02 `41d45a6` · 03 `73a4d32` · 04 `7f0649a` · 05 `16fb86c` · 06 `c125618` · 07 `397101c`.
+- **Last synced:** 2026-10-07 14:15 -0500, against branch heads 02 `41d45a6` · 03 `73a4d32` · 04 `7f0649a` · 05 `16fb86c` · 06 `c125618` · 07 `397101c`.
 - **Read it from any worktree:** `git fetch -q origin && git show origin/research/agent-01-coordinator:docs/status/READY_QUEUE.md`
 - **Status values:** READY · CLAIMED · BLOCKED · DONE.
 - **Priority:** P0 = critical path · P1 = next-up · P2 = useful parallel work.
@@ -20,7 +20,7 @@
 | A-02 | P1 | Release gate `tools/release_gate.sh` (pytest + interop_check + `mbos audit` + contract validator), plus `docs/status/RELEASE_GATE.md` with results | none | READY | 01 | One command, non-zero on any failure, results committed |
 | A-03 | P1 | Wire 05 `ActionGateway`/`PanicState`/`policy.decide` behind `Gateway`/`KillSwitch`/`PDP`. The gateway owns action-status receipts (R4) | E-02 | BLOCKED | 01 | A5 and A9 pass with 05's real gateway |
 | A-04 | P2 | Wire 02's B adapter + Deduper into `Components`; end-to-end fixture discovery → RESEARCHING | B-01 | **CLAIMED** | 01 | Integration test: 02 fixtures through the DBOS workflow |
-| A-05 | P2 | Wire 03's RESEARCH producer as a workflow step (RESEARCHING → SCORED) | C-01 | **CLAIMED** | 01 | A real discovered Item advances past RESEARCHING in a test |
+| A-05 | P2 | Wire 03's RESEARCH producer as a workflow step (RESEARCHING → SCORED) | C-01 | **CLAIMED** (01) | 01 | A real discovered Item advances past RESEARCHING in a test |
 | A-07 | P1 | `notify_decision(item_id, approval_id)` wake helper for the UI and CLI (06 P-06-1) | none | **DONE** (this push) | 01 | `mbos.workflows.notify_decision` exists; F-01 uses it |
 | A-08 | P2 | `_approval_gate` acts on `wake_on` = `new_info` / `price_change` / `auction_ending` via a message kind sent by lanes B/C (06 P-06-2) | none | **DONE** (this push): `mbos.workflows.notify_event(item_id, event, summary, evidence_provenance_id)` | 01 | Test: a HOLD with `wake_on=price_change` wakes on a price-change message, never executes |
 | A-09 | P1 | Ruling R12: the Item edge table is lane D's (every item passes RESEARCHING; a YES on HELD re-presents first; LEARNED is terminal; follow-up edge ACTED→AWAITING_APPROVAL). The spine is aligned (migration 0004) | none | **DONE** (this push) | 01 | Parity test against 04's live DB passes |
@@ -40,8 +40,8 @@
 | D-05 | **P0** | R12 re-affirmed: remove `NORMALIZED→SCORED`, `HELD→APPROVED` and `LEARNED→ARCHIVED/FAILED` (added in a0d1fbe to accommodate pre-R12 spine). Keep `ACTED→AWAITING_APPROVAL` | none | **DONE** @ `797a4e5` (parity gate verified by 01; now a hard pass) | 04 | 01's `test_r12_item_edges_match_lane_d` XPASSes (then flipped to a hard gate) |
 | D-03 | P1 | Reporting views (pipeline by lane, HOLD backlog, approval latency) over the ADR-0010 chain; restore drill D1 then `verify_chain` | D-01 | **DONE** @ `ca59e3c` (views + D1 restore drill on a 179-receipt chain) | 04 | D1 passes; views documented |
 
-| D-06 | P1 | State MCP server: narrow intent tools over 04's SQL API (create/transition/patch item, propose action, record approval/outcome, provenance) as the **only** agent write path (ADR-0003). Identity and scope are carried into provenance. No raw SQL tool | D-04 | READY | 04 | MCP tool tests; an agent role without the MCP cannot write; every tool call is receipted |
-| D-07 | P2 | Artifact store to FS (sha256 content-addressed, insert-only, `put_artifact` keeps the index), restore-drill aware | none | READY | 04 | Round-trip + tamper detection tests |
+| D-06 | P1 | State MCP server: narrow intent tools over 04's SQL API (create/transition/patch item, propose action, record approval/outcome, provenance) as the **only** agent write path (ADR-0003). Identity and scope are carried into provenance. No raw SQL tool | D-04 | **DONE** @ `012c141` (stdio MCP; agent profile has no approval/execute/spend/PANIC tools; R14) | 04 | MCP tool tests; an agent role without the MCP cannot write; every tool call is receipted |
+| D-07 | P2 | Artifact store to FS (sha256 content-addressed, insert-only, `put_artifact` keeps the index), restore-drill aware | none | **CLAIMED** (04) | 04 | Round-trip + tamper detection tests |
 | D-08 | P2 | pgvector rebuildable index (D3: drop → rebuild → identical query results) | none | READY | 04 | D3 passes |
 | D-09 | P2 | pgBackRest PITR off-box | operator: off-box target | BLOCKED (operator infra) | 04 | Restore drill from off-box |
 
