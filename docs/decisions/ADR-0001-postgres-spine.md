@@ -2,7 +2,7 @@
 
 ADR-0001 — PostgreSQL as the single system-of-record "spine"
 
-Status: PROPOSED
+Status: ACCEPTED (2026-10-06, Agent 01, after cross-agent reconciliation — see "Ratification" below)
 
 ## Context
 The core law is "no action without a receipt, no receipt without provenance." We need a datastore for a single self-hosted 24/7 server that holds relational state, flexible receipt payloads, vector memory, a job/queue substrate, and an append-only provenance/event log — operable by one person.
@@ -29,3 +29,9 @@ Adopt **PostgreSQL as the single system-of-record spine.** Receipts as JSONB; pr
 Moderate. Vector and queue concerns can be split out later with low churn; splitting the system-of-record itself would be expensive — but keeping everything in PG now preserves optionality.
 
 Coordinator review required: YES (needs input from 03 scoring storage, 04 CRM/state).
+
+## Ratification (2026-10-06, round-one reconciliation)
+- **Agreements:** Agent 04 (ADR-04-0001) independently chose a single Postgres with the write, its receipt and the outbox committed in one transaction. Agents 05, 06 and 07 assume an owned data plane and raise no conflict.
+- **Conflict C1, Agent 02 proposed SQLite (§11):** rejected at the hard gate. SQLite allows one writer at a time, and the design has 6+ agent processes plus the DBOS executor writing concurrently. INFERENCE: it would fail the same-transaction receipt invariant under concurrent writes. 02's schema is ported to Postgres as the `normalized` block of Item v1 (ADR-0004).
+- **Additions from 04:** content-addressed artifact store (`sha256` refs, local FS → Garage/SeaweedFS, not MinIO CE); pgvector treated as a *rebuildable index*, not truth; pgBackRest + nightly `pg_dump`, 3-2-1 with restore drills.
+- Full scoring: `docs/research/agent-01-integration.md` §3.

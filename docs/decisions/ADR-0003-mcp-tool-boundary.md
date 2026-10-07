@@ -2,7 +2,7 @@
 
 ADR-0003 — MCP as the authenticated tool boundary; A2A deferred
 
-Status: PROPOSED
+Status: ACCEPTED (2026-10-06, Agent 01, after cross-agent reconciliation — see "Ratification" below)
 
 ## Context
 Agents must call tools (sources, comms, CRM writes, LLM) through a boundary that is standard, authenticatable, and whose identity/scope can be recorded as provenance on every receipt. We must also decide whether to adopt an agent-to-agent protocol now.
@@ -29,3 +29,9 @@ Adopt **MCP now** as the authenticated tool boundary; pin to spec rev **2025-11-
 High. MCP is an interface boundary; A2A can be layered on later without disturbing MCP.
 
 Coordinator review required: YES (needs input from 06 communications tools, 02 source access).
+
+## Ratification (2026-10-06, round-one reconciliation)
+- **Agreements:** 04 (a custom MCP server is the only write path), 05 (agents hold no credentials; tools are mediated), and 06 (one Business-OS MCP server; Telnyx ships an official MCP server).
+- **Refinement:** every MCP tool that causes an external side effect goes through the **Action Gateway** (ADR-0005). An MCP call can create an ActionRequest, but only the gateway's execution guard can run an effector.
+- **Avoid:** Anthropic's archived SQLite MCP server (unpatched SQL injection, per 04 FACT). Postgres MCP Pro (MIT) is allowed for read/admin only, never for agent writes.
+- A2A stays deferred.

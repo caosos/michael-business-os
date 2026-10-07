@@ -2,7 +2,7 @@
 
 ADR-0002 — DBOS Transact as the durable workflow backbone
 
-Status: PROPOSED
+Status: ACCEPTED (2026-10-06, Agent 01, after cross-agent reconciliation — see "Ratification" below)
 
 ## Context
 The core flow (DISCOVER→NORMALIZE→RESEARCH→SCORE→RECOMMEND→[APPROVAL]→ACT→RECEIPT→OUTCOME→LEARN) must survive crashes/restarts while Michael sleeps, retry idempotently, schedule recurring work, and support indefinite human-approval waits (HOLD). One operator must be able to run it.
@@ -30,3 +30,17 @@ Adopt **DBOS Transact** as the durable backbone. Rationale from the comparison f
 High-ish. The core flow is expressed as our own state machine over the Item; Pydantic AI integrates with DBOS/Restate/Temporal, so swapping engines later is contained if we keep the state machine engine-agnostic.
 
 Coordinator review required: YES (needs input from 05 governance hooks, 06 approval-wait UX).
+
+## Ratification (2026-10-06, round-one reconciliation)
+**Conflict C2.** Agent 05 (ADR-05-002) recommended Temporal, or LangGraph if in-process. Agents 02 and 07 named n8n as the "backbone". Scored with the §7 rubric (integration doc §3):
+
+| Option | Weighted score | Hard gate |
+|---|---|---|
+| DBOS | **81.5 / 90** | passes |
+| Temporal | 74.5 / 90 | passes |
+| n8n | 51.0 / 90 | **fails as system of record**: workflow state and credentials live outside the receipt transaction, and its license is fair-code, not OSI |
+
+- Agent 05 marked DBOS's license "UNKNOWN [verify]". FACT: DBOS Transact is MIT (github.com/dbos-inc/dbos-transact-py).
+- Agent 05's own warning applies: LangGraph `interrupt()` resume re-runs the node from the top. **Approval waits therefore live in DBOS durable waits (recv/send), never in LangGraph interrupts.** LangGraph/Pydantic AI stays inside a single reasoning step.
+- 05's reasoning that "changing the substrate later is the most expensive swap" is accepted. That is why the Item and ActionRequest state machines are defined in our contracts (ADR-0004) and not in engine primitives. Temporal remains the documented scale-out path.
+- n8n is demoted to an optional connector (ADR-0006).

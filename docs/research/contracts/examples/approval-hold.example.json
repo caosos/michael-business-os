@@ -1,0 +1,23 @@
+{
+  "approval_id": "appr_01JA0000000000000000000001",
+  "action_request_id": "areq_01JA0000000000000000000001",
+  "decision": "HOLD",
+  "decider": "michael",
+  "decided_at": "2026-10-06T14:30:00Z",
+  "channel": "telegram",
+  "auth_context": {
+    "method": "telegram_user_id",
+    "step_up": false
+  },
+  "payload_hash_seen": "sha256:00832c10697b47c632aee2c3326d5b2f872c27f6527269b847feff0744f06b58",
+  "scope": "once",
+  "hold": {
+    "hold_until": "2026-10-07T12:00:00Z",
+    "wake_on": [
+      "time",
+      "price_change"
+    ],
+    "renotify_after": "PT24H",
+    "escalate_after": "PT48H"
+  }
+}

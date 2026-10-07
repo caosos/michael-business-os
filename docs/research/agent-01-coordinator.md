@@ -4,6 +4,13 @@
 
 **Date:** 2026-10-06 · **Author:** Agent 01 (chief coordinator / systems architect)
 
+> **UPDATE 2026-10-06, round-one reconciliation.** All six specialists have reported. The integrated decision is now **`docs/research/agent-01-integration.md`**. ADR-0001/0002/0003 are ACCEPTED, and ADR-0004–0008 have been added (see `docs/decisions/INDEX.md`). This file remains the technology survey. Corrections that follow from reconciliation:
+> - **HumanLayer** is withdrawn: Agent 05 reports the repo is effectively deprecated. A custom Telegram approval bot replaces it (ADR-0006).
+> - **n8n** is a connector only, never the orchestrator (ADR-0006).
+> - The governance layer adopts Agent 05's Action Gateway, PDP and execution guard, with a merged 3-level PANIC (ADR-0005).
+> - Scope is **flips + services** (Michael, ADR-0007).
+> - The Item and Receipt in §4 are superseded by the frozen JSON Schemas in `docs/research/contracts/` (ADR-0004).
+
 Every substantive claim below is labeled **FACT** (web-verified), **INFERENCE** (reasoning), **RECOMMENDATION** (adopt/consider/avoid), or **UNKNOWN**.
 
 ---
@@ -182,7 +189,7 @@ Specialists build to these contracts, not to each other. Changes require Agent 0
 
 **CRM** — Twenty (AGPL-3.0, github.com/twentyhq/twenty, Postgres + GraphQL/REST + Metadata API) **CONSIDER as projection**; Odoo Community (LGPL-3.0, Postgres) ERP-breadth fallback; EspoCRM (GPL-3.0)/SuiteCRM (AGPL) MySQL/PHP **AVOID as primary**.
 
-**Approval / HITL** — HumanLayer (Apache-2.0 SDK, Slack/email routing) **CONSIDER** as channel; n8n (fair-code, not OSI) low-code waits **CONSIDER**; Temporal/Inngest/DBOS durable waits are the state machine.
+**Approval / HITL** — HumanLayer (Apache-2.0 SDK) ~~CONSIDER~~ **WITHDRAWN** (effectively deprecated per Agent 05; custom Telegram bot instead, ADR-0006); n8n (fair-code, not OSI) low-code waits **CONSIDER**; Temporal/Inngest/DBOS durable waits are the state machine.
 
 **Cost gateway** — LiteLLM (MIT) **ADOPT**; Portkey Gateway (MIT since 2026-03, semantic caching + guardrails) **CONSIDER**; OpenRouter / Cloudflare AI Gateway (SaaS) only as upstreams behind your gateway, **AVOID** as control plane.
 

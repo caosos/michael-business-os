@@ -1,0 +1,203 @@
+{
+  "item_id": "itm_01JA0000000000000000000001",
+  "schema_version": "1.0.0",
+  "type": "flip",
+  "category": "trailer",
+  "subcategory": "6x12 enclosed utility trailer",
+  "opportunity_kind": "buy_item",
+  "state": "AWAITING_APPROVAL",
+  "created_at": "2026-10-06T13:00:00Z",
+  "sources": [
+    {
+      "source": "craigslist",
+      "source_listing_id": "EXAMPLE-0001",
+      "url": "https://example.invalid/listing/1",
+      "ingestion_method": "rss",
+      "tos_risk": "med",
+      "first_seen_at": "2026-10-06T13:00:00Z",
+      "raw_ref": "sha256:fa6e064a54d7b3d6584010d5526823b6363373d7e55f3df4a8971c8ad72860fc",
+      "provenance_id": "prov_01JA0000000000000000000001"
+    }
+  ],
+  "dedup_key": "trailer|1000-1500|cell-35.09-92.44",
+  "content_hash": "sha1:example",
+  "normalized": {
+    "title": "6x12 enclosed trailer, needs lights + floor",
+    "condition": "used",
+    "price": {
+      "amount": 1200,
+      "currency": "USD",
+      "type": "fixed"
+    },
+    "location": {
+      "city": "Conway",
+      "state": "AR",
+      "road_miles_one_way": 32,
+      "geo_tier": 1
+    },
+    "counterparty": {
+      "role": "seller",
+      "is_dealer": false,
+      "contact_method": "relay_email"
+    },
+    "listing_status": "active",
+    "flags": [
+      "underpriced"
+    ]
+  },
+  "economics": {
+    "acquisition": {
+      "ask_price": 1200,
+      "expected_buy_price": 1050,
+      "buy_fees": 25
+    },
+    "rehab": {
+      "parts_cost": 120,
+      "materials_cost": 180,
+      "labor_hours": 6,
+      "admin_hours": 2,
+      "required_skills": [
+        "trailer_wiring",
+        "carpentry"
+      ],
+      "repair_success_prob": 0.95,
+      "repair_scope_known": true
+    },
+    "logistics": {
+      "trips": [
+        {
+          "purpose": "inspect_pickup",
+          "round_trip_miles": 64,
+          "can_combine": false
+        },
+        {
+          "purpose": "buyer_meet",
+          "round_trip_miles": 20
+        }
+      ],
+      "vehicle_mpg": 18,
+      "fuel_price_per_gal": 3.2,
+      "wear_per_mile": 0.28,
+      "avg_speed_mph": 45
+    },
+    "holding": {
+      "storage_cost_per_day": 3,
+      "expected_hold_days": 14,
+      "disposal_cost": 0,
+      "sell_fees_rate": 0,
+      "sell_fees_flat": 0
+    },
+    "resale": {
+      "target_sell_price": 2100,
+      "comp_price_low": 1800,
+      "comp_price_expected": 2100,
+      "comp_price_high": 2400,
+      "sale_prob": 0.85,
+      "expected_dom_days": 14
+    },
+    "downside": {
+      "salvage_if_repair_fails": 900,
+      "salvage_if_unsold": 1000
+    },
+    "estimates_meta": {
+      "scoring_config_version": "2026.10.0",
+      "assumptions": [
+        {
+          "field": "rehab.labor_hours",
+          "value": 6,
+          "basis": "INFER",
+          "note": "illustrative"
+        }
+      ]
+    }
+  },
+  "research": [
+    {
+      "finding": "3 sold comps 1800-2400 in 90d (illustrative)",
+      "field": "resale.target_sell_price",
+      "basis": "FACT",
+      "source_uri": "https://example.invalid/comps",
+      "fetched_at": "2026-10-06T13:20:00Z",
+      "provenance_id": "prov_01JA0000000000000000000002"
+    }
+  ],
+  "scores": {
+    "scorecard_id": "scr_01JA0000000000000000000001",
+    "inputs_hash": "sha256:b2b88349d791d013817536f47052ac1981a4c2d66ffbc3c1101221f373e751ba",
+    "scorecard": {
+      "scoring_config_version": "2026.10.0",
+      "computed_at": "2026-10-06T14:00:00Z",
+      "derived": {
+        "ev_net_profit": 410.0,
+        "ev_profit_per_hour": 68.0,
+        "confidence": 0.7,
+        "max_loss": 520.0,
+        "cash_tied_up": 900.0
+      },
+      "sub_scores": {
+        "ev_score": 51,
+        "pph_score": 57,
+        "roi_score": 40,
+        "ttc_score": 70,
+        "risk_score": 62,
+        "conf_score": 70,
+        "skill_score": 90,
+        "scarcity_score": 65
+      },
+      "weights_used": {
+        "ev": 0.25,
+        "pph": 0.25,
+        "roi": 0.1,
+        "ttc": 0.1,
+        "risk": 0.1,
+        "conf": 0.05,
+        "skill": 0.1,
+        "scarcity": 0.05
+      },
+      "composite": 61.6,
+      "decision": "YES",
+      "alert": false,
+      "gates": {
+        "ev_positive": true,
+        "max_loss_ok": true,
+        "cash_ok": true,
+        "skill_ok": true,
+        "pph_floor_ok": true,
+        "min_profit_ok": true
+      },
+      "reasons": [
+        "ILLUSTRATIVE ONLY \u2014 not a real listing",
+        "EV profit/hour 68 >= 65 flip target",
+        "3 sold comps within 150 mi"
+      ]
+    }
+  },
+  "recommendation": {
+    "recommendation_id": "rec_01JA0000000000000000000001",
+    "verdict": "YES",
+    "proposed_actions": [
+      {
+        "capability": "comms.email.send",
+        "summary": "Ask seller to confirm floor/axle condition; offer $1,050",
+        "reversibility": "irreversible",
+        "estimated_cost": {
+          "amount": 0,
+          "currency": "USD"
+        }
+      }
+    ],
+    "rationale": [
+      "Composite 61.6 >= 60; confidence 0.70 >= 0.60"
+    ],
+    "confidence": 0.7,
+    "provenance_id": "prov_01JA0000000000000000000003"
+  },
+  "action_request_ids": [
+    "areq_01JA0000000000000000000001"
+  ],
+  "provenance_ids": [
+    "prov_01JA0000000000000000000001",
+    "prov_01JA0000000000000000000002",
+    "prov_01JA0000000000000000000003"
+  ]
+}
