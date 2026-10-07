@@ -112,3 +112,16 @@ for block, data in e["blocks"].items():       # economics | logistics | seasonal
   - the sold-comp target
   - hints from matched entries
 - The card tests need `MBOS_CONTRACTS_DIR`; see the C-15 section.
+
+### Michael's own mechanic notes (C-17: the `manual` path)
+```bash
+python -m mbos_economics note new --category mower --make "john deere" --model X380 --kind known_weakness \
+    --statement "..." --entered-by michael --entered-at 2026-10-07T20:00:00Z --basis-of-knowledge "own experience"
+# prints {note, provenance}; persist provenance FIRST, then store the note. Writes nothing itself.
+python -m mbos_economics note check NOTES.json     # validate a {"notes_format": 1, "notes": [...]} document
+```
+```python
+kb = merge_manual(load_kb(), load_manual_notes("mechanic_notes.json"))     # in memory; notes never live in the package
+build_value_add(item, as_of, cfg=cfg, kb=kb)
+```
+Notes need an author, a timestamp, a human provenance record and a make AND model. They show on the card as RECOMMENDATION (owner-stated), never FACT, and `load_kb` refuses any manual entry in a KB file. Source plan: `docs/research/agent-03-model-knowledge-source-plan.md`.

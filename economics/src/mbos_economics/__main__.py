@@ -5,12 +5,15 @@
     python -m mbos_economics estimate ITEM.json --as-of 2026-10-07T18:00:00Z [--bundle BUNDLE.json]
     python -m mbos_economics digest ITEMS.json --as-of 2026-10-07T18:00:00Z [--text] [--limit N]
     python -m mbos_economics audit EXPORT.json     # {items, receipts} (lane-D export) or a list of Items
+    python -m mbos_economics note new --category mower --make "john deere" --model X380 --kind known_weakness \
+        --statement "..." --entered-by michael --entered-at 2026-10-07T20:00:00Z --basis-of-knowledge "own experience"
+    python -m mbos_economics note check NOTES.json     # validate a mechanic-notes document
     python -m mbos_economics audit --dsn "host=... dbname=mbos user=agent_read" [--strict]   # live lane-D DB
 
 ITEM.json may be a bare Item v1 or an examples/*.scored.json wrapper ({item, provenance, ...}).
 
 ``score`` prints {scores, recommendation, provenance, receipt_drafts}. It writes nothing.
-Exit codes: 0 ok / replay match / audit clean, 1 replay mismatch or audit drift, 2 invalid input or bundle,
+Exit codes: 0 ok / replay match / audit clean, 1 replay mismatch or audit drift, 2 invalid input, bundle or note,
 3 estimate insufficient.
 """
 
@@ -36,6 +39,17 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--config-version")
     r = sub.add_parser("replay")
     r.add_argument("item", type=Path)
+    nt = sub.add_parser("note", help="Michael's own mechanic notes (manual entry path; writes nothing)")
+    nsub = nt.add_subparsers(dest="note_cmd", required=True)
+    nn = nsub.add_parser("new")
+    for flag in ("--category", "--kind", "--statement", "--entered-by", "--entered-at", "--basis-of-knowledge"):
+        nn.add_argument(flag, required=True)
+    nn.add_argument("--make", action="append", required=True, dest="makes")
+    nn.add_argument("--model", action="append", required=True, dest="models")
+    nn.add_argument("--plan-hint")
+    nn.add_argument("--reference-url")
+    nc = nsub.add_parser("check")
+    nc.add_argument("notes_file", type=Path)
     a = sub.add_parser("audit")
     a.add_argument("item", type=Path, nargs="?", help="lane-D export {items, receipts} or a JSON list of scored Items")
     a.add_argument("--dsn", help="read a live lane-D database (SELECT only; needs psycopg)")
@@ -51,6 +65,22 @@ def main(argv: list[str] | None = None) -> int:
     e.add_argument("--bundle", type=Path, help="research bundle JSON (comps, evidence, overrides; all with provenance)")
     args = ap.parse_args(argv)
 
+    if args.cmd == "note":
+        from .valueadd import NoteError, load_manual_notes, new_manual_note
+        try:
+            if args.note_cmd == "new":
+                out = new_manual_note(category=args.category, makes=args.makes, models=args.models, kind=args.kind,
+                                      statement=args.statement, entered_by=args.entered_by, entered_at=args.entered_at,
+                                      basis_of_knowledge=args.basis_of_knowledge, plan_hint=args.plan_hint,
+                                      reference_url=args.reference_url)
+                print(json.dumps(out, indent=2))     # the caller persists out["provenance"] FIRST, then stores out["note"]
+            else:
+                notes = load_manual_notes(args.notes_file)
+                print(json.dumps({"ok": True, "active_notes": len(notes)}, indent=2))
+        except NoteError as e:
+            print(json.dumps({"error": "invalid_note", "problems": e.problems}, indent=2))
+            return 2
+        return 0
     if args.cmd == "audit":
         from .replay_audit import audit, load_scored_items
         if args.dsn:

@@ -12,6 +12,10 @@ only facts tied to a named model and a primary source. Rules:
 * a model with no KB entry yields NO risks: absent knowledge is UNKNOWN, never a guess;
 * a risk is emitted only when a make AND a model token from the entry appear in the listing (word-bounded,
   case-insensitive, hyphen/space tolerant); the text is seller-stated and unverified, and the risk says so;
+* Michael's own mechanic notes enter ONLY through the ``manual`` path (``new_manual_note`` ->
+  ``load_manual_notes`` -> ``merge_manual``): a note needs a named author, a timestamp, a human provenance record,
+  and a make AND model match; it is shown as RECOMMENDATION (owner-stated), never FACT, and can never ship inside the
+  packaged KB (``load_kb`` refuses ``origin: manual``);
 * the plan is built from the deal's own numbers (budget, parts ceiling, sold-comp target) and from the matched
   entries' ``plan_hint``; never from free text.
 """
@@ -24,7 +28,7 @@ import re
 from pathlib import Path
 
 from . import __version__ as VERSION
-from .canonical import content_hash, derived_ulid
+from .canonical import content_hash, derived_ulid, parse_ts
 from .config import CONFIG_DIR, ScoringConfig
 from .engine import _bisect_int, compute
 from .inputs import build_engine_input
@@ -40,11 +44,131 @@ def load_kb(path: Path | None = None) -> dict:
     if doc.get("kb_format") != KB_FORMAT:
         raise ValueError(f"value-add KB must be kb_format {KB_FORMAT}")
     for e in doc["entries"]:                        # a risk without a primary source cannot exist
+        if e.get("origin") == "manual":
+            raise ValueError(f"KB entry {e.get('id')!r}: manual notes never ship in the KB file; use merge_manual()")
         src = e.get("source") or {}
         if not (e.get("risk") and e.get("kind") and src.get("url", "").startswith("https://") and src.get("title")):
             raise ValueError(f"KB entry {e.get('id')!r} needs risk, kind and a titled https source")
     doc["_hash"] = content_hash({k: v for k, v in doc.items() if k != "_hash"})
     return doc
+
+
+# --------------------------------------------------------------------------- Michael's own notes (manual path)
+
+NOTES_FORMAT = 1
+NOTE_KINDS = {"failure_mode", "expensive_part", "parts_availability", "known_weakness", "resale_demand", "economic"}
+NOTE_CATEGORIES = {"trailer", "mower", "generator", "welder", "compressor", "tool", "commercial_equipment",
+                   "mechanical_equipment", "project_vehicle", "other_asset"}
+MAX_NOTE_CHARS = 600
+# Boilerplate an experienced mechanic does not want (same patterns as agent-01 mbos.card.ELEMENTARY_ADVICE).
+_ELEMENTARY = [re.compile(p, re.I) for p in (
+    r"\bcheck (the )?(engine )?compression\b", r"\bcheck (for )?(a )?spark\b", r"\binspect (the )?fuel\b",
+    r"\bcheck (the )?(engine )?oil\b", r"\bcheck (the )?(air )?filter\b", r"\bcheck (the )?(spark ?plug|plugs)\b",
+    r"\binspect (the )?(belts?|hoses?)\b", r"\bverify (it )?(starts|runs)\b(?! after)",
+    r"\bmake sure (it|the engine) (starts|runs)\b", r"\bcheck (the )?battery\b", r"\blook for (any )?(leaks|damage)\b")]
+_PID = re.compile(r"^prov_[0-9A-HJKMNP-TV-Z]{26}$")
+
+
+class NoteError(ValueError):
+    def __init__(self, problems: list[str]):
+        super().__init__("; ".join(problems))
+        self.problems = problems
+
+
+def _note_problems(n: dict) -> list[str]:
+    """Every problem with a note, each check independent (a missing field never hides other faults)."""
+    p: list[str] = []
+    for k in ("note_id", "category", "match", "kind", "statement", "entered_by", "entered_at", "basis_of_knowledge", "provenance_id"):
+        if not n.get(k):
+            p.append(f"{k} is required")
+    if n.get("category") and n["category"] not in NOTE_CATEGORIES:
+        p.append(f"category {n['category']!r} is not a flip category")
+    if n.get("kind") and n["kind"] not in NOTE_KINDS:
+        p.append(f"kind {n['kind']!r} must be one of {sorted(NOTE_KINDS)}")
+    if n.get("provenance_id") and not _PID.match(n["provenance_id"]):
+        p.append("provenance_id must be the id of the persisted human provenance record")
+    if n.get("entered_at"):
+        try:
+            parse_ts(n["entered_at"])
+        except (TypeError, ValueError):
+            p.append("entered_at must be an RFC 3339 timestamp with a timezone")
+    m = n.get("match")
+    if m is not None and (not isinstance(m, list) or not m or not all(isinstance(g, dict) and g.get("makes") and g.get("models") for g in m)):
+        p.append("every match group needs BOTH makes and models (a note must be about a named model)")
+    if n.get("basis") not in (None, "RECOMMENDATION"):
+        p.append("a manual note is owner-stated: basis is always RECOMMENDATION, never FACT")
+    if n.get("reference_url") and not str(n["reference_url"]).startswith("https://"):
+        p.append("reference_url must be https")
+    for k in ("statement", "plan_hint"):
+        text = n.get(k) or ""
+        if len(text) > MAX_NOTE_CHARS:
+            p.append(f"{k} is over {MAX_NOTE_CHARS} characters")
+        hit = [m_.group(0) for rx in _ELEMENTARY for m_ in [rx.search(text)] if m_]
+        if hit:
+            p.append(f"{k} contains elementary advice {hit}: say what is specific to THIS model")
+    return p
+
+
+def new_manual_note(*, category: str, makes: list[str], models: list[str], kind: str, statement: str, entered_by: str,
+                    entered_at: str, basis_of_knowledge: str, plan_hint: str | None = None,
+                    reference_url: str | None = None, review_after: str | None = None) -> dict:
+    """Build one validated note plus the HUMAN provenance record the entry step must persist FIRST.
+    Pure: writes nothing and reads no clock (``entered_at`` is supplied by the entry channel)."""
+    try:                                    # validate the timestamp BEFORE deriving ids from it
+        parse_ts(entered_at)
+    except (TypeError, ValueError):
+        raise NoteError(["entered_at must be an RFC 3339 timestamp with a timezone"]) from None
+    body = {"category": category, "match": [{"makes": list(makes), "models": list(models)}], "kind": kind,
+            "statement": statement.strip(), "entered_by": entered_by, "entered_at": entered_at,
+            "basis_of_knowledge": basis_of_knowledge,
+            **({"plan_hint": plan_hint.strip()} if plan_hint else {}),
+            **({"reference_url": reference_url} if reference_url else {}),
+            **({"review_after": review_after} if review_after else {})}
+    digest = content_hash(body)
+    prov_id = derived_ulid("prov", entered_at, "manual-note|" + digest)
+    note = {"note_id": derived_ulid("mn", entered_at, "manual-note|" + digest), **body, "provenance_id": prov_id}
+    problems = _note_problems(note)
+    if problems:
+        raise NoteError(problems)
+    provenance = {"provenance_id": prov_id, "created_at": entered_at, "actor_type": "human", "human_actor": entered_by,
+                  "basis": "RECOMMENDATION", "tool_name": "mbos.manual_note", "tool_version": VERSION,
+                  "inputs_used": [{"ref": note["note_id"], "hash": digest}]}
+    return {"note": note, "provenance": provenance}
+
+
+def load_manual_notes(doc_or_path) -> list[dict]:
+    """Validate a notes document ``{"notes_format": 1, "notes": [...]}`` (dict or file path). Retracted notes are
+    kept out of the result. Raises NoteError listing every problem; nothing partial is returned."""
+    doc = doc_or_path if isinstance(doc_or_path, dict) else json.loads(Path(doc_or_path).read_text(encoding="utf-8"))
+    if doc.get("notes_format") != NOTES_FORMAT:
+        raise NoteError([f"notes_format must be {NOTES_FORMAT}"])
+    problems, out, seen = [], [], set()
+    for i, n in enumerate(doc.get("notes") or []):
+        errs = _note_problems(n)
+        if n.get("note_id") in seen:
+            errs.append("duplicate note_id")
+        seen.add(n.get("note_id"))
+        problems += [f"notes[{i}] {e}" for e in errs]
+        if not errs and not n.get("retracted"):
+            out.append(n)
+    if problems:
+        raise NoteError(problems)
+    return out
+
+
+def merge_manual(kb: dict, notes: list[dict]) -> dict:
+    """A COPY of the KB with the notes appended as ``origin: manual`` entries (sourced entries stay first)."""
+    merged = {k: v for k, v in copy.deepcopy(kb).items() if k != "_hash"}
+    for n in notes:
+        merged["entries"].append({
+            "id": f"manual:{n['note_id']}", "origin": "manual", "category": n["category"], "match": n["match"],
+            "kind": n["kind"], "risk": n["statement"], "plan_hint": n.get("plan_hint"), "provenance_id": n["provenance_id"],
+            "source": {"title": f"{n['entered_by']}'s own note ({n['basis_of_knowledge']}), entered {n['entered_at'][:10]}",
+                       "url": n.get("reference_url"), "retrieved": n["entered_at"][:10]}})
+    merged["kb_version"] = kb["kb_version"] + "+manual"
+    merged["_hash"] = content_hash(merged)
+    return merged
+
 
 
 def _token_re(token: str) -> re.Pattern:
@@ -153,9 +277,16 @@ def build_value_add(item: dict, as_of: str, *, cfg: ScoringConfig, kb: dict | No
     else:
         omitted.append(why_not)
 
-    risks = []
+    risks, manual_pids = [], []
     for e in hits:
         s = e["source"]
+        if e.get("origin") == "manual":       # Michael's own note: owner-stated, human provenance, never FACT
+            ref = f" <{s['url']}>" if s.get("url") else ""
+            risks.append({"risk": e["risk"] + " (Michael's note; the model is taken from the listing text and not verified against the unit.)",
+                          "kind": e["kind"], "basis": "RECOMMENDATION", "source": f"{s['title']}{ref}",
+                          "provenance_id": e["provenance_id"]})
+            manual_pids.append(e["provenance_id"])
+            continue
         risks.append({"risk": e["risk"] + " (Model taken from the listing text; not verified against the unit.)",
                       "kind": e["kind"], "basis": "FACT", "source": f"{s['title']} <{s['url']}> (retrieved {s['retrieved']})",
                       "provenance_id": pid})
@@ -169,8 +300,8 @@ def build_value_add(item: dict, as_of: str, *, cfg: ScoringConfig, kb: dict | No
         "basis": "INFERENCE", "tool_name": TOOL_NAME, "tool_version": VERSION, "config_version": kb["kb_version"],
         "inputs_used": [{"ref": "scorecard.inputs_hash", "hash": sc.get("inputs_hash") or "sha256:" + "0" * 64},
                         {"ref": f"value_add_kb@{kb['kb_version']}", "hash": kb["_hash"]}],
-        **({"derived_from": sorted({x["provenance_id"] for x in item.get("sources", []) if x.get("provenance_id")})}
-           if item.get("sources") else {}),
+        **({"derived_from": sorted({x["provenance_id"] for x in item.get("sources", []) if x.get("provenance_id")} | set(manual_pids))}
+           if (item.get("sources") or manual_pids) else {}),
     }
     return {"block": block, "provenance": provenance, "omitted": omitted, "matched": [e["id"] for e in hits],
             "value_add_hash": key}
