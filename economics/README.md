@@ -17,14 +17,14 @@ src/mbos_economics/
   comps.py       sold-comps aggregation (trimmed median, p25/p75)
   learn.py       Brier, MAPE, prior shrink, config-bump *proposal* (never self-activates)
   estimate.py    C-01 RESEARCH/estimate producer: Item (as discovered) + research bundle -> Item.economics
-tests/                             94 tests: worked flips/services, AT-1..21, C22/C23, contracts, determinism, C-01 estimator
+tests/                             118 tests: worked flips/services, AT-1..21, C22/C23, contracts, determinism, ADR-0010, C-01 estimator, C-04 comps feed
 examples/*.scored.json             13 golden scored Items (regenerate with scripts/regen_examples.py)
 ```
 
 ## Use
 ```bash
 cd economics
-python3 -m unittest discover -s tests          # stdlib only; the 4 contract tests skip without jsonschema
+python3 -m unittest discover -s tests          # stdlib only; the contract tests skip without jsonschema
 pip install -e '.[test]' && pytest -q          # full run, including Item v1 / Provenance conformance
 
 PYTHONPATH=src python3 -m mbos_economics score  examples/smart_home_install.scored.json --scored-at 2026-10-07T12:00:00Z
@@ -64,3 +64,24 @@ scored = score_item(apply_estimate(item, r), cfg, as_of)
 - **Bundle provenance.** Every bundle element (comps, evidence, overrides, active-listing count) must carry a `provenance_id`.
 - **No guessed resale.** A flip resale price is never guessed. With no comps the result is `insufficient`. Asking-only comps are discounted by the ask-to-sold ratio and can never reach YES.
 - **Service quotes.** A service quote prices the whole job: materials, trip cash and all hours (labor, admin, travel, quoting) × `quote_rate_per_hour`. That rate is a **UNK placeholder** until Michael supplies a price list.
+
+## Sold-comps feed (C-04)
+```python
+from mbos_economics.comps_feed import research_step, build_comps_bundle, load_fixture_comps
+comps, prov = load_fixture_comps("tests/fixtures/comps/sold_comps.json")   # or Agent 02's mbos_discovery.comps adapters
+r = research_step(item, comps, prov, as_of)   # comps -> bundle -> estimate -> score; persists nothing
+# r["proposed_next_state"]  "SCORED" | "RESEARCHING"
+# r["comps"]["rejected"]    every comp not used, with the rule that rejected it
+# r["provenance_records"]   used comps (FACT) + estimate + score: persist with the transition
+```
+- **Ownership.** Agent 02 owns the sources (manual inbox; eBay Marketplace Insights, fixture-first), raw retention and comp de-duplication. Lane C owns selection.
+- **A comp is used only when every check passes.** Selection is fail-closed and deterministic:
+  - the source is ALLOWED (registry mirrors ADR-02-0202; unknown sources are refused)
+  - the kind is one that source can report
+  - same category
+  - USD
+  - sold within 90 days and not after `as_of`
+  - FACT provenance with `source_uri` and `fetched_at`
+  - no fixed-vocabulary conflict (type/size)
+  - not a duplicate
+- **Condition routing.** `parts` sales feed the as-is market median, never the resale target.

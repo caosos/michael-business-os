@@ -1,0 +1,591 @@
+{
+ "_note": "Fixture-first sold-comps source in Agent 02's SoldComp shape (agreed 2026-10-07). Synthetic data; example.invalid URLs. Valid: #1-#5. #6-#16 each exercise one selection rule.",
+ "comps": [
+  {
+   "kind": "sold",
+   "price": 2050,
+   "sold_date": "2026-09-02",
+   "source": "ebay_marketplace_insights",
+   "url": "https://example.invalid/ebay_marketplace_insights/1",
+   "provenance_id": "prov_01JD0000000000000000000001",
+   "fetched_at": "2026-10-07T17:30:00Z",
+   "raw_ref": "sha256:0101010101010101010101010101010101010101010101010101010101010101",
+   "dom_days": 7,
+   "category": "trailer",
+   "title": "6x12 Enclosed Cargo Trailer, ramp door",
+   "condition": "used",
+   "location": {
+    "city": "Conway",
+    "state": "AR",
+    "zip": "72034"
+   },
+   "currency": "USD",
+   "_fixture_note": "valid"
+  },
+  {
+   "kind": "sold",
+   "price": 2200,
+   "sold_date": "2026-09-15",
+   "source": "ebay_marketplace_insights",
+   "url": "https://example.invalid/ebay_marketplace_insights/2",
+   "provenance_id": "prov_01JD0000000000000000000002",
+   "fetched_at": "2026-10-07T17:30:00Z",
+   "raw_ref": "sha256:0202020202020202020202020202020202020202020202020202020202020202",
+   "dom_days": 8,
+   "category": "trailer",
+   "title": "Enclosed trailer 6 x 12 single axle",
+   "condition": "used",
+   "location": {
+    "city": "Conway",
+    "state": "AR",
+    "zip": "72034"
+   },
+   "currency": "USD",
+   "_fixture_note": "valid ('6 x 12' normalizes)"
+  },
+  {
+   "kind": "sold",
+   "price": 2150,
+   "sold_date": "2026-09-28",
+   "source": "ebay_marketplace_insights",
+   "url": "https://example.invalid/ebay_marketplace_insights/3",
+   "provenance_id": "prov_01JD0000000000000000000003",
+   "fetched_at": "2026-10-07T17:30:00Z",
+   "raw_ref": "sha256:0303030303030303030303030303030303030303030303030303030303030303",
+   "dom_days": 9,
+   "category": "trailer",
+   "title": "6X12 ENCLOSED V-NOSE TRAILER",
+   "condition": "used",
+   "location": {
+    "city": "Conway",
+    "state": "AR",
+    "zip": "72034"
+   },
+   "currency": "USD",
+   "_fixture_note": "valid"
+  },
+  {
+   "kind": "sold",
+   "price": 2000,
+   "sold_date": "2026-09-20",
+   "source": "manual",
+   "url": "https://example.invalid/manual/4",
+   "provenance_id": "prov_01JD0000000000000000000004",
+   "fetched_at": "2026-10-07T17:30:00Z",
+   "raw_ref": "sha256:0404040404040404040404040404040404040404040404040404040404040404",
+   "dom_days": 10,
+   "category": "trailer",
+   "title": "6x12 enclosed (seen sold on FB Marketplace, Conway)",
+   "condition": "used",
+   "location": {
+    "city": "Conway",
+    "state": "AR",
+    "zip": "72034"
+   },
+   "currency": "USD",
+   "_fixture_note": "valid manual entry: human looked, human recorded"
+  },
+  {
+   "kind": "sold",
+   "price": 900,
+   "sold_date": "2026-09-10",
+   "source": "ebay_marketplace_insights",
+   "url": "https://example.invalid/ebay_marketplace_insights/5",
+   "provenance_id": "prov_01JD0000000000000000000005",
+   "fetched_at": "2026-10-07T17:30:00Z",
+   "raw_ref": "sha256:0505050505050505050505050505050505050505050505050505050505050505",
+   "dom_days": 11,
+   "category": "trailer",
+   "title": "6x12 enclosed trailer, rotted floor, as-is",
+   "condition": "parts",
+   "location": {
+    "city": "Conway",
+    "state": "AR",
+    "zip": "72034"
+   },
+   "currency": "USD",
+   "_fixture_note": "valid -> as_is_comps"
+  },
+  {
+   "kind": "sold",
+   "price": 650,
+   "sold_date": "2026-09-12",
+   "source": "ebay_marketplace_insights",
+   "url": "https://example.invalid/ebay_marketplace_insights/6",
+   "provenance_id": "prov_01JD0000000000000000000006",
+   "fetched_at": "2026-10-07T17:30:00Z",
+   "raw_ref": "sha256:0606060606060606060606060606060606060606060606060606060606060606",
+   "dom_days": 12,
+   "category": "trailer",
+   "title": "5x8 utility trailer with gate",
+   "condition": "used",
+   "location": {
+    "city": "Conway",
+    "state": "AR",
+    "zip": "72034"
+   },
+   "currency": "USD",
+   "_fixture_note": "reject: vocabulary conflict"
+  },
+  {
+   "kind": "sold",
+   "price": 2500,
+   "sold_date": "2026-09-18",
+   "source": "facebook_marketplace",
+   "url": "https://example.invalid/facebook_marketplace/7",
+   "provenance_id": "prov_01JD0000000000000000000007",
+   "fetched_at": "2026-10-07T17:30:00Z",
+   "raw_ref": "sha256:0707070707070707070707070707070707070707070707070707070707070707",
+   "dom_days": 13,
+   "category": "trailer",
+   "title": "6x12 enclosed trailer",
+   "condition": "used",
+   "location": {
+    "city": "Conway",
+    "state": "AR",
+    "zip": "72034"
+   },
+   "currency": "USD",
+   "_fixture_note": "reject: forbidden source"
+  },
+  {
+   "kind": "sold",
+   "price": 1900,
+   "sold_date": "2026-05-01",
+   "source": "ebay_marketplace_insights",
+   "url": "https://example.invalid/ebay_marketplace_insights/8",
+   "provenance_id": "prov_01JD0000000000000000000008",
+   "fetched_at": "2026-10-07T17:30:00Z",
+   "raw_ref": "sha256:0808080808080808080808080808080808080808080808080808080808080808",
+   "dom_days": 14,
+   "category": "trailer",
+   "title": "6x12 enclosed trailer",
+   "condition": "used",
+   "location": {
+    "city": "Conway",
+    "state": "AR",
+    "zip": "72034"
+   },
+   "currency": "USD",
+   "_fixture_note": "reject: older than 90 days"
+  },
+  {
+   "kind": "sold",
+   "price": 2100,
+   "sold_date": "2026-10-20",
+   "source": "ebay_marketplace_insights",
+   "url": "https://example.invalid/ebay_marketplace_insights/9",
+   "provenance_id": "prov_01JD0000000000000000000009",
+   "fetched_at": "2026-10-07T17:30:00Z",
+   "raw_ref": "sha256:0909090909090909090909090909090909090909090909090909090909090909",
+   "dom_days": 6,
+   "category": "trailer",
+   "title": "6x12 enclosed trailer",
+   "condition": "used",
+   "location": {
+    "city": "Conway",
+    "state": "AR",
+    "zip": "72034"
+   },
+   "currency": "USD",
+   "_fixture_note": "reject: after as_of"
+  },
+  {
+   "kind": "sold",
+   "price": 700,
+   "sold_date": "2026-09-14",
+   "source": "ebay_marketplace_insights",
+   "url": "https://example.invalid/ebay_marketplace_insights/10",
+   "provenance_id": "prov_01JD0000000000000000000010",
+   "fetched_at": "2026-10-07T17:30:00Z",
+   "raw_ref": "sha256:1010101010101010101010101010101010101010101010101010101010101010",
+   "dom_days": 7,
+   "category": "generator",
+   "title": "7500W generator",
+   "condition": "used",
+   "location": {
+    "city": "Conway",
+    "state": "AR",
+    "zip": "72034"
+   },
+   "currency": "USD",
+   "_fixture_note": "reject: wrong category"
+  },
+  {
+   "kind": "sold",
+   "price": 2300,
+   "sold_date": "2026-09-16",
+   "source": "ebay_marketplace_insights",
+   "url": "https://example.invalid/ebay_marketplace_insights/11",
+   "provenance_id": "prov_01JD0000000000000000000011",
+   "fetched_at": "2026-10-07T17:30:00Z",
+   "raw_ref": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+   "dom_days": 8,
+   "category": "trailer",
+   "title": "6x12 enclosed trailer",
+   "condition": "used",
+   "location": {
+    "city": "Conway",
+    "state": "AR",
+    "zip": "72034"
+   },
+   "currency": "EUR",
+   "_fixture_note": "reject: currency"
+  },
+  {
+   "kind": "sold",
+   "price": 2050,
+   "sold_date": "2026-09-02",
+   "source": "ebay_marketplace_insights",
+   "url": "https://example.invalid/ebay_marketplace_insights/1",
+   "provenance_id": "prov_01JD0000000000000000000012",
+   "fetched_at": "2026-10-07T17:30:00Z",
+   "raw_ref": "sha256:1212121212121212121212121212121212121212121212121212121212121212",
+   "dom_days": 9,
+   "category": "trailer",
+   "title": "6x12 Enclosed Cargo Trailer, ramp door",
+   "condition": "used",
+   "location": {
+    "city": "Conway",
+    "state": "AR",
+    "zip": "72034"
+   },
+   "currency": "USD",
+   "_fixture_note": "reject: duplicate of #1"
+  },
+  {
+   "kind": "sold",
+   "price": 2400,
+   "sold_date": "2026-09-17",
+   "source": "ebay_marketplace_insights",
+   "url": "https://example.invalid/ebay_marketplace_insights/13",
+   "provenance_id": "prov_01JD0000000000000000000013",
+   "fetched_at": "2026-10-07T17:30:00Z",
+   "raw_ref": "sha256:1313131313131313131313131313131313131313131313131313131313131313",
+   "dom_days": 10,
+   "category": "trailer",
+   "title": "6x12 enclosed trailer",
+   "condition": "used",
+   "location": {
+    "city": "Conway",
+    "state": "AR",
+    "zip": "72034"
+   },
+   "currency": "USD",
+   "_fixture_note": "reject: no provenance record"
+  },
+  {
+   "kind": "sold",
+   "price": 2600,
+   "sold_date": "2026-09-19",
+   "source": "ebay_marketplace_insights",
+   "url": "https://example.invalid/ebay_marketplace_insights/14",
+   "provenance_id": "prov_01JD0000000000000000000014",
+   "fetched_at": "2026-10-07T17:30:00Z",
+   "raw_ref": "sha256:1414141414141414141414141414141414141414141414141414141414141414",
+   "dom_days": 11,
+   "category": "trailer",
+   "title": "6x12 enclosed trailer",
+   "condition": "used",
+   "location": {
+    "city": "Conway",
+    "state": "AR",
+    "zip": "72034"
+   },
+   "currency": "USD",
+   "_fixture_note": "reject: provenance not FACT"
+  },
+  {
+   "kind": "sold",
+   "price": 2100,
+   "sold_date": "2026-09-21",
+   "source": "trailerbids_scraper",
+   "url": "https://example.invalid/trailerbids_scraper/15",
+   "provenance_id": "prov_01JD0000000000000000000015",
+   "fetched_at": "2026-10-07T17:30:00Z",
+   "raw_ref": "sha256:1515151515151515151515151515151515151515151515151515151515151515",
+   "dom_days": 12,
+   "category": "trailer",
+   "title": "6x12 enclosed trailer",
+   "condition": "used",
+   "location": {
+    "city": "Conway",
+    "state": "AR",
+    "zip": "72034"
+   },
+   "currency": "USD",
+   "_fixture_note": "reject: unknown source (fail closed)"
+  },
+  {
+   "kind": "sold",
+   "price": 2100,
+   "sold_date": "2026-09-22",
+   "source": "ebay_browse",
+   "url": "https://example.invalid/ebay_browse/16",
+   "provenance_id": "prov_01JD0000000000000000000016",
+   "fetched_at": "2026-10-07T17:30:00Z",
+   "raw_ref": "sha256:1616161616161616161616161616161616161616161616161616161616161616",
+   "dom_days": 13,
+   "category": "trailer",
+   "title": "6x12 enclosed trailer",
+   "condition": "used",
+   "location": {
+    "city": "Conway",
+    "state": "AR",
+    "zip": "72034"
+   },
+   "currency": "USD",
+   "_fixture_note": "reject: ebay_browse cannot report a SALE"
+  }
+ ],
+ "provenance": [
+  {
+   "provenance_id": "prov_01JD0000000000000000000001",
+   "created_at": "2026-10-07T17:30:00Z",
+   "basis": "FACT",
+   "source_uri": "https://example.invalid/ebay_marketplace_insights/1",
+   "fetched_at": "2026-10-07T17:30:00Z",
+   "actor_type": "external",
+   "agent_name": "agent-02-opportunity",
+   "tool_name": "mbos_discovery.comps",
+   "tool_version": "fixture",
+   "inputs_used": [
+    {
+     "ref": "raw",
+     "hash": "sha256:0101010101010101010101010101010101010101010101010101010101010101"
+    }
+   ]
+  },
+  {
+   "provenance_id": "prov_01JD0000000000000000000002",
+   "created_at": "2026-10-07T17:30:00Z",
+   "basis": "FACT",
+   "source_uri": "https://example.invalid/ebay_marketplace_insights/2",
+   "fetched_at": "2026-10-07T17:30:00Z",
+   "actor_type": "external",
+   "agent_name": "agent-02-opportunity",
+   "tool_name": "mbos_discovery.comps",
+   "tool_version": "fixture",
+   "inputs_used": [
+    {
+     "ref": "raw",
+     "hash": "sha256:0202020202020202020202020202020202020202020202020202020202020202"
+    }
+   ]
+  },
+  {
+   "provenance_id": "prov_01JD0000000000000000000003",
+   "created_at": "2026-10-07T17:30:00Z",
+   "basis": "FACT",
+   "source_uri": "https://example.invalid/ebay_marketplace_insights/3",
+   "fetched_at": "2026-10-07T17:30:00Z",
+   "actor_type": "external",
+   "agent_name": "agent-02-opportunity",
+   "tool_name": "mbos_discovery.comps",
+   "tool_version": "fixture",
+   "inputs_used": [
+    {
+     "ref": "raw",
+     "hash": "sha256:0303030303030303030303030303030303030303030303030303030303030303"
+    }
+   ]
+  },
+  {
+   "provenance_id": "prov_01JD0000000000000000000004",
+   "created_at": "2026-10-07T17:30:00Z",
+   "basis": "FACT",
+   "source_uri": "https://example.invalid/manual/4",
+   "fetched_at": "2026-10-07T17:30:00Z",
+   "actor_type": "human",
+   "human_actor": "michael",
+   "agent_name": "agent-02-opportunity"
+  },
+  {
+   "provenance_id": "prov_01JD0000000000000000000005",
+   "created_at": "2026-10-07T17:30:00Z",
+   "basis": "FACT",
+   "source_uri": "https://example.invalid/ebay_marketplace_insights/5",
+   "fetched_at": "2026-10-07T17:30:00Z",
+   "actor_type": "external",
+   "agent_name": "agent-02-opportunity",
+   "tool_name": "mbos_discovery.comps",
+   "tool_version": "fixture",
+   "inputs_used": [
+    {
+     "ref": "raw",
+     "hash": "sha256:0505050505050505050505050505050505050505050505050505050505050505"
+    }
+   ]
+  },
+  {
+   "provenance_id": "prov_01JD0000000000000000000006",
+   "created_at": "2026-10-07T17:30:00Z",
+   "basis": "FACT",
+   "source_uri": "https://example.invalid/ebay_marketplace_insights/6",
+   "fetched_at": "2026-10-07T17:30:00Z",
+   "actor_type": "external",
+   "agent_name": "agent-02-opportunity",
+   "tool_name": "mbos_discovery.comps",
+   "tool_version": "fixture",
+   "inputs_used": [
+    {
+     "ref": "raw",
+     "hash": "sha256:0606060606060606060606060606060606060606060606060606060606060606"
+    }
+   ]
+  },
+  {
+   "provenance_id": "prov_01JD0000000000000000000007",
+   "created_at": "2026-10-07T17:30:00Z",
+   "basis": "FACT",
+   "source_uri": "https://example.invalid/facebook_marketplace/7",
+   "fetched_at": "2026-10-07T17:30:00Z",
+   "actor_type": "external",
+   "agent_name": "agent-02-opportunity",
+   "tool_name": "mbos_discovery.comps",
+   "tool_version": "fixture",
+   "inputs_used": [
+    {
+     "ref": "raw",
+     "hash": "sha256:0707070707070707070707070707070707070707070707070707070707070707"
+    }
+   ]
+  },
+  {
+   "provenance_id": "prov_01JD0000000000000000000008",
+   "created_at": "2026-10-07T17:30:00Z",
+   "basis": "FACT",
+   "source_uri": "https://example.invalid/ebay_marketplace_insights/8",
+   "fetched_at": "2026-10-07T17:30:00Z",
+   "actor_type": "external",
+   "agent_name": "agent-02-opportunity",
+   "tool_name": "mbos_discovery.comps",
+   "tool_version": "fixture",
+   "inputs_used": [
+    {
+     "ref": "raw",
+     "hash": "sha256:0808080808080808080808080808080808080808080808080808080808080808"
+    }
+   ]
+  },
+  {
+   "provenance_id": "prov_01JD0000000000000000000009",
+   "created_at": "2026-10-07T17:30:00Z",
+   "basis": "FACT",
+   "source_uri": "https://example.invalid/ebay_marketplace_insights/9",
+   "fetched_at": "2026-10-07T17:30:00Z",
+   "actor_type": "external",
+   "agent_name": "agent-02-opportunity",
+   "tool_name": "mbos_discovery.comps",
+   "tool_version": "fixture",
+   "inputs_used": [
+    {
+     "ref": "raw",
+     "hash": "sha256:0909090909090909090909090909090909090909090909090909090909090909"
+    }
+   ]
+  },
+  {
+   "provenance_id": "prov_01JD0000000000000000000010",
+   "created_at": "2026-10-07T17:30:00Z",
+   "basis": "FACT",
+   "source_uri": "https://example.invalid/ebay_marketplace_insights/10",
+   "fetched_at": "2026-10-07T17:30:00Z",
+   "actor_type": "external",
+   "agent_name": "agent-02-opportunity",
+   "tool_name": "mbos_discovery.comps",
+   "tool_version": "fixture",
+   "inputs_used": [
+    {
+     "ref": "raw",
+     "hash": "sha256:1010101010101010101010101010101010101010101010101010101010101010"
+    }
+   ]
+  },
+  {
+   "provenance_id": "prov_01JD0000000000000000000011",
+   "created_at": "2026-10-07T17:30:00Z",
+   "basis": "FACT",
+   "source_uri": "https://example.invalid/ebay_marketplace_insights/11",
+   "fetched_at": "2026-10-07T17:30:00Z",
+   "actor_type": "external",
+   "agent_name": "agent-02-opportunity",
+   "tool_name": "mbos_discovery.comps",
+   "tool_version": "fixture",
+   "inputs_used": [
+    {
+     "ref": "raw",
+     "hash": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+    }
+   ]
+  },
+  {
+   "provenance_id": "prov_01JD0000000000000000000012",
+   "created_at": "2026-10-07T17:30:00Z",
+   "basis": "FACT",
+   "source_uri": "https://example.invalid/ebay_marketplace_insights/1",
+   "fetched_at": "2026-10-07T17:30:00Z",
+   "actor_type": "external",
+   "agent_name": "agent-02-opportunity",
+   "tool_name": "mbos_discovery.comps",
+   "tool_version": "fixture",
+   "inputs_used": [
+    {
+     "ref": "raw",
+     "hash": "sha256:1212121212121212121212121212121212121212121212121212121212121212"
+    }
+   ]
+  },
+  {
+   "provenance_id": "prov_01JD0000000000000000000014",
+   "created_at": "2026-10-07T17:30:00Z",
+   "basis": "INFERENCE",
+   "source_uri": "https://example.invalid/ebay_marketplace_insights/14",
+   "fetched_at": "2026-10-07T17:30:00Z",
+   "actor_type": "external",
+   "agent_name": "agent-02-opportunity",
+   "tool_name": "mbos_discovery.comps",
+   "tool_version": "fixture",
+   "inputs_used": [
+    {
+     "ref": "raw",
+     "hash": "sha256:1414141414141414141414141414141414141414141414141414141414141414"
+    }
+   ]
+  },
+  {
+   "provenance_id": "prov_01JD0000000000000000000015",
+   "created_at": "2026-10-07T17:30:00Z",
+   "basis": "FACT",
+   "source_uri": "https://example.invalid/trailerbids_scraper/15",
+   "fetched_at": "2026-10-07T17:30:00Z",
+   "actor_type": "external",
+   "agent_name": "agent-02-opportunity",
+   "tool_name": "mbos_discovery.comps",
+   "tool_version": "fixture",
+   "inputs_used": [
+    {
+     "ref": "raw",
+     "hash": "sha256:1515151515151515151515151515151515151515151515151515151515151515"
+    }
+   ]
+  },
+  {
+   "provenance_id": "prov_01JD0000000000000000000016",
+   "created_at": "2026-10-07T17:30:00Z",
+   "basis": "FACT",
+   "source_uri": "https://example.invalid/ebay_browse/16",
+   "fetched_at": "2026-10-07T17:30:00Z",
+   "actor_type": "external",
+   "agent_name": "agent-02-opportunity",
+   "tool_name": "mbos_discovery.comps",
+   "tool_version": "fixture",
+   "inputs_used": [
+    {
+     "ref": "raw",
+     "hash": "sha256:1616161616161616161616161616161616161616161616161616161616161616"
+    }
+   ]
+  }
+ ]
+}

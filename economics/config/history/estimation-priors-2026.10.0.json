@@ -1,37 +1,7 @@
 {
-  "priors_version": "2026.10.1",
-  "supersedes": "2026.10.0",
+  "priors_version": "2026.10.0",
   "priors_format": 1,
   "_note": "Category priors for the RESEARCH/estimate producer (C-RESEARCH-01). These are ESTIMATES used to fill Item.economics before evidence exists. They are not scoring policy; scoring policy lives in scoring-config.json. Every value is REC or UNK until LEARN calibrates it from outcomes. Any change bumps priors_version. Research-bundle overrides, which need provenance, always win over priors. The estimator never invents a resale price: no comps means status=insufficient.",
-
-  "_changelog": [
-    "2026.10.1 (C-04): comps_sources registry (ADR-02-0202 tiers, fail-closed) and comps_query vocabulary. Other values unchanged."
-  ],
-
-  "comps_sources": {
-    "_note": "Comps sources ACCEPTED by the lane-C selection policy (adapters themselves are owned by Agent 02: mbos_discovery.comps), mirroring Agent 02's ADR-02-0202 registry. ALLOWED = official API or an owned channel. Anything else, including unknown names, is refused. Manual entry is how prices seen on do-not-automate sites (Facebook etc.) legitimately enter: a human looked and recorded them.",
-    "ebay_marketplace_insights": { "disposition": "allowed", "tier": 1, "kind": "sold", "live_enabled": false, "basis": "INFER", "note": "official eBay Marketplace Insights API (sold items, ~90 days). Restricted access: needs eBay approval plus keyset (UNK). Fixture mode until then" },
-    "manual": { "disposition": "allowed", "tier": 1, "kind": "sold", "live_enabled": true, "basis": "FACT", "note": "comps recorded by Michael/operator (owned channel); every record names who recorded it and where it was seen" },
-    "ebay_browse": { "disposition": "allowed", "tier": 1, "kind": "asking", "live_enabled": false, "basis": "FACT", "note": "active listings = asking comps only (Agent 02 adapter); never sold" },
-    "craigslist": { "disposition": "pending_michael", "tier": 3 },
-    "govdeals": { "disposition": "pending_michael", "tier": 3 },
-    "hibid": { "disposition": "pending_michael", "tier": 3 },
-    "facebook_marketplace": { "disposition": "forbidden", "tier": 5 },
-    "facebook_groups": { "disposition": "forbidden", "tier": 5 },
-    "nextdoor": { "disposition": "forbidden", "tier": 5 },
-    "estatesales_net_site": { "disposition": "forbidden", "tier": 5 }
-  },
-
-  "comps_query": {
-    "_note": "Query keys are built ONLY from this fixed vocabulary, matched in listing titles (lower-case, word-bounded, 'N x M' normalized to 'NxM'). First match per group, in list order. Free text never becomes a query or a number. A category with no vocabulary gets a category-only key (coarse: prefer manual comps).",
-    "basis": "REC",
-    "trailer": { "type": ["enclosed", "dump", "car hauler", "flatbed", "landscape", "utility"], "size": ["4x8", "5x8", "5x10", "6x10", "6x12", "7x14", "7x16", "8.5x20"] },
-    "mower": { "type": ["zero turn", "zero-turn", "lawn tractor", "riding", "push"] },
-    "generator": { "size": ["2000w", "3500w", "5500w", "7500w", "9500w", "12000w"], "type": ["inverter", "standby", "portable"] },
-    "welder": { "process": ["mig", "tig", "stick", "plasma"], "brand": ["lincoln", "miller", "hobart"] },
-    "compressor": { "size": ["20 gallon", "30 gallon", "60 gallon", "80 gallon"] },
-    "tool": {}, "commercial_equipment": {}, "mechanical_equipment": {}, "project_vehicle": {}
-  },
 
   "home_base": {
     "label": { "value": "Conway, AR 72034", "basis": "UNK", "note": "research §19 open item; Michael to confirm" },

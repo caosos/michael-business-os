@@ -120,6 +120,11 @@ def _validate_bundle(bundle: dict) -> None:
                 p.append(f"{w}.price must be a positive number")
             if c.get("kind") == "sold" and not c.get("sold_date"):
                 p.append(f"{w}.sold_date is required for a sold comp")
+            if c.get("fetched_at") is not None:
+                try:
+                    parse_ts(c["fetched_at"])
+                except (TypeError, ValueError):
+                    p.append(f"{w}.fetched_at must be an RFC 3339 timestamp with a timezone")
     if "active_comparable_listings" in bundle and not str(
             bundle.get("active_comparable_listings_provenance_id", "")).startswith("prov_"):
         p.append("bundle.active_comparable_listings_provenance_id is required")
@@ -166,6 +171,18 @@ def _road_miles(item: dict, pri: ScoringConfig, led: _Ledger) -> Decimal | None:
         return led.note(f, fine(straight * rf), "INFER", f"geo_tier {tier} midpoint {straight} mi x road factor {rf}")
     led.gap("location_unknown", "no road miles, coordinates, known town or geo_tier", True)
     return None
+
+
+def _comp_fact(c: dict, field: str) -> dict:
+    """One FACT research entry per comp, carrying the comp's OWN provenance (C-04)."""
+    verb = "sold" if c["kind"] == "sold" else "asking"
+    r = {"finding": f"{verb} comp ${c['price']} on {c.get('sold_date', '?')} ({c.get('source', 'research')})",
+         "field": field, "basis": "FACT", "provenance_id": c["provenance_id"]}
+    if c.get("url"):
+        r["source_uri"] = c["url"]
+    if c.get("fetched_at"):
+        r["fetched_at"] = c["fetched_at"]
+    return r
 
 
 def _apply_overrides(econ: dict, bundle: dict, led: _Ledger) -> None:
@@ -242,6 +259,7 @@ def _estimate_flip(item: dict, bundle: dict, pri: ScoringConfig, miles: Decimal,
         med = money(_median(vals))
         acq["market_buy_median"] = led.note(f"{E}.acquisition.market_buy_median", _num(med), "INFER",
                                             f"median of {len(vals)} as-is comps (asking x {ratio})")
+        research += [_comp_fact(c, "acquisition.market_buy_median") for c in as_is]
 
     # ---- resale (never guessed)
     comps = bundle.get("comps") or []
@@ -258,6 +276,7 @@ def _estimate_flip(item: dict, bundle: dict, pri: ScoringConfig, miles: Decimal,
             resale["comp_price_low"], resale["comp_price_high"] = _num(agg["comp_price_low"]), _num(agg["comp_price_high"])
         research.append({"finding": f"{len(sold)} sold comps; trimmed median ${target}", "field": "resale.target_sell_price",
                          "basis": "INFERENCE"})
+        research += [_comp_fact(c, "resale.target_sell_price") for c in sold]
         if len(sold) < int(scoring_cfg.num("decision_thresholds.min_sold_comps_for_yes_flip")):
             led.gap("thin_comps", f"{len(sold)} sold comps; YES needs "
                     f"{scoring_cfg.num('decision_thresholds.min_sold_comps_for_yes_flip')}", False)
@@ -482,7 +501,7 @@ def estimate_item(item: dict, bundle: dict | None, as_of: str, *, priors: Scorin
         patch = {
             "economics": econ,
             "normalized.location.road_miles_one_way": _num(miles),
-            "research": [{**r, "provenance_id": prov_id} for r in research],
+            "research": [{"provenance_id": prov_id, **r} for r in research],   # comp facts keep their own
         }
 
     upstream = sorted({s["provenance_id"] for s in item.get("sources", []) if "provenance_id" in s}
