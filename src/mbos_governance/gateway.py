@@ -592,6 +592,74 @@ class ActionGateway:
                  "details": {"kind": "generic", "dry_run": dry_run}}))
             return Result("executed", areq, "executed", [], rids, response)
 
+    # ------------------------------------------------------------------ E-05 reconciliation
+    def reconcile(self, older_than_seconds: int | None = None) -> list[Result]:
+        """Reconcile execution claims stuck in `executing` (crash between the effector call and its
+        receipt). Provider-query-before-retry: ask the effector, by idempotency key, whether the call
+        landed — NEVER re-send.
+          found      -> finish `executed` with the provider's record, commit budget, ACTION_EXECUTED
+          not found  -> finish `failed`, release budget, ACTION_FAILED (no auto-retry: a new proposal + YES)
+          no answer  -> leave the claim untouched, report NEEDS_HUMAN
+        Exactly once: the request row is locked and the claim re-checked inside the transaction.
+        Allowed under PANIC: reconciliation records what already happened; it never acts."""
+        policy, err = self._policy()
+        if policy is None:
+            return [Result("refused", None, None, [err or "POLICY_UNREADABLE"])]
+        ttl = policy.data["execution"]["claim_ttl_seconds"] if older_than_seconds is None else older_than_seconds
+        with self.store.tx("gateway") as cur:
+            candidates = self.store.stuck_claims(cur, ttl)
+        return [self._reconcile_one(areq, policy) for areq in candidates]
+
+    def _reconcile_one(self, areq: str, policy: Policy) -> Result:
+        with self.store.tx("gateway") as cur:
+            ar = self.store.get_action_request(cur, areq, lock=True)
+            claim = self.store.claim_state(cur, areq)
+            if claim is None or claim["state"] != "executing" or ar["status"] != "executing":
+                return Result("duplicate", areq, ar["status"], ["ALREADY_RECONCILED"])
+            approval = self.store.latest_approval(cur, areq)
+            cap = policy.capability(ar["capability"])
+            effector = self._effectors.get(cap["effector"]) if cap else None
+            if effector is None:
+                return Result("refused", areq, ar["status"], ["NEEDS_HUMAN:NO_EFFECTOR_FOR_LOOKUP"])
+            token = self._minter.mint(areq, ar["payload_hash"], ar["idempotency_key"], self._dry_run_forced(policy))
+            try:
+                record = effector.lookup(token, ar)  # read-only provider query
+            except Exception as exc:  # noqa: BLE001 - cannot know => do not touch
+                return Result("refused", areq, ar["status"], [f"NEEDS_HUMAN:LOOKUP_FAILED:{type(exc).__name__}:{exc}"])
+            gw = self._tool_provenance(cur, policy.version, tool="mbos_governance.reconcile")
+            prov = [gw] + ar["provenance_ids"]
+            approval_id = approval["approval_id"] if approval else None
+            if record is not None and record.get("dry_run") is True:
+                self.store.effector_finish(cur, areq, "executed", record.get("provider"), record.get("provider_msg_id"), record)
+                res = self.store.open_reservation(cur, areq)
+                if res is not None:
+                    self.store.settle(cur, res["reservation_id"], "commit", None, GATEWAY_ACTOR,
+                                      "commit (reconciled; dry_run)", prov, f"{res['reservation_id']}:COMMIT")
+                rid = self.store.set_status(
+                    cur, areq, "executed", "ACTION_EXECUTED", GATEWAY_ACTOR,
+                    f"{ar['capability']} reconciled: provider confirms delivery (DRY-RUN); not re-sent", prov,
+                    f"{ar['idempotency_key']}:EXECUTED",
+                    {"approval_id": approval_id, "effect": EFFECT_BY_CATEGORY[ar["category"]],
+                     "tool_name": f"effector:{record.get('provider')}", "effector_response": record,
+                     "details": {"kind": "generic", "reconciled": True, "provider_found": True}})
+                return Result("executed", areq, "executed", ["RECONCILED:PROVIDER_FOUND"], [rid], record)
+            reason = ("RECONCILED:PROVIDER_NOT_FOUND" if record is None
+                      else "RECONCILED:PROVIDER_RECORD_NOT_DRY_RUN")
+            resp = {"provider": (record or {}).get("provider", cap["effector"]), "status": "not_delivered" if record is None
+                    else "invariant_violation", "dry_run": True, "error": reason}
+            reported = {"effector_reported": record} if record is not None else {}
+            self.store.effector_finish(cur, areq, "failed", resp["provider"], None, {**resp, **reported})
+            self._release(cur, ar, [gw], "reconciled: not delivered")
+            rid = self.store.set_status(cur, areq, "failed", "ACTION_FAILED", GATEWAY_ACTOR,
+                                        f"reconciled: provider has no record; marked failed, NOT retried ({reason})",
+                                        prov, f"{ar['idempotency_key']}:FAILED",
+                                        {"approval_id": approval_id, "effect": "none", "effector_response": resp,
+                                         "details": {"kind": "generic", "reconciled": True, "provider_found": record is not None,
+                                                     **reported}})
+        if record is not None:  # a provider claiming a live effect is the dry-run invariant breaking
+            self.engage_panic("L3", None, actor="action-gateway", reason=f"reconcile {areq}: {reason}")
+        return Result("failed", areq, "failed", [reason], [rid])
+
     # ------------------------------------------------------------------ PANIC (lane D mbos.panic_set)
     def _state_summary(self) -> dict:
         st = self.panic.read()

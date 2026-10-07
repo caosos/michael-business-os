@@ -19,7 +19,8 @@
     "quiet_hours",
     "budgets",
     "egress",
-    "llm_spend"
+    "llm_spend",
+    "execution"
   ],
   "properties": {
     "policy_schema": {
@@ -387,6 +388,19 @@
             }
           },
           "description": "Wave one: no agent may reach any host (maxItems 0)."
+        }
+      }
+    },
+    "execution": {
+      "type": "object",
+      "required": [
+        "claim_ttl_seconds"
+      ],
+      "properties": {
+        "claim_ttl_seconds": {
+          "type": "integer",
+          "minimum": 30,
+          "maximum": 86400
         }
       }
     }

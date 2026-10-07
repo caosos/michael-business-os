@@ -1,7 +1,7 @@
 {
   "policy_schema": "mbos.governance.policy/1",
   "policy_id": "wave-one-default-deny",
-  "version": "2026.10.07-w1.3",
+  "version": "2026.10.07-w1.4",
   "description": "Round Two wave one. Everything tier 0, every externally consequential action needs Michael's YES, every effector DRY-RUN, no delegation, no real-world spend. Anything not listed here is DENIED.",
   "system_mode": "mvp",
   "delegation_enabled": false,
@@ -17,6 +17,11 @@
       "reversibility": ["irreversible"],
       "untrusted_inputs": true
     }
+  },
+
+  "execution": {
+    "claim_ttl_seconds": 300,
+    "note": "E-05: an execution claim still `executing` after this long is reconciled by provider lookup (never re-sent)."
   },
 
   "action_request": {

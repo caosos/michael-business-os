@@ -68,6 +68,17 @@ class Effector:
     def _execute(self, token: GuardToken, action_request: dict) -> dict:  # pragma: no cover
         raise NotImplementedError
 
+    def lookup(self, token: GuardToken, action_request: dict) -> dict | None:
+        """Provider-side query by idempotency key (E-05 reconciliation): the provider's record of this
+        call, or None if the provider has no record. Raises if the provider cannot answer — callers
+        must then leave the claim alone. Read-only: never sends."""
+        if not self._minter.verify(token) or token.action_request_id != action_request["action_request_id"]:
+            raise EffectorRefused("invalid guard token for lookup")
+        return self._lookup(token, action_request)
+
+    def _lookup(self, token: GuardToken, action_request: dict) -> dict | None:  # pragma: no cover
+        raise NotImplementedError
+
 
 class DryRunEffector(Effector):
     """Simulates any capability. No network, no files, no spend."""
@@ -75,12 +86,25 @@ class DryRunEffector(Effector):
     name = "dryrun"
     supports_dry_run = True
 
+    def __init__(self, minter: TokenMinter):
+        super().__init__(minter)
+        # The simulated provider's own record, keyed by idempotency key (in-process; a real provider
+        # keeps this server-side and answers lookups by its Idempotency-Key / message id).
+        self.deliveries: dict[str, dict] = {}
+
     def _execute(self, token: GuardToken, action_request: dict) -> dict:
         if not token.dry_run:
             raise EffectorRefused("DryRunEffector refuses live execution")
-        return {
+        if token.idempotency_key in self.deliveries:   # provider-level idempotency: never twice
+            return self.deliveries[token.idempotency_key]
+        resp = {
             "provider": "dryrun",
             "provider_msg_id": f"dryrun_{new_ulid()}",
             "status": "simulated",
             "dry_run": True,
         }
+        self.deliveries[token.idempotency_key] = resp
+        return resp
+
+    def _lookup(self, token: GuardToken, action_request: dict) -> dict | None:
+        return self.deliveries.get(token.idempotency_key)

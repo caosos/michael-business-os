@@ -145,6 +145,13 @@ class PgGovernanceStore:
         return cur.execute("SELECT * FROM mbos.effector_claim(%s,%s)", (action_request_id, J(request))).fetchone()
 
     @staticmethod
+    def stuck_claims(cur, older_than_seconds: int) -> list[str]:
+        """Execution claims still `executing` longer than the TTL (DB clock: claimed_at is DB time)."""
+        return [r["action_request_id"] for r in cur.execute(
+            "SELECT action_request_id FROM mbos.effector_calls WHERE state = 'executing' "
+            "AND claimed_at < now() - make_interval(secs => %s) ORDER BY claimed_at", (older_than_seconds,))]
+
+    @staticmethod
     def effector_finish(cur, action_request_id: str, state: str, provider: str | None, msg_id: str | None,
                         response: dict) -> None:
         cur.execute("SELECT mbos.effector_finish(%s,%s,%s,%s,%s)", (action_request_id, state, provider, msg_id, J(response)))

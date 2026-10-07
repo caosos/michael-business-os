@@ -7,6 +7,7 @@
   mbos-gov ledger verify
   mbos-gov render egress|litellm [--out FILE]   (generators; stdout if no --out; no network)
   mbos-gov freeze-requests apply FILE.jsonl     (B-04: apply lane B's side-channel freeze requests)
+  mbos-gov reconcile [--older-than SECONDS]      (E-05: stuck claims; provider lookup, never re-send)
 
 Connection: --dsn, or env MBOS_GOV_DSN (one login for every role), or per role
 MBOS_GOV_DSN_GATEWAY / _APPROVER / _AGENT_WRITE / _POLICY_ADMIN. --policy / MBOS_POLICY for the policy file.
@@ -55,6 +56,8 @@ def main(argv: list[str] | None = None) -> int:
     fr = sub.add_parser("freeze-requests")
     fr.add_argument("action", choices=["apply"])
     fr.add_argument("file")
+    rc = sub.add_parser("reconcile")
+    rc.add_argument("--older-than", type=int)
     a = ap.parse_args(argv)
     policy_path = a.policy or os.environ.get("MBOS_POLICY", "policy/policy.v1.json")
 
@@ -101,6 +104,11 @@ def main(argv: list[str] | None = None) -> int:
         outs = apply_side_channel(gw, a.file)
         print(json.dumps([o.__dict__ for o in outs], indent=2))
         return 0 if all(o.applied or o.reasons == ["ALREADY_FROZEN"] for o in outs) else 1
+    if a.cmd == "reconcile":
+        outs = gw.reconcile(a.older_than)
+        print(json.dumps([{"action_request_id": o.action_request_id, "outcome": o.outcome, "reasons": o.reasons}
+                          for o in outs], indent=2))
+        return 1 if any(r.startswith("NEEDS_HUMAN") for o in outs for r in o.reasons) else 0
     try:
         if a.action == "freeze":
             out = gw.engage_panic(a.level, a.target, a.actor, a.reason or "cli freeze")

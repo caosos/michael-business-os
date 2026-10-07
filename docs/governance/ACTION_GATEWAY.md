@@ -1,7 +1,7 @@
 # Action Gateway: wave one implementation guide
 
 **Owner:** Agent 05 · **Status:** implemented, wave one · **Date:** 2026-10-07
-**Code:** `src/mbos_governance/` · **Policy data:** `policy/` · **Tests:** `tests/` (211 passing, on PostgreSQL 16)
+**Code:** `src/mbos_governance/` · **Policy data:** `policy/` · **Tests:** `tests/` (218 passing, on PostgreSQL 16)
 
 > Core law: no action without a receipt, and no receipt without provenance.
 > Governance rule: models may PROPOSE. Non-LLM policy code AUTHORIZES.
@@ -145,5 +145,5 @@ These defaults wait on Michael's decisions (`MICHAEL_DECISIONS.md`):
 2. L3 hooks: egress proxy deny-all, OpenBao lease revoke, LiteLLM per-agent budget 0, DBOS `cancel` for unstarted workflows. Plus B29.
 3. Sandbox policy (gVisor or E2B) and an egress allow-list for each adapter and effector.
 4. Governance alerts on FREEZE, budget breach, INJECTION_SUSPECTED and stuck `executing` claims.
-5. A reconciliation job for stuck claims. Effectors that work with real providers will query the provider by idempotency key before deciding.
+5. ~~A reconciliation job for stuck claims~~ **DONE (E-05):** `gw.reconcile()` / `mbos-gov reconcile` — provider lookup by idempotency key, never re-send. Agent 01 schedules it (A-03).
 6. Output-side secret scan for outbound content (§17 #25–26), and the `INJECTION_SUSPECTED` tripwire (#24) wired to L2 auto-demotion.
