@@ -1,7 +1,7 @@
 {
- "note": "Final card re-run: 01 mbos deec1d1; 04 c97ba6b and 05 87f0b53 unchanged since G-07.",
- "mbos_01": "deec1d144c9c36751b0734db2fa91469e51cf0d5",
+ "note": "Optional final pass: 01 mbos e755b38; 05 E-16 code head 716098e; 04 c97ba6b unchanged.",
+ "mbos_01": "e755b385094e991ba331c69eca9068b4bade3d0c",
  "lane_d_04": "c97ba6bb78bb20c3fdbcbebbc1f78d044c5d3ee8",
- "lane_e_05": "87f0b53eecfc92a918ac72fb0da84a5270f8032b",
+ "lane_e_05": "716098eb1b592e0f96a109606b753650e9e655d5",
  "lane_c_03_not_installed": "3d6212c3b1b5441ee4de4e63486f5e28a8e02a7e"
 }

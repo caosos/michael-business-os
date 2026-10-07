@@ -64,17 +64,25 @@ def test_a_junk_source_does_not_launder_elementary_advice(mc, profile, source):
     assert blocked(mc, _card(mc, profile, risks=r), "Check compression"), f"source={source!r} let elementary advice through"
 
 
-def test_the_contract_can_mark_content_model_specific(mc, profile):
-    """ADR-0011 rule 6: elementary advice is allowed only when a lane 'marks it model-specific with a source'. There must
-    be a place to put that mark; otherwise 'sourced' is the only gate and generic advice with any source passes."""
-    import json
+def test_with_no_exemption_path_nothing_elementary_can_pass(mc, profile):
+    """ADR-0011 as amended by Agent 01: the card contract has no model-specific marker, so NOTHING elementary-phrased can
+    pass (deliberately stricter than the earlier wording; an exception needs a contract field, ADR-0009). Hold it to that:
+    not with a source, not with a provenance id, not as FACT."""
+    for basis, extra in (("FACT", {"kind": "known_weakness", "source": "Honda GCV160 service manual section 4-12"}),
+                         ("INFERENCE", {"provenance_id": "prov_" + "0" * 25 + "1"}), ("RECOMMENDATION", {"source": "https://example.invalid/m"})):
+        r = [{"risk": "Check compression before buying", "basis": basis, **extra}]
+        assert blocked(mc, _card(mc, profile, risks=r), "Check compression"), (basis, extra)
 
-    from .conftest import CARD_SCHEMA
 
-    risk = CARD_SCHEMA["properties"]["value_add_plan"]["properties"]["model_specific_risks"]["items"]["properties"]
-    assert "model_specific" in risk or "model" in risk or "make_model" in risk, \
-        f"card.schema.json has no model-specificity marker on risks (kind enum: {risk['kind']['enum']})"
-    json.dumps(risk)
+def test_a_rejected_lane_claim_leaves_a_trace_on_the_card(mc, profile):
+    """A silently dropped claim hides a misbehaving lane. The card must say N lane claim(s) were rejected."""
+    r = [{"risk": "Check compression before buying", "basis": "INFERENCE", "provenance_id": "prov_" + "0" * 25 + "1"},
+         {"risk": "Check the fluids", "basis": "FACT", "kind": "known_weakness", "source": "Honda GCV160 service manual 4-12"}]
+    card = _card(mc, profile, risks=r)
+    assert any("rejected" in u for u in card["unknowns"]), f"no trace of the rejected claims in unknowns: {card['unknowns']}"
+    clean = _card(mc, profile, risks=[{"risk": "GCV160 carburetor bowl nut seeps when the gasket hardens; $9 gasket", "basis": "FACT",
+                                       "kind": "known_weakness", "source": "Honda GCV160 service manual section 4-12"}])
+    assert not any("rejected" in u for u in clean["unknowns"]), "a clean card must not claim rejections"
 
 
 def test_generic_advice_with_a_real_looking_source_is_still_generic(mc, profile):

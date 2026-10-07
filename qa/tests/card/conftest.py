@@ -10,6 +10,7 @@ from __future__ import annotations
 import importlib
 import itertools
 import json
+import re
 import os
 import pathlib
 
@@ -141,3 +142,12 @@ def qa(tmp_path_factory):
     q = getattr(importlib.import_module(mod), fn)(tmp_path_factory.mktemp("card"))
     yield q
     q.close()
+
+
+TRACE_RX = re.compile(r"^value_add_plan\.model_specific_risks \(\d+ lane claim\(s\) rejected: unsourced or elementary\)$")
+
+
+def unknowns_match(card: dict) -> bool:
+    """`unknowns` is exactly the UNKNOWN datum paths, plus (only) the documented rejection trace entries."""
+    extra = {u for u in card["unknowns"] if TRACE_RX.match(u)}
+    return set(card["unknowns"]) - extra == unknown_paths(card)

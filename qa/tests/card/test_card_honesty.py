@@ -5,7 +5,7 @@ import random
 
 import pytest
 
-from .conftest import base_item, independent_schema_errors, leaves, pid, unknown_paths, world
+from .conftest import base_item, independent_schema_errors, leaves, pid, unknowns_match, world
 
 LANE_PATHS = ["listing_activity.posted_at", "listing_activity.updated_at", "listing_activity.age_days",
               "listing_activity.suspected_relist", "listing_activity.stale_risk", "seller.account_age", "seller.rating",
@@ -36,7 +36,7 @@ def test_no_enrichment_everything_lane_supplied_is_unknown_and_listed(mc, profil
     assert card["seller"]["confidence"] == "UNKNOWN"
     assert card["listing_activity"]["recent_activity"] == []
     assert card["value_add_plan"]["model_specific_risks"] == []
-    assert set(card["unknowns"]) == unknown_paths(card), "`unknowns` must list exactly the UNKNOWN datums"
+    assert unknowns_match(card), "`unknowns` must list exactly the UNKNOWN datums (plus documented rejection traces)"
 
 
 def test_empty_dict_enrichment_equals_no_enrichment(mc, profile):
@@ -100,7 +100,7 @@ def test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid(mc
     assert independent_schema_errors(card) == [], independent_schema_errors(card)[:3]
     assert mc.validate_card(card) == []
     mc.render_text(card)  # must not raise on any card build_card returned
-    assert set(card["unknowns"]) == unknown_paths(card)
+    assert unknowns_match(card)
 
 
 def test_fuzzed_enrichment_never_crashes_and_never_invents(mc, profile):
