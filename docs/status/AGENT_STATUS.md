@@ -5,6 +5,7 @@ Role: Discovery / Source Adapters (DISCOVER + NORMALIZE lane)
 Branch: research/agent-02-opportunity
 Worktree: /home/michaelos/business-os-worktrees/agent-02-opportunity
 State: WORKING
+Claimed: B-01
 Current phase: Round Two — wave two: CLAIMED lane-B spine adapter + Deduper (Agent 01 ruling R8, ROUND_TWO_INTEGRATION §3-B, §5 item 5)
 Started: 2026-10-06 (Round One) · Round Two started 2026-10-07
 Last updated: 2026-10-07
@@ -12,8 +13,8 @@ Last updated: 2026-10-07
 ## Current objective
 **Claimed task (2026-10-07):** implement `SourceAdapter` / `Normalizer` / `Deduper` against Agent 01's
 `mbos.interfaces` (agent-01-coordinator @ bed7609), with `raw_ref` = hash of the stored raw bytes in both lanes,
-and route `FetchResult.error` / `freeze_requests` to a side channel (R5). Note: no `READY_QUEUE` / `ACTIVE_WORK`
-file exists on any branch as of this claim; the assignment is taken from Agent 01's binding rulings.
+and route `FetchResult.error` / `freeze_requests` to a side channel (R5). Confirmed by Agent 01's `READY_QUEUE.md` /
+`ACTIVE_WORK.md` @ `99e9ec0` (B-01 CLAIMED → 02). Next per queue: B-02 (ADR-0010 hashing), then B-03.
 
 Wave one (done):
 Read-only DISCOVER + NORMALIZE lane against frozen contracts v1.0.0 (agent-01-coordinator @ 1269405).
