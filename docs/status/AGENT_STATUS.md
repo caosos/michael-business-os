@@ -4,17 +4,22 @@ Agent: 06
 Role: Communications + Operator UI / Approval UX (build lane F)
 Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
-State: WORKING
-Claimed: F-08
-Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4
+State: WAITING
+Claimed: none
+Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44
 Blocked: F-04 on A-03
 Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
 Last updated: 2026-10-07
 
 ## Current objective
-**F-08** (READY after F-07; READY_QUEUE @ `aa88e7a`): follow-up and binding offer/quote templates as their own step-up ActionRequests (tier 0, irreversible). Templates + tests; nothing auto-sends. F-04 is still BLOCKED on A-03.
+WAITING. No READY task for 06 or ANY remains (checked READY_QUEUE after F-08). **F-04** is BLOCKED on **A-03**. Proposed next: P-06-8 (lane A `propose_followup` API, then a lane-F UI button).
 
 ## Done
+- **F-08 @ `9d75e44`:** `plan_followup` / `plan_offer` / `plan_quote` each draft their own ActionRequest.
+  - Binding drafts use `offer.<channel>.send`, so the spine classifies them as category `offer` (tier 0, irreversible, step-up). An offer is never drafted above the ask.
+  - The effector blocks binding drafts under `comms.*`.
+  - On the spine, YES without step-up is refused, and there are 0 effector calls (nothing auto-sends).
+  - 85 tests pass. Receipt: `docs/receipts/2026-10-07-f08-followup-and-binding-drafts.md`.
 - **F-07 @ `36ce9a4`:** consent ledger + DNC scrub store.
   - Schema `mbos_comms` is insert-only and PROPOSED for lane D. Raw contact values live only in `contacts`.
   - Each consent, revocation or STOP, and DNC scrub is written in one transaction with provenance and a chained receipt.
@@ -80,7 +85,9 @@ None. Live comms stay disabled (MICHAEL_DECISIONS #4).
 ## Proposed tasks
 - P-06-4 became F-05 (DONE) and P-06-5 became F-06 (DONE).
 - P-06-6 became F-07 (DONE).
-- **P-06-7 (lane F):** follow-up templates driven by Q&A answers (`seller_followup_questions`), and the binding `seller_offer` / `customer_quote` as their own tier-0, step-up requests after Q&A.
+- P-06-7 became F-08 (DONE).
+- **P-06-8 (lane A, then F):** a public `spine.propose_followup(conn, item_id, proposed_action)` plus an approval-gate workflow for follow-up requests on an existing item (the R12 edge ACTED → AWAITING_APPROVAL exists, but there is no API). F-08's tests use the internal `_propose`. Lane F would then add "Draft follow-up / offer / quote" on the UI card.
+- **P-06-9 (lane A, small):** `finish_act` reads `response.get("blocked")` for the reason text, but the F-06 effector reports `comms.blocked_reasons`. The reason falls back to "see details", so a one-line read of `response["comms"]["blocked_reasons"]` would make ACTION_FAILED intents self-explanatory.
 
 ## Files (Round Two, current)
 - `operator_ui/` (`backend`, `ux`, `views`, `server`, `__main__`, `mbos_canonical`), `comms_spec/` (+ `planner.py`, `effector.py`, `data/*.v1.json`), `tests/` (conftest, test_operator_ui, test_comms_spec, fixtures/illustrative.json)
