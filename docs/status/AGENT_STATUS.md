@@ -9,8 +9,9 @@ Done: G-01 @ 9cbce70
 Done: G-02 @ a1700d9
 Done: G-03 @ 4c2e897
 Done: G-04 @ 6d43d2b — wave-two RC verdict NOT READY (F-24 blocking; F-25 needs a ruling; F-22/F-23 open)
-Claimed: G-05
-Current phase: Round Two — G-04 delivered (RC verdict: NOT READY); G-05 (Deal Sniffer card acceptance) claimed
+Done: G-05 @ 3c330e8 — 148 pass / 87 fail → F-26..F-39 (3 of the highs: F-26 crash, F-31 dry-run shown as sent, F-35 text-view forgery; F-36 poison listing)
+Claimed: (none; G-06 waits for 05's E-13 ping)
+Current phase: Round Two — G-05 delivered; G-06 (RC re-run after E-13) waiting on 05
 Started: 2026-10-06 (round one) · 2026-10-07 (round two)
 Last updated: 2026-10-07
 
@@ -34,7 +35,20 @@ Last updated: 2026-10-07
 - **F-22 (05):** nobody holds a `publish.listing.create` grant, so the flip/publishing path is denied. **F-23 (01):** a PDP-denied item still goes to AWAITING_APPROVAL.
 - Re-run after fixes: `python -m mbos_qa spine --rc` (about 2.5 minutes). The strict xfails flip to failures when F-22/F-23 close, and the marker must then be removed.
 
+## G-05 result @ 3c330e8: card acceptance (ADR-0011)
+- 148 passed, 87 failed of 236 across pure, reference and lane D+E. `docs/qa/CARD_ACCEPTANCE.md`; receipt `docs/receipts/2026-10-07-G-05-card-acceptance.md`.
+- High: F-26 (build_card crashes on malformed enrichment), F-31 (dry-run shown as CONTACT SENT), F-35 (text-view forgery/ANSI/1 MB), F-36 (a NUL listing aborts the discover batch).
+- Held: no invented NEGOTIATING/QUALIFIED; trail = ledger 1:1; read-only; process-stable hash; no authority fields.
+- Re-run: `python -m mbos_qa card` (about 45 s).
+
+## G-06 plan (RC re-run once 05's E-13 lands; 01 will ping)
+- Re-pin `qa/impl_lane_pins.json` (`lane_e_05` to the E-13 head, `mbos_01` already `f8407c9`, `lane_d_04` `92d52b1`) and run `python -m mbos_qa spine --rc`.
+- Remove the F-23 strict xfail (01's R21 fixed it; the xfail will XPASS-fail otherwise). Amend A5 per R22 (a: one effector call, settled executed; b: failed + RECONCILED with zero duplicates; never two sends). The F-24 and F-22 markers go when 05 lands E-13.
+
 ## Proposed tasks
+- **P-07-13 (01) F-26/F-27/F-28/F-36:** harden the card builder against malformed enrichment (type-check, sanitise, validate values) and quarantine NUL/invalid-JSON listings at ingest; add the fuzz and poison-listing tests to 01's suite.
+- **P-07-14 (01 card + 06) F-31/F-32/F-35:** a dry-run is not 'sent'; derive timeline stages from typed documents; escape/truncate untrusted fields in `render_text`.
+- **P-07-15 (01 + 03) F-29/F-30:** `why` as sourced datums; real source requirement, a model-specific marker, a wider/normalised lint driven by data.
 - **P-07-9 (05) F-24:** on a G7 (or any guard) denial, set the request `approved → cancelled_by_freeze` (or `failed`) in the same transaction as ACTION_FAILED, so a denied approval can never be replayed.
 - **P-07-10 (05+01) F-22:** a propose-only grant for `publish.listing.create` (R7 pattern), or let drafting lanes propose under their own id.
 - **P-07-11 (01) F-23:** on a PDP deny, archive or fail the item instead of AWAITING_APPROVAL.
