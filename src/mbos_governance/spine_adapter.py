@@ -26,6 +26,7 @@ from typing import Any
 from mbos.interfaces import GuardResult, PolicyDecision  # Agent 01's types (runtime dependency of the spine)
 
 from .gateway import ActionGateway, GatewayRefused, Result
+from .hooks import DbosCancelHook, EgressPolicyHook, LiteLLMBudgetHook
 from .policy import PolicyStore, PolicyUnavailable, decide
 from .store_pg import PgGovernanceStore, PgPanicStore
 
@@ -132,9 +133,16 @@ class Governance:
     pdp: SpinePDP
 
 
-def build(dsns: str | dict[str, str], policy_path: str | None = None, *, panic_hooks: list | None = None,
-          **gateway_kw: Any) -> Governance:
-    """policy_path=None (production, E-06): the PDP reads lane D's mbos.policy_current; a file path is for dev/tests."""
+def build(dsns: str | dict[str, str], policy_path: str | None = None, *, dbos: Any = None,
+          egress_file: str | None = "var/egress_policy.json", litellm_file: str | None = "var/litellm_keys.json",
+          panic_hooks: list | None = None, **gateway_kw: Any) -> Governance:
+    """policy_path=None (production, E-06): the PDP reads lane D's mbos.policy_current; a file path is for dev/tests.
+
+    L3/L1/L2 side-effect hooks (E-03) are wired here so `engage_panic()` runs them:
+      * `dbos` (the DBOS class)  -> DbosCancelHook: L3 cancels ENQUEUED/DELAYED workflows
+      * `egress_file`            -> EgressPolicyHook: sealed deny-all/allow-list file for the egress proxy
+      * `litellm_file`           -> LiteLLMBudgetHook: per-agent LiteLLM key specs (budgets 0 when frozen)
+    Pass None to skip one; `panic_hooks=[...]` replaces the default set entirely."""
     store = PgGovernanceStore(dsns)
     gateway_dsn = dsns if isinstance(dsns, str) else dsns["gateway"]
     if policy_path is None:
@@ -142,5 +150,83 @@ def build(dsns: str | dict[str, str], policy_path: str | None = None, *, panic_h
         policies: Any = PgPolicyStore(gateway_dsn)
     else:
         policies = PolicyStore(policy_path)
+    if panic_hooks is None:
+        panic_hooks = []
+        if dbos is not None:
+            panic_hooks.append(DbosCancelHook(dbos))
+        if egress_file:
+            panic_hooks.append(EgressPolicyHook(egress_file, policies))
+        if litellm_file:
+            panic_hooks.append(LiteLLMBudgetHook(litellm_file, policies))
     gw = ActionGateway(store, policies, PgPanicStore(gateway_dsn), panic_hooks=panic_hooks, **gateway_kw)
     return Governance(gw, SpineGateway(gw), SpineKillSwitch(policies), SpinePDP(policies))
+
+
+# ---------------------------------------------------------------- A-18 helpers (plain functions, JSON-serialisable)
+def engage_panic(gov: Governance, level: str, target: str | None, actor: str, reason: str) -> dict[str, Any]:
+    """Freeze (any actor may engage). Runs the wired hooks. Returns {"state", "cancelled", "hooks", ["error"]}.
+    FAIL CLOSED: if the freeze cannot be written the DB is unreachable, PANIC then reads FROZEN everywhere and
+    the attempt is journaled; `error` is set. Never raises for a database outage."""
+    return gov.action_gateway.engage_panic(level, target, actor, reason)
+
+
+def release_panic(gov: Governance, level: str, target: str | None, actor: str, reason: str) -> dict[str, Any]:
+    """Release as the `approver` role (Michael). Raises GatewayRefused if `actor` is not a policy approver, the
+    reason is blank or the policy is unreadable, and the database error if the login lacks `approver`.
+    Loosening hooks run only after the release committed with its receipt."""
+    return gov.action_gateway.release_panic(level, target, actor, reason)
+
+
+def panic_state(gov: Governance) -> dict[str, Any]:
+    st = gov.action_gateway.panic.read()
+    return {"global": st.global_state, "readable": st.readable, "error": st.error, "revision": st.revision,
+            "frozen_agents": sorted(st.frozen_agents), "frozen_capabilities": sorted(st.frozen_capabilities)}
+
+
+@dataclass
+class ScheduledReconcile:
+    """Result of `schedule_reconcile`: the registered DBOS workflow and the post-launch activation."""
+    workflow: Any
+    name: str
+    schedule_name: str
+    crontab: str
+    _dbos: Any
+
+    def activate(self) -> str:
+        """Create (or refresh) the persistent DBOS schedule. Call AFTER `DBOS.launch()` (DBOS 3.x schedules live in
+        the system database). Idempotent: an existing schedule with the same cron is left alone; a changed cron is
+        replaced. Returns "created" | "unchanged" | "replaced"."""
+        existing = self._dbos.get_schedule(self.schedule_name)
+        if existing is not None:
+            if existing.get("schedule") == self.crontab:     # WorkflowSchedule is a TypedDict (a dict)
+                return "unchanged"
+            self._dbos.delete_schedule(self.schedule_name)
+        self._dbos.create_schedule(schedule_name=self.schedule_name, workflow_fn=self.workflow, schedule=self.crontab)
+        return "replaced" if existing is not None else "created"
+
+
+def schedule_reconcile(gov: Governance, dbos: Any, crontab: str = "*/5 * * * *", name: str = "mbos_reconcile_claims",
+                       older_than_seconds: int | None = None) -> ScheduledReconcile:
+    """DBOS (3.x) scheduled-workflow factory for E-05. At worker start:
+
+        sched = schedule_reconcile(gov, DBOS)        # 1. BEFORE DBOS.launch(): registers the workflow
+        DBOS.launch()
+        sched.activate()                             # 2. AFTER launch: creates the persistent cron schedule
+
+    Each run settles execution claims left `executing` past the policy TTL (provider lookup, never a resend).
+    Reconciliation is allowed under PANIC: it records what already happened and never acts, so the L3 cancel hook
+    is told never to cancel this workflow's queued runs. `crontab` may have 6 fields (seconds first)."""
+    def step_body() -> list[dict[str, Any]]:
+        return reconcile(gov.action_gateway, older_than_seconds)
+
+    step_body.__name__ = step_body.__qualname__ = f"{name}_step"      # names are DBOS registration keys: set first
+    step = dbos.step()(step_body)
+
+    def workflow(scheduled_time: Any, context: Any = None) -> list[dict[str, Any]]:
+        return step()
+    workflow.__name__ = workflow.__qualname__ = name
+    wf = dbos.workflow()(workflow)
+    for hook in gov.action_gateway.panic_hooks:       # reconcile must keep running while frozen
+        if isinstance(hook, DbosCancelHook):
+            hook.protect.add(name)
+    return ScheduledReconcile(wf, name, name, crontab, dbos)

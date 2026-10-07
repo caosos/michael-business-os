@@ -172,13 +172,15 @@ class DbosCancelHook:
 
     name = "dbos_cancel"
 
-    def __init__(self, dbos):
+    def __init__(self, dbos, protect: set[str] | None = None):
         self.dbos = dbos
+        self.protect: set[str] = set(protect or ())   # workflow names never cancelled (e.g. the reconcile job)
 
     def on_change(self, level, target, engage, state):
         if level != "L3" or not engage:
             return {"skipped": "only L3 engage cancels workflows"}
-        unstarted = [w.workflow_id for w in self.dbos.list_workflows(status=UNSTARTED)]
+        unstarted = [w.workflow_id for w in self.dbos.list_workflows(status=UNSTARTED)
+                     if getattr(w, "name", None) not in self.protect]
         if unstarted:
             self.dbos.cancel_workflows(unstarted)
         in_flight = [w.workflow_id for w in self.dbos.list_workflows(status=RUNNING)]
