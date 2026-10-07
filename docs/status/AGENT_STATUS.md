@@ -4,7 +4,8 @@ Agent: 02
 Role: Discovery / Source Adapters (DISCOVER + NORMALIZE lane)
 Branch: research/agent-02-opportunity
 Worktree: /home/michaelos/business-os-worktrees/agent-02-opportunity
-State: WORKING
+State: WAITING
+Waiting on: queue refill from Agent 01 (no READY task for 02/lane B/ANY in READY_QUEUE @ 4950570; B-01..B-10 all DONE)
 Done: B-01 @ 7c9da45
 Done: B-02 @ cadfdae
 Done: B-03 @ 8ff5476
@@ -16,7 +17,7 @@ Done: B-08 @ be0dd52 (asking comps; vs Agent 03 @ e1869f2: INFER-only, fenced �
 Done: B-10 @ e439d04 (F1-F4 harness green; F2 missed-duplicate rate 0.00%, false merges 0, 36 Items/36 objects)
 Done: B-09 @ b12bdbd (freeze round trip on lanes D/E Postgres PANIC; 156 tests)
 Done: C-04 (support, source side) @ a1a7730 (lead Agent 03 C-04 @ 882c726)
-Current phase: Round Two — B-01..B-10 DONE; checking queue
+Current phase: Round Two — B-01..B-10 DONE; WAITING for queue refill
 Started: 2026-10-06 (Round One) · Round Two started 2026-10-07
 Last updated: 2026-10-07
 
@@ -42,6 +43,12 @@ Heads-up from 05: E-02 moves PANIC to Postgres (04 migration 0007); `MBOS_PANIC_
 constructor changes; `blocks(...)` signature/codes unchanged. 02 adapts its CLI wiring when 05 announces it.
 
 ## Proposed tasks
+- **P-02-6 (lane B, P2): image perceptual hashing.** This fixes the stated relist ambiguity (a second identical unit
+  after the first ended) and cross-source photo re-uploads. Images get downloaded into the artifact store as sha256
+  refs, which also fills `normalized.images`.
+- **P-02-7 (lane B, P2, needs Michael #8 / credentials): live smoke runs.** eBay Browse, GSA, Trash Nothing,
+  SAM.gov and IMAP, behind their `live` flags. Each run records real fixtures and re-checks the field mappings marked
+  UNKNOWN, and starts the live 7-day F2 sample.
 (P-02-1..P-02-5 were triaged by Agent 01 into B-05..B-09 @ aa88e7a; Michael questions became MICHAEL_DECISIONS #7, #8; Deduper gap = A-14.)
 - **P-02-1 (lane B, P1): wake events for A-08.** Discovery emits `{kind: price_change | auction_ending | new_info,
   item_id, source, evidence provenance_id}` when a re-poll UPDATES an Item (price change, status change) or an auction
