@@ -20,6 +20,16 @@ ELEMENTARY = [
 ]
 
 
+def blocked(mc, card, needle: str) -> bool:
+    """The elementary advice does not reach Michael: either validation rejects the card, or the text is not on it.
+    (01's F-27 fix DROPS uncheckable risks instead of leaving an invalid FACT; that is at least as strict.)"""
+    if mc.validate_card(card):
+        return True
+    shown = [str(card["value_add_plan"]["plan"].get("value", ""))] + [r["risk"] for r in card["value_add_plan"]["model_specific_risks"]] \
+        + [str(w) for w in card["why"]]
+    return not any(needle.lower() in x.lower() for x in shown)
+
+
 def _card(mc, profile, plan=None, risks=None):
     enr = {}
     if plan is not None:
@@ -31,14 +41,13 @@ def _card(mc, profile, plan=None, risks=None):
 
 @pytest.mark.parametrize("text", ELEMENTARY, ids=[repr(t) for t in ELEMENTARY])
 def test_elementary_advice_in_the_plan_is_rejected(mc, profile, text):
-    errs = mc.validate_card(_card(mc, profile, plan=text))
-    assert errs, f"elementary advice passed validation as a plan: {text!r}"
+    assert blocked(mc, _card(mc, profile, plan=text), text), f"elementary advice reached Michael as a plan: {text!r}"
 
 
 @pytest.mark.parametrize("text", ELEMENTARY[:12], ids=[repr(t) for t in ELEMENTARY[:12]])
 def test_unsourced_elementary_risk_is_rejected(mc, profile, text):
     r = [{"risk": text, "basis": "INFERENCE", "provenance_id": "prov_" + "0" * 25 + "1"}]
-    assert mc.validate_card(_card(mc, profile, risks=r)), f"elementary advice passed as a risk: {text!r}"
+    assert blocked(mc, _card(mc, profile, risks=r), text), f"elementary advice reached Michael as a risk: {text!r}"
 
 
 def test_sourced_model_specific_knowledge_is_accepted(mc, profile):
@@ -52,7 +61,7 @@ def test_sourced_model_specific_knowledge_is_accepted(mc, profile):
 def test_a_junk_source_does_not_launder_elementary_advice(mc, profile, source):
     """'Sourced' must mean a real source. A placeholder string is not one."""
     r = [{"risk": "Check compression before buying", "kind": "known_weakness", "basis": "FACT", "source": source}]
-    assert mc.validate_card(_card(mc, profile, risks=r)), f"source={source!r} let elementary advice through"
+    assert blocked(mc, _card(mc, profile, risks=r), "Check compression"), f"source={source!r} let elementary advice through"
 
 
 def test_the_contract_can_mark_content_model_specific(mc, profile):
@@ -71,12 +80,12 @@ def test_the_contract_can_mark_content_model_specific(mc, profile):
 def test_generic_advice_with_a_real_looking_source_is_still_generic(mc, profile):
     """With no marker, any source string launders elementary advice."""
     r = [{"risk": "Check compression before buying", "kind": "known_weakness", "basis": "FACT", "source": "Briggs forum post"}]
-    assert mc.validate_card(_card(mc, profile, risks=r)), "generic advice was accepted because it carried a source"
+    assert blocked(mc, _card(mc, profile, risks=r), "Check compression"), "generic advice reached Michael because it carried a source"
 
 
 def test_a_risk_with_basis_fact_still_needs_a_source_or_provenance(mc, profile):
     r = [{"risk": "Crankshaft keyway shears under load on this model", "basis": "FACT"}]
-    assert mc.validate_card(_card(mc, profile, risks=r)), "an unsourced FACT claim was accepted as a model-specific risk"
+    assert blocked(mc, _card(mc, profile, risks=r), "Crankshaft keyway"), "an unsourced FACT claim reached Michael as a model-specific risk"
 
 
 def test_no_false_positives_on_legitimate_mechanic_language(mc, profile):
@@ -92,4 +101,4 @@ def test_the_lint_also_covers_the_lane_why_lines(mc, profile):
 
     card = mc.build_card(*world(), {"why": ["Check compression first, then decide."], "_prov": {"why": pid(7)}}, profile=profile)
     assert any("Check compression" in w for w in card["why"]), "the sourced why line is not on the card"
-    assert mc.validate_card(card), "elementary advice in a SOURCED `why` line passes validation"
+    assert blocked(mc, card, "Check compression"), "elementary advice in a SOURCED `why` line reaches Michael"

@@ -224,3 +224,30 @@ def test_asking_price_and_location_come_from_the_listing_only(mc, profile):
     item2["normalized"].pop("price")
     card2 = mc.build_card(*world(item2), None, profile=profile)
     assert card2["item"]["asking_price"]["value"] == "UNKNOWN"
+
+
+# ---------------------------------------------------------------- dates: the rules 01 states for listing dates (F-28)
+def _la(mc, profile, **vals):
+    return _build(mc, profile, {"listing_activity": {k: {"value": v, "basis": "FACT"} for k, v in vals.items()}})["listing_activity"]
+
+
+def test_valid_listing_dates_are_still_shown(mc, profile):
+    """Positive control: validation must not over-reject. Real, sane dates stay FACT."""
+    la = _la(mc, profile, posted_at="2026-10-05T14:30:00Z", updated_at="2026-10-06T09:00:00Z")
+    assert la["posted_at"]["value"] == "2026-10-05T14:30:00Z" and la["updated_at"]["value"] == "2026-10-06T09:00:00Z", la
+
+
+def test_an_edit_cannot_precede_the_post(mc, profile):
+    la = _la(mc, profile, posted_at="2026-10-06T09:00:00Z", updated_at="2026-10-01T09:00:00Z")
+    assert la["updated_at"]["value"] == "UNKNOWN" or la["posted_at"]["value"] == "UNKNOWN", la
+
+
+def test_a_date_after_the_discovery_window_is_not_shown(mc, profile):
+    far = _la(mc, profile, posted_at="2027-03-01T00:00:00Z")
+    assert far["posted_at"]["value"] == "UNKNOWN", far
+
+
+def test_date_formats_that_are_not_iso_are_not_shown_as_facts(mc, profile):
+    for bad in ("yesterday", "10/05/2026", "2026-13-45", "", "2026-10-05T25:61:00Z", 20261005, None, ["2026-10-05"]):
+        la = _la(mc, profile, posted_at=bad)
+        assert la["posted_at"]["value"] == "UNKNOWN", (bad, la["posted_at"])

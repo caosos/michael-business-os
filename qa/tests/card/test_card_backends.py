@@ -296,7 +296,11 @@ def test_a_poison_listing_does_not_stop_the_good_ones_being_discovered(qa, mc):
         results = _discover(qa, ad)
     except Exception as e:  # noqa: BLE001
         pytest.fail(f"one poison listing aborted the whole discovery batch: {type(e).__name__}: {str(e)[:120]}")
-    assert sum(1 for r in results if r["created"]) >= 2, results
+    created = [r for r in results if r["created"]]
+    assert len(created) == 3, f"the good listings behind the poison one must ingest, and the poison one is retried scrubbed: {results}"
+    flagged = [qa.item(r["item_id"]) for r in created if "needs_review" in (qa.item(r["item_id"])["normalized"].get("flags") or [])]
+    assert len(flagged) == 1 and "\u0000" not in json.dumps(flagged[0]) and "\\u0000" not in json.dumps(flagged[0]), \
+        "the scrubbed listing must be flagged needs_review and carry no NUL"
 
 
 def test_a_hostile_title_through_the_real_pipeline_cannot_forge_the_card_view(qa, mc):

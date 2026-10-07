@@ -1,8 +1,8 @@
 {
   "apply_via": "operator: LiteLLM proxy key API (/key/generate, /key/update). Not called by this code.",
-  "checksum": "sha256:aae85b09fe8943b2910223764cd6419869d69f9b59120f60bd300ae743466bf7",
+  "checksum": "sha256:2e6bc7aa0a5d8258b8e3c55d58f3438247ca89dfe23f37de087cb6bfc547c449",
   "frozen": false,
-  "generated_at": "2026-10-07T22:50:18.727583Z",
+  "generated_at": "2026-10-07T23:10:58.219634Z",
   "keys": [
     {
       "budget_duration": "1d",
@@ -82,7 +82,7 @@
       }
     }
   ],
-  "panic_revision": 2,
+  "panic_revision": 4,
   "policy_version": "2026.10.07-w1.8",
   "schema": "mbos.litellm.keys/1"
 }

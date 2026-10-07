@@ -1,6 +1,6 @@
 {
- "note": "G-07 release-candidate + card runs (git archive, never merged): 01 mbos 2d4e8dd, 04 c97ba6b (through 0016), 05 87f0b53 (E-15, policy w1.8). 03's engine is NOT in this stack (the RC uses 01's placeholder scorer); its head is recorded for reference only.",
- "mbos_01": "2d4e8dd9914c87f1b0836652990557da962baa44",
+ "note": "Final card re-run: 01 mbos deec1d1; 04 c97ba6b and 05 87f0b53 unchanged since G-07.",
+ "mbos_01": "deec1d144c9c36751b0734db2fa91469e51cf0d5",
  "lane_d_04": "c97ba6bb78bb20c3fdbcbebbc1f78d044c5d3ee8",
  "lane_e_05": "87f0b53eecfc92a918ac72fb0da84a5270f8032b",
  "lane_c_03_not_installed": "3d6212c3b1b5441ee4de4e63486f5e28a8e02a7e"

@@ -333,7 +333,7 @@ def _card_finding(module: str, name: str) -> str:
     if "one_malformed_enrichment_block" in n:
         return "F-27" if "bad-provenance" in n else "F-26"
     table = [("fuzzed_enrichment", "F-26"), ("lane_values_are_validated", "F-28"), ("impossible_lane_values", "F-28"),
-             ("unordered_resale", "F-28"), ("headline_status", "F-31"), ("lane_why_lines", "F-30"), ("why_lines_from_a_lane", "F-29"),
+             ("unordered_resale", "F-28"), ("date_formats_that_are_not_iso", "F-28"), ("headline_status", "F-31"), ("lane_why_lines", "F-30"), ("why_lines_from_a_lane", "F-29"),
              ("lint", "F-30"), ("elementary", "F-30"), ("junk_source", "F-30"), ("model_specific", "F-30"), ("basis_fact", "F-30"),
              ("generic_advice", "F-30"), ("contact_sent", "F-31"), ("dry_run", "F-31"), ("contact_approved", "F-32"),
              ("seller_reply", "F-32"), ("recorded_seller_reply", "F-32"), ("attribution", "F-32"), ("closed", "F-32"),
@@ -566,15 +566,15 @@ def cmd_spine(release: bool = False) -> int:
     return 0 if pytest_rc == 0 and not failed else 1
 
 
-FINDING_STATUS = {  # verified by the suites at the pins in qa/impl_lane_pins.json (G-07)
+FINDING_STATUS = {  # verified by the suites at the pins in qa/impl_lane_pins.json (final card re-run)
     "F-22": "FIXED", "F-23": "FIXED", "F-24": "FIXED", "F-25": "FIXED (R22)", "F-40": "FIXED", "F-41": "FIXED",
     "F-16": "FIXED", "F-18": "FIXED", "F-19": "FIXED", "F-20": "FIXED", "F-21": "FIXED",
-    "F-26": "FIXED", "F-27": "PARTIAL: a risk with a malformed `source` leaves a FACT risk that validate_card rejects",
-    "F-28": "PARTIAL: enums, ranges and negatives fixed; `posted_at`/`updated_at` still accept 'not a date' and a 2999 date as FACT",
-    "F-29": "FIXED", "F-30": "PARTIAL: 3 of 42 phrasings still pass; no model-specific marker in the contract; a sourced `why` is not linted",
-    "F-31": "PARTIAL: the row and the recommendation say dry-run; the headline 'Contact Sent / [now: CONTACT SENT]' does not",
+    "F-26": "FIXED", "F-27": "FIXED (an uncheckable risk is dropped, never left invalid)",
+    "F-28": "FIXED except one gap: a bare number such as 20261005 is still shown as a FACT date (dates must be ISO strings)",
+    "F-29": "FIXED", "F-30": "FIXED in effect (elementary advice never reaches Michael; 42/42 phrasings blocked, junk sources rejected). Residual, low: the ADR promises a model-specific exemption path that the contract does not have, so no elementary-phrased content can ever pass",
+    "F-31": "FIXED (headline now carries the DRY-RUN marker)",
     "F-32": "FIXED", "F-33": "FIXED", "F-34": "FIXED", "F-35": "FIXED",
-    "F-36": "OPEN: `discover` has no per-record isolation around `normalize_step`; one NUL makes the reference normalizer raise (unpicklable CanonicalError) and aborts the whole batch. `ingest`'s scrub and savepoint never run",
+    "F-36": "FIXED (the good listings behind a NUL ingest; the poison one is retried scrubbed and flagged needs_review; both backends)",
     "F-37": "FIXED", "F-38": "FIXED", "F-39": "ACCEPTED (R25)",
     "F-13": "FIXED", "F-14": "FIXED",
 }

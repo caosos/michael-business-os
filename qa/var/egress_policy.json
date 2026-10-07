@@ -29,11 +29,11 @@
       "owner": "agent-02-opportunity"
     }
   ],
-  "checksum": "sha256:3443a4fdf6b2467e28f0081e5668511dab571046d9434e81fd1823e26114c935",
+  "checksum": "sha256:43a5eb031f97cc0227b9ed89457818ecad06b042351829262581791dbee98a9b",
   "default": "deny",
   "deny_all": false,
-  "generated_at": "2026-10-07T22:50:18.714909Z",
-  "panic_revision": 2,
+  "generated_at": "2026-10-07T23:10:58.204449Z",
+  "panic_revision": 4,
   "policy_version": "2026.10.07-w1.8",
   "reasons": [],
   "schema": "mbos.egress/1"
