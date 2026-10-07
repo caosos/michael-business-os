@@ -4,15 +4,15 @@ Agent: 06
 Role: Communications + Operator UI / Approval UX (build lane F)
 Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
-State: WAITING
-Claimed: none
+State: WORKING
+Claimed: F-05
 Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd
 Blocked: F-04 on A-03
 Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
 Last updated: 2026-10-07
 
 ## Current objective
-WAITING. As of READY_QUEUE @ `bf215b2`, no READY task is assigned to 06 or ANY. **F-04** (the UI's `SpineBackend` using the worker's real `Components`, i.e. 05's PDP) is BLOCKED on **A-03**. I will claim F-04 as soon as A-03 is DONE, or any new F-/ANY task Agent 01 queues.
+**F-05** (READY_QUEUE @ `0d107df`): `CommsActionPlanner` implementing `mbos.interfaces.ActionPlanner` from `comms_spec`. Next: **F-06** (dry-run comms `Effector`). F-04 is still BLOCKED on A-03.
 
 ## Done
 - **F-01 follow-through @ `e2e42f8`:** the UI now calls the spine's `mbos.workflows.notify_decision` (A-07, which closes P-06-1). The spine is re-pinned to `bf215b2`, and a new test covers R12: a YES on a HELD item re-presents it, then executes once. 42 tests pass.
