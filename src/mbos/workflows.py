@@ -18,9 +18,9 @@ from typing import Any, Optional
 
 from dbos import DBOS, SetWorkflowID
 
-from mbos import __version__, spine
+from mbos import __version__, spine  # noqa: F401  (reference backend; S() selects)
 from mbos.clock import parse
-from mbos.runtime import components, item_workflow_id, runtime, tx
+from mbos.runtime import components, item_workflow_id, runtime, spine_module as S, tx
 
 DECISION_TOPIC = "decision"
 WAKE_EVENTS = ("price_change", "auction_ending", "new_info")
@@ -78,7 +78,7 @@ def discover(adapter_name: str, since: Optional[str] = None) -> list[dict[str, A
     results = []
     for raw in fetch_step(adapter_name, since):
         norm = normalize_step(raw)
-        r = tx(spine.ingest, raw, norm, adapter_name, version, components())
+        r = tx(S().ingest, raw, norm, adapter_name, version, components())
         if r["created"]:
             with SetWorkflowID(item_workflow_id(r["item_id"])):
                 DBOS.start_workflow(item_lifecycle, r["item_id"])
@@ -88,19 +88,19 @@ def discover(adapter_name: str, since: Optional[str] = None) -> list[dict[str, A
 
 @DBOS.workflow()
 def item_lifecycle(item_id: str) -> dict[str, Any]:
-    item = tx(spine.read_item, item_id)
+    item = tx(S().read_item, item_id)
     if item["state"] not in ("NORMALIZED", "RESEARCHING"):
         return {"status": "skipped", "state": item["state"]}
     if components().researcher is not None:  # A-05: RESEARCH (lane C, comps via lane B) before SCORE
         rr = research_step(item)
-        out = tx(spine.record_research, item_id, rr, components())
+        out = tx(S().record_research, item_id, rr, components())
         if out["next_state"] != "SCORED":
             return {"status": "researching", "gaps": out["gaps"]}
         sr = rr["score"]
     else:
         sr = score_step(item)
-    tx(spine.record_score, item_id, sr)
-    routed = tx(spine.route_recommendation, item_id, components())
+    tx(S().record_score, item_id, sr)
+    routed = tx(S().route_recommendation, item_id, components())
     if routed["verdict"] != "YES":
         return {"status": routed["verdict"].lower()}
     return _approval_gate(item_id, routed["action_request_id"])
@@ -113,7 +113,7 @@ def _approval_gate(item_id: str, areq_id: str) -> dict[str, Any]:
     hold: Optional[dict[str, Any]] = None
     hold_started = last_notice = None
     while True:
-        st = tx(spine.poll_decision, areq_id, after_seq)
+        st = tx(S().poll_decision, areq_id, after_seq)
         appr = st["approval"]
         if appr is not None:
             after_seq = st["approval_seq"]
@@ -121,21 +121,21 @@ def _approval_gate(item_id: str, areq_id: str) -> dict[str, Any]:
             if d == "YES":
                 return _act(item_id, areq_id, appr)
             if d == "NO":
-                tx(spine.apply_no, item_id, appr)
+                tx(S().apply_no, item_id, appr)
                 return {"status": "rejected", "action_request_id": areq_id}
             if d == "MODIFY":
-                areq_id = tx(spine.apply_modify, item_id, appr)
+                areq_id = tx(S().apply_modify, item_id, appr)
                 after_seq, hold = 0, None
                 continue
             if d == "HOLD":
-                out = tx(spine.apply_hold, item_id, appr)
+                out = tx(S().apply_hold, item_id, appr)
                 hold, hold_started, last_notice = appr["hold"], parse(appr["decided_at"]), parse(out["now"])
                 continue
 
         now = parse(st["now"])
         deadlines = [parse(st["expires_at"])]
         if now >= deadlines[0]:
-            tx(spine.expire, item_id, areq_id)
+            tx(S().expire, item_id, areq_id)
             return {"status": "expired", "action_request_id": areq_id}
         if hold is not None:
             wake_at = [t for t in (
@@ -144,12 +144,12 @@ def _approval_gate(item_id: str, areq_id: str) -> dict[str, Any]:
             ) if t is not None]
             if wake_at and now >= min(wake_at):
                 why = "hold_until reached" if hold.get("hold_until") and now >= parse(hold["hold_until"]) else "escalate_after elapsed"
-                tx(spine.wake_from_hold, item_id, areq_id, why, components())
+                tx(S().wake_from_hold, item_id, areq_id, why, components())
                 hold = None
                 continue
             renotify_at = last_notice + _iso_duration(hold.get("renotify_after", "PT24H"))
             if now >= renotify_at:
-                last_notice = parse(tx(spine.renotify, item_id, areq_id, components())["now"])
+                last_notice = parse(tx(S().renotify, item_id, areq_id, components())["now"])
                 continue
             deadlines += wake_at + [renotify_at]
         timeout = max(0.2, min(poll, min((t - now).total_seconds() for t in deadlines)))
@@ -157,21 +157,21 @@ def _approval_gate(item_id: str, areq_id: str) -> dict[str, Any]:
         if not isinstance(msg, dict):
             continue
         if msg.get("kind") == "ping" and hold is not None and "michael_ping" in (hold.get("wake_on") or []):
-            tx(spine.wake_from_hold, item_id, areq_id, "michael_ping", components())
+            tx(S().wake_from_hold, item_id, areq_id, "michael_ping", components())
             hold = None
         elif msg.get("kind") == "event" and msg.get("event") in WAKE_EVENTS:
             why = f"{msg['event']}: {str(msg.get('summary', ''))[:120]}".rstrip(": ")
             if hold is not None and msg["event"] in (hold.get("wake_on") or []):
-                tx(spine.wake_from_hold, item_id, areq_id, why, components())
+                tx(S().wake_from_hold, item_id, areq_id, why, components())
                 hold = None
             elif hold is None:  # awaiting a decision: new facts are re-presented, never acted on
-                last_notice = parse(tx(spine.renotify, item_id, areq_id, components(), why)["now"])
+                last_notice = parse(tx(S().renotify, item_id, areq_id, components(), why)["now"])
 
 
 def _act(item_id: str, areq_id: str, approval: dict[str, Any]) -> dict[str, Any]:
-    tx(spine.begin_act, item_id, areq_id, approval)
+    tx(S().begin_act, item_id, areq_id, approval)
     guard = gateway_step(areq_id, approval["approval_id"])
-    result = tx(spine.finish_act, item_id, areq_id, approval, guard)
+    result = tx(S().finish_act, item_id, areq_id, approval, guard)
     return {**result, "action_request_id": areq_id, "approval_id": approval["approval_id"]}
 
 
@@ -180,7 +180,7 @@ def record_decision(action_request_id: str, decision: str, payload_hash_seen: st
     """Record Michael's decision (one transaction), then wake the item workflow."""
 
     def decide(conn: Any) -> dict[str, Any]:
-        return spine.decide(conn, action_request_id, decision, payload_hash_seen, components(), **kw)
+        return S().decide(conn, action_request_id, decision, payload_hash_seen, components(), **kw)
 
     out = tx(decide)
     DBOS.send(item_workflow_id(out["item_id"]), {"kind": "decision", "approval_id": out["approval"]["approval_id"]},

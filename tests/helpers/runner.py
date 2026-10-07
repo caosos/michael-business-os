@@ -99,6 +99,58 @@ def resume(item_id: str, action: str) -> None:
     os._exit(0)
 
 
+def lane_d_e2e(fixture: str) -> None:
+    """A-01 phase 2: the full DBOS lifecycle on lane D's canonical store (state_backend="lane_d")."""
+    import dataclasses
+
+    import sqlalchemy as sa
+
+    from mbos import spine_d
+    from mbos.adapters.state04 import Pg04Ledger
+    from mbos.contracts import schemas
+    from mbos.hashing import reference
+    from tests.helpers.common import item_state
+
+    init_runtime(dataclasses.replace(_settings(), state_backend="lane_d"), Components())
+    from mbos import workflows
+
+    engine = runtime().engine
+    with engine.begin() as c:  # a fresh lane D DB is FROZEN; Michael (approver/owner) releases it, receipted
+        spine_d.set_kill_switch(c, "global_freeze", False, reason="test bootstrap: Michael releases the initial FROZEN state")
+    runtime().components.adapters["fx"] = FixtureSourceAdapter(fixture, name="fx")
+    with SetWorkflowID("discover:fx"):
+        results = DBOS.start_workflow(workflows.discover, "fx").get_result()
+    ids = {r["item_id"] for r in results if r["created"]}
+    with engine.connect() as c:
+        by_cat = {c.execute(sa.text("SELECT category FROM mbos.items WHERE item_id = :i"), {"i": i}).scalar_one(): i for i in ids}
+    final = {}
+    for cat, i in by_cat.items():
+        final[cat] = wait_state(engine, i, {"AWAITING_APPROVAL", "RESEARCHING", "ARCHIVED"}, timeout=60)
+    trailer, smart = by_cat["trailer"], by_cat["smart_home_install"]
+    a = pending_request(engine, trailer)
+    workflows.record_decision(a["action_request_id"], "YES", a["payload_hash"], auth_context=STEP_UP)
+    b = pending_request(engine, smart)
+    workflows.record_decision(b["action_request_id"], "NO", b["payload_hash"], reason="lane D e2e: not this week")
+    final["trailer_after"] = wait_state(engine, trailer, {"ACTED", "FAILED"}, timeout=60)
+    final["smart_after"] = wait_state(engine, smart, "ARCHIVED", timeout=60)
+    L = Pg04Ledger()
+    with engine.connect() as c:
+        chain = L.verify_chain(c)
+        exported = L.export_receipts(c)
+        calls = c.execute(sa.text("SELECT count(*) FROM mbos.effector_calls")).scalar_one()
+        live = c.execute(sa.text("SELECT count(*) FROM mbos.effector_calls WHERE dry_run IS NOT TRUE")).scalar_one()
+        docs = [r[0] for r in c.execute(sa.text("SELECT doc FROM mbos.v_item_documents"))]
+        areqs = [r[0] for r in c.execute(sa.text("SELECT doc FROM mbos.v_action_request_documents"))]
+    ref_ok, ref_msg = reference().verify_chain(exported)
+    errors = [e for d in docs for e in schemas.errors("item", d)] + [e for d in areqs for e in schemas.errors("action-request", d)] \
+        + [e for r in exported for e in schemas.errors("receipt", r)]
+    say("RESULT", json.dumps({"final": final, "chain": chain, "reference_chain": [ref_ok, ref_msg],
+                              "effector_calls": calls, "live_effector_calls": live, "receipts": len(exported),
+                              "contract_errors": errors[:5], "executed": sum(r["type"] == "ACTION_EXECUTED" for r in exported)}))
+    os._exit(0)
+
+
 if __name__ == "__main__":
     mode, *args = sys.argv[1:]
-    {"crash_mid_act": crash_mid_act, "hold_then_die": hold_then_die, "resume": resume}[mode](*args)
+    {"crash_mid_act": crash_mid_act, "hold_then_die": hold_then_die, "resume": resume,
+     "lane_d_e2e": lane_d_e2e}[mode](*args)

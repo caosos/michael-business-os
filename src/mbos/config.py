@@ -21,6 +21,9 @@ class Settings:
     approval_poll_seconds: float = 30.0
     llm_daily_cap_usd: dict[str, float] = field(default_factory=lambda: {"*": 0.0})
     dry_run: bool = DRY_RUN
+    # "reference": Agent 01's own DDL (src/mbos/db/migrations). "lane_d": Agent 04's canonical store (R1),
+    # migrated by lane D's own migrator; the spine then writes only through lane D's SQL API (mbos.spine_d).
+    state_backend: str = "reference"
 
 
 _override: Settings | None = None

@@ -1,7 +1,7 @@
 # READY QUEUE: Michael Business OS, Round Two
 
 - **Owner:** Agent 01 (coordinator / dispatcher). **Protocol:** `docs/COORDINATION.md`. Read it before claiming.
-- **Last synced:** 2026-10-07 15:15 -0500, against branch heads 02 `41d45a6` · 03 `73a4d32` · 04 `7f0649a` · 05 `16fb86c` · 06 `c125618` · 07 `397101c`.
+- **Last synced:** 2026-10-07 15:45 -0500, against branch heads 02 `41d45a6` · 03 `73a4d32` · 04 `7f0649a` · 05 `16fb86c` · 06 `c125618` · 07 `397101c`.
 - **Read it from any worktree:** `git fetch -q origin && git show origin/research/agent-01-coordinator:docs/status/READY_QUEUE.md`
 - **Status values:** READY · CLAIMED · BLOCKED · DONE.
 - **Priority:** P0 = critical path · P1 = next-up · P2 = useful parallel work.
@@ -40,11 +40,14 @@
 | D-02 | **P0** | **ADR-0010 conformance (supersedes the R3 wording in your claim).** Install `contracts/canonical/mbos_canonical.sql`. Set `NEW.canonical := mbos.cjson(mbos.receipt_canonical(NEW))` and `NEW.row_hash := 'sha256:'∥sha256(canonical)`; `verify_chain` uses the same formula. `mbos.payload_hash` → `mbos.cjson_sha256`. Keep `utc_iso` (it already conforms) | none | **DONE** @ `a0d1fbe` (verified by 01's gate test) | 04 | All `vectors.json` pass in PostgreSQL; a chain exported from 04's DB verifies with `mbos_canonical.verify_chain` |
 | D-04 | **P0** | Fold Lane E's requirements into 0005 (binding input; ruling R5): `origin/research/agent-05-governance:docs/integration/05-requirements-for-04-migration-0005.md`. Covers: `panic_events` (append-only) + `panic_current` view + `panic_set()`, release by approver only, bootstrap FROZEN; `effector_calls` as the execution-claim table; action-status edges `approved→expired`, `approved→failed` and `executing→cancelled_by_freeze`; budget caps per action, daily, global and velocity | D-01 (same migration) | **DONE** @ `14bd690` (0007: panic_set/current, claims, 3 gateway edges, budget modes) | 04 | 05's E-02 port runs on 0005 without workarounds |
 | D-05 | **P0** | R12 re-affirmed: remove `NORMALIZED→SCORED`, `HELD→APPROVED` and `LEARNED→ARCHIVED/FAILED` (added in a0d1fbe to accommodate pre-R12 spine). Keep `ACTED→AWAITING_APPROVAL` | none | **DONE** @ `797a4e5` (parity gate verified by 01; now a hard pass) | 04 | 01's `test_r12_item_edges_match_lane_d` XPASSes (then flipped to a hard gate) |
+| D-13 | **P1 (critical-path support)** | Review 01's lane-D backend (`src/mbos/spine_d.py`, `src/mbos/reference/governance_lane_d.py`) for misuse of lane D's API (idempotency keys, edges, role expectations, document views). Report findings to 01; don't edit 01's branch | none | READY | 04 | Findings list in your status, or "no findings" |
+| D-11 | P2 | `caps.velocity_actions_per_hour` (05's request) | none | READY | 04 | 05's velocity tests pass on lane D |
+| D-12 | P2 | ADR-0009 v1.1.0 DDL | A-06 (ADR-0009 accepted) | BLOCKED | 04 | — |
 | D-03 | P1 | Reporting views (pipeline by lane, HOLD backlog, approval latency) over the ADR-0010 chain; restore drill D1 then `verify_chain` | D-01 | **DONE** @ `ca59e3c` (views + D1 restore drill on a 179-receipt chain) | 04 | D1 passes; views documented |
 
 | D-06 | P1 | State MCP server: narrow intent tools over 04's SQL API (create/transition/patch item, propose action, record approval/outcome, provenance) as the **only** agent write path (ADR-0003). Identity and scope are carried into provenance. No raw SQL tool | D-04 | **DONE** @ `012c141` (stdio MCP; agent profile has no approval/execute/spend/PANIC tools; R14) | 04 | MCP tool tests; an agent role without the MCP cannot write; every tool call is receipted |
-| D-07 | P2 | Artifact store to FS (sha256 content-addressed, insert-only, `put_artifact` keeps the index), restore-drill aware | none | **CLAIMED** (04) | 04 | Round-trip + tamper detection tests |
-| D-08 | P2 | pgvector rebuildable index (D3: drop → rebuild → identical query results) | none | READY | 04 | D3 passes |
+| D-07 | P2 | Artifact store to FS (sha256 content-addressed, insert-only, `put_artifact` keeps the index), restore-drill aware | none | **DONE** @ `215a861` | 04 | Round-trip + tamper detection tests |
+| D-08 | P2 | pgvector rebuildable index (D3: drop → rebuild → identical query results) | none | **DONE** @ `d668386` (pgvector in `mbos_ext`; bootstrap needs superuser) | 04 | D3 passes |
 | D-09 | P2 | pgBackRest PITR off-box | operator: off-box target | BLOCKED (operator infra) | 04 | Restore drill from off-box |
 
 ### Lane B: Agent 02 (discovery)
@@ -59,8 +62,10 @@
 | B-06 | P2 | P-02-2: IMAP alert ingestor (tier 2), fixture-first, no live mailbox without explicit enablement | none | **DONE** @ `bd899f4` (read-only IMAP, DKIM-checked) | 02 | Fixture emails → RawListing; no network in tests |
 | B-07 | P2 | P-02-3: SAM.gov adapter (service lane / gov contracts), fixture-first | none | **DONE** @ `32c148c` | 02 | Fixture tests |
 | B-08 | P2 | P-02-4: eBay Browse *asking* comps for 03's evidence bundle (labelled ASKING, never SOLD) | none | **DONE** @ `be0dd52` (asking-only evidence gives a fenced INFER estimate; never YES) | 02 (+03) | 03's estimator consumes them with the right basis |
-| B-10 | P1 | Discovery acceptance F1–F4 as a runnable harness: F1 every Item has ≥1 `sources[]` with `raw_ref`; F2 duplicate rate after dedup on a 7-day fixture corpus (target <2%); F3 repeated 403/429 → L2 freeze request; F4 no collector touches a do-not-automate source | none | **CLAIMED** (02) | 02 | Harness green; F2 rate reported |
-| B-09 | P2 | P-02-5: source-freeze wiring onto Postgres PANIC | E-02 | READY after B-10 (E-02 done: `PgPanicStore`) | 02 | Freeze round-trips on 04/05's tables |
+| B-10 | P1 | Discovery acceptance F1–F4 as a runnable harness: F1 every Item has ≥1 `sources[]` with `raw_ref`; F2 duplicate rate after dedup on a 7-day fixture corpus (target <2%); F3 repeated 403/429 → L2 freeze request; F4 no collector touches a do-not-automate source | none | **DONE** @ `e439d04` (F1–F4 PASS on a synthetic 7-day corpus; F2 missed-dup 0.00%) | 02 | Harness green; F2 rate reported |
+| B-11 | P2 | P-02-6: image perceptual hashing for relists and photo re-uploads (fixture images, no network) | none | READY | 02 | The relist ambiguity in B-10 resolves with no false merges |
+| B-12 | P2 | P-02-7: live smoke runs behind live flags (re-record real fixtures; start the live F2 sample) | MICHAEL #8 + operator credentials | BLOCKED | 02 | — |
+| B-09 | P2 | P-02-5: source-freeze wiring onto Postgres PANIC | E-02 | **DONE** @ `b12bdbd` (freeze round trip on lanes D/E Postgres) | 02 | Freeze round-trips on 04/05's tables |
 
 ### Lane C: Agent 03 (economics)
 | ID | Pri | Task | Deps | Status | Agent | Acceptance |
@@ -76,7 +81,8 @@
 | C-07 | P1 | LEARN on 04's outcome store: Brier/MAPE from `predicted_vs_actual`; a config bump is PROPOSED as a tier-0 ActionRequest (`config.scoring.bump`), never auto-applied | none | **DONE** @ `0c3cf4a` (LEARN proposes, never applies; system-scoped areq waits on ADR-0009 item 9) | 03 | Two outcomes → a bump proposal with provenance; nothing applied |
 
 | C-10 | **P1 (do first)** | Fix `comps_feed.entry()` KeyError `sold_date` on ASKING comps (02's repro; unblocks B-08) | none | **DONE** @ `e1869f2` (engine 0.6.1; verified by 01's lane-C tests) | 03 | 02's B-08 xfail test passes unchanged |
-| C-11 | P1 | Estimator coverage: every flip category (trailer … other_asset) has priors and a comps query mapping, and every service category has a job/quote template. Gaps are reported as data, never guessed | none | READY | 03 | Coverage matrix test: 19/19 categories produce either an estimate or an explicit `insufficient` with gaps |
+| C-11 | P1 | Estimator coverage: every flip category (trailer … other_asset) has priors and a comps query mapping, and every service category has a job/quote template. Gaps are reported as data, never guessed | none | **DONE** @ `c648ca3` (19/19 categories; `scope_override_required` for other_*) | 03 | Coverage matrix test: 19/19 categories produce either an estimate or an explicit `insufficient` with gaps |
+| C-12 | P1 | Replay audit (AT-1 at scale): a read-only job that replays every stored scorecard from its stored inputs + config version and reports any `inputs_hash` / decision drift | none | READY | 03 | Audit over 03's goldens + a lane-D DB export: zero drift, and a planted drift is detected |
 | C-08 | P1 | Morning digest ranking: a pure function over scored Items → a ranked "what to do first" list (EV $/h, time-to-cash, expiry/auction end, confidence) with one-line reasons and provenance refs, for the Operator UI and a daily summary (72-hour plan) | none | **DONE** @ `a81a989` (`mbos_economics.digest.build_digest(items, as_of)`) | 03 (06 renders) | Deterministic ranking over the 13 goldens + 02 fixtures; explanation per row |
 | C-09 | P1 | Owner-decision support for MICHAEL_DECISIONS #1/#2: a sensitivity report showing how verdicts on current goldens and fixtures change across cash caps and $/h floor/targets. Report only; config untouched | none | **DONE** @ `286e0f3` (docs/research/agent-03-sensitivity-michael-decisions.md) | 03 | `docs/` report with a table; no config change |
 
@@ -87,8 +93,13 @@
 | E-02 | P0 (after D-01) | Postgres-backed `GovernanceStore` + `PanicStore` on 04's tables (R2/R4/R5). Fail-closed is kept | D-01, D-02 | **DONE** @ `1c554cb` (211 tests on PG16 via lane D's API; no SQLite on the production path; R4 enforced by role) | 05 | 05's suite passes on Postgres; no SQLite in the production path |
 | E-03 | P2 | A8/A9 hardening, dry: per-agent LiteLLM budget config generator (no external calls); L3 hook that cancels unstarted DBOS workflows (`DBOS.cancel_workflows`) and writes the egress deny-all policy file | none | **DONE** @ `e12caa3` | 05 | Tests prove L3 cancels pending workflows and emits deny-all config; nothing reaches the network |
 
-| E-04 | P1 | Outbound secret scan + `INJECTION_SUSPECTED` tripwire (05 §17 #24–26): scan proposed payloads and effector requests; listing/inbound text matching injection patterns emits an `INJECTION_SUSPECTED` receipt and forces tier 0 + `needs_review` | none | **CLAIMED** | 05 | Tests: a secret in a payload is refused; an injected listing yields at most a tier-0 proposal with the tripwire receipt |
-| E-05 | P2 | Stuck-claim reconciliation job: executions left `executing` past a TTL are reconciled through the gateway (provider-query-before-retry semantics, dry-run) | none | **CLAIMED** (05) | 05 | Test: a crashed claim is reconciled exactly once; no re-send |
+| E-10 | **P0 (critical-path support)** | Adapter for A-03 in 05's package: `mbos_governance.spine_adapter` implementing `mbos.interfaces.Gateway` (execute(engine, areq_id, approval_id) → GuardResult), `KillSwitch` (PgPanicStore) and `PolicyDecisionPoint` (full areq) on lane D. R4: the gateway owns action-status edges and receipts, so the spine's finish_act must not double-write; document the exact contract. Plus `reconcile()` as a function the spine can schedule | none | READY | 05 | 05's tests drive the adapter through 01's `mbos.interfaces` types on lane D; a written handoff note for A-03 |
+| E-06 | P1 | Policy data into lane D's `mbos.policy` / `policy_current` (publish via `mbos.publish_policy`, receipted) | none | READY | 05 | PDP reads policy from Postgres; same decisions as the JSON file |
+| E-09 | P1 | Governance alert queries (FREEZE, MB006 budget refusals, INJECTION_SUSPECTED, NEEDS_HUMAN, stuck claims). Queries only, no sends | none | READY | 05 | Alert views + tests |
+| E-07 | P2 | Egress allow-list per adapter/effector as policy data | none | READY | 05 | Data + checker |
+| E-08 | P2 | Sandbox spec + config checker (doc + checker only; no Podman on host) | none | READY | 05 | Checker tests |
+| E-04 | P1 | Outbound secret scan + `INJECTION_SUSPECTED` tripwire (05 §17 #24–26): scan proposed payloads and effector requests; listing/inbound text matching injection patterns emits an `INJECTION_SUSPECTED` receipt and forces tier 0 + `needs_review` | none | **DONE** @ `4fadbe7` | 05 | Tests: a secret in a payload is refused; an injected listing yields at most a tier-0 proposal with the tripwire receipt |
+| E-05 | P2 | Stuck-claim reconciliation job: executions left `executing` past a TTL are reconciled through the gateway (provider-query-before-retry semantics, dry-run) | none | **DONE** @ `9391c16` (reconcile(): never re-sends; schedule at startup in A-03) | 05 | Test: a crashed claim is reconciled exactly once; no re-send |
 
 ### Lane F: Agent 06 (Operator UI)
 | ID | Pri | Task | Deps | Status | Agent | Acceptance |
@@ -107,7 +118,7 @@
 | F-09 | P1 | Operator UI pages from the 72-hour plan: **outcome entry** (via `spine.record_outcome`), **source health** panel (02's health data, read-only), **HOLD backlog**. Human channel only (R14) | none | READY | 06 | Pages + tests on the real spine; outcomes receipted |
 | F-10 | P2 | Morning digest page rendering 03's C-08 ranking | C-08 | READY (C-08 done; `title` is listing text and must be HTML-escaped) | 06 | Ranked list with reasons and provenance links |
 | F-11 | P2 | Follow-up / offer / quote buttons on the card | A-15 | BLOCKED | 06 | Each creates its own step-up ActionRequest via the public API |
-| D-10 | P2 | Adopt 06's `mbos_comms` consent/DNC schema (`comms_spec/sql/0001_comms_ledger.sql`) into lane D migrations (R1: one DDL owner) | none | READY | 04 | 06's F-07 tests pass on lane D's schema |
+| D-10 | P2 | Adopt 06's `mbos_comms` consent/DNC schema (`comms_spec/sql/0001_comms_ledger.sql`) into lane D migrations (R1: one DDL owner) | none | **DONE** DDL @ `6533334` (0011); final acceptance waits on A-01 phase 2 | 04 | 06's F-07 tests pass on lane D's schema |
 
 ### Lane G: Agent 07 (QA)
 | ID | Pri | Task | Deps | Status | Agent | Acceptance |

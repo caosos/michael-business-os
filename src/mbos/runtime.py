@@ -40,7 +40,7 @@ class Components:
     notifier: Optional[Notifier] = None
     llm_budget: Optional[LLMBudget] = None
 
-    def with_defaults(self) -> "Components":
+    def with_defaults(self, state_backend: str = "reference") -> "Components":
         from mbos.reference.action_planner import DefaultActionPlanner
         from mbos.reference.fixture_adapter import ExactKeyDeduper, FixtureNormalizer
         from mbos.reference.governance import (
@@ -49,6 +49,12 @@ class Components:
         from mbos.reference.notify import OutboxNotifier
         from mbos.reference.placeholder_scorer import PlaceholderScorer
 
+        if state_backend == "lane_d":
+            from mbos.reference.governance_lane_d import LaneDDryRunEffector, LaneDReferenceGateway, PanicKillSwitch
+
+            self.kill_switch = self.kill_switch or PanicKillSwitch()
+            self.gateway = self.gateway or LaneDReferenceGateway(LaneDDryRunEffector(), self.kill_switch)
+            self.notifier = self.notifier or NullNotifier()  # lane D's receipt trigger writes the outbox
         self.normalizer = self.normalizer or FixtureNormalizer()
         self.deduper = self.deduper or ExactKeyDeduper()
         self.planner = self.planner or DefaultActionPlanner()
@@ -59,6 +65,11 @@ class Components:
         self.notifier = self.notifier or OutboxNotifier()
         self.llm_budget = self.llm_budget or LedgerLLMBudget()
         return self
+
+
+class NullNotifier:
+    def notify(self, conn, *, kind, item_id, action_request_id, summary) -> None:  # noqa: ANN001
+        return None
 
 
 @dataclass
@@ -78,6 +89,17 @@ def runtime() -> Runtime:
     return _RT
 
 
+def spine_module():
+    """The spine backend for this runtime: `mbos.spine` (reference DDL) or `mbos.spine_d` (lane D)."""
+    if _RT is not None and _RT.settings.state_backend == "lane_d":
+        from mbos import spine_d
+
+        return spine_d
+    from mbos import spine
+
+    return spine
+
+
 def components() -> Components:
     return runtime().components
 
@@ -88,7 +110,8 @@ def init_runtime(s: Settings, comps: Optional[Components] = None, *, launch: boo
     import mbos.workflows  # noqa: F401 — registers workflows before launch
 
     configure(s)
-    migrate(app_engine())
+    if s.state_backend == "reference":
+        migrate(app_engine())  # lane D databases are migrated by lane D's own migrator
     config: DBOSConfig = {
         "name": s.app_name,
         "system_database_url": sqlalchemy_url(s.system_database_url),
@@ -98,7 +121,8 @@ def init_runtime(s: Settings, comps: Optional[Components] = None, *, launch: boo
     }
     DBOS(config=config)
     ds = SQLAlchemyDatasource.create(sqlalchemy_url(s.database_url))
-    _RT = Runtime(settings=s, components=(comps or Components()).with_defaults(), datasource=ds, engine=app_engine())
+    _RT = Runtime(settings=s, components=(comps or Components()).with_defaults(s.state_backend), datasource=ds,
+                  engine=app_engine())
     if launch:
         DBOS.launch()
     return _RT

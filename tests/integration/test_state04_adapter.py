@@ -10,12 +10,6 @@ provenance, item, scores, action request, approval, dry-run execution and outcom
 
 from __future__ import annotations
 
-import importlib
-import io
-import os
-import subprocess
-import sys
-import tarfile
 
 import pytest
 import sqlalchemy as sa
@@ -26,36 +20,19 @@ from mbos.db.engine import engine_for
 from mbos.hashing import reference, sha256_of
 from tests.helpers.common import ROOT
 
-REF = os.environ.get("MBOS_STATE04_REF", "origin/research/agent-04-state")
 SYS = {"type": "system", "id": "agent-01-coordinator"}
 MICHAEL = {"type": "human", "id": "michael"}
 
 
-def _extract(ref: str, dest) -> str:
-    sha = subprocess.run(["git", "rev-parse", "--short", ref], cwd=ROOT, capture_output=True, text=True, check=True).stdout.strip()
-    tar = subprocess.run(["git", "archive", ref, "state"], cwd=ROOT, capture_output=True, check=True).stdout
-    tarfile.open(fileobj=io.BytesIO(tar)).extractall(dest, filter="data")
-    return sha
-
-
 @pytest.fixture(scope="module")
 def db04(tmp_path_factory):
+    from tests.helpers import lane_d
+
     pgserver = pytest.importorskip("pgserver")
     src = tmp_path_factory.mktemp("lane-d-src")
-    sha = _extract(REF, src)
+    sha = lane_d.extract(src)
     server = pgserver.get_server(str(tmp_path_factory.mktemp("pg04")), cleanup_mode="stop")
-    server.psql((src / "state/bootstrap/roles.sql").read_text())
-    server.psql("CREATE DATABASE mbos04 OWNER mbos_owner;")
-    url = server.get_uri().replace("/postgres?", "/mbos04?")
-    sys.path.insert(0, str(src / "state"))
-    try:
-        migrate = importlib.import_module("mbos_state.migrate")
-        migrate.migrate(url, log=lambda *_: None)
-    finally:
-        sys.path.remove(str(src / "state"))
-        for m in [m for m in sys.modules if m.startswith("mbos_state")]:
-            del sys.modules[m]
-    engine = engine_for(url)
+    engine = engine_for(lane_d.build(server, src, "mbos04"))
     engine.lane_d_commit = sha
     yield engine
     engine.dispose()
