@@ -4,13 +4,15 @@ Agent: 05
 Role: Governance / Action Gateway / PANIC — "controlled autonomy"
 Branch: research/agent-05-governance
 Worktree: /home/michaelos/business-os-worktrees/agent-05-governance
-State: WORKING — R7 + R3 DONE; evaluating next ruling (R4/R5/R2)
-Current phase: ROUND TWO — implementation, wave one (DRY-RUN only)
+State: WORKING
+Claimed: E-01 (R7 grant + ADR-0010 payload_hash + stand-in row_hash MBOS-RH-1) — READY_QUEUE @ agent-01 99e9ec0
+Blocked: E-02 on D-01, D-02 (Agent 04 migration 0005 + ADR-0010 ledger)
+Current phase: ROUND TWO — wave two (foreman loop, docs/COORDINATION.md)
 Started: 2026-10-06
-Last updated: 2026-10-07 (wave two: R7/R3 done)
+Last updated: 2026-10-07 (claimed E-01 under ADR-0010)
 
 ## Current objective
-**DONE (2026-10-07):** Agent 01 binding rulings for lane E
+**SUPERSEDED by ADR-0010 (E-01):** Agent 01 binding rulings for lane E
 (`origin/research/agent-01-coordinator@bed7609:docs/integration/ROUND_TWO_INTEGRATION.md`):
 - R7: propose-only grant `comms.email.send` / `comms.sms.send` for `agent-01-coordinator`.
 - R3: align payload_hash with the normative canonical JSON (drop the float refusal).
@@ -19,8 +21,9 @@ Last updated: 2026-10-07 (wave two: R7/R3 done)
   Hashes are byte-identical with 01 `mbos.hashing` and 06 `operator_ui.util` (golden vectors
   pinned in tests). NaN/Infinity/non-JSON payloads are refused at `propose()` (fixed a bug where a
   rejected NaN proposal crashed on storage).
-NOTE: no READY_QUEUE / ACTIVE_WORK file exists on any branch or in Agent 01's worktree
-(FACT, checked 2026-10-07); the rulings table is used as the assignment source.
+NOTE: at first check (2026-10-07 ~12:00) no READY_QUEUE existed; Agent 01 published it at 99e9ec0.
+ADR-0010 replaces R3's json.dumps form with MBOS-CJSON-1 (RFC 8785; 850.0 == 850), so the R3
+hashing in 5b36a09 is superseded by E-01. The R7 grant stands.
 
 Previous objective:
 Wave one: Action Gateway + fail-closed governance layer per ADR-0004/ADR-0005 against frozen
@@ -105,6 +108,12 @@ step-up method, no delegation.
 - docs/governance/ACTION_GATEWAY.md
 - docs/decisions/ADR-05-003-wave-one-gateway-implementation.md
 - docs/receipts/2026-10-07-round-two-gateway-build.md
+
+## Proposed tasks
+- (E-02 prep, done as a handoff, no DDL touched) `docs/integration/05-requirements-for-04-migration-0005.md`:
+  what lane E needs from 04's 0005 — panic_events table + panic_set, effector_calls claims, three
+  missing status edges (approved→expired, approved→failed, executing→cancelled_by_freeze), budget
+  mode/zero-amount/multi-cap. For Agent 04 (D-01) and Agent 01 to triage.
 
 ## Next action
 1-week path (ACTION_GATEWAY.md §8): Postgres store on Agent 04 DDL; L3 hooks (egress
