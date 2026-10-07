@@ -12,7 +12,17 @@ Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
 Last updated: 2026-10-07
 
 ## Current objective
-**F-04** (READY_QUEUE @ `ca6d056`, unblocked by A-03): the UI's `SpineBackend` uses the worker's real `Components` on lane D, via `mbos.adapters.governance.lane_e_components(dsn, policy_path)` (05's gateway, kill switch and PDP), with `state_backend="lane_d"` and `gateway_mode="lane_e"`. Human channel only (R14). F-11 is still BLOCKED on A-15.
+**F-04** (CLAIMED in `d60a731`, IN PROGRESS, no code yet): the UI's `SpineBackend` uses the worker's real `Components` on lane D, via `lane_e_components(dsn, policy_path)` (05 gateway, kill switch, PDP), with `state_backend="lane_d"` and `gateway_mode="lane_e"`.
+
+Findings so far (FACT, spine @ `ca6d056`):
+- Lane D runs through `mbos.spine_d`, which has the same public API (`decide`, `pending_decisions`, `record_outcome`). `mbos.runtime.spine_module()` selects it by `state_backend`.
+- `operator_ui/backend.py` imports `mbos.spine` directly and reads the **reference** tables (`mbos.items`, `mbos.action_requests`, `mbos.approvals`, `mbos.receipts`, `mbos.provenance`, `mbos.outcomes`, `mbos.governance_flags`) with raw SQL. On lane D those reads must move to lane D's schema/API (`mbos.adapters.state04.Pg04Ledger`).
+
+Next steps:
+1. Install 05's `mbos_governance` from its pushed head, and extract the whole `policy/` directory (each file fails closed).
+2. Build a lane-D test database the way `tests/helpers/lane_d.py` does (04's `state/` via git archive, roles.sql, migrator).
+3. Make `SpineBackend` backend-aware (`spine_module()`, plus a lane-D reader) and pass in the worker's `Components` from `lane_e_components`.
+4. Re-run the UI suite on lane D. Consent GRANTED / DNC CLEAR need the gateway role (D-10).
 
 ## Done
 - **F-12 @ `0e5a3fe`:** local daily summary (`python -m operator_ui summary` writes `.md`/`.html`, plus the `/summary` page), never sent.
