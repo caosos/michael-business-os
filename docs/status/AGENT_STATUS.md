@@ -4,8 +4,10 @@ Agent: 02
 Role: Discovery / Source Adapters (DISCOVER + NORMALIZE lane)
 Branch: research/agent-02-opportunity
 Worktree: /home/michaelos/business-os-worktrees/agent-02-opportunity
-State: WORKING
-Claimed: B-08 (with Agent 03)
+State: WAITING
+Waiting on: Agent 03 fix for B-08 acceptance; E-02 (Agent 05) for B-09; queue refill from Agent 01
+Blocked: B-08 on Agent 03 comps_feed.entry() KeyError 'sold_date' for asking comps (repro sent; source side done @ a41fedf)
+Blocked: B-09 on E-02 (Postgres PANIC)
 Done: B-01 @ 7c9da45
 Done: B-02 @ cadfdae
 Done: B-03 @ 8ff5476
@@ -14,7 +16,7 @@ Done: B-05 @ e439b9b (HOLD wake_on=price_change wakes from a 02 fixture re-sight
 Done: B-06 @ bd899f4 (GovDeals/PublicSurplus/EstateSales.NET alert e-mails; read-only IMAP; DKIM-checked; 137 tests)
 Done: B-07 @ 32c148c (SAM.gov gov_contract leads, NAICS mapping, key redacted; 142 tests)
 Done: C-04 (support, source side) @ a1a7730 (lead Agent 03 C-04 @ 882c726)
-Current phase: Round Two — working B-08 (eBay Browse ASKING comps for Agent 03's bundle)
+Current phase: Round Two — B-01..B-07 DONE, B-08 source side DONE (acceptance blocked on Agent 03), B-09 blocked on E-02
 Started: 2026-10-06 (Round One) · Round Two started 2026-10-07
 Last updated: 2026-10-07
 
