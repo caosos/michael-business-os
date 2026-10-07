@@ -33,7 +33,9 @@ os.environ.setdefault("MBOS_CONTRACTS_DIR", str(QA_ROOT / "contracts"))  # F-16:
 import sqlalchemy as sa  # noqa: E402
 
 STEP_UP = {"method": "qa_step_up", "step_up": True}
-IMPLEMENTATION = f"REAL: Agent 01 spine `mbos` @ {PIN[:7]} on PostgreSQL 16 (pgserver) + DBOS"
+STATE_BACKEND = os.environ.get("MBOS_QA_STATE_BACKEND", "reference")  # mbos Settings.state_backend: reference | lane_d
+IMPLEMENTATION = (f"REAL: Agent 01 spine `mbos` @ {PIN[:7]}, state_backend=`{STATE_BACKEND}`, "
+                  "on PostgreSQL 16 (pgserver) + DBOS")
 
 
 class Refused(Exception):
@@ -118,8 +120,9 @@ class SpineQA:
 
                 _wrap_effector()
                 s = Settings(database_url=new_database("qa_app"), system_database_url=new_database("qa_sys"),
-                             approval_poll_seconds=0.3)
+                             approval_poll_seconds=0.3, state_backend=STATE_BACKEND)
                 _STATE["rt"] = init_runtime(s, Components())
+                assert _STATE["rt"].settings.state_backend == STATE_BACKEND
         self.rt = _STATE["rt"]
         self.engine = self.rt.engine
 
@@ -155,12 +158,7 @@ class SpineQA:
             return workflows.record_decision(areq_id, decision, seen, auth_context=STEP_UP if step_up else None, **kw)
         except spine.DecisionRefused as e:
             raise Refused(str(e)) from e
-        except Exception as e:  # noqa: BLE001
-            # e.g. NO without a reason is refused by the frozen-contract check (ContractViolation), not by
-            # DecisionRefused. Same outcome (refused, rolled back), different exception type: finding F-18.
-            if type(e).__name__ == "ContractViolation":
-                raise Refused(f"ContractViolation: {e}") from e
-            raise
+
 
     def ping(self, item_id: str) -> None:
         from mbos import workflows

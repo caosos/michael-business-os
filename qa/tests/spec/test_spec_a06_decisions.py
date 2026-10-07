@@ -52,7 +52,7 @@ def test_irreversible_yes_without_step_up_is_refused(qa, pending_flip):
 def test_no_archives_with_reason_and_never_executes(qa, pending_flip):
     item_id, areq = pending_flip
     n_prov = qa.scalar("SELECT count(*) FROM mbos.provenance")
-    with pytest.raises(Refused):
+    with pytest.raises(Refused, match="contract"):  # F-18 fixed: DecisionRefused, not ContractViolation
         qa.decide(areq["action_request_id"], "NO")  # the contract requires a reason
     assert qa.approvals(areq["action_request_id"]) == []
     assert qa.scalar("SELECT count(*) FROM mbos.provenance") == n_prov, "a refused decision left a partial write"

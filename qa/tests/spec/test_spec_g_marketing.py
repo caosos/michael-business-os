@@ -1,7 +1,7 @@
 """G1–G4 (owner 07) against the REAL spine, with the real lane-07 ActionPlanner (`mbos_qa.marketing_planner`) wired
-into 01's runtime Components. G1 must pass. G2/G4 encode spine gaps as STRICT xfails tied to findings (F-20/F-19):
-they fail the run the moment the gap closes, so the marker has to be removed rather than drift. G3 has no code path
-in wave one and is skipped with a reason."""
+into 01's runtime Components. G1, G2 and G4 (draft frozen into the approved payload) must pass. The G4 provenance
+clause is a STRICT xfail tied to F-21: it fails the run the moment the gap closes, so the marker has to be removed
+rather than drift. G3 has no code path in wave one and is skipped with a reason."""
 import time
 
 import pytest
@@ -67,21 +67,31 @@ def test_g1_every_execution_in_the_ledger_traces_to_a_yes_on_the_same_payload(qa
         assert appr["payload_hash_seen"] == r["payload_hash"] == qa.areq(r["action_request_id"])["payload_hash"]
 
 
-@pytest.mark.xfail(strict=True, reason="F-19: the spine freezes {summary, target, ids} only; the planner's draft "
-                                       "content and its G4 provenance never reach the approved payload")
-def test_g4_approved_payload_carries_the_draft_and_its_provenance(qa, planner07):
+def test_g4_approved_payload_freezes_the_draft_exactly(qa, planner07):
+    """F-19 (fixed in A-13): what Michael approves is the draft itself, hash-covered."""
     item_id, areq = _publishing_request(qa)
-    draft = MarketingPlanner().plan(qa.item(item_id))[0]["draft"]
-    payload = areq["payload"]
-    assert payload.get("content_hash") == draft["content_hash"] == sha256_ref(draft["content"])
-    assert payload.get("prompt_hash") and payload.get("model_id") and payload.get("template_version")
+    expected = MarketingPlanner().plan(qa.item(item_id))[0]["draft"]
+    draft = areq["payload"].get("draft")
+    assert draft == expected, "the approved payload does not carry the planner's draft verbatim"
+    assert draft["content_hash"] == sha256_ref(draft["content"])
+    assert draft["prompt_hash"] and draft["model_id"] and draft["template_version"]
+    assert areq["payload_hash"] == sha256_ref(areq["payload"]), "the draft is not covered by the approved hash"
+
+
+@pytest.mark.xfail(strict=True, reason="F-21: the draft's template/prompt hash/model are frozen in the payload "
+                                       "but no provenance record for the request resolves to them (only "
+                                       "route_recommendation tool provenance)")
+def test_g4_draft_provenance_resolves_to_template_and_model(qa, planner07):
+    """G4 wording: content hash, prompt version and model are recorded IN PROVENANCE for the outgoing draft."""
+    item_id, areq = _publishing_request(qa)
+    draft = areq["payload"]["draft"]
     prov = [qa.find_provenance(p) for p in areq["provenance_ids"]]
-    assert any(p.get("prompt_hash") == draft["prompt_hash"] for p in prov)
+    assert any(p.get("prompt_hash") == draft["prompt_hash"] and p.get("model_id") for p in prov), \
+        [{k: p.get(k) for k in ("tool_name", "prompt_hash", "model_id")} for p in prov]
 
 
-@pytest.mark.xfail(strict=True, reason="F-20: no spine API records lead attribution (record_outcome takes no "
-                                       "`attribution`; outcome.schema.json supports it)")
 def test_g2_service_lead_carries_attribution(qa, planner07):
+    """F-20 (fixed): attribution is recorded on the lead through the spine's public API."""
     from mbos import spine
 
     item_id = qa.discover(SERVICE_YES)

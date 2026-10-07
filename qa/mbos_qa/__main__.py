@@ -103,25 +103,22 @@ FINDINGS = [
      "their `$id`, contrary to the ADR-0004 mitigation. Its 13 scored examples (26 documents) still validate "
      "against frozen v1.0.0, so nothing breaks today.",
      "RECOMMENDATION: 03 bumps the `$id` / version on its next schema change. 01 re-pins through a semver bump."),
-    ("F-18", "FACT", "01", "`spine.decide` refuses NO without a reason through the frozen-contract check "
-     "(`ContractViolation`), not `DecisionRefused`. The outcome is correct: it is refused and the transaction is "
-     "rolled back, including the provenance row written before the check (verified in spec A6). But callers such "
-     "as the Operator UI must catch two exception types.",
-     "RECOMMENDATION: validate the approval document before any write, and raise `DecisionRefused` for every "
-     "invalid decision."),
-    ("F-19", "FACT", "01 + 06/07 (G4; approval integrity)", "`spine._propose` freezes a payload of only "
-     "{capability, summary, item_id, recommendation_id, target, dry_run}. The draft content a drafting lane writes "
-     "(listing title/body, email subject/body) and its G4 provenance never enter the hash-frozen payload, so Michael "
-     "approves a one-line summary, not the text that would go out. Strict xfail "
-     "`test_g4_approved_payload_carries_the_draft_and_its_provenance` (real spine).",
-     "RECOMMENDATION: extend the `ActionPlanner` contract with an optional `draft` (content, content_hash, "
-     "template_version, prompt_hash, model_id) that `_propose` copies into the payload, so it is hash-frozen and "
-     "shown in the Operator UI, plus a draft provenance row. `mbos_qa.marketing_planner` already emits it."),
-    ("F-20", "FACT", "01 (G2)", "No spine API records lead attribution: `spine.record_outcome` has no "
-     "`attribution` parameter, although `outcome.schema.json` supports it. Strict xfail "
-     "`test_g2_service_lead_carries_attribution` (real spine).",
-     "RECOMMENDATION: add `attribution=` to `record_outcome` (or a `record_attribution` call at intake) and "
-     "capture it for every `service_lead`."),
+    ("F-18", "FACT", "01", "FIXED at a910ad9 (verified on the real spine): NO without a reason raises "
+     "`DecisionRefused` and leaves no partial write. It used to surface as `ContractViolation`.",
+     "None. Kept for the record."),
+    ("F-19", "FACT", "01", "FIXED by A-13 (aa88e7a), verified on the real spine at a910ad9: the planner's `draft` is "
+     "frozen verbatim into the approved payload (`payload.draft`) and covered by `payload_hash`. Michael approves "
+     "the text that goes out.", "None. Kept for the record."),
+    ("F-20", "FACT", "01", "FIXED at a910ad9 (verified): `spine.record_outcome(..., attribution=...)` stores "
+     "lead attribution.", "None. Kept for the record."),
+    ("F-21", "FACT", "01 / 07 (G4 provenance clause)", "The draft's `template_version`, `prompt_hash` and "
+     "`model_id` are frozen in the payload, but the request's provenance is only the `route_recommendation` tool "
+     "record. No provenance resolves the outgoing content to its generator, which is what provenance.schema's "
+     "model + version + prompt-hash branch is for (LLM drafts later). Strict xfail "
+     "`test_g4_draft_provenance_resolves_to_template_and_model` (real spine).",
+     "RECOMMENDATION: when a proposed action carries `draft`, `_propose` records a provenance row (actor = the "
+     "drafting agent; `model_id`, `model_version`=template version, `prompt_hash`; `inputs_used` = content_hash) "
+     "and cites it in the request's `provenance_ids`. Agent 01 may instead rule that payload freezing satisfies G4."),
     ("F-16", "FACT", "01", "Agent 01's package only finds the contracts by a path relative to the source tree. "
      "With a normal (non-editable) `pip install`, 94 of its 109 tests fail or error with `docs/research/contracts "
      "not found; set MBOS_CONTRACTS_DIR`. With that variable set, 108 pass and 1 is skipped "
@@ -260,8 +257,9 @@ def cmd_spine() -> int:
           "insert-only triggers, `CHECK` constraints and the MBOS-RH-1 chain, `TableKillSwitch`, `LedgerLLMBudget`, "
           "and `audit`.",
           "- **Still 01's *reference* components, so A5/A8/A9 must re-run when they ship:** the gateway, kill "
-          "switch and LLM budget are 01's stand-ins for lane E (Agent 05: A-03/E-02). The store is 01's reference "
-          "DDL until A-01 phase 2 moves it onto Agent 04's schema. The adapter reads through mbos' public API where "
+          "switch and LLM budget are 01's stand-ins for lane E (Agent 05: A-03/E-02). This run used "
+          f"`state_backend={impl_spine.STATE_BACKEND}`. Destructive ledger-mode tests always use 01's reference DDL. "
+          "The lane-D backend (A-01 phase 2) is the P-07-5 re-run after A-03. The adapter reads through mbos' public API where "
           "one exists; the remaining raw-SQL reads sit in one marked block.",
           "- **Crash/restart (A5, A6):** a real child process killed with `os._exit(137)`, then a second process "
           "whose `DBOS.launch()` recovers the workflow.", "",
