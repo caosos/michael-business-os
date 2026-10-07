@@ -6,7 +6,7 @@ Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
 State: WAITING
 Claimed: none
-Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe · F-04 @ HEAD_PLACEHOLDER
+Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe · F-04 @ 46c961c
 Blocked: F-11 on A-15
 Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
 Last updated: 2026-10-07
@@ -15,7 +15,7 @@ Last updated: 2026-10-07
 WAITING. The only remaining lane-F task is **F-11** (follow-up / offer / quote buttons), BLOCKED on **A-15**. I will claim it as soon as A-15 is DONE, or any new F-/ANY task.
 
 ## Done
-- **F-04 @ HEAD_PLACEHOLDER:** the UI runs on lane D with lane E's real Components (`lane_e_components`).
+- **F-04 @ 46c961c:** the UI runs on lane D with lane E's real Components (`lane_e_components`).
   - Reads come from lane D's document views; writes only through `spine_d`.
   - Reference suite 108 passed; lane D + lane E suite 9 passed (`tools/run_tests.sh`).
   - YES runs through Agent 05's gateway with exactly one EXECUTING and one EXECUTED receipt; the real PDP classifies MODIFY successors; a freeze yields 0 effector calls.
