@@ -1,7 +1,7 @@
 """G1–G4 (owner 07) against the REAL spine, with the real lane-07 ActionPlanner (`mbos_qa.marketing_planner`) wired
-into 01's runtime Components. G1, G2 and G4 (draft frozen into the approved payload) must pass. The G4 provenance
-clause is a STRICT xfail tied to F-21: it fails the run the moment the gap closes, so the marker has to be removed
-rather than drift. G3 has no code path in wave one and is skipped with a reason."""
+into 01's runtime Components. G1, G2 and G4 (draft frozen into the approved payload AND a provenance record that
+resolves it to its template/prompt/model — F-21, fixed at ca6d056) must pass. G3 has no code path in wave one and is
+skipped with a reason."""
 import time
 
 import pytest
@@ -78,9 +78,6 @@ def test_g4_approved_payload_freezes_the_draft_exactly(qa, planner07):
     assert areq["payload_hash"] == sha256_ref(areq["payload"]), "the draft is not covered by the approved hash"
 
 
-@pytest.mark.xfail(strict=True, reason="F-21: the draft's template/prompt hash/model are frozen in the payload "
-                                       "but no provenance record for the request resolves to them (only "
-                                       "route_recommendation tool provenance)")
 def test_g4_draft_provenance_resolves_to_template_and_model(qa, planner07):
     """G4 wording: content hash, prompt version and model are recorded IN PROVENANCE for the outgoing draft."""
     item_id, areq = _publishing_request(qa)

@@ -111,14 +111,9 @@ FINDINGS = [
      "the text that goes out.", "None. Kept for the record."),
     ("F-20", "FACT", "01", "FIXED at a910ad9 (verified): `spine.record_outcome(..., attribution=...)` stores "
      "lead attribution.", "None. Kept for the record."),
-    ("F-21", "FACT", "01 / 07 (G4 provenance clause)", "The draft's `template_version`, `prompt_hash` and "
-     "`model_id` are frozen in the payload, but the request's provenance is only the `route_recommendation` tool "
-     "record. No provenance resolves the outgoing content to its generator, which is what provenance.schema's "
-     "model + version + prompt-hash branch is for (LLM drafts later). Strict xfail "
-     "`test_g4_draft_provenance_resolves_to_template_and_model` (real spine).",
-     "RECOMMENDATION: when a proposed action carries `draft`, `_propose` records a provenance row (actor = the "
-     "drafting agent; `model_id`, `model_version`=template version, `prompt_hash`; `inputs_used` = content_hash) "
-     "and cites it in the request's `provenance_ids`. Agent 01 may instead rule that payload freezing satisfies G4."),
+    ("F-21", "FACT", "01", "FIXED at ca6d056 (P-07-8), verified on the real spine: a proposed action's `draft` gets "
+     "its own provenance record, cited in the request's `provenance_ids`, that resolves to its template, prompt hash "
+     "and model.", "None. Kept for the record."),
     ("F-16", "FACT", "01", "Agent 01's package only finds the contracts by a path relative to the source tree. "
      "With a normal (non-editable) `pip install`, 94 of its 109 tests fail or error with `docs/research/contracts "
      "not found; set MBOS_CONTRACTS_DIR`. With that variable set, 108 pass and 1 is skipped "
