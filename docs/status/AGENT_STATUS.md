@@ -5,12 +5,13 @@ Role: Governance / Action Gateway / PANIC — "controlled autonomy"
 Branch: research/agent-05-governance
 Worktree: /home/michaelos/business-os-worktrees/agent-05-governance
 State: WORKING
-Claimed: E-02 (P0: Postgres-backed GovernanceStore + PanicStore on 04's 0005 API; R2/R4/R5) — READY_QUEUE @ agent-01 0d107df, deps D-01/D-02/D-04 DONE @ agent-04 a0d1fbe
+Claimed: B-04 (lane-E half: run 02's freeze-request fixture through PANIC; decide auto-apply) — 02's half DONE @ agent-02 029356c
+Blocked: E-02 on D-04 — Agent 04 re-opened D-04 (0005 at a0d1fbe lacks the lane-E requirements: status edges, effector claim, multi-cap budget); migration 0007 in progress. Agreed with 04: no workarounds. PG test harness prep continues.
 Done: E-01 @ df826c3 (interop row 05 = 10/10; vectors receipt_chain verifies; 141 tests)
 Done: E-03 @ e12caa3 (L3 DBOS cancel verified on real dbos 3.2.0; deny-all egress + LiteLLM budget generators; 157 tests)
 Current phase: ROUND TWO — wave two (foreman loop, docs/COORDINATION.md)
 Started: 2026-10-06
-Last updated: 2026-10-07 (claimed E-02; then E-04, E-05 queued)
+Last updated: 2026-10-07 (E-02 blocked on 0007; claimed B-04 lane-E half)
 
 ## Current objective
 **SUPERSEDED by ADR-0010 (E-01):** Agent 01 binding rulings for lane E
