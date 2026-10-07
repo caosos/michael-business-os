@@ -21,11 +21,14 @@ def utc(y, mo, d, h, mi=0):
 
 
 # ---------------------------------------------------------------- package is send-free
-def test_spec_package_has_no_network_or_send_path():
-    src = (ROOT / "comms_spec" / "__init__.py").read_text()
-    mods = {n.names[0].name.split(".")[0] for n in ast.walk(ast.parse(src)) if isinstance(n, ast.Import)}
-    mods |= {(n.module or "").split(".")[0] for n in ast.walk(ast.parse(src)) if isinstance(n, ast.ImportFrom)}
-    assert not mods & {"socket", "http", "urllib", "smtplib", "requests", "httpx", "telnyx", "twilio", "subprocess"}
+@pytest.mark.parametrize("path", sorted((ROOT / "comms_spec").glob("*.py")), ids=lambda p: p.name)
+def test_spec_package_has_no_network_or_send_path(path):
+    src = path.read_text()
+    tree = ast.parse(src)
+    mods = {a.name.split(".")[0] for n in ast.walk(tree) if isinstance(n, ast.Import) for a in n.names}
+    mods |= {(n.module or "").split(".")[0] for n in ast.walk(tree) if isinstance(n, ast.ImportFrom)}
+    assert not mods & {"socket", "http", "urllib", "smtplib", "ssl", "requests", "httpx", "aiohttp",
+                       "telnyx", "twilio", "postmark", "vapi", "retell", "subprocess"}, mods
     assert "def send" not in src
 
 
