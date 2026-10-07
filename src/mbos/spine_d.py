@@ -139,6 +139,24 @@ def ingest(conn: sa.Connection, raw: dict, norm: Optional[dict], adapter_name: s
 
 
 
+
+def propose_followup(conn: sa.Connection, item_id: str, pa: dict, components: Any) -> dict:
+    """A follow-up action on an Item that already acted (A-15; R12 edge ACTED -> AWAITING_APPROVAL): e.g. a counter-offer,
+    a follow-up message, a quote. A new ActionRequest through the SAME policy path (PDP, proposer_for, step-up); the item
+    returns to AWAITING_APPROVAL only if there is something for Michael to decide."""
+    item = read_item(conn, item_id)
+    if item["state"] != "ACTED":
+        raise DecisionRefused(f"{item_id} is {item['state']}; a follow-up needs an item that has already acted")
+    if not item.get("recommendation") or not item.get("scores"):
+        raise DecisionRefused(f"{item_id} has no recommendation/score to follow up on")
+    prov = _prov(conn, "mbos.spine_d.propose_followup", basis="RECOMMENDATION", inputs=(item_id,),
+                 derived_from=[item["recommendation"]["provenance_id"]])
+    areq = _propose(conn, item, pa, prov, components)
+    if areq.get("no_proposer") or areq["status"] == "rejected":
+        return {"action_request_id": areq.get("action_request_id"), "policy_denied": True}
+    _to(conn, item_id, "AWAITING_APPROVAL", f"follow-up awaiting Michael: {areq['capability']}", [prov])
+    return {"action_request_id": areq["action_request_id"], "policy_denied": False}
+
 def ingest_safe(conn: sa.Connection, raw: dict, norm: Optional[dict], adapter_name: str, adapter_version: str,
                 components: Any) -> dict:
     """One poisonous listing must never abort the batch (07 F-36): scrub first, then ingest inside a savepoint; on any

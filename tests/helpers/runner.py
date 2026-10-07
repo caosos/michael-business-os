@@ -163,6 +163,23 @@ def lane_d_e2e(fixture: str, gateway_mode: str = "reference") -> None:
         a = pending_request(engine, trailer)
         workflows.record_decision(a["action_request_id"], "YES", a["payload_hash"], auth_context=STEP_UP)
         final["trailer_after"] = wait_state(engine, trailer, {"ACTED", "FAILED"}, timeout=60)
+    followup = None
+    if trailer in awaiting and final.get("trailer_after") == "ACTED":  # A-15: a follow-up on the item that already acted
+        fu = workflows.propose_followup(trailer, {"capability": "comms.email.send", "reversibility": "irreversible",
+                                                  "summary": "Follow up: still available? (DRY-RUN draft)",
+                                                  "estimated_cost": {"amount": 0, "currency": "USD"}})
+        wait_state(engine, trailer, "AWAITING_APPROVAL", timeout=60)
+        f2 = pending_request(engine, trailer)
+        workflows.record_decision(f2["action_request_id"], "YES", f2["payload_hash"], auth_context=STEP_UP)
+        t0 = time.monotonic()
+        while time.monotonic() - t0 < 60:
+            with engine.connect() as c:
+                n = c.execute(sa.text("SELECT count(*) FROM mbos.receipts WHERE item_id = :i AND type = 'ACTION_EXECUTED'"), {"i": trailer}).scalar_one()
+            if n >= 2:
+                break
+            time.sleep(0.3)
+        wait_state(engine, trailer, "ACTED", timeout=30)
+        followup = {"policy_denied": fu["policy_denied"], "executed_receipts": n, "second_request": f2["action_request_id"] != a["action_request_id"]}
     if smart in awaiting:
         b = pending_request(engine, smart)
         workflows.record_decision(b["action_request_id"], "NO", b["payload_hash"], reason="lane D e2e: not this week")
@@ -228,7 +245,7 @@ def lane_d_e2e(fixture: str, gateway_mode: str = "reference") -> None:
     id_addressable = sum(1 for r in exported if r["type"] in ("SCORE_RECORDED", "RECOMMENDATION_RECORDED")
                          and r.get("entity_type") in ("scorecard", "recommendation") and r.get("entity_id", "")[:4] in ("scr_", "rec_"))
     scored = sum(1 for r in exported if r["type"] in ("SCORE_RECORDED", "RECOMMENDATION_RECORDED"))
-    say("RESULT", json.dumps({"id_addressable": [id_addressable, scored], "panic": panic, "reconcile_schedule": sched, "cards": card_stats, "card_errors": card_errors[:5], "at1": at1, "receipt_types": by_type, "gateway_mode": gateway_mode, "final": final, "chain": chain, "reference_chain": [ref_ok, ref_msg],
+    say("RESULT", json.dumps({"followup": followup, "id_addressable": [id_addressable, scored], "panic": panic, "reconcile_schedule": sched, "cards": card_stats, "card_errors": card_errors[:5], "at1": at1, "receipt_types": by_type, "gateway_mode": gateway_mode, "final": final, "chain": chain, "reference_chain": [ref_ok, ref_msg],
                               "effector_calls": calls, "live_effector_calls": live, "receipts": len(exported),
                               "contract_errors": errors[:5], "executed": sum(r["type"] == "ACTION_EXECUTED" for r in exported)}))
     os._exit(0)

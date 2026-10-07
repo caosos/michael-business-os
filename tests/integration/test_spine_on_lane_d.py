@@ -34,7 +34,8 @@ def test_full_lifecycle_on_lane_d(lane_d_urls, tmp_path):
     assert r["final"]["smart_after"] == "ARCHIVED"
     assert r["chain"]["ok"], r["chain"]
     assert r["reference_chain"][0], r["reference_chain"]          # ADR-0010: verifiable without trusting the DB
-    assert r["effector_calls"] == 1 and r["live_effector_calls"] == 0 and r["executed"] == 1
+    assert r["followup"]["executed_receipts"] == 2                      # A-15: first action + its follow-up
+    assert r["effector_calls"] == 2 and r["live_effector_calls"] == 0 and r["executed"] == 2
     assert not r["contract_errors"], r["contract_errors"]
     assert r["id_addressable"][0] == r["id_addressable"][1] > 0, r["id_addressable"]  # 04 R2: scorecard/recommendation receipts carry their ids
     assert not r["card_errors"], r["card_errors"]  # every opportunity renders a valid, honest card on lane D
@@ -74,8 +75,10 @@ def test_full_lifecycle_with_lane_e_gateway(tmp_path_factory, tmp_path):
     r = json.loads(line(cp, "RESULT"))
     assert r["final"]["trailer_after"] == "ACTED", r
     assert r["chain"]["ok"] and r["reference_chain"][0], r
-    assert r["effector_calls"] == 1 and r["live_effector_calls"] == 0 and r["executed"] == 1
-    assert r["receipt_types"].get("ACTION_EXECUTING") == 1, r["receipt_types"]  # exactly one per edge (R4)
+    fu = r["followup"]  # A-15: the follow-up ran through lane E's gateway as its own request
+    assert fu and fu["policy_denied"] is False and fu["second_request"] and fu["executed_receipts"] == 2, fu
+    assert r["effector_calls"] == 2 and r["live_effector_calls"] == 0 and r["executed"] == 2
+    assert r["receipt_types"].get("ACTION_EXECUTING") == 2, r["receipt_types"]  # exactly one per edge per request (R4)
     # A-18: PANIC runs through lane E (hooks, approver-only release) and the reconcile schedule exists
     pn = r["panic"]
     assert pn["engage_error"] is None and pn["frozen_blocks"] is True, pn

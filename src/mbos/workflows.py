@@ -16,13 +16,14 @@ from dataclasses import asdict
 from datetime import timedelta
 from typing import Any, Optional
 
-from dbos import DBOS, SetWorkflowID
+from dbos import DBOS, EnqueueOptions, SetWorkflowID
 
 from mbos import __version__, spine  # noqa: F401  (reference backend; S() selects)
 from mbos.clock import parse
 from mbos.runtime import components, item_workflow_id, runtime, spine_module as S, tx
 
 DECISION_TOPIC = "decision"
+FOLLOWUP_QUEUE = "followups"
 WAKE_EVENTS = ("price_change", "auction_ending", "new_info")
 
 
@@ -248,3 +249,32 @@ def notify_event(item_id: str, event: str, summary: str = "", evidence_provenanc
             c.send(item_workflow_id(item_id), message, topic=DECISION_TOPIC)
         finally:
             c.destroy()
+
+
+# ---------------------------------------------------------------- follow-up actions on an Item that already acted (A-15)
+@DBOS.workflow()
+def followup_lifecycle(item_id: str, areq_id: str) -> dict[str, Any]:
+    """The approval gate for a follow-up request: same wait/decision/act path as the first action, same receipts."""
+    return _approval_gate(item_id, areq_id)
+
+
+def propose_followup(item_id: str, proposed_action: dict[str, Any]) -> dict[str, Any]:
+    """Public API (Operator UI, CLI): propose a follow-up action on an ACTED item. Creates the request in one transaction,
+    then starts its approval gate on the `followups` queue (a running worker executes it; if none is running the gate
+    starts when one is). The item workflow of the first action has already finished, so this is its own workflow."""
+    out = tx(lambda conn: S().propose_followup(conn, item_id, proposed_action, components()))
+    if out.get("policy_denied") or not out.get("action_request_id"):
+        return out
+    opts: EnqueueOptions = {"queue_name": FOLLOWUP_QUEUE, "workflow_name": "followup_lifecycle",
+                            "workflow_id": f"followup:{out['action_request_id']}"}
+    try:
+        DBOS.enqueue_workflow_with_options(opts, item_id, out["action_request_id"])
+    except Exception:  # not inside a launched runtime (UI/CLI process): enqueue through the client
+        from mbos.runtime import client
+
+        c = client()
+        try:
+            c.enqueue(opts, item_id, out["action_request_id"])
+        finally:
+            c.destroy()
+    return out

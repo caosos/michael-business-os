@@ -134,6 +134,9 @@ def init_runtime(s: Settings, comps: Optional[Components] = None, *, launch: boo
                   engine=app_engine())
     if launch:
         DBOS.launch()
+        from mbos.workflows import FOLLOWUP_QUEUE
+
+        DBOS.register_queue(FOLLOWUP_QUEUE)  # follow-up approval gates (A-15) are dequeued by this worker (needs a launched DBOS)
         if sched is not None:  # A-18 step 2 (AFTER launch): persistent, idempotent schedule; keeps running while frozen
             _RT.reconcile_schedule = sched.activate()
     return _RT
