@@ -31,11 +31,14 @@ def contracts_dir() -> Path:
     env = os.environ.get("MBOS_CONTRACTS_DIR")
     if env:
         return Path(env)
-    for parent in Path(__file__).resolve().parents:
+    for parent in Path(__file__).resolve().parents:  # source checkout / editable install
         candidate = parent / "docs" / "research" / "contracts"
         if (candidate / "item.schema.json").exists():
             return candidate
-    raise FileNotFoundError("docs/research/contracts not found; set MBOS_CONTRACTS_DIR")
+    packaged = Path(__file__).resolve().parents[1] / "_data" / "contracts"  # wheel: copied at build time (setup.py)
+    if (packaged / "item.schema.json").exists():
+        return packaged
+    raise FileNotFoundError("frozen contracts not found; set MBOS_CONTRACTS_DIR")
 
 
 @lru_cache(maxsize=1)

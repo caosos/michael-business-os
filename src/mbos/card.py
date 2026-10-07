@@ -54,8 +54,17 @@ def elementary_advice(text: str) -> list[str]:
 
 
 def load_profile(path: Optional[str | Path] = None) -> dict[str, Any]:
-    p = Path(path) if path else Path(__file__).resolve().parents[2] / "config" / "operator_profile.v1.json"
-    return json.loads(p.read_text())
+    import os
+
+    if path is None:
+        env = os.environ.get("MBOS_OPERATOR_PROFILE")
+        candidates = [Path(env)] if env else [Path(__file__).resolve().parents[2] / "config" / "operator_profile.v1.json",
+                                              Path(__file__).resolve().parent / "_data" / "config" / "operator_profile.v1.json"]
+        found = next((c for c in candidates if c.exists()), None)
+        if found is None:  # never guess Michael's capabilities
+            raise FileNotFoundError("operator_profile.v1.json not found; set MBOS_OPERATOR_PROFILE")
+        path = found
+    return json.loads(Path(path).read_text())
 
 
 # ---------------------------------------------------------------- datum helpers

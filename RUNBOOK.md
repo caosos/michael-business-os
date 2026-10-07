@@ -56,6 +56,13 @@ export UV_PYTHON_INSTALL_DIR=$PWD/.tools/python UV_CACHE_DIR=$PWD/.tools/uv-cach
 
 `.venv/`, `.tools/` and `.pgdata/` are git-ignored.
 
+**Non-editable install.** `pip install .` (or a wheel) works with no environment variables: `setup.py` copies the frozen
+contracts and `config/operator_profile.v1.json` into `mbos/_data/` at build time from their single source files. A
+missing operator profile raises rather than guessing Michael's capabilities (`MBOS_OPERATOR_PROFILE` overrides).
+
+**Opportunity card.** `mbos card ITEM_ID` prints Michael's decision-ready card (ADR-0011); the Operator UI renders the same
+card at `/item/<id>`.
+
 ## 3. Database
 
 **Development and tests.** `pgserver` runs a real PostgreSQL 16.2 from a pip wheel, project-local, with no system install:

@@ -32,5 +32,6 @@ mbos = ["db/migrations/*.sql"]
 testpaths = ["tests"]
 addopts = "-ra"
 markers = [
+    "slow_build: builds and installs a wheel in a clean venv",
     "acceptance: unified acceptance suite A1-A10 (docs/research/agent-01-integration.md §8)",
 ]
