@@ -1,20 +1,12 @@
 {
-  "priors_version": "2026.10.2",
-  "supersedes": "2026.10.1",
+  "priors_version": "2026.10.1",
+  "supersedes": "2026.10.0",
   "priors_format": 1,
   "_note": "Category priors for the RESEARCH/estimate producer (C-RESEARCH-01). These are ESTIMATES used to fill Item.economics before evidence exists. They are not scoring policy; scoring policy lives in scoring-config.json. Every value is REC or UNK until LEARN calibrates it from outcomes. Any change bumps priors_version. Research-bundle overrides, which need provenance, always win over priors. The estimator never invents a resale price: no comps means status=insufficient.",
 
   "_changelog": [
-    "2026.10.2 (C-07): learn parameters (min outcomes per group, prior weight, minimum relative change). Other values unchanged.",
     "2026.10.1 (C-04): comps_sources registry (ADR-02-0202 tiers, fail-closed) and comps_query vocabulary. Other values unchanged."
   ],
-
-  "learn": {
-    "_note": "LEARN (C-07) proposal rules. Proposals are tier-0 ActionRequests and never self-apply.",
-    "min_outcomes_per_group": { "value": 2, "basis": "REC", "note": "small on purpose; shrinkage keeps 2 outcomes from moving a prior much" },
-    "prior_weight": { "value": 10, "basis": "REC", "note": "beta-binomial pseudo-count k: posterior = (k*prior + successes)/(k + n)" },
-    "min_relative_change": { "value": 0.02, "basis": "REC", "note": "do not propose changes under 2% of the current prior" }
-  },
 
   "comps_sources": {
     "_note": "Comps sources ACCEPTED by the lane-C selection policy (adapters themselves are owned by Agent 02: mbos_discovery.comps), mirroring Agent 02's ADR-02-0202 registry. ALLOWED = official API or an owned channel. Anything else, including unknown names, is refused. Manual entry is how prices seen on do-not-automate sites (Facebook etc.) legitimately enter: a human looked and recorded them.",
