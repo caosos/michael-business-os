@@ -1,14 +1,14 @@
 # READY QUEUE: Michael Business OS, Round Two
 
 - **Owner:** Agent 01 (coordinator / dispatcher). **Protocol:** `docs/COORDINATION.md`. Read it before claiming.
-- **Last synced:** 2026-10-07 15:10 -0500, against branch heads 02 `41d45a6` · 03 `73a4d32` · 04 `7f0649a` · 05 `16fb86c` · 06 `c125618` · 07 `397101c`.
+- **Last synced:** 2026-10-07 15:15 -0500, against branch heads 02 `41d45a6` · 03 `73a4d32` · 04 `7f0649a` · 05 `16fb86c` · 06 `c125618` · 07 `397101c`.
 - **Read it from any worktree:** `git fetch -q origin && git show origin/research/agent-01-coordinator:docs/status/READY_QUEUE.md`
 - **Status values:** READY · CLAIMED · BLOCKED · DONE.
 - **Priority:** P0 = critical path · P1 = next-up · P2 = useful parallel work.
 - **Every task is DRY-RUN ONLY.** No action without a receipt, and no receipt without provenance.
 
 ## Critical path
-`D-04` (04: migration 0007, PANIC/claims/edges/budget modes per 05's requirements) → `A-01` phase 2 (01: spine on 04's store) → `E-02` (05: gateway on Postgres) → `A-03` (01: real gateway wired) → `G-02` (07: release run on real components).
+`A-01` phase 2 (01: spine on lane D's store) → `A-03` (01: 05's real ActionGateway + PgPanicStore + hooks) → `G-02`/`G-03` (07: release run on real components). Lanes B–F are off the critical path.
 
 ## Tasks
 
@@ -16,9 +16,9 @@
 | ID | Pri | Task | Deps | Status | Agent | Acceptance |
 |---|---|---|---|---|---|---|
 | A-00 | P0 | F-13/F-14 rulings: ADR-0010, reference implementations (py and sql), vectors, interop tool, spine conformance | none | **DONE** | 01 | 142 tests pass; vectors pass in Python and in PostgreSQL 16 |
-| A-01 | P0 | Port `ledger.py`/`spine.py` onto 04's `StateStore` (R1/R2). **Phase 1, now:** state adapter against 04's existing SQL API @ `7f0649a`. **Phase 2:** on 0005 | D-01, D-02 for phase 2 | **CLAIMED**, phase 2 now (unblocked) | 01 | A1–A10 pass unchanged on 04's schema |
+| A-01 | P0 | Port `ledger.py`/`spine.py` onto 04's `StateStore` (R1/R2). **Phase 1, now:** state adapter against 04's existing SQL API @ `7f0649a`. **Phase 2:** on 0005 | D-01, D-02 for phase 2 | **CLAIMED**, phase 2 = **CRITICAL PATH NOW** (05's gateway needs the spine on lane D's tables) | 01 | A1–A10 pass unchanged on 04's schema |
 | A-02 | P1 | Release gate `tools/release_gate.sh` (pytest + interop_check + `mbos audit` + contract validator), plus `docs/status/RELEASE_GATE.md` with results | none | READY | 01 | One command, non-zero on any failure, results committed |
-| A-03 | P1 | Wire 05 `ActionGateway`/`PanicState`/`policy.decide` behind `Gateway`/`KillSwitch`/`PDP`. The gateway owns action-status receipts (R4) | E-02 | BLOCKED | 01 | A5 and A9 pass with 05's real gateway |
+| A-03 | P1 | Wire 05 `ActionGateway`/`PanicState`/`policy.decide` behind `Gateway`/`KillSwitch`/`PDP`. The gateway owns action-status receipts (R4) | E-02 | BLOCKED on A-01 phase 2 (E-02 done) | 01 | A5 and A9 pass with 05's real gateway |
 | A-04 | P2 | Wire 02's B adapter + Deduper into `Components`; end-to-end fixture discovery → RESEARCHING | B-01 | **CLAIMED** | 01 | Integration test: 02 fixtures through the DBOS workflow |
 | A-05 | P2 | Wire 03's RESEARCH producer as a workflow step (RESEARCHING → SCORED) | C-01 | **DONE** (this push): `Researcher` interface + `EconomicsResearcher`; lane-B items through lane C's research_step in the workflow | 01 | A real discovered Item advances past RESEARCHING in a test |
 | A-07 | P1 | `notify_decision(item_id, approval_id)` wake helper for the UI and CLI (06 P-06-1) | none | **DONE** (this push) | 01 | `mbos.workflows.notify_decision` exists; F-01 uses it |
@@ -60,7 +60,7 @@
 | B-07 | P2 | P-02-3: SAM.gov adapter (service lane / gov contracts), fixture-first | none | **DONE** @ `32c148c` | 02 | Fixture tests |
 | B-08 | P2 | P-02-4: eBay Browse *asking* comps for 03's evidence bundle (labelled ASKING, never SOLD) | none | **DONE** @ `be0dd52` (asking-only evidence gives a fenced INFER estimate; never YES) | 02 (+03) | 03's estimator consumes them with the right basis |
 | B-10 | P1 | Discovery acceptance F1–F4 as a runnable harness: F1 every Item has ≥1 `sources[]` with `raw_ref`; F2 duplicate rate after dedup on a 7-day fixture corpus (target <2%); F3 repeated 403/429 → L2 freeze request; F4 no collector touches a do-not-automate source | none | **CLAIMED** (02) | 02 | Harness green; F2 rate reported |
-| B-09 | P2 | P-02-5: source-freeze wiring onto Postgres PANIC | E-02 | BLOCKED | 02 | Freeze round-trips on 04/05's tables |
+| B-09 | P2 | P-02-5: source-freeze wiring onto Postgres PANIC | E-02 | READY after B-10 (E-02 done: `PgPanicStore`) | 02 | Freeze round-trips on 04/05's tables |
 
 ### Lane C: Agent 03 (economics)
 | ID | Pri | Task | Deps | Status | Agent | Acceptance |
@@ -84,11 +84,11 @@
 | ID | Pri | Task | Deps | Status | Agent | Acceptance |
 |---|---|---|---|---|---|---|
 | E-01 | P1 | R7 propose-only grant for `agent-01-coordinator` + ADR-0010 `payload_hash` (drop the float refusal) + stand-in store `row_hash` → MBOS-RH-1 | none | **DONE** @ `df826c3` | 05 | interop row 05 = 10/10; `vectors.json` `receipt_chain` verifies with 05's code |
-| E-02 | P0 (after D-01) | Postgres-backed `GovernanceStore` + `PanicStore` on 04's tables (R2/R4/R5). Fail-closed is kept | D-01, D-02 | **READY, P0** (unblocked by D-04 @ `14bd690`) | 05 | 05's suite passes on Postgres; no SQLite in the production path |
+| E-02 | P0 (after D-01) | Postgres-backed `GovernanceStore` + `PanicStore` on 04's tables (R2/R4/R5). Fail-closed is kept | D-01, D-02 | **DONE** @ `1c554cb` (211 tests on PG16 via lane D's API; no SQLite on the production path; R4 enforced by role) | 05 | 05's suite passes on Postgres; no SQLite in the production path |
 | E-03 | P2 | A8/A9 hardening, dry: per-agent LiteLLM budget config generator (no external calls); L3 hook that cancels unstarted DBOS workflows (`DBOS.cancel_workflows`) and writes the egress deny-all policy file | none | **DONE** @ `e12caa3` | 05 | Tests prove L3 cancels pending workflows and emits deny-all config; nothing reaches the network |
 
 | E-04 | P1 | Outbound secret scan + `INJECTION_SUSPECTED` tripwire (05 §17 #24–26): scan proposed payloads and effector requests; listing/inbound text matching injection patterns emits an `INJECTION_SUSPECTED` receipt and forces tier 0 + `needs_review` | none | **CLAIMED** | 05 | Tests: a secret in a payload is refused; an injected listing yields at most a tier-0 proposal with the tripwire receipt |
-| E-05 | P2 | Stuck-claim reconciliation job: executions left `executing` past a TTL are reconciled through the gateway (provider-query-before-retry semantics, dry-run) | none | READY | 05 | Test: a crashed claim is reconciled exactly once; no re-send |
+| E-05 | P2 | Stuck-claim reconciliation job: executions left `executing` past a TTL are reconciled through the gateway (provider-query-before-retry semantics, dry-run) | none | **CLAIMED** (05) | 05 | Test: a crashed claim is reconciled exactly once; no re-send |
 
 ### Lane F: Agent 06 (Operator UI)
 | ID | Pri | Task | Deps | Status | Agent | Acceptance |
