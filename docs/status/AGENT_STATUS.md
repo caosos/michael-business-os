@@ -5,16 +5,23 @@ Role: Communications + Operator UI / Approval UX (build lane F)
 Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
 State: WORKING
-Claimed: F-09
-Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44
+Claimed: F-10
+Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db
 Blocked: F-04 on A-03
 Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
 Last updated: 2026-10-07
 
 ## Current objective
-**F-09** (READY_QUEUE @ `c23bee8`): Operator UI pages for outcome entry (`spine.record_outcome`), a read-only source-health panel (02's data) and a HOLD backlog, on the human channel only (R14). Then F-10 (after C-08) and F-11 (after A-15). F-04 is still BLOCKED on A-03.
+**F-10** (READY per Agent 01 after C-08): a morning digest page rendering 03's `mbos_economics.digest.build_digest` (C-08 @ `a81a989`). It is a ranked list with reasons and provenance links, and listing titles are untrusted, so they are escaped. F-11 is BLOCKED on A-15, and F-04 on A-03.
 
 ## Done
+- **F-09 @ `317a2db`:** Operator UI pages.
+  - Outcome entry on settled cards via `spine.record_outcome` (receipted, with LEARN predicted-vs-actual pairs) and `/outcomes`.
+  - `/holds` HOLD backlog with an overdue flag.
+  - `/sources` read-only lane B source health, worst first, with staleness and escaping.
+  - Human channel only (R14). 96 tests pass on spine `c23bee8`.
+  - Receipt: `docs/receipts/2026-10-07-f09-operator-ui-pages.md`.
+- Re-pin to `c23bee8` (`19b0982`): the seq-gap finding is fixed by A-16 and is now a regression test where both verifiers agree. P-06-9 is asserted (ACTION_FAILED intents name the block reason).
 - **F-08 @ `9d75e44`:** `plan_followup` / `plan_offer` / `plan_quote` each draft their own ActionRequest.
   - Binding drafts use `offer.<channel>.send`, so the spine classifies them as category `offer` (tier 0, irreversible, step-up). An offer is never drafted above the ask.
   - The effector blocks binding drafts under `comms.*`.
@@ -77,7 +84,7 @@ None. Live comms stay disabled (MICHAEL_DECISIONS #4).
   1. `_propose` merges `payload_extension(pa)` into the payload before hashing.
   2. `finish_act` maps `effector_response.status=="blocked"` to ACTION_FAILED.
   3. Optionally, merge `effector_response.comms` into `details`. F-06's acceptance text says the checks belong in `details`; the gateway at `0d107df` builds `details` itself, so they ride in `effector_response.comms` today, and `audit()` reads either location.
-- **FINDING (spine @ `aa88e7a`, lane A):** receipt `seq` comes from `nextval()` in `mbos.receipts_chain()`. A rolled-back receipt transaction (including A1 fault injection) therefore leaves a seq gap. `mbos.verify_chain()` checks links only and stays ok; the ADR-0010 reference `verify_chain` reports `gap before seq N`. Pinned by `tests/test_operator_ui.py::test_finding_spine_seq_gap_after_rollback_is_flagged_only_by_the_reference`. R1 (lane D's gapless chain) should close it. Until then the two verifiers disagree.
+- RESOLVED in `c23bee8` (A-16): **FINDING (spine @ `aa88e7a`, lane A):** receipt `seq` comes from `nextval()` in `mbos.receipts_chain()`. A rolled-back receipt transaction (including A1 fault injection) therefore leaves a seq gap. `mbos.verify_chain()` checks links only and stays ok; the ADR-0010 reference `verify_chain` reports `gap before seq N`. Pinned by `tests/test_operator_ui.py::test_finding_spine_seq_gap_after_rollback_is_flagged_only_by_the_reference`. R1 (lane D's gapless chain) should close it. Until then the two verifiers disagree.
 - **F-07 DDL:** `comms_spec/sql/0001_comms_ledger.sql` (schema `mbos_comms`) is PROPOSED for lane D to adopt or port (R1: 04 owns DDL).
 - **ADR-0009 request:** add receipt types CONSENT_RECORDED / CONSENT_REVOKED / DNC_SCRUB_RECORDED. Under v1.0.0 these events use GRANT_CREATED/GRANT_REVOKED with `entity_type` `consent` or `dnc_scrub`.
 - The comms policy values in `comms_spec/data/comms_policy.v1.json` are PROPOSED (conservative). Loosening any of them is a version bump.
@@ -87,7 +94,8 @@ None. Live comms stay disabled (MICHAEL_DECISIONS #4).
 - P-06-6 became F-07 (DONE).
 - P-06-7 became F-08 (DONE).
 - **P-06-8 (lane A, then F):** a public `spine.propose_followup(conn, item_id, proposed_action)` plus an approval-gate workflow for follow-up requests on an existing item (the R12 edge ACTED → AWAITING_APPROVAL exists, but there is no API). F-08's tests use the internal `_propose`. Lane F would then add "Draft follow-up / offer / quote" on the UI card.
-- **P-06-9 (lane A, small):** `finish_act` reads `response.get("blocked")` for the reason text, but the F-06 effector reports `comms.blocked_reasons`. The reason falls back to "see details", so a one-line read of `response["comms"]["blocked_reasons"]` would make ACTION_FAILED intents self-explanatory.
+- **P-06-10 (lane A, small):** `spine.record_outcome` hard-codes provenance `tool_name="mbos.cli.outcome"`, so web-entered outcomes are labelled CLI. Proposal: add a `channel` parameter.
+- P-06-9 is DONE in `c23bee8`. Original note: `finish_act` reads `response.get("blocked")` for the reason text, but the F-06 effector reports `comms.blocked_reasons`. The reason falls back to "see details", so a one-line read of `response["comms"]["blocked_reasons"]` would make ACTION_FAILED intents self-explanatory.
 
 ## Files (Round Two, current)
 - `operator_ui/` (`backend`, `ux`, `views`, `server`, `__main__`, `mbos_canonical`), `comms_spec/` (+ `planner.py`, `effector.py`, `data/*.v1.json`), `tests/` (conftest, test_operator_ui, test_comms_spec, fixtures/illustrative.json)
