@@ -15,7 +15,7 @@ from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, quote, urlparse
 
-from mbos.clock import utcnow
+from mbos.clock import iso, utcnow
 from mbos.spine import DecisionRefused
 
 from . import ux, views
@@ -82,7 +82,7 @@ def page(title, body, state, flash=None, error=False):
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>{e(title)}</title><style>{CSS}</style></head>
 <body><div class="banner">DRY-RUN · nothing leaves this machine · system {e(state)}</div>
-<header><b>Operator UI</b><nav><a href="/">Queue</a><a href="/holds">HOLD backlog</a><a href="/outcomes">Outcomes</a><a href="/sources">Source health</a><a href="/ledger">Receipt ledger</a></nav></header>
+<header><b>Operator UI</b><nav><a href="/">Queue</a><a href="/digest">Morning digest</a><a href="/holds">HOLD backlog</a><a href="/outcomes">Outcomes</a><a href="/sources">Source health</a><a href="/ledger">Receipt ledger</a></nav></header>
 <main>{f}{body}</main></body></html>"""
 
 
@@ -318,6 +318,49 @@ def render_outcomes(rows, store):
             f"<th>Net $</th><th>Notes</th></tr>{''.join(out)}</table></div>")
 
 
+_BUCKET_LABEL = {"act_alert": "ACT NOW (alert)", "act": "Decide", "research": "Research", "research_r13": "Research before discarding (R13)"}
+
+
+def render_digest(view):
+    if view["error"]:
+        return f"<div class='card'><h2>Morning digest</h2><p class='bad'>{e(view['error'])}</p></div>"
+    d = view["digest"]
+    def prov(pid):
+        return f"<a href='/provenance/{e(pid)}'><code>{e(pid)}</code></a>" if pid else "—"
+    rows = []
+    for r in d["rows"]:
+        card = view["cards"].get(r["item_id"])
+        title = e(r["title"])  # listing text: untrusted
+        title = f"<a href='/areq/{e(card)}'>{title}</a>" if card else title
+        rf = r["refs"]
+        rows.append(
+            f"<tr><td class='num'>{e(r['rank'])}</td><td><b>{e(_BUCKET_LABEL.get(r['bucket'], r['bucket']))}</b></td>"
+            f"<td>{_lane(r['lane'])} <span class='small mut'>{e(r['category'])}</span><br>{title}</td>"
+            f"<td><b>{e(r['action'])}</b><br><span class='small mut'>{e(r['reason'])}</span></td>"
+            f"<td>{e(r['window'])}{'<br><span class=small>' + e(r['deadline']) + '</span>' if r.get('deadline') else ''}</td>"
+            f"<td class='num'>{e(_num(r['value_per_hour']))}</td>"
+            f"<td class='small'>scr <code>{e(rf.get('scorecard_id'))}</code><br>inputs <code>{e((rf.get('inputs_hash') or '')[:19])}</code><br>"
+            f"rec <code>{e(rf.get('recommendation_id'))}</code><br>prov {prov(rf.get('provenance_id'))}</td></tr>")
+    excl = d["excluded"] + view["precheck_excluded"]
+    ex = "".join(f"<li><code>{e(x['item_id'])}</code>: {e(x['reason'])}</li>" for x in excl)
+    counts = " · ".join(f"{e(_BUCKET_LABEL[k])}: {e(v)}" for k, v in d["counts"].items())
+    p = d["provenance"]
+    return (f"<div class='card'><h2>Morning digest</h2><p class='small mut'>As of {e(d['as_of'])} · horizon {e(d['horizon_hours'])} h · "
+            f"ranking by lane C (<code>{e(p['tool_name'])} {e(p['tool_version'])}</code>, basis {e(p['basis'])}) · "
+            f"digest hash <code>{e(d['digest_hash'][:23])}</code></p><p>{counts}</p></div>"
+            f"<div class='card'><table><tr><th>#</th><th>Bucket</th><th>Opportunity</th><th>Next step · why</th><th>Deadline</th>"
+            f"<th>Value $/h</th><th>Refs</th></tr>{''.join(rows) or '<tr><td colspan=7 class=mut>Nothing open to rank.</td></tr>'}</table></div>"
+            f"<div class='card'><h2>Not ranked ({len(excl)})</h2>{'<ul>' + ex + '</ul>' if ex else '<p class=mut>None.</p>'}</div>")
+
+
+def render_provenance(p, pid):
+    if p is None:
+        return f"<div class='card'><h2>Provenance</h2><p class='bad'>{e(pid)} not found in mbos.provenance.</p></div>"
+    s = views._prov_summary(p)
+    return (f"<div class='card'><h2>Provenance <code>{e(pid)}</code></h2><p><b>{e(s['kind'])}</b> · basis {e(s['basis'])} · "
+            f"{e(s['who'])}</p><p>{e(s['what'])}</p><pre>{e(json.dumps(p, indent=2, sort_keys=True))}</pre></div>")
+
+
 class App:
     """Turns form posts into `spine.decide` calls through the backend. No side effects of its own."""
 
@@ -429,6 +472,13 @@ def make_handler(app):
             err = (qs.get("err") or [None])[0]
             if u.path == "/":
                 return self._send(200, page("Operator queue", render_queue(views.queue(app.store, now)), app.state(), flash or err, bool(err)))
+            if u.path == "/digest":
+                from . import digest as digest_view
+
+                return self._send(200, page("Morning digest", render_digest(digest_view.build(app.store, iso(now))), app.state()))
+            if u.path.startswith("/provenance/"):
+                pid = u.path.split("/")[2]
+                return self._send(200, page("Provenance", render_provenance(app.store.provenance(pid), pid), app.state()))
             if u.path == "/holds":
                 return self._send(200, page("HOLD backlog", render_holds(app.store.held(), now), app.state()))
             if u.path == "/sources":

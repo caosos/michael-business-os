@@ -46,6 +46,9 @@ class SpineBackend:
     def action_requests(self, limit: int = 200) -> list[dict]:
         return self._bodies("SELECT body FROM mbos.action_requests ORDER BY body->>'created_at' DESC LIMIT :n", n=limit)
 
+    def items_in_states(self, states) -> list[dict]:
+        return self._bodies("SELECT body FROM mbos.items WHERE state = ANY(:s)", s=list(states))
+
     def action_requests_for_item(self, item_id: str) -> list[dict]:
         return self._bodies("SELECT body FROM mbos.action_requests WHERE item_id = :i ORDER BY body->>'created_at'", i=item_id)
 

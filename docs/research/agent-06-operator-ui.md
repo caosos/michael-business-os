@@ -93,3 +93,6 @@ FACT (`bed7609`): the workflow acts on `hold_until`, `escalate_after`, `renotify
 | `/sources` | Lane B source health (`MBOS_SOURCE_HEALTH_FILE`), worst first, freeze reasons, staleness | none (clearing a freeze stays lane B's human CLI) |
 
 Every page keeps the loopback, Host-check, CSRF and CSP guards (R14: human channel only).
+
+## 7. Morning digest (task F-10)
+`/digest` renders lane C's C-08 ranking (`mbos_economics.digest.build_digest`) **unchanged**: rank, bucket, escaped title linked to the open card, lane C's action and reason, deadline window, value $/h, and refs with `/provenance/<id>` links. Items without a lane-C engine scorecard are listed under "Not ranked" with the reason, never dropped silently. The page is read-only.
