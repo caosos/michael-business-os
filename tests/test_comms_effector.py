@@ -1,8 +1,8 @@
-"""F-06: CommsDryRunEffector on the REAL spine (DBOS + pgserver Postgres; mbos @ bf215b2).
+"""F-06: CommsDryRunEffector on the REAL spine (DBOS + pgserver Postgres; mbos @ aa88e7a, which includes A-13).
 
-F-05's planner and F-06's effector are swapped into the running Components. `A13_shim` reproduces the
-one seam Agent 01 is asked to add in A-13 (merge `payload_extension(pa)` into the payload before
-hashing), so the approved payload carries the draft. Everything is dry-run.
+F-05's planner and F-06's effector are swapped into the running Components. The spine itself merges the
+planner's `comms` block into the payload before hashing, maps `status=blocked` to ACTION_FAILED, and
+puts the comms checks into `details`. Everything is dry-run.
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ import sqlalchemy as sa
 import comms_spec as cs
 from comms_spec.effector import CommsDryRunEffector
 from comms_spec.planner import CommsActionPlanner, payload_extension
-from mbos import spine, workflows
+from mbos import workflows
 from mbos.audit import dry_run_exceptions
 from mbos.hashing import sha256_of
 from mbos.interfaces import Effector
@@ -51,30 +51,13 @@ def pending(engine, item_id):
 
 @pytest.fixture()
 def comms_lane(rt, monkeypatch):
-    """F-05 planner + F-06 effector behind the reference gateway, plus the A-13 payload shim."""
+    """F-05 planner + F-06 effector behind the reference gateway (A-13 wiring is in the spine)."""
     comps = components()
     eff = CommsDryRunEffector(clock=lambda: NOON_AR, fallback=DryRunEffector())
     monkeypatch.setattr(comps, "planner", CommsActionPlanner())
     monkeypatch.setattr(comps, "gateway", ReferenceGateway(eff, comps.kill_switch))
 
-    orig_propose, orig_insert = spine._propose, spine._insert_and_classify
-
-    def A13_shim(conn, item, pa, prov, comps_):
-        ext = payload_extension(pa)
-
-        def insert(conn2, areq, prov2, comps2, actor):
-            if ext:
-                areq["payload"].update(ext)
-                areq["payload_hash"] = sha256_of(areq["payload"])
-            return orig_insert(conn2, areq, prov2, comps2, actor)
-
-        spine._insert_and_classify = insert
-        try:
-            return orig_propose(conn, item, pa, prov, comps_)
-        finally:
-            spine._insert_and_classify = orig_insert
-
-    monkeypatch.setattr(spine, "_propose", A13_shim)
+    # A-13 (spine @ aa88e7a) merges the planner's `comms` block into the payload before hashing; no shim.
     return eff
 
 
@@ -195,3 +178,27 @@ def test_non_comms_capability_uses_fallback(rt, discover, comms_lane):
     assert r["provider"] == "dry-run:schedule.appointment.create" and r["dry_run"] is True
     with pytest.raises(ValueError):
         CommsDryRunEffector().execute(rt.engine, dict(areq, idempotency_key="t-nofallback"))
+
+
+def test_a13_blocked_send_is_action_failed_and_checks_are_in_details(rt, discover, rt_late_effector):
+    """A-13 (aa88e7a): a blocked attempt becomes ACTION_FAILED, the item becomes FAILED, and the comms
+    checks are merged into details (kind=comms, dry_run=true)."""
+    item_id = discover("FIX-TRAILER-1")["FIX-TRAILER-1"]
+    wait_state(rt.engine, item_id, "AWAITING_APPROVAL")
+    areq = pending(rt.engine, item_id)
+    workflows.record_decision(areq["action_request_id"], "YES", areq["payload_hash"], auth_context=STEP_UP)
+    wait_state(rt.engine, item_id, "FAILED")
+    (failed,) = [r[0] for r in q(rt.engine, "SELECT body FROM mbos.receipts WHERE action_request_id = :a "
+                                             "AND type = 'ACTION_FAILED'", a=areq["action_request_id"])]
+    d = failed["details"]
+    assert d["kind"] == "comms" and d["dry_run"] is True and any("send window" in x for x in d["blocked_reasons"])
+    g = cs.audit([failed])
+    assert g["sends"] == 0
+
+
+@pytest.fixture()
+def rt_late_effector(rt, monkeypatch):
+    comps = components()
+    monkeypatch.setattr(comps, "planner", CommsActionPlanner())
+    monkeypatch.setattr(comps, "gateway", ReferenceGateway(
+        CommsDryRunEffector(clock=lambda: LATE_AR, fallback=DryRunEffector()), comps.kill_switch))

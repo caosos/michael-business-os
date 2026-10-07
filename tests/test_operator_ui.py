@@ -296,7 +296,7 @@ def test_f02_ledger_independent_rh1_check_agrees_with_spine(rt, discover, ui):
     ok, msg = ui.store.verify_chain_independent()
     assert ok, msg
     _, _, body = req(ui, "GET", "/ledger")
-    assert "independent MBOS-RH-1 check (vendored reference): " in body and "FAILED" not in body
+    assert re.search(r"independent MBOS-RH-1 check \(vendored reference\): \d+ receipts verified", body)
 
 
 def test_yes_on_a_held_request_re_presents_then_executes(rt, discover, ui):
