@@ -39,9 +39,20 @@ PROPOSED_ACTION_CORE = {"capability", "summary", "reversibility", "estimated_cos
 PAYLOAD_RESERVED = {"item_id", "recommendation_id", "target", "dry_run"}
 
 
-def requires_step_up(areq: dict) -> bool:
-    """ADR-05-001 / Agent 04 approvals trigger: irreversible or money-like YES needs step-up."""
-    return areq["reversibility"] == "irreversible" or areq["category"] in STEP_UP_CATEGORIES
+def requires_step_up(areq: dict, components: Any = None) -> bool:
+    """Michael's YES needs an explicit step-up when the request is irreversible or money-like (ADR-05-001) OR when the
+    policy decision point says so (07 F-40: lane E stamps step_up=required on publishing, offers, counters, buys).
+    Refusing here, at decision time, means the approval is never silently lost at the gateway."""
+    if areq["reversibility"] == "irreversible" or areq["category"] in STEP_UP_CATEGORIES:
+        return True
+    pdp = getattr(components, "pdp", None)
+    if pdp is None:
+        return False
+    try:
+        d = pdp.decide(areq)
+    except Exception:  # noqa: BLE001 — if the PDP cannot answer, ask for the stronger confirmation
+        return True
+    return bool(getattr(d, "step_up", False)) or "step_up=required" in str(getattr(d, "reason", ""))
 
 
 
@@ -59,6 +70,14 @@ def ingest(conn: sa.Connection, raw: dict[str, Any], norm: Optional[dict[str, An
     """
     from mbos.interfaces import NormalizedListing
 
+    from mbos.card import scrub
+
+    raw, c1 = scrub(raw)  # NUL / control characters cannot live in jsonb or canonical JSON (07 F-36)
+    norm, c2 = scrub(norm) if norm is not None else (None, False)
+    if (c1 or c2) and norm is not None:
+        flags = list((norm.get("normalized") or {}).get("flags") or [])
+        if "needs_review" not in flags:
+            norm = {**norm, "normalized": {**norm["normalized"], "flags": flags + ["needs_review"]}}
     if norm is None:
         return {"item_id": None, "created": False, "merged": False, "dropped": True}
     ident = {"source": raw["source"]}
@@ -114,6 +133,19 @@ def ingest(conn: sa.Connection, raw: dict[str, Any], norm: Optional[dict[str, An
 
 
 # ---------------------------------------------------------------- SCORE + RECOMMEND
+
+def ingest_safe(conn: sa.Connection, raw: dict, norm: Optional[dict], adapter_name: str, adapter_version: str,
+                components: Any) -> dict:
+    """One poisonous listing must never abort the batch (07 F-36): scrub first, then ingest inside a savepoint; on any
+    error the listing is dropped with a readable reason (the real exception may not even be picklable)."""
+    try:
+        with conn.begin_nested():
+            return ingest(conn, raw, norm, adapter_name, adapter_version, components)
+    except Exception as e:  # noqa: BLE001
+        return {"item_id": None, "created": False, "merged": False, "dropped": True,
+                "error": f"{type(e).__name__}: {str(e)[:200]}", "listing": (raw or {}).get("source_listing_id")}
+
+
 def read_item(conn: sa.Connection, item_id: str) -> dict[str, Any]:
     return load_item(conn, item_id)
 
@@ -329,7 +361,7 @@ def decide(conn: sa.Connection, action_request_id: str, decision: str, payload_h
         raise DecisionRefused("payload_hash_seen does not match the request — re-read the request before deciding")
     if parse(areq["expires_at"]) <= utcnow():
         raise DecisionRefused(f"{action_request_id} expired at {areq['expires_at']}")
-    if decision == "YES" and requires_step_up(areq) and not (auth_context or {}).get("step_up"):
+    if decision == "YES" and requires_step_up(areq, components) and not (auth_context or {}).get("step_up"):
         raise DecisionRefused("YES on an irreversible / money / purchase / offer / commitment request needs step-up "
                               "(auth_context.step_up=true; CLI: --step-up)")
 

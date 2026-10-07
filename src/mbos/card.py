@@ -40,11 +40,12 @@ STAGES = ("DISCOVERED", "RESEARCHED", "SCORED", "CONTACT APPROVED", "CONTACT SEN
 
 # Elementary mechanical advice Michael does not want (he is an experienced mechanic). Allowed only when the lane marks the
 # entry model-specific with a source.
+_VERB = r"(?:check|test|inspect|verify|confirm|see if|make sure|try|look (?:for|at)|pull|do an?|run an?)"
+_BASIC = (r"compression|spark|fuel|oil|starts?|starting|runs?|running|turns? over|battery|belts?|hoses?|leaks?|filters?|"
+          r"plugs?|carb(?:urator)?|idle|choke|coolant|tires?|brakes?")
 ELEMENTARY_ADVICE = [re.compile(p, re.I) for p in (
-    r"\bcheck (the )?(engine )?compression\b", r"\bcheck (for )?(a )?spark\b", r"\binspect (the )?fuel\b",
-    r"\bcheck (the )?(engine )?oil\b", r"\bcheck (the )?(air )?filter\b", r"\bcheck (the )?(spark ?plug|plugs)\b",
-    r"\binspect (the )?(belts?|hoses?)\b", r"\bverify (it )?(starts|runs)\b(?! after)", r"\bmake sure (it|the engine) (starts|runs)\b",
-    r"\bcheck (the )?battery\b", r"\blook for (any )?(leaks|damage)\b",
+    rf"\b{_VERB}\b[^.;\n]{{0,30}}\b(?:{_BASIC})\b(?!\s+(?:pump|housing|module|coupler|gasket|regulator|solenoid)\b)",
+    r"\bcompression (?:test|check)\b", r"\bsee if it (?:starts|runs)\b", r"\bpull the (?:spark )?plug\b",
 )]
 
 
@@ -67,6 +68,94 @@ def load_profile(path: Optional[str | Path] = None) -> dict[str, Any]:
     return json.loads(Path(path).read_text())
 
 
+# ---------------------------------------------------------------- lane-data validation (F-26/F-27/F-28)
+_PROV_RX = re.compile(r"^prov_[0-9A-HJKMNP-TV-Z]{26}$")
+_BASES = ("FACT", "INFERENCE", "RECOMMENDATION")
+ENUMS = {"stale_risk": ("low", "medium", "high"), "demand_now": ("strong", "normal", "weak"),
+         "transport_mode": ("fits_truck", "requires_trailer"), "difficulty": ("easy", "moderate", "hard")}
+# datum keys whose value MUST be a finite number (money / counts / hours / miles), and the non-negative subset
+NUMERIC = {"asking_price", "opening_offer", "max_acquisition", "transport_cost", "resale_conservative", "resale_likely",
+           "resale_optimistic", "days_to_cash", "age_days", "trip_miles_round_trip", "trip_hours", "fuel_cost", "distance_miles",
+           "rating", "prior_listings"}
+NONNEG = NUMERIC - {"rating"}
+JUNK_SOURCES = {"", "n/a", "na", "none", "null", "unknown", "source", "x", "xx", "tbd", "todo", "n.a.", "-", "?", "trust me", "internet", "google", "web"}
+
+
+def _finite(x: Any) -> bool:
+    return isinstance(x, (int, float)) and not isinstance(x, bool) and x == x and x not in (float("inf"), float("-inf"))
+
+
+def _blk(src: Any, key: str) -> dict:
+    """A lane block, or {} if absent / not an object. A bad block must never take the card down."""
+    v = src.get(key) if isinstance(src, dict) else None
+    return v if isinstance(v, dict) else {}
+
+
+def _strs(v: Any, limit: int = 20, size: int = 300) -> list[str]:
+    return [x[:size] for x in v if isinstance(x, str) and x.strip()][:limit] if isinstance(v, list) else []
+
+
+def _valid_datum(key: str, d: Any) -> bool:
+    if not isinstance(d, dict) or d.get("basis") not in _BASES or "value" not in d:
+        return False
+    v = d["value"]
+    if v is None or v == "UNKNOWN" or isinstance(v, str) and not v.strip():
+        return False
+    if not isinstance(v, (int, float, str, bool, list, dict)):
+        return False
+    if isinstance(v, float) and not _finite(v):
+        return False
+    if key in NUMERIC and not _finite(v):
+        return False
+    if key in NONNEG and v < 0:
+        return False
+    if key in ENUMS and v not in ENUMS[key]:
+        return False
+    for k in ("unit", "note"):
+        if k in d and not isinstance(d[k], str):
+            return False
+    lo, hi = d.get("low"), d.get("high")
+    for b in (lo, hi):
+        if b is not None and not _finite(b):
+            return False
+    if lo is not None and hi is not None and lo > hi:
+        return False
+    if "provenance_id" in d and not (isinstance(d["provenance_id"], str) and _PROV_RX.match(d["provenance_id"])):
+        return False
+    return True
+
+
+# ---------------------------------------------------------------- text safety (F-35/F-36)
+_CTRL = re.compile(r"[\x00-\x1f\x7f-\x9f\u200b-\u200f\u202a-\u202e\u2060-\u2069\ufeff]")
+
+
+def clean_text(s: Any, limit: int = 300) -> str:
+    """Untrusted listing/lane text → one safe line: no control characters, ANSI escapes, bidi overrides, zero-width
+    characters or newlines (so it cannot forge card sections or drive the terminal)."""
+    t = re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)?|\x1b.", " ", str(s))
+    t = _CTRL.sub(" ", t)
+    return re.sub(r" {2,}", " ", t).strip()[:limit]
+
+
+def scrub(obj: Any) -> tuple[Any, bool]:
+    """Remove NUL / control characters from every string in a JSON-like structure. Returns (clean, changed)."""
+    changed = False
+
+    def go(o: Any) -> Any:
+        nonlocal changed
+        if isinstance(o, str):
+            t = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", o)
+            changed |= t != o
+            return t
+        if isinstance(o, dict):
+            return {go(k) if isinstance(k, str) else k: go(v) for k, v in o.items()}
+        if isinstance(o, list):
+            return [go(v) for v in o]
+        return o
+
+    return go(obj), changed
+
+
 # ---------------------------------------------------------------- datum helpers
 def _unknown(reason: str = "") -> dict[str, Any]:
     return {"value": "UNKNOWN", **({"reason": reason} if reason else {})}
@@ -82,12 +171,13 @@ def _datum(value: Any, basis: str, *, unit: Optional[str] = None, low: Optional[
 
 
 def _from_block(block: Optional[dict], key: str, reason: str) -> dict[str, Any]:
-    """Take a lane-supplied datum verbatim if it is well-formed, else UNKNOWN. Never invent."""
-    v = (block or {}).get(key)
-    if isinstance(v, dict) and (v.get("value") == "UNKNOWN" or ("value" in v and v.get("basis") in ("FACT", "INFERENCE", "RECOMMENDATION"))):
-        if v.get("value") == "UNKNOWN" and v.get("basis"):
-            return _unknown(v.get("reason") or reason)
-        return {k: val for k, val in v.items() if k in ("value", "unit", "low", "high", "basis", "provenance_id", "note", "reason")}
+    """Take a lane-supplied datum verbatim ONLY if it validates (shape AND value), else UNKNOWN. Never invent."""
+    v = block.get(key) if isinstance(block, dict) else None
+    if _valid_datum(key, v):
+        out = {k: val for k, val in v.items() if k in ("value", "unit", "low", "high", "basis", "provenance_id", "note")}
+        if isinstance(out["value"], str):
+            out["value"] = clean_text(out["value"], 500)
+        return out
     return _unknown(reason)
 
 
@@ -96,9 +186,31 @@ def _is_unknown(d: dict) -> bool:
 
 
 # ---------------------------------------------------------------- status timeline
+CLOSING_OUTCOMES = {"flip_sold", "flip_unsold_salvaged", "flip_repair_failed", "flip_passed_missed", "service_lost",
+                    "service_completed", "service_paid", "wasted_trip"}
+
+
+def _decision_of(r: dict) -> Optional[str]:
+    """Michael's decision from an APPROVAL_DECIDED receipt: after_state when present, else the intent text both
+    backends write ("Michael decided YES")."""
+    d = (r.get("after_state") or {}).get("decision")
+    if d in ("YES", "NO", "MODIFY", "HOLD"):
+        return d
+    m = re.search(r"decided (YES|NO|MODIFY|HOLD)\b", r.get("intent", ""))
+    return m.group(1) if m else None
+
+
+def _outcome_kind(r: dict) -> Optional[str]:
+    k = (r.get("after_state") or {}).get("kind")
+    if isinstance(k, str):
+        return k
+    m = re.search(r"outcome ([a-z_]+)", r.get("intent", ""))
+    return m.group(1) if m else None
+
+
 def _stage_events(item: dict, receipts: list[dict], areqs: list[dict]) -> list[tuple[str, dict]]:
     """(stage, receipt) for every stage that has an event source. Stages without one (NEGOTIATING, QUALIFIED until
-    inbound comms exist) are never invented."""
+    inbound comms exist) are never invented. An outcome closes the card only if its kind is a closing one."""
     comms_areq = {a["action_request_id"] for a in areqs if str(a.get("capability", "")).startswith("comms.")}
     ev: list[tuple[str, dict]] = []
     for r in sorted(receipts, key=lambda x: x["seq"]):
@@ -109,27 +221,32 @@ def _stage_events(item: dict, receipts: list[dict], areqs: list[dict]) -> list[t
                 ev.append(("DISCOVERED", r))
             elif st == "RESEARCHING":
                 ev.append(("RESEARCHED", r))
-            elif st == "AWAITING_APPROVAL" or st == "HELD":
+            elif st in ("AWAITING_APPROVAL", "HELD"):
                 ev.append(("AWAITING MICHAEL", r))
             elif st in ("ARCHIVED", "REJECTED"):
                 ev.append(("PASSED", r))
         elif t == "SCORE_RECORDED":
             ev.append(("SCORED", r))
-        elif t == "APPROVAL_DECIDED" and r.get("action_request_id") in comms_areq and after.get("decision") == "YES":
+        elif t == "APPROVAL_DECIDED" and r.get("action_request_id") in comms_areq and _decision_of(r) == "YES":
             ev.append(("CONTACT APPROVED", r))
         elif t == "ACTION_EXECUTED" and r.get("action_request_id") in comms_areq:
             ev.append(("CONTACT SENT", r))
         elif t == "OUTCOME_RECORDED":
-            kind = (after or {}).get("kind", "")
-            ev.append(("SELLER RESPONDED" if kind == "message_replied" else "CLOSED", r)
-                      if kind not in ("message_no_reply", "wasted_trip") else ("CONTACT SENT", r))
+            kind = _outcome_kind(r)
+            if kind == "message_replied":
+                ev.append(("SELLER RESPONDED", r))
+            elif kind in CLOSING_OUTCOMES:
+                ev.append(("CLOSED", r))  # every other kind (acquired, won, attribution, no-reply) is trail-only
     return ev
 
 
 def _timeline(events: list[tuple[str, dict]]) -> list[dict]:
     seen: dict[str, dict] = {}
     for stage, r in events:
-        seen[stage] = {"stage": stage, "at": r["ts"], "receipt_id": r["receipt_id"]}  # latest receipt per stage
+        e = {"stage": stage, "at": r["ts"], "receipt_id": r["receipt_id"]}  # latest receipt per stage
+        if stage == "CONTACT SENT" and (r.get("effector_response") or {}).get("dry_run"):
+            e["dry_run"] = True
+        seen[stage] = e
     return sorted(seen.values(), key=lambda e: (e["at"], STAGES.index(e["stage"])))
 
 
@@ -168,8 +285,8 @@ def _next_action(item: dict, areqs: list[dict]) -> str:
 def _trail(item: dict, receipts: list[dict], areqs: list[dict]) -> list[dict]:
     rows = []
     for r in sorted(receipts, key=lambda x: x["seq"]):
-        rows.append({"at": r["ts"], "agent": r["actor"]["id"], "what": _WHAT.get(r["type"], r["type"].lower().replace("_", " ")),
-                     "why": r["intent"], "inputs": list(r["provenance_ids"]), "result": _result(r),
+        rows.append({"at": r["ts"], "agent": clean_text(r["actor"]["id"], 80), "what": _WHAT.get(r["type"], r["type"].lower().replace("_", " ")),
+                     "why": clean_text(r["intent"], 400), "inputs": list(r["provenance_ids"]), "result": _result(r),
                      "receipt_id": r["receipt_id"], "next_action": "(done)"})
     if rows:
         rows[-1]["next_action"] = _next_action(item, areqs)
@@ -177,7 +294,13 @@ def _trail(item: dict, receipts: list[dict], areqs: list[dict]) -> list[dict]:
 
 
 # ---------------------------------------------------------------- recommendation
-def _recommend(item: dict, areqs: list[dict], stage: str) -> dict[str, Any]:
+def _sorted_areqs(areqs: list[dict]) -> list[dict]:
+    """Deterministic order (F-33): by (created_at, id), independent of the order the caller passes."""
+    return sorted((a for a in areqs if isinstance(a, dict)), key=lambda a: (str(a.get("created_at", "")), str(a.get("action_request_id", ""))))
+
+
+def _recommend(item: dict, areqs: list[dict], stage: str, dry_run_sent: bool = False) -> dict[str, Any]:
+    areqs = _sorted_areqs(areqs)
     rec = item.get("recommendation") or {}
     verdict = rec.get("verdict")
     card = (item.get("scores") or {}).get("scorecard") or {}
@@ -186,7 +309,7 @@ def _recommend(item: dict, areqs: list[dict], stage: str) -> dict[str, Any]:
     cap = (last or {}).get("capability", "")
     action, waiting, why = "HOLD", False, "Not enough information yet to recommend an action; more research is running."
     if item["state"] in ("ARCHIVED", "REJECTED") or verdict == "PASS":
-        action, why = "PASS", "; ".join((rec.get("rationale") or ["The numbers do not support pursuing this."])[:2])
+        action, why = "PASS", "; ".join(clean_text(x) for x in (rec.get("rationale") or ["The numbers do not support pursuing this."])[:2])
         if card.get("pass_on_priors"):
             action, why = "HOLD", "A pass here would rest on assumptions, not evidence; gather the missing evidence before discarding it."
     elif (not live) and any(a.get("status") == "rejected" and not a.get("derived_from") for a in areqs) and item["state"] == "RECOMMENDED":
@@ -204,10 +327,12 @@ def _recommend(item: dict, areqs: list[dict], stage: str) -> dict[str, Any]:
             action, why = "OFFER", "The numbers clear Michael's thresholds; an offer within the maximum is drafted for approval."
         else:
             action, why = "CONTACT", "Contact first to confirm availability and condition before spending more research time."
-        if (last or {}).get("status") in ("executed",) or stage in ("CONTACT SENT", "SELLER RESPONDED"):
+        if dry_run_sent:  # F-31: a DRY-RUN is not a send, so there is no seller to wait for
+            why += " The contact was only simulated (dry-run); nothing has been sent, and a live send needs Michael's separate go-ahead."
+        elif (last or {}).get("status") == "executed" or stage in ("CONTACT SENT", "SELLER RESPONDED"):
             waiting, why = True, why + " Already contacted; waiting on the seller's reply."
     elif verdict == "MAYBE":
-        action, why = "HOLD", "Promising but undecided: " + (rec.get("cheapest_decisive_evidence") or "needs more evidence") + "."
+        action, why = "HOLD", "Promising but undecided: " + clean_text(rec.get("cheapest_decisive_evidence") or "needs more evidence") + "."
     out: dict[str, Any] = {"action": action, "waiting": waiting, "why": why}
     if last:
         out["action_request_id"] = last["action_request_id"]
@@ -327,90 +452,139 @@ def _fact_reasons(item: dict, econ: dict, la: dict, lg: dict) -> list[str]:
 
 
 # ---------------------------------------------------------------- build
+def _lane_why(enr: dict) -> tuple[list[str], list[str]]:
+    """Lane-supplied reasons are shown ONLY with provenance (F-29): (lines, provenance ids)."""
+    prov = (enr.get("_prov") or {}).get("why") if isinstance(enr.get("_prov"), dict) else None
+    block = enr.get("why")
+    lines = block.get("why") if isinstance(block, dict) else block
+    if not (isinstance(prov, str) and _PROV_RX.match(prov)):
+        return [], []
+    return _strs(lines, limit=10, size=300), [prov]
+
+
+def _risks(va_in: dict) -> list[dict]:
+    out = []
+    for r in va_in.get("model_specific_risks") if isinstance(va_in.get("model_specific_risks"), list) else []:
+        if not isinstance(r, dict) or r.get("basis") not in _BASES or not isinstance(r.get("risk"), str) or not r["risk"].strip():
+            continue
+        e: dict[str, Any] = {"risk": clean_text(r["risk"], 400), "basis": r["basis"]}
+        if r.get("kind") in ("failure_mode", "expensive_part", "parts_availability", "known_weakness", "resale_demand", "economic"):
+            e["kind"] = r["kind"]
+        if isinstance(r.get("source"), str):
+            e["source"] = clean_text(r["source"], 300)
+        if isinstance(r.get("provenance_id"), str) and _PROV_RX.match(r["provenance_id"]):
+            e["provenance_id"] = r["provenance_id"]
+        out.append(e)
+    return out
+
+
 def build_card(item: dict, receipts: list[dict], areqs: list[dict], enrichment: Optional[dict] = None, *,
                profile: Optional[dict] = None, now: Optional[datetime] = None) -> dict[str, Any]:
-    """The card for one Item. Pure: same inputs → same card_hash (generated_at excluded from the hash)."""
+    """The card for one Item. Pure and total: same inputs → same card_hash (generated_at excluded), and malformed lane
+    data degrades to UNKNOWN instead of failing (F-26)."""
     profile = profile or load_profile()
-    enr = enrichment or {}
+    enr = enrichment if isinstance(enrichment, dict) else {}
     n = item["normalized"]
     src0 = item["sources"][0]
-    la_in, sel_in = enr.get("listing_activity") or {}, enr.get("seller") or {}
+    # only this Item's own receipts (F-38): its item_id, or one of its action requests
+    areqs = _sorted_areqs(areqs)
+    mine = {a.get("action_request_id") for a in areqs}
+    receipts = [r for r in receipts if r.get("item_id") == item["item_id"] or r.get("action_request_id") in mine]
+    la_in, sel_in = _blk(enr, "listing_activity"), _blk(enr, "seller")
     loc = n.get("location") or {}
-    loc_s = ", ".join(x for x in (loc.get("city"), loc.get("state")) if x)
+    loc_s = ", ".join(clean_text(x, 80) for x in (loc.get("city"), loc.get("state")) if isinstance(x, str) and x)
     miles = loc.get("road_miles_one_way")
-    stale = _from_block(la_in, "stale_risk", "listing dates not available from this source")
     la = {
         "posted_at": _from_block(la_in, "posted_at", "this source does not expose the original post date"),
         "updated_at": _from_block(la_in, "updated_at", "this source does not expose the last edit date"),
         "age_days": _from_block(la_in, "age_days", "needs the original post date"),
-        "recent_activity": [str(x) for x in (la_in.get("recent_activity") or [])],
+        "recent_activity": [clean_text(x) for x in _strs(la_in.get("recent_activity"))],
         "suspected_relist": _from_block(la_in, "suspected_relist", "relist detection needs prior sightings or dates"),
-        "stale_risk": stale,
+        "stale_risk": _from_block(la_in, "stale_risk", "listing dates not available from this source"),
     }
     seller = {k: _from_block(sel_in, k, "this source does not expose it") for k in
               ("account_age", "rating", "prior_listings", "complaint_signals", "response_history", "inconsistencies")}
     seller["confidence"] = sel_in.get("confidence") if sel_in.get("confidence") in ("high", "medium", "low") else "UNKNOWN"
     econ = _economics(item, enr)
-    va_in = enr.get("value_add") or {}
-    plan = _from_block(va_in, "plan", "no value-add plan from lane C yet")
-    risks = []
-    for r in va_in.get("model_specific_risks") or []:
-        if r.get("basis") in ("FACT", "INFERENCE", "RECOMMENDATION") and r.get("risk"):
-            risks.append({k: v for k, v in r.items() if k in ("risk", "kind", "basis", "source", "provenance_id")})
-    se_in = enr.get("seasonality") or {}
+    va_in = _blk(enr, "value_add")
+    se_in = _blk(enr, "seasonality")
     seasonality = {"demand_now": _from_block(se_in, "demand_now", "no seasonality evidence for this category"),
                    "hold_likely": _from_block(se_in, "hold_likely", "depends on seasonality"),
                    "note": _from_block(se_in, "note", "no seasonality note")}
-    if isinstance(se_in.get("peak_months"), list):
-        seasonality["peak_months"] = [int(m) for m in se_in["peak_months"]]
+    pm = se_in.get("peak_months")
+    if isinstance(pm, list) and pm and all(isinstance(m, int) and not isinstance(m, bool) and 1 <= m <= 12 for m in pm):
+        seasonality["peak_months"] = sorted(set(pm))
+    lg = _logistics(item, enr, profile)
     events = _stage_events(item, receipts, areqs)
     timeline = _timeline(events)
-    state_stage = {"AWAITING_APPROVAL": "AWAITING MICHAEL", "HELD": "AWAITING MICHAEL", "ARCHIVED": "PASSED", "REJECTED": "PASSED",
-                   "OUTCOME_RECORDED": "CLOSED", "LEARNED": "CLOSED"}.get(item["state"])
-    current = state_stage or (timeline[-1]["stage"] if timeline else "DISCOVERED")
+    state_stage = {"AWAITING_APPROVAL": "AWAITING MICHAEL", "HELD": "AWAITING MICHAEL", "ARCHIVED": "PASSED", "REJECTED": "PASSED"}.get(item["state"])
+    closed = any(t["stage"] == "CLOSED" for t in timeline)
+    current = state_stage or ("CLOSED" if closed else (timeline[-1]["stage"] if timeline else "DISCOVERED"))
+    dry = any(t["stage"] == "CONTACT SENT" and t.get("dry_run") for t in timeline)
     rec = item.get("recommendation") or {}
-    why = [str(x) for x in (enr.get("why") or [])]  # lane C's plain-English reasons come first
-    why += _fact_reasons(item, econ, la, _logistics(item, enr, profile))
-    why += [x for x in (rec.get("rationale") or []) if not _machine_noise(x)]
+    lane_lines, why_prov = _lane_why(enr)
+    why = list(lane_lines) + _fact_reasons(item, econ, la, lg)
+    why += [clean_text(x) for x in (rec.get("rationale") or []) if isinstance(x, str) and not _machine_noise(x)]
     if not why:
         why = ["Discovered; no reasoning yet (still being researched)."]
+    flags = [clean_text(f, 60) for f in (n.get("flags") or []) if isinstance(f, str)]
     card: dict[str, Any] = {
         "card_version": CARD_VERSION, "item_id": item["item_id"], "generated_at": iso(now or utcnow()),
-        "item": {"title": n["title"], "make_model": _from_block(enr, "make_model", "not extracted from the listing"),
-                 "category": item["category"], "type": item["type"],
-                 "asking_price": econ["asking_price"],
+        "item": {"title": clean_text(n["title"], 300), "make_model": _from_block(enr, "make_model", "not extracted from the listing"),
+                 "category": item["category"], "type": item["type"], "asking_price": econ["asking_price"],
                  "location": _datum(loc_s, "FACT", provenance_id=src0.get("provenance_id")) if loc_s else _unknown("listing has no location"),
-                 "distance_miles": (_datum(float(miles), "FACT", unit="miles") if miles is not None else _from_block(enr, "distance_miles", "no distance computed")),
-                 "source": src0["source"], "url": src0["url"]},
+                 "distance_miles": (_datum(float(miles), "FACT", unit="miles") if _finite(miles) and miles >= 0 else _from_block(enr, "distance_miles", "no distance computed")),
+                 "source": clean_text(src0["source"], 80), "url": clean_text(src0["url"], 500)},
         "listing_activity": la, "seller": seller, "why": why, "economics": econ,
-        "value_add_plan": {"plan": plan, "model_specific_risks": risks},
-        "seasonality": seasonality, "logistics": _logistics(item, enr, profile),
-        "recommendation": _recommend(item, areqs, current),
+        "value_add_plan": {"plan": _from_block(va_in, "plan", "no value-add plan from lane C yet"), "model_specific_risks": _risks(va_in)},
+        "seasonality": seasonality, "logistics": lg,
+        "recommendation": _recommend(item, areqs, current, dry_run_sent=dry),
         "status": {"current": current, "timeline": timeline},
         "activity_trail": _trail(item, receipts, areqs), "unknowns": [],
     }
+    if flags:
+        card["item"]["flags"] = flags
+    if why_prov:
+        card["why_provenance"] = why_prov
     unk: list[str] = []
-    _collect_unknowns("", {k: v for k, v in card.items() if k not in ("activity_trail", "status", "why", "unknowns")}, unk)
+    _collect_unknowns("", {k: v for k, v in card.items() if k not in ("activity_trail", "status", "why", "unknowns", "why_provenance")}, unk)
     card["unknowns"] = sorted(set(unk))
-    body = {k: v for k, v in card.items() if k not in ("generated_at", "card_hash")}
-    card["card_hash"] = sha256_of(body)
+    card["card_hash"] = sha256_of({k: v for k, v in card.items() if k not in ("generated_at", "card_hash")})
     return card
 
 
+def _source_ok(src: Any) -> bool:
+    """A source must name something checkable: at least a few letters, not a placeholder, and either a URL, a date, or
+    two+ words (e.g. "CPSC recall 24-123, 2026-03-01")."""
+    if not isinstance(src, str):
+        return False
+    t = src.strip()
+    if t.lower() in JUNK_SOURCES or len(t) < 8 or not re.search(r"[A-Za-z]{3}", t):
+        return False
+    return bool(re.search(r"https?://|\d{4}-\d{2}-\d{2}|\d{3,}", t) or len(t.split()) >= 3)
+
+
 def validate_card(card: dict) -> list[str]:
-    """Schema errors (card.schema.json) + honesty/lint rules. Empty list = a card Michael can be shown."""
+    """Schema errors (card.schema.json) + honesty/lint/integrity rules. Empty list = a card Michael can be shown."""
     errs = schemas.errors("card", card)
+    if errs:
+        return errs
     plan = card["value_add_plan"]["plan"]
     texts = [str(plan.get("value", ""))] if not _is_unknown(plan) else []
-    texts += [r["risk"] for r in card["value_add_plan"]["model_specific_risks"] if not r.get("source")]
+    texts += [r["risk"] for r in card["value_add_plan"]["model_specific_risks"]]
     for t in texts:
         for hit in elementary_advice(t):
-            errs.append(f"value_add_plan: elementary advice not allowed without a model-specific source: {hit!r}")
+            errs.append(f"value_add_plan: elementary advice not allowed: {hit!r}")
     for r in card["value_add_plan"]["model_specific_risks"]:
-        if r["basis"] != "FACT" and not r.get("source") and not r.get("provenance_id"):
-            errs.append(f"model-specific risk without source/provenance: {r['risk']!r}")
+        if r["basis"] != "FACT" and not r.get("provenance_id") and not _source_ok(r.get("source")):
+            errs.append(f"model-specific risk without a checkable source/provenance: {r['risk']!r}")
+        elif r["basis"] == "FACT" and not (r.get("provenance_id") or _source_ok(r.get("source"))):
+            errs.append(f"FACT risk without a checkable source/provenance: {r['risk']!r}")
     if card["recommendation"]["waiting"] and card["recommendation"]["action"] in ("PASS",):
         errs.append("a PASS cannot be 'waiting'")
+    claimed = card.get("card_hash")
+    if claimed is not None and claimed != sha256_of({k: v for k, v in card.items() if k not in ("generated_at", "card_hash")}):
+        errs.append("card_hash does not match the card's content (tampered or stale)")
     return errs
 
 
@@ -455,6 +629,7 @@ def enrichment_from_item(conn: Any, item: dict) -> dict[str, Any]:
             out[f[len("card."):]] = _json.loads(bytes(row[0]))
         except (ValueError, TypeError):
             continue
+        out.setdefault("_prov", {})[f[len("card."):]] = r.get("provenance_id")
     return out
 
 
@@ -475,24 +650,28 @@ def render_text(card: dict) -> str:
     i, la, e, lg, r = card["item"], card["listing_activity"], card["economics"], card["logistics"], card["recommendation"]
     sep = "-" * 50
     ago = lambda d: _fmt(d) if d.get("value") == "UNKNOWN" else str(d["value"])[:10]
-    lines = [sep, i["title"].upper(), f"{_fmt(i['location'])} — {_fmt(i['asking_price'], True)}   [{i['source']}]", ""]
+    T = clean_text
+    lines = [sep, T(i["title"]).upper(), f"{_fmt(i['location'])} — {_fmt(i['asking_price'], True)}   [{T(i['source'], 80)}]"]
+    if i.get("flags"):
+        lines.append("FLAGS: " + ", ".join(T(f, 60) for f in i["flags"]) + "  (listing text needs Michael's eyes)")
+    lines.append("")
     lines += [f"POSTED: {ago(la['posted_at'])}   UPDATED: {ago(la['updated_at'])}   AGE: {_fmt(la['age_days'])} days"
               if la["age_days"]["value"] != "UNKNOWN" else f"POSTED: {ago(la['posted_at'])}   UPDATED: {ago(la['updated_at'])}",
               f"STALE RISK: {_fmt(la['stale_risk'])}" + (f"   SUSPECTED RELIST: {_fmt(la['suspected_relist'])}" if la['suspected_relist']['value'] != 'UNKNOWN' else "")]
-    lines += [f"  · {a}" for a in la["recent_activity"]]
+    lines += [f"  · {T(a)}" for a in la["recent_activity"]]
     s = card["seller"]
     lines += ["", "SELLER: " + "; ".join(f"{k.replace('_', ' ')} {_fmt(s[k])}" for k in ("account_age", "rating", "prior_listings", "response_history")
                                          if s[k]["value"] != "UNKNOWN") + (f" (confidence {s['confidence']})" if s["confidence"] != "UNKNOWN" else "")
               if any(s[k]["value"] != "UNKNOWN" for k in ("account_age", "rating", "prior_listings", "response_history"))
               else "SELLER: UNKNOWN (this source does not expose seller history)"]
-    lines += ["", "WHY IT'S INTERESTING:"] + [f"  {w}" for w in card["why"]]
+    lines += ["", "WHY IT'S INTERESTING:"] + [f"  {T(w)}" for w in card["why"]]
     lines += ["", "ESTIMATED NUMBERS:",
               f"  Ask: {_fmt(e['asking_price'], True)}   Opening offer: {_fmt(e['recommended_opening_offer'], True)}   Max acquisition: {_fmt(e['maximum_acquisition_price'], True)}",
               f"  Repair/material: {_fmt(e['expected_repair_material_cost'], True)}   Transport: {_fmt(e['transport_cost'], True)}   Cash at risk: {_fmt(e['total_cash_at_risk'], True)}",
               f"  Resale: conservative {_fmt(e['resale_conservative'], True)} / likely {_fmt(e['resale_likely'], True)} / optimistic {_fmt(e['resale_optimistic'], True)}",
               f"  Gross {_fmt(e['expected_gross_profit'], True)}   Net {_fmt(e['expected_net_profit'], True)}   Per hour {_fmt(e['expected_profit_per_hour'], True)}   Days to cash {_fmt(e['expected_days_to_cash'])}"]
     plan = card["value_add_plan"]
-    lines += ["", f"VALUE-ADD PLAN: {_fmt(plan['plan'])}"] + [f"  ! {x['risk']} [{x['basis']}{', ' + x['source'] if x.get('source') else ''}]" for x in plan["model_specific_risks"]]
+    lines += ["", f"VALUE-ADD PLAN: {_fmt(plan['plan'])}"] + [f"  ! {T(x['risk'])} [{x['basis']}{', ' + T(x['source'], 120) if x.get('source') else ''}]" for x in plan["model_specific_risks"]]
     se = card["seasonality"]
     lines += ["", f"SEASONALITY: {_fmt(se['note'])}" + (f" (demand now: {_fmt(se['demand_now'])}; hold likely: {_fmt(se['hold_likely'])})" if se['demand_now']['value'] != 'UNKNOWN' else "")]
     mode = lg["transport_mode"]["value"]
@@ -500,10 +679,10 @@ def render_text(card: dict) -> str:
               + f" Trip: {_fmt(lg['trip_miles_round_trip'])} mi round trip, {_fmt(lg['trip_hours'])} h, fuel {_fmt(lg['fuel_cost'], True)}, difficulty {_fmt(lg['difficulty'])}."]
     st = card["status"]
     lines += ["", "SYSTEM STATUS: " + " → ".join(t["stage"].title() for t in st["timeline"]) + f"   [now: {st['current']}]"]
-    lines += [f"  {t['at'][:16]}  {t['stage']}" for t in st["timeline"]]
-    lines += ["", f"RECOMMENDATION: {r['action']}" + (" / WAIT FOR RESPONSE" if r["waiting"] else "") + (" (needs step-up approval)" if r.get("requires_step_up") else ""), f"  {r['why']}"]
+    lines += [f"  {t['at'][:16]}  {t['stage']}" + ("  (DRY-RUN: simulated, nothing sent)" if t.get("dry_run") else "") for t in st["timeline"]]
+    lines += ["", f"RECOMMENDATION: {r['action']}" + (" / WAIT FOR RESPONSE" if r["waiting"] else "") + (" (needs step-up approval)" if r.get("requires_step_up") else ""), f"  {T(r['why'], 600)}"]
     if card["unknowns"]:
         lines += ["", f"UNKNOWN ({len(card['unknowns'])}): " + ", ".join(card["unknowns"])]
-    lines += ["", "ACTIVITY (every action has a receipt):"] + [f"  {t['at'][:16]}  {t['agent']}: {t['what']} — {t['why'][:90]}  → {t['result']}  [{t['receipt_id']}]" for t in card["activity_trail"]]
-    lines += [f"  NEXT: {card['activity_trail'][-1]['next_action']}"] if card["activity_trail"] else []
+    lines += ["", "ACTIVITY (every action has a receipt):"] + [f"  {t['at'][:16]}  {T(t['agent'], 60)}: {T(t['what'], 80)} — {T(t['why'], 90)}  → {T(t['result'], 80)}  [{t['receipt_id']}]" for t in card["activity_trail"]]
+    lines += [f"  NEXT: {T(card['activity_trail'][-1]['next_action'], 200)}"] if card["activity_trail"] else []
     return "\n".join(lines + [sep])

@@ -165,3 +165,39 @@ def test_policy_denied_proposal_never_awaits_approval(ledger_db):
     assert all(p["item"]["item_id"] != item_id for p in pend), "nothing for Michael to approve"
     card = cardmod.build_card(item, receipts, areqs)
     assert card["recommendation"]["action"] == "HOLD" and "policy blocked" in card["recommendation"]["why"]
+
+
+def test_yes_without_step_up_is_refused_when_the_pdp_requires_it(ledger_db):
+    """07 F-40: the PDP says step_up=required (even for a reversible request); decide() must refuse the YES up front."""
+    from mbos.interfaces import PolicyDecision
+
+    class StepUpPDP:
+        def decide(self, areq):
+            return PolicyDecision(decision="require_approval", tier=0, category="publishing",
+                                  reason="GATED:publishing:tier0; step_up=required", policy_version="t")
+
+    ids = seed_flow(ledger_db, act=False)
+    with ledger_db.begin() as c:
+        h = c.execute(sa.text("SELECT payload_hash FROM mbos.action_requests")).scalar_one()
+        areq = c.execute(sa.text("SELECT body FROM mbos.action_requests")).scalar_one()
+    reversible = {**areq, "reversibility": "reversible", "category": "publishing"}
+    assert spine.requires_step_up(reversible, Components(pdp=StepUpPDP()).with_defaults()) is True
+    assert spine.requires_step_up(reversible, Components().with_defaults()) is False  # the stand-in PDP does not demand it
+
+
+def test_a_poisonous_listing_does_not_abort_the_batch(ledger_db):
+    comps = Components().with_defaults()
+    good, bad = _raw("FIX-TRAILER-1"), _raw("FIX-LEAD-SMARTHOME-1")
+    n = FixtureNormalizer()
+    bad_norm = asdict(n.normalize(bad))
+    bad_norm["normalized"]["title"] = "Saw\x00 with a NUL"
+    bad_norm["normalized"]["description"] = "line\x07bell \x1b[2J"
+    with ledger_db.begin() as c:
+        r_bad = spine.ingest_safe(c, asdict(bad), bad_norm, "fx", "0", comps)
+        r_good = spine.ingest_safe(c, asdict(good), asdict(n.normalize(good)), "fx", "0", comps)
+        item = spine.read_item(c, r_bad["item_id"])
+    assert r_bad["created"] and r_good["created"], (r_bad, r_good)           # NUL scrubbed, batch continues
+    assert "\x00" not in item["normalized"]["title"] and "needs_review" in item["normalized"]["flags"]
+    with ledger_db.begin() as c:                                                # an unrecoverable listing is dropped, not fatal
+        r = spine.ingest_safe(c, {"payload": {}, "source": None}, {"dedup_key": "k", "type": "flip", "category": "trailer"}, "fx", "0", comps)
+    assert r["dropped"] is True and "error" in r

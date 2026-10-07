@@ -78,7 +78,7 @@ def discover(adapter_name: str, since: Optional[str] = None) -> list[dict[str, A
     results = []
     for raw in fetch_step(adapter_name, since):
         norm = normalize_step(raw)
-        r = tx(S().ingest, raw, norm, adapter_name, version, components())
+        r = tx(S().ingest_safe, raw, norm, adapter_name, version, components())
         if r["created"]:
             with SetWorkflowID(item_workflow_id(r["item_id"])):
                 DBOS.start_workflow(item_lifecycle, r["item_id"])

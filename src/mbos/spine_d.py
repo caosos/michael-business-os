@@ -86,6 +86,14 @@ def ingest(conn: sa.Connection, raw: dict, norm: Optional[dict], adapter_name: s
            components: Any) -> dict:
     from mbos.interfaces import NormalizedListing
 
+    from mbos.card import scrub
+
+    raw, c1 = scrub(raw)  # NUL / control characters cannot live in jsonb or canonical JSON (07 F-36)
+    norm, c2 = scrub(norm) if norm is not None else (None, False)
+    if (c1 or c2) and norm is not None:
+        flags = list((norm.get("normalized") or {}).get("flags") or [])
+        if "needs_review" not in flags:
+            norm = {**norm, "normalized": {**norm["normalized"], "flags": flags + ["needs_review"]}}
     if norm is None:
         return {"item_id": None, "created": False, "merged": False, "dropped": True}
     ident = {"source": raw["source"]}
@@ -128,6 +136,19 @@ def ingest(conn: sa.Connection, raw: dict, norm: Optional[dict], adapter_name: s
     if norm.get("economics"):
         _patch(conn, item_id, {"economics": norm["economics"]}, "source-supplied economics", [norm_prov], actor)
     return {"item_id": item_id, "created": True, "merged": False, "dropped": False}
+
+
+
+def ingest_safe(conn: sa.Connection, raw: dict, norm: Optional[dict], adapter_name: str, adapter_version: str,
+                components: Any) -> dict:
+    """One poisonous listing must never abort the batch (07 F-36): scrub first, then ingest inside a savepoint; on any
+    error the listing is dropped with a readable reason (the real exception may not even be picklable)."""
+    try:
+        with conn.begin_nested():
+            return ingest(conn, raw, norm, adapter_name, adapter_version, components)
+    except Exception as e:  # noqa: BLE001
+        return {"item_id": None, "created": False, "merged": False, "dropped": True,
+                "error": f"{type(e).__name__}: {str(e)[:200]}", "listing": (raw or {}).get("source_listing_id")}
 
 
 def read_item(conn: sa.Connection, item_id: str) -> dict:
@@ -256,7 +277,7 @@ def decide(conn: sa.Connection, action_request_id: str, decision: str, payload_h
         raise DecisionRefused("payload_hash_seen does not match the request — re-read the request before deciding")
     if parse(areq["expires_at"]) <= utcnow():
         raise DecisionRefused(f"{action_request_id} expired at {areq['expires_at']}")
-    if decision == "YES" and requires_step_up(areq) and not (auth_context or {}).get("step_up"):
+    if decision == "YES" and requires_step_up(areq, components) and not (auth_context or {}).get("step_up"):
         raise DecisionRefused("YES on an irreversible / money / purchase / offer / commitment request needs step-up "
                               "(auth_context.step_up=true; CLI: --step-up)")
     approval_id = new_id("appr")

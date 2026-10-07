@@ -163,6 +163,22 @@ None new. MICHAEL_DECISIONS #1–#5 are unchanged; none blocks the dry-run MVP.
   - 07 re-runs as G-06 after E-13.
 - Tests: 183 passed.
 
+## 22:30 checkpoint (card hardening from 07's adversarial acceptance)
+- 07's G-05 found 87 failures in `mbos.card`, all mapped to findings. Fixed F-26..F-38 in one pass:
+  - validated lane data (shape AND value) with UNKNOWN on any failure, so malformed enrichment never crashes the card
+  - control, ANSI and bidi text is cleaned, and NUL is scrubbed at ingest with one bad listing dropped by a savepoint, not the batch
+  - a dry-run send is labelled and does not "wait for the seller"
+  - outcomes close a card only if their kind closes it
+  - stage mapping falls back to intent text
+  - deterministic request order and filtered receipts
+  - `card_hash` is verified
+  - broader mechanic-advice lint and a checkable-source rule
+  - lane reasons are shown only with provenance
+  - listing flags are visible
+- F-39 kept (Michael's own vocabulary has HOLD). R24: `decide()` consults the PDP's step-up requirement (F-40).
+- Open, with owners: E-15 (05: other guard refusals settle failed; narrow agent-01 grants), G-07 (07 re-run), F-14 (06 operator-note form), B-18 (02 flip years flag).
+- Tests: 215 passed.
+
 ## Next action (superseded by READY_QUEUE.md)
 1. On 04's `0005`: port `ledger.py`/`spine.py` onto `mbos_state.StateStore` (R1/R2), with A1–A10 passing unchanged.
 2. Wire 05's ActionGateway, PanicState and PDP adapters (R4–R7), with A5/A9 passing on the real gateway.

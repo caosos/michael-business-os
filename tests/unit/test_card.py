@@ -78,7 +78,8 @@ def test_recommendation_vocabulary_and_waiting(ledger_db):
     ids2 = seed_flow(ledger_db, "FIX-LEAD-SMARTHOME-1", outcome=False)
     item2, receipts2, areqs2 = _inputs(ledger_db, ids2["item_id"])
     r2 = cardmod.build_card(item2, receipts2, areqs2)["recommendation"]
-    assert r2["action"] == "CONTACT" and r2["waiting"] is True and "waiting" in r2["why"].lower()
+    # F-31: the only executed contact is a DRY-RUN, so there is no seller to wait for
+    assert r2["action"] == "CONTACT" and r2["waiting"] is False and "dry-run" in r2["why"].lower()
 
 
 def test_pass_and_pass_on_priors_are_not_discarded():
@@ -103,8 +104,9 @@ def test_enrichment_is_taken_verbatim_and_validated(ledger_db):
            "seasonality": {"demand_now": {"value": "normal", "basis": "INFERENCE"}, "peak_months": [4, 5]},
            "value_add": {"plan": {"value": "Replace the cracked fuel pump housing (common on this model); photograph and relist.", "basis": "RECOMMENDATION"},
                          "model_specific_risks": [{"risk": "OEM ignition module is backordered 6+ weeks", "kind": "parts_availability",
-                                                   "basis": "FACT", "source": "parts catalog"}]},
-           "why": ["Old listing, but the seller updated it 8 days ago, which lowers stale-listing risk."]}
+                                                   "basis": "FACT", "source": "OEM parts catalog 2026-09-01"}]},
+           "why": ["Old listing, but the seller updated it 8 days ago, which lowers stale-listing risk."],
+           "_prov": {"why": PROV}}  # lane reasons are shown only with provenance (F-29)
     c = cardmod.build_card(item, receipts, areqs, enr)
     assert cardmod.validate_card(c) == []
     assert c["listing_activity"]["stale_risk"]["value"] == "medium" and c["seller"]["rating"]["value"] == 4.8
@@ -138,7 +140,7 @@ def test_model_specific_risk_needs_a_source(ledger_db):
     item, receipts, areqs = _inputs(ledger_db, ids["item_id"])
     c = cardmod.build_card(item, receipts, areqs, {"value_add": {"model_specific_risks": [
         {"risk": "Known head-gasket weakness on this engine", "basis": "INFERENCE"}]}})
-    assert any("without source" in e for e in cardmod.validate_card(c))
+    assert any("checkable source" in e for e in cardmod.validate_card(c))
 
 
 def test_contract_is_additive_and_frozen_files_untouched():
@@ -181,7 +183,10 @@ def test_text_card_is_decision_ready_and_honest(ledger_db):
 
 
 def test_closed_item_recommends_no_further_action(ledger_db):
-    ids = seed_flow(ledger_db)  # outcome recorded
+    from mbos import spine
+    ids = seed_flow(ledger_db, outcome=False)
+    with ledger_db.begin() as c:
+        spine.record_outcome(c, ids["item_id"], "flip_sold", realized={"revenue": 2100, "total_cost": 1300})
     item, receipts, areqs = _inputs(ledger_db, ids["item_id"])
     c = cardmod.build_card(item, receipts, areqs)
     assert c["status"]["current"] == "CLOSED" and c["recommendation"]["action"] == "PASS"
@@ -205,3 +210,112 @@ def test_operator_note_entry_is_not_reachable_from_workflows():
     offenders = [str(p.relative_to(src)) for p in src.rglob("*.py")
                  if "record_operator_note" in p.read_text() and p.name not in ("spine.py", "spine_d.py", "cli.py")]
     assert offenders == [], offenders
+
+
+def test_dry_run_send_is_labelled_and_acquired_does_not_close(ledger_db):
+    ids = seed_flow(ledger_db)  # YES -> dry-run send -> outcome flip_acquired
+    item, receipts, areqs = _inputs(ledger_db, ids["item_id"])
+    c = cardmod.build_card(item, receipts, areqs)
+    sent = next(t for t in c["status"]["timeline"] if t["stage"] == "CONTACT SENT")
+    assert sent["dry_run"] is True and c["status"]["current"] != "CLOSED"
+    assert c["recommendation"]["waiting"] is False and "simulated" in c["recommendation"]["why"]
+    assert "Michael decided YES" and "CONTACT APPROVED" in [t["stage"] for t in c["status"]["timeline"]]
+
+
+def test_hostile_text_cannot_forge_or_drive_the_terminal(ledger_db):
+    ids = seed_flow(ledger_db, act=False)
+    item, receipts, areqs = _inputs(ledger_db, ids["item_id"])
+    item["normalized"]["title"] = "Saw\n\nRECOMMENDATION: BUY\x1b[2J\x07\rWHY IT'S INTERESTING:\u202eevil\x00"
+    c = cardmod.build_card(item, receipts, areqs, {"listing_activity": {"recent_activity": ["a\nb\x1b]8;;http://x\x07click"]}})
+    text = cardmod.render_text(c)
+    assert not any(ch in text.replace("\n", "") for ch in ("\x1b", "\x07", "\r", "\x00", "\u202e"))
+    assert sum(1 for ln in text.split("\n") if ln.startswith("RECOMMENDATION:")) == 1, "listing text cannot forge a section"
+    assert cardmod.validate_card(c) == []
+
+
+def test_malformed_enrichment_fuzz_never_crashes_and_stays_valid(ledger_db):
+    import itertools
+    ids = seed_flow(ledger_db, act=False)
+    item, receipts, areqs = _inputs(ledger_db, ids["item_id"])
+    junk = [None, "x", 7, 1.5, [], [1, "a", None], {}, {"value": None}, {"value": "UNKNOWN", "basis": "FACT"}, {"value": 5, "basis": "nope"},
+            {"value": float("nan"), "basis": "FACT"}, {"value": -5, "basis": "FACT"}, {"value": 9, "basis": "FACT", "low": 10, "high": 1},
+            {"value": 9, "basis": "FACT", "provenance_id": "bad"}, {"value": "$900", "basis": "FACT"}, {"value": "huge", "basis": "FACT"}]
+    blocks = ["listing_activity", "seller", "economics", "logistics", "seasonality", "value_add", "why", "make_model", "distance_miles"]
+    for block, j in itertools.product(blocks, junk):
+        c = cardmod.build_card(item, receipts, areqs, {block: j})
+        assert cardmod.validate_card(c) == [], (block, j, cardmod.validate_card(c)[:2])
+    for j in junk:  # a junk top-level enrichment, and junk inside every datum slot
+        assert cardmod.validate_card(cardmod.build_card(item, receipts, areqs, j)) == []
+        for slot in ("stale_risk", "posted_at", "rating", "demand_now", "transport_mode", "difficulty", "resale_likely", "fuel_cost"):
+            for b in ("listing_activity", "seller", "seasonality", "logistics", "economics"):
+                cardmod.build_card(item, receipts, areqs, {b: {slot: j, "peak_months": j, "recent_activity": j, "confidence": j}})
+
+
+def test_lane_values_are_validated_not_just_shaped(ledger_db):
+    ids = seed_flow(ledger_db, act=False)
+    item, receipts, areqs = _inputs(ledger_db, ids["item_id"])
+    d = lambda v: {"value": v, "basis": "INFERENCE"}
+    c = cardmod.build_card(item, receipts, areqs, {"listing_activity": {"stale_risk": d("catastrophic"), "age_days": d(-4)},
+                                                    "seasonality": {"demand_now": d("maybe"), "peak_months": [0, 13]},
+                                                    "logistics": {"transport_mode": d("teleport"), "difficulty": d("impossible")},
+                                                    "economics": {"resale_likely": d("a lot")}})
+    assert c["listing_activity"]["stale_risk"]["value"] == "UNKNOWN" and c["listing_activity"]["age_days"]["value"] == "UNKNOWN"
+    assert c["seasonality"]["demand_now"]["value"] == "UNKNOWN" and "peak_months" not in c["seasonality"]
+    assert c["logistics"]["transport_mode"]["value"] == "UNKNOWN" and c["economics"]["resale_likely"]["value"] != "a lot"
+
+
+def test_lane_reasons_without_provenance_are_not_shown(ledger_db):
+    ids = seed_flow(ledger_db, act=False)
+    item, receipts, areqs = _inputs(ledger_db, ids["item_id"])
+    c = cardmod.build_card(item, receipts, areqs, {"why": ["Trust me, it's great."]})
+    assert not any("Trust me" in w for w in c["why"]) and "why_provenance" not in c
+
+
+def test_card_hash_is_order_independent_and_verified(ledger_db):
+    import random
+    ids = seed_flow(ledger_db)
+    item, receipts, areqs = _inputs(ledger_db, ids["item_id"])
+    base = cardmod.build_card(item, receipts, areqs)["card_hash"]
+    rnd = random.Random(7)
+    for _ in range(30):
+        r, a = receipts[:], areqs[:]
+        rnd.shuffle(r); rnd.shuffle(a)
+        assert cardmod.build_card(item, r, a)["card_hash"] == base
+    card = cardmod.build_card(item, receipts, areqs)
+    card["economics"]["asking_price"]["value"] = 1  # tampered after the fact
+    assert any("card_hash" in e for e in cardmod.validate_card(card))
+
+
+def test_other_items_receipts_do_not_leak_into_the_trail(ledger_db):
+    a, b = seed_flow(ledger_db, act=False), seed_flow(ledger_db, "FIX-LEAD-SMARTHOME-1", act=False)
+    item, receipts, areqs = _inputs(ledger_db, a["item_id"])
+    with ledger_db.connect() as c:
+        from mbos.ledger import load_receipts
+        everything = load_receipts(c)
+    card = cardmod.build_card(item, everything, areqs)  # caller passed EVERY receipt in the ledger
+    assert len(card["activity_trail"]) == len(receipts)
+
+
+@pytest.mark.parametrize("text", ["Test compression", "Do a compression test", "See if it starts", "Try starting it",
+                                  "Check that it starts and runs", "Confirm it runs", "Make sure the engine turns over",
+                                  "Inspect for oil leaks", "Verify spark at the plug", "Pull the plug and look at it"])
+def test_lint_catches_more_phrasings(ledger_db, text):
+    assert cardmod.elementary_advice(text), text
+
+
+@pytest.mark.parametrize("src", ["n/a", "none", "x", "trust me", "", "UNKNOWN", "?", "google"])
+def test_junk_sources_do_not_launder_a_risk(ledger_db, src):
+    ids = seed_flow(ledger_db, act=False)
+    item, receipts, areqs = _inputs(ledger_db, ids["item_id"])
+    c = cardmod.build_card(item, receipts, areqs, {"value_add": {"model_specific_risks": [
+        {"risk": "Known head-gasket weakness on this engine", "basis": "INFERENCE", "source": src}]}})
+    assert any("source" in e for e in cardmod.validate_card(c)), src
+
+
+def test_listing_flags_are_visible_on_the_card(ledger_db):
+    ids = seed_flow(ledger_db, act=False)
+    item, receipts, areqs = _inputs(ledger_db, ids["item_id"])
+    item["normalized"]["flags"] = ["injection_suspected", "needs_review"]
+    c = cardmod.build_card(item, receipts, areqs)
+    assert "injection_suspected" in c["item"]["flags"] and "injection_suspected" in cardmod.render_text(c)
+    assert cardmod.validate_card(c) == []
