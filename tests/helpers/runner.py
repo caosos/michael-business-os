@@ -118,6 +118,10 @@ def lane_d_e2e(fixture: str, gateway_mode: str = "reference") -> None:
         from mbos.adapters.governance import lane_e_components
 
         comps, gov = lane_e_components(s.database_url, os.environ["MBOS_POLICY_PATH"])
+    if os.environ.get("MBOS_SCORER") == "engine":  # lane C's real engine (release gate AT-1)
+        from mbos.adapters.economics import EconomicsEngineScorer
+
+        comps.scorer = EconomicsEngineScorer()
     init_runtime(s, comps)
     from mbos import workflows
 
@@ -134,12 +138,15 @@ def lane_d_e2e(fixture: str, gateway_mode: str = "reference") -> None:
     for cat, i in by_cat.items():
         final[cat] = wait_state(engine, i, {"AWAITING_APPROVAL", "RESEARCHING", "ARCHIVED"}, timeout=60)
     trailer, smart = by_cat["trailer"], by_cat["smart_home_install"]
-    a = pending_request(engine, trailer)
-    workflows.record_decision(a["action_request_id"], "YES", a["payload_hash"], auth_context=STEP_UP)
-    b = pending_request(engine, smart)
-    workflows.record_decision(b["action_request_id"], "NO", b["payload_hash"], reason="lane D e2e: not this week")
-    final["trailer_after"] = wait_state(engine, trailer, {"ACTED", "FAILED"}, timeout=60)
-    final["smart_after"] = wait_state(engine, smart, "ARCHIVED", timeout=60)
+    awaiting = [i for i in (trailer, smart) if final[[k for k, v in by_cat.items() if v == i][0]] == "AWAITING_APPROVAL"]
+    if trailer in awaiting:
+        a = pending_request(engine, trailer)
+        workflows.record_decision(a["action_request_id"], "YES", a["payload_hash"], auth_context=STEP_UP)
+        final["trailer_after"] = wait_state(engine, trailer, {"ACTED", "FAILED"}, timeout=60)
+    if smart in awaiting:
+        b = pending_request(engine, smart)
+        workflows.record_decision(b["action_request_id"], "NO", b["payload_hash"], reason="lane D e2e: not this week")
+        final["smart_after"] = wait_state(engine, smart, "ARCHIVED", timeout=60)
     L = Pg04Ledger()
     with engine.connect() as c:
         chain = L.verify_chain(c)
@@ -149,11 +156,22 @@ def lane_d_e2e(fixture: str, gateway_mode: str = "reference") -> None:
         docs = [r[0] for r in c.execute(sa.text("SELECT doc FROM mbos.v_item_documents"))]
         areqs = [r[0] for r in c.execute(sa.text("SELECT doc FROM mbos.v_action_request_documents"))]
     ref_ok, ref_msg = reference().verify_chain(exported)
+    at1 = None
+    if os.environ.get("MBOS_SCORER") == "engine":  # 03's AT-1 replay audit over this lane-D export (strict)
+        from mbos_economics.replay_audit import audit, load_scored_items
+
+        raw = engine.raw_connection()
+        try:
+            items_, receipts_ = load_scored_items(raw.driver_connection)
+        finally:
+            raw.close()
+        rep = audit(items_, receipts=receipts_, strict=True)
+        at1 = {k: rep.get(k) for k in ("ok", "drift_count", "weak_receipt_count")} | {"items": len(items_)}
     errors = [e for d in docs for e in schemas.errors("item", d)] + [e for d in areqs for e in schemas.errors("action-request", d)] \
         + [e for r in exported for e in schemas.errors("receipt", r)]
     with engine.connect() as c:
         by_type = dict(c.execute(sa.text("SELECT type, count(*) FROM mbos.receipts GROUP BY type")).all())
-    say("RESULT", json.dumps({"receipt_types": by_type, "gateway_mode": gateway_mode, "final": final, "chain": chain, "reference_chain": [ref_ok, ref_msg],
+    say("RESULT", json.dumps({"at1": at1, "receipt_types": by_type, "gateway_mode": gateway_mode, "final": final, "chain": chain, "reference_chain": [ref_ok, ref_msg],
                               "effector_calls": calls, "live_effector_calls": live, "receipts": len(exported),
                               "contract_errors": errors[:5], "executed": sum(r["type"] == "ACTION_EXECUTED" for r in exported)}))
     os._exit(0)

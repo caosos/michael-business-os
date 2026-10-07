@@ -5,7 +5,7 @@
 - **Branch:** `research/agent-01-coordinator`
 - **Worktree:** `/home/michaelos/business-os-worktrees/agent-01-coordinator`
 - **State:** WORKING
-- **Claimed:** A-01 phase 2 (port the spine onto Agent 04's store; unblocked 13:00)
+- **Claimed:** A-01 phase 2, remainder (A1–A10 parity on lane D as the `mbos_dbos` login via 04's D-15 provision)
 - **Done:** A-00 (ADR-0010), A-01 phase 1 (`Pg04Ledger`), A-07 (`notify_decision`), A-09 (R12), A-11 (interop tool)
 - **Current phase:** ROUND TWO. The Lane A spine is built and tested. Integration rulings R1–R11 are issued.
 - **Role:** foreman/dispatcher. I own `docs/status/READY_QUEUE.md` and `ACTIVE_WORK.md` (`docs/COORDINATION.md`).
@@ -121,6 +121,18 @@ None new. MICHAEL_DECISIONS #1–#5 are unchanged; none blocks the dry-run MVP.
   - All commits since `c5c7c1c` use an explicit identity.
   - X-01 (the launcher fix) is an operator item.
 - Tests: 146 passed, 1 xfailed (the deliberate D-05 gate), plus the lane-D integration suite.
+
+## 17:30 checkpoint (session paused: usage limit)
+- DONE this wave:
+  - A-03: 05's real gateway behind the spine on lane D
+  - A-02: release gate **PASS 5/5** (docs/status/RELEASE_GATE.md)
+  - A-05, A-13, A-14, A-16, A-17
+  - A-01 milestones 1+2
+- Tests: 158 passed.
+- Next for 01:
+  - adopt D-15 provision in the lane-D tests and finish A1–A10 parity on lane D (A-01)
+  - A-18 (PANIC + reconcile via 05)
+  - A-04, A-15, A-12, A-10, A-06
 
 ## Next action (superseded by READY_QUEUE.md)
 1. On 04's `0005`: port `ledger.py`/`spine.py` onto `mbos_state.StateStore` (R1/R2), with A1–A10 passing unchanged.
