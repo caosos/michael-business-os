@@ -1,7 +1,7 @@
 # READY QUEUE: Michael Business OS, Round Two
 
 - **Owner:** Agent 01 (coordinator / dispatcher). **Protocol:** `docs/COORDINATION.md`. Read it before claiming.
-- **Last synced:** 2026-10-07 15:00 -0500, against branch heads 02 `41d45a6` · 03 `73a4d32` · 04 `7f0649a` · 05 `16fb86c` · 06 `c125618` · 07 `397101c`.
+- **Last synced:** 2026-10-07 15:10 -0500, against branch heads 02 `41d45a6` · 03 `73a4d32` · 04 `7f0649a` · 05 `16fb86c` · 06 `c125618` · 07 `397101c`.
 - **Read it from any worktree:** `git fetch -q origin && git show origin/research/agent-01-coordinator:docs/status/READY_QUEUE.md`
 - **Status values:** READY · CLAIMED · BLOCKED · DONE.
 - **Priority:** P0 = critical path · P1 = next-up · P2 = useful parallel work.
@@ -76,8 +76,9 @@
 | C-07 | P1 | LEARN on 04's outcome store: Brier/MAPE from `predicted_vs_actual`; a config bump is PROPOSED as a tier-0 ActionRequest (`config.scoring.bump`), never auto-applied | none | **DONE** @ `0c3cf4a` (LEARN proposes, never applies; system-scoped areq waits on ADR-0009 item 9) | 03 | Two outcomes → a bump proposal with provenance; nothing applied |
 
 | C-10 | **P1 (do first)** | Fix `comps_feed.entry()` KeyError `sold_date` on ASKING comps (02's repro; unblocks B-08) | none | **DONE** @ `e1869f2` (engine 0.6.1; verified by 01's lane-C tests) | 03 | 02's B-08 xfail test passes unchanged |
-| C-08 | P1 | Morning digest ranking: a pure function over scored Items → a ranked "what to do first" list (EV $/h, time-to-cash, expiry/auction end, confidence) with one-line reasons and provenance refs, for the Operator UI and a daily summary (72-hour plan) | none | **CLAIMED** | 03 (06 renders) | Deterministic ranking over the 13 goldens + 02 fixtures; explanation per row |
-| C-09 | P1 | Owner-decision support for MICHAEL_DECISIONS #1/#2: a sensitivity report showing how verdicts on current goldens and fixtures change across cash caps and $/h floor/targets. Report only; config untouched | none | READY | 03 | `docs/` report with a table; no config change |
+| C-11 | P1 | Estimator coverage: every flip category (trailer … other_asset) has priors and a comps query mapping, and every service category has a job/quote template. Gaps are reported as data, never guessed | none | READY | 03 | Coverage matrix test: 19/19 categories produce either an estimate or an explicit `insufficient` with gaps |
+| C-08 | P1 | Morning digest ranking: a pure function over scored Items → a ranked "what to do first" list (EV $/h, time-to-cash, expiry/auction end, confidence) with one-line reasons and provenance refs, for the Operator UI and a daily summary (72-hour plan) | none | **DONE** @ `a81a989` (`mbos_economics.digest.build_digest(items, as_of)`) | 03 (06 renders) | Deterministic ranking over the 13 goldens + 02 fixtures; explanation per row |
+| C-09 | P1 | Owner-decision support for MICHAEL_DECISIONS #1/#2: a sensitivity report showing how verdicts on current goldens and fixtures change across cash caps and $/h floor/targets. Report only; config untouched | none | **DONE** @ `286e0f3` (docs/research/agent-03-sensitivity-michael-decisions.md) | 03 | `docs/` report with a table; no config change |
 
 ### Lane E: Agent 05 (governance)
 | ID | Pri | Task | Deps | Status | Agent | Acceptance |
@@ -104,7 +105,7 @@
 | F-08 | P2 | P-06-7: follow-up and binding offer/quote templates as their own step-up ActionRequests (tier 0, irreversible) | F-07 | **DONE** @ `9d75e44` (follow-up/offer/quote as separate step-up areqs) | 06 | Templates + tests; nothing auto-sends |
 
 | F-09 | P1 | Operator UI pages from the 72-hour plan: **outcome entry** (via `spine.record_outcome`), **source health** panel (02's health data, read-only), **HOLD backlog**. Human channel only (R14) | none | READY | 06 | Pages + tests on the real spine; outcomes receipted |
-| F-10 | P2 | Morning digest page rendering 03's C-08 ranking | C-08 | BLOCKED | 06 | Ranked list with reasons and provenance links |
+| F-10 | P2 | Morning digest page rendering 03's C-08 ranking | C-08 | READY (C-08 done; `title` is listing text and must be HTML-escaped) | 06 | Ranked list with reasons and provenance links |
 | F-11 | P2 | Follow-up / offer / quote buttons on the card | A-15 | BLOCKED | 06 | Each creates its own step-up ActionRequest via the public API |
 | D-10 | P2 | Adopt 06's `mbos_comms` consent/DNC schema (`comms_spec/sql/0001_comms_ledger.sql`) into lane D migrations (R1: one DDL owner) | none | READY | 04 | 06's F-07 tests pass on lane D's schema |
 

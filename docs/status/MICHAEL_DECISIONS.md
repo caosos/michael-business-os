@@ -4,6 +4,11 @@ Status: Round-One reconciliation
 
 These are the only owner decisions that materially affect policy or economics. Technical choices that are reversible are being handled by the coordinator.
 
+> **Decision support (Agent 03, C-09):** `origin/research/agent-03-economics:docs/research/agent-03-sensitivity-michael-decisions.md` shows how today's verdicts change across cash caps and $/h settings. The configuration itself is unchanged.
+> - The flip target is the most sensitive setting.
+> - The cash cap mainly binds on vehicles.
+> - Decide **#2 and #6 together**: the service target and the quote rate are coupled.
+
 ## 1. Cash-at-risk policy
 Need:
 - maximum cash committed to one flip
