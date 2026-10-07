@@ -57,6 +57,23 @@ class RunReport:
         return asdict(self)
 
 
+def gate(adapter, profile: SearchProfile, health: HealthBook, enabled_sources: frozenset[str], panic) -> str | None:
+    """Why this source must not be fetched right now, or None. One gate for every collector (items and comps):
+    ADR-02-0202 policy → lane → local block freeze → lane E PANIC (fail closed)."""
+    try:
+        check_allowed(adapter.source, enabled_sources)
+    except SourceRefused as e:
+        return f"policy: {e}"
+    if profile.lane not in adapter.lanes:
+        return f"adapter does not serve lane {profile.lane}"
+    if health.is_frozen(adapter.source):
+        return "source FROZEN (block freeze); human must clear"
+    blocked = external_blocks(panic, adapter.source)
+    if blocked:
+        return "PANIC: " + "; ".join(blocked)
+    return None
+
+
 def build_provenance(adapter: SourceAdapter, n: Normalized, raw_ref: str,
                      fetched_at: datetime, request_uri: str) -> dict:
     prov = {
@@ -100,20 +117,9 @@ def run_discovery(jobs: list[tuple[SourceAdapter, SearchProfile]], store: ItemSt
         stats = SourceRunStats(source=adapter.source, profile_id=profile.profile_id)
         report.sources.append(stats)
 
-        try:
-            check_allowed(adapter.source, enabled_sources)
-        except SourceRefused as e:
-            stats.status, stats.skipped_reason = "skipped", f"policy: {e}"
-            continue
-        if profile.lane not in adapter.lanes:
-            stats.status, stats.skipped_reason = "skipped", f"adapter does not serve lane {profile.lane}"
-            continue
-        if health.is_frozen(adapter.source):
-            stats.status, stats.skipped_reason = "skipped", "source FROZEN (block freeze); human must clear"
-            continue
-        blocked = external_blocks(panic, adapter.source)
-        if blocked:
-            stats.status, stats.skipped_reason = "skipped", "PANIC: " + "; ".join(blocked)
+        why = gate(adapter, profile, health, enabled_sources, panic)
+        if why:
+            stats.status, stats.skipped_reason = "skipped", why
             continue
 
         try:

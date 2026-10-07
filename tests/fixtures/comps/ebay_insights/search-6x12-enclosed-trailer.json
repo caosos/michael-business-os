@@ -1,0 +1,6 @@
+{"total":4,"itemSales":[
+ {"itemId":"v1|330000000001|0","title":"6x12 Enclosed Cargo Trailer V-nose","lastSoldPrice":{"value":"1950.00","currency":"USD"},"lastSoldDate":"2026-09-25T18:00:00.000Z","totalSoldQuantity":1,"condition":"Used","conditionId":"3000","itemLocation":{"city":"Searcy","stateOrProvince":"AR","postalCode":"721**"},"itemWebUrl":"https://www.ebay.com/itm/330000000001","categories":[{"categoryName":"Trailers"}]},
+ {"itemId":"v1|330000000002|0","title":"7x14 Enclosed Trailer Tandem Axle","lastSoldPrice":{"value":"3900.00","currency":"USD"},"lastSoldDate":"2026-09-02T12:00:00.000Z","conditionId":"3000","itemWebUrl":"https://www.ebay.com/itm/330000000002"},
+ {"itemId":"v1|330000000003|0","title":"6x12 enclosed utility trailer","lastSoldPrice":{"value":"1700.00","currency":"USD"},"lastSoldDate":"2026-07-15T09:30:00.000Z","conditionId":"3000","itemWebUrl":"https://www.ebay.com/itm/330000000003"},
+ {"itemId":"v1|330000000004|0","title":"6x12 enclosed trailer","lastSoldDate":"2026-09-01T00:00:00.000Z"}
+]}

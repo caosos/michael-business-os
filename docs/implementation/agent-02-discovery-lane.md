@@ -156,3 +156,25 @@ Verification (FACT): `tests/test_b04_freeze_contract.py` has 13 tests. They vali
 Agent id is now `agent-02-opportunity`, the branch name, per R7 and 05's `policy.v1.json`. It was `agent-02-discovery`. This changes `provenance.agent_name` and `receipt_intent.actor.id`.
 
 Install 05's package for these tests: `git archive b632583 | tar -x -C <dir> && .venv/bin/pip install --no-deps <dir>`. Without it, the real-store tests skip.
+
+## 12. Sold-comps feed, lane-B side — READY_QUEUE C-04 (Agent 03 leads)
+
+Hand-off agreed with Agent 03 (messages of 2026-10-07):
+- **02 owns:** comp sources, raw retention, comp dedup, one Provenance record per comp, and the `candidate_comps()` pre-filter.
+- **03 owns:** selection policy, bundle assembly and estimation (`mbos_economics.comps_feed.build_comps_bundle` / `research_step`).
+
+| Piece | Where | Notes |
+|---|---|---|
+| `SoldComp.to_record()` | `comps.py` | `{comp_id, kind:"sold", price, currency, sold_date, source, source_comp_id, url, category, title, condition, fetched_at, raw_ref, provenance_id[, location, dom_days]}`, with `price` only. `condition: parts` is routed by 03 to `as_is_comps` |
+| `ManualCompsAdapter` (`source = "manual"`) | `comps.py` | JSON inbox written by Michael or the Operator UI. Read-only. Provenance is `actor_type: human`, `human_actor`, `basis: FACT`. Works today. A human recording a price seen on a do-not-automate site is allowed, because nothing automates that site |
+| `EbayInsightsAdapter` (`source = "ebay_marketplace_insights"`) | `adapters/ebay_insights.py` | Official but **Limited Release** (FACT, eBay docs). Runs only with `live=True` and an approved keyset with scope `buy.marketplace.insights`. Fixture-first. Provenance `actor_type: external`. The exact response shape is UNKNOWN until access is granted |
+| `collect_comps()` | `comps.py` | Uses the same gate as discovery (`pipeline.gate`: policy → lane → local freeze → lane E PANIC). Identity is `(source, source_comp_id)`, so a human correcting a date or price keeps the `comp_id` |
+| `candidate_comps(item, comps, as_of)` | `comps.py` | Deterministic pre-filter: same category, sold within (as_of − 365 d, as_of], title similarity ≥ 0.5. 03 narrows this to 90 days and checks vocabulary |
+
+Source names match Agent 03's `comps_sources` registry exactly (`manual`, `ebay_marketplace_insights`). Any other name is refused by 03's fail-closed policy. Comps are evidence and never become Items.
+
+**Acceptance (FACT):** `test_flip_with_comps_advances_to_scored_with_fact_comp_provenance` runs Agent 03's `research_step` @ `882c726`, using a pinned config copy at `tests/fixtures/econ_config_882c726`.
+- Input: the eBay-fixture 6x12 enclosed trailer, plus manual and Insights fixture comps.
+- 7 candidates. 03 rejected 2 on vocabulary (5x8 and 7x14) and selected 5.
+- Estimate status `estimated`, state moves RESEARCHING → **SCORED**, verdict **MAYBE**.
+- Every selected comp's provenance is FACT and appears in `Item.research[]`.

@@ -79,6 +79,8 @@ class EbayBrowseAdapter(SourceAdapter):
         self.token_url = token_url
         self.http = ReadOnlyTransport(transport or UrllibTransport(), frozenset({host}), frozenset({token_url}))
         self.clock = clock
+        self.scope = SCOPE
+        self.list_key = "itemSummaries"
         self._token: tuple[str, datetime] | None = None
 
     @classmethod
@@ -120,7 +122,7 @@ class EbayBrowseAdapter(SourceAdapter):
                     res.error, res.records = err, []
                     return res
                 fetched_at = self.clock()
-                for s in body.get("itemSummaries") or []:
+                for s in body.get(self.list_key) or []:
                     iid = s.get("itemId") if isinstance(s, dict) else None
                     if iid and iid in seen:
                         continue                    # same listing hit by two keywords
@@ -185,7 +187,7 @@ class EbayBrowseAdapter(SourceAdapter):
             r = self.http.request("POST", self.token_url,
                                   {"Authorization": f"Basic {basic}",
                                    "Content-Type": "application/x-www-form-urlencoded"},
-                                  urlencode({"grant_type": "client_credentials", "scope": SCOPE}).encode())
+                                  urlencode({"grant_type": "client_credentials", "scope": self.scope}).encode())
         except TransportError as e:
             return "", SourceError("network", f"token: {e}")
         res.requests_made += 1

@@ -40,8 +40,12 @@ REGISTRY: dict[str, SourcePolicy] = {p.source: p for p in [
     _P("trashnothing", Disposition.ALLOWED, 1, "low", "Trash Nothing REST API — next adapter"),
     _P("website_lead", Disposition.ALLOWED, 1, "low", "our own website form submissions"),
     _P("referral", Disposition.ALLOWED, 1, "low", "referral intake recorded by Michael"),
+    _P("ebay_marketplace_insights", Disposition.ALLOWED, 1, "low",
+       "eBay Marketplace Insights (sold comps) — Limited Release; needs eBay approval + live flag"),
     # Tier 2 — sanctioned email alerts in our own inbox
     _P("email_alert", Disposition.ALLOWED, 2, "low", "IMAP saved-search alerts — next adapter"),
+    # Tier 5 — human-entered evidence (Michael / Operator UI), with human provenance
+    _P("manual", Disposition.ALLOWED, 5, "low", "sold comps recorded by a human, with provenance"),
     # Tier 3/4 — gray zone, needs explicit per-source enablement (P2)
     _P("craigslist", Disposition.PENDING_MICHAEL, 3, "med", "Cloudflare-gated; experimental only after live test"),
     _P("govdeals", Disposition.PENDING_MICHAEL, 3, "med", "buyer access only via internal JSON"),
