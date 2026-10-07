@@ -4,13 +4,14 @@ Agent: 02
 Role: Discovery / Source Adapters (DISCOVER + NORMALIZE lane)
 Branch: research/agent-02-opportunity
 Worktree: /home/michaelos/business-os-worktrees/agent-02-opportunity
-State: WORKING
+State: WAITING
+Waiting on: Agent 01 triage of P-02-1..P-02-5 below (no READY task for 02/lane B/ANY in READY_QUEUE @ 2629917); E-02 for P-02-5
 Done: B-01 @ 7c9da45
 Done: B-02 @ cadfdae
 Done: B-03 @ 8ff5476
 Done: B-04 @ 029356c (lane-E half by Agent 05 @ d3b9948: fixture vendored, auto-apply of valid requests)
 Done: C-04 (support, source side) @ a1a7730 (lead Agent 03 C-04 @ 882c726)
-Current phase: Round Two — B-01..B-04 + C-04 (support) DONE; checking READY_QUEUE for next lane-B task
+Current phase: Round Two — B-01..B-04 + C-04 (support) DONE; WAITING for new lane-B tasks (proposals below)
 Started: 2026-10-06 (Round One) · Round Two started 2026-10-07
 Last updated: 2026-10-07
 
@@ -36,6 +37,18 @@ Heads-up from 05: E-02 moves PANIC to Postgres (04 migration 0007); `MBOS_PANIC_
 constructor changes; `blocks(...)` signature/codes unchanged. 02 adapts its CLI wiring when 05 announces it.
 
 ## Proposed tasks
+- **P-02-1 (lane B, P1): wake events for A-08.** Discovery emits `{kind: price_change | auction_ending | new_info,
+  item_id, source, evidence provenance_id}` when a re-poll UPDATES an Item (price change, status change) or an auction
+  crosses `ending_soon`. These are the lane-B producer for A-08's `_approval_gate` `wake_on`. The data already exists:
+  UPDATED events, `price_changed`, `ending_soon`.
+- **P-02-2 (lane B, P2): IMAP saved-search alert ingestor** (ADR-02-0202 tier 2). Fixture-first parser for GovDeals,
+  PublicSurplus and EstateSales.NET alert emails from our own inbox. This is the sanctioned path for no-API sources.
+- **P-02-3 (lane B, P2): SAM.gov Opportunities API v2 adapter** (official; free key). Fixture-first, live flag, for
+  `gov_contract` service leads.
+- **P-02-4 (lanes B+C, P2): `ebay_browse` asking comps.** Emit active eBay listings as `kind: asking` comps under the
+  name already in Agent 03's registry. They improve the market-depth inputs; they are never sold comps.
+- **P-02-5 (lanes B+E, after E-02): Postgres PANIC wiring.** Re-point `mbos-discover`'s `MBOS_PANIC_STATE` to 05's
+  Postgres-backed store (a DSN), with unchanged fail-closed behaviour.
 - (follow-up, 02 + 05, after E-02) re-point `mbos-discover` PANIC wiring to 05's Postgres-backed store (DSN).
 - (Michael, via Agent 01) enable eBay Marketplace Insights only after eBay grants Limited Release access; until then
   sold comps come from manual entry (source `manual`).
