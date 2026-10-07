@@ -6,7 +6,7 @@ Branch: research/agent-05-governance
 Worktree: /home/michaelos/business-os-worktrees/agent-05-governance
 State: WAITING
 Done: E-01 @ df826c3 (interop row 05 = 10/10; vectors receipt_chain verifies; 141 tests)
-Done: E-03 @ <E03_COMMIT> (L3 DBOS cancel verified on real dbos 3.2.0; deny-all egress + LiteLLM budget generators; 157 tests)
+Done: E-03 @ e12caa3 (L3 DBOS cancel verified on real dbos 3.2.0; deny-all egress + LiteLLM budget generators; 157 tests)
 Waiting on: E-02 (BLOCKED on D-01, D-02 — Agent 04 migration 0005 + ADR-0010 ledger). No other READY task is assigned to lane E.
 Blocked: E-02 on D-01, D-02 (Agent 04 migration 0005 + ADR-0010 ledger)
 Current phase: ROUND TWO — wave two (foreman loop, docs/COORDINATION.md)
