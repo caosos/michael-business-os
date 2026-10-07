@@ -4,15 +4,15 @@ Agent: 06
 Role: Communications + Operator UI / Approval UX (build lane F)
 Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
-State: WAITING
-Claimed: none
+State: WORKING
+Claimed: F-09
 Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44
 Blocked: F-04 on A-03
 Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
 Last updated: 2026-10-07
 
 ## Current objective
-WAITING. No READY task for 06 or ANY remains (checked READY_QUEUE after F-08). **F-04** is BLOCKED on **A-03**. Proposed next: P-06-8 (lane A `propose_followup` API, then a lane-F UI button).
+**F-09** (READY_QUEUE @ `c23bee8`): Operator UI pages for outcome entry (`spine.record_outcome`), a read-only source-health panel (02's data) and a HOLD backlog, on the human channel only (R14). Then F-10 (after C-08) and F-11 (after A-15). F-04 is still BLOCKED on A-03.
 
 ## Done
 - **F-08 @ `9d75e44`:** `plan_followup` / `plan_offer` / `plan_quote` each draft their own ActionRequest.
