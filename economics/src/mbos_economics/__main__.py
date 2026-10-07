@@ -3,6 +3,7 @@
     python -m mbos_economics score  ITEM.json --scored-at 2026-10-07T12:00:00Z [--config-version V]
     python -m mbos_economics replay ITEM.json        # ITEM.json must carry a `scores` block
     python -m mbos_economics estimate ITEM.json --as-of 2026-10-07T18:00:00Z [--bundle BUNDLE.json]
+    python -m mbos_economics digest ITEMS.json --as-of 2026-10-07T18:00:00Z [--text] [--limit N]
 
 ITEM.json may be a bare Item v1 or an examples/*.scored.json wrapper ({item, provenance, ...}).
 
@@ -32,6 +33,11 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--config-version")
     r = sub.add_parser("replay")
     r.add_argument("item", type=Path)
+    g = sub.add_parser("digest")
+    g.add_argument("item", type=Path, help="JSON list of scored Items")
+    g.add_argument("--as-of", required=True)
+    g.add_argument("--text", action="store_true", help="plain-text 72-hour plan instead of JSON")
+    g.add_argument("--limit", type=int)
     e = sub.add_parser("estimate")
     e.add_argument("item", type=Path)
     e.add_argument("--as-of", required=True, help="RFC 3339 timestamp; the estimator never reads the clock")
@@ -39,6 +45,11 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     item = json.loads(args.item.read_text(encoding="utf-8"))
+    if args.cmd == "digest":
+        from .digest import build_digest, render_text
+        d = build_digest(item, args.as_of, limit=args.limit)
+        print(render_text(d) if args.text else json.dumps(d, indent=2))
+        return 0
     if "item" in item and "type" not in item:   # examples/*.scored.json wrapper
         item = item["item"]
     if args.cmd == "estimate":
