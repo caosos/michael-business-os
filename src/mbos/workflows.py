@@ -23,6 +23,7 @@ from mbos.clock import parse
 from mbos.runtime import components, item_workflow_id, runtime, tx
 
 DECISION_TOPIC = "decision"
+WAKE_EVENTS = ("price_change", "auction_ending", "new_info")
 
 
 def _iso_duration(text: str) -> timedelta:
@@ -140,10 +141,18 @@ def _approval_gate(item_id: str, areq_id: str) -> dict[str, Any]:
             deadlines += wake_at + [renotify_at]
         timeout = max(0.2, min(poll, min((t - now).total_seconds() for t in deadlines)))
         msg = DBOS.recv(DECISION_TOPIC, timeout_seconds=timeout)
-        if isinstance(msg, dict) and msg.get("kind") == "ping" and hold is not None \
-                and "michael_ping" in (hold.get("wake_on") or []):
+        if not isinstance(msg, dict):
+            continue
+        if msg.get("kind") == "ping" and hold is not None and "michael_ping" in (hold.get("wake_on") or []):
             tx(spine.wake_from_hold, item_id, areq_id, "michael_ping", components())
             hold = None
+        elif msg.get("kind") == "event" and msg.get("event") in WAKE_EVENTS:
+            why = f"{msg['event']}: {str(msg.get('summary', ''))[:120]}".rstrip(": ")
+            if hold is not None and msg["event"] in (hold.get("wake_on") or []):
+                tx(spine.wake_from_hold, item_id, areq_id, why, components())
+                hold = None
+            elif hold is None:  # awaiting a decision: new facts are re-presented, never acted on
+                last_notice = parse(tx(spine.renotify, item_id, areq_id, components(), why)["now"])
 
 
 def _act(item_id: str, areq_id: str, approval: dict[str, Any]) -> dict[str, Any]:
@@ -175,6 +184,27 @@ def notify_decision(item_id: str, approval_id: str) -> None:
     (Operator UI, CLI). Works from any process: uses DBOS inside a launched runtime, else a DBOSClient.
     The approval row is the truth; this message is only a wake-up (the workflow re-polls on its own)."""
     message = {"kind": "decision", "approval_id": approval_id}
+    try:
+        DBOS.send(item_workflow_id(item_id), message, topic=DECISION_TOPIC)
+    except Exception:
+        from mbos.runtime import client
+
+        c = client()
+        try:
+            c.send(item_workflow_id(item_id), message, topic=DECISION_TOPIC)
+        finally:
+            c.destroy()
+
+
+def notify_event(item_id: str, event: str, summary: str = "", evidence_provenance_id: str | None = None) -> None:
+    """Lane B/C → item workflow: something changed about this item (A-08 / B-05).
+
+    `event` ∈ WAKE_EVENTS. The producer records the evidence's provenance FIRST (in its own transaction) and
+    passes its id. Effect: a HOLD with a matching `wake_on` is re-presented; an item awaiting a decision is
+    re-notified. Nothing is ever executed by an event."""
+    if event not in WAKE_EVENTS:
+        raise ValueError(f"event must be one of {WAKE_EVENTS}")
+    message = {"kind": "event", "event": event, "summary": summary, "evidence_provenance_id": evidence_provenance_id}
     try:
         DBOS.send(item_workflow_id(item_id), message, topic=DECISION_TOPIC)
     except Exception:

@@ -57,6 +57,16 @@ Needed eventually:
 
 These set the quotes the system drafts for service leads. The dry-run MVP uses the placeholders, and every draft is still shown to Michael before anything is sent.
 
+## 7. Reselling items given away for free (raised by Agent 02; not blocking)
+Some community gift groups, such as Trash Nothing, forbid reselling gifted items.
+
+Should the system ever propose flips of free items from these groups?
+
+Default: these items are flagged `needs_review`, and nothing is pursued without your explicit YES on each one.
+
+## 8. eBay Marketplace Insights access (optional)
+Applying to eBay's Limited Release program would give the system sold-price comparables. Applying is an external account action, so it is your call. Until then, sold comps are entered manually.
+
 ---
 
 ## Decisions already resolved technically

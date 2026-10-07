@@ -34,6 +34,8 @@ class DecisionRefused(ValueError):
 
 
 STEP_UP_CATEGORIES = {"money", "purchase", "offer", "external_commitment"}
+PROPOSED_ACTION_CORE = {"capability", "summary", "reversibility", "estimated_cost"}
+PAYLOAD_RESERVED = {"item_id", "recommendation_id", "target", "dry_run"}
 
 
 def requires_step_up(areq: dict) -> bool:
@@ -211,7 +213,11 @@ def _propose(conn: sa.Connection, item: dict, pa: dict, prov: str, components: A
     areq_id = new_id("areq")
     category, _ = classify_capability(pa["capability"])
     counterparty = item["normalized"].get("counterparty") or {}
+    # A-13: lanes 06/07 attach drafting blocks (e.g. `comms`) to a proposed action; they become part of the
+    # FROZEN payload (hashed below, shown to Michael, executed verbatim). Core keys cannot be overridden.
+    extension = {k: v for k, v in pa.items() if k not in PROPOSED_ACTION_CORE and k not in PAYLOAD_RESERVED}
     payload = {
+        **extension,
         "capability": pa["capability"],
         "summary": pa["summary"],
         "item_id": item["item_id"],
@@ -379,13 +385,14 @@ def wake_from_hold(conn: sa.Connection, item_id: str, action_request_id: str, wh
     return {"now": now_iso()}
 
 
-def renotify(conn: sa.Connection, item_id: str, action_request_id: str, components: Any) -> dict:
+def renotify(conn: sa.Connection, item_id: str, action_request_id: str, components: Any,
+             why: str = "still on HOLD after renotify_after TTL") -> dict:
     areq = conn.execute(sa.text("SELECT body FROM mbos.action_requests WHERE action_request_id = :a"),
                         {"a": action_request_id}).one().body
     prov = tool_provenance(conn, "mbos.workflows.item_lifecycle", inputs=[action_request_id])
-    _areq_receipt(conn, areq, "APPROVAL_REQUESTED", "re-notify: still on HOLD after renotify_after TTL (no execution)", [prov])
+    _areq_receipt(conn, areq, "APPROVAL_REQUESTED", f"re-notify: {why} (no execution)", [prov])
     components.notifier.notify(conn, kind="hold_renotify", item_id=item_id, action_request_id=action_request_id,
-                            summary=f"Still on HOLD: {areq['payload']['summary']}")
+                            summary=f"Re-notify ({why}): {areq['payload']['summary']}")
     return {"now": now_iso()}
 
 
@@ -425,6 +432,12 @@ def finish_act(conn: sa.Connection, item_id: str, action_request_id: str, approv
     kind = "comms" if areq["capability"].startswith("comms.") else "generic"
     details = {"kind": kind, "dry_run": True, "guard_checks": guard["checks"], "guard_reason": guard["reason"],
                "action_idempotency_key": areq["idempotency_key"]}
+    response = guard.get("effector_response") or {}
+    if isinstance(response.get("comms"), dict):  # 06's per-send checks (consent/DNC/window/disclosure) for E1–E7
+        details.update(response["comms"])
+        details.update(kind="comms", dry_run=True)  # never overridable by an effector
+    if guard["ok"] and response.get("status") == "blocked":  # the effector itself refused (fail-closed check)
+        guard = {**guard, "ok": False, "reason": "effector blocked: " + ", ".join(response.get("blocked", []) or ["see details"])}
     if guard["ok"]:
         _areq_receipt(conn, areq, "ACTION_EXECUTED", f"DRY-RUN {areq['capability']} executed via gateway (no external effect)",
                       [prov], approval_id=approval["approval_id"], effect=effect, tool_name=GATEWAY_TOOL,

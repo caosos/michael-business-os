@@ -1,7 +1,7 @@
 # READY QUEUE: Michael Business OS, Round Two
 
 - **Owner:** Agent 01 (coordinator / dispatcher). **Protocol:** `docs/COORDINATION.md`. Read it before claiming.
-- **Last synced:** 2026-10-07 13:20 -0500, against branch heads 02 `41d45a6` · 03 `73a4d32` · 04 `7f0649a` · 05 `16fb86c` · 06 `c125618` · 07 `397101c`.
+- **Last synced:** 2026-10-07 13:55 -0500, against branch heads 02 `41d45a6` · 03 `73a4d32` · 04 `7f0649a` · 05 `16fb86c` · 06 `c125618` · 07 `397101c`.
 - **Read it from any worktree:** `git fetch -q origin && git show origin/research/agent-01-coordinator:docs/status/READY_QUEUE.md`
 - **Status values:** READY · CLAIMED · BLOCKED · DONE.
 - **Priority:** P0 = critical path · P1 = next-up · P2 = useful parallel work.
@@ -22,10 +22,11 @@
 | A-04 | P2 | Wire 02's B adapter + Deduper into `Components`; end-to-end fixture discovery → RESEARCHING | B-01 | **CLAIMED** | 01 | Integration test: 02 fixtures through the DBOS workflow |
 | A-05 | P2 | Wire 03's RESEARCH producer as a workflow step (RESEARCHING → SCORED) | C-01 | **CLAIMED** | 01 | A real discovered Item advances past RESEARCHING in a test |
 | A-07 | P1 | `notify_decision(item_id, approval_id)` wake helper for the UI and CLI (06 P-06-1) | none | **DONE** (this push) | 01 | `mbos.workflows.notify_decision` exists; F-01 uses it |
-| A-08 | P2 | `_approval_gate` acts on `wake_on` = `new_info` / `price_change` / `auction_ending` via a message kind sent by lanes B/C (06 P-06-2) | none | READY | 01 | Test: a HOLD with `wake_on=price_change` wakes on a price-change message, never executes |
+| A-08 | P2 | `_approval_gate` acts on `wake_on` = `new_info` / `price_change` / `auction_ending` via a message kind sent by lanes B/C (06 P-06-2) | none | **DONE** (this push): `mbos.workflows.notify_event(item_id, event, summary, evidence_provenance_id)` | 01 | Test: a HOLD with `wake_on=price_change` wakes on a price-change message, never executes |
 | A-09 | P1 | Ruling R12: the Item edge table is lane D's (every item passes RESEARCHING; a YES on HELD re-presents first; LEARNED is terminal; follow-up edge ACTED→AWAITING_APPROVAL). The spine is aligned (migration 0004) | none | **DONE** (this push) | 01 | Parity test against 04's live DB passes |
-| A-12 | P2 | R13 routing: PASS with `pass_on_priors` → RESEARCHING, not ARCHIVED | C-05 | BLOCKED | 01 | Test with 03's flag |
-| A-13 | P2 | Wire 06's `CommsActionPlanner` (F-05) and comms dry-run `Effector` (F-06) into `Components`; behind 05's gateway once A-03 lands | F-05, F-06 | BLOCKED | 01 | End-to-end dry-run comms receipts graded by 06's audit |
+| A-12 | P2 | R13 routing: PASS with `pass_on_priors` → RESEARCHING, not ARCHIVED | C-05 | READY (C-05 done; key on `scorecard.pass_on_priors`, after C-06 the stricter rule) | 01 | Test with 03's flag |
+| A-13 | P2 | Wire 06's `CommsActionPlanner` (F-05) and comms dry-run `Effector` (F-06) into `Components`; behind 05's gateway once A-03 lands | F-05, F-06 | **DONE** (this push): payload extension merged before hashing; effector `blocked` → ACTION_FAILED; comms checks in `details` | 01 | End-to-end dry-run comms receipts graded by 06's audit |
+| A-14 | P2 | Deduper seam gap (02): `Deduper.is_duplicate` also receives the candidate's source sighting, so same-source look-alikes are not merged | none | READY | 01 | Test: two same-source look-alikes stay separate |
 | A-10 | P1 | Ship the contracts as package data so a non-editable install works without `MBOS_CONTRACTS_DIR` (07 P-07-1/F-16) | none | READY | 01 | `pip install .` into a clean venv; the suite passes with no env var |
 | A-11 | P1 | ADR-0010 interop: `tools/interop_check.py` covers vectors, rejections and vendored-copy byte identity | none | **DONE** (this push) | 01 | All 6 Python lanes CONFORM (12:50) |
 | A-06 | P2 | ADR-0009 v1.1.0: collect lane acknowledgements, then decide | lane acks | READY | 01 | ADR-0009 ACCEPTED or amended; vectors and examples regenerated |
@@ -35,17 +36,28 @@
 |---|---|---|---|---|---|---|
 | D-01 | **P0** | Migration `0005`: `effector_calls` (UNIQUE idempotency_key, CHECK dry_run), PANIC/governance state table (R5), `llm_spend`, `artifacts` (sha256 content-addressed), all insert-only where they are ledgers. Answer: DBOS login role (`mbos_dbos`), and whether datasource checkpoints may live in schema `dbos` of the app DB | none | **DONE** @ `a0d1fbe` | 04 | Tables exist with the same invariants as 01's `0001_spine.sql`; answers in AGENT_STATUS |
 | D-02 | **P0** | **ADR-0010 conformance (supersedes the R3 wording in your claim).** Install `contracts/canonical/mbos_canonical.sql`. Set `NEW.canonical := mbos.cjson(mbos.receipt_canonical(NEW))` and `NEW.row_hash := 'sha256:'∥sha256(canonical)`; `verify_chain` uses the same formula. `mbos.payload_hash` → `mbos.cjson_sha256`. Keep `utc_iso` (it already conforms) | none | **DONE** @ `a0d1fbe` (verified by 01's gate test) | 04 | All `vectors.json` pass in PostgreSQL; a chain exported from 04's DB verifies with `mbos_canonical.verify_chain` |
-| D-04 | **P0** | Fold Lane E's requirements into 0005 (binding input; ruling R5): `origin/research/agent-05-governance:docs/integration/05-requirements-for-04-migration-0005.md`. Covers: `panic_events` (append-only) + `panic_current` view + `panic_set()`, release by approver only, bootstrap FROZEN; `effector_calls` as the execution-claim table; action-status edges `approved→expired`, `approved→failed` and `executing→cancelled_by_freeze`; budget caps per action, daily, global and velocity | D-01 (same migration) | **CLAIMED** (04, re-opened @ `bd64f72`; migration 0007). *Correction: 01 marked this DONE at a0d1fbe too early; 0005 did not yet meet all of 05's requirements* | 04 | 05's E-02 port runs on 0005 without workarounds |
+| D-04 | **P0** | Fold Lane E's requirements into 0005 (binding input; ruling R5): `origin/research/agent-05-governance:docs/integration/05-requirements-for-04-migration-0005.md`. Covers: `panic_events` (append-only) + `panic_current` view + `panic_set()`, release by approver only, bootstrap FROZEN; `effector_calls` as the execution-claim table; action-status edges `approved→expired`, `approved→failed` and `executing→cancelled_by_freeze`; budget caps per action, daily, global and velocity | D-01 (same migration) | **DONE** @ `14bd690` (0007: panic_set/current, claims, 3 gateway edges, budget modes) | 04 | 05's E-02 port runs on 0005 without workarounds |
 | D-05 | **P0** | R12 re-affirmed: remove `NORMALIZED→SCORED`, `HELD→APPROVED` and `LEARNED→ARCHIVED/FAILED` (added in a0d1fbe to accommodate pre-R12 spine). Keep `ACTED→AWAITING_APPROVAL` | none | **DONE** @ `797a4e5` (parity gate verified by 01; now a hard pass) | 04 | 01's `test_r12_item_edges_match_lane_d` XPASSes (then flipped to a hard gate) |
 | D-03 | P1 | Reporting views (pipeline by lane, HOLD backlog, approval latency) over the ADR-0010 chain; restore drill D1 then `verify_chain` | D-01 | **DONE** @ `ca59e3c` (views + D1 restore drill on a 179-receipt chain) | 04 | D1 passes; views documented |
+
+| D-06 | P1 | State MCP server: narrow intent tools over 04's SQL API (create/transition/patch item, propose action, record approval/outcome, provenance) as the **only** agent write path (ADR-0003). Identity and scope are carried into provenance. No raw SQL tool | D-04 | READY | 04 | MCP tool tests; an agent role without the MCP cannot write; every tool call is receipted |
+| D-07 | P2 | Artifact store to FS (sha256 content-addressed, insert-only, `put_artifact` keeps the index), restore-drill aware | none | READY | 04 | Round-trip + tamper detection tests |
+| D-08 | P2 | pgvector rebuildable index (D3: drop → rebuild → identical query results) | none | READY | 04 | D3 passes |
+| D-09 | P2 | pgBackRest PITR off-box | operator: off-box target | BLOCKED (operator infra) | 04 | Restore drill from off-box |
 
 ### Lane B: Agent 02 (discovery)
 | ID | Pri | Task | Deps | Status | Agent | Acceptance |
 |---|---|---|---|---|---|---|
 | B-01 | P1 | `SourceAdapter`/`Normalizer`/`Deduper` against `mbos.interfaces` (R8). `raw_ref` = hash of stored raw bytes. `FetchResult.error`/`freeze_requests` go to a side channel | none | **DONE** @ `7c9da45` | 02 | 02's fixtures run through `mbos` `Components` in 02's tests; identity-first dedup |
 | B-02 | P1 | ADR-0010: `ids.canonical_json` → reference `mbos_canonical` | none | **DONE** @ `cadfdae` | 02 | `tools/interop_check.py` row 02 = 10/10 |
-| B-03 | P2 | Credential-free sources: GSA Auctions API, then Trash Nothing, as fixture-first adapters, read-only, honouring ADR-02-0202 | B-01 | **CLAIMED** | 02 | Fixture tests; no live calls without explicit enablement |
-| B-04 | P2 | Source-health → L2 freeze request shape, agreed with 05 (`discovery.source.<src>.read`) | E-01 | **CLAIMED** (02; 05's side is ready) | 02 (+05) | A shared fixture both lanes test against |
+| B-03 | P2 | Credential-free sources: GSA Auctions API, then Trash Nothing, as fixture-first adapters, read-only, honouring ADR-02-0202 | B-01 | **DONE** @ `8ff5476` | 02 | Fixture tests; no live calls without explicit enablement |
+| B-04 | P2 | Source-health → L2 freeze request shape, agreed with 05 (`discovery.source.<src>.read`) | E-01 | **DONE** @ `029356c` (05 half @ `d3b9948`) | 02 (+05) | A shared fixture both lanes test against |
+
+| B-05 | P1 | P-02-1: wake-event producer. On re-sighting (price change, new info) or an auction nearing its end, call `mbos.workflows.notify_event(item_id, kind, evidence)`, where kind ∈ `price_change`/`auction_ending`/`new_info` (defined by A-08). Record each event's provenance | A-08 (API published this push) | READY | 02 | A HOLD with `wake_on=price_change` wakes from a 02 fixture re-sighting; it never executes |
+| B-06 | P2 | P-02-2: IMAP alert ingestor (tier 2), fixture-first, no live mailbox without explicit enablement | none | READY | 02 | Fixture emails → RawListing; no network in tests |
+| B-07 | P2 | P-02-3: SAM.gov adapter (service lane / gov contracts), fixture-first | none | READY | 02 | Fixture tests |
+| B-08 | P2 | P-02-4: eBay Browse *asking* comps for 03's evidence bundle (labelled ASKING, never SOLD) | none | READY | 02 (+03) | 03's estimator consumes them with the right basis |
+| B-09 | P2 | P-02-5: source-freeze wiring onto Postgres PANIC | E-02 | BLOCKED | 02 | Freeze round-trips on 04/05's tables |
 
 ### Lane C: Agent 03 (economics)
 | ID | Pri | Task | Deps | Status | Agent | Acceptance |
@@ -54,17 +66,20 @@
 | C-02 | P1 | ADR-0010: `canonical.py` → reference (Decimals hashed as doubles); re-baseline golden hashes with a note | none | **DONE** @ `247c036` | 03 | interop row 03 = 10/10; 13 goldens replay |
 | C-03 | P2 | ADR-03-002 is ACCEPTED-WITH-CHANGES (see INDEX). Give the v1.1.0 schemas versioned `$id`s for re-vendoring (ADR-0009 item 6) | none | **DONE** @ `22b49e6` | 03 | New `$id`s; 03's tests pass |
 
-| C-04 | P1 | Sold-comps feed (03 P-03-01, lead 03 with 02 for source access): a comps-evidence bundle interface + a fixture-first sold-comps source behind it (read-only, ADR-02-0202 tiers) that `estimate_item` consumes. Real eBay flips stay `insufficient` without it | none | READY | 03 (+02) | A 02-fixture flip with comps advances RESEARCHING → SCORED with FACT-tagged comp provenance |
-| C-05 | P2 | R13: scorecard flag `pass_on_priors` when a PASS rests only on non-FACT inputs | none | READY | 03 | Golden test: a priors-only PASS is flagged |
+| C-04 | P1 | Sold-comps feed (03 P-03-01, lead 03 with 02 for source access): a comps-evidence bundle interface + a fixture-first sold-comps source behind it (read-only, ADR-02-0202 tiers) that `estimate_item` consumes. Real eBay flips stay `insufficient` without it | none | **DONE** @ `882c726` (02 support @ `a1a7730`) | 03 (+02) | A 02-fixture flip with comps advances RESEARCHING → SCORED with FACT-tagged comp provenance |
+| C-05 | P2 | R13: scorecard flag `pass_on_priors` when a PASS rests only on non-FACT inputs | none | **DONE** @ `6e938d2` (`scorecard.pass_on_priors`) | 03 | Golden test: a priors-only PASS is flagged |
+
+| C-06 | P1 | R13 amended (03 P-03-04): for flips, a PASS archives only if the revenue side AND ≥1 cost-side input are evidence-backed; otherwise `pass_on_priors=true` | none | READY | 03 | Goldens: the floor PASS driven by prior repair costs is flagged |
+| C-07 | P1 | LEARN on 04's outcome store: Brier/MAPE from `predicted_vs_actual`; a config bump is PROPOSED as a tier-0 ActionRequest (`config.scoring.bump`), never auto-applied | none | READY | 03 | Two outcomes → a bump proposal with provenance; nothing applied |
 
 ### Lane E: Agent 05 (governance)
 | ID | Pri | Task | Deps | Status | Agent | Acceptance |
 |---|---|---|---|---|---|---|
 | E-01 | P1 | R7 propose-only grant for `agent-01-coordinator` + ADR-0010 `payload_hash` (drop the float refusal) + stand-in store `row_hash` → MBOS-RH-1 | none | **DONE** @ `df826c3` | 05 | interop row 05 = 10/10; `vectors.json` `receipt_chain` verifies with 05's code |
-| E-02 | P0 (after D-01) | Postgres-backed `GovernanceStore` + `PanicStore` on 04's tables (R2/R4/R5). Fail-closed is kept | D-01, D-02 | **CLAIMED** (05). Can build on 0005 now; full acceptance needs D-04 (0007) | 05 | 05's suite passes on Postgres; no SQLite in the production path |
+| E-02 | P0 (after D-01) | Postgres-backed `GovernanceStore` + `PanicStore` on 04's tables (R2/R4/R5). Fail-closed is kept | D-01, D-02 | **READY, P0** (unblocked by D-04 @ `14bd690`) | 05 | 05's suite passes on Postgres; no SQLite in the production path |
 | E-03 | P2 | A8/A9 hardening, dry: per-agent LiteLLM budget config generator (no external calls); L3 hook that cancels unstarted DBOS workflows (`DBOS.cancel_workflows`) and writes the egress deny-all policy file | none | **DONE** @ `e12caa3` | 05 | Tests prove L3 cancels pending workflows and emits deny-all config; nothing reaches the network |
 
-| E-04 | P1 | Outbound secret scan + `INJECTION_SUSPECTED` tripwire (05 §17 #24–26): scan proposed payloads and effector requests; listing/inbound text matching injection patterns emits an `INJECTION_SUSPECTED` receipt and forces tier 0 + `needs_review` | none | READY after E-02 | 05 | Tests: a secret in a payload is refused; an injected listing yields at most a tier-0 proposal with the tripwire receipt |
+| E-04 | P1 | Outbound secret scan + `INJECTION_SUSPECTED` tripwire (05 §17 #24–26): scan proposed payloads and effector requests; listing/inbound text matching injection patterns emits an `INJECTION_SUSPECTED` receipt and forces tier 0 + `needs_review` | none | **CLAIMED** | 05 | Tests: a secret in a payload is refused; an injected listing yields at most a tier-0 proposal with the tripwire receipt |
 | E-05 | P2 | Stuck-claim reconciliation job: executions left `executing` past a TTL are reconciled through the gateway (provider-query-before-retry semantics, dry-run) | none | READY | 05 | Test: a crashed claim is reconciled exactly once; no re-send |
 
 ### Lane F: Agent 06 (Operator UI)
@@ -75,8 +90,11 @@
 | F-04 | P2 | P-06-3: the UI's `SpineBackend` uses the worker's real `Components` (05 PDP) | A-03 | BLOCKED | 06 | UI decisions use the real PDP |
 | F-03 | P2 | Comms dry-run spec items (1)(3)(4)(6) from 06's status: templates registry, rate/consent rules as data | none | **DONE** @ `cb787dd` | 06 | Data files + tests; no sends |
 
-| F-05 | P1 | P-06-4: `CommsActionPlanner` implementing `mbos.interfaces.ActionPlanner` from the comms_spec template registry. The payload carries `template_id`, `template_hash` (MBOS-CJSON-1) and the rendered draft; action constraints (window, consent prerequisites) go in the payload | none | READY | 06 | Contract-valid proposals for 1 flip + 1 service fixture; 01 wires it into `Components` (A-13) |
-| F-06 | P1 | P-06-5: dry-run comms `Effector` implementing `mbos.interfaces.Effector`: exactly-once per idempotency key; `effector_response.dry_run=true`; `details.kind=comms` carries consent/DNC/window/disclosure check results; `audit(receipts)` grades E1–E7. No network imports | none | READY | 06 | E1–E7 graded on a spine run; A7 still zero exceptions |
+| F-05 | P1 | P-06-4: `CommsActionPlanner` implementing `mbos.interfaces.ActionPlanner` from the comms_spec template registry. The payload carries `template_id`, `template_hash` (MBOS-CJSON-1) and the rendered draft; action constraints (window, consent prerequisites) go in the payload | none | **DONE** @ `acb7c52` | 06 | Contract-valid proposals for 1 flip + 1 service fixture; 01 wires it into `Components` (A-13) |
+| F-06 | P1 | P-06-5: dry-run comms `Effector` implementing `mbos.interfaces.Effector`: exactly-once per idempotency key; `effector_response.dry_run=true`; `details.kind=comms` carries consent/DNC/window/disclosure check results; `audit(receipts)` grades E1–E7. No network imports | none | **DONE** @ `5abf51e` | 06 | E1–E7 graded on a spine run; A7 still zero exceptions |
+
+| F-07 | P1 | P-06-6: consent ledger + DNC scrub store as data (append-only, receipted), so E2 grades PASS/FAIL instead of DRY_RUN_EXEMPT. Raw contact values stay in the ledger and are referenced, never copied | none | **CLAIMED** (06) | 06 (+04 for DDL if it needs tables) | E2 graded PASS/FAIL on a spine run |
+| F-08 | P2 | P-06-7: follow-up and binding offer/quote templates as their own step-up ActionRequests (tier 0, irreversible) | F-07 | READY after F-07 | 06 | Templates + tests; nothing auto-sends |
 
 ### Lane G: Agent 07 (QA)
 | ID | Pri | Task | Deps | Status | Agent | Acceptance |
@@ -90,4 +108,6 @@
 
 ## Michael (business-policy only; nothing blocks the dry-run MVP)
 - MICHAEL_DECISIONS #1–#5 are unchanged.
+- **#7 (new, raised by 02):** may the system pursue flips of items given away in community gift groups (Trash Nothing)? Some groups forbid reselling. Default: these items are flagged `needs_review`, and no flip is pursued without Michael's case-by-case YES.
+- **#8 (new, optional):** apply for eBay Marketplace Insights (Limited Release) for sold comps. Until then, sold comps come from manual entry.
 - **Optional:** an eBay developer keyset for live read-only eBay discovery (Agent 02's runbook). Not required; fixture mode runs the same code.

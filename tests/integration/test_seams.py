@@ -57,3 +57,31 @@ def test_modify_accepts_full_edited_payload(ledger_db):
         new = c.execute(sa.text("SELECT body FROM mbos.action_requests WHERE action_request_id = :a"),
                         {"a": out["new_action_request_id"]}).scalar_one()
         spine.decide(c, new["action_request_id"], "MODIFY", new["payload_hash"], ids["components"], new_payload={"summary": "x"})
+
+
+def test_notify_event_wakes_matching_hold_and_never_executes(rt, run_discovery):
+    from datetime import timedelta
+
+    from mbos import workflows
+    from mbos.clock import iso, utcnow
+    from tests.helpers.common import pending_request, receipts_for, wait_state
+
+    item_id = run_discovery("FIX-TRAILER-1")["FIX-TRAILER-1"]
+    wait_state(rt.engine, item_id, "AWAITING_APPROVAL")
+    areq = pending_request(rt.engine, item_id)
+    workflows.notify_event(item_id, "new_info", "seller added photos")  # awaiting → re-notified only
+    workflows.record_decision(areq["action_request_id"], "HOLD", areq["payload_hash"],
+                              hold={"hold_until": iso(utcnow() + timedelta(hours=6)), "wake_on": ["price_change"],
+                                    "renotify_after": "PT6H"})
+    wait_state(rt.engine, item_id, "HELD")
+    workflows.notify_event(item_id, "auction_ending", "not in wake_on")  # ignored while held
+    workflows.notify_event(item_id, "price_change", "ask dropped 950 -> 800")
+    wait_state(rt.engine, item_id, "AWAITING_APPROVAL")
+    intents = [r["intent"] for r in receipts_for(rt.engine, areq=areq["action_request_id"], type="APPROVAL_REQUESTED")]
+    assert any("new_info" in i for i in intents) and any("price_change" in i for i in intents)
+    assert not any("auction_ending" in i for i in intents)
+    assert not receipts_for(rt.engine, areq=areq["action_request_id"], type="ACTION_EXECUTING")
+    with pytest.raises(ValueError):
+        workflows.notify_event(item_id, "buy_now")
+    workflows.record_decision(areq["action_request_id"], "NO", areq["payload_hash"], reason="cleanup")
+    wait_state(rt.engine, item_id, "ARCHIVED")
