@@ -2,7 +2,7 @@
 
 Reads come straight from the spine's Postgres tables (read-only). The one write path is
 `decide()`: `mbos.spine.decide` in ONE transaction (approval + provenance + receipt + status),
-then a DBOS message to wake the item workflow. That is the same path as `mbos decide` (CLI).
+then `mbos.workflows.notify_decision` to wake the item workflow, the same path as `mbos decide` (CLI).
 The UI owns no gateway, no timers and no ledger. Execution happens only in the item
 workflow → lane E gateway → dry-run effector.
 """
@@ -16,17 +16,17 @@ import sqlalchemy as sa
 from mbos import spine
 from mbos.ledger import load_receipts, verify_chain
 from mbos.runtime import Components, client, item_workflow_id
-from mbos.workflows import DECISION_TOPIC
+from mbos.workflows import DECISION_TOPIC, notify_decision
 
 from . import mbos_canonical
 
 
 class SpineBackend:
-    def __init__(self, engine: sa.Engine, components: Optional[Components] = None, wake=None):
+    def __init__(self, engine: sa.Engine, components: Optional[Components] = None, notify=None):
         self.engine = engine
         # Must match the worker's lanes: spine.decide classifies a MODIFY successor with the PDP.
         self.components = components or Components().with_defaults()
-        self._wake = wake or _dbos_wake
+        self._notify = notify or notify_decision  # spine's wake helper (A-07)
 
     # ---- reads ---------------------------------------------------------------------------
     def _bodies(self, sql: str, **params: Any) -> list[dict]:
@@ -107,15 +107,16 @@ class SpineBackend:
         with self.engine.begin() as c:
             out = spine.decide(c, areq_id, decision, payload_hash_seen, self.components, channel="web", **kw)
         # Wake-up only: if this message is lost, the workflow still finds the row on its next poll.
-        self._wake(out["item_id"], {"kind": "decision", "approval_id": out["approval"]["approval_id"]})
+        self._notify(out["item_id"], out["approval"]["approval_id"])
         return out
 
     def ping(self, item_id: str) -> None:
         """'Wake now' for a HOLD whose wake_on includes michael_ping (re-presents; never executes)."""
-        self._wake(item_id, {"kind": "ping"})
+        _client_send(item_id, {"kind": "ping"})
 
 
-def _dbos_wake(item_id: str, message: dict) -> None:
+def _client_send(item_id: str, message: dict) -> None:
+    """The spine's `workflows.ping` needs a launched DBOS runtime; the UI process uses a DBOSClient."""
     c = client()
     try:
         c.send(item_workflow_id(item_id), message, topic=DECISION_TOPIC)

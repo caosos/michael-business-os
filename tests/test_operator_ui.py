@@ -297,3 +297,20 @@ def test_f02_ledger_independent_rh1_check_agrees_with_spine(rt, discover, ui):
     assert ok, msg
     _, _, body = req(ui, "GET", "/ledger")
     assert "independent MBOS-RH-1 check (vendored reference): " in body and "FAILED" not in body
+
+
+def test_yes_on_a_held_request_re_presents_then_executes(rt, discover, ui):
+    """R12 (bf215b2): a YES on a HELD item re-presents it first (HELD → AWAITING_APPROVAL → APPROVED);
+    the HOLD itself never executes."""
+    item_id, areq = ready(rt, discover)
+    post(ui, areq, "HOLD", hold_preset="24h")
+    wait_state(rt.engine, item_id, "HELD")
+    assert effector_calls(rt.engine, areq["action_request_id"]) == []
+    _, loc, _ = post(ui, areq, "YES", pin=PIN)
+    assert "msg=YES recorded" in loc
+    wait_state(rt.engine, item_id, "ACTED")
+    states = [r[0] for r in q(rt.engine, "SELECT body->'after_state'->>'state' FROM mbos.receipts WHERE item_id = :i "
+                                         "AND type = 'ITEM_STATE_CHANGED' ORDER BY seq", i=item_id)]
+    i = states.index("HELD")
+    assert states[i + 1:i + 3] == ["AWAITING_APPROVAL", "APPROVED"]
+    assert len(effector_calls(rt.engine, areq["action_request_id"])) == 1

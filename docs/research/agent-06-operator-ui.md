@@ -1,7 +1,7 @@
 # Agent 06: Operator UI / Approval UX (build lane F)
 
 **Updated:** 2026-10-07 (wave two, task **F-01** = ruling R10) · **Branch:** `research/agent-06-communications`
-**Spine:** Agent 01's `mbos` @ `99e9ec0` (re-pinned for F-02; F-01 was built on `bed7609`), installed into this worktree's `.venv` from a `git archive` copy. Not merged.
+**Spine:** Agent 01's `mbos` @ `bf215b2` (F-01 was built on `bed7609`, F-02 on `99e9ec0`), installed into this worktree's `.venv` from a `git archive` copy. Not merged.
 
 **Dry-run only.** The UI cannot send, spend, publish or contact anyone. It records Michael's decision and nothing else. Execution happens only in the spine's DBOS item workflow, which goes through the lane E gateway to the dry-run effector.
 
@@ -38,7 +38,7 @@ cd /home/michaelos/business-os-worktrees/agent-06-communications
 eval "$(.venv/bin/mbos devdb up)"                                                 # pgserver Postgres 16, exports MBOS_* URLs
 .venv/bin/mbos worker --fixture tests/fixtures/illustrative.json &                # spine worker, ILLUSTRATIVE fixtures
 MBOS_OPERATOR_PIN=<pin> .venv/bin/python -m operator_ui serve                     # http://127.0.0.1:8765/
-.venv/bin/python -m pytest -q tests -p no:cacheprovider                           # 15 tests, real spine
+.venv/bin/python -m pytest -q tests -p no:cacheprovider                           # 42 tests (16 UI on the real spine + 26 comms spec)
 ```
 The setup for `.venv` (uv, Python 3.12, `mbos[dev]` from the pinned `99e9ec0` archive) is in the F-01 receipt.
 
@@ -69,7 +69,8 @@ The spine sets `escalate_after` to its default, P7D.
 FACT (`bed7609`): the workflow acts on `hold_until`, `escalate_after`, `renotify_after` and `michael_ping`. **It does not act on `new_info`, `price_change` or `auction_ending`.** Those are recorded for when lanes B and C send them. This is a proposed task (see status).
 
 ## 4. Gaps and notes
-- **`notify_decision`**, named in R10, does not exist in the spine at `bed7609`. The UI uses the same wake as `mbos decide` (`DBOSClient.send(item:<id>, …, topic="decision")`). The DB row stays the source of truth.
+- **`notify_decision`** did not exist at `bed7609`. Agent 01 added it as A-07 (`bf215b2`), and the UI now calls `mbos.workflows.notify_decision(item_id, approval_id)` after `spine.decide`. "Wake now" still uses a `DBOSClient` ping, because `workflows.ping` needs a launched runtime. The DB row stays the source of truth.
+- **R12** (`bf215b2`): a YES on a HELD item re-presents it first (HELD → AWAITING_APPROVAL → APPROVED). This is covered by `test_yes_on_a_held_request_re_presents_then_executes`.
 - **The NO archive checkbox was removed.** The spine always archives after NO, so the UI no longer offers a choice it cannot honour.
 - **`SpineBackend.components`** must match the worker's lanes, because `spine.decide` classifies a MODIFY successor with the PDP. The default is the reference lanes, the same as `mbos decide`. When lane E's real PDP is wired (A-03), the UI must be built with the same `Components`.
 - **Step-up method** is `local_pin`. WebAuthn/TOTP and remote access remain lane E work. The UI stays loopback-only.
