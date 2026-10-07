@@ -30,13 +30,30 @@ class TestGoldens(unittest.TestCase):
         self.assertTrue(sc["pass_on_priors"])
         self.assertEqual(sc["pass_basis"]["evidence_backed_inputs"], [])
         self.assertIn("economics.rehab.labor_hours", sc["pass_basis"]["decisive_inputs"])
-        self.assertTrue(any(r.startswith("R13: PASS rests only on priors") for r in sc["reasons"]))
+        self.assertTrue(any(r.startswith("R13: PASS is not evidence-backed") for r in sc["reasons"]))
 
     def test_evidence_backed_pass_is_not_flagged(self):
-        sc = golden("project_vehicle_truck_over_cap")      # cash-cap PASS on an attested listing price
+        sc = golden("project_vehicle_truck_over_cap")      # cash-cap PASS on an agreed (FACT) buy price
         self.assertEqual(sc["decision"], "PASS")
         self.assertFalse(sc["pass_on_priors"])
-        self.assertEqual(sc["pass_basis"]["evidence_backed_inputs"], ["economics.acquisition.ask_price"])
+        self.assertEqual(sc["pass_basis"]["evidence_backed_inputs"], ["economics.acquisition.expected_buy_price"])
+        self.assertTrue(sc["pass_basis"]["gates"]["cash_ok"]["evidence_backed"])
+
+    def test_c06_floor_pass_on_prior_repair_costs_is_flagged(self):
+        """C-06 acceptance: revenue IS evidence-backed (FACT sold comps) and the ask IS a FACT, yet the
+        floor PASS rests on prior repair costs, so the amended rule flags it."""
+        sc = golden("welder_estimated_from_comps")
+        self.assertEqual(sc["decision"], "PASS")
+        self.assertFalse(sc["gates"]["pph_floor_ok"])
+        g = sc["pass_basis"]["gates"]["pph_floor_ok"]
+        self.assertEqual((g["revenue_backed"], g["cost_backed"]), (True, False))
+        self.assertTrue(sc["pass_on_priors"])
+
+    def test_ask_price_is_not_a_decisive_input(self):
+        for p in sorted(EXAMPLES.glob("*.scored.json")):
+            sc = json.loads(p.read_text())["item"]["scores"]["scorecard"]
+            if sc.get("pass_basis"):
+                self.assertNotIn("economics.acquisition.ask_price", sc["pass_basis"]["decisive_inputs"], p.name)
 
     def test_flag_never_set_on_yes_or_maybe(self):
         for p in sorted(EXAMPLES.glob("*.scored.json")):
@@ -64,8 +81,28 @@ class TestDecisiveInputsPerGate(unittest.TestCase):
 
     def test_non_fact_basis_does_not_count(self):
         it = case("project_vehicle_truck_over_cap")
-        it["economics"]["estimates_meta"]["assumptions"][0]["basis"] = "REC"
+        for a in it["economics"]["estimates_meta"]["assumptions"]:
+            a["basis"] = "REC"
         self.assertTrue(run(it)["scores"]["scorecard"]["pass_on_priors"])
+
+    def test_flip_economic_pass_backed_on_both_sides_archives(self):
+        it = case("mower_no_start")                        # floor PASS
+        it["economics"]["estimates_meta"]["assumptions"] = [
+            {"field": "economics.resale.target_sell_price", "value": 650, "basis": "INFER",
+             "evidence_backed": True, "provenance_ids": ["prov_01JE0000000000000000000001"]},
+            {"field": "economics.rehab.parts_cost", "value": 150, "basis": "FACT", "note": "parts quoted by dealer"}]
+        sc = run(it)["scores"]["scorecard"]
+        self.assertEqual(sc["decision"], "PASS")
+        self.assertFalse(sc["pass_on_priors"])
+
+    def test_service_rule_unchanged_one_input(self):
+        it = case("equipment_repair_zero_turn")
+        it["economics"]["job"]["quoted_revenue"] = 300      # now under the floor
+        it["economics"]["estimates_meta"]["assumptions"] = [
+            {"field": "economics.job.quoted_revenue", "value": 300, "basis": "FACT", "note": "customer's firm budget"}]
+        sc = run(it)["scores"]["scorecard"]
+        self.assertEqual(sc["decision"], "PASS")
+        self.assertFalse(sc["pass_on_priors"])
 
     def test_distance_gate_decisive_set_includes_distance(self):
         sc = golden("generator_far")
@@ -88,8 +125,8 @@ class TestEstimatorMarksEvidence(unittest.TestCase):
         self.assertEqual((a["basis"], a["evidence_backed"], a["provenance_ids"]), ("INFER", True, [P(0), P(1), P(2)]))
         sc = run(apply_estimate(it, r))["scores"]["scorecard"]
         self.assertEqual(sc["decision"], "PASS")                      # welder under the $40/h floor
-        self.assertFalse(sc["pass_on_priors"])
         self.assertIn("economics.resale.target_sell_price", sc["pass_basis"]["evidence_backed_inputs"])
+        self.assertTrue(sc["pass_on_priors"])                          # C-06: cost side still priors
 
     def test_asking_only_target_is_not_evidence_backed(self):
         items = json.loads((HERE / "fixtures" / "agent02" / "items.json").read_text())

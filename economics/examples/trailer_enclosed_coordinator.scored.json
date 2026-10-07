@@ -92,12 +92,12 @@
       }
     },
     "scores": {
-      "scorecard_id": "scr_01M4B3R6G0VYS0J26AJQHJ5P46",
+      "scorecard_id": "scr_01M4B3R6G07R5Y138KMWRPH590",
       "inputs_hash": "sha256:d0260cb37bd3a20b08e9291fc52effa69b8dd7ad37c21d7f23ea09f04106f00f",
       "scorecard": {
         "scoring_config_version": "2026.10.1",
         "computed_at": "2026-10-07T12:00:00Z",
-        "engine_version": "0.3.0",
+        "engine_version": "0.4.0",
         "config_hash": "sha256:8b7b98c7d92457d9d0049a0a2d7dd0c4e3bafa735c99c989bf156289aff58b20",
         "lane": "flip",
         "derived": {
@@ -210,11 +210,34 @@
         "decision": "PASS",
         "pass_on_priors": true,
         "pass_basis": {
+          "gates": {
+            "composite_floor": {
+              "rule": "flip economic: revenue side AND >= 1 cost-side input evidence-backed",
+              "decisive_inputs": [
+                "economics.resale.target_sell_price",
+                "economics.acquisition.expected_buy_price",
+                "economics.acquisition.buy_fees",
+                "economics.rehab.parts_cost",
+                "economics.rehab.materials_cost",
+                "economics.rehab.labor_hours",
+                "economics.rehab.admin_hours",
+                "economics.rehab.repair_success_prob",
+                "economics.resale.sale_prob",
+                "economics.downside.salvage_if_unsold",
+                "economics.downside.salvage_if_repair_fails"
+              ],
+              "evidence_backed_inputs": [],
+              "revenue_backed": false,
+              "cost_backed": false,
+              "evidence_backed": false
+            }
+          },
           "decisive_inputs": [
-            "economics.acquisition.ask_price",
+            "economics.acquisition.buy_fees",
             "economics.acquisition.expected_buy_price",
             "economics.downside.salvage_if_repair_fails",
             "economics.downside.salvage_if_unsold",
+            "economics.rehab.admin_hours",
             "economics.rehab.labor_hours",
             "economics.rehab.materials_cost",
             "economics.rehab.parts_cost",
@@ -274,7 +297,7 @@
         "walk_away_price": null,
         "reasons": [
           "composite 43.06 < pass floor 45",
-          "R13: PASS rests only on priors/unattested inputs (no decisive input is evidence-backed): route to RESEARCHING, do not archive",
+          "R13: PASS is not evidence-backed (composite_floor: revenue NOT backed, cost NOT backed): route to RESEARCHING, do not archive",
           "deterministic: net $644.54, $65.33/h over 9.8666 h, cash tied up $1,455.46, ROI 0.4428",
           "expected: net $443.55, $44.95/h, max loss $455.46, P(loss) 0.1925, time-to-cash 15 d",
           "note: estimates prepared under config 2026.10.0, scored under 2026.10.1",
@@ -284,11 +307,11 @@
       }
     },
     "recommendation": {
-      "recommendation_id": "rec_01M4B3R6G01MVFWH1W89DMT934",
+      "recommendation_id": "rec_01M4B3R6G05M6X2TB52YWB01Z9",
       "verdict": "PASS",
       "rationale": [
         "composite 43.06 < pass floor 45",
-        "R13: PASS rests only on priors/unattested inputs (no decisive input is evidence-backed): route to RESEARCHING, do not archive",
+        "R13: PASS is not evidence-backed (composite_floor: revenue NOT backed, cost NOT backed): route to RESEARCHING, do not archive",
         "deterministic: net $644.54, $65.33/h over 9.8666 h, cash tied up $1,455.46, ROI 0.4428",
         "expected: net $443.55, $44.95/h, max loss $455.46, P(loss) 0.1925, time-to-cash 15 d",
         "note: estimates prepared under config 2026.10.0, scored under 2026.10.1",
@@ -296,22 +319,22 @@
       ],
       "confidence": 0.2,
       "alert": false,
-      "provenance_id": "prov_01M4B3R6G03QGBWM261H6VKAKZ",
+      "provenance_id": "prov_01M4B3R6G0Z8PTP913M7FGFG12",
       "cheapest_decisive_evidence": "condition_verified -> MAYBE"
     },
     "provenance_ids": [
       "prov_01JB0000000000000000000080",
-      "prov_01M4B3R6G03QGBWM261H6VKAKZ"
+      "prov_01M4B3R6G0Z8PTP913M7FGFG12"
     ]
   },
   "provenance": {
-    "provenance_id": "prov_01M4B3R6G03QGBWM261H6VKAKZ",
+    "provenance_id": "prov_01M4B3R6G0Z8PTP913M7FGFG12",
     "created_at": "2026-10-07T12:00:00Z",
     "actor_type": "system",
     "agent_name": "agent-03-economics",
     "basis": "INFERENCE",
     "tool_name": "mbos_economics.engine",
-    "tool_version": "0.3.0",
+    "tool_version": "0.4.0",
     "config_version": "2026.10.1",
     "inputs_used": [
       {
@@ -333,26 +356,26 @@
       "type": "SCORE_RECORDED",
       "item_id": "itm_01JB0000000000000000000008",
       "entity_type": "scorecard",
-      "entity_id": "scr_01M4B3R6G0VYS0J26AJQHJ5P46",
+      "entity_id": "scr_01M4B3R6G07R5Y138KMWRPH590",
       "tool_name": "mbos_economics.engine",
       "inputs_hash": "sha256:d0260cb37bd3a20b08e9291fc52effa69b8dd7ad37c21d7f23ea09f04106f00f",
-      "payload_hash": "sha256:0ef9bab378331c2c8de117f27976d19cec9c3ed60c7a503073922aca99fbfe99",
-      "idempotency_key": "score:scr_01M4B3R6G0VYS0J26AJQHJ5P46",
+      "payload_hash": "sha256:67f27998d24e89fb7be410372e9ba22c46f61bebbca374cfc76cb0107e4fedcd",
+      "idempotency_key": "score:scr_01M4B3R6G07R5Y138KMWRPH590",
       "provenance_ids": [
-        "prov_01M4B3R6G03QGBWM261H6VKAKZ"
+        "prov_01M4B3R6G0Z8PTP913M7FGFG12"
       ]
     },
     {
       "type": "RECOMMENDATION_RECORDED",
       "item_id": "itm_01JB0000000000000000000008",
       "entity_type": "recommendation",
-      "entity_id": "rec_01M4B3R6G01MVFWH1W89DMT934",
+      "entity_id": "rec_01M4B3R6G05M6X2TB52YWB01Z9",
       "tool_name": "mbos_economics.engine",
       "inputs_hash": "sha256:d0260cb37bd3a20b08e9291fc52effa69b8dd7ad37c21d7f23ea09f04106f00f",
-      "payload_hash": "sha256:e4586fafe5f82ef04fef0a45915e908dfd9e135be79083ae131674014c76b107",
-      "idempotency_key": "recommend:rec_01M4B3R6G01MVFWH1W89DMT934",
+      "payload_hash": "sha256:6c011ac4de52eba37e30e23734d775b238df8cd004f091f51ff292ef4f437bae",
+      "idempotency_key": "recommend:rec_01M4B3R6G05M6X2TB52YWB01Z9",
       "provenance_ids": [
-        "prov_01M4B3R6G03QGBWM261H6VKAKZ"
+        "prov_01M4B3R6G0Z8PTP913M7FGFG12"
       ]
     }
   ]

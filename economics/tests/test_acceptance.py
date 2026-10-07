@@ -280,6 +280,7 @@ class AT14_WorkedExamplesCorrected(unittest.TestCase):
         "equipment_repair_zero_turn": ("MAYBE", False),
         "trailer_enclosed_coordinator": ("PASS", False),
         "drywall_patch_coordinator": ("MAYBE", False),
+        "welder_estimated_from_comps": ("PASS", False),   # C-06 golden: floor PASS on prior repair costs
     }
 
     def test(self):

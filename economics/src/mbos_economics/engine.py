@@ -103,55 +103,67 @@ def _evidence_items(lane: str, category: str, econ: dict, skill_fit: Decimal, cf
 
 # --------------------------------------------------------------------------- R13: PASS on priors
 
+# R13 as amended (agent-01 aa88e7a, from 03 P-03-04). Decisive inputs are ARITHMETIC inputs only:
+# the asking price is evidence for the expected buy price, not an input to any formula.
 _E = "economics."
-_DECISIVE = {
+_FLIP_REVENUE = [_E + "resale.target_sell_price"]
+_FLIP_COST = [_E + f for f in ("acquisition.expected_buy_price", "acquisition.buy_fees", "rehab.parts_cost",
+                               "rehab.materials_cost", "rehab.labor_hours", "rehab.admin_hours")]
+_FLIP_OTHER_ECON = [_E + f for f in ("rehab.repair_success_prob", "resale.sale_prob",
+                                     "downside.salvage_if_unsold", "downside.salvage_if_repair_fails")]
+_SERVICE_ECON = [_E + f for f in ("job.quoted_revenue", "job.labor_hours", "job.admin_hours", "job.materials_cost",
+                                  "job.win_prob", "job.completion_prob")]
+_DISTANCE = ["normalized.location.road_miles_one_way", "economics.logistics.trips"]
+_NON_ECON = {
     "flip": {
-        "economic": ["acquisition.ask_price", "acquisition.expected_buy_price", "resale.target_sell_price",
-                     "rehab.parts_cost", "rehab.materials_cost", "rehab.labor_hours", "rehab.repair_success_prob",
-                     "resale.sale_prob", "downside.salvage_if_unsold", "downside.salvage_if_repair_fails"],
-        "max_loss_ok": ["acquisition.ask_price", "acquisition.expected_buy_price", "rehab.parts_cost",
-                        "downside.salvage_if_repair_fails"],
-        "cash_ok": ["acquisition.ask_price", "acquisition.expected_buy_price", "acquisition.buy_fees",
-                    "rehab.parts_cost", "rehab.materials_cost"],
-        "skills": ["rehab.required_skills", "rehab.requires_license_he_lacks"],
+        "max_loss_ok": [_E + f for f in ("acquisition.expected_buy_price", "acquisition.buy_fees", "rehab.parts_cost",
+                                         "downside.salvage_if_repair_fails")],
+        "cash_ok": [_E + f for f in ("acquisition.expected_buy_price", "acquisition.buy_fees", "rehab.parts_cost",
+                                     "rehab.materials_cost")],
+        "skills": [_E + "rehab.required_skills", _E + "rehab.requires_license_he_lacks"],
     },
     "service": {
-        "economic": ["job.quoted_revenue", "job.labor_hours", "job.admin_hours", "job.materials_cost",
-                     "job.win_prob", "job.completion_prob"],
-        "max_loss_ok": ["job.quoted_revenue", "job.materials_cost", "job.deposit_rate"],
-        "cash_ok": ["job.quoted_revenue", "job.materials_cost", "job.deposit_rate"],
-        "skills": ["job.required_skills", "job.requires_license_he_lacks"],
+        "max_loss_ok": [_E + f for f in ("job.quoted_revenue", "job.materials_cost", "job.deposit_rate")],
+        "cash_ok": [_E + f for f in ("job.quoted_revenue", "job.materials_cost", "job.deposit_rate")],
+        "skills": [_E + "job.required_skills", _E + "job.requires_license_he_lacks"],
     },
 }
-_DISTANCE = ["normalized.location.road_miles_one_way", "economics.logistics.trips"]
+_ECON_GATES = {"ev_positive", "pph_floor_ok", "min_profit_ok", "distance_ratio_ok", "composite_floor"}
 
 
-def _decisive_fields(lane: str, failed: list[str], composite_floor: bool) -> list[str]:
-    d = _DECISIVE[lane]
-    out: list[str] = []
-    for g in failed:
-        if g in ("max_loss_ok", "cash_ok"):
-            out += [_E + f for f in d[g]]
-        elif g in ("skill_ok", "license_ok"):
-            out += [_E + f for f in d["skills"]]
-        elif g == "distance_ratio_ok":
-            out += _DISTANCE + [_E + f for f in d["economic"]]
-        else:  # ev_positive, pph_floor_ok, min_profit_ok
-            out += [_E + f for f in d["economic"]]
-    if composite_floor:
-        out += [_E + f for f in d["economic"]]
-    return sorted(set(out))
+def _gate_basis(gate: str, lane: str, backed: set[str]) -> dict:
+    if gate in _ECON_GATES:
+        extra = _DISTANCE if gate == "distance_ratio_ok" else []
+        if lane == "flip":
+            decisive = _FLIP_REVENUE + _FLIP_COST + _FLIP_OTHER_ECON + extra
+            rev = [f for f in _FLIP_REVENUE if f in backed]
+            cost = [f for f in _FLIP_COST if f in backed]
+            return {"rule": "flip economic: revenue side AND >= 1 cost-side input evidence-backed",
+                    "decisive_inputs": decisive, "evidence_backed_inputs": [f for f in decisive if f in backed],
+                    "revenue_backed": bool(rev), "cost_backed": bool(cost), "evidence_backed": bool(rev and cost)}
+        decisive = _SERVICE_ECON + extra
+    else:
+        key = "skills" if gate in ("skill_ok", "license_ok") else gate
+        decisive = _NON_ECON[lane][key]
+    hit = [f for f in decisive if f in backed]
+    return {"rule": ">= 1 decisive input evidence-backed", "decisive_inputs": decisive,
+            "evidence_backed_inputs": hit, "evidence_backed": bool(hit)}
 
 
 def _pass_on_priors(econ: dict, lane: str, failed: list[str], composite_floor: bool) -> dict:
-    """R13: a PASS may archive only when >= 1 decisive input is evidence-backed (basis FACT, or an
-    aggregate the estimator marked ``evidence_backed`` from FACT evidence). Inputs with no assumption
-    record are unattested, hence not evidence-backed."""
-    basis = {a.get("field"): a for a in (econ.get("estimates_meta") or {}).get("assumptions") or []
-             if isinstance(a, dict)}
-    decisive = _decisive_fields(lane, failed, composite_floor)
-    backed = [f for f in decisive if f in basis and (basis[f].get("basis") == "FACT" or basis[f].get("evidence_backed") is True)]
-    return {"decisive_inputs": decisive, "evidence_backed_inputs": backed, "pass_on_priors": not backed}
+    """R13 (amended): a PASS archives only if at least one failed gate (or the composite floor) is
+    evidence-backed under its rule. Evidence-backed = an assumption record with basis FACT, or an aggregate
+    the estimator marked ``evidence_backed`` from FACT evidence. Unattested inputs never count."""
+    backed = {a.get("field") for a in (econ.get("estimates_meta") or {}).get("assumptions") or []
+              if isinstance(a, dict) and (a.get("basis") == "FACT" or a.get("evidence_backed") is True)}
+    gates = {g: _gate_basis(g, lane, backed) for g in (failed or (["composite_floor"] if composite_floor else []))}
+    return {
+        "gates": gates,
+        "decisive_inputs": sorted({f for g in gates.values() for f in g["decisive_inputs"]}),
+        "evidence_backed_inputs": sorted({f for g in gates.values() for f in g["evidence_backed_inputs"]}),
+        "pass_on_priors": not any(g["evidence_backed"] for g in gates.values()),
+    }
+
 
 # --------------------------------------------------------------------------- compute
 
@@ -304,10 +316,18 @@ def compute(inp: dict, cfg: ScoringConfig) -> dict:
     if decision == "PASS":
         pass_basis = _pass_on_priors(econ, lane, failed, composite_floor=not failed)
         if pass_basis["pass_on_priors"]:
-            reasons.append("R13: PASS rests only on priors/unattested inputs (no decisive input is evidence-backed): "
-                           "route to RESEARCHING, do not archive")
+            why = []
+            for g, v in pass_basis["gates"].items():
+                if "revenue_backed" in v:
+                    why.append(f"{g}: revenue {'backed' if v['revenue_backed'] else 'NOT backed'}, "
+                               f"cost {'backed' if v['cost_backed'] else 'NOT backed'}")
+                else:
+                    why.append(f"{g}: no decisive input backed")
+            reasons.append("R13: PASS is not evidence-backed (" + "; ".join(why) + "): route to RESEARCHING, do not archive")
         else:
-            reasons.append("R13: PASS is evidence-backed via " + ", ".join(pass_basis["evidence_backed_inputs"]))
+            ok = [g for g, v in pass_basis["gates"].items() if v["evidence_backed"]]
+            reasons.append("R13: PASS is evidence-backed (" + ", ".join(ok) + ") via "
+                           + ", ".join(pass_basis["evidence_backed_inputs"]))
     reasons.append(f"deterministic: net {_usd(le.net_profit)}, {_usd(le.pph)}/h over {le.total_hours} h, "
                    f"cash tied up {_usd(le.cash_tied_up)}, ROI {le.roi}")
     reasons.append(f"expected: net {_usd(le.ev_net_profit)}, {_usd(le.ev_pph)}/h, max loss {_usd(le.max_loss)}, "

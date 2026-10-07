@@ -161,9 +161,13 @@ def project_vehicle_truck_over_cap() -> dict:
     d["economics"]["resale"].update({"target_sell_price": 4800, "comp_price_low": 4300, "comp_price_high": 5300})
     d["economics"]["downside"].update({"salvage_if_repair_fails": 1900, "salvage_if_unsold": 3800})
     d["economics"]["rehab"]["parts_cost"] = 320
-    # R13 (C-05): the asking price is attested from the listing, so this cash-cap PASS is evidence-backed
+    # R13 (C-05/C-06): the seller agreed $2,400 in writing, so the buy price, an arithmetic input of the
+    # cash gate, is attested and this cash-cap PASS is evidence-backed. (The ask alone would not be: it is
+    # evidence for the buy price, not an input.)
     d["economics"]["estimates_meta"]["assumptions"] = [
-        {"field": "economics.acquisition.ask_price", "value": 2600, "basis": "FACT", "note": "listing price"}]
+        {"field": "economics.acquisition.ask_price", "value": 2600, "basis": "FACT", "note": "listing price"},
+        {"field": "economics.acquisition.expected_buy_price", "value": 2400, "basis": "FACT",
+         "note": "seller agreed $2,400 in writing (illustrative)"}]
     return d
 
 
@@ -262,6 +266,22 @@ def equipment_repair_zero_turn() -> dict:
     }, source="referral")
 
 
+def welder_estimated_from_comps() -> dict:
+    """C-06 golden. Agent 02's real Searcy welder listing (@7b4d9a8 pipeline output) run through the
+    C-01 estimator with 3 FACT sold comps. Revenue is evidence-backed, but the floor PASS is driven by
+    PRIOR repair costs (parts/labor), so amended R13 flags it and the item stays in RESEARCHING."""
+    import json
+    from pathlib import Path
+
+    from mbos_economics.estimate import apply_estimate, estimate_item
+    items = json.loads((Path(__file__).parent / "fixtures" / "agent02" / "items.json").read_text())
+    it = [i for i in items if i["category"] == "welder"][0]
+    comps = [{"kind": "sold", "price": p, "sold_date": f"2026-09-{10 + i:02d}", "source": "manual",
+              "url": f"https://example.invalid/welder-comp/{i}", "fetched_at": "2026-10-07T11:00:00Z",
+              "provenance_id": f"prov_01JF{i:022d}"} for i, p in enumerate([600, 650, 700])]
+    return apply_estimate(it, estimate_item(it, {"comps": comps}, SCORED_AT))
+
+
 FLIP_CASES = {
     "trailer_utility": trailer_utility,
     "trailer_utility_at_walkaway": trailer_utility_at_walkaway,
@@ -271,6 +291,7 @@ FLIP_CASES = {
     "project_vehicle_civic": project_vehicle_civic,
     "project_vehicle_truck_over_cap": project_vehicle_truck_over_cap,
     "trailer_enclosed_coordinator": trailer_enclosed_coordinator,
+    "welder_estimated_from_comps": welder_estimated_from_comps,
 }
 SERVICE_CASES = {
     "drywall_basement": drywall_basement,

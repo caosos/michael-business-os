@@ -1,0 +1,603 @@
+{
+  "item": {
+    "category": "welder",
+    "content_hash": "sha256:81d2c5c8159a980517346209ce4745ce6ad18a19f2cd10ce3c5a57197f229c3d",
+    "created_at": "2026-10-07T17:12:00Z",
+    "dedup_key": "welder|250-500|zip-721",
+    "item_id": "itm_01M4BNKG0DD37NT1Q8QWCHDF93",
+    "normalized": {
+      "condition": "used",
+      "counterparty": {
+        "contact_method": "platform",
+        "role": "seller"
+      },
+      "images": [],
+      "listing_status": "active",
+      "location": {
+        "city": "Searcy",
+        "geo_tier": 1,
+        "state": "AR",
+        "zip": "721**",
+        "road_miles_one_way": 50
+      },
+      "price": {
+        "amount": 480.0,
+        "currency": "USD",
+        "type": "fixed"
+      },
+      "title": "Lincoln 180 MIG welder with cart"
+    },
+    "opportunity_kind": "buy_item",
+    "provenance_ids": [
+      "prov_01M4B3R6G0P2004V7T6NXP8MZY",
+      "prov_01M4BNKG0DF7254BE97CR1MAG4"
+    ],
+    "schema_version": "1.0.0",
+    "sources": [
+      {
+        "first_seen_at": "2026-10-07T17:12:00Z",
+        "ingestion_method": "api",
+        "last_seen_at": "2026-10-07T17:12:00Z",
+        "provenance_id": "prov_01M4BNKG0DF7254BE97CR1MAG4",
+        "raw_ref": "sha256:618788444d87211e0b64172646fdb1a383de15484c5e57bca595c2a827594948",
+        "source": "ebay",
+        "source_listing_id": "v1|220000000002|0",
+        "tos_risk": "low",
+        "url": "https://www.ebay.com/itm/220000000002"
+      }
+    ],
+    "state": "RECOMMENDED",
+    "type": "flip",
+    "updated_at": "2026-10-07T17:12:00Z",
+    "economics": {
+      "acquisition": {
+        "ask_price": 480,
+        "expected_buy_price": 408,
+        "buy_fees": 0,
+        "acquire_lead_days": 1
+      },
+      "rehab": {
+        "parts_cost": 60,
+        "materials_cost": 10,
+        "labor_hours": 2,
+        "admin_hours": 1.5,
+        "required_skills": [
+          "welding",
+          "electrical_diagnosis"
+        ],
+        "repair_success_prob": 0.85,
+        "repair_scope_known": false
+      },
+      "logistics": {
+        "trips": [
+          {
+            "purpose": "inspect_pickup",
+            "round_trip_miles": 100
+          },
+          {
+            "purpose": "buyer_meet",
+            "round_trip_miles": 16
+          }
+        ]
+      },
+      "holding": {
+        "storage_cost_per_day": 1,
+        "expected_hold_days": 22,
+        "sell_fees_rate": 0,
+        "sell_fees_flat": 0
+      },
+      "resale": {
+        "target_sell_price": 650,
+        "comp_price_expected": 650,
+        "comp_price_low": 625,
+        "comp_price_high": 675,
+        "expected_dom_days": 21,
+        "sale_prob": 0.8
+      },
+      "downside": {
+        "salvage_if_unsold": 455,
+        "salvage_if_repair_fails": 163.2
+      },
+      "estimates_meta": {
+        "scoring_config_version": "2026.10.1",
+        "assumptions": [
+          {
+            "field": "normalized.location.road_miles_one_way",
+            "value": 50,
+            "basis": "INFER",
+            "note": "town table: searcy, ar (approximate; verify)"
+          },
+          {
+            "field": "economics.acquisition.ask_price",
+            "value": 480,
+            "basis": "FACT",
+            "note": "normalized.price (fixed)"
+          },
+          {
+            "field": "economics.acquisition.expected_buy_price",
+            "value": 408,
+            "basis": "REC",
+            "note": "ask 480.0 x negotiation factor 0.85 (prior)"
+          },
+          {
+            "field": "economics.acquisition.buy_fees",
+            "value": 0,
+            "basis": "REC",
+            "note": "flat 0 + (0 prior + buyer premium 0) x buy"
+          },
+          {
+            "field": "economics.resale.target_sell_price",
+            "value": 650,
+            "basis": "INFER",
+            "note": "trimmed median of 3 sold comps (n used 3)",
+            "evidence_backed": true,
+            "provenance_ids": [
+              "prov_01JF0000000000000000000000",
+              "prov_01JF0000000000000000000001",
+              "prov_01JF0000000000000000000002"
+            ]
+          },
+          {
+            "field": "economics.resale.expected_dom_days",
+            "value": 21,
+            "basis": "REC",
+            "note": "prior"
+          },
+          {
+            "field": "economics.resale.sale_prob",
+            "value": 0.8,
+            "basis": "REC",
+            "note": "prior"
+          },
+          {
+            "field": "economics.rehab.parts_cost",
+            "value": 60,
+            "basis": "REC",
+            "note": "prior (welder, used)"
+          },
+          {
+            "field": "economics.rehab.materials_cost",
+            "value": 10,
+            "basis": "REC",
+            "note": "prior (welder)"
+          },
+          {
+            "field": "economics.rehab.labor_hours",
+            "value": 2,
+            "basis": "REC",
+            "note": "prior (welder, used)"
+          },
+          {
+            "field": "economics.rehab.admin_hours",
+            "value": 1.5,
+            "basis": "REC",
+            "note": "prior (welder)"
+          },
+          {
+            "field": "economics.rehab.repair_success_prob",
+            "value": 0.85,
+            "basis": "REC",
+            "note": "prior (welder, used)"
+          },
+          {
+            "field": "economics.rehab.required_skills",
+            "value": [
+              "welding",
+              "electrical_diagnosis"
+            ],
+            "basis": "REC",
+            "note": "prior (welder)"
+          },
+          {
+            "field": "economics.holding.expected_hold_days",
+            "value": 22,
+            "basis": "INFER",
+            "note": "ceil(labor 2 / 4 h/day) + DOM"
+          },
+          {
+            "field": "economics.holding.storage_cost_per_day",
+            "value": 1,
+            "basis": "REC",
+            "note": "prior (welder)"
+          },
+          {
+            "field": "economics.downside.salvage_if_unsold",
+            "value": 455,
+            "basis": "REC",
+            "note": "target x 0.70 (prior)"
+          },
+          {
+            "field": "economics.downside.salvage_if_repair_fails",
+            "value": 163.2,
+            "basis": "REC",
+            "note": "expected buy x 0.40 (prior)"
+          },
+          {
+            "field": "economics.logistics.trips",
+            "value": [
+              {
+                "purpose": "inspect_pickup",
+                "round_trip_miles": 100
+              },
+              {
+                "purpose": "buyer_meet",
+                "round_trip_miles": 16
+              }
+            ],
+            "basis": "INFER",
+            "note": "one combined inspect+pickup trip (2 x road miles) + buyer meet prior"
+          }
+        ],
+        "estimate": {
+          "estimate_hash": "sha256:f158cf792aa2867ca31842319fd6a041371f4ce6fb6d49805e15c7d4255ba95f",
+          "estimator_version": "0.4.0",
+          "priors_version": "2026.10.1",
+          "priors_hash": "sha256:cf69bcc1b35db16b91563ba6e721aefead414cfda9d4ed08e81969566b15cd3c",
+          "as_of": "2026-10-07T12:00:00Z",
+          "provenance_id": "prov_01M4B3R6G0821H34SMZAVZTBJT"
+        },
+        "comps": [
+          {
+            "url": "https://example.invalid/welder-comp/0",
+            "sold_price": 600,
+            "sold_date": "2026-09-10",
+            "source": "manual"
+          },
+          {
+            "url": "https://example.invalid/welder-comp/1",
+            "sold_price": 650,
+            "sold_date": "2026-09-11",
+            "source": "manual"
+          },
+          {
+            "url": "https://example.invalid/welder-comp/2",
+            "sold_price": 700,
+            "sold_date": "2026-09-12",
+            "source": "manual"
+          }
+        ]
+      }
+    },
+    "research": [
+      {
+        "provenance_id": "prov_01M4B3R6G0821H34SMZAVZTBJT",
+        "finding": "3 sold comps; trimmed median $650.00",
+        "field": "resale.target_sell_price",
+        "basis": "INFERENCE"
+      },
+      {
+        "provenance_id": "prov_01JF0000000000000000000000",
+        "finding": "sold comp $600 on 2026-09-10 (manual)",
+        "field": "resale.target_sell_price",
+        "basis": "FACT",
+        "source_uri": "https://example.invalid/welder-comp/0",
+        "fetched_at": "2026-10-07T11:00:00Z"
+      },
+      {
+        "provenance_id": "prov_01JF0000000000000000000001",
+        "finding": "sold comp $650 on 2026-09-11 (manual)",
+        "field": "resale.target_sell_price",
+        "basis": "FACT",
+        "source_uri": "https://example.invalid/welder-comp/1",
+        "fetched_at": "2026-10-07T11:00:00Z"
+      },
+      {
+        "provenance_id": "prov_01JF0000000000000000000002",
+        "finding": "sold comp $700 on 2026-09-12 (manual)",
+        "field": "resale.target_sell_price",
+        "basis": "FACT",
+        "source_uri": "https://example.invalid/welder-comp/2",
+        "fetched_at": "2026-10-07T11:00:00Z"
+      }
+    ],
+    "scores": {
+      "scorecard_id": "scr_01M4B3R6G0RHNA0G2HG6KHSG7C",
+      "inputs_hash": "sha256:2527b4cd870a8253ede250e1279529d93722d89b60e74f8937426dc8030f38af",
+      "scorecard": {
+        "scoring_config_version": "2026.10.1",
+        "computed_at": "2026-10-07T12:00:00Z",
+        "engine_version": "0.4.0",
+        "config_hash": "sha256:8b7b98c7d92457d9d0049a0a2d7dd0c4e3bafa735c99c989bf156289aff58b20",
+        "lane": "flip",
+        "derived": {
+          "vehicle_cost_per_mile": 0.4578,
+          "road_miles_one_way": 50,
+          "trips_cash": 53.1,
+          "travel_hours": 2.5778,
+          "labor_hours": 2,
+          "admin_hours": 1.5,
+          "total_hours": 6.0778,
+          "cost_out": 553.1,
+          "r_net": 650,
+          "net_profit_deterministic": 96.9,
+          "profit_per_hour_deterministic": 15.94,
+          "cash_tied_up": 553.1,
+          "roi_deterministic": 0.1752,
+          "expected_revenue": 543.83,
+          "ev_net_profit": 2.93,
+          "ev_hours": 6.0778,
+          "ev_profit_per_hour": 0.48,
+          "ev_roi": 0.0053,
+          "p_waste": 0,
+          "evidence_quality": 0.4,
+          "wasted_trip_ev": 0,
+          "confidence_raw": 0.4,
+          "confidence_distance_penalty": 0,
+          "confidence": 0.4,
+          "confidence_haircut": 0.76,
+          "ev_decision": 2.23,
+          "max_loss": 308.58,
+          "p_loss": 0.32,
+          "coefficient_of_variation": 1,
+          "risk_raw": 0.4889,
+          "time_to_cash_days": 23,
+          "travel_burden": 156.21,
+          "travel_burden_limit": 1.03,
+          "distance_ratio_gate_applies": false,
+          "skill_fit": 0.8,
+          "skill_coverage": 1,
+          "skill_mean_proficiency": 0.8,
+          "scarcity": 0.16,
+          "deal_discount": 0,
+          "demand_velocity": 0.5333,
+          "supply_tightness": 0,
+          "acquisition": 408,
+          "buy_fees": 0,
+          "parts": 60,
+          "materials": 10,
+          "storage_cost": 22,
+          "hold_days": 22,
+          "sell_fees": 0,
+          "trips_cash_acquisition": 45.78,
+          "cost_out_fail": 471.78,
+          "branches": [
+            {
+              "name": "repaired_and_sold",
+              "prob": 0.68,
+              "value": 96.9,
+              "revenue": 650
+            },
+            {
+              "name": "repaired_unsold",
+              "prob": 0.17,
+              "value": -98.1,
+              "revenue": 455
+            },
+            {
+              "name": "repair_failed",
+              "prob": 0.15,
+              "value": -308.58,
+              "revenue": 163.2
+            }
+          ],
+          "trips": [
+            {
+              "purpose": "inspect_pickup",
+              "round_trip_miles": 100,
+              "cash": 45.78,
+              "hours": 2.2222
+            },
+            {
+              "purpose": "buyer_meet",
+              "round_trip_miles": 16,
+              "cash": 7.32,
+              "hours": 0.3556
+            }
+          ]
+        },
+        "sub_scores": {
+          "ev_score": 0.28,
+          "pph_score": 0.4,
+          "roi_score": 0.35,
+          "ttc_score": 61.67,
+          "risk_score": 51.11,
+          "conf_score": 40,
+          "skill_score": 80,
+          "scarcity_score": 16
+        },
+        "weights_used": {
+          "ev": 0.25,
+          "pph": 0.25,
+          "roi": 0.1,
+          "ttc": 0.1,
+          "risk": 0.1,
+          "conf": 0.05,
+          "skill": 0.1,
+          "scarcity": 0.05
+        },
+        "composite": 22.28,
+        "decision": "PASS",
+        "pass_on_priors": true,
+        "pass_basis": {
+          "gates": {
+            "pph_floor_ok": {
+              "rule": "flip economic: revenue side AND >= 1 cost-side input evidence-backed",
+              "decisive_inputs": [
+                "economics.resale.target_sell_price",
+                "economics.acquisition.expected_buy_price",
+                "economics.acquisition.buy_fees",
+                "economics.rehab.parts_cost",
+                "economics.rehab.materials_cost",
+                "economics.rehab.labor_hours",
+                "economics.rehab.admin_hours",
+                "economics.rehab.repair_success_prob",
+                "economics.resale.sale_prob",
+                "economics.downside.salvage_if_unsold",
+                "economics.downside.salvage_if_repair_fails"
+              ],
+              "evidence_backed_inputs": [
+                "economics.resale.target_sell_price"
+              ],
+              "revenue_backed": true,
+              "cost_backed": false,
+              "evidence_backed": false
+            },
+            "min_profit_ok": {
+              "rule": "flip economic: revenue side AND >= 1 cost-side input evidence-backed",
+              "decisive_inputs": [
+                "economics.resale.target_sell_price",
+                "economics.acquisition.expected_buy_price",
+                "economics.acquisition.buy_fees",
+                "economics.rehab.parts_cost",
+                "economics.rehab.materials_cost",
+                "economics.rehab.labor_hours",
+                "economics.rehab.admin_hours",
+                "economics.rehab.repair_success_prob",
+                "economics.resale.sale_prob",
+                "economics.downside.salvage_if_unsold",
+                "economics.downside.salvage_if_repair_fails"
+              ],
+              "evidence_backed_inputs": [
+                "economics.resale.target_sell_price"
+              ],
+              "revenue_backed": true,
+              "cost_backed": false,
+              "evidence_backed": false
+            }
+          },
+          "decisive_inputs": [
+            "economics.acquisition.buy_fees",
+            "economics.acquisition.expected_buy_price",
+            "economics.downside.salvage_if_repair_fails",
+            "economics.downside.salvage_if_unsold",
+            "economics.rehab.admin_hours",
+            "economics.rehab.labor_hours",
+            "economics.rehab.materials_cost",
+            "economics.rehab.parts_cost",
+            "economics.rehab.repair_success_prob",
+            "economics.resale.sale_prob",
+            "economics.resale.target_sell_price"
+          ],
+          "evidence_backed_inputs": [
+            "economics.resale.target_sell_price"
+          ],
+          "pass_on_priors": true
+        },
+        "alert": false,
+        "alert_checks": {
+          "is_yes": false,
+          "scarcity_ok": false,
+          "perishable": false,
+          "ev_multiple_ok": false,
+          "deal_discount_ok": false
+        },
+        "gates": {
+          "ev_positive": true,
+          "max_loss_ok": true,
+          "cash_ok": true,
+          "skill_ok": true,
+          "license_ok": true,
+          "pph_floor_ok": false,
+          "min_profit_ok": false,
+          "distance_ratio_ok": true
+        },
+        "yes_conditions": {
+          "composite_ok": false,
+          "confidence_ok": false,
+          "ev_pph_target_ok": false,
+          "ev_min_profit_ok": false,
+          "remote_verification_ok": true,
+          "sold_comps_ok": true,
+          "fault_identified_ok": false,
+          "title_ok": true
+        },
+        "evidence": {
+          "three_sold_comps": true,
+          "condition_verified": false,
+          "fault_identified": false,
+          "title_verified": true,
+          "demand_evidence": false,
+          "seller_screened": false,
+          "skill_fit_high": false,
+          "price_distribution": true,
+          "remote_verification": false
+        },
+        "evidence_search": {
+          "target": "MAYBE",
+          "items": [],
+          "reaches": null
+        },
+        "walk_away_price": null,
+        "reasons": [
+          "GATE FAIL pph_floor_ok: deterministic profit/hour $15.94 below floor $40.00",
+          "GATE FAIL min_profit_ok: deterministic net profit $96.90 below minimum $150.00",
+          "R13: PASS is not evidence-backed (pph_floor_ok: revenue backed, cost NOT backed; min_profit_ok: revenue backed, cost NOT backed): route to RESEARCHING, do not archive",
+          "deterministic: net $96.90, $15.94/h over 6.0778 h, cash tied up $553.10, ROI 0.1752",
+          "expected: net $2.93, $0.48/h, max loss $308.58, P(loss) 0.3200, time-to-cash 23 d",
+          "evidence is not the blocker: no missing evidence item changes the verdict"
+        ]
+      }
+    },
+    "recommendation": {
+      "recommendation_id": "rec_01M4B3R6G0SPTPSEA0HRN5W36P",
+      "verdict": "PASS",
+      "rationale": [
+        "GATE FAIL pph_floor_ok: deterministic profit/hour $15.94 below floor $40.00",
+        "GATE FAIL min_profit_ok: deterministic net profit $96.90 below minimum $150.00",
+        "R13: PASS is not evidence-backed (pph_floor_ok: revenue backed, cost NOT backed; min_profit_ok: revenue backed, cost NOT backed): route to RESEARCHING, do not archive",
+        "deterministic: net $96.90, $15.94/h over 6.0778 h, cash tied up $553.10, ROI 0.1752",
+        "expected: net $2.93, $0.48/h, max loss $308.58, P(loss) 0.3200, time-to-cash 23 d",
+        "evidence is not the blocker: no missing evidence item changes the verdict"
+      ],
+      "confidence": 0.4,
+      "alert": false,
+      "provenance_id": "prov_01M4B3R6G0P2004V7T6NXP8MZY"
+    }
+  },
+  "provenance": {
+    "provenance_id": "prov_01M4B3R6G0P2004V7T6NXP8MZY",
+    "created_at": "2026-10-07T12:00:00Z",
+    "actor_type": "system",
+    "agent_name": "agent-03-economics",
+    "basis": "INFERENCE",
+    "tool_name": "mbos_economics.engine",
+    "tool_version": "0.4.0",
+    "config_version": "2026.10.1",
+    "inputs_used": [
+      {
+        "ref": "engine_input",
+        "hash": "sha256:2527b4cd870a8253ede250e1279529d93722d89b60e74f8937426dc8030f38af"
+      },
+      {
+        "ref": "scoring-config@2026.10.1",
+        "hash": "sha256:8b7b98c7d92457d9d0049a0a2d7dd0c4e3bafa735c99c989bf156289aff58b20"
+      }
+    ],
+    "derived_from": [
+      "prov_01JF0000000000000000000000",
+      "prov_01JF0000000000000000000001",
+      "prov_01JF0000000000000000000002",
+      "prov_01M4B3R6G0821H34SMZAVZTBJT",
+      "prov_01M4BNKG0DF7254BE97CR1MAG4"
+    ],
+    "confidence": 0.4
+  },
+  "receipt_drafts": [
+    {
+      "type": "SCORE_RECORDED",
+      "item_id": "itm_01M4BNKG0DD37NT1Q8QWCHDF93",
+      "entity_type": "scorecard",
+      "entity_id": "scr_01M4B3R6G0RHNA0G2HG6KHSG7C",
+      "tool_name": "mbos_economics.engine",
+      "inputs_hash": "sha256:2527b4cd870a8253ede250e1279529d93722d89b60e74f8937426dc8030f38af",
+      "payload_hash": "sha256:c7c1c2261dc6b70ae5ff86eff1428f39a61964093f69040f435936f3daf97b61",
+      "idempotency_key": "score:scr_01M4B3R6G0RHNA0G2HG6KHSG7C",
+      "provenance_ids": [
+        "prov_01M4B3R6G0P2004V7T6NXP8MZY"
+      ]
+    },
+    {
+      "type": "RECOMMENDATION_RECORDED",
+      "item_id": "itm_01M4BNKG0DD37NT1Q8QWCHDF93",
+      "entity_type": "recommendation",
+      "entity_id": "rec_01M4B3R6G0SPTPSEA0HRN5W36P",
+      "tool_name": "mbos_economics.engine",
+      "inputs_hash": "sha256:2527b4cd870a8253ede250e1279529d93722d89b60e74f8937426dc8030f38af",
+      "payload_hash": "sha256:f7439aab37a20c6f03894504702953014d8ff73cbeb376dbdcaaa27e3fb10133",
+      "idempotency_key": "recommend:rec_01M4B3R6G0SPTPSEA0HRN5W36P",
+      "provenance_ids": [
+        "prov_01M4B3R6G0P2004V7T6NXP8MZY"
+      ]
+    }
+  ]
+}
