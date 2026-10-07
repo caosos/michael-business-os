@@ -5,7 +5,7 @@ Role: Discovery / Source Adapters (DISCOVER + NORMALIZE lane)
 Branch: research/agent-02-opportunity
 Worktree: /home/michaelos/business-os-worktrees/agent-02-opportunity
 State: WAITING
-Waiting on: B-12 unblock (MICHAEL_DECISIONS #8 + credentials) or queue refill; full-suite re-run pending after B-14
+Waiting on: B-12 unblock (MICHAEL_DECISIONS #8 + credentials) or queue refill
 Blocked: B-12 on MICHAEL_DECISIONS #8 + operator credentials
 Done: B-01 @ 7c9da45
 Done: B-02 @ cadfdae
@@ -19,7 +19,7 @@ Done: B-10 @ e439d04 (F1-F4 harness green; F2 missed-duplicate rate 0.00%, false
 Done: B-09 @ b12bdbd (freeze round trip on lanes D/E Postgres PANIC; 156 tests)
 Done: B-11 @ 8c634c9 (pHash: relist ambiguity resolved; F2 0 false merges with photos vs 1 without; 168 tests)
 Done: B-13 @ 741dfd7 (spine-path Deduper; corpus via 01's spine.ingest: F2 0.00% / 0 false merges; blocking key coarsened; 171 tests)
-Done: B-14 (photos via put_artifact; normalized.images round-trips by sha256 on the spine path; see receipt)
+Done: B-14 @ 0dd506b (photos via put_artifact; normalized.images round-trips by sha256 on the spine path; full suite 175 passed)
 Done: C-04 (support, source side) @ a1a7730 (lead Agent 03 C-04 @ 882c726)
 Current phase: Round Two — B-01..B-11, B-13, B-14 DONE; B-12 blocked; WAITING
 Started: 2026-10-06 (Round One) · Round Two started 2026-10-07

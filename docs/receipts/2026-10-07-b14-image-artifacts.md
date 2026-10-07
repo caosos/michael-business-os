@@ -9,4 +9,4 @@
   - no sink → no refs
   - lying or broken sink → no refs
   - lane D (Agent 04 @ 14bd690) `put_artifact` via `agent_write`: round trip and idempotent; the reader login is refused
-- Not re-run: the full suite after this change. The B-14 file passed; the previous full run was 171 green.
+- Full suite after this change: **175 passed, 0 skipped**.
