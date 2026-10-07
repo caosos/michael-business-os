@@ -4,15 +4,16 @@ Agent: 03
 Role: Economics / Scoring (Round-Two build lane C)
 Branch: research/agent-03-economics
 Worktree: /home/michaelos/business-os-worktrees/agent-03-economics
-State: WORKING
+State: WAITING
 Current phase: ROUND TWO, wave two. Claimed task: RESEARCH/estimate producer (lane C)
 Started: 2026-10-06
-Last updated: 2026-10-07 (C-06 done; C-07 claimed)
+Last updated: 2026-10-07 (C-06, C-07 done; WAITING: no READY lane-C task)
 
 ## Claimed work (wave two). Foreman loop: `docs/COORDINATION.md` @ agent-01 `99e9ec0`
-Claimed: C-07
-Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6; C-04 @ 882c726; C-05 @ 6e938d2; C-06 @ 9e36ec9
-Queue (lane C, after C-07): none READY @ agent-01 `aa88e7a`
+Claimed: (none)
+Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6; C-04 @ 882c726; C-05 @ 6e938d2; C-06 @ 9e36ec9; C-07 @ 0c3cf4a
+Queue (lane C): none READY @ agent-01 `aa88e7a`
+Waiting on: Agent 01 triage of P-03-05 (ActionRequest contract gaps for config bumps, ADR-0009); any new lane-C task
 
 - **C-01**, the RESEARCH/estimate producer, fills `Item.economics` from normalized fields, comps evidence and category priors, with provenance per estimate. It is deterministic and does no LLM arithmetic.
   - Claimed at `b923852`; confirmed CLAIMED in READY_QUEUE @ `99e9ec0`.
@@ -59,7 +60,17 @@ Queue (lane C, after C-07): none READY @ agent-01 `aa88e7a`
 - **New golden:** the welder (02 listing + FACT sold comps) floor PASS on prior repair costs is flagged.
 - **Interpretation note:** the revenue requirement is applied to economic gates only; see the receipt. Agent 01 can widen it in one line.
 
+### C-07 result (DONE @ `0c3cf4a`; receipt `docs/receipts/2026-10-07-c07-learn.md`)
+- `learn.load_outcomes` reads 04's read views (SELECT-only) and `calibrate` computes Brier/MAPE/bias.
+- `propose_learn_bump` produces a tier-0 `config.scoring.bump` ActionRequest draft. Its payload embeds the whole next document, and `payload_hash` binds the approval.
+- **Never applied:** the priors file stays byte-identical (tested).
+- **Acceptance:** 2 outcomes yield a priors 2026.10.2 → 2026.10.3 proposal with provenance. 142 tests pass.
+
 ## Proposed tasks (for Agent 01 to triage)
+- **P-03-05 (lane A, ADR-0009): ActionRequest contract gaps for config bumps.**
+  - Frozen v1.0.0 requires `item_id` and has no config category.
+  - The C-07 draft omits `item_id` and uses `config_change`, and conforms otherwise.
+  - Request: make `item_id` optional for system actions, and add the `config_change` category (tier 0).
 - **P-03-03 (lane C, internal): ship config as package data. DONE** (see the commit after `7390416`).
   - `economics/config/` moved to `economics/src/mbos_economics/config/` and is declared as package-data.
   - A non-editable wheel install, used from an unrelated directory, loads config 2026.10.1, history and priors, and replays a golden (`match: true`).
