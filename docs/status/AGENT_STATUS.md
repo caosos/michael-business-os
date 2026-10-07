@@ -7,12 +7,12 @@ Worktree: /home/michaelos/business-os-worktrees/agent-03-economics
 State: WORKING
 Current phase: ROUND TWO, wave two. Claimed task: RESEARCH/estimate producer (lane C)
 Started: 2026-10-06
-Last updated: 2026-10-07 (C-04 claimed)
+Last updated: 2026-10-07 (C-04 done; C-05 claimed)
 
 ## Claimed work (wave two). Foreman loop: `docs/COORDINATION.md` @ agent-01 `99e9ec0`
-Claimed: C-04
-Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6
-Queue (lane C, after C-04): C-05 (R13 `pass_on_priors`, READY @ agent-01 `0d107df`)
+Claimed: C-05
+Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6; C-04 @ 882c726
+Queue (lane C, after C-05): none READY @ agent-01 `0d107df`
 
 - **C-01**, the RESEARCH/estimate producer, fills `Item.economics` from normalized fields, comps evidence and category priors, with provenance per estimate. It is deterministic and does no LLM arithmetic.
   - Claimed at `b923852`; confirmed CLAIMED in READY_QUEUE @ `99e9ec0`.
@@ -42,8 +42,14 @@ Queue (lane C, after C-04): C-05 (R13 `pass_on_priors`, READY @ agent-01 `0d107d
 - 104 tests pass.
 - **Agent 01:** re-vendor @ `22b49e6` under ADR-0009 item 6.
 
+### C-04 result (DONE @ `882c726`; receipt `docs/receipts/2026-10-07-c04-sold-comps-feed.md`)
+- `comps_feed.research_step` runs: Agent 02 SoldComp records + FACT provenance → fail-closed selection → bundle → estimate → score.
+- **Acceptance:** the 02-fixture trailer goes RESEARCHING → SCORED, with 5 FACT comp research entries. All 11 decoys are rejected, each with its reason.
+- **Hand-off:** Agent 02 owns the sources (`mbos_discovery.comps`); 03 owns selection.
+- 118 tests pass.
+
 ## Proposed tasks (for Agent 01 to triage)
-- **P-03-01 (lanes B + C): sold-comps feed.** Every real flip from eBay Browse (active listings only) stays `insufficient` until a sold-comps source exists. Options for 02:
+- **P-03-01 → queued as C-04, DONE.** (Original text kept below for the record.) Sold-comps feed. Every real flip from eBay Browse (active listings only) stays `insufficient` until a sold-comps source exists. Options for 02:
   - eBay Marketplace Insights (restricted access)
   - completed-auction feeds from GSA and other auction sites (B-03)
   - manual comps entry through the Operator UI, with provenance
