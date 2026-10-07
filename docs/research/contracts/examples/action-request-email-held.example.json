@@ -1,0 +1,30 @@
+{
+  "action_request_id": "areq_01JA0000000000000000000001",
+  "item_id": "itm_01JA0000000000000000000001",
+  "recommendation_id": "rec_01JA0000000000000000000001",
+  "created_at": "2026-10-06T14:05:00Z",
+  "proposed_by": "agent-06-communications",
+  "on_behalf_of": "michael",
+  "capability": "comms.email.send",
+  "category": "email",
+  "payload": {
+    "to_ref": "relay:EXAMPLE-0001",
+    "template_id": "seller_condition_q_v1",
+    "offer": 1050
+  },
+  "payload_hash": "sha256:00832c10697b47c632aee2c3326d5b2f872c27f6527269b847feff0744f06b58",
+  "idempotency_key": "areq-1-send-1",
+  "estimated_cost": {
+    "amount": 0,
+    "currency": "USD"
+  },
+  "reversibility": "irreversible",
+  "untrusted_inputs_present": true,
+  "tier": 0,
+  "score_ref": "scr_01JA0000000000000000000001",
+  "status": "held",
+  "expires_at": "2026-10-08T14:05:00Z",
+  "provenance_ids": [
+    "prov_01JA0000000000000000000003"
+  ]
+}

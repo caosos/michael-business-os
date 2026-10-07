@@ -1,0 +1,352 @@
+"""Minimal local web UI (stdlib http.server; no JS, no framework).
+
+Binds to 127.0.0.1 only and rejects non-local Host headers (DNS-rebinding guard).
+Every POST carries a per-process CSRF token. Remote access and real step-up
+(WebAuthn/TOTP) are lane E (Agent 05) work and are deliberately not attempted here.
+"""
+
+import html
+import json
+import secrets
+import threading
+from http import HTTPStatus
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import parse_qs, quote, urlparse
+
+from . import views
+from .approvals import DecisionError
+
+ALLOWED_HOSTS = {"127.0.0.1", "localhost", "[::1]"}
+
+CSS = """
+:root{--bg:#f6f7f9;--card:#fff;--ink:#16181d;--mut:#5d6470;--line:#dde1e7;--acc:#2456c9;
+--yes:#137a3c;--no:#b3261e;--mod:#8a5a00;--hold:#4b4f9e;--flip:#0e6e72;--svc:#7a3c9a;--warn:#fff4d6;--warnink:#6b4e00}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#111317;--card:#1a1d23;--ink:#e8eaee;--mut:#9aa2ae;
+--line:#2c313a;--acc:#7aa2ff;--yes:#4cc17a;--no:#ff7a70;--mod:#e0a63a;--hold:#9ea2ff;--flip:#4fc7cc;--svc:#c792e6;--warn:#3a3014;--warnink:#f1d48a}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,sans-serif}
+a{color:var(--acc)}header{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+header b{font-size:17px}nav a{margin-right:12px}main{max-width:1060px;margin:0 auto;padding:16px}
+.banner{background:var(--warn);color:var(--warnink);padding:8px 16px;font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:0 0 14px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:baseline}.grow{flex:1 1 auto}
+.badge{display:inline-block;padding:1px 8px;border-radius:99px;font-size:12px;font-weight:700;letter-spacing:.03em;border:1px solid currentColor}
+.flip{color:var(--flip)}.service{color:var(--svc)}.v-YES{color:var(--yes)}.v-PASS{color:var(--no)}.v-MAYBE{color:var(--mod)}
+.mut{color:var(--mut)}.small{font-size:13px}h1{font-size:21px;margin:4px 0}h2{font-size:15px;margin:0 0 8px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+table{border-collapse:collapse;width:100%}td,th{text-align:left;padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;color:var(--mut);font-size:13px}td.num{text-align:right;font-variant-numeric:tabular-nums}
+pre{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px;overflow:auto;font-size:13px;white-space:pre-wrap;word-break:break-word}
+code{font-size:12.5px;word-break:break-all}
+.decide{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.decide form{border:1px solid var(--line);border-radius:8px;padding:10px}
+button{font:inherit;font-weight:700;border:0;border-radius:6px;padding:8px 14px;color:#fff;cursor:pointer;width:100%}
+.b-YES{background:var(--yes)}.b-NO{background:var(--no)}.b-MODIFY{background:var(--mod)}.b-HOLD{background:var(--hold)}
+input,textarea,select{font:inherit;width:100%;margin:4px 0 8px;padding:6px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink)}
+input[type=checkbox],input[type=radio]{width:auto;margin-right:6px}textarea{min-height:120px;font-family:ui-monospace,monospace;font-size:13px}
+.flash{padding:10px 14px;border-radius:8px;margin-bottom:14px;border:1px solid var(--line);background:var(--card)}.err{border-color:var(--no);color:var(--no)}
+.q a.rowlink{display:block;text-decoration:none;color:inherit}.bad{color:var(--no);font-weight:600}.ok{color:var(--yes);font-weight:600}
+"""
+
+e = lambda v: html.escape("" if v is None else str(v))  # noqa: E731
+
+
+def _money(v):
+    return f"${v:,.0f}" if isinstance(v, (int, float)) else e(v)
+
+
+def _fmt(row):
+    v, u = row["value"], row["unit"]
+    if u == "$":
+        return _money(v)
+    if u == "%":
+        return f"{v * 100:.0f}%"
+    return f"{e(v)}{'' if u in ('', None) else ' ' + u}"
+
+
+def _lane(lane):
+    return f'<span class="badge {e(lane)}">{"FLIP" if lane == "flip" else "SERVICE"}</span>'
+
+
+def _verdict(v):
+    return f'<span class="badge v-{e(v)}">System says {e(v)}</span>' if v else ""
+
+
+def page(title, body, state, flash=None, error=False):
+    f = f'<div class="flash{" err" if error else ""}">{e(flash)}</div>' if flash else ""
+    return f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>{e(title)}</title><style>{CSS}</style></head>
+<body><div class="banner">DRY-RUN · nothing leaves this machine · system {e(state)}</div>
+<header><b>Operator UI</b><nav><a href="/">Queue</a><a href="/ledger">Receipt ledger</a></nav></header>
+<main>{f}{body}</main></body></html>"""
+
+
+def render_queue(q):
+    def rows(lst, empty):
+        if not lst:
+            return f'<p class="mut">{empty}</p>'
+        out = []
+        for r in lst:
+            extra = f' · held until {e(r["hold_until"])}' if r.get("hold_until") else ""
+            extra += f' · modified from {e(r["derived_from"][:13])}…' if r.get("derived_from") else ""
+            out.append(f"""<div class="card q"><a class="rowlink" href="/areq/{e(r['areq_id'])}">
+<div class="row">{_lane(r['lane'])}<span class="mut small">{e(r['category'])}</span>{_verdict(r['verdict'])}
+<span class="grow"></span><span class="small mut">{e(r['status'])} · expires in {e(r['expires_in_hours'])}h{extra}</span></div>
+<h1>{e(r['title'])}</h1>
+<div class="row small"><span>EV {_money(r['ev'])}</span><span>{_money(r['pph'])}/h</span>
+<span>confidence {e(r['confidence'])}</span><span class="mut">{e(r['reversibility'])}</span></div>
+<div>Proposed: <b>{e(r['summary'])}</b> <code>{e(r['capability'])}</code></div></a></div>""")
+        return "".join(out)
+
+    return (f"<h2>Needs your decision ({len(q['pending'])})</h2>{rows(q['pending'], 'Nothing waiting.')}"
+            f"<h2>On hold ({len(q['held'])})</h2>{rows(q['held'], 'Nothing parked.')}"
+            f"<h2>Closed / executed ({len(q['closed'])})</h2>{rows(q['closed'], 'None yet.')}")
+
+
+def render_card(c, csrf):
+    a, item = c["areq"], c["item"]
+    loc = c["location"]
+    econ = "".join(f"<tr><td>{e(r['label'])}</td><td class='num'>{_fmt(r)}</td></tr>" for r in c["economics"])
+    rk = c["risk"]
+    risk = "".join(f"<tr><td>{k}</td><td>{v}</td></tr>" for k, v in [
+        ("Risk sub-score", e(rk["risk_score"])), ("Max loss", _money(rk["max_loss"])),
+        ("Reversibility", f'<span class="{"bad" if rk["reversibility"] == "irreversible" else ""}">{e(rk["reversibility"])}</span>'),
+        ("Approval tier", f"{e(rk['tier'])} (Michael must decide)" if rk["tier"] == 0 else e(rk["tier"])),
+        ("Untrusted inputs", '<span class="bad">yes — listing/inbound text was used</span>' if rk["untrusted_inputs_present"] else "no"),
+        ("Source ToS risk", e(", ".join(rk["source_tos_risk"]) or "—")),
+        ("Failed gates", f'<span class="bad">{e(", ".join(rk["failed_gates"]))}</span>' if rk["failed_gates"] else '<span class="ok">none</span>'),
+        ("Flags", e(", ".join(rk["flags"]) or "—")),
+    ])
+    why = "".join(f"<li>{e(x)}</li>" for x in c["rationale"] + c["reasons"])
+    cde = f"<p><b>Cheapest decisive evidence:</b> {e(c['cheapest_decisive_evidence'])}</p>" if c["cheapest_decisive_evidence"] else ""
+    sources = "".join(
+        f"<tr><td>{e(s['source'])}</td><td><a href='{e(s['url'])}' rel='noreferrer noopener'>{e(s['url'])}</a></td>"
+        f"<td>{e(s['ingestion_method'])}</td><td>{e(s['first_seen_at'])}</td><td><code>{e((s.get('raw_ref') or '—')[:23])}</code></td></tr>"
+        for s in c["sources"])
+    research = "".join(f"<li><span class='badge'>{e(r['basis'])}</span> {e(r['finding'])} <code>{e(r['provenance_id'])}</code></li>" for r in c["research"])
+    prov = "".join(
+        f"<tr><td><code>{e(p['id'])}</code></td><td>{e(p['kind'])}</td><td>{e(p.get('basis'))}</td><td>{e(p.get('who'))}</td><td>{e(p['what'])}</td></tr>"
+        for p in c["provenance"])
+    receipts = "".join(
+        f"<tr><td class='num'>{r['seq']}</td><td>{e(r['ts'])}</td><td>{e(r['type'])}</td><td>{e(r['actor']['id'])}</td>"
+        f"<td>{e(r['intent'])}{' <b>[dry_run]</b>' if (r.get('effector_response') or {}).get('dry_run') else ''}"
+        f"{' · msg ' + e(r['effector_response'].get('provider_msg_id')) if r.get('effector_response') else ''}</td>"
+        f"<td><code>{e(r['row_hash'][7:19])}</code></td></tr>"
+        for r in sorted(c["receipts"] + c["item_receipts"], key=lambda r: r["seq"]))
+    apprs = "".join(
+        f"<li><b>{e(x['decision'])}</b> by {e(x['decider'])} at {e(x['decided_at'])} via {e(x['channel'])}"
+        f"{' · step-up' if (x.get('auth_context') or {}).get('step_up') else ''}"
+        f"{' · reason: ' + e(x['reason']) if x.get('reason') else ''}"
+        f"{' · hold ' + e(json.dumps(x['hold'])) if x.get('hold') else ''}"
+        f"{' · new request <a href=/areq/' + e(x['modifications']['new_action_request_id']) + '>' + e(x['modifications']['new_action_request_id']) + '</a>' if x.get('modifications') else ''}</li>"
+        for x in c["approvals"])
+    lineage = ""
+    if a.get("derived_from"):
+        lineage += f"<p>Modified from <a href='/areq/{e(a['derived_from'])}'>{e(a['derived_from'])}</a></p>"
+    for s in c["successors"]:
+        lineage += f"<p>Superseded by <a href='/areq/{e(s)}'>{e(s)}</a></p>"
+    hold = ""
+    if c["hold"]:
+        h = c["hold"]
+        hold = (f"<p><b>On HOLD.</b> Wakes: {e(', '.join(json.loads(h['wake_on'])))}"
+                f"{' · until ' + e(h['hold_until']) if h['hold_until'] else ''} · next reminder {e(h['next_renotify_at'])}"
+                f"{' · escalates ' + e(h['escalate_at']) if h['escalate_at'] else ''}. It will never execute on its own.</p>")
+
+    common = (f'<input type="hidden" name="csrf" value="{e(csrf)}">'
+              f'<input type="hidden" name="payload_hash_seen" value="{e(a["payload_hash"])}">')
+    presets = "".join(
+        f'<label><input type="radio" name="hold_preset" value="{e(k)}"{" checked" if k == "24h" else ""}>{e(v["label"])}</label><br>'
+        for k, v in c["hold_presets"].items())
+    decide = "<p class='mut'>This request is closed — no decision possible.</p>"
+    if c["decidable"]:
+        pin = ('<label>Step-up PIN (irreversible / money)<input name="pin" type="password" autocomplete="off" required></label>'
+               if c["step_up"] else "")
+        decide = f"""<div class="decide">
+<form method="post" action="/areq/{e(a['action_request_id'])}/decide">{common}<input type="hidden" name="decision" value="YES">
+<p class="small">Executes <b>exactly</b> the frozen payload above (hash <code>{e(a['payload_hash'][7:19])}</code>). Dry-run only.</p>{pin}
+<button class="b-YES">YES</button></form>
+<form method="post" action="/areq/{e(a['action_request_id'])}/decide">{common}<input type="hidden" name="decision" value="NO">
+<label>Reason (required)<input name="reason" required maxlength="500"></label>
+<label><input type="checkbox" name="archive" value="1" checked>Archive the opportunity</label>
+<button class="b-NO">NO</button></form>
+<form method="post" action="/areq/{e(a['action_request_id'])}/decide">{common}<input type="hidden" name="decision" value="MODIFY">
+<label>Edited payload (creates a NEW request that needs its own YES)<textarea name="new_payload">{e(json.dumps(a['payload'], indent=2))}</textarea></label>
+<label>Note<input name="note" maxlength="500"></label><button class="b-MODIFY">MODIFY</button></form>
+<form method="post" action="/areq/{e(a['action_request_id'])}/decide">{common}<input type="hidden" name="decision" value="HOLD">
+{presets}<label>…or custom time (local)<input type="datetime-local" name="hold_until"></label>
+<label>Reason<input name="reason" maxlength="500"></label><button class="b-HOLD">HOLD</button></form></div>"""
+
+    return f"""<div class="card"><div class="row">{_lane(c['lane'])}<span class="mut">{e(c['category'])} · {e(c['subcategory'])}</span>
+{_verdict(c['verdict'])}<span class="grow"></span><span class="small mut">item {e(item['state'])} · request {e(a['status'])} · expires in {e(c['expires_in_hours'])}h</span></div>
+<h1>{e(c['title'])}</h1><div class="mut small">{e(loc.get('city'))}, {e(loc.get('state'))} · {e(loc.get('road_miles_one_way'))} road miles one way</div>{hold}{lineage}</div>
+<div class="grid">
+<div class="card"><h2>Why the system recommends this</h2><p>Composite <b>{e(c['composite'])}</b> · confidence <b>{e(c['confidence'])}</b></p><ul>{why}</ul>{cde}</div>
+<div class="card"><h2>Economics</h2><table>{econ}</table></div>
+<div class="card"><h2>Confidence &amp; risk</h2><table>{risk}</table></div>
+</div>
+<div class="card"><h2>Proposed action</h2><p><b>{e(c['action_summary'] or a['capability'])}</b></p>
+<div class="row small"><span><code>{e(a['capability'])}</code></span><span>category {e(a['category'])}</span><span>proposed by {e(a['proposed_by'])}</span>
+<span>target {e((a.get('target') or {}).get('ref'))}</span></div>
+<pre>{e(json.dumps(a['payload'], indent=2))}</pre>
+<div class="small mut">payload_hash <code>{e(a['payload_hash'])}</code> · idempotency <code>{e(a['idempotency_key'])}</code></div></div>
+<div class="card"><h2>Decide</h2>{decide}</div>
+<div class="card"><h2>Sources</h2><table><tr><th>Source</th><th>URL</th><th>Method</th><th>First seen</th><th>raw_ref</th></tr>{sources}</table>
+{'<h2 style="margin-top:12px">Research findings</h2><ul>' + research + '</ul>' if research else ''}</div>
+<div class="card"><h2>Provenance (every fact, score and decision)</h2><table><tr><th>ID</th><th>Kind</th><th>Basis</th><th>Who</th><th>What</th></tr>{prov}</table></div>
+<div class="card"><h2>Decisions</h2>{'<ul>' + apprs + '</ul>' if apprs else '<p class="mut">None yet.</p>'}</div>
+<div class="card"><h2>Receipts</h2><table><tr><th>seq</th><th>ts</th><th>type</th><th>actor</th><th>intent</th><th>row_hash</th></tr>{receipts}</table></div>"""
+
+
+def render_ledger(store):
+    ok, bad, n = store.verify_chain()
+    status = f"<span class='ok'>chain verified ({n} receipts)</span>" if ok else f"<span class='bad'>CHAIN BROKEN at seq {bad}</span>"
+    rows = "".join(
+        f"<tr><td class='num'>{r['seq']}</td><td>{e(r['ts'])}</td><td>{e(r['type'])}</td><td>{e(r['actor']['id'])}</td>"
+        f"<td>{'<a href=/areq/' + e(r['action_request_id']) + '>' + e(r['action_request_id'][:13]) + '…</a>' if r.get('action_request_id') else ''}</td>"
+        f"<td>{e(r['intent'])}</td><td><code>{e(', '.join(r['provenance_ids']))}</code></td><td><code>{e(r['row_hash'][7:19])}</code></td></tr>"
+        for r in reversed(store.receipts()))
+    return (f"<div class='card'><h2>Receipt ledger</h2><p>{status}</p></div><div class='card'><table><tr><th>seq</th><th>ts</th><th>type</th><th>actor</th>"
+            f"<th>request</th><th>intent</th><th>provenance</th><th>row_hash</th></tr>{rows}</table></div>")
+
+
+class App:
+    def __init__(self, store, approvals, clock):
+        self.store, self.approvals, self.clock = store, approvals, clock
+        self.csrf = secrets.token_urlsafe(32)
+
+    def state(self):
+        try:
+            return self.store.system("system_state")
+        except Exception:  # noqa: BLE001
+            return "UNREADABLE (fail-closed)"
+
+    def decide(self, areq_id, f):
+        if not secrets.compare_digest(f.get("csrf", ""), self.csrf):
+            raise DecisionError("invalid form token; reload the page")
+        d, seen = f.get("decision"), f.get("payload_hash_seen")
+        if d == "YES":
+            r = self.approvals.yes(areq_id, seen, pin=f.get("pin"))
+            ex = r.get("execution") or {}
+            return f"YES recorded. Execution: {ex.get('status')}" + (f" ({ex.get('error')})" if ex.get("error") else " — dry-run receipt written.")
+        if d == "NO":
+            self.approvals.no(areq_id, seen, f.get("reason"), archive=f.get("archive") == "1")
+            return "NO recorded; request closed."
+        if d == "MODIFY":
+            try:
+                payload = json.loads(f.get("new_payload") or "")
+            except json.JSONDecodeError as ex:
+                raise DecisionError(f"edited payload is not valid JSON: {ex}")
+            r = self.approvals.modify(areq_id, seen, payload, note=f.get("note"))
+            return f"MODIFY recorded. New request {r['new_action_request_id']} awaits its own YES."
+        if d == "HOLD":
+            self.approvals.hold(areq_id, seen, preset=f.get("hold_preset") or "24h",
+                                hold_until=f.get("hold_until") or None, reason=f.get("reason"))
+            return "HOLD recorded. It will re-notify and never execute on its own."
+        raise DecisionError(f"unknown decision {d!r}")
+
+
+def make_handler(app):
+    class H(BaseHTTPRequestHandler):
+        server_version = "OperatorUI"
+        sys_version = ""
+
+        def log_message(self, fmt, *args):  # quiet; the receipt ledger is the audit log
+            pass
+
+        def _send(self, status, body, ctype="text/html; charset=utf-8", headers=None):
+            data = body.encode("utf-8")
+            self.send_response(status)
+            self.send_header("Content-Type", ctype)
+            self.send_header("Content-Length", str(len(data)))
+            self.send_header("Content-Security-Policy",
+                             "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'")
+            self.send_header("X-Content-Type-Options", "nosniff")
+            self.send_header("Referrer-Policy", "no-referrer")
+            self.send_header("Cache-Control", "no-store")
+            for k, v in (headers or {}).items():
+                self.send_header(k, v)
+            self.end_headers()
+            self.wfile.write(data)
+
+        def _host_ok(self):
+            host = (self.headers.get("Host") or "").rsplit(":", 1)[0] if not (self.headers.get("Host") or "").startswith("[") \
+                else (self.headers.get("Host") or "").split("]")[0] + "]"
+            if host not in ALLOWED_HOSTS:
+                self._send(HTTPStatus.FORBIDDEN, "forbidden host", "text/plain")
+                return False
+            return True
+
+        def do_GET(self):
+            if not self._host_ok():
+                return
+            u = urlparse(self.path)
+            qs = parse_qs(u.query)
+            now = app.clock.now()
+            flash = (qs.get("msg") or [None])[0]
+            err = (qs.get("err") or [None])[0]
+            if u.path == "/":
+                return self._send(200, page("Operator queue", render_queue(views.queue(app.store, now)), app.state(), flash or err, bool(err)))
+            if u.path == "/ledger":
+                return self._send(200, page("Receipt ledger", render_ledger(app.store), app.state()))
+            if u.path.startswith("/areq/"):
+                c = views.card(app.store, u.path.split("/")[2], now)
+                if c is None:
+                    return self._send(404, page("Not found", "<p>No such request.</p>", app.state()))
+                return self._send(200, page(c["title"], render_card(c, app.csrf), app.state(), flash or err, bool(err)))
+            if u.path == "/api/queue.json":
+                return self._send(200, json.dumps(views.queue(app.store, now)), "application/json")
+            if u.path.startswith("/api/areq/"):
+                c = views.card(app.store, u.path.split("/")[3].removesuffix(".json"), now)
+                if c is None:
+                    return self._send(404, "{}", "application/json")
+                return self._send(200, json.dumps({k: v for k, v in c.items() if k != "hold_presets"}, default=str), "application/json")
+            return self._send(404, page("Not found", "<p>Not found.</p>", app.state()))
+
+        def do_POST(self):
+            if not self._host_ok():
+                return
+            u = urlparse(self.path)
+            parts = u.path.strip("/").split("/")
+            if len(parts) != 3 or parts[0] != "areq" or parts[2] != "decide":
+                return self._send(404, "not found", "text/plain")
+            n = min(int(self.headers.get("Content-Length") or 0), 65536)
+            f = {k: v[0] for k, v in parse_qs(self.rfile.read(n).decode("utf-8"), keep_blank_values=True).items()}
+            areq_id = parts[1]
+            try:
+                msg = app.decide(areq_id, f)
+                target = areq_id
+                for a in app.store.action_requests_for_item(app.store.action_request(areq_id)["item_id"]):
+                    if a.get("derived_from") == areq_id and f.get("decision") == "MODIFY":
+                        target = a["action_request_id"]
+                loc, key = f"/areq/{target}", "msg"
+            except DecisionError as ex:
+                loc, key, msg = f"/areq/{areq_id}", "err", str(ex)
+            self.send_response(303)
+            self.send_header("Location", f"{loc}?{key}={quote(msg)}")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+
+    return H
+
+
+def serve(app, host="127.0.0.1", port=8765, tick_seconds=60):
+    if host not in ("127.0.0.1", "localhost", "::1"):
+        raise SystemExit("refusing to bind a non-loopback address: remote access needs lane E auth (WebAuthn/TOTP)")
+    stop = threading.Event()
+
+    def ticker():
+        while not stop.wait(tick_seconds):
+            try:
+                app.approvals.tick()
+            except Exception as ex:  # noqa: BLE001
+                print("tick error:", ex)
+
+    threading.Thread(target=ticker, daemon=True).start()
+    httpd = ThreadingHTTPServer((host, port), make_handler(app))
+    print(f"Operator UI on http://{host}:{port}/  (dry-run; Ctrl-C to stop)")
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        stop.set()
+        httpd.server_close()
