@@ -4,7 +4,8 @@ Agent: 05
 Role: Governance / Action Gateway / PANIC — "controlled autonomy"
 Branch: research/agent-05-governance
 Worktree: /home/michaelos/business-os-worktrees/agent-05-governance
-State: WAITING — every queued lane-E task is DONE (E-01..E-13). Waiting on 07's re-run of the release candidate.
+State: WORKING
+Claimed: E-14 (P1: spine_adapter engage_panic/release_panic/schedule_reconcile helpers + L3 hooks wired; call-sequence doc) — for 01's A-18
 Done: E-13 @ ecf1600 (F-24: freeze/unreadable/corrupt PANIC denial settles approved->cancelled_by_freeze, 6-mode regression; F-25/R22: durable dry-run provider in mbos.effector_calls, after-send->executed, before/unproven->failed RECONCILED; F-22: publish.* propose-only grants for 07+01; 362 tests)
 Done: E-12 @ c507ac0 (offer.*/counter/purchase.* tier0+step-up, binding never under comms.*, cash-at-risk defaults as data, R20 cancelled_by_freeze; 338 tests)
 Done: E-11 @ 1c12a24 (lane D re-vendored @ a08dd9f/0014; velocity count now in mbos.budget_reserve_caps; in-Python count deleted; 305 tests)
@@ -21,7 +22,7 @@ Done: E-01 @ df826c3 (interop row 05 = 10/10; vectors receipt_chain verifies; 14
 Done: E-03 @ e12caa3 (L3 DBOS cancel verified on real dbos 3.2.0; deny-all egress + LiteLLM budget generators; 157 tests)
 Current phase: ROUND TWO — wave two (foreman loop, docs/COORDINATION.md)
 Started: 2026-10-06
-Last updated: 2026-10-07 (E-13 done)
+Last updated: 2026-10-07 (claimed E-14)
 
 ## Current objective
 **SUPERSEDED by ADR-0010 (E-01):** Agent 01 binding rulings for lane E
