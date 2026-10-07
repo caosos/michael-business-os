@@ -4,8 +4,8 @@ Agent: 02
 Role: Discovery / Source Adapters (DISCOVER + NORMALIZE lane)
 Branch: research/agent-02-opportunity
 Worktree: /home/michaelos/business-os-worktrees/agent-02-opportunity
-State: WAITING
-Waiting on: B-12 unblock (MICHAEL_DECISIONS #8 + operator credentials) or queue refill from Agent 01
+State: WORKING
+Claimed: B-13
 Blocked: B-12 on MICHAEL_DECISIONS #8 + operator credentials
 Done: B-01 @ 7c9da45
 Done: B-02 @ cadfdae
@@ -19,7 +19,7 @@ Done: B-10 @ e439d04 (F1-F4 harness green; F2 missed-duplicate rate 0.00%, false
 Done: B-09 @ b12bdbd (freeze round trip on lanes D/E Postgres PANIC; 156 tests)
 Done: B-11 @ 8c634c9 (pHash: relist ambiguity resolved; F2 0 false merges with photos vs 1 without; 168 tests)
 Done: C-04 (support, source side) @ a1a7730 (lead Agent 03 C-04 @ 882c726)
-Current phase: Round Two — B-01..B-11 DONE; B-12 blocked (Michael #8 + credentials); WAITING
+Current phase: Round Two — working B-13 (spine-side Deduper with A-14 context: relist + pHash rules)
 Started: 2026-10-06 (Round One) · Round Two started 2026-10-07
 Last updated: 2026-10-07
 
