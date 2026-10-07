@@ -4,12 +4,20 @@ Agent: 05
 Role: Governance / Action Gateway / PANIC — "controlled autonomy"
 Branch: research/agent-05-governance
 Worktree: /home/michaelos/business-os-worktrees/agent-05-governance
-State: WAVE ONE COMPLETE — awaiting Agent 01 review of ADR-05-003 + integration
+State: WORKING — claimed R7 + R3 (Agent 01 ROUND_TWO_INTEGRATION rulings)
 Current phase: ROUND TWO — implementation, wave one (DRY-RUN only)
 Started: 2026-10-06
-Last updated: 2026-10-07 (wave one gateway delivered)
+Last updated: 2026-10-07 (wave two: claimed R7/R3)
 
 ## Current objective
+**ACTIVE (claimed 2026-10-07):** Agent 01 binding rulings for lane E
+(`origin/research/agent-01-coordinator@bed7609:docs/integration/ROUND_TWO_INTEGRATION.md`):
+- R7: propose-only grant `comms.email.send` / `comms.sms.send` for `agent-01-coordinator`.
+- R3: align payload_hash with the normative canonical JSON (drop the float refusal).
+NOTE: no READY_QUEUE / ACTIVE_WORK file exists on any branch or in Agent 01's worktree
+(FACT, checked 2026-10-07); the rulings table is used as the assignment source.
+
+Previous objective:
 Wave one: Action Gateway + fail-closed governance layer per ADR-0004/ADR-0005 against frozen
 contracts v1.0.0. **Delivered.**
 
