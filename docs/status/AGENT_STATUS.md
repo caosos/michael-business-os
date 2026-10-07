@@ -5,7 +5,7 @@ Role: Postgres / State / Receipts (lane D: durable business state, receipts, pro
 Branch: research/agent-04-state
 Worktree: /home/michaelos/business-os-worktrees/agent-04-state
 State: WORKING
-Claimed: D-08
+Claimed: D-10
 Done: D-01 @ a0d1fbe
 Done: D-02 @ a0d1fbe
 Done: D-03 @ ca59e3c
@@ -13,15 +13,17 @@ Done: D-05 @ 797a4e5
 Done: D-04 @ 14bd690
 Done: D-06 @ 012c141
 Done: D-07 @ 215a861
+Done: D-08 @ d668386
 Current phase: ROUND TWO: foreman loop (READY_QUEUE)
 Started: 2026-10-06
-Last updated: 2026-10-07 (D-07 done @ 215a861; D-08 claimed)
+Last updated: 2026-10-07 (D-08 done @ d668386; D-10 claimed)
 
 ## Current objective
-**D-08 (P2): pgvector rebuildable index (acceptance D3).** Drop, then rebuild, must give identical query results. Embeddings are a projection keyed by content hash, never truth.
+**D-10 (P2):** adopt 06's `mbos_comms` consent/DNC schema (`comms_spec/sql/0001_comms_ledger.sql`) into lane D migrations (R1: one DDL owner). Acceptance: 06's F-07 tests pass on lane D's schema.
 
-- D-07 done @ `215a861`: the filesystem artifact store.
-- D-06 done @ `012c141`: the State MCP server. R14 records the approval ruling.
+Recent:
+- D-08 done @ `d668386`: pgvector rebuildable index; D3 passes.
+- D-07 done @ `215a861`: filesystem artifact store.
 
 ### Interface notes for Agent 05 (E-02) and Agent 01 (A-01/A-03)
 - **PANIC:**
@@ -40,11 +42,8 @@ Last updated: 2026-10-07 (D-07 done @ 215a861; D-08 claimed)
 ## Proposed tasks (for Agent 01 to triage into READY_QUEUE)
 | Proposed ID | Pri | Task | Deps | Acceptance |
 |---|---|---|---|---|
-| D-06 | P1 | State MCP server: narrow intent tools over `mbos.*` (ingest, transition, propose, outcome, lesson), login `mbos_state_mcp`; the only agent write path; no raw SQL | none | Tool tests; an agent cannot approve, execute or spend through it |
-| D-07 | P2 | Artifact store to FS (sha256 paths) behind `put_artifact`, plus `storage='fs'` rows; integrity check job | none | Round-trip and hash-verify tests; restore drill includes artifacts |
-| D-08 | P2 | pgvector rebuildable index (acceptance D3): embeddings keyed by content hash, with a drop/rebuild drill | none | Identical query results after rebuild |
-| D-09 | P2 | pgBackRest PITR to an off-box target, plus a PITR drill | an off-box target (UNKNOWN; Michael) | Point-in-time restore, then verify_chain |
-| D-10 | P2 | Contract v1.1.0 (ADR-0009) DDL follow-up: ITEM_UPDATED, ACTION_EXPIRED, GUARD_REFUSED and `superseded` status, once ADR-0009 is accepted | A-06 | Migration plus tests; old receipts still verify |
+| D-11 | P2 | `caps.velocity_actions_per_hour` in `budget_reserve_caps`: a count of unreleased bucket reservations in the last hour, zero-amount rows included. Requested by 05 after E-02, so lane E's 3-money-actions/h rule lives in one place | none | 05 switches from its own count; a parallel test never exceeds N actions/h |
+| D-12 | P2 | Contract v1.1.0 (ADR-0009) DDL follow-up: ITEM_UPDATED, ACTION_EXPIRED, GUARD_REFUSED, `superseded` | ADR-0009 accepted | Migration + tests; old receipts still verify |
 
 ## Answers requested by Agent 01 (ROUND_TWO_INTEGRATION §3 D, READY_QUEUE D-01)
 1. **DBOS login role: `mbos_dbos`.** It is created by `state/bootstrap/roles.sql`.
