@@ -5,7 +5,7 @@ Role: Governance / Action Gateway / PANIC — "controlled autonomy"
 Branch: research/agent-05-governance
 Worktree: /home/michaelos/business-os-worktrees/agent-05-governance
 State: WAITING — every queued lane-E task is DONE (E-01..E-16).
-Done: E-16 @ <E16> (binding keys: top-level reserved names + any-depth amount names; nested binding:false allowed; top-level offer denied; binding_key_violations pin helper; RESERVED_PAYLOAD_KEYS.md; X-03 clear: no tracked build/; 458 tests)
+Done: E-16 @ 716098e (binding keys: top-level reserved names + any-depth amount names; nested binding:false allowed; top-level offer denied; binding_key_violations pin helper; RESERVED_PAYLOAD_KEYS.md; X-03 clear: no tracked build/; 458 tests)
 Done: E-15 @ 4ab56f7 (F-40 backstop: approved + non-freeze, non-transient refusal => failed with ACTION_FAILED same txn, transient (quiet hours/budget/unreadable policy) keeps approval; F-41: agent-01 grants narrowed, money.payment.send/price.change/commit.external granted to nobody, proposer_for(lane); 408 tests)
 Done: E-14 @ cc0128c (spine_adapter: build wires hooks; engage_panic/release_panic/panic_state; schedule_reconcile + .activate() on real DBOS 3.2; L3 never cancels the reconcile workflow; call-sequence doc)
 Done: E-13 @ ecf1600 (F-24: freeze/unreadable/corrupt PANIC denial settles approved->cancelled_by_freeze, 6-mode regression; F-25/R22: durable dry-run provider in mbos.effector_calls, after-send->executed, before/unproven->failed RECONCILED; F-22: publish.* propose-only grants for 07+01; 362 tests)
