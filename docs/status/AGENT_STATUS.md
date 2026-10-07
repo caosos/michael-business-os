@@ -5,18 +5,23 @@ Role: Communications + Operator UI / Approval UX (build lane F)
 Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
 State: WORKING
-Claimed: F-07
-Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e
+Claimed: F-08
+Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4
 Blocked: F-04 on A-03
 Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
 Last updated: 2026-10-07
 
 ## Current objective
-**F-07** (READY_QUEUE @ `aa88e7a`): consent ledger + DNC scrub store as data (append-only, receipted, raw contact values referenced and never copied), so E2 grades PASS/FAIL on a spine run. Next: **F-08**. F-04 is still BLOCKED on A-03.
-
-Note: the queue at `aa88e7a` already showed F-07 as CLAIMED (06), set by Agent 01's sync before this push. This commit is 06's own claim under COORDINATION.md step 2.
+**F-08** (READY after F-07; READY_QUEUE @ `aa88e7a`): follow-up and binding offer/quote templates as their own step-up ActionRequests (tier 0, irreversible). Templates + tests; nothing auto-sends. F-04 is still BLOCKED on A-03.
 
 ## Done
+- **F-07 @ `36ce9a4`:** consent ledger + DNC scrub store.
+  - Schema `mbos_comms` is insert-only and PROPOSED for lane D. Raw contact values live only in `contacts`.
+  - Each consent, revocation or STOP, and DNC scrub is written in one transaction with provenance and a chained receipt.
+  - `ConsentLedger` lookups fail closed.
+  - **On the real spine, E2 is graded PASS and E4 PASS**; without consent the send is blocked → ACTION_FAILED.
+  - A-13 is verified: the shim is removed. 72 tests pass.
+  - Receipt: `docs/receipts/2026-10-07-f07-consent-ledger-dnc-store.md`.
 - **F-06 @ `5abf51e`:** `comms_spec/effector.py` `CommsDryRunEffector`.
   - Exactly once (it replays before evaluating) and sends only the frozen `payload.comms` draft.
   - Fail-closed checks: template integrity, E1 disclosure, E3 window, rate limits and DNC. Consent is recorded as `not_evaluated`.
@@ -67,11 +72,14 @@ None. Live comms stay disabled (MICHAEL_DECISIONS #4).
   1. `_propose` merges `payload_extension(pa)` into the payload before hashing.
   2. `finish_act` maps `effector_response.status=="blocked"` to ACTION_FAILED.
   3. Optionally, merge `effector_response.comms` into `details`. F-06's acceptance text says the checks belong in `details`; the gateway at `0d107df` builds `details` itself, so they ride in `effector_response.comms` today, and `audit()` reads either location.
+- **FINDING (spine @ `aa88e7a`, lane A):** receipt `seq` comes from `nextval()` in `mbos.receipts_chain()`. A rolled-back receipt transaction (including A1 fault injection) therefore leaves a seq gap. `mbos.verify_chain()` checks links only and stays ok; the ADR-0010 reference `verify_chain` reports `gap before seq N`. Pinned by `tests/test_operator_ui.py::test_finding_spine_seq_gap_after_rollback_is_flagged_only_by_the_reference`. R1 (lane D's gapless chain) should close it. Until then the two verifiers disagree.
+- **F-07 DDL:** `comms_spec/sql/0001_comms_ledger.sql` (schema `mbos_comms`) is PROPOSED for lane D to adopt or port (R1: 04 owns DDL).
+- **ADR-0009 request:** add receipt types CONSENT_RECORDED / CONSENT_REVOKED / DNC_SCRUB_RECORDED. Under v1.0.0 these events use GRANT_CREATED/GRANT_REVOKED with `entity_type` `consent` or `dnc_scrub`.
 - The comms policy values in `comms_spec/data/comms_policy.v1.json` are PROPOSED (conservative). Loosening any of them is a version bump.
 
 ## Proposed tasks
 - P-06-4 became F-05 (DONE) and P-06-5 became F-06 (DONE).
-- **P-06-6 (lane D/F):** a consent ledger plus a DNC scrub store (data only, dry-run). It feeds `CommsDryRunEffector(consent_lookup, dnc_lookup)`, so that E2 can grade PASS/FAIL instead of DRY_RUN_EXEMPT.
+- P-06-6 became F-07 (DONE).
 - **P-06-7 (lane F):** follow-up templates driven by Q&A answers (`seller_followup_questions`), and the binding `seller_offer` / `customer_quote` as their own tier-0, step-up requests after Q&A.
 
 ## Files (Round Two, current)
