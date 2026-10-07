@@ -34,6 +34,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from . import __version__, contracts
+from .content_guard import ContentRulesStore, ContentRulesUnavailable, injection_findings, secret_findings
 from .effectors import DryRunEffector, Effector, TokenMinter
 from .hooks import run_hooks
 from .ids import fmt_ts, fmt_ts_us, new_id, new_ulid, parse_ts, payload_hash, utcnow
@@ -70,7 +71,8 @@ def to_micros(amount) -> int:
 
 class ActionGateway:
     def __init__(self, store, policy_store: PolicyStore, panic_store: PanicStore, clock=utcnow,
-                 journal_path: str | Path | None = None, panic_hooks: list | None = None):
+                 journal_path: str | Path | None = None, panic_hooks: list | None = None,
+                 content_rules: ContentRulesStore | None = None):
         self.store = store
         self.policies = policy_store
         self.panic = panic_store
@@ -79,6 +81,8 @@ class ActionGateway:
         self._effectors: dict[str, Effector] = {"dryrun": DryRunEffector(self._minter)}
         self._journal = Path(journal_path) if journal_path else Path(str(panic_store.path) + ".journal.jsonl")
         self.panic_hooks = list(panic_hooks or [])  # hooks.py: DBOS cancel, egress, LiteLLM (E-03)
+        # E-04: secret scan + injection tripwire rules (data). Default: next to the policy file.
+        self.content_rules = content_rules or ContentRulesStore(Path(policy_store.path).with_name("content_rules.v1.json"))
 
     # ------------------------------------------------------------------ helpers
     def _policy(self) -> tuple[Policy | None, str | None]:
@@ -171,14 +175,54 @@ class ActionGateway:
             p.append(f"BAD_TIMESTAMP:{exc}")
         return p
 
-    def propose(self, ar: dict, caller: str) -> Result:
-        """An agent submits a proposed side-effect. Never executes anything."""
+    def _content_rules(self):
+        try:
+            return self.content_rules.current(), None
+        except ContentRulesUnavailable as exc:
+            return None, f"CONTENT_RULES_UNREADABLE:{exc}"
+
+    def _tripwire_receipt(self, cur, ar: dict, intent: str, details: dict, config_version: str) -> dict:
+        """INJECTION_SUSPECTED. Findings carry rule ids + JSON paths only, never matched values."""
+        prov = self._tool_provenance(cur, config_version, tool="mbos_governance.content_guard")
+        return self.store.append_receipt(cur, {
+            "type": "INJECTION_SUSPECTED", "actor": GATEWAY_ACTOR, "intent": intent,
+            "item_id": ar["item_id"], "action_request_id": ar["action_request_id"], "capability": ar["capability"],
+            "payload_hash": ar["payload_hash"], "effect": "none", "provenance_ids": [prov] + ar["provenance_ids"],
+            "idempotency_key": f"{ar['action_request_id']}:INJECTION_SUSPECTED:{new_ulid()}",
+            "details": {"kind": "generic", **details},
+        })
+
+    def propose(self, ar: dict, caller: str, untrusted_texts: list[dict] | None = None) -> Result:
+        """An agent submits a proposed side-effect. Never executes anything.
+
+        `untrusted_texts`: the attacker-controllable inputs that fed this proposal (listing body,
+        inbound message), as [{"ref": ..., "text": ...}]. Supplying any marks the request tainted
+        (tier 0, step-up on YES); injection markers in them or in the payload fire the tripwire."""
         contracts.require_valid("action-request", ar)
         try:
             payload_hash(ar["payload"])
         except (ValueError, TypeError) as exc:
             # Not canonical JSON (NaN/Infinity/non-JSON type): it cannot be stored or receipted faithfully.
             raise GatewayRefused(f"PAYLOAD_NOT_HASHABLE:{exc}") from exc
+        if untrusted_texts is not None and not (isinstance(untrusted_texts, list) and all(
+                isinstance(t, dict) and isinstance(t.get("text"), str) and isinstance(t.get("ref"), str)
+                for t in untrusted_texts)):
+            raise GatewayRefused("UNTRUSTED_TEXTS_MALFORMED: expected [{'ref': str, 'text': str}]")
+        rules, rules_err = self._content_rules()
+        if rules is None:
+            raise GatewayRefused(rules_err)  # fail closed: cannot scan => cannot propose
+        secrets_found = secret_findings(rules, ar["payload"])
+        if secrets_found:
+            # Refused at the door: the payload (and the secret) is never stored. Receipt has paths only.
+            with self.store.tx() as cur:
+                self._tripwire_receipt(cur, ar, "secret-shaped content in an outbound payload; proposal refused, not stored",
+                                       {"finding": "secret_in_outbound_payload", "rules_version": rules.version,
+                                        "findings": [f.as_dict() for f in secrets_found], "stored": False},
+                                       rules.version)
+            raise GatewayRefused("SECRET_IN_PAYLOAD:" + ",".join(f"{f.rule}@{f.path}" for f in secrets_found))
+        injections = injection_findings(rules, untrusted=untrusted_texts or [], payload=ar["payload"])
+        if untrusted_texts or injections:
+            ar = {**ar, "untrusted_inputs_present": True, "tier": 0}  # taint: schema then pins tier 0
         policy, policy_err = self._policy()
         panic_state = self.panic.read()
         with self.store.tx() as cur:
@@ -212,6 +256,13 @@ class ActionGateway:
             if decision and not reasons:
                 stored["tier"] = decision.tier
             self.store.insert_action_request(cur, stored)
+            if injections:
+                self._tripwire_receipt(cur, stored, "prompt-injection markers in inputs feeding this proposal; "
+                                       "forced tier 0, needs review, step-up required",
+                                       {"finding": "injection_suspected", "rules_version": rules.version,
+                                        "findings": [f.as_dict() for f in injections], "needs_review": True,
+                                        "untrusted_refs": [t["ref"] for t in (untrusted_texts or [])]},
+                                       rules.version)
 
             agent_actor = {"type": "agent", "id": ar["proposed_by"]}
             rids = [self._action_receipt(cur, "ACTION_PROPOSED", ar, f"{ar['proposed_by']} proposed {ar['capability']}",
@@ -226,8 +277,11 @@ class ActionGateway:
                          "policy_version": config_version})["receipt_id"])
             if not reasons:
                 rids.append(self._action_receipt(
-                    cur, "APPROVAL_REQUESTED", stored, "Michael's YES/NO/MODIFY/HOLD required (tier 0)",
-                    [gw_prov] + ar["provenance_ids"], policy_decision_ref=pdp_ref, effect="none")["receipt_id"])
+                    cur, "APPROVAL_REQUESTED", stored, "Michael's YES/NO/MODIFY/HOLD required (tier 0)"
+                    + (" — NEEDS REVIEW: injection tripwire fired" if injections else ""),
+                    [gw_prov] + ar["provenance_ids"], policy_decision_ref=pdp_ref, effect="none",
+                    details={"kind": "generic", "needs_review": bool(injections),
+                             "tainted": bool(stored.get("untrusted_inputs_present"))})["receipt_id"])
             return Result("rejected" if reasons else "pending_approval", ar["action_request_id"], final_status,
                           reasons, rids)
 
@@ -244,7 +298,8 @@ class ActionGateway:
         if approval["payload_hash_seen"] != ar["payload_hash"]:
             p.append("APPROVAL_PAYLOAD_HASH_MISMATCH")
         need_step_up = (ar["category"] in rules["step_up_required"]["categories"]
-                        or ar["reversibility"] in rules["step_up_required"]["reversibility"])
+                        or ar["reversibility"] in rules["step_up_required"]["reversibility"]
+                        or (rules["step_up_required"].get("untrusted_inputs") and ar.get("untrusted_inputs_present")))
         if need_step_up and not (approval.get("auth_context") or {}).get("step_up"):
             p.append("STEP_UP_REQUIRED")
         if not (approval.get("auth_context") or {}).get("method"):
@@ -415,6 +470,11 @@ class ActionGateway:
                 f["G6"] += d.reasons
             if ar["tier"] != 0:
                 f["G6"].append(f"TIER_NOT_ZERO:{ar['tier']}")
+        rules, rules_err = self._content_rules()
+        if rules is None:
+            f["G6"].append(rules_err)
+        else:
+            f["G6"] += [f"SECRET_IN_PAYLOAD:{x.rule}@{x.path}" for x in secret_findings(rules, ar["payload"])]
         cat = policy.category(ar["category"])
         if cat and cat["quiet_hours"] and self._in_quiet_hours(policy):
             f["G6"].append("QUIET_HOURS")

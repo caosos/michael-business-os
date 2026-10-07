@@ -48,6 +48,7 @@ class Env:
         self.policy_path.parent.mkdir()
         shutil.copy(REPO / "policy" / "policy.v1.json", self.policy_path)
         shutil.copy(REPO / "policy" / "policy.schema.json", self.policy_path.parent / "policy.schema.json")
+        shutil.copy(REPO / "policy" / "content_rules.v1.json", self.policy_path.parent / "content_rules.v1.json")
         self.clock = Clock(NOON)
         self.panic = PanicStore(tmp / "panic_state.json")
         self.panic.init("michael", "test bootstrap", state="RUNNING")

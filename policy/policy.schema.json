@@ -94,7 +94,8 @@
           "type": "object",
           "required": [
             "categories",
-            "reversibility"
+            "reversibility",
+            "untrusted_inputs"
           ],
           "properties": {
             "categories": {
@@ -112,6 +113,10 @@
                   "irreversible"
                 ]
               }
+            },
+            "untrusted_inputs": {
+              "const": true,
+              "description": "E-04: tainted requests (untrusted inputs / injection tripwire) always need step-up. Wave one pins it on."
             }
           }
         }

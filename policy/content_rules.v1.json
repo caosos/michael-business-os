@@ -1,0 +1,28 @@
+{
+  "rules_schema": "mbos.governance.content_rules/1",
+  "version": "2026.10.07-e04",
+  "description": "E-04 (05 §14, §17 #24-26). Injection rules take an optional `scope` (subset of [\"untrusted\", \"payload\"], default both). Secret rules REFUSE outbound payloads. Injection rules are a TRIPWIRE: INJECTION_SUSPECTED receipt + tier 0 + untrusted flag + needs_review/step-up, never a wall. Patterns are Python `re` syntax, matched case-insensitively unless `case_sensitive` is true. Values are never logged — only rule id + JSON path.",
+  "secret_rules": [
+    { "id": "private_key_block",   "pattern": "-----BEGIN (?:RSA |EC |OPENSSH |DSA |PGP |ENCRYPTED )?PRIVATE KEY-----" },
+    { "id": "aws_access_key_id",   "pattern": "\\b(?:AKIA|ASIA)[0-9A-Z]{16}\\b", "case_sensitive": true },
+    { "id": "github_token",        "pattern": "\\bgh[pousr]_[A-Za-z0-9]{36,}\\b", "case_sensitive": true },
+    { "id": "slack_token",         "pattern": "\\bxox[abposr]-[A-Za-z0-9-]{10,}\\b", "case_sensitive": true },
+    { "id": "stripe_secret_key",   "pattern": "\\b(?:sk|rk)_(?:live|test)_[A-Za-z0-9]{16,}\\b", "case_sensitive": true },
+    { "id": "openai_style_key",    "pattern": "\\bsk-(?:proj-|ant-)?[A-Za-z0-9_-]{20,}\\b", "case_sensitive": true },
+    { "id": "google_api_key",      "pattern": "\\bAIza[0-9A-Za-z_-]{35}\\b", "case_sensitive": true },
+    { "id": "jwt",                 "pattern": "\\beyJ[A-Za-z0-9_-]{10,}\\.eyJ[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}\\b", "case_sensitive": true },
+    { "id": "bearer_token",        "pattern": "\\bbearer\\s+[A-Za-z0-9._~+/=-]{20,}" },
+    { "id": "password_assignment", "pattern": "\\b(?:password|passwd|pwd|passcode|api[_-]?key|secret)\\s*[:=]\\s*\\S{6,}" },
+    { "id": "us_ssn",              "pattern": "\\b(?!000|666|9\\d\\d)\\d{3}-(?!00)\\d{2}-(?!0000)\\d{4}\\b" },
+    { "id": "payment_card",        "pattern": "\\b(?:\\d[ -]?){13,19}\\b", "luhn": true }
+  ],
+  "injection_rules": [
+    { "id": "ignore_instructions",  "pattern": "\\b(?:ignore|disregard|forget|override)\\b.{0,40}\\b(?:previous|prior|above|earlier|all|any|your|the)\\b.{0,40}\\b(?:instructions?|directions?|rules?|prompts?|guidelines?)\\b" },
+    { "id": "role_reassignment",    "pattern": "\\b(?:you are now|from now on you|act as (?:an? )?(?:system|admin|developer|assistant)|new instructions?:)" },
+    { "id": "system_prompt_probe",  "pattern": "\\b(?:system prompt|developer message|reveal (?:your|the) (?:prompt|instructions))\\b" },
+    { "id": "chat_markup",          "pattern": "(?:<\\|im_start\\|>|<\\|im_end\\|>|\\[/?INST\\]|<\\|system\\|>|^\\s*(?:system|assistant)\\s*:)" },
+    { "id": "tool_call_smuggling",  "pattern": "\\b(?:function_call|tool_call|tool_use)\\b|\"name\"\\s*:\\s*\"[a-z_]+\\.(?:send|pay|create|post)\"" },
+    { "id": "payment_demand",       "scope": ["untrusted"], "pattern": "\\b(?:send|wire|transfer|venmo|zelle|cash ?app)\\b.{0,30}(?:\\$\\s?\\d|\\d+\\s?(?:usd|dollars)|deposit)|\\bpay\\b.{0,15}\\b(?:me|us|upfront|up front|in advance|a deposit|the deposit)\\b|\\bgift ?cards?\\b|\\b(?:deposit|advance fee)\\b.{0,30}\\b(?:first|before|now|today)\\b" },
+    { "id": "exfiltration_request", "pattern": "\\b(?:send|post|email|forward|paste|share)\\b.{0,40}\\b(?:api ?keys?|passwords?|credentials?|tokens?|secrets?|env(?:ironment)? variables?)\\b" }
+  ]
+}
