@@ -32,7 +32,7 @@ from .canonical import CanonicalError, raw_json_bytes
 from .contract import check_provenance
 from .dedup import title_similarity
 from .health import HealthBook
-from .ids import derived_ulid, iso
+from .ids import derived_ulid, iso, parse_ts
 from .normalize import classify, clean_text, match_text, money
 from .rawstore import RawStore
 
@@ -276,21 +276,27 @@ def collect_comps(jobs: list[tuple[CompSourceAdapter, SearchProfile]], store: Co
 # ---------------------------------------------------------------- retrieval (pre-filter; 03 owns selection)
 def candidate_comps(item: dict, comps: list[dict], as_of: datetime, *, window_days: int = 365,
                     min_similarity: float = 0.5, limit: int = 25) -> list[dict]:
-    """Deterministic candidates for one flip Item: same category, sold in (as_of - window, as_of], title
+    """Deterministic candidates for one flip Item (sold or asking comps; never the subject's own listing): same
+    category, sold/observed in (as_of - window, as_of], title
     similarity ≥ min_similarity; ordered by similarity desc, sold_date desc, comp_id. Agent 03's
     `build_comps_bundle` applies the real selection policy (90-day window, vocabulary agreement, FACT check)."""
     if item.get("type") != "flip":
         return []
+    own = {s.get("url") for s in item.get("sources", [])} | {
+        s.get("source_listing_id") for s in item.get("sources", []) if s.get("source_listing_id")}
     title = item.get("normalized", {}).get("title", "")
     lo = (as_of - timedelta(days=window_days)).date().isoformat()
     hi = as_of.date().isoformat()
     scored = []
     for c in comps:
-        if c["category"] != item.get("category") or not (lo < c["sold_date"] <= hi):
+        if c.get("url") in own or c.get("source_comp_id") in own:
+            continue                                    # never the subject's own listing (its ask is not a comp)
+        when = c.get("sold_date") or c.get("observed_date") or ""
+        if c["category"] != item.get("category") or not (lo < when <= hi):
             continue
         sim = title_similarity(title, c["title"])
         if sim >= min_similarity:
-            scored.append((-round(sim, 6), _neg_date(c["sold_date"]), c["comp_id"], c))
+            scored.append((-round(sim, 6), _neg_date(when), c["comp_id"], c))
     return [c for *_, c in sorted(scored, key=lambda t: t[:3])[:limit]]
 
 
@@ -301,3 +307,50 @@ def _neg_date(d: str) -> int:
 def comp_digest(records: list[dict]) -> str:
     """Stable digest of a candidate set (for receipts/tests)."""
     return "sha256:" + hashlib.sha256(raw_json_bytes(records)).hexdigest()
+
+
+# ---------------------------------------------------------------- ASKING comps from eBay Browse (READY_QUEUE B-08)
+ASKING_SOURCE = "ebay_browse"          # name in Agent 03's comps_sources registry (kind "asking" only)
+
+
+def asking_comps_from_items(items: list[dict], *, item_source: str = "ebay",
+                            tool_version: str = "1.0.0") -> tuple[list[dict], list[dict]]:
+    """ASKING comps derived from listings discovery already retained (no extra API calls).
+
+    Each eligible eBay sighting becomes one record labelled `kind: "asking"` with an `observed_date` — never a
+    `sold_date`. An ask is what a seller wants, not what a buyer paid. Eligible: active, fixed price (`fixed`)
+    with a positive amount. Auctions (a current bid is not an ask) and free items are excluded. Provenance is FACT
+    in the narrow sense "the source listed this asking price at fetched_at", actor `external`, with the sighting's
+    `raw_ref` as input. Returns (records, provenance_records), both sorted by comp_id."""
+    recs: dict[str, dict] = {}
+    provs: dict[str, dict] = {}
+    for it in items:
+        if it.get("type") != "flip":
+            continue
+        n = it.get("normalized") or {}
+        price = n.get("price") or {}
+        if n.get("listing_status", "active") != "active" or price.get("type") != "fixed" or not price.get("amount"):
+            continue
+        for s in it.get("sources", []):
+            if s.get("source") != item_source or not s.get("raw_ref"):
+                continue
+            seen_at = parse_ts(s.get("last_seen_at") or s["first_seen_at"])
+            comp_id = derived_ulid("comp", _EPOCH, ASKING_SOURCE, s["source_listing_id"])
+            prov = {
+                "provenance_id": derived_ulid("prov", seen_at, "asking", s["source_listing_id"], s["raw_ref"]),
+                "created_at": iso(seen_at), "actor_type": "external", "basis": "FACT", "agent_name": AGENT_ID,
+                "source_uri": s["url"], "fetched_at": iso(seen_at), "tool_name": "mbos_discovery.comps.asking",
+                "tool_version": tool_version, "config_version": f"normalizer-{NORMALIZER_VERSION}",
+                "inputs_used": [{"ref": s["url"], "hash": s["raw_ref"]}],
+            }
+            check_provenance(prov)
+            provs[prov["provenance_id"]] = prov
+            rec = {"comp_id": comp_id, "kind": "asking", "price": float(price["amount"]),
+                   "currency": price.get("currency", "USD"), "observed_date": seen_at.date().isoformat(),
+                   "source": ASKING_SOURCE, "source_comp_id": s["source_listing_id"], "url": s["url"],
+                   "category": it["category"], "title": n.get("title", ""), "condition": n.get("condition", "unknown"),
+                   "fetched_at": iso(seen_at), "raw_ref": s["raw_ref"], "provenance_id": prov["provenance_id"]}
+            if n.get("location"):
+                rec["location"] = {k: v for k, v in n["location"].items() if k in ("city", "state", "zip")}
+            recs[comp_id] = rec
+    return [recs[k] for k in sorted(recs)], [provs[k] for k in sorted(provs)]

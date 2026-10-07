@@ -240,3 +240,17 @@ Mutation check: with the `notify_event` call removed, the item stays HELD.
 - **Not fetched:** `description`, a link that needs the key. Points of contact stay in the raw artifact only.
 - **Later:** `ptype=g` (sale of surplus property) could feed the flip lane. That's not part of this task.
 - **Fixed while testing:** the smart-home keyword rules didn't match plurals ("thermostats", "doorbells"), so such leads fell to `handyman`. They now classify as `smart_home_install`.
+
+## 16. ASKING comps from eBay Browse — READY_QUEUE B-08 (with Agent 03)
+
+`comps.asking_comps_from_items(items)` turns listings discovery **already retained** into asking comps, so it makes no extra API calls.
+
+- **Record:** `{kind: "asking", source: "ebay_browse", observed_date, price, currency, url, category, title, condition, fetched_at, raw_ref, provenance_id}`. There is **never** a `sold_date`, because an ask is not a sale.
+- **Eligible listings:** active, fixed price, positive amount. Auctions (a bid is not an ask), free items and ended listings are excluded.
+- **Provenance:** FACT, actor `external`, meaning only that "the source listed this asking price at `fetched_at`". The input is the sighting's `raw_ref`.
+- **`candidate_comps` now excludes the subject's own listing**, by url or listing id, for every comp kind. An item's own ask can never be its evidence.
+
+Acceptance status:
+- My source side is tested (3 tests).
+- The estimator check (`test_estimator_consumes_asking_with_the_right_basis`) requires two things. With asking-only evidence the comps are selected but the item stays RESEARCHING, because an ask never sets the resale target. With sold comps added the item scores and carries the asking comp.
+- That check is **xfail** today. Agent 03's `comps_feed.entry()` reads `c["sold_date"]` unconditionally, so a correctly-labelled asking comp crashes `build_comps_bundle` (confirmed @ `b582645`; repro sent to Agent 03). The test passes without edits once 03 fixes it.
