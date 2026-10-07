@@ -8,7 +8,7 @@ State: WORKING
 Done: B-04 lane-E half @ d3b9948 (02's fixture applies + blocks exactly that source; auto-apply decided, release human-only)
 Done: E-04 @ 4fadbe7 (secret scan refuses + never stores; injection tripwire => tier 0, needs_review, step-up; 205 tests)
 Done: E-02 @ 1c554cb (gateway + PANIC on lane D Postgres via mbos.* API; no SQLite in prod path; R4 role-enforced; 211 tests on PG16)
-Done: E-05 @ <E05> (reconcile: provider lookup by idempotency key; found→executed, not found→failed, no answer→NEEDS_HUMAN; never re-sends; exactly once)
+Done: E-05 @ 9391c16 (reconcile: provider lookup by idempotency key; found→executed, not found→failed, no answer→NEEDS_HUMAN; never re-sends; exactly once)
 Done: E-01 @ df826c3 (interop row 05 = 10/10; vectors receipt_chain verifies; 141 tests)
 Done: E-03 @ e12caa3 (L3 DBOS cancel verified on real dbos 3.2.0; deny-all egress + LiteLLM budget generators; 157 tests)
 Current phase: ROUND TWO — wave two (foreman loop, docs/COORDINATION.md)
