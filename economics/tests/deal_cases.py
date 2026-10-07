@@ -61,3 +61,32 @@ def utility_trailer(miles: float = 20, ask: float = 700) -> tuple[dict, list, li
 
 
 CASES = {"zero_turn_mower": zero_turn_mower, "concrete_saw": concrete_saw, "utility_trailer": utility_trailer}
+
+
+# ---- C-16: titles that name a model (seller-stated). Illustrative fixtures only.
+def recalled_cub_cadet(ask: float = 2400) -> tuple[dict, list, list]:
+    it = item(4, "mower", "2018 Cub Cadet RZT SX 54 EFI zero turn mower 17AWCBYS010, tank neck leaking", ask, 25)
+    comps, prov = comps_for("mower", "Cub Cadet RZT SX zero turn mower", [3200, 3350, 3500, 3650, 3800], 70)
+    return it, comps, prov
+
+
+def recalled_generac(ask: float = 650) -> tuple[dict, list, list]:
+    it = item(5, "generator", "Generac GP6500E 6500 watt portable generator, barely used", ask, 30)
+    comps, prov = comps_for("generator", "6500w portable generator", [800, 850, 900], 90)
+    return it, comps, prov
+
+
+def generac_gp7500e(ask: float = 650) -> tuple[dict, list, list]:
+    it = item(6, "generator", "Generac GP7500E 7500 watt portable generator", ask, 30)
+    comps, prov = comps_for("generator", "7500w portable generator", [900, 950, 1000], 110)
+    return it, comps, prov
+
+
+def campbell_compressor(ask: float = 120) -> tuple[dict, list, list]:
+    it = item(7, "compressor", "Campbell Hausfeld HU200099AV 20 gallon air compressor", ask, 15)
+    comps, prov = comps_for("compressor", "20 gallon air compressor", [220, 240, 260], 130)
+    return it, comps, prov
+
+
+VALUE_ADD_CASES = {"recalled_cub_cadet": recalled_cub_cadet, "recalled_generac": recalled_generac,
+                   "generac_gp7500e": generac_gp7500e, "campbell_compressor": campbell_compressor}

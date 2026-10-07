@@ -291,7 +291,8 @@ class TestGoldens(unittest.TestCase):
     """economics/examples/deal_sniffer/*.json (regenerate: scripts/regen_deal_sniffer.py)."""
 
     def test_goldens_reproduce_and_differ(self):
-        files = {p.stem: json.loads(p.read_text()) for p in sorted((HERE.parent / "examples" / "deal_sniffer").glob("*.json"))}
+        files = {p.stem: json.loads(p.read_text()) for p in sorted((HERE.parent / "examples" / "deal_sniffer").glob("*.json"))
+                 if not p.stem.startswith("value_add_")}          # value_add goldens belong to C-16 (test_valueadd.py)
         self.assertEqual(set(files), {"concrete_saw", "utility_trailer", "zero_turn_mower"})
         for name, doc in files.items():
             it = scored({"zero_turn_mower": dc.zero_turn_mower, "concrete_saw": dc.concrete_saw,

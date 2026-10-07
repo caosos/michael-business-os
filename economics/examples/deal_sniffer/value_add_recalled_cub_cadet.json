@@ -1,0 +1,50 @@
+{
+ "_note": "C-16 golden. Illustrative listing; recall facts are from primary CPSC/agency pages (see source in each risk).",
+ "as_of": "2026-10-07T18:00:00Z",
+ "block": {
+  "model_specific_risks": [
+   {
+    "basis": "FACT",
+    "kind": "failure_mode",
+    "provenance_id": "prov_01M4BRBC806BY35G2D1HEB5YZX",
+    "risk": "Cub Cadet RZT SX EFI zero-turn recall (Oct 24, 2018): the fuel tank neck can crack and leak, a fire hazard. Models 17AWCBYS010, 17AWCBYZ010, 17RWCBYN010, 17RWCBYN210, 17RWCBYS010, 17RWCBYZ010, built Dec 2017 to Jun 2018, about 4,900 sold in the U.S., 15 cracked-neck reports. The remedy is a free repair at an authorized Cub Cadet dealer; whether it was done on this unit is UNKNOWN, and a dealer can answer it from the model and serial. (Model taken from the listing text; not verified against the unit.)",
+    "source": "CPSC: Cub Cadet Recalls Zero-Turn Riding Mowers Due to Fire Hazard (Recall Alert), recall date Oct 24, 2018 <https://www.cpsc.gov/Recalls/2019/Cub-Cadet-Recalls-ZeroTurn-Riding-Mowers-Due-to-Fire-Hazard-Recall-Alert> (retrieved 2026-10-07)"
+   }
+  ],
+  "plan": {
+   "basis": "INFERENCE",
+   "provenance_id": "prov_01M4BRBC806BY35G2D1HEB5YZX",
+   "value": "Budget about $80 in parts and $10 in materials plus about 3 h of your time (a category estimate; the fault is not diagnosed yet). Even with no parts spend this fails your $800 worst-case loss limit and your $1,500 per-deal cash limit (it ties up $2,137). The trailer run is already costed in ($27 and 1 h). Sell target is $3,500, the median of 5 sold comparables. Do not budget fuel tank parts until a Cub Cadet dealer confirms whether the free recall repair is still open on this unit."
+  }
+ },
+ "item_id": "itm_01JK0000000000000000000004",
+ "matched": [
+  "cub_cadet_rzt_sx_efi_fuel_tank_2018"
+ ],
+ "omitted": [],
+ "provenance": {
+  "actor_type": "system",
+  "agent_name": "agent-03-economics",
+  "basis": "INFERENCE",
+  "config_version": "2026.10.0",
+  "created_at": "2026-10-07T18:00:00Z",
+  "derived_from": [
+   "prov_01JK0000000000000000000400"
+  ],
+  "inputs_used": [
+   {
+    "hash": "sha256:511d87bca15e5f86836a4a9f323f2d9be32e46ec1f5004e5d4ee0a129f623cbd",
+    "ref": "scorecard.inputs_hash"
+   },
+   {
+    "hash": "sha256:b2da114a6ce214cc2a0c4c4959f2c1cb46bc8b45791c2936b1b91195dd57c243",
+    "ref": "value_add_kb@2026.10.0"
+   }
+  ],
+  "provenance_id": "prov_01M4BRBC806BY35G2D1HEB5YZX",
+  "tool_name": "mbos_economics.valueadd",
+  "tool_version": "0.9.1"
+ },
+ "title": "2018 Cub Cadet RZT SX 54 EFI zero turn mower 17AWCBYS010, tank neck leaking",
+ "value_add_hash": "sha256:973d8f094bc13bcec11e50d3527d0ffd272df75b5c2d6f3f47ea22c8c2bc4986"
+}

@@ -159,7 +159,7 @@ def spine_style(export: dict) -> dict:
     d = copy.deepcopy(export)
     for rc in d["receipts"]:
         rc.pop("payload_hash", None)
-        rc["tool_name"] = "mbos_economics.engine@0.9.0"
+        rc["tool_name"] = "mbos_economics.engine@0.9.1"
     return d
 
 

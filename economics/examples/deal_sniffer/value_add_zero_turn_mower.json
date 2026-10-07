@@ -1,0 +1,41 @@
+{
+ "_note": "C-16 golden. Illustrative listing; recall facts are from primary CPSC/agency pages (see source in each risk).",
+ "as_of": "2026-10-07T18:00:00Z",
+ "block": {
+  "plan": {
+   "basis": "INFERENCE",
+   "provenance_id": "prov_01M4BRBC80X7WFGRZGQ3FE4BJP",
+   "value": "Budget about $80 in parts and $10 in materials plus about 3 h of your time (a category estimate; the fault is not diagnosed yet). Parts can run up to $509 before the deal drops below your $65/h flip target. The trailer run is already costed in ($27 and 1 h). Sell target is $1,950, the median of 5 sold comparables."
+  }
+ },
+ "item_id": "itm_01JK0000000000000000000001",
+ "matched": [],
+ "omitted": [
+  "model_specific_risks: no sourced knowledge for this model (KB 2026.10.0); UNKNOWN, not guessed"
+ ],
+ "provenance": {
+  "actor_type": "system",
+  "agent_name": "agent-03-economics",
+  "basis": "INFERENCE",
+  "config_version": "2026.10.0",
+  "created_at": "2026-10-07T18:00:00Z",
+  "derived_from": [
+   "prov_01JK0000000000000000000100"
+  ],
+  "inputs_used": [
+   {
+    "hash": "sha256:3ff9f770659136c1d5da48f08ef27d088e6aa920327ace486c094b31b267089d",
+    "ref": "scorecard.inputs_hash"
+   },
+   {
+    "hash": "sha256:b2da114a6ce214cc2a0c4c4959f2c1cb46bc8b45791c2936b1b91195dd57c243",
+    "ref": "value_add_kb@2026.10.0"
+   }
+  ],
+  "provenance_id": "prov_01M4BRBC80X7WFGRZGQ3FE4BJP",
+  "tool_name": "mbos_economics.valueadd",
+  "tool_version": "0.9.1"
+ },
+ "title": "Cub Cadet 54 in zero turn mower, deck needs rebuild",
+ "value_add_hash": "sha256:803927a8ea5f730759676ae16aefad0047d8ce502ce329312be2c8e4f440befb"
+}

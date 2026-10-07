@@ -1,0 +1,74 @@
+{
+  "kb_version": "2026.10.0",
+  "kb_format": 1,
+  "_note": "C-16. Fixture-first, SOURCED knowledge base of model-specific facts for the opportunity card's value_add block (ADR-0011 R18). Michael is an experienced mechanic: this file holds NO general advice, only facts tied to a named model and a primary source. A model with no entry yields NO risks (UNKNOWN), never a guess. Every entry cites a primary source URL; facts were read on the primary page on 2026-10-07 via a fetch tool that summarizes the page, so figures are as stated there and the pages deserve a human glance before anyone relies on them. Applicability rests on a model token appearing in the listing (seller-stated, unverified): the card says so.",
+  "verification_default": "read from the primary CPSC/agency page on 2026-10-07 through a page-fetch tool that returns a summary; not cross-checked against a second source",
+  "entries": [
+    {
+      "id": "cub_cadet_rzt_sx_efi_fuel_tank_2018",
+      "category": "mower",
+      "match": [ { "makes": ["cub cadet"], "models": ["17AWCBYS010", "17AWCBYZ010", "17RWCBYN010", "17RWCBYN210", "17RWCBYS010", "17RWCBYZ010"] } ],
+      "kind": "failure_mode",
+      "risk": "Cub Cadet RZT SX EFI zero-turn recall (Oct 24, 2018): the fuel tank neck can crack and leak, a fire hazard. Models 17AWCBYS010, 17AWCBYZ010, 17RWCBYN010, 17RWCBYN210, 17RWCBYS010, 17RWCBYZ010, built Dec 2017 to Jun 2018, about 4,900 sold in the U.S., 15 cracked-neck reports. The remedy is a free repair at an authorized Cub Cadet dealer; whether it was done on this unit is UNKNOWN, and a dealer can answer it from the model and serial.",
+      "plan_hint": "Do not budget fuel tank parts until a Cub Cadet dealer confirms whether the free recall repair is still open on this unit.",
+      "source": { "title": "CPSC: Cub Cadet Recalls Zero-Turn Riding Mowers Due to Fire Hazard (Recall Alert), recall date Oct 24, 2018", "url": "https://www.cpsc.gov/Recalls/2019/Cub-Cadet-Recalls-ZeroTurn-Riding-Mowers-Due-to-Fire-Hazard-Recall-Alert", "retrieved": "2026-10-07" }
+    },
+    {
+      "id": "cub_cadet_commercial_zt_fuel_vent_2011",
+      "category": "mower",
+      "match": [ { "makes": ["cub cadet"], "models": ["M54-KH", "M60-KH", "M60-KW", "M72-KW", "S6031-KW", "S7237-KW", "TANK L48", "TANK L60"] } ],
+      "kind": "failure_mode",
+      "risk": "Cub Cadet 2011 commercial zero-turn recall (Apr 29, 2013): fuel can leak from the vent valve grommet on top of the fuel tank during operation, a fire hazard. Models M54-KH, M60-KH, M60-KW, M72-KW, S6031-KW, S7237-KW, TANK L48, TANK L60, built Jan to Dec 2011, 106 leak reports including one fire. The remedy was a free repair at an authorized Cub Cadet service dealer; whether it was done is UNKNOWN.",
+      "plan_hint": "Ask a Cub Cadet service dealer whether the vent-grommet recall repair was done before you spend on the fuel system.",
+      "source": { "title": "CPSC: MTD Products Recalls Cub Cadet Commercial Lawn Mowers Due to Risk of Fire (Recall Alert), recall date Apr 29, 2013", "url": "https://www.cpsc.gov/Recalls/2013/MTD-Products-Recalls-Cub-Cadet-Commercial-Lawn-Mowers-Recall-Alert", "retrieved": "2026-10-07" }
+    },
+    {
+      "id": "kohler_courage_seat_switch_2011",
+      "category": "mower",
+      "match": [
+        { "makes": ["cub cadet"], "models": ["LTX1046", "RZT42", "SLTX1050", "Z-Force S48"] },
+        { "makes": ["husqvarna"], "models": ["LGT2554", "RZ4623"] },
+        { "makes": ["troy-bilt", "troy bilt"], "models": ["Mustang RZT50", "Colt RZT42"] }
+      ],
+      "kind": "failure_mode",
+      "risk": "Kohler Courage twin-cylinder engine recall (May 5, 2011): a wire connector can disconnect and make the operator-presence seat switch fail, so the blades do not shut down (laceration hazard). It covers engines with serial numbers beginning 41028 to 41056 on Cub Cadet LTX1046, RZT42, SLTX1050, Z-Force S48; Husqvarna LGT2554, RZ4623; Troy-Bilt Mustang RZT50, Colt RZT42, sold Feb to Apr 2011. Only units whose engine serial falls in that range are affected, so the model alone does not settle it.",
+      "plan_hint": "Read the engine serial against the 41028 to 41056 range before treating the seat-switch circuit as a recall item.",
+      "source": { "title": "CPSC: Kohler Recalls Engines Sold with Husqvarna, Cub Cadet, and Troy-Bilt Riding Lawn Tractors; Laceration Hazard Posed, recall date May 5, 2011", "url": "https://www.cpsc.gov/Recalls/2011/kohler-recalls-engines-sold-with-husqvarna-cub-cadet-and-troy-bilt-riding-lawn-tractors", "retrieved": "2026-10-07" }
+    },
+    {
+      "id": "kawasaki_engines_overheat_2024",
+      "category": "mower",
+      "match": [
+        { "makes": ["bad boy"], "models": ["Rebel", "Rogue", "Revolt"] },
+        { "makes": ["bigdog", "big dog"], "models": ["Stout MP"] },
+        { "makes": ["bobcat"], "models": ["ZT6000", "ZT6100", "ZT7000"] },
+        { "makes": ["cub cadet"], "models": ["ZTX-6"] },
+        { "makes": ["hustler"], "models": ["FasTrak SDX"] },
+        { "makes": ["john deere"], "models": ["Z760R", "X350R", "X350", "X354", "X370", "X380", "X384", "X390", "X394"] },
+        { "makes": ["kubota"], "models": ["Z726XKW"] }
+      ],
+      "kind": "failure_mode",
+      "risk": "Kawasaki engine recall (Jun 6, 2024): engines in model families FJ400D, FS600V, FS651V, FX691V, FX730V, FX801V, FX850V and FXT00V (model years 2021 to 2023) can overheat, a fire and burn hazard, with eight fire reports. The listed equipment includes the Bad Boy Rebel, Rogue and Revolt, BigDog Stout MP, Bobcat ZT6000, ZT6100 and ZT7000, Cub Cadet ZTX-6, Hustler FasTrak SDX, John Deere Z760R and X350 to X394 series, and Kubota Z726XKW, sold Apr 2021 to Dec 2023. The remedy is a free repair through the maker or a dealer. The engine model and serial are on the fan housing, so whether this unit's engine is in the affected families is UNKNOWN until read there.",
+      "plan_hint": "Read the engine model and serial on the fan housing to see whether this unit is in the Kawasaki recall before pricing engine work.",
+      "source": { "title": "CPSC: Kawasaki Motors USA Recalls Engines Used in Bad Boy Mowers, BigDog, Bobcat, Cub Cadet, Hustler, John Deere and Kubota Brand Lawn and Garden Equipment Due to Fire and Burn Hazards, recall date Jun 6, 2024", "url": "https://www.cpsc.gov/Recalls/2024/Kawasaki-Motors-USA-Recalls-Engines-Used-in-Bad-Boy-Mowers-BigDog-Bobcat-Cub-Cadet-Hustler-John-Deere-and-Kubota-Brand-Lawn-and-Garden-Equipment-Due-to-Fire-and-Burn-Hazards", "retrieved": "2026-10-07" }
+    },
+    {
+      "id": "generac_gp_carburetor_fuel_leak_2026",
+      "category": "generator",
+      "match": [ { "makes": ["generac"], "models": ["GP3600", "GP4000DF", "GP6500", "GP6500E", "GP6500EDF", "GP6700EDF", "GP8000E", "GP9200E", "GP9500ETF"] } ],
+      "kind": "failure_mode",
+      "risk": "Generac portable generator recall (Apr 16, 2026): when first filled with gasoline, fuel can leak from the carburetor, a fire and burn hazard (114 leak reports, no injuries). Listed models are GP3600, GP4000DF, GP6500, GP6500E, GP6500EDF, GP6700EDF, GP8000E, GP9200E and GP9500ETF, sold May 2025 to Feb 2026. The remedy is a free repair at a dealer. The GP7500E is not on the list. Because the units were sold May 2025 to Feb 2026, a used example is recent enough that the free repair may still be open; whether it is open for this unit is UNKNOWN.",
+      "plan_hint": "A recall-eligible unit gets its carburetor repaired free at a Generac dealer, which removes carburetor parts from your budget.",
+      "source": { "title": "NY DHSES (CPSC recall notice): Generac Power Systems Recalls Portable Generators Due to Risk of Serious Injury or Death from Burn and Fire Hazards, recall date Apr 16, 2026", "url": "https://www.dhses.ny.gov/node/32841", "retrieved": "2026-10-07" }
+    },
+    {
+      "id": "campbell_hausfeld_hu200099av_overload_2009",
+      "category": "compressor",
+      "match": [ { "makes": ["campbell hausfeld"], "models": ["HU200099AV"] } ],
+      "kind": "failure_mode",
+      "risk": "Campbell Hausfeld HU200099AV (20-gallon) recall (Jun 17, 2009): the thermal overload, which shuts the unit off when it overheats, can fail, so internal components can melt and start a fire. Sold Jan to Jun 2009 at Wal-Mart. The recall remedy was a full refund at Wal-Mart, not a repair. Whether any remedy is still open is UNKNOWN.",
+      "plan_hint": "The recall remedy was a refund, not a repair, so any repair cost on the overload circuit is yours.",
+      "source": { "title": "CPSC: Campbell Hausfeld Recalls Air Compressors Due to Fire Hazard; Sold Exclusively at Wal-Mart, recall date Jun 17, 2009", "url": "https://www.cpsc.gov/Recalls/2009/Campbell-Hausfeld-Recalls-Air-Compressors-Due-to-Fire-Hazard-Sold-Exclusively-at-Wal-Mart", "retrieved": "2026-10-07" }
+    }
+  ]
+}

@@ -100,3 +100,15 @@ for block, data in e["blocks"].items():       # economics | logistics | seasonal
 - **Transport is an economic input, never a gate.** `research_step(..., profile=)` classifies fits-truck vs needs-trailer and adds an explicit `economics.logistics.transport` input (extra cash and hours). The engine puts that into the arithmetic, so a trailer-requiring deal scores a little lower but is never rejected for it. The borrowed trailer stays UNKNOWN until a person confirms it.
 - **Sourced seasonality.** `config/seasonality.json` records where each claim came from; entries resting only on Michael's example are marked RECOMMENDATION.
 - **Tests.** The card integration tests need agent-01's package and `MBOS_CONTRACTS_DIR=<archive>/docs/research/contracts`; they skip cleanly otherwise.
+
+## value_add block (C-16)
+`valueadd.build_value_add(item, as_of, cfg=, kb=load_kb(), make_model=)` returns the `value_add` block for `spine.record_enrichment(conn, item_id, "value_add", block, provenance_id, agent="agent-03-economics")`: `{plan, model_specific_risks[]}`.
+- **Knowledge base:** `config/value_add_kb.json` holds only model-specific facts, each with a primary-source URL. Today it is six CPSC recall entries: Cub Cadet (two), Kohler Courage, Kawasaki engines, Generac and Campbell Hausfeld.
+- **Match rule:** a risk appears only when a make AND a model token from an entry appear in the listing title (or a lane-B `make_model`). The text is seller-stated, so the risk says "not verified against the unit".
+- **No match means no risks.** The card shows UNKNOWN. Nothing is guessed, and there is no general advice.
+- **The plan** comes from the deal's own numbers, never from free text:
+  - the parts and materials budget
+  - the parts ceiling at which the deal still clears the $/h target (it names the limit that actually binds)
+  - the sold-comp target
+  - hints from matched entries
+- The card tests need `MBOS_CONTRACTS_DIR`; see the C-15 section.

@@ -1,0 +1,41 @@
+{
+ "_note": "C-16 golden. Illustrative listing; recall facts are from primary CPSC/agency pages (see source in each risk).",
+ "as_of": "2026-10-07T18:00:00Z",
+ "block": {
+  "plan": {
+   "basis": "INFERENCE",
+   "provenance_id": "prov_01M4BRBC8079H1Q7CDEDE9CC91",
+   "value": "Budget about $80 in parts and $10 in materials plus about 3 h of your time (a category estimate; the fault is not diagnosed yet). Parts can run up to $210 before the deal drops below your $65/h flip target. Sell target is $3,000, the median of 4 sold comparables."
+  }
+ },
+ "item_id": "itm_01JK0000000000000000000002",
+ "matched": [],
+ "omitted": [
+  "model_specific_risks: no sourced knowledge for this model (KB 2026.10.0); UNKNOWN, not guessed"
+ ],
+ "provenance": {
+  "actor_type": "system",
+  "agent_name": "agent-03-economics",
+  "basis": "INFERENCE",
+  "config_version": "2026.10.0",
+  "created_at": "2026-10-07T18:00:00Z",
+  "derived_from": [
+   "prov_01JK0000000000000000000200"
+  ],
+  "inputs_used": [
+   {
+    "hash": "sha256:fc191065f8d95ebbc8a076e0f3d4921acb7603f9cc9181a9d419615273815e51",
+    "ref": "scorecard.inputs_hash"
+   },
+   {
+    "hash": "sha256:b2da114a6ce214cc2a0c4c4959f2c1cb46bc8b45791c2936b1b91195dd57c243",
+    "ref": "value_add_kb@2026.10.0"
+   }
+  ],
+  "provenance_id": "prov_01M4BRBC8079H1Q7CDEDE9CC91",
+  "tool_name": "mbos_economics.valueadd",
+  "tool_version": "0.9.1"
+ },
+ "title": "Husqvarna FS 400 walk-behind concrete saw, blade guard cracked",
+ "value_add_hash": "sha256:29524e90277a92db7869bfc8a1f753e59696dc31040b4ee40a6483e7b139141d"
+}
