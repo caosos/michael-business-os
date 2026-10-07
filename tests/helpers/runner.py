@@ -7,6 +7,7 @@ process death with no cleanup — the next process must recover from durable sta
 from __future__ import annotations
 
 import json
+import pathlib
 import os
 import sys
 import time
@@ -99,6 +100,21 @@ def resume(item_id: str, action: str) -> None:
     os._exit(0)
 
 
+def _budgets(node) -> list:
+    """Every numeric value under a key containing 'budget', wherever it sits in lane E's LiteLLM spec."""
+    out = []
+    if isinstance(node, dict):
+        for k, v in node.items():
+            if "budget" in str(k).lower() and isinstance(v, (int, float)):
+                out.append(v)
+            else:
+                out += _budgets(v)
+    elif isinstance(node, list):
+        for v in node:
+            out += _budgets(v)
+    return out
+
+
 def lane_d_e2e(fixture: str, gateway_mode: str = "reference") -> None:
     """A-01 phase 2 / A-03: the full DBOS lifecycle on lane D's canonical store (state_backend="lane_d"),
     with the spine's stand-in gateway or lane E's real ActionGateway (gateway_mode="lane_e")."""
@@ -117,7 +133,10 @@ def lane_d_e2e(fixture: str, gateway_mode: str = "reference") -> None:
     if gateway_mode == "lane_e":
         from mbos.adapters.governance import lane_e_components
 
-        comps, gov = lane_e_components(s.database_url, os.environ["MBOS_POLICY_PATH"])
+        from dbos import DBOS as _D
+
+        comps, gov = lane_e_components(s.database_url, os.environ["MBOS_POLICY_PATH"], dbos=_D,
+                                       egress_file=os.environ.get("MBOS_EGRESS_FILE"), litellm_file=os.environ.get("MBOS_LITELLM_FILE"))
     if os.environ.get("MBOS_SCORER") == "engine":  # lane C's real engine (release gate AT-1)
         from mbos.adapters.economics import EconomicsEngineScorer
 
@@ -128,6 +147,7 @@ def lane_d_e2e(fixture: str, gateway_mode: str = "reference") -> None:
     engine = runtime().engine
     with engine.begin() as c:  # a fresh lane D DB is FROZEN; Michael (approver/owner) releases it, receipted
         spine_d.set_kill_switch(c, "global_freeze", False, reason="test bootstrap: Michael releases the initial FROZEN state")
+    sched = runtime().reconcile_schedule
     runtime().components.adapters["fx"] = FixtureSourceAdapter(fixture, name="fx")
     with SetWorkflowID("discover:fx"):
         results = DBOS.start_workflow(workflows.discover, "fx").get_result()
@@ -147,6 +167,22 @@ def lane_d_e2e(fixture: str, gateway_mode: str = "reference") -> None:
         b = pending_request(engine, smart)
         workflows.record_decision(b["action_request_id"], "NO", b["payload_hash"], reason="lane D e2e: not this week")
         final["smart_after"] = wait_state(engine, smart, "ARCHIVED", timeout=60)
+    panic = None
+    if gateway_mode == "lane_e":  # A-18: PANIC through lane E (hooks), then Michael releases as approver
+        with engine.begin() as c:
+            eng = spine_d.set_kill_switch(c, "global_freeze", True, reason="A-18 drill: engage L3")
+        egress = json.loads(pathlib.Path(os.environ["MBOS_EGRESS_FILE"]).read_text())
+        lite = json.loads(pathlib.Path(os.environ["MBOS_LITELLM_FILE"]).read_text())
+        with engine.connect() as c:
+            frozen_now = c.execute(sa.text("SELECT mbos.panic_blocks('agent-x', 'comms.email.send', 'email')")).scalar_one()
+        with engine.begin() as c:
+            rel = spine_d.set_kill_switch(c, "global_freeze", False, reason="A-18 drill: all clear")
+        with engine.connect() as c:
+            clear_now = c.execute(sa.text("SELECT mbos.panic_blocks('agent-x', 'comms.email.send', 'email')")).scalar_one()
+        panic = {"engage_error": eng.get("error"), "frozen_blocks": bool(frozen_now), "released_blocks": bool(clear_now),
+                 "egress_file": egress, "litellm_budgets": _budgets(lite),
+                 "release_error": rel.get("error")}
+    import pathlib as _p  # noqa: F401
     L = Pg04Ledger()
     with engine.connect() as c:
         chain = L.verify_chain(c)
@@ -189,7 +225,7 @@ def lane_d_e2e(fixture: str, gateway_mode: str = "reference") -> None:
             card_stats[cat] = [cd["status"]["current"], cd["recommendation"]["action"], len(cd["unknowns"]), len(cd["activity_trail"])]
     with engine.connect() as c:
         by_type = dict(c.execute(sa.text("SELECT type, count(*) FROM mbos.receipts GROUP BY type")).all())
-    say("RESULT", json.dumps({"cards": card_stats, "card_errors": card_errors[:5], "at1": at1, "receipt_types": by_type, "gateway_mode": gateway_mode, "final": final, "chain": chain, "reference_chain": [ref_ok, ref_msg],
+    say("RESULT", json.dumps({"panic": panic, "reconcile_schedule": sched, "cards": card_stats, "card_errors": card_errors[:5], "at1": at1, "receipt_types": by_type, "gateway_mode": gateway_mode, "final": final, "chain": chain, "reference_chain": [ref_ok, ref_msg],
                               "effector_calls": calls, "live_effector_calls": live, "receipts": len(exported),
                               "contract_errors": errors[:5], "executed": sum(r["type"] == "ACTION_EXECUTED" for r in exported)}))
     os._exit(0)

@@ -28,6 +28,7 @@ class Settings:
     # "lane_e": Agent 05's ActionGateway (A-03, R4). The gateway owns every action-status edge and its receipts;
     # the spine moves only the Item. Requires state_backend="lane_d".
     gateway_mode: str = "reference"
+    reconcile_crontab: str = "*/5 * * * *"  # E-05: settle stuck execution claims (never re-sends)
 
 
 _override: Settings | None = None

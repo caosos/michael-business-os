@@ -11,15 +11,21 @@ from __future__ import annotations
 from typing import Any
 
 
-def lane_e_components(dsns: str | dict[str, str], policy_path: str, *, panic_hooks: list | None = None,
+def lane_e_components(dsns: str | dict[str, str], policy_path: str | None, *, panic_hooks: list | None = None,
+                      dbos: Any = None, egress_file: str | None = None, litellm_file: str | None = None,
                       **component_kw: Any):
-    """Return (Components, Governance) wired to lane E. Hooks (DBOS cancel, egress, LiteLLM) are optional."""
+    """Return (Components, Governance) wired to lane E. `policy_path=None` reads the policy from lane D
+    (`mbos.policy_current`). With `dbos`/`egress_file`/`litellm_file`, lane E wires its three L3/L1/L2 hooks
+    (DBOS cancel, egress deny-all, LiteLLM budgets to zero) so a PANIC engage runs them (A-18)."""
     from mbos_governance.spine_adapter import build
 
     from mbos.runtime import Components
 
-    gov = build(dsns, policy_path, panic_hooks=panic_hooks or [])
-    comps = Components(gateway=gov.gateway, kill_switch=gov.kill_switch, pdp=gov.pdp, **component_kw)
+    kw: dict[str, Any] = {k: v for k, v in (("dbos", dbos), ("egress_file", egress_file), ("litellm_file", litellm_file)) if v}
+    if panic_hooks:
+        kw["panic_hooks"] = panic_hooks
+    gov = build(dsns, policy_path, **kw)
+    comps = Components(gateway=gov.gateway, kill_switch=gov.kill_switch, pdp=gov.pdp, governance=gov, **component_kw)
     return comps, gov
 
 

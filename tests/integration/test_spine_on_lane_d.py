@@ -65,7 +65,8 @@ def test_full_lifecycle_with_lane_e_gateway(tmp_path_factory, tmp_path):
         policy = tmp_path / "policy" / "policy.v1.json"
         fixture = fixture_variant(tmp_path, "le", ["FIX-TRAILER-1", "FIX-LEAD-SMARTHOME-1", "FIX-MOWER-1"])
         cp = run_runner((app, server.get_uri().replace("/postgres?", "/mbos_e_sys?")), "lane_d_e2e", str(fixture), "lane_e",
-                        timeout=180, extra_env={"MBOS_POLICY_PATH": str(policy)})
+                        timeout=180, extra_env={"MBOS_POLICY_PATH": str(policy), "MBOS_EGRESS_FILE": str(tmp_path / "egress.json"),
+                                                "MBOS_LITELLM_FILE": str(tmp_path / "litellm.json")})
     finally:
         server.cleanup()
     assert cp.returncode == 0, cp.stdout[-3000:] + cp.stderr[-4000:]
@@ -74,4 +75,11 @@ def test_full_lifecycle_with_lane_e_gateway(tmp_path_factory, tmp_path):
     assert r["chain"]["ok"] and r["reference_chain"][0], r
     assert r["effector_calls"] == 1 and r["live_effector_calls"] == 0 and r["executed"] == 1
     assert r["receipt_types"].get("ACTION_EXECUTING") == 1, r["receipt_types"]  # exactly one per edge (R4)
+    # A-18: PANIC runs through lane E (hooks, approver-only release) and the reconcile schedule exists
+    pn = r["panic"]
+    assert pn["engage_error"] is None and pn["frozen_blocks"] is True, pn
+    assert pn["release_error"] is None and pn["released_blocks"] is False, pn
+    assert pn["litellm_budgets"] and all(b == 0 for b in pn["litellm_budgets"]), pn  # L3 zeroed every LLM budget (lane E hook)
+    assert pn["egress_file"], "lane E's egress deny-all policy file was written"
+    assert r["reconcile_schedule"] in ("created", "unchanged", "replaced"), r["reconcile_schedule"]
     assert not r["contract_errors"], r["contract_errors"]

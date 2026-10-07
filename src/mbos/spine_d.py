@@ -450,8 +450,28 @@ def _panic_key(conn: sa.Connection, level: str, target: Optional[str], frozen: b
     return f"panic:{level}:{target}:{frozen}:{sha256_of(reason)[7:19]}:{n}"
 
 
+def _governance() -> Any:
+    try:
+        from mbos.runtime import components
+
+        return getattr(components(), "governance", None)
+    except RuntimeError:  # no runtime (unit tests on a bare connection)
+        return None
+
+
 def set_kill_switch(conn: sa.Connection, key: str, frozen: bool, *, reason: str, actor_id: str = "michael") -> dict:
     """Lane D PANIC (0007): engage needs gateway/approver/policy_admin; RELEASE needs approver (Michael)."""
+    gov = _governance()
+    if gov is not None:  # A-18: lane E owns PANIC (hooks, L3 cancellation of approved-unstarted requests, approver-only release)
+        from mbos_governance import spine_adapter as gov_sa
+
+        lvl, tgt = ("L3", None) if key == "global_freeze" else (
+            ("L2", key.split(":", 1)[1]) if key.startswith("capability_freeze:") else ("L1", key.split(":", 1)[1]))
+        fn = gov_sa.engage_panic if frozen else gov_sa.release_panic
+        out = fn(gov, lvl, tgt, actor_id, reason)
+        if isinstance(out, dict) and out.get("error"):
+            return {"frozen": frozen, "reason": reason, "error": out["error"]}
+        return {"frozen": frozen, "reason": reason, "lane_e": out}
     level, target = ("L3", None) if key == "global_freeze" else (
         ("L2", key.split(":", 1)[1]) if key.startswith("capability_freeze:") else ("L1", key.split(":", 1)[1]))
     prov = L.record_provenance(conn, actor_type="human" if actor_id == "michael" else "system", human_actor=actor_id,

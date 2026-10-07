@@ -33,6 +33,7 @@ class Components:
     deduper: Optional[Deduper] = None
     planner: Optional[ActionPlanner] = None
     scorer: Optional[Scorer] = None
+    governance: Any = None  # lane E handle (mbos_governance Governance): PANIC engage/release + reconcile (A-18)
     enrichers: list = field(default_factory=list)  # card enrichment (ADR-0011); run after ingest and after scoring
     researcher: Optional[Researcher] = None  # when set, RESEARCH runs before SCORE (A-05)
     pdp: Optional[PolicyDecisionPoint] = None
@@ -79,6 +80,7 @@ class Runtime:
     components: Components
     datasource: SQLAlchemyDatasource
     engine: sa.Engine
+    reconcile_schedule: Optional[str] = None
 
 
 _RT: Optional[Runtime] = None
@@ -122,10 +124,18 @@ def init_runtime(s: Settings, comps: Optional[Components] = None, *, launch: boo
     }
     DBOS(config=config)
     ds = SQLAlchemyDatasource.create(sqlalchemy_url(s.database_url))
+    sched = None
+    gov = getattr(comps, "governance", None) if comps is not None else None
+    if gov is not None and s.gateway_mode == "lane_e":  # A-18 step 1 (BEFORE launch): register the reconcile workflow
+        from mbos_governance import spine_adapter as gov_sa
+
+        sched = gov_sa.schedule_reconcile(gov, DBOS, crontab=s.reconcile_crontab)
     _RT = Runtime(settings=s, components=(comps or Components()).with_defaults(s.state_backend), datasource=ds,
                   engine=app_engine())
     if launch:
         DBOS.launch()
+        if sched is not None:  # A-18 step 2 (AFTER launch): persistent, idempotent schedule; keeps running while frozen
+            _RT.reconcile_schedule = sched.activate()
     return _RT
 
 
