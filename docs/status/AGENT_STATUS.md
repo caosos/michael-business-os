@@ -5,10 +5,11 @@ Role: Discovery / Source Adapters (DISCOVER + NORMALIZE lane)
 Branch: research/agent-02-opportunity
 Worktree: /home/michaelos/business-os-worktrees/agent-02-opportunity
 State: WORKING
-Claimed: B-03
+Claimed: B-04
 Done: B-01 @ 7c9da45
 Done: B-02 @ cadfdae
-Current phase: Round Two — B-01, B-02 DONE; working B-03 (credential-free GSA Auctions, then Trash Nothing; fixture-first, read-only)
+Done: B-03 @ 8ff5476
+Current phase: Round Two — B-01, B-02, B-03 DONE; working B-04 (source-health → L2 freeze request shape agreed with Agent 05; shared fixture)
 Started: 2026-10-06 (Round One) · Round Two started 2026-10-07
 Last updated: 2026-10-07
 
@@ -22,7 +23,9 @@ B-01 result (FACT): `mbos_discovery.spine` implements SourceAdapter/Normalizer/D
 real `mbos.spine.ingest` on Postgres 16 with identity-first dedup; raw_ref bytes identical in both lanes; 68 tests.
 Receipt: docs/receipts/2026-10-07-b01-spine-seam.md.
 B-02 result (FACT): interop_check row 02 = 10/10 CONFORMS @ cadfdae; 89 tests. Receipt: docs/receipts/2026-10-07-b02-adr0010-hashing.md.
-Next after B-03: B-04 (needs E-01 from Agent 05).
+B-03 result (FACT): GSA Auctions + Trash Nothing adapters, fixture-first, `live = true` required for any real call,
+keys never in provenance; 101 tests. Receipt: docs/receipts/2026-10-07-b03-gsa-trashnothing.md.
+Next: B-04 (E-01 DONE @ df826c3 → unblocked).
 
 ## Proposed tasks
 - (for Agent 01 / ADR-0009) `Deduper.is_duplicate` should receive the candidate's `RawListing` (at least `source`,
@@ -54,6 +57,9 @@ Read-only DISCOVER + NORMALIZE lane against frozen contracts v1.0.0 (agent-01-co
 - Live eBay data needs an eBay developer keyset (EBAY_CLIENT_ID / EBAY_CLIENT_SECRET). Not a build blocker: fixture mode runs the identical code path. Steps in docs/runbooks/ebay-live-credentials.md.
 
 ## Needs Michael decision
+- NEW (business policy, not blocking discovery): may the system pursue flips of FREE items offered in community
+  gift groups (Trash Nothing / Freecycle-style)? Some groups' rules forbid reselling gifted items. Until decided,
+  every Trash Nothing Item is flagged `needs_review`; discovery stays read-only. (Agent 01 to triage into MICHAEL_DECISIONS.)
 - None new. (Unchanged: MICHAEL_DECISIONS #3 gray-zone sources; Craigslist/GovDeals/HiBid stay disabled.)
 - Action item (not a decision): create the free eBay developer keyset per the runbook.
 
