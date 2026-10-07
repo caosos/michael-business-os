@@ -349,3 +349,21 @@ def test_dry_run_headline_is_marked(ledger_db):
     item, receipts, areqs = _inputs(ledger_db, ids["item_id"])
     text = cardmod.render_text(cardmod.build_card(item, receipts, areqs))
     assert "DRY-RUN: simulated, nothing sent" in text and "Contact Sent (dry-run)" in text
+
+
+def test_bare_number_dates_are_not_facts(ledger_db):
+    ids = seed_flow(ledger_db, act=False)
+    item, receipts, areqs = _inputs(ledger_db, ids["item_id"])
+    c = cardmod.build_card(item, receipts, areqs, {"listing_activity": {"posted_at": {"value": 20261005, "basis": "FACT"}}})
+    assert c["listing_activity"]["posted_at"]["value"] == "UNKNOWN"
+
+
+def test_a_dropped_risk_leaves_a_trace(ledger_db, caplog):
+    import logging
+    ids = seed_flow(ledger_db, act=False)
+    item, receipts, areqs = _inputs(ledger_db, ids["item_id"])
+    with caplog.at_level(logging.WARNING, logger="mbos.card"):
+        c = cardmod.build_card(item, receipts, areqs, {"value_add": {"model_specific_risks": [
+            {"risk": "Known head-gasket weakness on this engine", "basis": "INFERENCE", "source": "n/a"}]}})
+    assert c["value_add_plan"]["model_specific_risks"] == []
+    assert any("rejected" in u for u in c["unknowns"]) and "dropped 1 model-specific risk" in caplog.text

@@ -457,8 +457,10 @@ def _date_checked(d: dict, item: dict, not_before: Optional[dict]) -> dict:
     post (07 F-28). Anything else is UNKNOWN, not FACT."""
     if _is_unknown(d):
         return d
+    if not isinstance(d["value"], str):  # a bare number such as 20261005 is not an ISO date-time
+        return _unknown("lane date is not an ISO date-time string")
     try:
-        t = parse(str(d["value"]))
+        t = parse(d["value"])
         if t.tzinfo is None:
             t = t.replace(tzinfo=parse("1970-01-01T00:00:00Z").tzinfo)
         limit = parse(item["created_at"]) + timedelta(days=1)
@@ -479,7 +481,7 @@ def _lane_why(enr: dict) -> tuple[list[str], list[str]]:
     return _strs(lines, limit=10, size=300), [prov]
 
 
-def _risks(va_in: dict) -> list[dict]:
+def _risks(va_in: dict, dropped: Optional[list] = None) -> list[dict]:
     out = []
     for r in va_in.get("model_specific_risks") if isinstance(va_in.get("model_specific_risks"), list) else []:
         if not isinstance(r, dict) or r.get("basis") not in _BASES or not isinstance(r.get("risk"), str) or not r["risk"].strip():
@@ -492,8 +494,13 @@ def _risks(va_in: dict) -> list[dict]:
         if isinstance(r.get("provenance_id"), str) and _PROV_RX.match(r["provenance_id"]):
             e["provenance_id"] = r["provenance_id"]
         if not (e.get("provenance_id") or _source_ok(e.get("source"))):
-            continue  # an uncheckable model-specific claim is not shown at all (07 F-27): UNKNOWN beats an unsourced claim
+            # an uncheckable model-specific claim is not shown at all (07 F-27): UNKNOWN beats an unsourced claim
+            if dropped is not None:
+                dropped.append((e["risk"][:80], "no checkable source"))
+            continue
         if elementary_advice(e["risk"]):
+            if dropped is not None:
+                dropped.append((e["risk"][:80], "elementary advice"))
             continue
         out.append(e)
     return out
@@ -538,6 +545,12 @@ def build_card(item: dict, receipts: list[dict], areqs: list[dict], enrichment: 
     pm = se_in.get("peak_months")
     if isinstance(pm, list) and pm and all(isinstance(m, int) and not isinstance(m, bool) and 1 <= m <= 12 for m in pm):
         seasonality["peak_months"] = sorted(set(pm))
+    dropped: list = []
+    risks = _risks(va_in, dropped)
+    if dropped:  # a rejected claim leaves a trace: on the card, and in the log for lane C (07 residual)
+        import logging
+
+        logging.getLogger("mbos.card").warning("card %s dropped %d model-specific risk(s): %s", item["item_id"], len(dropped), dropped)
     lg = _logistics(item, enr, profile)
     events = _stage_events(item, receipts, areqs)
     timeline = _timeline(events)
@@ -560,7 +573,7 @@ def build_card(item: dict, receipts: list[dict], areqs: list[dict], enrichment: 
                  "distance_miles": (_datum(float(miles), "FACT", unit="miles") if _finite(miles) and miles >= 0 else _from_block(enr, "distance_miles", "no distance computed")),
                  "source": clean_text(src0["source"], 80), "url": clean_text(src0["url"], 500)},
         "listing_activity": la, "seller": seller, "why": why, "economics": econ,
-        "value_add_plan": {"plan": _from_block(va_in, "plan", "no value-add plan from lane C yet"), "model_specific_risks": _risks(va_in)},
+        "value_add_plan": {"plan": _from_block(va_in, "plan", "no value-add plan from lane C yet"), "model_specific_risks": risks},
         "seasonality": seasonality, "logistics": lg,
         "recommendation": _recommend(item, areqs, current, dry_run_sent=dry),
         "status": {"current": current, "timeline": timeline},
@@ -572,6 +585,8 @@ def build_card(item: dict, receipts: list[dict], areqs: list[dict], enrichment: 
         card["why_provenance"] = why_prov
     unk: list[str] = []
     _collect_unknowns("", {k: v for k, v in card.items() if k not in ("activity_trail", "status", "why", "unknowns", "why_provenance")}, unk)
+    if dropped:
+        unk.append(f"value_add_plan.model_specific_risks ({len(dropped)} lane claim(s) rejected: unsourced or elementary)")
     card["unknowns"] = sorted(set(unk))
     card["card_hash"] = sha256_of({k: v for k, v in card.items() if k not in ("generated_at", "card_hash")})
     return card
