@@ -1,0 +1,7 @@
+{
+ "_note": "ILLUSTRATIVE payloads for sources with NO adapter (Craigslist is PENDING_MICHAEL, Facebook Marketplace is FORBIDDEN). They carry seller-ish and date-ish text on purpose: the lane must expose none of it as fact.",
+ "craigslist": {"postingId": "7712345678", "title": "6x12 enclosed trailer - trusted seller, 5 stars, posted 3 weeks ago", "price": 1200,
+                "body": "Been selling here for 10 years, great reviews. Reposted because it didn't sell. updated yesterday", "seller": "Bob"},
+ "facebook_marketplace": {"id": "998877", "marketplace_listing_title": "Enclosed trailer 6x12", "listing_price": {"amount": "1250"},
+                          "seller_name": "Pat Example", "seller_joined": "2019", "seller_rating": "5 stars", "listed": "2 weeks ago"}
+}

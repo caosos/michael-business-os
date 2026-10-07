@@ -1,25 +1,90 @@
 {
  "href": "https://api.ebay.com/buy/browse/v1/item_summary/search?q=utility+trailer&offset=0",
- "total": 3, "limit": 2, "offset": 0,
+ "total": 3,
+ "limit": 2,
+ "offset": 0,
  "next": "https://api.ebay.com/buy/browse/v1/item_summary/search?q=utility+trailer&limit=2&offset=2",
  "itemSummaries": [
-  {"itemId": "v1|110000000001|0", "title": "6x12 Enclosed Utility Trailer - needs lights and floor",
-   "price": {"value": "1200.00", "currency": "USD"}, "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"],
-   "condition": "Used", "conditionId": "3000",
+  {
+   "itemId": "v1|110000000001|0",
+   "title": "6x12 Enclosed Utility Trailer - needs lights and floor",
+   "price": {
+    "value": "1200.00",
+    "currency": "USD"
+   },
+   "buyingOptions": [
+    "FIXED_PRICE",
+    "BEST_OFFER"
+   ],
+   "condition": "Used",
+   "conditionId": "3000",
    "itemWebUrl": "https://www.ebay.com/itm/110000000001",
-   "itemLocation": {"city": "Conway", "stateOrProvince": "AR", "postalCode": "720**", "country": "US"},
-   "distanceFromPickupLocation": {"value": "4", "unitOfMeasure": "MILE"},
-   "seller": {"username": "conway_trailers", "feedbackScore": 41, "sellerAccountType": "INDIVIDUAL"},
-   "categories": [{"categoryId": "66466", "categoryName": "Trailers"}],
-   "image": {"imageUrl": "https://i.ebayimg.com/images/g/fixture1/s-l1600.jpg"}},
-  {"itemId": "v1|110000000002|0", "title": "5x8 Utility Trailer w/ ramp gate",
-   "price": {"value": "650.00", "currency": "USD"}, "currentBidPrice": {"value": "650.00", "currency": "USD"},
-   "bidCount": 0, "buyingOptions": ["AUCTION"], "itemEndDate": "2026-10-07T20:00:00.000Z",
-   "condition": "Used", "conditionId": "3000",
+   "itemLocation": {
+    "city": "Conway",
+    "stateOrProvince": "AR",
+    "postalCode": "720**",
+    "country": "US"
+   },
+   "distanceFromPickupLocation": {
+    "value": "4",
+    "unitOfMeasure": "MILE"
+   },
+   "seller": {
+    "username": "conway_trailers",
+    "feedbackScore": 412,
+    "sellerAccountType": "INDIVIDUAL",
+    "feedbackPercentage": "98.6"
+   },
+   "categories": [
+    {
+     "categoryId": "66466",
+     "categoryName": "Trailers"
+    }
+   ],
+   "image": {
+    "imageUrl": "https://i.ebayimg.com/images/g/fixture1/s-l1600.jpg"
+   },
+   "itemCreationDate": "2026-09-12T15:04:05.000Z"
+  },
+  {
+   "itemId": "v1|110000000002|0",
+   "title": "5x8 Utility Trailer w/ ramp gate",
+   "price": {
+    "value": "650.00",
+    "currency": "USD"
+   },
+   "currentBidPrice": {
+    "value": "650.00",
+    "currency": "USD"
+   },
+   "bidCount": 0,
+   "buyingOptions": [
+    "AUCTION"
+   ],
+   "itemEndDate": "2026-10-07T20:00:00.000Z",
+   "condition": "Used",
+   "conditionId": "3000",
    "itemWebUrl": "https://www.ebay.com/itm/110000000002",
-   "itemLocation": {"city": "Fort Smith", "stateOrProvince": "AR", "postalCode": "729**", "country": "US"},
-   "distanceFromPickupLocation": {"value": "121", "unitOfMeasure": "MILE"},
-   "seller": {"username": "fs_seller", "sellerAccountType": "BUSINESS"},
-   "categories": [{"categoryId": "66466", "categoryName": "Trailers"}]}
+   "itemLocation": {
+    "city": "Fort Smith",
+    "stateOrProvince": "AR",
+    "postalCode": "729**",
+    "country": "US"
+   },
+   "distanceFromPickupLocation": {
+    "value": "121",
+    "unitOfMeasure": "MILE"
+   },
+   "seller": {
+    "username": "fs_seller",
+    "sellerAccountType": "BUSINESS"
+   },
+   "categories": [
+    {
+     "categoryId": "66466",
+     "categoryName": "Trailers"
+    }
+   ]
+  }
  ]
 }

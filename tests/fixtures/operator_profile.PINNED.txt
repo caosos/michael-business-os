@@ -1,0 +1,1 @@
+Test-only copy of origin/research/agent-01-coordinator@d2ef52f:config/operator_profile.v1.json (the mbos wheel ships no config). Read-only.

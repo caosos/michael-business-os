@@ -31,7 +31,8 @@ class Cluster:
     def __init__(self) -> None:
         import psycopg
         self.root = Path(tempfile.mkdtemp(prefix="mbos02-pg-"))
-        self.sock = Path(tempfile.mkdtemp(prefix="m02-", dir=os.environ.get("XDG_RUNTIME_DIR") or "/tmp"))
+        # short path (<107 bytes) on /tmp: $XDG_RUNTIME_DIR is a small tmpfs that other agents fill (seen 100% full)
+        self.sock = Path(tempfile.mkdtemp(prefix="m02-", dir="/tmp"))
         self.port = int(os.environ.get("MBOS02_TEST_PORT", "55502"))
         b = _pg_bin()
         subprocess.run([b / "initdb", "-D", self.root / "data", "--auth=trust", "--encoding=UTF8", "--locale=C.UTF-8",

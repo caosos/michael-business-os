@@ -368,3 +368,35 @@ Limits (stated):
 - without photos: 0.00% missed and exactly the one known-ambiguous false merge
 - `spine_d.ingest` (the lane-D backend) calls the Deduper identically. I verified that by reading the code @ `a910ad9` but did **not** run it here, since it needs lane D's schema at Agent 01's current pin.
 - Not filled on the spine path: `normalized.images`. The photos are retained in lane B's raw store, but the spine's `mbos.artifacts` doesn't hold them. That would need a spine image-artifact hook (proposed).
+
+## 21. Deal Sniffer enrichment — READY_QUEUE B-15 (P0, ADR-0011)
+
+`src/mbos_discovery/enrichment.py` builds the `listing_activity` and `seller` blocks and attaches them with `spine.record_enrichment(conn, item_id, block, data, provenance_id, agent="agent-02-opportunity")`. The `spine` argument is `mbos.spine` (reference DDL) or `mbos.spine_d` (lane D). Lane B's own provenance is recorded first.
+
+**The rule: only what the source exposes; otherwise the key is omitted and the card prints UNKNOWN.**
+- Facts come only from a per-source whitelist (`exposed_facts`), read from the retained raw payload (`sources[].raw_ref`), so every block replays from stored bytes. Unknown source → nothing.
+- Free text is never mined. A title that says "trusted seller, 5 stars, posted 3 weeks ago" produces nothing (tested with Craigslist and Facebook Marketplace payloads).
+- "First seen by this system" appears only as an observation line in `recent_activity`. It is never used as a listing age.
+- Dates in the future are dropped.
+- `age_days` (FACT, computed) and `stale_risk` (INFERENCE, with the reason and thresholds in the note: medium ≥ 14 d, high ≥ 45 d) exist only when the source gave a real post date. They are not produced for auctions.
+- `suspected_relist` is True (INFERENCE) only when the Item carries two listing ids from one source, which is the relist rule's merge. "Not a relist" is never asserted, because the system can't see before its first sighting.
+- Seller `confidence` counts independent source-exposed dimensions: 1 → low, 2 → medium, 3 or more → high. Only `rating` is exposed by any source today, so it is `low`.
+- Attach is idempotent. A content key (the block hashed with a placeholder provenance) is recorded in the research entry. A re-run writes neither a duplicate block nor an orphan provenance.
+
+What each source exposes today:
+
+| Source | listing_activity | seller |
+|---|---|---|
+| eBay Browse | `posted_at` ← `itemCreationDate` | `rating` ← `feedbackPercentage` / `feedbackScore` |
+| GSA Auctions | `posted_at` ← `AucStartDt` | none (agency) |
+| Trash Nothing | `posted_at` ← `date`, `repost_count` | none |
+| Craigslist, Marketplace, e-mail, SAM.gov, intake | none | none |
+
+- **Never exposed anywhere yet:** `updated_at`, `account_age`, `prior_listings`, `complaint_signals`, `response_history`, `inconsistencies`.
+- **UNVERIFIED against a live call:** the eBay field names (`itemCreationDate`, `feedbackPercentage`, `feedbackScore`) come from my recollection of eBay's documented ItemSummary. The docs page returned 403 when I tried to confirm. The whitelist is data-driven: if a live response lacks a field, that key is omitted. B-12 should confirm and re-record the fixtures.
+
+Verified (FACT). `tests/test_b15_enrichment.py` has 13 tests. On the real `mbos.spine`, Postgres 16 and Agent 01's `mbos.card` @ `d2ef52f`:
+- The eBay fixture Item gets real dates and feedback. `validate_card` returns `[]`.
+- The rendered card shows 24 days, the 98.6% / 412 rating, `confidence: low`, and UNKNOWN for `updated_at`, `account_age` and the rest, all listed in `card.unknowns`.
+- An Item whose payload exposes nothing gets no seller block, and the card says UNKNOWN.
+- Not run: `spine_d` against lane D's database. `record_enrichment` has the same signature there; it needs lane D's schema at Agent 01's current pin.
