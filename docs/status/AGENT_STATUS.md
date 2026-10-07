@@ -4,7 +4,7 @@ Agent: 05
 Role: Governance / Action Gateway / PANIC — "controlled autonomy"
 Branch: research/agent-05-governance
 Worktree: /home/michaelos/business-os-worktrees/agent-05-governance
-State: WORKING
+State: WAITING — no READY lane-E task in READY_QUEUE (E-01..E-05 all done; queue not yet synced for E-04/E-05). Waiting on Agent 01 to triage proposed E-06..E-09 below; A-03 (01) will wire the gateway.
 Done: B-04 lane-E half @ d3b9948 (02's fixture applies + blocks exactly that source; auto-apply decided, release human-only)
 Done: E-04 @ 4fadbe7 (secret scan refuses + never stores; injection tripwire => tier 0, needs_review, step-up; 205 tests)
 Done: E-02 @ 1c554cb (gateway + PANIC on lane D Postgres via mbos.* API; no SQLite in prod path; R4 role-enforced; 211 tests on PG16)
@@ -13,7 +13,7 @@ Done: E-01 @ df826c3 (interop row 05 = 10/10; vectors receipt_chain verifies; 14
 Done: E-03 @ e12caa3 (L3 DBOS cancel verified on real dbos 3.2.0; deny-all egress + LiteLLM budget generators; 157 tests)
 Current phase: ROUND TWO — wave two (foreman loop, docs/COORDINATION.md)
 Started: 2026-10-06
-Last updated: 2026-10-07 (E-05 done)
+Last updated: 2026-10-07 (E-05 done; WAITING for queue refill)
 
 ## Current objective
 **SUPERSEDED by ADR-0010 (E-01):** Agent 01 binding rulings for lane E
@@ -114,6 +114,16 @@ step-up method, no delegation.
 - docs/receipts/2026-10-07-round-two-gateway-build.md
 
 ## Proposed tasks
+- E-06 (P1) Policy data into lane D: publish policy/policy.v1.json + content_rules into mbos.policy via
+  publish_policy (policy_admin), PDP reads policy_current; file stays as the signed source. Fail closed if
+  no current row. (Lane-E + 04 API, no DDL change expected.)
+- E-07 (P2) Egress allow-list per adapter/effector as policy data + render for the proxy (ADR-0005 §7,
+  assigned to 05). Wave one stays all-empty; adds the B-03 GSA/Trash Nothing read-only hosts as
+  disabled-by-default entries so lane B's enablement is a reviewed data change.
+- E-08 (P2) Sandbox policy (ADR-0005 §7): which processes run under gVisor vs E2B; written spec +
+  runnable config check. Host has no Podman (memory: EliteDesk facts) — doc + checker only.
+- E-09 (P2) Governance alerts (ADR-0005 §7): FREEZE, budget breach (MB006 refusals), INJECTION_SUSPECTED,
+  NEEDS_HUMAN reconcile, stuck claims > TTL — as a read-only query module + ntfy-ready JSON, no sends.
 - (for 04) count-based velocity in budget_reserve_caps (e.g. caps.velocity_actions_per_hour): lane E's
   money cap is ACTIONS/hour; 0007's velocity_per_hour is DOLLARS/hour. Interim: gateway counts under
   mbos.budget_lock in the same txn (correct, but two places).
