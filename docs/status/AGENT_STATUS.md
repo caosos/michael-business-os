@@ -4,13 +4,12 @@ Agent: 07
 Role: ROUND TWO — QA / End-to-End Integration / Manual-Assist Outputs (lane G)
 Branch: research/agent-07-marketing
 Worktree: /home/michaelos/business-os-worktrees/agent-07-marketing
-State: WAITING
+State: WORKING
 Done: G-01 @ 9cbce70
 Done: G-02 @ a1700d9
 Done: G-03 @ 4c2e897
-Claimed: (none)
-Waiting on: P-07-8 / Agent 01 ruling on F-21 (finish G-03) · A-03 (P-07-5 re-run of `mbos_qa spine` on state_backend=lane_d + 05's real gateway).
-Current phase: Round Two — foreman loop; G-01 + G-02 DONE; G-03 green except F-21 (G4 provenance clause)
+Claimed: G-04
+Current phase: Round Two — G-04 (P0): wave-two release-candidate run on state_backend=lane_d + gateway_mode=lane_e
 Started: 2026-10-06 (round one) · 2026-10-07 (round two)
 Last updated: 2026-10-07
 
