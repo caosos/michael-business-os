@@ -6,6 +6,7 @@ import sqlalchemy as sa
 from mbos import audit, ledger
 from mbos.config import Settings, configure, settings
 from mbos.reference.governance import DryRunEffector, ReferenceGateway, TableKillSwitch
+from tests.helpers.common import STEP_UP
 from tests.helpers.seed import seed_flow
 
 pytestmark = pytest.mark.acceptance
@@ -46,7 +47,7 @@ def test_gateway_refuses_when_dry_run_mode_is_off(ledger_db):
     from mbos import spine
     with ledger_db.begin() as c:
         h = c.execute(sa.text("SELECT payload_hash FROM mbos.action_requests")).scalar_one()
-        appr = spine.decide(c, ids["action_request_id"], "YES", h, ids["components"])["approval"]
+        appr = spine.decide(c, ids["action_request_id"], "YES", h, ids["components"], auth_context=STEP_UP)["approval"]
     live = dataclasses.replace(settings(), dry_run=False)
     configure(live)
 

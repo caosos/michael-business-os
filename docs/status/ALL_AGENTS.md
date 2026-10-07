@@ -1,18 +1,22 @@
 # Michael Business OS — Agent Dashboard
 
-Last updated: 2026-10-07 (Aria reconciliation + Agent 01 contract freeze)
+Last updated: 2026-10-07 (Round Two: Agent 01 integration review; branch heads below)
 
-> Source of truth: each agent's `docs/status/AGENT_STATUS.md` on its own `research/agent-XX-*` branch.
+> Source of truth: each agent's `docs/status/AGENT_STATUS.md` on its own `research/agent-XX-*` branch. States are quoted from those files. Test counts are each lane's own claim, except Agent 01's, which Agent 01 ran.
 
-| Agent | Role | State | Current objective | Blocker | Deliverable |
+| Agent | Lane | State (as reported) | Head | Round-two deliverable | Next dependency (rulings in `docs/integration/ROUND_TWO_INTEGRATION.md`) |
 |---|---|---|---|---|---|
-| 01 | Coordinator / Architect | COMPLETE | Round-One research + reconciliation complete; contracts frozen v1.0.0 | none | `docs/research/agent-01-coordinator.md`, `docs/research/ROUND_ONE_SYNTHESIS.md`, `docs/research/agent-01-integration.md`, `docs/research/contracts/`, `docs/decisions/INDEX.md` |
-| 02 | Opportunity Discovery | COMPLETE | Await Round-Two implementation gate | none | `docs/research/agent-02-opportunity.md` |
-| 03 | Economics / Scoring | COMPLETE | Await threshold calibration + implementation gate | none | `docs/research/agent-03-economics.md` |
-| 04 | CRM / State | COMPLETE | Await coordinator state-model decision | none | `docs/research/agent-04-state.md` |
-| 05 | Governance / Security | COMPLETE | Await policy values + implementation gate | none | `docs/research/agent-05-governance.md` |
-| 06 | Communications | COMPLETE | Await legal/architecture gate before live comms | none | `docs/research/agent-06-communications.md` |
-| 07 | Marketing | COMPLETE | Await Round-Two implementation gate | none | `docs/research/agent-07-marketing.md` |
+| 01 | A Core / integration | WAITING | this branch | `src/mbos` spine (DBOS + Postgres), A1–A10, CLI, RUNBOOK; **111 tests pass (verified)**; 03 engine wired | 04 `0005` → port onto 04 schema (R1/R2) |
+| 02 | B Discovery | WAITING | `5b62625` | `mbos_discovery`: eBay Browse + service intake, dedup, source health (claims 56 tests) | B adapter + Deduper (R8); `raw_ref` = raw bytes; eBay credentials not requested (not needed for MVP) |
+| 03 | C Economics | COMPLETE | `dcd6883` | `mbos_economics` engine v0.1.0, C14 fixed (claims 75 tests); **runs inside the spine (verified)** | RESEARCH/estimate producer with 02; versioned `$id` for v1.1.0 (ADR-0009) |
+| 04 | D State | COMPLETE (wave one) | `3af8e92` | `mbos_state` + SQL 0001–0004, gapless chain (claims 93 tests) | **Migration 0005 (R1 tables)**; DBOS role answer; no `jsonb::text` payload hash (R3) |
+| 05 | E Governance | WAVE ONE COMPLETE | `03db146` | `mbos_governance`: gateway G1–G8, PDP as data, PANIC L1–L3 (claims 114 tests) | Postgres-backed store and PANIC (R2/R5); propose-only grant for `agent-01-coordinator` (R7) |
+| 06 | F Operator UI | COMPLETE | `3e51ba4` | `operator_ui` (stdlib, loopback, CSRF, PIN step-up) (claims 29 tests) | Drop own gateway, ticker and store; call `spine.decide` (R10) |
+| 07 | G QA | WORKING | `4da1394` | `qa/` cross-lane spec suite on mocks (claims 76 tests + 31 contract checks) | Run against the real system via `mbos.qa_adapter:build` after R1 (R11) |
+
+**Contract drift:** none. All lanes keep byte-identical copies of the frozen v1.0.0 contracts (sha256 check, 2026-10-07). The v1.1.0 change set is consolidated in **ADR-0009 (PROPOSED, not applied)**.
+
+**Safety:** all lanes report dry-run only, and none reports external contact, spend or publishing. Agent 01 verified this for its own branch: DB CHECKs, A7, and the audit.
 
 ## Cross-Agent Conflicts — reconciled
 

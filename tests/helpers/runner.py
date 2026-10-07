@@ -16,7 +16,7 @@ from dbos import DBOS, SetWorkflowID
 from mbos.config import Settings
 from mbos.reference.fixture_adapter import FixtureSourceAdapter
 from mbos.runtime import Components, init_runtime, runtime
-from tests.helpers.common import pending_request, wait_state
+from tests.helpers.common import STEP_UP, pending_request, wait_state
 
 
 def say(*parts) -> None:
@@ -61,7 +61,7 @@ def crash_mid_act(fixture: str, point: str) -> None:
 
     item_id = _discover_one(fixture)
     areq = pending_request(runtime().engine, item_id)
-    workflows.record_decision(areq["action_request_id"], "YES", areq["payload_hash"])
+    workflows.record_decision(areq["action_request_id"], "YES", areq["payload_hash"], auth_context=STEP_UP)
     time.sleep(60)
     say("ERROR: did not crash")
     os._exit(3)

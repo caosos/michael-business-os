@@ -5,7 +5,7 @@ import sqlalchemy as sa
 
 from mbos import spine, workflows
 from mbos.reference.governance import DryRunEffector, ReferenceGateway, TableKillSwitch
-from tests.helpers.common import pending_request, receipts_for, scalar, wait_state
+from tests.helpers.common import STEP_UP, pending_request, receipts_for, scalar, wait_state
 from tests.helpers.seed import seed_flow
 
 pytestmark = pytest.mark.acceptance
@@ -15,7 +15,7 @@ def _approved(engine):
     ids = seed_flow(engine, act=False)
     with engine.begin() as c:
         h = c.execute(sa.text("SELECT payload_hash FROM mbos.action_requests")).scalar_one()
-        appr = spine.decide(c, ids["action_request_id"], "YES", h, ids["components"])["approval"]
+        appr = spine.decide(c, ids["action_request_id"], "YES", h, ids["components"], auth_context=STEP_UP)["approval"]
     return ids["action_request_id"], appr["approval_id"]
 
 
@@ -54,7 +54,7 @@ def test_panic_end_to_end_cancels_the_action(rt, run_discovery):
     with rt.engine.begin() as c:
         spine.set_kill_switch(c, "global_freeze", True, reason="A9 PANIC drill")
     try:
-        workflows.record_decision(areq["action_request_id"], "YES", areq["payload_hash"])
+        workflows.record_decision(areq["action_request_id"], "YES", areq["payload_hash"], auth_context=STEP_UP)
         wait_state(rt.engine, item_id, "FAILED")
     finally:
         with rt.engine.begin() as c:

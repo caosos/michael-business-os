@@ -142,7 +142,8 @@ def cmd_queue(a: argparse.Namespace) -> int:
         print(f"  action  {areq['capability']} (tier {areq['tier']}, {areq['reversibility']}): {areq['payload']['summary']}")
         print(f"  areq    {areq['action_request_id']}   expires {areq['expires_at']}")
         print(f"  payload {areq['payload_hash']}")
-        print(f"  decide: mbos decide {areq['action_request_id']} YES|NO|MODIFY|HOLD --seen {areq['payload_hash'][7:19]}")
+        step = " (YES needs --step-up)" if areq["reversibility"] == "irreversible" else ""
+        print(f"  decide: mbos decide {areq['action_request_id']} YES|NO|MODIFY|HOLD --seen {areq['payload_hash'][7:19]}{step}")
     return 0
 
 
@@ -170,6 +171,8 @@ def cmd_decide(a: argparse.Namespace) -> int:
         print("--seen does not match the request's payload hash (>= 12 hex chars). Re-read `mbos queue`.", file=sys.stderr)
         return 2
     kw: dict[str, Any] = {"channel": "cli", "reason": a.reason}
+    if a.step_up:
+        kw["auth_context"] = {"method": "cli_local_confirm", "step_up": True}
     if a.change:
         kw["payload_changes"] = dict(kv.split("=", 1) for kv in a.change)
     if a.decision == "HOLD":
@@ -229,7 +232,10 @@ def main(argv: list[str] | None = None) -> int:
     s = sub.add_parser("decide"); s.add_argument("areq"); s.add_argument("decision", choices=["YES", "NO", "MODIFY", "HOLD"])
     s.add_argument("--seen", required=True, help="payload hash prefix as shown by `mbos queue`")
     s.add_argument("--reason"); s.add_argument("--change", action="append", help="MODIFY: payload key=value")
-    s.add_argument("--hold-until"); s.add_argument("--renotify"); s.add_argument("--escalate"); s.set_defaults(fn=cmd_decide)
+    s.add_argument("--hold-until"); s.add_argument("--renotify"); s.add_argument("--escalate")
+    s.add_argument("--step-up", action="store_true",
+                   help="explicit confirmation required for YES on irreversible / money-like requests")
+    s.set_defaults(fn=cmd_decide)
     s = sub.add_parser("ping"); s.add_argument("item_id"); s.set_defaults(fn=cmd_ping)
     s = sub.add_parser("outcome"); s.add_argument("item_id"); s.add_argument("kind")
     s.add_argument("--revenue", type=float); s.add_argument("--cost", type=float); s.add_argument("--hours", type=float)

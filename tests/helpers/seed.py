@@ -9,7 +9,7 @@ import sqlalchemy as sa
 from mbos import spine
 from mbos.reference.fixture_adapter import FixtureSourceAdapter
 from mbos.runtime import Components
-from tests.helpers.common import FIXTURE
+from tests.helpers.common import FIXTURE, STEP_UP
 
 
 def seed_flow(engine: sa.Engine, listing: str = "FIX-TRAILER-1", *, act: bool = True, outcome: bool = True) -> dict:
@@ -17,7 +17,7 @@ def seed_flow(engine: sa.Engine, listing: str = "FIX-TRAILER-1", *, act: bool = 
     raw = next(r for r in FixtureSourceAdapter(FIXTURE, name="fixture").fetch() if r.source_listing_id == listing)
     norm = comps.normalizer.normalize(raw)
     with engine.begin() as c:
-        item_id = spine.ingest(c, asdict(raw), asdict(norm), "fixture", "0.1.0")["item_id"]
+        item_id = spine.ingest(c, asdict(raw), asdict(norm), "fixture", "0.1.0", comps)["item_id"]
     with engine.begin() as c:
         item = spine.read_item(c, item_id)
     with engine.begin() as c:
@@ -30,7 +30,7 @@ def seed_flow(engine: sa.Engine, listing: str = "FIX-TRAILER-1", *, act: bool = 
     with engine.begin() as c:
         h = c.execute(sa.text("SELECT payload_hash FROM mbos.action_requests WHERE action_request_id = :a"),
                       {"a": areq_id}).scalar_one()
-        approval = spine.decide(c, areq_id, "YES", h, comps)["approval"]
+        approval = spine.decide(c, areq_id, "YES", h, comps, auth_context=STEP_UP)["approval"]
     with engine.begin() as c:
         spine.begin_act(c, item_id, areq_id, approval)
     guard = asdict(comps.gateway.execute(engine, areq_id, approval["approval_id"]))

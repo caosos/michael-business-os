@@ -84,7 +84,7 @@ Rules:
 eval "$(.venv/bin/mbos devdb up)"
 .venv/bin/mbos worker --fixture fixtures/sources/illustrative.json   # long-running; Ctrl-C to stop
 .venv/bin/mbos queue                       # what needs Michael (opportunity cards + payload hash)
-.venv/bin/mbos decide <areq> YES --seen <first 12 hex of payload hash>
+.venv/bin/mbos decide <areq> YES --seen <first 12 hex of payload hash> --step-up   # --step-up: irreversible/money-like
 .venv/bin/mbos decide <areq> NO  --seen <hash> --reason "too far this week"
 .venv/bin/mbos decide <areq> MODIFY --seen <hash> --change "summary=Offer \$725 cash, pickup Saturday"
 .venv/bin/mbos decide <areq> HOLD --seen <hash> --hold-until 2026-10-09T15:00:00Z --renotify PT24H
@@ -125,7 +125,7 @@ Not yet built (lane E): egress cut, credential lease revocation, LiteLLM budget 
 ## 6. Tests
 
 ```bash
-.venv/bin/python -m pytest -q                       # everything (about 70 s; starts its own throwaway Postgres)
+.venv/bin/python -m pytest -q                       # everything (about 80 s; starts its own throwaway Postgres)
 .venv/bin/python -m pytest -q -m acceptance         # A1–A10 only
 .venv/bin/python -I docs/research/contracts/validate_contracts.py docs/research/contracts   # frozen-contract check
 ```
@@ -146,7 +146,11 @@ Not yet built (lane E): egress cut, credential lease revocation, LiteLLM budget 
 **Known scope limits.** These are honest gaps, tracked in `docs/integration/ROUND_TWO_INTEGRATION.md`:
 - **A8-LITELLM.** The cap is enforced by the spine's ledger, not yet by LiteLLM virtual keys (lane E).
 - **A9.** Only the gateway part of L3 is built. Egress cut and lease revocation are lane E.
-- **Scoring is a PLACEHOLDER** until lane C's engine is plugged in behind `Scorer`. Its verdicts are not economic advice.
+- **Scoring:** the default `Scorer` is a PLACEHOLDER, not economic advice.
+  - Agent 03's real engine plugs in via `mbos.adapters.economics.EconomicsEngineScorer(config_dir=...)`.
+  - Install it from 03's branch: `.tools/uv pip install --python .venv/bin/python "mbos-economics @ git+file://$(git rev-parse --git-common-dir | xargs realpath)@dcd6883#subdirectory=economics"`.
+  - `tests/integration/test_lane_c_economics.py` exercises it and skips if the package is not installed.
+- **The state store is the reference DDL** until the port onto Agent 04's schema (integration ruling R1).
 
 ## 7. Troubleshooting
 

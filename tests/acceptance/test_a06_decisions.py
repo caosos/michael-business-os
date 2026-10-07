@@ -13,6 +13,7 @@ from mbos.clock import iso, utcnow
 from mbos.db.engine import engine_for
 from mbos.hashing import sha256_of
 from tests.helpers.common import (
+    STEP_UP,
     create_database, fixture_variant, pending_request, receipts_for, scalar, wait_state,
 )
 from tests.helpers.proc import line, run_runner
@@ -28,7 +29,7 @@ def test_yes_executes_the_frozen_payload(rt, run_discovery):
     item_id = run_discovery("FIX-TRAILER-1")["FIX-TRAILER-1"]
     wait_state(rt.engine, item_id, "AWAITING_APPROVAL")
     areq = pending_request(rt.engine, item_id)
-    workflows.record_decision(areq["action_request_id"], "YES", areq["payload_hash"])
+    workflows.record_decision(areq["action_request_id"], "YES", areq["payload_hash"], auth_context=STEP_UP)
     wait_state(rt.engine, item_id, "ACTED")
     with rt.engine.connect() as c:
         call = c.execute(sa.text("SELECT request, response FROM mbos.effector_calls WHERE action_request_id = :a"),
@@ -71,8 +72,8 @@ def test_modify_creates_derived_request_and_executes_only_the_new_payload(rt, ru
     assert scalar(rt.engine, "SELECT status FROM mbos.action_requests WHERE action_request_id = :a",
                   a=old["action_request_id"]) == "rejected"
     with pytest.raises(spine.DecisionRefused):  # the superseded request can no longer be approved
-        workflows.record_decision(old["action_request_id"], "YES", old["payload_hash"])
-    workflows.record_decision(new_id, "YES", new["payload_hash"])
+        workflows.record_decision(old["action_request_id"], "YES", old["payload_hash"], auth_context=STEP_UP)
+    workflows.record_decision(new_id, "YES", new["payload_hash"], auth_context=STEP_UP)
     wait_state(rt.engine, item_id, "ACTED")
     assert _effector_calls(rt.engine, old["action_request_id"]) == 0
     with rt.engine.connect() as c:
@@ -124,7 +125,7 @@ def test_decision_on_a_payload_michael_did_not_see_is_refused(rt, run_discovery)
     wait_state(rt.engine, item_id, "AWAITING_APPROVAL")
     areq = pending_request(rt.engine, item_id)
     with pytest.raises(spine.DecisionRefused, match="payload_hash_seen"):
-        workflows.record_decision(areq["action_request_id"], "YES", "sha256:" + "f" * 64)
+        workflows.record_decision(areq["action_request_id"], "YES", "sha256:" + "f" * 64, auth_context=STEP_UP)
     with pytest.raises(sa.exc.DBAPIError, match="approval void"):  # the DB refuses it independently
         with rt.engine.begin() as c:
             c.execute(sa.text("INSERT INTO mbos.approvals (body) VALUES (CAST(:b AS jsonb))"), {"b": (

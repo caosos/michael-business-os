@@ -81,3 +81,7 @@ def receipts_for(engine: sa.Engine, *, item_id: str | None = None, areq: str | N
         clauses.append("type = :t"); params["t"] = type
     with engine.connect() as c:
         return [r.body for r in c.execute(sa.text(f"SELECT body FROM mbos.receipts WHERE {' AND '.join(clauses)} ORDER BY seq"), params)]
+
+
+# Michael's explicit step-up confirmation (required by the spine for irreversible / money-like YES).
+STEP_UP = {"method": "test_step_up", "step_up": True}

@@ -9,7 +9,9 @@ labelled with the lane that replaces it.
 |--------------------|----------------------------|-----------------------------------------|
 | SourceAdapter      | B Discovery (Agent 02)     | reference.fixture_adapter.FixtureSourceAdapter |
 | Normalizer         | B Discovery (Agent 02)     | reference.fixture_adapter.FixtureNormalizer    |
-| Scorer             | C Economics (Agent 03)     | reference.placeholder_scorer.PlaceholderScorer |
+| Deduper            | B Discovery (Agent 02)     | reference.fixture_adapter.ExactKeyDeduper      |
+| Scorer             | C Economics (Agent 03)     | adapters.economics.EconomicsEngineScorer (real) / reference.placeholder_scorer |
+| ActionPlanner      | 06 Comms / 07 Marketing    | reference.action_planner.DefaultActionPlanner  |
 | PolicyDecisionPoint| E Governance (Agent 05)    | reference.governance.DenyByDefaultPDP          |
 | Gateway            | E Governance (Agent 05)    | reference.governance.ReferenceGateway          |
 | Effector           | 06 Comms / 07 Marketing    | reference.governance.DryRunEffector            |
@@ -73,6 +75,13 @@ class SourceAdapter(Protocol):
 
 
 @runtime_checkable
+class Deduper(Protocol):
+    def is_duplicate(self, existing_item: dict[str, Any], candidate: NormalizedListing) -> bool:
+        """Called only for existing Items that share the candidate's `dedup_key`. The key is a BLOCKING
+        bucket (Agent 02: category|priceband|geocell), never an identity: equal keys alone must not merge."""
+
+
+@runtime_checkable
 class Normalizer(Protocol):
     def normalize(self, raw: RawListing) -> Optional[NormalizedListing]:
         """Map one raw listing to Item v1 fields; None = not an opportunity (dropped, still receipted)."""
@@ -94,12 +103,23 @@ class ScoreResult:
     proposed_actions: list[dict[str, Any]] = field(default_factory=list)  # Item.recommendation.proposed_actions
     cheapest_decisive_evidence: Optional[str] = None
     alert: bool = False
+    # Lane C may mint deterministic ids (replay, AT-1). When set, the spine stores them as-is.
+    scorecard_id: Optional[str] = None
+    recommendation_id: Optional[str] = None
 
 
 @runtime_checkable
 class Scorer(Protocol):
     def score(self, item: dict[str, Any]) -> ScoreResult:
         """Pure and replayable: the same Item inputs must reproduce the same inputs_hash and scorecard (AT-1, C22)."""
+
+
+@runtime_checkable
+class ActionPlanner(Protocol):
+    def plan(self, item: dict[str, Any]) -> list[dict[str, Any]]:
+        """For a YES item whose recommendation carries no proposed_actions (lane C proposes none), return
+        Item.recommendation.proposed_actions entries {capability, summary, reversibility, estimated_cost}.
+        Drafting content is lane 06 (comms) / 07 (publishing); the spine owns turning them into requests."""
 
 
 # ---------------------------------------------------------------- E: governance

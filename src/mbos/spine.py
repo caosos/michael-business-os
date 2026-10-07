@@ -25,7 +25,7 @@ from mbos.ledger import (
 from mbos.reference.governance import GATEWAY_TOOL, classify_capability
 from mbos.state_machine import check_action_transition
 
-SPINE_AGENT = "agent-01-spine"
+SPINE_AGENT = "agent-01-coordinator"  # agent ids == branch names (ADR-05-003)
 MICHAEL = {"type": "human", "id": "michael"}
 
 
@@ -33,19 +33,38 @@ class DecisionRefused(ValueError):
     """A decision that the request's current status, or its payload hash, does not allow."""
 
 
+STEP_UP_CATEGORIES = {"money", "purchase", "offer", "external_commitment"}
+
+
+def requires_step_up(areq: dict) -> bool:
+    """ADR-05-001 / Agent 04 approvals trigger: irreversible or money-like YES needs step-up."""
+    return areq["reversibility"] == "irreversible" or areq["category"] in STEP_UP_CATEGORIES
+
+
 # ---------------------------------------------------------------- DISCOVER + NORMALIZE
 def ingest(conn: sa.Connection, raw: dict[str, Any], norm: Optional[dict[str, Any]], adapter_name: str,
-           adapter_version: str) -> dict[str, Any]:
-    """Store the raw artifact, then create a new Item or merge a duplicate sighting (dedup collapse)."""
+           adapter_version: str, components: Any) -> dict[str, Any]:
+    """Store the raw artifact, then create a new Item or merge a duplicate sighting.
+
+    Identity first: the same (source, source_listing_id) is the same sighting → no-op.
+    Then `dedup_key` (a blocking bucket) nominates candidates and the lane-B Deduper decides.
+    """
+    from mbos.interfaces import NormalizedListing
+
     if norm is None:
         return {"item_id": None, "created": False, "merged": False, "dropped": True}
-    existing = conn.execute(sa.text("SELECT body FROM mbos.items WHERE dedup_key = :k FOR UPDATE"),
-                            {"k": norm["dedup_key"]}).one_or_none()
-    if existing is not None:
-        for s in existing.body["sources"]:
-            if s["source"] == raw["source"] and s.get("source_listing_id") == raw["source_listing_id"] \
-                    and s.get("url") == raw["url"]:
-                return {"item_id": existing.body["item_id"], "created": False, "merged": False, "dropped": False}
+    ident = {"source": raw["source"]}
+    ident.update({"source_listing_id": raw["source_listing_id"]} if raw["source_listing_id"] else {"url": raw["url"]})
+    seen = conn.execute(sa.text("SELECT item_id FROM mbos.items WHERE body->'sources' @> CAST(:s AS jsonb) LIMIT 1"),
+                        {"s": _j([ident])}).scalar_one_or_none()
+    if seen is not None:
+        return {"item_id": seen, "created": False, "merged": False, "dropped": False}
+    existing = None
+    for row in conn.execute(sa.text("SELECT body FROM mbos.items WHERE dedup_key = :k ORDER BY body->>'created_at' FOR UPDATE"),
+                            {"k": norm["dedup_key"]}).all():
+        if components.deduper.is_duplicate(row.body, NormalizedListing(**norm)):
+            existing = row
+            break
 
     raw_bytes = canonical_json(raw["payload"])
     raw_ref = sha256_bytes(raw_bytes)
@@ -101,14 +120,14 @@ def record_score(conn: sa.Connection, item_id: str, sr: dict[str, Any]) -> dict[
         inputs_used=[{"ref": item_id, "hash": sr["inputs_hash"]}],
         derived_from=[s["provenance_id"] for s in item["sources"]], confidence=sr["confidence"],
     )
-    scores = {"scorecard_id": new_id("scr"), "inputs_hash": sr["inputs_hash"], "scorecard": sr["scorecard"]}
+    scores = {"scorecard_id": sr.get("scorecard_id") or new_id("scr"), "inputs_hash": sr["inputs_hash"], "scorecard": sr["scorecard"]}
     update_item(conn, item_id, to_state="SCORED", patch={"scores": scores}, intent="scored", provenance_ids=[prov], actor=actor)
     append_receipt(conn, type="SCORE_RECORDED", intent=f"scorecard {scores['scorecard_id']}: {sr['verdict']}",
                    provenance_ids=[prov], actor=actor, item_id=item_id, entity_type="scorecard",
                    entity_id=scores["scorecard_id"], effect="create", inputs_hash=sr["inputs_hash"],
                    tool_name=f"{sr['tool_name']}@{sr['tool_version']}")
     rec = {k: v for k, v in {
-        "recommendation_id": new_id("rec"), "verdict": sr["verdict"], "proposed_actions": sr["proposed_actions"] or None,
+        "recommendation_id": sr.get("recommendation_id") or new_id("rec"), "verdict": sr["verdict"], "proposed_actions": sr["proposed_actions"] or None,
         "rationale": sr["rationale"], "confidence": sr["confidence"],
         "cheapest_decisive_evidence": sr.get("cheapest_decisive_evidence"), "alert": sr.get("alert"),
         "provenance_id": prov,
@@ -130,14 +149,15 @@ def route_recommendation(conn: sa.Connection, item_id: str, components: Any) -> 
     if rec["verdict"] == "PASS":
         update_item(conn, item_id, to_state="ARCHIVED", intent="machine verdict PASS: archived", provenance_ids=[prov])
         return {"verdict": "PASS", "action_request_id": None}
-    if rec["verdict"] == "MAYBE" or not rec.get("proposed_actions"):
+    proposed = rec.get("proposed_actions") or (components.planner.plan(item) if rec["verdict"] == "YES" else [])
+    if rec["verdict"] == "MAYBE" or not proposed:
         why = rec.get("cheapest_decisive_evidence") or "more evidence"
         update_item(conn, item_id, to_state="RESEARCHING", intent=f"MAYBE: needs {why}", provenance_ids=[prov])
         components.notifier.notify(conn, kind="research_needed", item_id=item_id, action_request_id=None,
                                    summary=f"{item['normalized']['title']}: needs {why}")
         return {"verdict": "MAYBE", "action_request_id": None}
     # MVP: the item proceeds on its primary proposed action; further actions are proposed after it settles.
-    areq = _propose(conn, item, rec["proposed_actions"][0], prov, components)
+    areq = _propose(conn, item, proposed[0], prov, components)
     update_item(conn, item_id, to_state="AWAITING_APPROVAL",
                 patch={"action_request_ids": (item.get("action_request_ids") or []) + [areq["action_request_id"]]},
                 intent=f"awaiting Michael: {areq['capability']}", provenance_ids=[prov])
@@ -163,11 +183,13 @@ def _areq_receipt(conn: sa.Connection, areq: dict, rtype: str, intent: str, prov
 
 
 def _insert_and_classify(conn: sa.Connection, areq: dict, prov: str, components: Any, actor: Optional[dict]) -> dict:
+    decision = components.pdp.decide(areq)  # the PDP sees the FULL request (lane E contract)
+    areq = {**areq, "tier": decision.tier, "category": decision.category,
+            "policy_decision_ref": decision.policy_version}
     ActionRequest.from_doc(areq)  # frozen-contract check, incl. irreversible/untrusted/money ⇒ tier 0
     conn.execute(sa.text("INSERT INTO mbos.action_requests (body) VALUES (CAST(:b AS jsonb))"), {"b": _j(areq)})
     _areq_receipt(conn, areq, "ACTION_PROPOSED", f"proposed {areq['capability']}: {areq['payload']['summary']}",
                   [prov], actor=actor, effect="create")
-    decision = components.pdp.decide(areq)
     _set_status(conn, areq["action_request_id"], "classified")
     _areq_receipt(conn, areq, "POLICY_DECIDED", f"PDP: {decision.decision}, tier {decision.tier} — {decision.reason}",
                   [prov], policy_decision_ref=decision.policy_version,
@@ -199,7 +221,6 @@ def _propose(conn: sa.Connection, item: dict, pa: dict, prov: str, components: A
     ends_at = item["normalized"].get("ends_at")
     if ends_at and parse(ends_at) < expires:
         expires = parse(ends_at)
-    pdp = components.pdp.decide({"capability": pa["capability"]})
     areq = {k: v for k, v in {
         "action_request_id": areq_id, "item_id": item["item_id"],
         "recommendation_id": item["recommendation"]["recommendation_id"], "created_at": iso(now),
@@ -207,7 +228,7 @@ def _propose(conn: sa.Connection, item: dict, pa: dict, prov: str, components: A
         "payload": payload, "payload_hash": sha256_of(payload), "idempotency_key": f"act:{areq_id}",
         "estimated_cost": pa.get("estimated_cost") or {"amount": 0, "currency": "USD"},
         "reversibility": pa["reversibility"], "untrusted_inputs_present": True,  # listing-derived ⇒ tainted
-        "tier": pdp.tier, "policy_decision_ref": pdp.policy_version, "score_ref": item["scores"]["scorecard_id"],
+        "tier": 0, "score_ref": item["scores"]["scorecard_id"],
         "status": "drafted", "expires_at": iso(expires), "provenance_ids": [prov],
         "target": payload["target"],
     }.items() if v is not None}
@@ -218,7 +239,7 @@ def _propose(conn: sa.Connection, item: dict, pa: dict, prov: str, components: A
 def decide(conn: sa.Connection, action_request_id: str, decision: str, payload_hash_seen: str, components: Any, *,
            decider: str = "michael", channel: str = "cli", reason: Optional[str] = None,
            hold: Optional[dict] = None, payload_changes: Optional[dict] = None,
-           auth_context: Optional[dict] = None) -> dict[str, Any]:
+           new_payload: Optional[dict] = None, auth_context: Optional[dict] = None) -> dict[str, Any]:
     """Record Michael's YES / NO / MODIFY / HOLD. Append-only; the item workflow reacts to it.
 
     The caller must then wake the workflow: `DBOS.send(f"item:{item_id}", {...}, topic="decision")`
@@ -236,6 +257,9 @@ def decide(conn: sa.Connection, action_request_id: str, decision: str, payload_h
         raise DecisionRefused("payload_hash_seen does not match the request — re-read the request before deciding")
     if parse(areq["expires_at"]) <= utcnow():
         raise DecisionRefused(f"{action_request_id} expired at {areq['expires_at']}")
+    if decision == "YES" and requires_step_up(areq) and not (auth_context or {}).get("step_up"):
+        raise DecisionRefused("YES on an irreversible / money / purchase / offer / commitment request needs step-up "
+                              "(auth_context.step_up=true; CLI: --step-up)")
 
     approval_id = new_id("appr")
     now = utcnow()
@@ -253,6 +277,10 @@ def decide(conn: sa.Connection, action_request_id: str, decision: str, payload_h
         doc["hold"] = {"wake_on": ["time", "michael_ping"], "renotify_after": "PT24H", "escalate_after": "P7D",
                        "hold_until": iso(now + timedelta(hours=24)), **(hold or {})}
     elif decision == "MODIFY":
+        if new_payload is not None:  # Operator UI sends the whole edited payload; store the diff
+            payload_changes = {k: v for k, v in new_payload.items() if areq["payload"].get(k) != v}
+            if set(areq["payload"]) - set(new_payload):
+                raise DecisionRefused("MODIFY cannot remove payload fields")
         if not payload_changes:
             raise DecisionRefused("MODIFY needs payload changes")
         forbidden = {"capability", "item_id", "dry_run"} & set(payload_changes)

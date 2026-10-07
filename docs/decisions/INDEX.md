@@ -1,6 +1,6 @@
 # Global ADR Registry — Michael Business OS
 
-Maintained by Agent 01. Last updated: 2026-10-06 (round-one reconciliation).
+Maintained by Agent 01. Last updated: 2026-10-07 (round-two integration review).
 
 ## Numbering rule
 - **System ADRs** are `ADR-00NN`. Only Agent 01 issues them, on branch `research/agent-01-coordinator`.
@@ -27,6 +27,7 @@ The executive synthesis is `docs/research/ROUND_ONE_SYNTHESIS.md`. The ADRs belo
 | ADR-0006 | Integration roles: CRM projection, n8n edge-only, one comms subsystem, Operator UI approvals | ACCEPTED |
 | ADR-0007 | Business scope: flips + services | ACCEPTED (Michael decision) |
 | ADR-0008 | Implementation language: Python | ACCEPTED (technical; per synthesis) |
+| ADR-0009 | Contracts v1.1.0 change set | **PROPOSED**: v1.0.0 stays in force |
 
 ## Specialist ADRs
 | Alias | Branch file | Title | Disposition | Binding changes / notes |
@@ -41,3 +42,11 @@ The executive synthesis is `docs/research/ROUND_ONE_SYNTHESIS.md`. The ADRs belo
 | ADR-06-002 | agent-06 `ADR-002-approval-gate-and-receipts.md` | Approval gate and receipts | **ACCEPTED-WITH-CHANGES** → ADR-0004/0005 | Add HOLD. The comms receipt becomes `Receipt.details{kind:"comms"}`. Add `inputs_hash` and `idempotency_key`. |
 | ADR-07-0001 | agent-07 `ADR-0001-automation-orchestration-hub.md` | n8n automation hub | **SUPERSEDED** by ADR-0006 | n8n is an optional connector only, never the orchestrator. |
 | ADR-07-0002 | agent-07 `ADR-0002-crm-selection.md` | CRM selection | **ACCEPTED-WITH-CHANGES** → ADR-0006 | Twenty is a one-way projection. Postgres holds the lead, attribution and system of record. |
+
+## Round-two specialist ADRs (reviewed 2026-10-07; rulings in `docs/integration/ROUND_TWO_INTEGRATION.md`)
+| Alias | Title | Disposition | Binding changes / notes |
+|---|---|---|---|
+| ADR-03-002 | Engine v0.1.0, C14 resolution, formula clarifications | **ACCEPTED-WITH-CHANGES** | The C14 resolution is accepted (rule kept, AT-14 corrected). The wider `inputs_hash` scope is accepted and goes into the contract via ADR-0009. The v1.1.0 schemas must get versioned `$id`s before re-vendoring. |
+| ADR-05-003 | Wave-one gateway implementation, plus contract requests R1–R3 | **ACCEPTED-WITH-CHANGES** | Store and panic state move to Postgres (R2, R4, R5). Contract requests are folded into ADR-0009; canonical hashing is ruled now (R3). |
+| ADR-06-003 | Operator UI on stdlib | **ACCEPTED-WITH-CHANGES** | Integration R10: drop the UI-side gateway, ticker and SQLite store; call `spine.decide`. |
+| (04 schema) | Durable state migrations 0001–0004 | **ACCEPTED as canonical DDL** (R1) | Add the R1 tables in 0005. Payload hashes are not computed with `jsonb::text` (R3). |

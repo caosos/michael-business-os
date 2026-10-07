@@ -17,7 +17,8 @@ from mbos.config import Settings, configure, settings
 from mbos.db.engine import app_engine, sqlalchemy_url
 from mbos.db.migrate import migrate
 from mbos.interfaces import (
-    Gateway, KillSwitch, LLMBudget, Normalizer, Notifier, PolicyDecisionPoint, Scorer, SourceAdapter,
+    ActionPlanner, Deduper, Gateway, KillSwitch, LLMBudget, Normalizer, Notifier, PolicyDecisionPoint, Scorer,
+    SourceAdapter,
 )
 
 R = TypeVar("R")
@@ -29,6 +30,8 @@ class Components:
 
     adapters: dict[str, SourceAdapter] = field(default_factory=dict)
     normalizer: Optional[Normalizer] = None
+    deduper: Optional[Deduper] = None
+    planner: Optional[ActionPlanner] = None
     scorer: Optional[Scorer] = None
     pdp: Optional[PolicyDecisionPoint] = None
     kill_switch: Optional[KillSwitch] = None
@@ -37,7 +40,8 @@ class Components:
     llm_budget: Optional[LLMBudget] = None
 
     def with_defaults(self) -> "Components":
-        from mbos.reference.fixture_adapter import FixtureNormalizer
+        from mbos.reference.action_planner import DefaultActionPlanner
+        from mbos.reference.fixture_adapter import ExactKeyDeduper, FixtureNormalizer
         from mbos.reference.governance import (
             DenyByDefaultPDP, DryRunEffector, LedgerLLMBudget, ReferenceGateway, TableKillSwitch,
         )
@@ -45,6 +49,8 @@ class Components:
         from mbos.reference.placeholder_scorer import PlaceholderScorer
 
         self.normalizer = self.normalizer or FixtureNormalizer()
+        self.deduper = self.deduper or ExactKeyDeduper()
+        self.planner = self.planner or DefaultActionPlanner()
         self.scorer = self.scorer or PlaceholderScorer()
         self.pdp = self.pdp or DenyByDefaultPDP()
         self.kill_switch = self.kill_switch or TableKillSwitch()

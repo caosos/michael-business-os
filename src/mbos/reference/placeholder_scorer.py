@@ -97,17 +97,6 @@ def _service(e: dict[str, Any]) -> tuple[dict, dict, list[str], float]:
     return derived, {"cash_ok": True}, reasons, confidence
 
 
-def _proposed_actions(item: dict[str, Any]) -> list[dict[str, Any]]:
-    zero = {"amount": 0, "currency": "USD"}
-    if item["type"] == "flip":
-        offer = item["economics"]["acquisition"]["expected_buy_price"]
-        return [{"capability": "comms.email.send", "reversibility": "irreversible", "estimated_cost": zero,
-                 "summary": f"Ask seller to confirm condition and availability; offer ${offer:,.0f} (DRY-RUN draft)"}]
-    quote = item["economics"]["job"]["quoted_revenue"]
-    return [{"capability": "comms.email.send", "reversibility": "irreversible", "estimated_cost": zero,
-             "summary": f"Send customer a ${quote:,.0f} quote and propose a visit time (DRY-RUN draft)"}]
-
-
 class PlaceholderScorer:
     def score(self, item: dict[str, Any]) -> ScoreResult:
         h = inputs_hash(item)
@@ -146,5 +135,4 @@ class PlaceholderScorer:
             card["cheapest_decisive_evidence"] = evidence
         return ScoreResult(scorecard=card, inputs_hash=h, verdict=verdict, rationale=reasons, confidence=conf,
                            scoring_config_version=CONFIG_VERSION, tool_name=TOOL, tool_version=__version__,
-                           proposed_actions=_proposed_actions(item) if verdict == "YES" else [],
                            cheapest_decisive_evidence=evidence)
