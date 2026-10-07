@@ -87,8 +87,10 @@ def receipts_for(engine: sa.Engine, *, item_id: str | None = None, areq: str | N
         clauses.append("action_request_id = :a"); params["a"] = areq
     if type:
         clauses.append("type = :t"); params["t"] = type
+    src = ("(SELECT r.seq, r.item_id, r.action_request_id, r.type, d.doc AS body FROM mbos.receipts r "
+           "JOIN mbos.v_receipt_documents d USING (receipt_id)) x") if is_lane_d(engine) else "mbos.receipts"
     with engine.connect() as c:
-        return [r.body for r in c.execute(sa.text(f"SELECT body FROM mbos.receipts WHERE {' AND '.join(clauses)} ORDER BY seq"), params)]
+        return [r.body for r in c.execute(sa.text(f"SELECT body FROM {src} WHERE {' AND '.join(clauses)} ORDER BY seq"), params)]
 
 
 # Michael's explicit step-up confirmation (required by the spine for irreversible / money-like YES).

@@ -7,8 +7,8 @@ import sys
 from tests.helpers.common import ROOT
 
 
-def run_runner(env_urls: tuple[str, str], *args: str, timeout: float = 90) -> subprocess.CompletedProcess:
-    env = {**os.environ, "MBOS_DATABASE_URL": env_urls[0], "MBOS_SYSTEM_DATABASE_URL": env_urls[1]}
+def run_runner(env_urls: tuple[str, str], *args: str, timeout: float = 90, extra_env: dict | None = None) -> subprocess.CompletedProcess:
+    env = {**os.environ, "MBOS_DATABASE_URL": env_urls[0], "MBOS_SYSTEM_DATABASE_URL": env_urls[1], **(extra_env or {})}
     return subprocess.run([sys.executable, "-m", "tests.helpers.runner", *args], cwd=ROOT, env=env,
                           capture_output=True, text=True, timeout=timeout)
 

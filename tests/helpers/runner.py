@@ -99,8 +99,9 @@ def resume(item_id: str, action: str) -> None:
     os._exit(0)
 
 
-def lane_d_e2e(fixture: str) -> None:
-    """A-01 phase 2: the full DBOS lifecycle on lane D's canonical store (state_backend="lane_d")."""
+def lane_d_e2e(fixture: str, gateway_mode: str = "reference") -> None:
+    """A-01 phase 2 / A-03: the full DBOS lifecycle on lane D's canonical store (state_backend="lane_d"),
+    with the spine's stand-in gateway or lane E's real ActionGateway (gateway_mode="lane_e")."""
     import dataclasses
 
     import sqlalchemy as sa
@@ -111,7 +112,13 @@ def lane_d_e2e(fixture: str) -> None:
     from mbos.hashing import reference
     from tests.helpers.common import item_state
 
-    init_runtime(dataclasses.replace(_settings(), state_backend="lane_d"), Components())
+    s = dataclasses.replace(_settings(), state_backend="lane_d", gateway_mode=gateway_mode)
+    comps, gov = Components(), None
+    if gateway_mode == "lane_e":
+        from mbos.adapters.governance import lane_e_components
+
+        comps, gov = lane_e_components(s.database_url, os.environ["MBOS_POLICY_PATH"])
+    init_runtime(s, comps)
     from mbos import workflows
 
     engine = runtime().engine
@@ -144,7 +151,9 @@ def lane_d_e2e(fixture: str) -> None:
     ref_ok, ref_msg = reference().verify_chain(exported)
     errors = [e for d in docs for e in schemas.errors("item", d)] + [e for d in areqs for e in schemas.errors("action-request", d)] \
         + [e for r in exported for e in schemas.errors("receipt", r)]
-    say("RESULT", json.dumps({"final": final, "chain": chain, "reference_chain": [ref_ok, ref_msg],
+    with engine.connect() as c:
+        by_type = dict(c.execute(sa.text("SELECT type, count(*) FROM mbos.receipts GROUP BY type")).all())
+    say("RESULT", json.dumps({"receipt_types": by_type, "gateway_mode": gateway_mode, "final": final, "chain": chain, "reference_chain": [ref_ok, ref_msg],
                               "effector_calls": calls, "live_effector_calls": live, "receipts": len(exported),
                               "contract_errors": errors[:5], "executed": sum(r["type"] == "ACTION_EXECUTED" for r in exported)}))
     os._exit(0)
@@ -152,5 +161,13 @@ def lane_d_e2e(fixture: str) -> None:
 
 if __name__ == "__main__":
     mode, *args = sys.argv[1:]
-    {"crash_mid_act": crash_mid_act, "hold_then_die": hold_then_die, "resume": resume,
+    try:
+        {"crash_mid_act": crash_mid_act, "hold_then_die": hold_then_die, "resume": resume,
      "lane_d_e2e": lane_d_e2e}[mode](*args)
+    except BaseException:  # DBOS threads are non-daemon: without a hard exit a failure would hang to the timeout
+        import traceback
+
+        traceback.print_exc()
+        sys.stdout.flush()
+        sys.stderr.flush()
+        os._exit(1)

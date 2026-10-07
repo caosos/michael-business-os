@@ -24,6 +24,10 @@ class Settings:
     # "reference": Agent 01's own DDL (src/mbos/db/migrations). "lane_d": Agent 04's canonical store (R1),
     # migrated by lane D's own migrator; the spine then writes only through lane D's SQL API (mbos.spine_d).
     state_backend: str = "reference"
+    # "reference": the spine's stand-in gateway; the spine writes action-status receipts itself.
+    # "lane_e": Agent 05's ActionGateway (A-03, R4). The gateway owns every action-status edge and its receipts;
+    # the spine moves only the Item. Requires state_backend="lane_d".
+    gateway_mode: str = "reference"
 
 
 _override: Settings | None = None

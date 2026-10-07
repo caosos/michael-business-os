@@ -36,3 +36,39 @@ def test_full_lifecycle_on_lane_d(lane_d_urls, tmp_path):
     assert r["reference_chain"][0], r["reference_chain"]          # ADR-0010: verifiable without trusting the DB
     assert r["effector_calls"] == 1 and r["live_effector_calls"] == 0 and r["executed"] == 1
     assert not r["contract_errors"], r["contract_errors"]
+
+
+def test_full_lifecycle_with_lane_e_gateway(tmp_path_factory, tmp_path):
+    """A-03: Agent 05's real ActionGateway behind the spine on lane D (R4: the gateway owns action receipts)."""
+    pytest.importorskip("mbos_governance.spine_adapter")
+    import subprocess
+
+    from tests.helpers.common import ROOT
+
+    pgserver = pytest.importorskip("pgserver")
+    src = tmp_path_factory.mktemp("lane-d-src-e")
+    lane_d.extract(src)
+    server = pgserver.get_server(str(tmp_path_factory.mktemp("pge")), cleanup_mode="stop")
+    try:
+        app = lane_d.build(server, src, "mbos_e")
+        server.psql("CREATE DATABASE mbos_e_sys;")
+        import io
+        import tarfile
+
+        # the whole policy directory: the policy, its schema and the E-04 content rules (each fails closed if missing)
+        tar = subprocess.run(["git", "archive", "origin/research/agent-05-governance", "policy"], cwd=ROOT,
+                             capture_output=True, check=True).stdout
+        tarfile.open(fileobj=io.BytesIO(tar)).extractall(tmp_path, filter="data")
+        policy = tmp_path / "policy" / "policy.v1.json"
+        fixture = fixture_variant(tmp_path, "le", ["FIX-TRAILER-1", "FIX-LEAD-SMARTHOME-1", "FIX-MOWER-1"])
+        cp = run_runner((app, server.get_uri().replace("/postgres?", "/mbos_e_sys?")), "lane_d_e2e", str(fixture), "lane_e",
+                        timeout=180, extra_env={"MBOS_POLICY_PATH": str(policy)})
+    finally:
+        server.cleanup()
+    assert cp.returncode == 0, cp.stdout[-3000:] + cp.stderr[-4000:]
+    r = json.loads(line(cp, "RESULT"))
+    assert r["final"]["trailer_after"] == "ACTED", r
+    assert r["chain"]["ok"] and r["reference_chain"][0], r
+    assert r["effector_calls"] == 1 and r["live_effector_calls"] == 0 and r["executed"] == 1
+    assert r["receipt_types"].get("ACTION_EXECUTING") == 1, r["receipt_types"]  # exactly one per edge (R4)
+    assert not r["contract_errors"], r["contract_errors"]

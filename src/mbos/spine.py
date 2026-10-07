@@ -171,6 +171,7 @@ def record_score(conn: sa.Connection, item_id: str, sr: dict[str, Any]) -> dict[
     append_receipt(conn, type="SCORE_RECORDED", intent=f"scorecard {scores['scorecard_id']}: {sr['verdict']}",
                    provenance_ids=[prov], actor=actor, item_id=item_id, entity_type="scorecard",
                    entity_id=scores["scorecard_id"], effect="create", inputs_hash=sr["inputs_hash"],
+                   payload_hash=sha256_of(sr["scorecard"]),  # binds the scorecard content (03 P-03-06)
                    tool_name=f"{sr['tool_name']}@{sr['tool_version']}")
     rec = {k: v for k, v in {
         "recommendation_id": sr.get("recommendation_id") or new_id("rec"), "verdict": sr["verdict"], "proposed_actions": sr["proposed_actions"] or None,
@@ -279,10 +280,27 @@ def _propose(conn: sa.Connection, item: dict, pa: dict, prov: str, components: A
         "estimated_cost": pa.get("estimated_cost") or {"amount": 0, "currency": "USD"},
         "reversibility": pa["reversibility"], "untrusted_inputs_present": True,  # listing-derived ⇒ tainted
         "tier": 0, "score_ref": item["scores"]["scorecard_id"],
-        "status": "drafted", "expires_at": iso(expires), "provenance_ids": [prov],
+        "status": "drafted", "expires_at": iso(expires), "provenance_ids": [prov] + _draft_provenance(conn, pa, record_provenance),
         "target": payload["target"],
     }.items() if v is not None}
     return _insert_and_classify(conn, areq, prov, components, None)
+
+
+def _draft_provenance(conn: sa.Connection, pa: dict, record: Any) -> list[str]:
+    """07 F-21 / P-07-8: a drafted message carries its own provenance (who drafted it, with which model, prompt
+    and template), so G4 "prompt version and model in provenance" holds for what Michael approves."""
+    d = pa.get("draft") or (pa.get("comms") or {})
+    if not isinstance(d, dict) or not d:
+        return []
+    fields = {"actor_type": "agent", "agent_name": d.get("drafted_by") or "drafting-agent", "basis": "INFERENCE",
+              "inputs_used": [{"ref": "draft", "hash": d.get("content_hash") or sha256_of(d)}]}
+    if d.get("model_id") and d.get("prompt_hash"):
+        fields.update(model_id=d["model_id"], model_version=str(d.get("model_version") or d.get("template_version") or "unknown"),
+                      prompt_hash=d["prompt_hash"])
+    else:  # template-rendered drafts: the deterministic renderer is the tool
+        fields.update(tool_name=f"template:{d.get('template_id', 'unknown')}",
+                      tool_version=str(d.get("template_version") or "unknown"))
+    return [record(conn, **fields)]
 
 
 # ---------------------------------------------------------------- APPROVE (Michael)

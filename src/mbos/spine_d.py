@@ -26,7 +26,7 @@ from mbos.hashing import canonical_json, sha256_of
 from mbos.ids import new_id
 from mbos.reference.governance import GATEWAY_TOOL, classify_capability
 from mbos.spine import (  # shared, backend-independent pieces
-    MICHAEL, PAYLOAD_RESERVED, PROPOSED_ACTION_CORE, SPINE_AGENT, DecisionRefused, requires_step_up,
+    MICHAEL, PAYLOAD_RESERVED, _draft_provenance, PROPOSED_ACTION_CORE, SPINE_AGENT, DecisionRefused, requires_step_up,
 )
 
 L = Pg04Ledger()
@@ -164,7 +164,7 @@ def record_score(conn: sa.Connection, item_id: str, sr: dict) -> dict:
               "scorecard": sr["scorecard"]}
     _to(conn, item_id, "SCORED", "scored", [prov], LANE_C)
     _patch(conn, item_id, {"scores": scores}, f"scorecard {scores['scorecard_id']}: {sr['verdict']}", [prov], LANE_C,
-           receipt_type="SCORE_RECORDED", extra={"inputs_hash": sr["inputs_hash"],
+           receipt_type="SCORE_RECORDED", extra={"inputs_hash": sr["inputs_hash"], "payload_hash": sha256_of(sr["scorecard"]),
                                                  "tool_name": f"{sr['tool_name']}@{sr['tool_version']}"})
     rec = {k: v for k, v in {
         "recommendation_id": sr.get("recommendation_id") or new_id("rec"), "verdict": sr["verdict"],
@@ -232,7 +232,8 @@ def _propose(conn: sa.Connection, item: dict, pa: dict, prov: str, components: A
         "payload": payload, "payload_hash": sha256_of(payload), "idempotency_key": f"act:{areq_id}",
         "estimated_cost": pa.get("estimated_cost") or {"amount": 0, "currency": "USD"}, "reversibility": pa["reversibility"],
         "untrusted_inputs_present": True, "tier": 0, "score_ref": item["scores"]["scorecard_id"], "status": "drafted",
-        "expires_at": iso(expires), "provenance_ids": [prov], "target": payload["target"]}.items() if v is not None}
+        "expires_at": iso(expires), "provenance_ids": [prov] + _draft_provenance(conn, pa, L.record_provenance),
+        "target": payload["target"]}.items() if v is not None}
     return _classify_and_present(conn, areq, [prov], components, SYSTEM)
 
 
@@ -297,10 +298,11 @@ def decide(conn: sa.Connection, action_request_id: str, decision: str, payload_h
 
 
 def pending_decisions(conn: sa.Connection) -> list[dict]:
-    rows = conn.execute(sa.text(
-        "SELECT a.doc AS areq, i.doc AS item FROM mbos.v_action_request_documents a "
-        "JOIN mbos.v_item_documents i ON i.item_id = a.doc->>'item_id' "
-        "WHERE a.doc->>'status' IN ('pending_approval', 'held') ORDER BY a.doc->>'created_at'")).all()
+    rows = conn.execute(sa.text(  # filter on the indexed base table, not the view's JSON (04 D-13 F9)
+        "SELECT a.doc AS areq, i.doc AS item FROM mbos.action_requests r "
+        "JOIN mbos.v_action_request_documents a USING (action_request_id) "
+        "JOIN mbos.v_item_documents i ON i.item_id = r.item_id "
+        "WHERE r.status IN ('pending_approval', 'held') ORDER BY r.created_at")).all()
     return [{"action_request": r.areq, "item": r.item} for r in rows]
 
 
@@ -377,6 +379,8 @@ def begin_act(conn: sa.Connection, item_id: str, action_request_id: str, approva
     _to(conn, item_id, "APPROVED", "Michael said YES", [prov], MICHAEL)
     areq = _areq(conn, action_request_id)
     _to(conn, item_id, "ACTING", f"executing {areq['capability']} (DRY-RUN)", [prov])
+    if settings().gateway_mode == "lane_e":
+        return  # R4: lane E's gateway moves approved→executing and writes ACTION_EXECUTING itself
     _status(conn, areq, "executing", "ACTION_EXECUTING", "handing the frozen payload to the action gateway (DRY-RUN)", [prov],
             extra={"approval_id": approval["approval_id"]})
 
@@ -398,6 +402,14 @@ def finish_act(conn: sa.Connection, item_id: str, action_request_id: str, approv
         reasons = response.get("blocked") or (response.get("comms") or {}).get("blocked_reasons") or ["see details"]
         guard = {**guard, "ok": False, "reason": "effector blocked: " + ", ".join(map(str, reasons))}
     base = {"approval_id": approval["approval_id"], "tool_name": GATEWAY_TOOL, "effector_response": response, "details": details}
+    if settings().gateway_mode == "lane_e":
+        # R4: lane E's gateway already wrote ACTION_EXECUTED|FAILED (+ BUDGET_*) and moved the request.
+        # The spine records only the Item outcome, citing the gateway's reason.
+        if guard["ok"]:
+            _to(conn, item_id, "ACTED", f"dry-run action receipted by lane E gateway: {guard['reason']}"[:300], [prov])
+            return {"status": "acted"}
+        _to(conn, item_id, "FAILED", f"action not executed (lane E gateway): {guard['reason']}"[:300], [prov])
+        return {"status": "failed", "reason": guard["reason"]}
     if guard["ok"]:
         _status(conn, areq, "executed", "ACTION_EXECUTED", f"DRY-RUN {areq['capability']} executed via gateway (no external effect)",
                 [prov], extra={**base, "effect": effect})
@@ -430,6 +442,12 @@ def record_outcome(conn: sa.Connection, item_id: str, kind: str, *, realized: Op
     return doc
 
 
+def _panic_key(conn: sa.Connection, level: str, target: Optional[str], frozen: bool, reason: str) -> str:
+    """Deterministic and replay-safe (04 D-13 F4): keyed on the ledger position plus the requested change."""
+    n = conn.execute(sa.text("SELECT count(*) FROM mbos.receipts WHERE type = 'KILL_SWITCH_CHANGED'")).scalar_one()
+    return f"panic:{level}:{target}:{frozen}:{sha256_of(reason)[7:19]}:{n}"
+
+
 def set_kill_switch(conn: sa.Connection, key: str, frozen: bool, *, reason: str, actor_id: str = "michael") -> dict:
     """Lane D PANIC (0007): engage needs gateway/approver/policy_admin; RELEASE needs approver (Michael)."""
     level, target = ("L3", None) if key == "global_freeze" else (
@@ -438,5 +456,5 @@ def set_kill_switch(conn: sa.Connection, key: str, frozen: bool, *, reason: str,
                                basis="FACT", tool_name="mbos.kill_switch", tool_version="0.1.0")
     rid = conn.execute(sa.text("SELECT mbos.panic_set(:l, :t, :e, CAST(:a AS jsonb), :r, :p, :k)"),
                        {"l": level, "t": target, "e": frozen, "a": canonical_json({"type": "human", "id": actor_id}).decode(),
-                        "r": reason, "p": [prov], "k": f"panic:{level}:{target}:{frozen}:{new_id('rcpt')}"}).scalar_one()
+                        "r": reason, "p": [prov], "k": _panic_key(conn, level, target, frozen, reason)}).scalar_one()
     return {"frozen": frozen, "reason": reason, "receipt_id": rid}

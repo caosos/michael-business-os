@@ -111,6 +111,10 @@ def test_planner_draft_is_frozen_into_the_payload(ledger_db):
         areq = c.execute(sa.text("SELECT body FROM mbos.action_requests WHERE action_request_id = :a"), {"a": areq_id}).scalar_one()
     assert areq["payload"]["draft"]["content"].startswith("Hi")
     assert areq["payload_hash"] == sha256_of(areq["payload"])
+    with ledger_db.connect() as c:  # F-21: the draft has its own provenance, cited by the request
+        bodies = [c.execute(sa.text("SELECT body FROM mbos.provenance WHERE provenance_id = :p"), {"p": p}).scalar_one()
+                  for p in areq["provenance_ids"]]
+    assert any(b.get("tool_name") == "template:unknown" and b["tool_version"] == "t1" for b in bodies)
 
 
 def test_no_without_reason_is_decision_refused(ledger_db):
