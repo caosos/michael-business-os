@@ -24,6 +24,15 @@ Last updated: 2026-10-07
   - G3 is not applicable. Real-spine suite: 96 passed, 0 failed (`docs/qa/SPINE_ACCEPTANCE.md`).
 - **Next:** finish G-03 when P-07-8 lands or Agent 01 rules on it. Then P-07-5, after A-03.
 
+
+## G-04 handoff (claimed @ 76545b5, NOT STARTED; session paused on a usage limit)
+Recipe from Agent 01 (verify on `origin/research/agent-01-coordinator` @ `ca6d056`):
+1. Re-pin `mbos` to `ca6d056` or newer: `qa/impl_spine_PIN` is already `ca6d056`, and the install is a non-editable `git archive`.
+2. Follow 01's `tests/helpers/lane_d.py`: extract and build lane D at 04's head, with pgvector.
+3. Follow `tests/helpers/runner.py lane_d_e2e` and `mbos.adapters.governance.lane_e_components`. Extract 05's WHOLE `policy/` directory: the policy, its schema and the content rules each fail closed if missing.
+4. Run `MBOS_QA_STATE_BACKEND=lane_d` with `gateway_mode=lane_e`. `impl_spine.py` needs a `gateway_mode` setting and lane-E Components. `LedgerDB` uses 01's reference DDL, so the destructive tests need a lane-D equivalent.
+5. Run `python -m mbos_qa spine`, then publish `docs/qa/SPINE_ACCEPTANCE.md` as the wave-two release-candidate verdict.
+
 ## Proposed tasks (for Agent 01 to triage)
 - **P-07-1 (01), F-16:** ship the contracts as package data, or fail clearly. A non-editable install of `mbos` fails 94 of 109 tests without `MBOS_CONTRACTS_DIR` (`docs/qa/BUILD_VERIFICATION.md`).
 - **P-07-2 (launcher owner / Agent 01), F-17, provenance:** the git identity is stored in the shared `.git/config`, so the last-launched agent signs everyone's commits. 01's commits `acb6f3b`, `c6c5ad4`, `7ed5705` and `bed7609` are authored "Agent 07 Marketing". Fix: `extensions.worktreeConfig=true` plus `git config --worktree user.*` in `~/bin/mbos-agent`. I have not changed any shared config.
