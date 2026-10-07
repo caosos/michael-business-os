@@ -6,7 +6,7 @@ Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
 State: WORKING
 Claimed: F-13 hardening
-Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe · F-04 @ 46c961c · F-13 @ 2415936 · F-14 @ HEADPH
+Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe · F-04 @ 46c961c · F-13 @ 2415936 · F-14 @ c68a33c
 Blocked: F-11 on A-15
 Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
 Last updated: 2026-10-07
@@ -15,7 +15,7 @@ Last updated: 2026-10-07
 F-13 hardening from Agent 01 / 07's acceptance: re-vendor `card.schema.json` (new optional fields), show `item.flags` warnings, a DRY-RUN tag on timeline entries, `why_provenance` links, `mbos.card.clean_text` for strings outside the card model, and no "waiting for the seller" except after a real send. F-11 is BLOCKED on A-15.
 
 ## Done
-- **F-14 @ HEADPH:** "Add what you know about this model".
+- **F-14 @ c68a33c:** "Add what you know about this model".
   - Server-set author, PIN-gated, every refusal reason shown, append-only and receipted; `/notes` lists them.
   - End to end on the real lane-C engine, a note shows on the next card of that model as Michael's RECOMMENDATION with his provenance.
   - 119 + 18 tests pass. Receipt: `docs/receipts/2026-10-07-f14-operator-notes.md`.
