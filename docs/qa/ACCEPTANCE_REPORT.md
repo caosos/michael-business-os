@@ -4,7 +4,7 @@
 
 - Contracts: v1.0.0 pinned byte-exact from `research/agent-01-coordinator` @ `99e9ec0` (20 files); drift check vs `origin/research/agent-01-coordinator`
 - Contract validation: **PASS** (31/31 checks)
-- Acceptance tests: **PASS** (77 passed, 0 failed, 1 strict-xfail known gaps)
+- Acceptance tests: **FAIL** (188 passed, 71 failed, 1 strict-xfail known gaps)
 - End-to-end dry-run (flip + service): **PASS** → [E2E_REPORT.md](e2e/E2E_REPORT.md)
 - Cross-lane ADR-0010 interop against the peers' real code: [INTEROP_REPORT.md](INTEROP_REPORT.md) (`python -m mbos_qa interop`). Open rows map to F-13, F-14 and F-15.
 - Each lane's own test suite, run independently: [BUILD_VERIFICATION.md](BUILD_VERIFICATION.md) (`python -m mbos_qa builds`).
@@ -98,13 +98,211 @@
 | F-23 | FACT | 01 | Release candidate: when the PDP DENIES a proposal, `spine_d` still records `awaiting Michael` and moves the item to AWAITING_APPROVAL. The request is `rejected`, so there is nothing to decide: the item is stuck and the approval queue lies. Receipts show `POLICY_DECIDED … deny` then `ITEM_STATE_CHANGED awaiting Michael`. | RECOMMENDATION: on a deny, archive or fail the item (and notify) instead of AWAITING_APPROVAL. The reference spine has the same shape. |
 | F-24 | FACT | 05 + 01 (**release-blocking**) | Release candidate: a request the gateway DENIES at execution time (freeze engaged before the YES, or PANIC state unreadable/corrupt, L1/L2 freeze) stays `approved` while the item goes FAILED. When the switch is released or repaired, calling the gateway again EXECUTES that stale approval (request `executed`, one effector row, item still FAILED). ADR-0005 and the reference gateway end such a request as `cancelled_by_freeze`. Probed directly and as spec A9 (8/8 on the reference backend, 6 of 8 fail on lane E). | RECOMMENDATION: 05's gateway sets `approved → cancelled_by_freeze` (or `failed`) on a G7 denial, in the same transaction as the ACTION_FAILED receipt, so a denied approval can never be replayed. Add a regression test (`test_a_request_denied_by_a_freeze_cannot_fire_once_the_switch_is_readable_again`). |
 | F-25 | FACT | 05 + 01 (needs a ruling) | Release candidate: after a hard kill mid-ACT the lane E gateway never duplicates the effector (invariant holds, both crash points), but on restart it reconciles the claim to `FAILED` (`RECONCILED:PROVIDER_NOT_FOUND`, not retried) instead of resuming to ACTED. Unified suite A5 says 'resumes'. Also, the dry-run provider's delivery record is in-process, so for a crash AFTER the effector ran the reconciliation records 'provider has no record' although the simulated send happened (a real provider lookup would be correct). | RECOMMENDATION: rule whether A5 means 'resumes' (reference gateway) or 'at-most-once, fail-safe, re-approve' (lane E), and amend the unified suite. For a crash BEFORE the effector call a safe retry is possible. The simulated provider should keep its delivery log durably (a table), like a real provider. |
-| F-16 | FACT | 01 | Agent 01's package only finds the contracts by a path relative to the source tree. With a normal (non-editable) `pip install`, 94 of its 109 tests fail or error with `docs/research/contracts not found; set MBOS_CONTRACTS_DIR`. With that variable set, 108 pass and 1 is skipped ([BUILD_VERIFICATION](BUILD_VERIFICATION.md)). | RECOMMENDATION: ship the contracts as package data (as 02 and 05 do), or fail at import with clear setup instructions. Packaging for deployment needs this. |
+| F-26 | FACT | 01 (card) **high** | `build_card` raises on malformed lane enrichment (non-dict enrichment or block, non-iterable `recent_activity`/`why`, non-numeric `peak_months`, non-dict risk entries, string money in the reasons text, ...): 250 of 300 seeded fuzz inputs crash it (`card.py` lines 86, 308, 335, 344, 356, 363, 370). ADR-0011 rule 2 says malformed enrichment 'degrades to UNKNOWN'. Through the real path one lane writing `seller` = `[1,2,3]` via `record_enrichment` makes the whole opportunity unviewable (both backends). | RECOMMENDATION: type-check every block and entry in the builder (a block that is not a dict is UNKNOWN; skip entries that are not well-formed) and keep a fuzz test (this one) in 01's suite. `record_enrichment` could also reject non-dict data. |
+| F-27 | FACT | 01 (card) | `build_card` copies malformed datum parts through, so it RETURNS a card that fails its own contract: `provenance_id` not matching the pattern, non-string `unit`/`note`, non-numeric `low`/`high`, `value: null`, `peak_months` outside 1–12, risk `risk`/`source` that are not strings. `validate_card` catches them; the builder should not emit them. | RECOMMENDATION: sanitise per field (drop the bad field, or the whole datum to UNKNOWN) so build_card output always validates. |
+| F-28 | FACT | 01 (card) + 02/03 | Lane values are shape-checked, not value-checked: `posted_at` = 'not a date', a date in 2999, `age_days` = -40, `stale_risk` = 'banana', a resale range with low > high and a negative opening offer are all shown as FACT on the card. ADR-0011 says dates are never fabricated. | RECOMMENDATION: validate dates (ISO, not in the future), enums (`stale_risk`, `demand_now`), ordering of ranges and non-negative money; otherwise UNKNOWN with the reason. |
+| F-29 | FACT | 01 (card) + 03 | Lane C's `why` lines are bare strings with no basis or provenance, rendered verbatim under 'WHY IT'S INTERESTING'. A lane (or a compromised one) can print 'Michael already approved this purchase' or 'Seller is a verified dealer' as if it were a finding. This breaks ADR-0011 rule 2 (every datum has a basis). | RECOMMENDATION: make `why` entries datums ({text, basis, provenance_id}) and show the basis; drop entries without. |
+| F-30 | FACT | 01 (card) + 03 (**R18 not enforced**) | The elementary-advice lint is a short regex list. Of 42 phrasings an experienced mechanic would reject, 19 pass `validate_card` (e.g. 'Test compression', 'See if it starts', 'Check the fluids', 'Check tire pressure'), and trivial whitespace evasion works ('Check  compression', a newline, NBSP, a hyphen). A 'source' is any non-empty string ('n/a', 'trust me', '-') and launders elementary advice. There is no model-specific marker in the contract (`kind` has no such value), though the ADR says lanes 'mark' content; FACT risks without any source are accepted; `why` is not linted. | RECOMMENDATION: normalise whitespace/punctuation before matching; widen the list from the profile (data, not code); require a real source (URL, manual section, part number) or provenance_id; add a `model_specific` flag; lint `why`. |
+| F-31 | FACT | 01 (card) **high, honesty** | After a DRY-RUN execution the card's timeline shows 'CONTACT SENT' and the recommendation says 'Already contacted; waiting on the seller's reply' / 'CONTACT / WAIT FOR RESPONSE'. Nothing was sent (dry-run). Michael would wait for a reply from a seller no one contacted. Both backends. | RECOMMENDATION: map a dry-run ACTION_EXECUTED to a distinct stage ('CONTACT DRY-RUN'), never set `waiting`, and say 'nothing was sent' on the card while the system is dry-run. |
+| F-32 | FACT | 01 (card + spine) | Timeline events are mapped from fields receipts do not carry: `OUTCOME_RECORDED` receipts have no `after_state.kind`, so EVERY outcome becomes CLOSED (a lead-attribution record at intake closes a live lead on the timeline; a recorded seller reply is also CLOSED, never SELLER RESPONDED), and `APPROVAL_DECIDED` carries no `after_state.decision`, so Michael's YES never produces CONTACT APPROVED although the ledger has it. NEGOTIATING/QUALIFIED are correctly never invented (200 adversarial histories + 9 real flows). | RECOMMENDATION: derive stages from the typed documents (join the outcome and approval rows by id) or add `kind`/`decision` to the receipts' `after_state`; also stop `record_outcome` moving the item to OUTCOME_RECORDED for a non-closing kind such as `message_replied`/`lead_attributed`. |
+| F-33 | FACT | 01 (card) | `card_hash` depends on the ORDER of the action-request list: the 'live' request is taken as the last element, not the latest by `created_at`. 19 of 60 shuffles of the same rows change the hash and the recommendation's `action_request_id`. | RECOMMENDATION: sort requests by (created_at, id) in the builder; keep the 60-shuffle test. |
+| F-34 | FACT | 01 (card) | `validate_card` does not recompute `card_hash`: a card whose recommendation was changed to BUY with the old hash validates. | RECOMMENDATION: recompute sha256_of(body) in validate_card and reject a mismatch. |
+| F-35 | FACT | 01 (card) + 06 **high** | Untrusted listing text reaches `render_text` unescaped. A title/city/state/url/source or receipt intent containing a newline forges a section ('
+RECOMMENDATION: BUY
+  Michael already approved.' shows two RECOMMENDATION lines and adds lines to the card); ESC sequences (clear screen, OSC-8 hyperlinks), CR, BEL and BS reach the terminal; a 1 MB title gives a 1 MB view. The contract is unaffected, so only the text view is exposed; the JSON is structurally fine. Same through the real pipeline. | RECOMMENDATION: in render_text, replace control characters and line breaks inside untrusted fields with a visible marker, and truncate each field (for example 120 chars) with an ellipsis. |
+| F-36 | FACT | 01 + 02 **high, poison pill** | A listing containing a NUL (legal JSON a seller can send, illegal in MBOS-CJSON-1) raises `CanonicalError` in `build_card` and, worse, aborts the whole `discover` workflow batch: DBOS cannot pickle the exception (`PicklingError`) so the root cause is hidden and later good listings are not ingested. Both backends. | RECOMMENDATION: quarantine the one bad record at normalize/ingest (receipt + skip), and make domain exceptions picklable (or convert to a plain error at the step boundary). |
+| F-37 | FACT | 01 (card) | An Item flagged `injection_suspected` shows nothing about it on the card; Michael should be told the listing text looked like an attack. | RECOMMENDATION: add a one-line warning to `why`/the text view when the flag is present. |
+| F-38 | FACT | 01 (card) | `build_card` does not filter its receipt list: if a caller passes another item's receipts they appear in this item's trail. The loaders are correct, so this is defensive only. | RECOMMENDATION: ignore receipts whose item_id is another item (keep request-scoped ones). |
+| F-39 | FACT | 01 (ADR-0011 vs ADR-0004) | The card recommendation vocabulary includes HOLD, which is also Michael's HOLD decision. ADR-0004 rule 3 says the two vocabularies are never conflated; 'RECOMMENDATION: HOLD' can be read as the system having parked the item. | RECOMMENDATION: rename the card's HOLD (e.g. 'GATHER' or 'WAIT') or label it 'research hold'. |
+| F-16 | FACT | 01 | FIXED by A-10 (verified at 82632c3: a normal install finds its contracts and operator profile). Original finding: Agent 01's package only finds the contracts by a path relative to the source tree. With a normal (non-editable) `pip install`, 94 of its 109 tests fail or error with `docs/research/contracts not found; set MBOS_CONTRACTS_DIR`. With that variable set, 108 pass and 1 is skipped ([BUILD_VERIFICATION](BUILD_VERIFICATION.md)). | RECOMMENDATION: ship the contracts as package data (as 02 and 05 do), or fail at import with clear setup instructions. Packaging for deployment needs this. |
 | F-17 | FACT | launcher / all lanes | The git identity is stored in the SHARED `.git/config` (`extensions.worktreeConfig` is unset), so the launcher's per-agent identity reassertion overwrites every worktree. Agent 01's commits acb6f3b, c6c5ad4, 7ed5705 and bed7609 are authored 'Agent 07 Marketing'. Commit provenance across all branches is unreliable. | RECOMMENDATION (launcher owner; not changed by 07): `git config extensions.worktreeConfig true` plus `git config --worktree user.name/email` per worktree in `~/bin/mbos-agent`. Note the misattribution in affected receipts. History is not rewritten. |
 
 ## Every test case
 
 | Module | Test | Outcome |
 |---|---|---|
+| test_card_authority | `test_card_has_no_decision_or_authority_fields` | passed |
+| test_card_authority | `test_recommendation_uses_its_own_vocabulary_not_michaels` | FAILED |
+| test_card_authority | `test_recommendation_is_derived_from_the_machine_verdict_and_the_live_request` | passed |
+| test_card_authority | `test_a_yes_in_the_enrichment_or_the_listing_does_not_change_the_recommendation` | passed |
+| test_card_authority | `test_a_pending_request_is_never_presented_as_decided` | passed |
+| test_card_authority | `test_build_validate_render_have_no_side_effects` | passed |
+| test_card_authority | `test_the_card_schema_forbids_extra_top_level_fields` | passed |
+| test_card_determinism | `test_card_hash_is_independent_of_receipt_and_request_order` | FAILED |
+| test_card_determinism | `test_text_view_is_independent_of_input_order` | passed |
+| test_card_determinism | `test_card_hash_ignores_generation_time_but_nothing_else` | passed |
+| test_card_determinism | `test_card_hash_is_stable_across_processes_and_hash_seeds` | passed |
+| test_card_determinism | `test_key_order_and_float_representation_do_not_change_the_hash` | passed |
+| test_card_determinism | `test_card_hash_matches_an_independent_recomputation` | passed |
+| test_card_determinism | `test_a_tampered_card_does_not_pass_validation` | FAILED |
+| test_card_determinism | `test_building_a_card_does_not_mutate_its_inputs` | passed |
+| test_card_honesty | `test_no_enrichment_everything_lane_supplied_is_unknown_and_listed` | passed |
+| test_card_honesty | `test_empty_dict_enrichment_equals_no_enrichment` | passed |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[enrichment-is-list]` | passed |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[enrichment-is-string]` | FAILED |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[enrichment-is-number]` | FAILED |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[block-is-none]` | passed |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[block-is-list]` | FAILED |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[block-is-string]` | FAILED |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[datum-bare-number]` | passed |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[datum-no-basis]` | passed |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[datum-bad-basis]` | passed |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[datum-lower-basis]` | passed |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[datum-value-null]` | FAILED |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[datum-bad-provenance]` | FAILED |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[datum-bad-unit]` | FAILED |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[datum-bad-low-high]` | FAILED |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[datum-bad-note]` | FAILED |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[datum-extra-keys]` | passed |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[datum-unknown-with-basis]` | passed |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[recent-activity-string]` | passed |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[recent-activity-numbers]` | passed |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[recent-activity-not-iterable]` | FAILED |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[why-string]` | passed |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[why-number]` | FAILED |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[why-nulls]` | passed |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[peak-months-strings]` | FAILED |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[peak-months-out-of-range]` | FAILED |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[peak-months-nested]` | FAILED |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[peak-months-string]` | passed |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[confidence-bad]` | passed |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[confidence-list]` | passed |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[risks-not-list]` | FAILED |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[risks-null-entries]` | FAILED |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[risks-bad-fields]` | FAILED |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[plan-wrong-type]` | passed |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[plan-datum-list]` | passed |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[make-model-bare]` | passed |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[distance-string]` | passed |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[logistics-mode-garbage]` | passed |
+| test_card_honesty | `test_malformed_enrichment_degrades_to_unknown_never_crashes_never_invalid[money-as-string]` | FAILED |
+| test_card_honesty | `test_fuzzed_enrichment_never_crashes_and_never_invents` | FAILED |
+| test_card_honesty | `test_a_wellformed_lane_datum_is_shown_verbatim_with_its_basis` | passed |
+| test_card_honesty | `test_no_datum_is_shown_without_a_basis` | passed |
+| test_card_honesty | `test_lane_values_are_validated_not_just_shape_checked` | FAILED |
+| test_card_honesty | `test_why_lines_from_a_lane_carry_provenance` | FAILED |
+| test_card_honesty | `test_enrichment_cannot_inject_card_sections_or_authority` | passed |
+| test_card_honesty | `test_asking_price_and_location_come_from_the_listing_only` | passed |
+| test_card_hostile | `test_hostile_title_keeps_the_card_valid_and_the_decision_unchanged[ansi-clear-screen]` | passed |
+| test_card_hostile | `test_hostile_title_keeps_the_card_valid_and_the_decision_unchanged[bell-and-backspaces]` | passed |
+| test_card_hostile | `test_hostile_title_keeps_the_card_valid_and_the_decision_unchanged[bidi-override]` | passed |
+| test_card_hostile | `test_hostile_title_keeps_the_card_valid_and_the_decision_unchanged[carriage-return-overwrite]` | passed |
+| test_card_hostile | `test_hostile_title_keeps_the_card_valid_and_the_decision_unchanged[emoji-astral]` | passed |
+| test_card_hostile | `test_hostile_title_keeps_the_card_valid_and_the_decision_unchanged[empty]` | passed |
+| test_card_hostile | `test_hostile_title_keeps_the_card_valid_and_the_decision_unchanged[format-string]` | passed |
+| test_card_hostile | `test_hostile_title_keeps_the_card_valid_and_the_decision_unchanged[html-script]` | passed |
+| test_card_hostile | `test_hostile_title_keeps_the_card_valid_and_the_decision_unchanged[json-breaker]` | passed |
+| test_card_hostile | `test_hostile_title_keeps_the_card_valid_and_the_decision_unchanged[long-single-word-url]` | passed |
+| test_card_hostile | `test_hostile_title_keeps_the_card_valid_and_the_decision_unchanged[newline-section-forgery]` | passed |
+| test_card_hostile | `test_hostile_title_keeps_the_card_valid_and_the_decision_unchanged[null-byte]` | FAILED |
+| test_card_hostile | `test_hostile_title_keeps_the_card_valid_and_the_decision_unchanged[osc8-hyperlink]` | passed |
+| test_card_hostile | `test_hostile_title_keeps_the_card_valid_and_the_decision_unchanged[prompt-injection]` | passed |
+| test_card_hostile | `test_hostile_title_keeps_the_card_valid_and_the_decision_unchanged[sql-ish]` | passed |
+| test_card_hostile | `test_hostile_title_keeps_the_card_valid_and_the_decision_unchanged[tab-columns]` | passed |
+| test_card_hostile | `test_hostile_title_keeps_the_card_valid_and_the_decision_unchanged[very-long]` | passed |
+| test_card_hostile | `test_hostile_title_keeps_the_card_valid_and_the_decision_unchanged[whitespace-only]` | passed |
+| test_card_hostile | `test_hostile_title_keeps_the_card_valid_and_the_decision_unchanged[zero-width]` | passed |
+| test_card_hostile | `test_hostile_title_cannot_forge_or_corrupt_the_text_view[ansi-clear-screen]` | FAILED |
+| test_card_hostile | `test_hostile_title_cannot_forge_or_corrupt_the_text_view[bell-and-backspaces]` | FAILED |
+| test_card_hostile | `test_hostile_title_cannot_forge_or_corrupt_the_text_view[bidi-override]` | passed |
+| test_card_hostile | `test_hostile_title_cannot_forge_or_corrupt_the_text_view[carriage-return-overwrite]` | FAILED |
+| test_card_hostile | `test_hostile_title_cannot_forge_or_corrupt_the_text_view[emoji-astral]` | passed |
+| test_card_hostile | `test_hostile_title_cannot_forge_or_corrupt_the_text_view[empty]` | passed |
+| test_card_hostile | `test_hostile_title_cannot_forge_or_corrupt_the_text_view[format-string]` | passed |
+| test_card_hostile | `test_hostile_title_cannot_forge_or_corrupt_the_text_view[html-script]` | passed |
+| test_card_hostile | `test_hostile_title_cannot_forge_or_corrupt_the_text_view[json-breaker]` | passed |
+| test_card_hostile | `test_hostile_title_cannot_forge_or_corrupt_the_text_view[newline-section-forgery]` | FAILED |
+| test_card_hostile | `test_hostile_title_cannot_forge_or_corrupt_the_text_view[null-byte]` | FAILED |
+| test_card_hostile | `test_hostile_title_cannot_forge_or_corrupt_the_text_view[osc8-hyperlink]` | FAILED |
+| test_card_hostile | `test_hostile_title_cannot_forge_or_corrupt_the_text_view[prompt-injection]` | passed |
+| test_card_hostile | `test_hostile_title_cannot_forge_or_corrupt_the_text_view[sql-ish]` | passed |
+| test_card_hostile | `test_hostile_title_cannot_forge_or_corrupt_the_text_view[tab-columns]` | passed |
+| test_card_hostile | `test_hostile_title_cannot_forge_or_corrupt_the_text_view[whitespace-only]` | FAILED |
+| test_card_hostile | `test_hostile_title_cannot_forge_or_corrupt_the_text_view[zero-width]` | passed |
+| test_card_hostile | `test_a_huge_listing_does_not_produce_a_huge_text_view` | FAILED |
+| test_card_hostile | `test_hostile_city_state_url_and_source_cannot_forge_the_view` | FAILED |
+| test_card_hostile | `test_injection_flag_on_the_item_is_visible_to_michael` | FAILED |
+| test_card_hostile | `test_untrusted_text_in_activity_intents_cannot_forge_a_row` | passed |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['Check compression before buying']` | passed |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['check the compression']` | passed |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['Inspect the fuel']` | passed |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['inspect fuel system for varnish']` | passed |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['Check engine oil level']` | passed |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['Check the oil']` | passed |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['check the air filter']` | passed |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['Check spark']` | passed |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['check for spark']` | passed |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['Check the spark plug']` | passed |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['check the plugs']` | passed |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['Verify it starts']` | passed |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['Make sure it runs']` | passed |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['verify it runs']` | passed |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['Make sure the engine starts']` | passed |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['Check the battery']` | passed |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['look for leaks']` | passed |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['Look for any damage']` | passed |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['Inspect the belts']` | passed |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['inspect hoses']` | passed |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['Test compression']` | FAILED |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['Do a compression test']` | FAILED |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['Pull the plug and check for spark']` | passed |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['See if it starts']` | FAILED |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['Try starting it']` | FAILED |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['Check that it starts']` | FAILED |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['Check the fuel']` | FAILED |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['Check fuel flow']` | FAILED |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['Check the carburetor']` | FAILED |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['Check the oil level and condition']` | passed |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['Check tire pressure']` | FAILED |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['Check the coolant level']` | FAILED |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['Check the fluids']` | FAILED |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['Inspect the spark plug']` | FAILED |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['Verify the engine runs']` | FAILED |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['Make sure it turns over']` | FAILED |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['Check for oil leaks']` | FAILED |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['Check  compression']` | FAILED |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['Check\\ncompression']` | FAILED |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['Check\\xa0compression']` | FAILED |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['CHECK COMPRESSION']` | passed |
+| test_card_lint | `test_elementary_advice_in_the_plan_is_rejected['check-compression']` | FAILED |
+| test_card_lint | `test_unsourced_elementary_risk_is_rejected['Check compression before buying']` | passed |
+| test_card_lint | `test_unsourced_elementary_risk_is_rejected['check the compression']` | passed |
+| test_card_lint | `test_unsourced_elementary_risk_is_rejected['Inspect the fuel']` | passed |
+| test_card_lint | `test_unsourced_elementary_risk_is_rejected['inspect fuel system for varnish']` | passed |
+| test_card_lint | `test_unsourced_elementary_risk_is_rejected['Check engine oil level']` | passed |
+| test_card_lint | `test_unsourced_elementary_risk_is_rejected['Check the oil']` | passed |
+| test_card_lint | `test_unsourced_elementary_risk_is_rejected['check the air filter']` | passed |
+| test_card_lint | `test_unsourced_elementary_risk_is_rejected['Check spark']` | passed |
+| test_card_lint | `test_unsourced_elementary_risk_is_rejected['check for spark']` | passed |
+| test_card_lint | `test_unsourced_elementary_risk_is_rejected['Check the spark plug']` | passed |
+| test_card_lint | `test_unsourced_elementary_risk_is_rejected['check the plugs']` | passed |
+| test_card_lint | `test_unsourced_elementary_risk_is_rejected['Verify it starts']` | passed |
+| test_card_lint | `test_sourced_model_specific_knowledge_is_accepted` | passed |
+| test_card_lint | `test_a_junk_source_does_not_launder_elementary_advice[n/a]` | FAILED |
+| test_card_lint | `test_a_junk_source_does_not_launder_elementary_advice[none]` | FAILED |
+| test_card_lint | `test_a_junk_source_does_not_launder_elementary_advice[N/A]` | FAILED |
+| test_card_lint | `test_a_junk_source_does_not_launder_elementary_advice[unknown]` | FAILED |
+| test_card_lint | `test_a_junk_source_does_not_launder_elementary_advice[-]` | FAILED |
+| test_card_lint | `test_a_junk_source_does_not_launder_elementary_advice[ ]` | FAILED |
+| test_card_lint | `test_a_junk_source_does_not_launder_elementary_advice[todo]` | FAILED |
+| test_card_lint | `test_a_junk_source_does_not_launder_elementary_advice[trust me]` | FAILED |
+| test_card_lint | `test_the_contract_can_mark_content_model_specific` | FAILED |
+| test_card_lint | `test_generic_advice_with_a_real_looking_source_is_still_generic` | FAILED |
+| test_card_lint | `test_a_risk_with_basis_fact_still_needs_a_source_or_provenance` | FAILED |
+| test_card_lint | `test_no_false_positives_on_legitimate_mechanic_language` | passed |
+| test_card_lint | `test_the_lint_also_covers_the_lane_why_lines` | FAILED |
+| test_card_trail_timeline | `test_trail_is_the_items_receipts_one_to_one_in_seq_order` | passed |
+| test_card_trail_timeline | `test_every_trail_row_has_its_input_provenance` | passed |
+| test_card_trail_timeline | `test_a_receipt_without_provenance_never_becomes_a_trail_row_silently` | passed |
+| test_card_trail_timeline | `test_receipts_of_other_items_do_not_leak_into_the_trail` | FAILED |
+| test_card_trail_timeline | `test_receipts_tied_to_the_items_requests_but_lacking_item_id_still_appear` | passed |
+| test_card_trail_timeline | `test_next_action_is_stated_exactly_once_on_the_last_row` | passed |
+| test_card_trail_timeline | `test_negotiating_and_qualified_never_appear_without_an_event` | passed |
+| test_card_trail_timeline | `test_every_timeline_stage_is_backed_by_a_receipt_with_the_right_timestamp` | passed |
+| test_card_trail_timeline | `test_an_attribution_outcome_does_not_close_a_live_lead` | FAILED |
+| test_card_trail_timeline | `test_a_dry_run_execution_is_not_reported_as_contact_sent` | FAILED |
+| test_card_trail_timeline | `test_michaels_yes_on_a_contact_request_appears_as_contact_approved` | FAILED |
+| test_card_trail_timeline | `test_a_seller_reply_is_not_a_closed_deal` | FAILED |
 | test_a01_atomic_state_receipt | `test_fault_between_state_and_receipt_leaves_neither[after_state_before_receipt]` | passed |
 | test_a01_atomic_state_receipt | `test_fault_between_state_and_receipt_leaves_neither[after_receipt_before_commit]` | passed |
 | test_a01_atomic_state_receipt | `test_unresolvable_provenance_rolls_back_the_state_change` | passed |

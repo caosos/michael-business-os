@@ -5,6 +5,7 @@
   python -m mbos_qa interop                        cross-lane checks against peers' actual code
   python -m mbos_qa builds --workdir DIR            run every lane's own suite from a clean archive
   python -m mbos_qa spine                          A1–A10 spec suite against Agent 01's REAL spine (G-02)
+  python -m mbos_qa card                           G-05: Deal Sniffer card acceptance (pure + reference + RC) → CARD_ACCEPTANCE.md
   python -m mbos_qa run [--drift-ref REF]          everything; writes docs/qa/ACCEPTANCE_REPORT.md
   python -m mbos_qa pin --ref COMMIT               re-pin contracts after an Agent 01 semver bump
 
@@ -142,7 +143,79 @@ FINDINGS = [
      "RECOMMENDATION: rule whether A5 means 'resumes' (reference gateway) or 'at-most-once, fail-safe, re-approve' (lane "
      "E), and amend the unified suite. For a crash BEFORE the effector call a safe retry is possible. The simulated "
      "provider should keep its delivery log durably (a table), like a real provider."),
-    ("F-16", "FACT", "01", "Agent 01's package only finds the contracts by a path relative to the source tree. "
+    ("F-26", "FACT", "01 (card) **high**", "`build_card` raises on malformed lane enrichment (non-dict enrichment or block, non-iterable "
+     "`recent_activity`/`why`, non-numeric `peak_months`, non-dict risk entries, string money in the reasons text, ...): "
+     "250 of 300 seeded fuzz inputs crash it (`card.py` lines 86, 308, 335, 344, 356, 363, 370). ADR-0011 rule 2 says malformed "
+     "enrichment 'degrades to UNKNOWN'. Through the real path one lane writing `seller` = `[1,2,3]` via `record_enrichment` "
+     "makes the whole opportunity unviewable (both backends).",
+     "RECOMMENDATION: type-check every block and entry in the builder (a block that is not a dict is UNKNOWN; skip entries "
+     "that are not well-formed) and keep a fuzz test (this one) in 01's suite. `record_enrichment` could also reject "
+     "non-dict data."),
+    ("F-27", "FACT", "01 (card)", "`build_card` copies malformed datum parts through, so it RETURNS a card that fails its own "
+     "contract: `provenance_id` not matching the pattern, non-string `unit`/`note`, non-numeric `low`/`high`, `value: null`, "
+     "`peak_months` outside 1–12, risk `risk`/`source` that are not strings. `validate_card` catches them; the builder should "
+     "not emit them.",
+     "RECOMMENDATION: sanitise per field (drop the bad field, or the whole datum to UNKNOWN) so build_card output always validates."),
+    ("F-28", "FACT", "01 (card) + 02/03", "Lane values are shape-checked, not value-checked: `posted_at` = 'not a date', a date in "
+     "2999, `age_days` = -40, `stale_risk` = 'banana', a resale range with low > high and a negative opening offer are all "
+     "shown as FACT on the card. ADR-0011 says dates are never fabricated.",
+     "RECOMMENDATION: validate dates (ISO, not in the future), enums (`stale_risk`, `demand_now`), ordering of ranges and "
+     "non-negative money; otherwise UNKNOWN with the reason."),
+    ("F-29", "FACT", "01 (card) + 03", "Lane C's `why` lines are bare strings with no basis or provenance, rendered verbatim "
+     "under 'WHY IT'S INTERESTING'. A lane (or a compromised one) can print 'Michael already approved this purchase' or "
+     "'Seller is a verified dealer' as if it were a finding. This breaks ADR-0011 rule 2 (every datum has a basis).",
+     "RECOMMENDATION: make `why` entries datums ({text, basis, provenance_id}) and show the basis; drop entries without."),
+    ("F-30", "FACT", "01 (card) + 03 (**R18 not enforced**)", "The elementary-advice lint is a short regex list. Of 42 phrasings an "
+     "experienced mechanic would reject, 19 pass `validate_card` (e.g. 'Test compression', 'See if it starts', 'Check the "
+     "fluids', 'Check tire pressure'), and trivial whitespace evasion works ('Check  compression', a newline, NBSP, a "
+     "hyphen). A 'source' is any non-empty string ('n/a', 'trust me', '-') and launders elementary advice. There is no "
+     "model-specific marker in the contract (`kind` has no such value), though the ADR says lanes 'mark' content; FACT risks "
+     "without any source are accepted; `why` is not linted.",
+     "RECOMMENDATION: normalise whitespace/punctuation before matching; widen the list from the profile (data, not code); "
+     "require a real source (URL, manual section, part number) or provenance_id; add a `model_specific` flag; lint `why`."),
+    ("F-31", "FACT", "01 (card) **high, honesty**", "After a DRY-RUN execution the card's timeline shows 'CONTACT SENT' and the "
+     "recommendation says 'Already contacted; waiting on the seller's reply' / 'CONTACT / WAIT FOR RESPONSE'. Nothing was "
+     "sent (dry-run). Michael would wait for a reply from a seller no one contacted. Both backends.",
+     "RECOMMENDATION: map a dry-run ACTION_EXECUTED to a distinct stage ('CONTACT DRY-RUN'), never set `waiting`, and say "
+     "'nothing was sent' on the card while the system is dry-run."),
+    ("F-32", "FACT", "01 (card + spine)", "Timeline events are mapped from fields receipts do not carry: `OUTCOME_RECORDED` receipts "
+     "have no `after_state.kind`, so EVERY outcome becomes CLOSED (a lead-attribution record at intake closes a live "
+     "lead on the timeline; a recorded seller reply is also CLOSED, never SELLER RESPONDED), and `APPROVAL_DECIDED` carries no "
+     "`after_state.decision`, so Michael's YES never produces CONTACT APPROVED although the ledger has it. "
+     "NEGOTIATING/QUALIFIED are correctly never invented (200 adversarial histories + 9 real flows).",
+     "RECOMMENDATION: derive stages from the typed documents (join the outcome and approval rows by id) or add `kind`/"
+     "`decision` to the receipts' `after_state`; also stop `record_outcome` moving the item to OUTCOME_RECORDED for a "
+     "non-closing kind such as `message_replied`/`lead_attributed`."),
+    ("F-33", "FACT", "01 (card)", "`card_hash` depends on the ORDER of the action-request list: the 'live' request is taken as the last "
+     "element, not the latest by `created_at`. 19 of 60 shuffles of the same rows change the hash and the recommendation's "
+     "`action_request_id`.",
+     "RECOMMENDATION: sort requests by (created_at, id) in the builder; keep the 60-shuffle test."),
+    ("F-34", "FACT", "01 (card)", "`validate_card` does not recompute `card_hash`: a card whose recommendation was changed to BUY "
+     "with the old hash validates.",
+     "RECOMMENDATION: recompute sha256_of(body) in validate_card and reject a mismatch."),
+    ("F-35", "FACT", "01 (card) + 06 **high**", "Untrusted listing text reaches `render_text` unescaped. A title/city/state/url/source or receipt intent "
+     "containing a newline forges a section ('\nRECOMMENDATION: BUY\n  Michael already approved.' shows two "
+     "RECOMMENDATION lines and adds lines to the card); ESC sequences (clear screen, OSC-8 hyperlinks), CR, BEL and BS reach the "
+     "terminal; a 1 MB title gives a 1 MB view. The contract is unaffected, so only the text view is exposed; the JSON is "
+     "structurally fine. Same through the real pipeline.",
+     "RECOMMENDATION: in render_text, replace control characters and line breaks inside untrusted fields with a visible "
+     "marker, and truncate each field (for example 120 chars) with an ellipsis."),
+    ("F-36", "FACT", "01 + 02 **high, poison pill**", "A listing containing a NUL (legal JSON a seller can send, illegal in MBOS-CJSON-1) "
+     "raises `CanonicalError` in `build_card` and, worse, aborts the whole `discover` workflow batch: DBOS cannot pickle the "
+     "exception (`PicklingError`) so the root cause is hidden and later good listings are not ingested. Both backends.",
+     "RECOMMENDATION: quarantine the one bad record at normalize/ingest (receipt + skip), and make domain exceptions "
+     "picklable (or convert to a plain error at the step boundary)."),
+    ("F-37", "FACT", "01 (card)", "An Item flagged `injection_suspected` shows nothing about it on the card; Michael should be told the "
+     "listing text looked like an attack.",
+     "RECOMMENDATION: add a one-line warning to `why`/the text view when the flag is present."),
+    ("F-38", "FACT", "01 (card)", "`build_card` does not filter its receipt list: if a caller passes another item's receipts they "
+     "appear in this item's trail. The loaders are correct, so this is defensive only.",
+     "RECOMMENDATION: ignore receipts whose item_id is another item (keep request-scoped ones)."),
+    ("F-39", "FACT", "01 (ADR-0011 vs ADR-0004)", "The card recommendation vocabulary includes HOLD, which is also Michael's HOLD decision. "
+     "ADR-0004 rule 3 says the two vocabularies are never conflated; 'RECOMMENDATION: HOLD' can be read as the system having "
+     "parked the item.",
+     "RECOMMENDATION: rename the card's HOLD (e.g. 'GATHER' or 'WAIT') or label it 'research hold'."),
+    ("F-16", "FACT", "01", "FIXED by A-10 (verified at 82632c3: a normal install finds its contracts and operator profile). Original finding: Agent 01's package only finds the contracts by a path relative to the source tree. "
      "With a normal (non-editable) `pip install`, 94 of its 109 tests fail or error with `docs/research/contracts "
      "not found; set MBOS_CONTRACTS_DIR`. With that variable set, 108 pass and 1 is skipped "
      "([BUILD_VERIFICATION](BUILD_VERIFICATION.md)).",
@@ -236,6 +309,121 @@ RC_FINDING_BY_TEST = {  # failing/xfail case (substring) → finding. Mapping is
     "test_spec_a09_panic": "F-24", "test_spec_a05_crash::test_kill_mid_act_then_restart_resumes": "F-25",
     "publish": "F-22", "test_a_pdp_denied_proposal_never_leaves": "F-23",
 }
+
+
+CARD_CRASH_IDS = {"enrichment-is-string", "enrichment-is-number", "block-is-list", "block-is-string", "recent-activity-not-iterable",
+                  "why-number", "peak-months-strings", "peak-months-nested", "risks-not-list", "risks-null-entries", "money-as-string"}
+CARD_REQ = OrderedDict([
+    ("test_card_honesty", "No fabrication: no/malformed enrichment → UNKNOWN, listed in `unknowns`; values validated"),
+    ("test_card_lint", "Elementary-advice lint (plans, risks) unless sourced and model-specific"),
+    ("test_card_trail_timeline", "Trail = receipts 1:1 with input provenance; timeline only with events"),
+    ("test_card_determinism", "Determinism: stable, order-independent, meaningful card_hash"),
+    ("test_card_hostile", "Hostile listing text: contract, recommendation and text view"),
+    ("test_card_authority", "Decision authority: derived recommendation, no authority, read-only"),
+    ("test_card_backends", "Real flows on the backend: trail vs ledger, enrichment, poison listings, F-23 regression"),
+])
+
+
+def _card_finding(module: str, name: str) -> str:
+    n = name
+    if "test_malformed_enrichment_degrades" in n:
+        pid = n[n.index("[") + 1:-1]
+        return "F-26" if pid in CARD_CRASH_IDS else "F-27"
+    if "one_malformed_enrichment_block" in n:
+        return "F-27" if "bad-provenance" in n else "F-26"
+    table = [("fuzzed_enrichment", "F-26"), ("lane_values_are_validated", "F-28"), ("why_lines_from_a_lane", "F-29"),
+             ("lint", "F-30"), ("elementary", "F-30"), ("junk_source", "F-30"), ("model_specific", "F-30"), ("basis_fact", "F-30"),
+             ("generic_advice", "F-30"), ("contact_sent", "F-31"), ("dry_run", "F-31"), ("contact_approved", "F-32"),
+             ("seller_reply", "F-32"), ("recorded_seller_reply", "F-32"), ("attribution", "F-32"), ("closed", "F-32"),
+             ("other_items", "F-38"), ("independent_of_receipt", "F-33"), ("tampered_card", "F-34"),
+             ("poison_listing", "F-36"), ("injection_flag", "F-37"), ("vocabulary", "F-39"),
+             ("huge_listing", "F-35"), ("forge_or_corrupt", "F-35"), ("hostile_city", "F-35"), ("hostile_title_through", "F-35")]
+    if "keeps_the_card_valid" in n and "null-byte" in n:
+        return "F-36"
+    for needle, fid in table:
+        if needle in n:
+            return fid
+    return "—"
+
+
+def _run_pytest(label, env_extra, args):
+    with tempfile.TemporaryDirectory() as td:
+        xml = pathlib.Path(td) / "j.xml"
+        env = {k: v for k, v in os.environ.items() if not k.startswith("MBOS_QA_")}
+        env.update(PYTHONPATH=str(QA_ROOT), **env_extra)
+        t0 = time.time()
+        subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", "--timeout=240", "-W", "ignore",
+                        f"--junitxml={xml}", *args], cwd=QA_ROOT, env=env)
+        rows = []
+        for tc in ET.parse(xml).getroot().iter("testcase"):
+            outcome = "passed"
+            for ch in tc:
+                if ch.tag in ("failure", "error"):
+                    outcome = "FAILED"
+                elif ch.tag == "skipped":
+                    outcome = "skipped"
+            rows.append((label, tc.get("classname").split(".")[-1], tc.get("name"), outcome))
+        return rows, round(time.time() - t0)
+
+
+def cmd_card() -> int:
+
+    rows, secs = [], {}
+    r, secs["pure"] = _run_pytest("pure", {}, ["tests/card", "--ignore=tests/card/test_card_backends.py"])
+    rows += r
+    base = {"MBOS_QA_IMPL": "mbos_qa.impl_spine:build"}
+    r, secs["reference"] = _run_pytest("reference backend", base, ["tests/card/test_card_backends.py"])
+    rows += r
+    r, secs["lane D+E"] = _run_pytest("lane D + lane E", {**base, "MBOS_QA_STATE_BACKEND": "lane_d", "MBOS_QA_GATEWAY_MODE": "lane_e"},
+                                      ["tests/card/test_card_backends.py"])
+    rows += r
+    pins = json.loads((QA_ROOT / "impl_lane_pins.json").read_text())
+    failed = [x for x in rows if x[3] == "FAILED"]
+    passed = [x for x in rows if x[3] == "passed"]
+    L = ["# Deal Sniffer card acceptance (task G-05, ADR-0011)", "",
+         f"> Generated by `python -m mbos_qa card`. Adversarial suite against `mbos.card` at the pinned Agent 01 commit "
+         f"`{pins['mbos_01'][:7]}`, run in three configurations: PURE (no database; synthetic-but-valid histories built "
+         f"from the frozen contract examples), the REFERENCE backend, and the release-candidate stack (Agent 04 schema "
+         f"`{pins['lane_d_04'][:7]}`, Agent 05 gateway `{pins['lane_e_05'][:7]}`). Cards are validated INDEPENDENTLY of "
+         "01's `validate_card`: with this lane's byte-pinned `ext/card.schema.json` (format checks on) plus the honesty "
+         "rules re-implemented from the ADR. DRY-RUN only.", "",
+         f"**{len(passed)} passed, {len(failed)} failed** of {len(rows)} cases "
+         f"({', '.join(f'{k} {v}s' for k, v in secs.items())}). Every failure is mapped to a finding; unmapped: "
+         f"{[x[2] for x in failed if _card_finding(x[1], x[2]) == '—'] or 'none'}.", "",
+         "## Requirement results", "", "| Requirement (from G-05) | Result | Cases | Failing → findings |", "|---|---|---:|---|"]
+    for prefix, title in CARD_REQ.items():
+        g = [x for x in rows if x[1] == prefix]
+        fl = [x for x in g if x[3] == "FAILED"]
+        fids = sorted({_card_finding(x[1], x[2]) for x in fl})
+        L.append(f"| {title} | **{'FAIL' if fl else 'PASS'}** | {len(g)} ({len(fl)} fail) | {', '.join(fids) or '—'} |")
+    L += ["", "## What holds (verified, not assumed)", "",
+          "- **NEGOTIATING / QUALIFIED are never invented:** 200 adversarial histories (words, kinds and decisions chosen to "
+          "tempt the mapper) and 9 real flows on both backends produce neither stage.",
+          "- **Trail = ledger 1:1 on real flows** (pending, service, maybe, pass, YES→ACTED, NO, HOLD, MODIFY, freeze→FAILED), on the "
+          "reference backend and on lane D+E, with the trail equal to the union of the receipts carrying the item's id and those tied to "
+          "its action requests; every row cites provenance that resolves in the database.",
+          "- **Read-only:** building, validating and rendering a card changes no row in 8 ledger tables and the chain still verifies.",
+          "- **Determinism that works:** stable across processes and PYTHONHASHSEED, independent of generation time, key order and "
+          "`850` vs `850.0`, equal to an independent MBOS-CJSON-1 recomputation.",
+          "- **Authority:** no decision/approval fields, the recommendation uses its own vocabulary (except HOLD, F-39), is unchanged "
+          "by hostile listing text or by enrichment trying to override it, and a pending request is never shown as decided.",
+          "- **Enrichment seam:** a lane's data round-trips with its provenance and appears in the trail; two writes to the same block "
+          "keep the latest (atomic, D-16); the F-23 fix (a PDP-denied proposal is shown as blocked, not awaiting Michael) holds on lane E.",
+          "", "## Failing cases by finding", "", "| Finding | Cases (configuration) |", "|---|---|"]
+    by = {}
+    for lab, mod, name, out in rows:
+        if out == "FAILED":
+            short = name.replace("test_", "", 1)
+            short = (short[:44] + ("…" + short[short.index("["):] if "[" in short and len(short) > 44 else "")) if len(short) > 44 else short
+            by.setdefault(_card_finding(mod, name), []).append(f"`{short}` ({lab})")
+    for fid, cases in sorted(by.items()):
+        L.append(f"| {fid} | {'<br>'.join(cases[:10])}{'<br>… +' + str(len(cases) - 10) + ' more' if len(cases) > 10 else ''} |")
+    L += ["", "Finding text, severity and recommendations are in [ACCEPTANCE_REPORT.md](ACCEPTANCE_REPORT.md) (F-26 … F-39).", "",
+          "## Every case", "", "| Config | Module | Test | Outcome | Finding |", "|---|---|---|---|---|"]
+    L += [f"| {lab} | {mod} | `{name[:90]}` | {out} | {_card_finding(mod, name) if out == 'FAILED' else ''} |" for lab, mod, name, out in rows]
+    (OUT / "CARD_ACCEPTANCE.md").write_text("\n".join(L) + "\n")
+    print(f"wrote {OUT / 'CARD_ACCEPTANCE.md'}: {len(passed)} passed, {len(failed)} failed")
+    return 0 if not failed else 1
 
 
 def _finding_for(module: str, test: str) -> str:
@@ -425,6 +613,7 @@ def main(argv=None):
         p.add_argument("--drift-ref")
     sub.add_parser("e2e")
     sub.add_parser("interop")
+    sub.add_parser("card")
     sp = sub.add_parser("spine")
     sp.add_argument("--rc", action="store_true",
                     help="release-candidate stack: state_backend=lane_d + gateway_mode=lane_e → docs/qa/RELEASE_CANDIDATE.md")
@@ -446,6 +635,8 @@ def main(argv=None):
         for c in rep.checks:
             print(f"{c.status:7} {c.group} · {c.name} — {c.detail[:140]}")
         return 0
+    if a.cmd == "card":
+        return cmd_card()
     if a.cmd == "spine":
         return cmd_spine(release=a.rc)
     if a.cmd == "builds":

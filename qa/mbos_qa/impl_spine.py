@@ -39,7 +39,7 @@ QA_ROOT = pathlib.Path(__file__).resolve().parent.parent
 REPO = QA_ROOT.parent
 PIN = (QA_ROOT / "impl_spine_PIN").read_text().strip()
 LANE_PINS = json.loads((QA_ROOT / "impl_lane_pins.json").read_text())
-os.environ.setdefault("MBOS_CONTRACTS_DIR", str(QA_ROOT / "contracts"))  # F-16: non-editable install needs this
+# F-16 is fixed (A-10): the non-editable install ships its contracts and operator profile; no env override.
 
 import sqlalchemy as sa  # noqa: E402
 

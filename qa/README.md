@@ -21,6 +21,8 @@ Core law under test: **no action without a receipt; no receipt without provenanc
 | `tests/spec/` | **A1–A10 spec suite against a REAL implementation** (G-02). It is written only against the QA facade, and `MBOS_QA_IMPL=mbos_qa.impl_spine:build` runs it on Agent 01's spine (PostgreSQL 16 + DBOS, pinned in `impl_spine_PIN`). It is not collected in mock mode. |
 | `mbos_qa/impl_spine.py`, `_spine_child.py` | The adapter to 01's public API, plus out-of-process crash/restart scenarios. |
 | `mbos_qa/interop.py`, `_probe.py` | ADR-0010 interop: each lane's own hasher on `vectors.json`, plus the SQL twins on PostgreSQL. |
+| `tests/card/`, `mbos_qa card` | **G-05 Deal Sniffer card acceptance** (ADR-0011): pure adversarial tests on `mbos.card` plus real flows on the reference and lane D+E backends → `docs/qa/CARD_ACCEPTANCE.md`. |
+| `mbos_qa/pgdir.py` | Where throwaway PostgreSQL clusters live (short `/tmp/a07pg-<pid>-*` path, guaranteed teardown, stale-run sweep). Never the shared tmpfs. |
 | `mbos_qa/buildverify.py` | Runs every lane's own suite from a clean `git archive`. |
 
 ## Run
@@ -37,6 +39,8 @@ The e2e output is reproducible byte for byte (fixed clock, seeded IDs).
 
 ```bash
 ../.venv/bin/python -m mbos_qa spine      # A1–A10 spec suite on Agent 01's spine → docs/qa/SPINE_ACCEPTANCE.md
+../.venv/bin/python -m mbos_qa spine --rc # wave-two release candidate (lane D + E) → docs/qa/RELEASE_CANDIDATE.md
+../.venv/bin/python -m mbos_qa card       # Deal Sniffer card acceptance        → docs/qa/CARD_ACCEPTANCE.md
 ../.venv/bin/python -m mbos_qa interop    # ADR-0010 cross-lane matrix          → docs/qa/INTEROP_REPORT.md
 ../.venv/bin/python -m mbos_qa builds --workdir /tmp/claude-1001/a07b   # every lane's own suite → docs/qa/BUILD_VERIFICATION.md
 ```
