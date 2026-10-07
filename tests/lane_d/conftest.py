@@ -123,12 +123,14 @@ def discover_d(rtd):
     from mbos.reference.fixture_adapter import FixtureSourceAdapter
     from mbos.runtime import components
 
-    def _run(*ids: str) -> dict[str, str]:
+    def _run(*ids: str, titles: dict | None = None) -> dict[str, str]:
         tag = uuid.uuid4().hex[:8]
         data = json.loads(Path(FIXTURE).read_text())
         out = []
         for rec in data["listings"]:
             if rec["source_listing_id"] in ids:
+                if titles and rec["source_listing_id"] in titles:
+                    rec["record"]["normalized"]["title"] = titles[rec["source_listing_id"]]
                 rec["source_listing_id"] = f"{rec['source_listing_id']}-{tag}"
                 rec["url"] = f"{rec['url']}?t={tag}"
                 rec["record"]["dedup_key"] = f"{rec['record']['dedup_key']}|{tag}"

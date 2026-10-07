@@ -105,3 +105,6 @@ Every page keeps the loopback, Host-check, CSRF and CSP guards (R14: human chann
 
 ## 10. The opportunity card (task F-13)
 `/item/<id>` is the primary view (the queue links here). It renders `mbos.card.build_card(...)` and adds no data. UNKNOWN stays UNKNOWN with its reason; all text is escaped; a card failing `validate_card` shows a red banner. The YES/NO/MODIFY/HOLD controls sit beneath the RECOMMENDATION block and return to the card. Config: `MBOS_OPERATOR_PROFILE` (lane A's `config/operator_profile.v1.json`) and `MBOS_CONTRACTS_DIR` (includes the vendored `card.schema.json`).
+
+## 11. Michael's model notes (task F-14)
+The card has an "Add what you know about this model" form (a prompt when no sourced knowledge is shown). It calls `spine_d.record_operator_note` through `SpineBackend`, with the server-set author, the step-up PIN, and every refusal reason shown. `/notes` lists the current notes. Lane D only; never reachable from workflows (R14).

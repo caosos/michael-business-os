@@ -5,16 +5,21 @@ Role: Communications + Operator UI / Approval UX (build lane F)
 Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
 State: WORKING
-Claimed: F-14
-Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe · F-04 @ 46c961c · F-13 @ 2415936
+Claimed: F-13 hardening
+Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe · F-04 @ 46c961c · F-13 @ 2415936 · F-14 @ HEADPH
 Blocked: F-11 on A-15
 Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
 Last updated: 2026-10-07
 
 ## Current objective
-**F-14** (P1, READY_QUEUE @ `f4c6529`): "Add what you know about this model" on the opportunity card. A human-channel form calls `mbos.spine_d.record_operator_note(conn, new_manual_note(...))` with `entered_by` = the authenticated author. Refusals (elementary advice, basis FACT, missing model) are shown with their reasons. F-11 is still BLOCKED on A-15.
+F-13 hardening from Agent 01 / 07's acceptance: re-vendor `card.schema.json` (new optional fields), show `item.flags` warnings, a DRY-RUN tag on timeline entries, `why_provenance` links, `mbos.card.clean_text` for strings outside the card model, and no "waiting for the seller" except after a real send. F-11 is BLOCKED on A-15.
 
 ## Done
+- **F-14 @ HEADPH:** "Add what you know about this model".
+  - Server-set author, PIN-gated, every refusal reason shown, append-only and receipted; `/notes` lists them.
+  - End to end on the real lane-C engine, a note shows on the next card of that model as Michael's RECOMMENDATION with his provenance.
+  - 119 + 18 tests pass. Receipt: `docs/receipts/2026-10-07-f14-operator-notes.md`.
+  - The pinned freeze test flipped to `cancelled_by_freeze` (R20 / E-12).
 - **F-13 @ 2415936:** the ADR-0011 opportunity card is the primary view at `/item/<id>`, built only from `mbos.card` (Agent 01's API).
   - All sections, UNKNOWN shown as UNKNOWN, escaped text, validate_card banner, every receipt in the trail.
   - Decision controls beneath the RECOMMENDATION block (human channel, R14) return to the card.
@@ -113,6 +118,7 @@ None. Live comms stay disabled (MICHAEL_DECISIONS #4).
 - The comms policy values in `comms_spec/data/comms_policy.v1.json` are PROPOSED (conservative). Loosening any of them is a version bump.
 
 ## Proposed tasks
+- **P-06-14 (lane A):** a `spine_d.retract_operator_note` wrapper so the UI can offer retract and edit of notes (the SQL function exists).
 - **P-06-13 (lane A):** `mbos.card.load_profile()` defaults to a repo-relative path, and `card.schema.json` is not found by a non-editable install without `MBOS_CONTRACTS_DIR` (same class as A-10). The UI works around it with `MBOS_OPERATOR_PROFILE` and `MBOS_CONTRACTS_DIR`.
 - R20: P-06-11 is resolved by 05's E-12 (`cancelled_by_freeze`); my pinned test must flip when it lands.
 - **P-06-11 (lane A/E):** after a global freeze, a YES leaves the ActionRequest `approved` (ACTION_FAILED, item FAILED) on lane D + lane E, whereas the reference gateway used `cancelled_by_freeze`. Is that intended? Pinned as observed behaviour.

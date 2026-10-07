@@ -160,3 +160,15 @@ def test_missing_operator_profile_is_a_clear_error_not_a_guess(rt, discover, ui,
     s, _, body = item_page(ui, item_id)
     assert s == 503 and "operator profile not found" in body and "MBOS_OPERATOR_PROFILE" in body
     assert req(ui, "GET", "/")[0] == 200
+
+
+def test_notes_are_unavailable_on_the_reference_backend_and_nothing_is_stored(rt, discover, ui):
+    """F-14: notes need lane D. The form says so, and a forged POST is refused with the reason."""
+    item_id, _ = ready(rt, discover)
+    body = item_page(ui, item_id)[2]
+    assert "Add what you know about this model" in body and "Notes need the lane D store" in body and 'name="makes"' not in body
+    form = {"csrf": ui.csrf, "pin": PIN, "category": "trailer", "makes": "Big Tex", "models": "10PI", "kind": "known_weakness",
+            "statement": "Torsion axle seats rot out by year six on this model.", "basis_of_knowledge": "own experience on this model"}
+    s, _, out = req(ui, "POST", f"/item/{item_id}/note", form)
+    assert s == 200 and "Note not saved." in out and "operator notes need the lane D store" in out
+    assert "Notes need the lane D store" in req(ui, "GET", "/notes")[2]

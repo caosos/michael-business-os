@@ -65,6 +65,53 @@ def auth_context(areq: dict, pin: str | None, configured_pin: str | None, sessio
     return {"method": "local_pin" if step_up else "localhost_csrf_session", "session_id": session_id, "step_up": step_up}
 
 
+# ---------------------------------------------------------------- F-14 operator notes
+NOTE_BASIS_CHOICES = ["own experience on this model", "service manual", "parts counter / dealer", "another owner or forum",
+                      "other (say in the detail box)"]
+_FACT_REFUSAL = "a manual note is owner-stated: basis is always RECOMMENDATION, never FACT"  # same text as 03's loader
+
+
+def _split(s: str) -> list[str]:
+    return [x.strip() for x in (s or "").replace("\n", ",").split(",") if x.strip()]
+
+
+def parse_note(form: dict, author: str, entered_at: str) -> dict:
+    """Form → the bundle `spine_d.record_operator_note` takes, via Agent 03's own `new_manual_note` (the single source
+    of the rules). `author` is the AUTHENTICATED operator set by the server: there is no author field on the form, and
+    a posted one is ignored. All problems are reported together, each with its reason."""
+    from mbos_economics.valueadd import NoteError, new_manual_note
+
+    problems: list[str] = []
+    if (form.get("basis") or "RECOMMENDATION").strip().upper() != "RECOMMENDATION":
+        problems.append(_FACT_REFUSAL)
+    choice = (form.get("basis_of_knowledge") or "").strip()
+    detail = (form.get("basis_detail") or "").strip()[:200]
+    if choice not in NOTE_BASIS_CHOICES:
+        problems.append(f"basis_of_knowledge must be one of: {', '.join(NOTE_BASIS_CHOICES)}")
+        choice = ""
+    basis_of_knowledge = f"{choice}: {detail}" if detail and choice else choice
+    try:
+        bundle = new_manual_note(
+            category=(form.get("category") or "").strip(), makes=_split(form.get("makes")), models=_split(form.get("models")),
+            kind=(form.get("kind") or "").strip(), statement=(form.get("statement") or ""), entered_by=author,
+            entered_at=entered_at, basis_of_knowledge=basis_of_knowledge, plan_hint=(form.get("plan_hint") or "").strip() or None,
+            reference_url=(form.get("reference_url") or "").strip() or None)
+    except NoteError as ex:
+        problems += list(ex.problems)
+        bundle = None
+    if problems:
+        raise NoteInputError(problems)
+    return bundle
+
+
+class NoteInputError(InputError):
+    """The note failed validation. `.reasons` is the full list shown to Michael."""
+
+    def __init__(self, reasons):
+        self.reasons = list(reasons)
+        super().__init__("; ".join(self.reasons))
+
+
 # ---------------------------------------------------------------- F-09 outcome entry
 OUTCOME_KINDS = {
     "flip": ["flip_acquired", "flip_sold", "flip_unsold_salvaged", "flip_repair_failed", "flip_passed_missed"],

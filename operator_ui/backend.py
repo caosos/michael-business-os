@@ -34,6 +34,14 @@ class ProfileUnavailable(RuntimeError):
     pass
 
 
+class NoteRefused(Exception):
+    """The note was not stored. `.reasons` are shown to Michael verbatim."""
+
+    def __init__(self, reasons):
+        self.reasons = list(reasons)
+        super().__init__("; ".join(self.reasons))
+
+
 class ItemNotFound(Exception):
     """Unknown item id. Deliberately NOT a LookupError: a KeyError from the card builder must surface as a failure."""
 
@@ -188,6 +196,27 @@ class SpineBackend:
             raise ItemNotFound(item_id) from None
         card = mc.build_card(item, receipts, areqs, enr, profile=profile)
         return {"card": card, "errors": mc.validate_card(card), "areqs": areqs}
+
+    # ---- F-14: Michael's own model knowledge (operator notes). Lane D only; HUMAN CHANNEL ONLY (R14) -----------
+    def operator_notes(self) -> list[dict]:
+        """Current head of every note chain (retractions included), from lane D's folded document."""
+        if self.lane != "lane_d":
+            return []
+        with self.engine.connect() as c:
+            return self._spine.operator_notes_document(c)["notes"]
+
+    def record_operator_note(self, bundle: dict) -> str:
+        """The ONLY caller of spine_d.record_operator_note in the system besides the CLI (`mbos_dbos` holds the approver
+        role, so the database cannot stop a workflow from calling it; the code path must). `bundle` comes from
+        `mbos_economics.new_manual_note` with the AUTHENTICATED author. Database refusals are returned as NoteRefused."""
+        if self.lane != "lane_d":
+            raise NoteRefused(["operator notes need the lane D store (MBOS_STATE_BACKEND=lane_d)"])
+        try:
+            with self.engine.begin() as c:
+                return self._spine.record_operator_note(c, bundle)
+        except sa.exc.DBAPIError as ex:
+            msg = str(getattr(ex, "orig", ex)).strip().splitlines()[0]
+            raise NoteRefused([f"the store refused the note: {msg}"]) from None
 
     def held(self) -> list[dict]:
         """HOLD backlog: held requests with their item and the HOLD in force (approval row)."""

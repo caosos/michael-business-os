@@ -166,6 +166,52 @@ def render_unknowns(card: dict) -> str:
     return f"<div class='card'><h2>UNKNOWN ({len(u)}): what the system could not establish</h2>{body}</div>"
 
 
+def needs_model_knowledge(card: dict) -> bool:
+    """True when the card shows no lane-SOURCED model knowledge (FACT/INFERENCE). Michael's own notes are
+    RECOMMENDATION and do not count as sourced, so the prompt stays until a sourced recall exists."""
+    return not any(r.get("basis") in ("FACT", "INFERENCE") for r in card["value_add_plan"]["model_specific_risks"])
+
+
+def render_note_section(card: dict, csrf: str, lane_d: bool, categories: list[str], kinds: list[str], basis_choices: list[str],
+                        flash_reasons: list[str] | None = None, values: dict | None = None) -> str:
+    """\"Add what you know about this model\" (F-14). The author is NOT a form field: the server sets it."""
+    v = values or {}
+    i = card["item"]
+    cat = v.get("category") or (i["category"] if i["category"] in categories else "")
+    prompt = needs_model_knowledge(card)
+    head = ("Add what you know about this model" if prompt else "Add another note about this model")
+    why = ("<p class='unk'><b>No sourced model knowledge is on this card.</b> Your own experience is the most valuable thing you can add here; "
+           "it shows on this and later cards as <b>your recommendation</b> (never as a fact), behind any sourced recall.</p>"
+           if prompt else "<p class='small mut'>Your notes show on cards as RECOMMENDATION, behind sourced recalls.</p>")
+    if i["type"] != "flip":
+        return (f"<div class='card'><h2>{e(head)}</h2><p class='small mut'>Model notes cover flip equipment categories in this version; "
+                f"this is a {e(i['type'])}.</p></div>")
+    errs = ("<div class='flash err'><b>Note not saved.</b><ul>" + "".join(f"<li>{e(r)}</li>" for r in (flash_reasons or [])) + "</ul></div>"
+            if flash_reasons else "")
+    if not lane_d:
+        return (f"<div class='card'><h2>{e(head)}</h2>{why}{errs}<p class='bad'>Notes need the lane D store "
+                "(<code>MBOS_STATE_BACKEND=lane_d</code>); this UI is running on the reference backend.</p></div>")
+    opts = lambda xs, sel: "".join(f"<option value='{e(x)}'{' selected' if x == sel else ''}>{e(x)}</option>" for x in xs)  # noqa: E731
+    mm = card["item"]["make_model"]
+    hint = f"Card make/model: {datum(mm)}" if not unknown(mm) else "Card make/model: <b class='unk'>UNKNOWN</b>, so please type the make and model."
+    return f"""<div class="card" id="note"><h2>{e(head)}</h2>{why}{errs}
+<form method="post" action="/item/{e(card['item_id'])}/note"><input type="hidden" name="csrf" value="{e(csrf)}">
+<p class="small">{hint}. A note must name a make <b>and</b> a model. Several are allowed, separated by commas. Entered as <b>you</b> (author is set by the system and needs your PIN).</p>
+<div class="decide"><label>Category<select name="category">{opts(categories, cat)}</select></label>
+<label>Make(s)<input name="makes" value="{e(v.get('makes'))}" maxlength="200" required></label>
+<label>Model(s)<input name="models" value="{e(v.get('models'))}" maxlength="200" required></label>
+<label>Kind of knowledge<select name="kind">{opts(kinds, v.get('kind'))}</select></label></div>
+<label>What is specific to THIS model (max 600 characters; no generic advice)<textarea name="statement" maxlength="600" required>{e(v.get('statement'))}</textarea></label>
+<label>Plan hint (optional)<input name="plan_hint" maxlength="600" value="{e(v.get('plan_hint'))}"></label>
+<div class="decide"><label>How do you know?<select name="basis_of_knowledge">{opts(basis_choices, v.get('basis_of_knowledge'))}</select></label>
+<label>Detail (optional)<input name="basis_detail" maxlength="200" value="{e(v.get('basis_detail'))}"></label>
+<label>Reference link (optional, https)<input name="reference_url" maxlength="500" value="{e(v.get('reference_url'))}"></label>
+<label>Step-up PIN<input name="pin" type="password" autocomplete="off" required></label></div>
+<p class="small mut">This is stored as your recommendation, append-only and receipted. Edits are new notes; nothing is overwritten.</p>
+<button class="b-HOLD" style="width:auto">Save my note</button></form>
+<p class="small"><a href="/notes">All my notes</a></p></div>"""
+
+
 def render_item_card(card: dict, errors: list[str], controls_html: str, hold_html: str = "") -> str:
     """Whole page body. `controls_html` is server.render_decide(...) for the open request ('' when none)."""
     banner = ""

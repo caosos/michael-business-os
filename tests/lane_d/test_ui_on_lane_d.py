@@ -133,9 +133,9 @@ def test_frozen_system_denies_at_the_real_gateway(rtd, discover_d, ui_d):
         _, loc, _ = post(ui_d, areq, "YES", pin=PIN)
         assert "msg=YES recorded" in loc                                  # the human decision is recorded...
         wait(lambda: state(ui_d, item_id) == "FAILED")                    # ...and the real gateway refuses to act
-        # FINDING (reported to Agent 01): on lane D + lane E a freeze denial leaves the request `approved`
-        # (the reference gateway used `cancelled_by_freeze`). Pinned here as observed behaviour.
-        assert ui_d.store.action_request(areq["action_request_id"])["status"] == "approved"
+        # R20 / E-12 (Agent 05 @ 408bcad): a freeze-refused approved request becomes `cancelled_by_freeze`, so the
+        # approval is not silently reusable after a release. Michael re-approves. (This pinned `approved` before E-12.)
+        assert ui_d.store.action_request(areq["action_request_id"])["status"] == "cancelled_by_freeze"
         assert "ACTION_FAILED" in rtypes(ui_d, areq["action_request_id"])
         assert q(rtd, "SELECT count(*) FROM mbos.effector_calls WHERE action_request_id = :a", a=areq["action_request_id"])[0][0] == 0
         assert "ACTION_EXECUTED" not in rtypes(ui_d, areq["action_request_id"])

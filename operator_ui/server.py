@@ -18,8 +18,13 @@ from urllib.parse import parse_qs, quote, urlparse
 from mbos.clock import iso, utcnow
 from mbos.spine import DecisionRefused
 
+try:  # lane C's package is optional: without it the notes form is simply unavailable
+    from mbos_economics.valueadd import NOTE_CATEGORIES, NOTE_KINDS
+except ImportError:  # pragma: no cover
+    NOTE_CATEGORIES, NOTE_KINDS = frozenset(), frozenset()
+
 from . import card_view, ux, views
-from .backend import ItemNotFound, ProfileUnavailable
+from .backend import ItemNotFound, NoteRefused, ProfileUnavailable
 from .sources import load_health
 from .ux import InputError
 
@@ -85,7 +90,7 @@ def page(title, body, state, flash=None, error=False):
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>{e(title)}</title><style>{CSS}</style></head>
 <body><div class="banner">DRY-RUN · nothing leaves this machine · system {e(state)}</div>
-<header><b>Operator UI</b><nav><a href="/">Queue</a><a href="/digest">Morning digest</a><a href="/summary">Daily summary</a><a href="/holds">HOLD backlog</a><a href="/outcomes">Outcomes</a><a href="/sources">Source health</a><a href="/ledger">Receipt ledger</a></nav></header>
+<header><b>Operator UI</b><nav><a href="/">Queue</a><a href="/digest">Morning digest</a><a href="/summary">Daily summary</a><a href="/notes">My notes</a><a href="/holds">HOLD backlog</a><a href="/outcomes">Outcomes</a><a href="/sources">Source health</a><a href="/ledger">Receipt ledger</a></nav></header>
 <main>{f}{body}</main></body></html>"""
 
 
@@ -253,6 +258,22 @@ def _num(v):
 
 def _pva(o):
     return ", ".join(f"{p['field']}: {_num(p.get('predicted'))} → {_num(p.get('actual'))}" for p in o.get("predicted_vs_actual") or [])
+
+
+def render_notes(notes, lane):
+    if lane != "lane_d":
+        return "<div class='card'><h2>My notes</h2><p class='bad'>Notes need the lane D store (<code>MBOS_STATE_BACKEND=lane_d</code>).</p></div>"
+    rows = "".join(
+        f"<tr><td>{e(n.get('entered_at'))}</td><td>{e(n.get('category'))}</td>"
+        f"<td>{e(', '.join(g.get('makes', [])))} / {e(', '.join(g.get('models', [])))}</td><td>{e(n.get('kind'))}</td>"
+        f"<td>{'<b class=bad>RETRACTED</b> ' if n.get('retracted') else ''}{e(n.get('statement'))}</td>"
+        f"<td>{e(n.get('basis_of_knowledge'))}</td><td>{e(n.get('entered_by'))}</td>"
+        f"<td><a href='/provenance/{e(n.get('provenance_id'))}'><code>{e(n.get('provenance_id'))}</code></a></td></tr>"
+        for n in (g_ for g_ in notes) for g in [((n.get('match') or [{}])[0])])
+    return ("<div class='card'><h2>My notes (your own model knowledge)</h2><p class='small mut'>Append-only and receipted. They show on cards as "
+            "<b>RECOMMENDATION</b>, behind sourced recalls. Edits are new notes; retraction is not available from this page yet.</p>"
+            "<table><tr><th>Entered</th><th>Category</th><th>Make / model</th><th>Kind</th><th>Statement</th><th>How I know</th>"
+            f"<th>By</th><th>Provenance</th></tr>{rows or '<tr><td colspan=8 class=mut>No notes yet.</td></tr>'}</table></div>")
 
 
 def render_outcome_card_section(app, item_id, open_areq, areqs):
@@ -450,6 +471,26 @@ class App:
         o = self.store.record_outcome(item["item_id"], kind, **kw)
         return f"Outcome {o['kind']} recorded ({o['outcome_id']})."
 
+    author = "michael"  # the authenticated operator: set HERE, never taken from a form (F-14; all humans share one DB login)
+
+    def add_note(self, item_id, f):
+        """F-14: Michael's own model knowledge → spine_d.record_operator_note. Human channel only (R14): CSRF + PIN,
+        and this is the only code path in the UI that calls it. Returns a flash message; raises with every reason."""
+        self._check_csrf(f)
+        if not self.operator_pin:
+            raise InputError("step-up not configured (MBOS_OPERATOR_PIN unset); notes are refused (fail-closed)")
+        if not f.get("pin") or not secrets.compare_digest(str(f["pin"]), str(self.operator_pin)):
+            raise InputError("a PIN is required to enter a note (it identifies you as the author)")
+        try:
+            self.store.opportunity_card(item_id)
+        except ItemNotFound:
+            raise InputError("unknown opportunity") from None
+        if not NOTE_CATEGORIES:
+            raise InputError("lane C's package (mbos_economics) is not installed; notes are unavailable")
+        bundle = ux.parse_note(f, self.author, iso(utcnow()))
+        note_id = self.store.record_operator_note(bundle)
+        return f"Note saved ({note_id}). It will show on this model's cards as your recommendation."
+
     def wake(self, areq_id, f):
         self._check_csrf(f)
         areq = self.store.action_request(areq_id)
@@ -504,6 +545,8 @@ def make_handler(app):
                 from . import digest as digest_view
 
                 return self._send(200, page("Morning digest", render_digest(digest_view.build(app.store, iso(now))), app.state()))
+            if u.path == "/notes":
+                return self._send(200, page("My notes", render_notes(app.store.operator_notes(), app.store.lane), app.state(), flash or err, bool(err)))
             if u.path.startswith("/item/"):
                 return self._item_page(u.path.split("/")[2], now, flash or err, bool(err))
             if u.path == "/summary":
@@ -538,7 +581,23 @@ def make_handler(app):
                 return self._send(200, json.dumps({k: v for k, v in c.items() if k != "hold_presets"}, default=str), "application/json")
             return self._send(404, page("Not found", "<p>Not found.</p>", app.state()))
 
-        def _item_page(self, item_id, now, flash, is_err):
+        def _post_note(self, item_id):
+            n = min(int(self.headers.get("Content-Length") or 0), 65536)
+            f = {k: v[0] for k, v in parse_qs(self.rfile.read(n).decode("utf-8"), keep_blank_values=True).items()}
+            try:
+                msg = app.add_note(item_id, f)
+            except (ux.NoteInputError, NoteRefused) as ex:  # re-render the card with every reason and the typed values
+                return self._item_page(item_id, utcnow(), None, False, note_reasons=ex.reasons,
+                                       note_values={k: v for k, v in f.items() if k not in ("pin", "csrf")})
+            except InputError as ex:
+                return self._item_page(item_id, utcnow(), None, False, note_reasons=[str(ex)],
+                                       note_values={k: v for k, v in f.items() if k not in ("pin", "csrf")})
+            self.send_response(303)
+            self.send_header("Location", f"/item/{item_id}?msg={quote(msg)}#note")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+
+        def _item_page(self, item_id, now, flash, is_err, note_reasons=None, note_values=None):
             """F-13: the opportunity card is the primary view of an item."""
             try:
                 res = app.store.opportunity_card(item_id)
@@ -555,6 +614,8 @@ def make_handler(app):
                 controls, hold = render_decide(v, app.csrf, ret=True), render_hold_notice(v, app.csrf, ret=True)
                 controls += f"<p class='small'><a href='/areq/{e(open_areq['action_request_id'])}'>Technical view of this request (payload, hashes)</a></p>"
             body = card_view.render_item_card(card, res["errors"], controls, hold)
+            body += card_view.render_note_section(card, app.csrf, app.store.lane == "lane_d", sorted(NOTE_CATEGORIES), sorted(NOTE_KINDS),
+                                                  ux.NOTE_BASIS_CHOICES, flash_reasons=note_reasons, values=note_values)
             body += render_outcome_card_section(app, item_id, open_areq, res["areqs"])
             return self._send(200, page(card["item"]["title"], body, app.state(), flash, is_err))
 
@@ -563,6 +624,8 @@ def make_handler(app):
                 return
             u = urlparse(self.path)
             parts = u.path.strip("/").split("/")
+            if len(parts) == 3 and parts[0] == "item" and parts[2] == "note":
+                return self._post_note(parts[1])
             if len(parts) != 3 or parts[0] != "areq" or parts[2] not in ("decide", "wake", "outcome"):
                 return self._send(404, "not found", "text/plain")
             n = min(int(self.headers.get("Content-Length") or 0), 65536)
