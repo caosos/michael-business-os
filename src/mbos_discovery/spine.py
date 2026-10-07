@@ -32,6 +32,7 @@ from mbos.interfaces import NormalizedListing, RawListing
 
 from .adapter import FetchResult, NormalizationError, SearchProfile, SourceAdapter, SourceError
 from .dedup import RELIST_WINDOW, content_hash, dedup_key, is_cross_source_duplicate, is_relist
+from .artifacts import upload as upload_artifact
 from .images import collect as collect_images, compare as compare_images
 from .health import HealthBook, external_blocks
 from .ids import iso, parse_ts
@@ -97,10 +98,16 @@ class PhashIndex:
     def load(cls, path: str | os.PathLike) -> "PhashIndex":
         return cls(Path(path), load_json(Path(path), {}))
 
-    def note(self, source: str, lid: str, seen_at: str, hashes: list[str]) -> None:
+    def note(self, source: str, lid: str, seen_at: str, hashes: list[str], refs: list[str] = ()) -> None:
         r = self.rows.setdefault(f"{source}\x1f{lid}", {"phash": [], "last_seen": seen_at})
         r["last_seen"] = max(r["last_seen"], seen_at)
         r["phash"] += [h for h in hashes if h not in r["phash"]]
+        if refs:                                         # B-14: photos confirmed in the SPINE's artifact store
+            r.setdefault("refs", [])
+            r["refs"] += [x for x in refs if x not in r["refs"]]
+
+    def refs(self, source: str, lid: str) -> list[str]:
+        return list(self.rows.get(f"{source}\x1f{lid}", {}).get("refs", []))
 
     def hashes(self, sightings: list[dict]) -> list[str]:
         out: list[str] = []
@@ -124,11 +131,12 @@ class SpineSourceAdapter:
                  side: SideChannel, health: Optional[HealthBook] = None, health_path: Optional[Path] = None,
                  enabled_sources: frozenset[str] = frozenset(), name: Optional[str] = None,
                  clock=_now, panic=None, events=None, ledger: Optional[FetchLedger] = None,
-                 index: Optional[PhashIndex] = None, images=None) -> None:
+                 index: Optional[PhashIndex] = None, images=None, artifact_sink=None) -> None:
         self.inner, self.profile, self.raw, self.side = inner, profile, raw_store, side
         self.panic = panic                              # lane E PanicStore (B-04); None = local health only
         self.events = events                            # WakeEventDetector (B-05); None = no wake events
         self.ledger, self.index, self.images = ledger, index, images   # B-13 dedup context; B-11 photo fetcher
+        self.artifact_sink = artifact_sink              # B-14: spine artifact store for photos (None = keep local)
         self.health_path = Path(health_path) if health_path else None
         self.health = health or HealthBook.from_json(load_json(self.health_path, {}) if self.health_path else {})
         self.enabled = enabled_sources
@@ -183,10 +191,15 @@ class SpineSourceAdapter:
                                error=f"{type(e).__name__}: {str(e)[:300]}")
                 continue
             if self.index is not None:
-                hashes = []
+                hashes, uploaded = [], []
                 if self.images is not None and n.match_hints.get("image_urls"):
-                    _, hashes = collect_images(n.match_hints["image_urls"], self.images, self.raw.put)
-                self.index.note(src, n.source_listing_id, iso(rec.fetched_at), hashes)
+                    def put(data: bytes) -> str:
+                        ref = upload_artifact(self.artifact_sink, data)
+                        if ref:
+                            uploaded.append(ref)
+                        return self.raw.put(data)            # always retained in lane B too
+                    _, hashes = collect_images(n.match_hints["image_urls"], self.images, put)
+                self.index.note(src, n.source_listing_id, iso(rec.fetched_at), hashes, uploaded)
             if self.events is not None:
                 self.events.observe(source=src, source_listing_id=n.source_listing_id, url=n.url,
                                     normalized=n.normalized, fetched_at=rec.fetched_at, raw_ref=raw_ref)
@@ -227,6 +240,11 @@ class SpineNormalizer:
         except Exception as e:
             self.side.emit("quarantine", source=raw.source, url=raw.url, error=f"{type(e).__name__}: {str(e)[:300]}")
             return None
+        normalized = n.normalized
+        if self.index is not None:                       # B-14: only photos confirmed in the spine's artifact store
+            refs = self.index.refs(raw.source, n.source_listing_id)
+            if refs:
+                normalized = {**normalized, "images": refs}
         hints: dict[str, Any] = {}                       # A-14 / B-13: JSON-only, DBOS-checkpointed with the listing
         if n.match_hints.get("contact_fp"):
             hints["contact_fp"] = n.match_hints["contact_fp"]
@@ -241,7 +259,7 @@ class SpineNormalizer:
         return NormalizedListing(
             type=n.type, category=n.category,
             dedup_key=dedup_key(n.type, n.category, n.normalized, n.match_hints.get("contact_fp")),
-            normalized=n.normalized, subcategory=n.subcategory, opportunity_kind=n.opportunity_kind,
+            normalized=normalized, subcategory=n.subcategory, opportunity_kind=n.opportunity_kind,
             content_hash=content_hash(n.normalized), economics=None, match_hints=hints or None)
 
 
@@ -290,7 +308,7 @@ def discovery_components(jobs: list[tuple[SourceAdapter, SearchProfile]], *, raw
                          side_path: Optional[str | os.PathLike] = None,
                          health_path: Optional[str | os.PathLike] = None,
                          enabled_sources: frozenset[str] = frozenset(), clock=_now, panic=None, events=None,
-                         images=None, index_path: Optional[str | os.PathLike] = None):
+                         images=None, index_path: Optional[str | os.PathLike] = None, artifact_sink=None):
     """Build (adapters, normalizer, deduper, side_channel) for `mbos.runtime.Components`.
     Adapter names are `<source>:<profile_id>` so several profiles of one source can coexist."""
     side = SideChannel(Path(side_path) if side_path else None)
@@ -303,7 +321,7 @@ def discovery_components(jobs: list[tuple[SourceAdapter, SearchProfile]], *, raw
         a = SpineSourceAdapter(inner, profile, raw_store=raw, side=side, health=health, health_path=health_path,
                                enabled_sources=enabled_sources, name=f"{inner.source}:{profile.profile_id}",
                                clock=clock, panic=panic, events=events, ledger=ledger, index=index,
-                               images=images)
+                               images=images, artifact_sink=artifact_sink)
         adapters[a.name] = a
         by_source.setdefault(inner.source, inner)
     return adapters, SpineNormalizer(by_source, side, ledger, index), SpineDeduper(index), side
