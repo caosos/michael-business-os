@@ -1,0 +1,26 @@
+{
+  "source_repo": "caosos/michael-business-os",
+  "source_branch": "research/agent-01-coordinator",
+  "source_commit": "acb6f3b628dd5e3319341a088520fa90c0346ff4",
+  "source_path": "docs/research/contracts/",
+  "contracts_version": "1.0.0",
+  "note": "Byte-exact pinned copy of the FROZEN contracts (ADR-0004). Do not edit. Re-pin only via `python -m mbos_qa pin --ref <commit>` after an Agent 01 semver bump.",
+  "files": {
+    "action-request.schema.json": "sha256:38be3f152c69b343bddc54edc0d86d29cc9f0b8c09250e66cd5f9f49304055b3",
+    "approval.schema.json": "sha256:d8593684adf1c622e7916f6e4aa068f73ff1bb38f62817f5606ce40e69072bc5",
+    "examples/action-request-email-held.example.json": "sha256:14e7a343c7550ed6b67371b7325096e21a0bc734f8cf6083d5bc967296d17ed5",
+    "examples/approval-hold.example.json": "sha256:99f2f703c675beac7efe067c16e956cba68589b9d6413fd3897b069a3d059bfe",
+    "examples/item-flip-trailer.example.json": "sha256:5fa97c15e4a8b013a6c5ebe2925fe2e0e495c6f26c07a73e6800bf9fcaa08602",
+    "examples/item-service-drywall.example.json": "sha256:ebdba9b5b0c5736350ccffdab2360863023d82d7f9431f8b76b3baf3fea6e48a",
+    "examples/outcome-flip-sold.example.json": "sha256:d90bbd2fd7aab32f808abeffcb3895acbfb3c565bbdf1c7e03ef154c3bf26dc6",
+    "examples/provenance-human.example.json": "sha256:451f463b1232549848ebba0a21eb0bc2f99b51bf4d50818e1a93c943e353fa2d",
+    "examples/receipt-approval-decided.example.json": "sha256:4379925aa4fd8408d6ed63ca05ab787ea394d2a786c351631b6122353c4dd560",
+    "item.schema.json": "sha256:c5a806f6ce98265dc697f53ec564b5c326d68d3eeed120d13c5caf2e40ee3ad4",
+    "outcome.schema.json": "sha256:b7c29fce0b9274526c50d5af264b77443b7b15dbca0c03c925a2f44d4949f02f",
+    "provenance.schema.json": "sha256:15db68a4c6ef28d442209cd35e45970330653e7dff76ce5431bd8b05ec807b4c",
+    "receipt.schema.json": "sha256:c6a55d47583541aef839bc66f5ecf07dcca187d0325b64b380a3a1bf52f155f9",
+    "vendor/agent-03/opportunity.schema.json": "sha256:0633bc58ae987e2b0596c343b404b8f982fcee7c6d02521d9bd311c268cf5797",
+    "vendor/agent-03/scorecard.schema.json": "sha256:a6718390616d3a0b29c6e4454a92c8e6efb54580d69f7b6716fb3841e17abb8d",
+    "vendor/agent-03/service-job.schema.json": "sha256:9e1fddc22fb50324999a4dda683d8268458a424bb462463a6933c3e5001d1506"
+  }
+}

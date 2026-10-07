@@ -1,0 +1,4 @@
+jsonschema>=4.18
+referencing
+rfc3339-validator
+pytest>=8

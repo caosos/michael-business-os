@@ -1,0 +1,15 @@
+{
+  "acquisition": {"ask_price": 950, "expected_buy_price": 850, "buy_fees": 0},
+  "rehab": {"parts_cost": 70, "materials_cost": 150, "labor_hours": 5, "admin_hours": 1.5,
+            "required_skills": ["trailer_wiring", "carpentry"], "repair_success_prob": 0.95, "repair_scope_known": true},
+  "logistics": {"trips": [{"purpose": "inspect_pickup", "round_trip_miles": 36, "can_combine": false},
+                          {"purpose": "buyer_meet", "round_trip_miles": 10}],
+                "vehicle_mpg": 18, "fuel_price_per_gal": 3.2, "wear_per_mile": 0.28, "avg_speed_mph": 45},
+  "holding": {"storage_cost_per_day": 0, "expected_hold_days": 10, "disposal_cost": 0, "sell_fees_rate": 0, "sell_fees_flat": 0},
+  "resale": {"target_sell_price": 2200, "comp_price_low": 1900, "comp_price_expected": 2250, "comp_price_high": 2400,
+             "sale_prob": 0.85, "expected_dom_days": 12},
+  "downside": {"salvage_if_repair_fails": 800, "salvage_if_unsold": 1000},
+  "estimates_meta": {"scoring_config_version": "2026.10.0",
+                     "assumptions": [{"field": "rehab.labor_hours", "value": 5, "basis": "INFER", "note": "QA fixture"},
+                                     {"field": "resale.sale_prob", "value": 0.85, "basis": "INFER", "note": "QA fixture"}]}
+}

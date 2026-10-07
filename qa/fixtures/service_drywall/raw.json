@@ -1,0 +1,23 @@
+{
+  "_fixture": "SYNTHETIC QA FIXTURE — not a real customer; URLs use the reserved .invalid TLD",
+  "type": "service",
+  "category": "drywall_repair",
+  "subcategory": "drywall patch (two holes) + texture match",
+  "opportunity_kind": "service_lead",
+  "source": "website_lead",
+  "url": "https://example.invalid/qa/form/0002",
+  "ingestion_method": "inbound_form",
+  "fetched_at": "2026-10-07T10:15:00Z",
+  "title": "Drywall patch after plumbing repair",
+  "request": "Two fist-sized holes in hallway drywall after a plumber fixed a leak. Photos attached. Orange-peel texture.",
+  "price": null,
+  "price_type": "quote_requested",
+  "condition": "n/a",
+  "location": {"city": "Conway", "state": "AR", "lat": 35.08, "lng": -92.45, "distance_miles": 7},
+  "counterparty_role": "customer",
+  "contact_method": "email",
+  "listing_status": "open",
+  "attribution": {"first_touch_source": "google_business_profile", "first_touch_detail": "GBP website button",
+                  "self_reported_source": "Google search", "channel": "organic_local",
+                  "utm": {"utm_source": "google", "utm_medium": "organic", "utm_campaign": "gbp"}}
+}

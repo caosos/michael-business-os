@@ -1,0 +1,15 @@
+{
+  "skills_on_file": ["trailer_wiring", "carpentry", "drywall", "welding", "small_engine"],
+  "scarcity": 0.5,
+  "actions": [
+    {"draft": "service_quote", "params": {"price": 425, "scope": "patch two holes, match orange-peel texture, prime; paint by customer"},
+     "proposed_by": "agent-06-communications", "capability": "comms.email.send", "category": "email",
+     "summary": "Reply to inbound form with a $425 estimate", "reversibility": "irreversible",
+     "estimated_cost": {"amount": 0, "currency": "USD"}, "target": {"kind": "party", "ref": "party:QA-CUST-0002"}}
+  ],
+  "decisions": [
+    {"action": 0, "decision": "HOLD", "hold": {"hold_until": "2026-10-07T18:00:00Z", "wake_on": ["time", "new_info"]},
+     "advance": "PT7H", "then": "MODIFY", "modify": {"price": 450, "scope": "patch two holes, match orange-peel texture, prime and paint touch-up"},
+     "finally": "YES"}
+  ]
+}

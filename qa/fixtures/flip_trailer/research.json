@@ -1,0 +1,10 @@
+[
+  {"finding": "Sold comp: 6x12 enclosed, refurbished, $2,250 (SYNTHETIC)", "field": "resale.comp_price_expected", "basis": "FACT",
+   "source_uri": "https://example.invalid/qa/comps/1", "fetched_at": "2026-10-07T11:40:00Z"},
+  {"finding": "Sold comp: 6x12 enclosed, good floor, $2,400 (SYNTHETIC)", "field": "resale.comp_price_high", "basis": "FACT",
+   "source_uri": "https://example.invalid/qa/comps/2", "fetched_at": "2026-10-07T11:40:00Z"},
+  {"finding": "Sold comp: 6x12 enclosed, needs work, $1,900 (SYNTHETIC)", "field": "resale.comp_price_low", "basis": "FACT",
+   "source_uri": "https://example.invalid/qa/comps/3", "fetched_at": "2026-10-07T11:40:00Z"},
+  {"finding": "Floor replacement (2x 4x8 PT plywood) + LED light kit parts estimate (SYNTHETIC)", "field": "rehab.materials_cost", "basis": "INFERENCE",
+   "source_uri": "https://example.invalid/qa/prices/materials", "fetched_at": "2026-10-07T11:45:00Z"}
+]

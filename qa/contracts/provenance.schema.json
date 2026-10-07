@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://michael-business-os/contracts/provenance.schema.json",
+  "title": "Provenance v1 — where a fact, score, decision or action came from",
+  "description": "Adopted from Agent 04 §5 (W3C PROV-aligned) with Agent 01's resolution rule: every entry must resolve to at least one of (a) an external source URI + fetched time, (b) a model + version + prompt hash, (c) a human decision id, (d) a deterministic computation (tool + version + config version). Append-only.",
+  "type": "object",
+  "required": ["provenance_id", "created_at", "actor_type", "basis"],
+  "additionalProperties": false,
+  "properties": {
+    "provenance_id": { "type": "string", "pattern": "^prov_[0-9A-HJKMNP-TV-Z]{26}$" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "actor_type": { "enum": ["agent", "human", "system", "external"] },
+    "agent_name": { "type": "string" },
+    "human_actor": { "type": "string" },
+    "basis": { "enum": ["FACT", "INFERENCE", "RECOMMENDATION", "UNKNOWN"] },
+    "source_uri": { "type": "string" },
+    "fetched_at": { "type": "string", "format": "date-time" },
+    "model_id": { "type": "string" },
+    "model_version": { "type": "string" },
+    "prompt_hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "tool_name": { "type": "string" },
+    "tool_version": { "type": "string" },
+    "config_version": { "type": "string", "description": "e.g. scoring_config_version 2026.10.0" },
+    "approval_id": { "type": "string", "pattern": "^appr_[0-9A-HJKMNP-TV-Z]{26}$" },
+    "trace_id": { "type": "string", "description": "OpenTelemetry / Langfuse trace id." },
+    "inputs_used": { "type": "array", "items": { "type": "object", "properties": { "ref": { "type": "string" }, "hash": { "type": "string" } } } },
+    "derived_from": { "type": "array", "items": { "type": "string", "pattern": "^prov_[0-9A-HJKMNP-TV-Z]{26}$" } },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+  },
+  "anyOf": [
+    { "required": ["source_uri", "fetched_at"] },
+    { "required": ["model_id", "model_version", "prompt_hash"] },
+    { "required": ["approval_id"] },
+    { "required": ["tool_name", "tool_version"] }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "action_request_id": "areq_01M4BVS7W06J40BTCSYE22WZY2",
+  "approval_id": "appr_01M4BVS7W0V1QV4EFKRWBMRXX2",
+  "content_hash": "sha256:aa3857d5bb7f3a9c1b7d413c26f793e35a223da9a92e3b62c460bda03a0444ab",
+  "dry_run": true,
+  "packet_sha256": "sha256:5ca98a23e344839563116eba4c8d765420a0f3696b234fa64ab70f716084bcb6",
+  "packet_version": "manual-assist-packet/1",
+  "payload_hash": "sha256:442c069a53fd7395fd84966d5811bfd9f803fdb6ba854e00e4808efb9dd6ed3f"
+}

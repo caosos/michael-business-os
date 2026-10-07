@@ -1,0 +1,19 @@
+{
+  "skills_on_file": ["trailer_wiring", "carpentry", "drywall", "welding", "small_engine"],
+  "scarcity": 0.6,
+  "actions": [
+    {"draft": "seller_inquiry", "params": {"offer": 850, "questions": ["Are the axles and tires sound?", "Is the title clear and in your name?"]},
+     "proposed_by": "agent-06-communications", "capability": "comms.email.send", "category": "email",
+     "summary": "Ask seller about axles/title; non-binding $850 cash question", "reversibility": "irreversible",
+     "estimated_cost": {"amount": 0, "currency": "USD"}, "target": {"kind": "listing_relay", "ref": "relay:QA-FLIP-0001"}},
+    {"draft": "resale_listing", "params": {"price": 2200, "platform": "Facebook Marketplace",
+       "work_done": "new plywood floor, new LED lights and wiring", "unknowns": "bearings not repacked"},
+     "proposed_by": "agent-07-marketing", "capability": "publish.listing.create", "category": "publishing",
+     "summary": "Pre-draft resale listing (manual-assist; posted by Michael after rehab)", "reversibility": "partially_reversible",
+     "estimated_cost": {"amount": 0, "currency": "USD"}, "target": {"kind": "platform", "ref": "facebook_marketplace:manual"}}
+  ],
+  "decisions": [
+    {"action": 0, "decision": "YES"},
+    {"action": 1, "decision": "MODIFY", "modify": {"price": 2150}, "then": "YES"}
+  ]
+}

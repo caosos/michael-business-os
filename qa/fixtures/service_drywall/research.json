@@ -1,0 +1,6 @@
+[
+  {"finding": "Customer photos show two ~4in holes, no water damage beyond cut area (SYNTHETIC)", "field": "job.labor_hours", "basis": "FACT",
+   "source_uri": "https://example.invalid/qa/form/0002/photos", "fetched_at": "2026-10-07T10:15:00Z"},
+  {"finding": "Patch kit + texture spray + paint sample materials estimate (SYNTHETIC)", "field": "job.materials_cost", "basis": "INFERENCE",
+   "source_uri": "https://example.invalid/qa/prices/drywall", "fetched_at": "2026-10-07T10:30:00Z"}
+]
