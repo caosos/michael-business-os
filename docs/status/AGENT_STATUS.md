@@ -5,14 +5,14 @@ Role: Communications + Operator UI / Approval UX (build lane F)
 Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
 State: WORKING
-Claimed: F-13 hardening
-Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe · F-04 @ 46c961c · F-13 @ 2415936 · F-14 @ c68a33c
+Claimed: F-15
+Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe · F-04 @ 46c961c · F-13 @ 2415936 · F-14 @ c68a33c · F-13 hardening @ 6e47646
 Blocked: F-11 on A-15
 Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
 Last updated: 2026-10-07
 
 ## Current objective
-F-13 hardening from Agent 01 / 07's acceptance: re-vendor `card.schema.json` (new optional fields), show `item.flags` warnings, a DRY-RUN tag on timeline entries, `why_provenance` links, `mbos.card.clean_text` for strings outside the card model, and no "waiting for the seller" except after a real send. F-11 is BLOCKED on A-15.
+**F-15** (P1, READY_QUEUE): tag every proposed action with `lane` = `agent-06-communications` in `CommsActionPlanner`, so lane E stamps `proposed_by` (05's E-15, 07's F-41). Acceptance: `proposed_by` equals `agent-06-communications` in the ledger for my comms proposals. F-14 and the F-13 hardening are DONE (queue not yet synced). F-11 is BLOCKED on A-15.
 
 ## Done
 - **F-14 @ c68a33c:** "Add what you know about this model".
