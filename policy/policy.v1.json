@@ -1,7 +1,7 @@
 {
   "policy_schema": "mbos.governance.policy/1",
   "policy_id": "wave-one-default-deny",
-  "version": "2026.10.07-w1.8",
+  "version": "2026.10.07-w1.9",
   "description": "Round Two wave one. Everything tier 0, every externally consequential action needs Michael's YES, every effector DRY-RUN, no delegation, no real-world spend. Anything not listed here is DENIED.",
   "system_mode": "mvp",
   "delegation_enabled": false,
@@ -117,6 +117,8 @@
     "publish_namespace": "publish.",
     "comms_categories": ["message", "sms", "phone_call", "email"],
     "binding_payload_keys": ["offer", "offer_amount", "offer_usd", "counter", "counter_offer", "bid_amount", "binding"],
+    "binding_payload_keys_any_depth": ["offer_amount", "offer_usd", "counter_offer", "bid_amount"],
+    "binding_keys_note": "E-16 (06 P-06-16). Reserved names are matched case-insensitively on KEY NAMES only, never values. `binding_payload_keys` are reserved at the TOP LEVEL of a comms.*/publish.* payload (any value, even `binding: false`). `binding_payload_keys_any_depth` are unambiguous amount names reserved at ANY depth. Everything else may be nested freely, so a draft with a nested `binding: false` or `meta.offer` text is allowed. Drafting lanes: pin your planners against these two lists (spine_adapter.binding_key_violations).",
     "cash_at_risk": {
       "max_per_flip_usd": 1500,
       "max_total_active_usd": 3000,

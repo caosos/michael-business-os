@@ -1,7 +1,7 @@
 # Action Gateway: wave one implementation guide
 
 **Owner:** Agent 05 · **Status:** implemented, wave one · **Date:** 2026-10-07
-**Code:** `src/mbos_governance/` · **Policy data:** `policy/` · **Tests:** `tests/` (408 passing, on PostgreSQL 16)
+**Code:** `src/mbos_governance/` · **Policy data:** `policy/` · **Tests:** `tests/` (458 passing, on PostgreSQL 16)
 
 > Core law: no action without a receipt, and no receipt without provenance.
 > Governance rule: models may PROPOSE. Non-LLM policy code AUTHORIZES.
@@ -134,6 +134,7 @@ These defaults wait on Michael's decisions (`MICHAEL_DECISIONS.md`):
 - **A binding offer can never be created under `comms.*`:**
   - Policy cross-checks make the whole policy unavailable if any `offer.*` or `purchase.*` capability maps to the wrong category, or any `comms.*` capability maps to a binding or money category.
   - The PDP also denies a `comms.*` request whose payload carries a binding key (`offer`, `counter_offer`, `offer_amount`, …; a data list) with `BINDING_UNDER_COMMS`.
+- **Reserved binding key names (E-16):** the top-level and any-depth lists are in `docs/governance/RESERVED_PAYLOAD_KEYS.md`. A nested `binding: false` is allowed, and a top-level `offer` is denied.
 - **`step_up_required(ar, policy)`** is the one rule behind the card's `requires_step_up`. The PDP result carries it (`PolicyDecision.step_up`), and the spine adapter appends `step_up=required` to the reason.
 - **Cash at risk (MICHAEL_DECISIONS #1, UNDECIDED, conservative defaults as data):** `max_per_flip_usd 1500` and `max_total_active_usd 3000`.
   - Outstanding offer and purchase reservations (reserved minus released) are summed under the budget lock.

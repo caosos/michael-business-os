@@ -123,7 +123,7 @@ def test_publish_default_deny(env, cap, cat, agent):
     assert decide(ar_for(env, cap, cat, agent), PolicyStore(env.policy_path).current()).decision == "deny"
 
 
-@pytest.mark.parametrize("payload", [{"offer": 900}, {"counter_offer": 700}, {"listing": {"binding": True}}])
+@pytest.mark.parametrize("payload", [{"offer": 900}, {"counter_offer": 700}, {"binding": True}, {"listing": {"offer_usd": 5}}])
 def test_binding_offers_never_through_publish(env, payload):
     d = decide(ar_for(env, "publish.listing.create", "publishing", "agent-07-marketing", payload={"title": "x", **payload}),
                PolicyStore(env.policy_path).current())

@@ -179,6 +179,15 @@ class PolicyStore:
             return self._policy
 
 
+def binding_key_hits(payload: Any, ra: dict) -> list[str]:
+    """Reserved binding key names present in a comms.*/publish.* payload (E-16; names only, never values):
+    `binding_payload_keys` at the TOP LEVEL, `binding_payload_keys_any_depth` at any depth."""
+    top = {str(k).lower() for k in payload} if isinstance(payload, dict) else set()
+    deep = {str(k).lower() for k in _payload_keys(payload)}
+    hits = (top & {k.lower() for k in ra["binding_payload_keys"]}) | (deep & {k.lower() for k in ra["binding_payload_keys_any_depth"]})
+    return sorted(hits)
+
+
 def _payload_keys(obj, depth: int = 0):
     if isinstance(obj, dict) and depth < 6:
         for k, v in obj.items():
@@ -208,11 +217,10 @@ def decide(action_request: dict, policy: Policy) -> PolicyDecision:
         return deny(f"CAPABILITY_NOT_HELD:{action_request['proposed_by']} lacks {cap_name}")
     ra = policy.data["recommendation_actions"]
     if cap_name.startswith((ra["comms_namespace"], ra["publish_namespace"])):   # a binding offer never rides comms.*/publish.*
-        keys = {str(k).lower() for k in _payload_keys(action_request.get("payload"))}
-        hit = sorted(keys & {k.lower() for k in ra["binding_payload_keys"]})
+        hit = binding_key_hits(action_request.get("payload"), ra)
         if hit:
-            return deny(f"BINDING_UNDER_{'COMMS' if cap_name.startswith(ra['comms_namespace']) else 'PUBLISH'}:{','.join(hit)} "
-                        "(use offer.<channel>.send / .counter)")
+            ns = "COMMS" if cap_name.startswith(ra["comms_namespace"]) else "PUBLISH"
+            return deny(f"BINDING_UNDER_{ns}:{','.join(hit)} (use offer.<channel>.send / .counter)")
     cat = policy.category(category)
     if cat is None:
         return deny(f"UNKNOWN_CATEGORY:{category}")

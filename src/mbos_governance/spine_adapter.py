@@ -180,6 +180,21 @@ def proposer_for(gov: Governance, capability: str, lane: str | None, spine_ident
     return None
 
 
+def binding_key_violations(gov: Governance, capability: str, payload: Any) -> list[str]:
+    """Pin your planners against the reserved binding names (E-16). Returns the reserved key names the PDP would deny
+    for this comms.*/publish.* payload ([] = fine, or not a comms/publish capability). Fails closed: if policy is
+    unreadable it returns ["POLICY_UNREADABLE"]. Use it in the drafting lane's own tests:
+        assert not binding_key_violations(gov, "comms.email.send", draft_payload)"""
+    from .policy import binding_key_hits
+    try:
+        ra = gov.action_gateway.policies.current().data["recommendation_actions"]
+    except PolicyUnavailable:
+        return ["POLICY_UNREADABLE"]
+    if not capability.startswith((ra["comms_namespace"], ra["publish_namespace"])):
+        return []
+    return binding_key_hits(payload, ra)
+
+
 # ---------------------------------------------------------------- A-18 helpers (plain functions, JSON-serialisable)
 def engage_panic(gov: Governance, level: str, target: str | None, actor: str, reason: str) -> dict[str, Any]:
     """Freeze (any actor may engage). Runs the wired hooks. Returns {"state", "cancelled", "hooks", ["error"]}.

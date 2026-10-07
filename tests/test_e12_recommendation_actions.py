@@ -57,7 +57,7 @@ def test_default_deny(env, cap, cat, agent):
     assert d.decision == "deny" and d.tier == 0
 
 
-@pytest.mark.parametrize("payload", [{"offer": 850}, {"counter_offer": 700}, {"nested": {"Offer_Amount": 1}}, {"x": [{"binding": True}]}])
+@pytest.mark.parametrize("payload", [{"offer": 850}, {"counter_offer": 700}, {"nested": {"Offer_Amount": 1}}, {"binding": True}, {"x": [{"counter_offer": 1}]}])
 def test_binding_offer_never_creatable_under_comms(env, payload):
     pol = PolicyStore(env.policy_path).current()
     for cap, cat in (("comms.email.send", "email"), ("comms.sms.send", "sms"), ("comms.message.send", "message")):
