@@ -4,8 +4,8 @@ Agent: 02
 Role: Discovery / Source Adapters (DISCOVER + NORMALIZE lane)
 Branch: research/agent-02-opportunity
 Worktree: /home/michaelos/business-os-worktrees/agent-02-opportunity
-State: WORKING
-Claimed: B-18
+State: WAITING
+Waiting on: B-12 unblock (MICHAEL_DECISIONS #8 + credentials); queue refill
 Blocked: B-12 on MICHAEL_DECISIONS #8 + operator credentials (prep DONE: docs/runbooks/first-live-run-checklist.md; SAM.gov added to the CLI)
 Done: B-01 @ 7c9da45
 Done: B-02 @ cadfdae
@@ -24,8 +24,9 @@ Done: B-15 @ 09a755c (P0; listing_activity + seller blocks, only what the source
 Done: B-16 @ ab61f02 (CPSC adapter; 3 KB entries pass Agent 03's load_kb; review list for the rest; 198 tests)
 Done: B-17 @ 43de283 (NHTSA adapter; endpoints confirmed live; entries held for review until KB has model years; 208 tests)
 Done: B-19 @ a9cd922 (mbos-discover run covers every source; --dry prints exact requests; network guarantee tested; 217 tests)
+Done: B-18 @ bae240e (NHTSA entries admitted with model years; verified vs Agent 03 load_kb/match_hits; 218 tests)
 Done: C-04 (support, source side) @ a1a7730 (lead Agent 03 C-04 @ 882c726)
-Current phase: Round Two — working B-18 (flip KB_SUPPORTS_MODEL_YEARS; Agent 03 C-18 landed @ d9bceea)
+Current phase: Round Two — B-01..B-11, B-13..B-19 DONE; B-12 blocked; WAITING
 Started: 2026-10-06 (Round One) · Round Two started 2026-10-07
 Last updated: 2026-10-07
 
