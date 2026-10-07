@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://michael-business-os/schemas/scorecard.schema.json",
+  "title": "Opportunity Scorecard",
+  "description": "The reconstructable output of the economics engine for one opportunity. Stores inputs-derived intermediates, sub-scores, composite, decision, and reasons so the score can be replayed by hand under its scoring_config_version.",
+  "type": "object",
+  "required": ["scoring_config_version", "derived", "sub_scores", "composite", "decision", "reasons"],
+  "properties": {
+    "scoring_config_version": { "type": "string" },
+    "computed_at": { "type": "string", "format": "date-time" },
+    "derived": {
+      "type": "object",
+      "description": "Intermediate economic quantities (all in $ or hours or days).",
+      "properties": {
+        "trips_cash": { "type": "number" },
+        "travel_hours": { "type": "number" },
+        "total_hours": { "type": "number" },
+        "cost_out": { "type": "number" },
+        "r_net": { "type": "number" },
+        "net_profit_deterministic": { "type": "number" },
+        "profit_per_hour_deterministic": { "type": "number" },
+        "cash_tied_up": { "type": "number" },
+        "roi_deterministic": { "type": "number" },
+        "ev_net_profit": { "type": "number" },
+        "ev_profit_per_hour": { "type": "number" },
+        "ev_roi": { "type": "number" },
+        "ev_decision": { "type": "number", "description": "EV after wasted-trip EV and confidence haircut." },
+        "max_loss": { "type": "number" },
+        "p_loss": { "type": "number" },
+        "wasted_trip_ev": { "type": "number" },
+        "time_to_cash_days": { "type": "number" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "confidence_haircut": { "type": "number" },
+        "skill_fit": { "type": "number", "minimum": 0, "maximum": 1 },
+        "scarcity": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "sub_scores": {
+      "type": "object",
+      "description": "Each normalized to 0-100 (§12.2).",
+      "properties": {
+        "ev_score": { "type": "number" },
+        "pph_score": { "type": "number" },
+        "roi_score": { "type": "number" },
+        "ttc_score": { "type": "number" },
+        "risk_score": { "type": "number" },
+        "conf_score": { "type": "number" },
+        "skill_score": { "type": "number" },
+        "scarcity_score": { "type": "number" }
+      }
+    },
+    "weights_used": {
+      "type": "object",
+      "description": "The weight vector applied (flip vs service), copied in for reconstructability."
+    },
+    "composite": { "type": "number", "minimum": 0, "maximum": 100 },
+    "decision": { "enum": ["YES", "MAYBE", "PASS"] },
+    "alert": { "type": "boolean", "description": "Immediate-alert flag (§12.5): strong AND perishable." },
+    "gates": {
+      "type": "object",
+      "description": "Which hard gates passed/failed (§12.4).",
+      "additionalProperties": { "type": "boolean" }
+    },
+    "reasons": {
+      "type": "array",
+      "description": "Human-readable justification lines; must be sufficient to explain the decision.",
+      "items": { "type": "string" }
+    },
+    "cheapest_decisive_evidence": {
+      "type": "string",
+      "description": "For MAYBE-on-evidence: the lowest-cost missing item that would most move the decision (EVPI, §15)."
+    }
+  }
+}
