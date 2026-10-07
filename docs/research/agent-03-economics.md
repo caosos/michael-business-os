@@ -244,7 +244,7 @@ Every opportunity is reduced to a ledger of cash out, cash in, and Michael-hours
 | `S_fail`, `S_unsold` | salvage floors | ✓ | — |
 | `w` | Michael's time value (opportunity-cost floor) | ✓ | ✓ |
 
-### 5.2 Default constants **[REC]** — all live in [`economics/config/scoring-config.json`](../../economics/config/scoring-config.json) (round-one 2026.10.0 archived in `economics/config/history/`)
+### 5.2 Default constants **[REC]** — all live in [`economics/src/mbos_economics/config/scoring-config.json`](../../economics/src/mbos_economics/src/mbos_economics/config/scoring-config.json) (round-one 2026.10.0 archived in `economics/src/mbos_economics/config/history/`)
 
 | Constant | Default | Basis |
 |----------|---------|-------|

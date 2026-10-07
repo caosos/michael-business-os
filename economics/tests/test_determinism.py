@@ -142,3 +142,16 @@ class TestConfig(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestConfigShipsAsPackageData(unittest.TestCase):
+    """P-03-03 (reported by Agent 02): an installed wheel must carry its config."""
+
+    def test_config_inside_package_and_declared(self):
+        import mbos_economics
+        pkg = Path(mbos_economics.__file__).resolve().parent
+        self.assertEqual(CONFIG_DIR, pkg / "config")
+        for f in ("scoring-config.json", "estimation-priors.json", "history/scoring-config-2026.10.0.json"):
+            self.assertTrue((CONFIG_DIR / f).exists(), f)
+        toml = (pkg.parents[1] / "pyproject.toml").read_text()
+        self.assertIn('mbos_economics = ["config/*.json", "config/history/*.json"]', toml)

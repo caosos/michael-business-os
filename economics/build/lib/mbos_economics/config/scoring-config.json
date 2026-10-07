@@ -1,0 +1,167 @@
+{
+  "scoring_config_version": "2026.10.1",
+  "config_format": 1,
+  "supersedes": "2026.10.0",
+  "effective_from": "2026-10-07",
+  "_note": "Single source of truth for every constant the economics engine uses (ADR-03-001; C13: also the single source for per-mile cost). Any value change MUST bump scoring_config_version and move the previous file to config/history/ so historical scorecards replay under the config that produced them. Leaves are {value, basis, note?, source?}. basis uses Agent 03's short alias (FACT|INFER|REC|UNK), permitted inside 03 blocks by ADR-0004 ruling 7. Owner-policy values carry source=MICHAEL_DECISIONS and are coordinator defaults, NOT Michael-confirmed business truth.",
+  "_changelog": [
+    "2026.10.1: engine-ready. Formula strings replaced by numeric parameters (p_waste, confidence haircut). vehicle_cost_per_mile is no longer stored; it is derived (fuel/mpg + wear) so it cannot drift from its parts (C13). Added: service confidence checklist, skill proficiency store, license-gated skill list, time-to-cash defaults, service bad-job recovery, distance-ratio-gate radius, YES evidence requirements (sold comps, scope, title, remote verification), service alert rule, evidence search order. Threshold values unchanged from 2026.10.0. C14 resolved by keeping the YES rule (EV profit/hour >= target) and correcting AT-14; see docs/decisions/ADR-03-002-round-two-engine.md."
+  ],
+
+  "vehicle": {
+    "fuel_price_per_gal": { "value": 3.20, "basis": "UNK", "note": "calibrate to local pump price" },
+    "vehicle_mpg": { "value": 18, "basis": "UNK", "note": "work truck; item logistics may override per vehicle" },
+    "wear_per_mile": { "value": 0.28, "basis": "REC", "note": "tires + maintenance + depreciation. v = fuel/mpg + wear = 0.4578/mi; IRS all-in ~0.70/mi is a cross-check only" },
+    "avg_speed_mph": { "value": 45, "basis": "REC", "note": "blended town + highway" }
+  },
+
+  "time_value": {
+    "w_min_per_hour": { "value": 40, "basis": "REC", "source": "MICHAEL_DECISIONS #2 coordinator default", "note": "absolute floor; deterministic profit/hour below it is a hard PASS. Also prices Michael's travel time in the distance-ratio gate and wasted-trip EV" },
+    "w_target_flip_per_hour": { "value": 65, "basis": "REC", "source": "MICHAEL_DECISIONS #2 coordinator default", "note": "EV profit/hour required for a flip YES" },
+    "w_target_service_per_hour": { "value": 75, "basis": "REC", "source": "MICHAEL_DECISIONS #2 coordinator default", "note": "EV profit/hour required for a service YES" }
+  },
+
+  "capital_and_risk": {
+    "risk_capital_per_deal_cap": { "value": 1500, "basis": "REC", "source": "MICHAEL_DECISIONS #1 coordinator default", "note": "max cash tied up in one deal; above it is a hard PASS (escalation is Agent 05's budget ledger, not the engine)" },
+    "max_loss_cap": { "value": 800, "basis": "REC", "source": "MICHAEL_DECISIONS #1 coordinator default", "note": "largest single-deal loss tolerated (worst branch with non-zero probability)" },
+    "min_profit_flip": { "value": 150, "basis": "REC" },
+    "min_profit_service": { "value": 100, "basis": "REC" },
+    "f_diag_parts_fraction_on_fail": { "value": 0.3, "basis": "REC", "note": "fraction of parts spent before discovering the repair fails" }
+  },
+
+  "time_to_cash": {
+    "flip_acquire_lead_days_default": { "value": 1, "basis": "REC" },
+    "flip_dom_days_default": { "value": 30, "basis": "REC", "note": "used only when neither holding.expected_hold_days nor resale.expected_dom_days is supplied" },
+    "service_schedule_lag_days_default": { "value": 3, "basis": "REC" },
+    "service_hours_per_job_day": { "value": 8, "basis": "REC", "note": "job_days = ceil(labor_hours / this) when job.job_days absent" },
+    "service_payment_terms_days_default": { "value": 0, "basis": "REC" }
+  },
+
+  "service": {
+    "revenue_recovered_if_job_goes_bad": { "value": 0.5, "basis": "REC", "note": "bad-job branch (rework / dispute / nonpayment): deposit + this fraction of the remaining balance is collected" }
+  },
+
+  "normalization_caps": {
+    "ev_cap_flip": { "value": 800, "basis": "REC" },
+    "ev_cap_service": { "value": 1500, "basis": "REC" },
+    "pph_cap": { "value": 120, "basis": "REC" },
+    "roi_cap": { "value": 1.5, "basis": "REC", "note": "150% per cycle" },
+    "ttc_cap_days": { "value": 60, "basis": "REC" },
+    "dom_cap_days": { "value": 45, "basis": "REC", "note": "for demand_velocity" },
+    "supply_cap_listings": { "value": 20, "basis": "REC", "note": "for supply_tightness" }
+  },
+
+  "composite_weights": {
+    "basis": "REC",
+    "flip":    { "ev": 0.25, "pph": 0.25, "roi": 0.10, "ttc": 0.10, "risk": 0.10, "conf": 0.05, "skill": 0.10, "scarcity": 0.05 },
+    "service": { "ev": 0.20, "pph": 0.35, "roi": 0.00, "ttc": 0.10, "risk": 0.08, "conf": 0.07, "skill": 0.15, "scarcity": 0.05 }
+  },
+
+  "risk_score_weights": { "basis": "REC", "max_loss": 0.5, "p_loss": 0.3, "cov": 0.2 },
+
+  "confidence": {
+    "basis": "REC",
+    "flip_evidence_weights": {
+      "three_sold_comps": 0.25,
+      "condition_verified": 0.20,
+      "fault_identified": 0.15,
+      "title_verified": 0.10,
+      "demand_evidence": 0.10,
+      "seller_screened": 0.08,
+      "skill_fit_high": 0.07,
+      "price_distribution": 0.05
+    },
+    "service_evidence_weights": {
+      "scope_verified": 0.30,
+      "customer_screened": 0.15,
+      "price_agreed_in_writing": 0.15,
+      "skill_fit_high": 0.15,
+      "materials_priced": 0.10,
+      "access_and_schedule_confirmed": 0.10,
+      "repeat_or_referral": 0.05
+    },
+    "haircut_base": { "value": 0.6, "basis": "REC", "note": "confidence_haircut = base + slope * confidence (0.6 .. 1.0)" },
+    "haircut_slope": { "value": 0.4, "basis": "REC" },
+    "skill_fit_high_threshold": { "value": 0.85, "basis": "REC", "note": "derived evidence item skill_fit_high = skill_fit >= this" },
+    "beyond_normal_radius_penalty": { "value": 0.10, "basis": "REC", "note": "subtracted from confidence beyond distance_rules.normal_radius_miles_one_way (no casual revisit)" }
+  },
+
+  "scarcity_weights": { "basis": "REC", "deal_discount": 0.5, "demand_velocity": 0.3, "supply_tightness": 0.2 },
+
+  "decision_thresholds": {
+    "composite_yes": { "value": 60, "basis": "REC" },
+    "composite_pass_below": { "value": 45, "basis": "REC" },
+    "confidence_min_for_yes": { "value": 0.60, "basis": "REC" },
+    "skill_fit_hard_floor": { "value": 0.40, "basis": "REC" },
+    "min_sold_comps_for_yes_flip": { "value": 3, "basis": "REC" },
+    "require_repair_scope_known_for_yes_flip": { "value": true, "basis": "REC", "note": "a guessed fault caps a flip at MAYBE (§15)" },
+    "titled_categories": { "value": ["trailer", "project_vehicle"], "basis": "REC", "note": "YES requires evidence.title_verified" }
+  },
+
+  "alert_thresholds": {
+    "scarcity_min": { "value": 0.6, "basis": "REC" },
+    "listing_age_hours_max": { "value": 6, "basis": "REC" },
+    "auction_ends_in_hours_max": { "value": 24, "basis": "REC" },
+    "supply_tightness_min": { "value": 0.7, "basis": "REC" },
+    "ev_multiple_of_min_profit": { "value": 2, "basis": "REC" },
+    "deal_discount_min": { "value": 0.35, "basis": "REC" },
+    "service_lead_quality_min": { "value": 0.6, "basis": "REC" },
+    "service_lead_age_hours_max": { "value": 6, "basis": "REC" }
+  },
+
+  "distance_rules": {
+    "normal_radius_miles_one_way": { "value": 100, "basis": "REC", "note": "Conway / Central AR; beyond it the confidence penalty applies" },
+    "remote_verification_required_beyond_miles": { "value": 60, "basis": "REC", "note": "YES requires evidence.remote_verification beyond this" },
+    "distance_ratio_gate_beyond_miles": { "value": 60, "basis": "REC", "note": "hard gate (§13-1) applies only beyond this; inside it travel is already priced through cash + profit/hour" },
+    "travel_cost_fraction_of_ev_max": { "value": 0.35, "basis": "REC", "note": "(trips_cash + travel_hours*w_min + wasted_trip_ev) <= this * ev_net_profit" },
+    "p_waste_base": { "value": 0.05, "basis": "REC", "note": "p_waste = clamp(base + per_mile*miles_one_way - evidence_slope*evidence_quality, 0, max)" },
+    "p_waste_per_mile": { "value": 0.001, "basis": "REC" },
+    "p_waste_evidence_slope": { "value": 0.4, "basis": "REC" },
+    "p_waste_max": { "value": 0.6, "basis": "REC" }
+  },
+
+  "skills": {
+    "_note": "Skill-proficiency store (gap 2). Coverage uses Michael's stated skills (FACT); proficiency levels are REC priors that LEARN updates via a config bump. A required skill not listed here counts as NOT covered.",
+    "proficiency": {
+      "basis": "REC",
+      "mechanical_diagnosis": 0.85,
+      "small_engine_repair": 0.85,
+      "engine_repair": 0.75,
+      "repair": 0.85,
+      "equipment_repair": 0.85,
+      "hydraulics": 0.65,
+      "maintenance": 0.90,
+      "welding": 0.85,
+      "fabrication": 0.80,
+      "troubleshooting": 0.85,
+      "electrical_diagnosis": 0.75,
+      "trailer_wiring": 0.85,
+      "low_voltage_wiring": 0.80,
+      "drywall": 0.85,
+      "drywall_hang": 0.85,
+      "drywall_finish": 0.80,
+      "construction": 0.80,
+      "carpentry": 0.75,
+      "painting": 0.70,
+      "assembly": 0.90,
+      "smart_home_install": 0.90,
+      "network_config": 0.75,
+      "auto_body": 0.50
+    },
+    "license_gated_skills": { "value": ["licensed_electrical", "licensed_plumbing", "hvac_refrigerant", "gas_line"], "basis": "REC", "note": "Agent 05 owns the authoritative allow-list; a required skill here that is not in licenses_held is a hard PASS" },
+    "licenses_held": { "value": [], "basis": "UNK", "note": "Michael to confirm" }
+  },
+
+  "evidence_search": {
+    "_note": "Order in which missing evidence is tried when naming cheapest_decisive_evidence (cheapest first). REC.",
+    "flip_order": { "value": ["seller_screened", "condition_verified", "fault_identified", "title_verified", "remote_verification", "demand_evidence", "three_sold_comps", "price_distribution"], "basis": "REC" },
+    "service_order": { "value": ["customer_screened", "scope_verified", "materials_priced", "access_and_schedule_confirmed", "price_agreed_in_writing", "remote_verification"], "basis": "REC" }
+  },
+
+  "comps": {
+    "recency_window_days": { "value": 90, "basis": "REC" },
+    "radius_miles": { "value": 150, "basis": "REC", "note": "widen if thin" },
+    "trim_each_side": { "value": 1, "basis": "REC", "note": "drop this many lowest and highest sold prices when n >= 5" },
+    "use_sold_not_asking": { "value": true, "basis": "FACT" }
+  }
+}

@@ -4,9 +4,9 @@ This engine scores both lanes, FLIPS and SERVICES, as a pure function of `(Item 
 
 ## Layout
 ```
-config/scoring-config.json        current config (2026.10.1), the single source of every constant
-config/history/                    superseded versions (replay loads them by version)
-config/estimation-priors.json      category priors for the estimator (own version; REC/UNK until LEARN)
+src/mbos_economics/config/scoring-config.json  current config (2026.10.1), the single source of every constant
+src/mbos_economics/config/history/             superseded versions (replay loads them by version)
+src/mbos_economics/config/estimation-priors.json  category priors for the estimator (own version; REC/UNK until LEARN)
 src/mbos_economics/
   engine.py      compute() (pure scoring), score(), score_item() (adds ids, provenance, receipt drafts)
   lanes.py       flip and service ledgers + EV trees
@@ -47,7 +47,7 @@ out = score_item(item, load_config(), scored_at="2026-10-07T12:00:00Z")
 - **Stdlib only at runtime.** Python ≥ 3.10. ADR-0008 targets 3.12; the suite also passes on 3.10.
 - **Writes nothing.** Persisting results and receipts is the State lane's (04) job, in one transaction.
 
-Path note: `CONFIG_DIR` resolves relative to the source tree (`economics/config`). When Agent 01 packages the platform, pass `config_dir=` explicitly.
+Config ships as **package data** (`mbos_economics/config/`). An installed wheel finds its scoring config, history and estimation priors without any `config_dir=` argument. `config_dir=` is only needed to point at a different config set.
 
 ## RESEARCH / estimate producer (C-01)
 ```python

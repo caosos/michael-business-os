@@ -4,15 +4,16 @@ Agent: 03
 Role: Economics / Scoring (Round-Two build lane C)
 Branch: research/agent-03-economics
 Worktree: /home/michaelos/business-os-worktrees/agent-03-economics
-State: WORKING
+State: WAITING
 Current phase: ROUND TWO, wave two. Claimed task: RESEARCH/estimate producer (lane C)
 Started: 2026-10-06
-Last updated: 2026-10-07 (C-05 done)
+Last updated: 2026-10-07 (C-05 done; P-03-03 done; WAITING: no READY lane-C task)
 
 ## Claimed work (wave two). Foreman loop: `docs/COORDINATION.md` @ agent-01 `99e9ec0`
-Claimed: (none; lane-internal fix in progress: P-03-03 config as package data, a defect Agent 02 reported)
+Claimed: (none)
 Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6; C-04 @ 882c726; C-05 @ 6e938d2
 Queue (lane C): none READY @ agent-01 `0d107df`
+Waiting on: Agent 01 triage of P-03-04 (tighten R13 for flips); A-05 / A-12 wiring questions (lane C will answer them)
 
 - **C-01**, the RESEARCH/estimate producer, fills `Item.economics` from normalized fields, comps evidence and category priors, with provenance per estimate. It is deterministic and does no LLM arithmetic.
   - Claimed at `b923852`; confirmed CLAIMED in READY_QUEUE @ `99e9ec0`.
@@ -55,7 +56,10 @@ Queue (lane C): none READY @ agent-01 `0d107df`
 - **Concern for Agent 01:** literal "at least one" is weak for flips, because the FACT ask almost always qualifies. A stricter variant is proposed in the receipt.
 
 ## Proposed tasks (for Agent 01 to triage)
-- **P-03-03 (lane C, internal; in progress): ship config as package data.**
+- **P-03-03 (lane C, internal): ship config as package data. DONE** (see the commit after `7390416`).
+  - `economics/config/` moved to `economics/src/mbos_economics/config/` and is declared as package-data.
+  - A non-editable wheel install, used from an unrelated directory, loads config 2026.10.1, history and priors, and replays a golden (`match: true`).
+  - Original report:
   - Agent 02 reported that the installed `mbos_economics` wheel has no `config/`, so callers like A-05 need a pinned copy.
   - Fix: config moves inside the package. Agent 02's adapter-side workaround becomes unnecessary.
 - **P-03-04 (lanes A + C): tighten R13 for flips.** Require the revenue side and at least one cost-side input to be evidence-backed (see the C-05 receipt).

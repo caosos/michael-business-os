@@ -1,0 +1,95 @@
+{
+  "scoring_config_version": "2026.10.0",
+  "_note": "Single source of truth for every constant in the economics engine. Changing any value here MUST bump scoring_config_version so historical scores stay reconstructable. basis tags: FACT=stated/identity, REC=recommended default (calibrate), UNK=must be supplied by Michael or learned.",
+
+  "vehicle": {
+    "fuel_price_per_gal": { "value": 3.20, "basis": "UNK", "note": "calibrate to local pump price" },
+    "vehicle_mpg": { "value": 18, "basis": "UNK", "note": "work truck; set per vehicle" },
+    "wear_per_mile": { "value": 0.28, "basis": "REC", "note": "tires + maintenance + depreciation" },
+    "vehicle_cost_per_mile_v": { "value": 0.46, "basis": "REC", "note": "= fuel_price/mpg (0.178) + wear (0.28); IRS all-in ~0.70/mi as cross-check only" },
+    "avg_speed_mph": { "value": 45, "basis": "REC", "note": "blended town + highway" }
+  },
+
+  "time_value": {
+    "w_min_per_hour": { "value": 40, "basis": "UNK", "note": "absolute floor wage; hard PASS below" },
+    "w_target_flip_per_hour": { "value": 65, "basis": "REC", "note": "required EV profit/hour for a flip YES" },
+    "w_target_service_per_hour": { "value": 75, "basis": "REC", "note": "required profit/hour for a service YES" }
+  },
+
+  "capital_and_risk": {
+    "risk_capital_per_deal_cap": { "value": 1500, "basis": "REC", "note": "max acquisition/cash per deal w/o Agent 05 escalation" },
+    "max_loss_cap": { "value": 800, "basis": "REC", "note": "largest single-deal loss tolerated" },
+    "min_profit_flip": { "value": 150, "basis": "REC" },
+    "min_profit_service": { "value": 100, "basis": "REC" },
+    "f_diag_parts_fraction_on_fail": { "value": 0.3, "basis": "REC", "note": "fraction of parts spent before discovering repair failure" }
+  },
+
+  "holding": {
+    "storage_small_per_day": { "value": 1, "basis": "REC" },
+    "storage_large_per_day": { "value": 3, "basis": "REC" }
+  },
+
+  "normalization_caps": {
+    "ev_cap_flip": { "value": 800, "basis": "REC" },
+    "ev_cap_service": { "value": 1500, "basis": "REC" },
+    "pph_cap": { "value": 120, "basis": "REC" },
+    "roi_cap": { "value": 1.5, "basis": "REC", "note": "150% per cycle" },
+    "ttc_cap_days": { "value": 60, "basis": "REC" },
+    "dom_cap_days": { "value": 45, "basis": "REC", "note": "for demand_velocity" },
+    "supply_cap_listings": { "value": 20, "basis": "REC", "note": "for supply_tightness" }
+  },
+
+  "composite_weights": {
+    "flip":    { "ev": 0.25, "pph": 0.25, "roi": 0.10, "ttc": 0.10, "risk": 0.10, "conf": 0.05, "skill": 0.10, "scarcity": 0.05 },
+    "service": { "ev": 0.20, "pph": 0.35, "roi": 0.00, "ttc": 0.10, "risk": 0.08, "conf": 0.07, "skill": 0.15, "scarcity": 0.05 }
+  },
+
+  "risk_score_weights": { "max_loss": 0.5, "p_loss": 0.3, "cov": 0.2, "basis": "REC" },
+
+  "confidence_evidence_weights": {
+    "three_sold_comps": 0.25,
+    "condition_verified": 0.20,
+    "fault_identified": 0.15,
+    "title_verified": 0.10,
+    "demand_evidence": 0.10,
+    "seller_screened": 0.08,
+    "skill_fit_high": 0.07,
+    "price_distribution": 0.05,
+    "basis": "REC"
+  },
+  "confidence_haircut_formula": { "value": "0.6 + 0.4 * confidence", "basis": "REC" },
+
+  "scarcity_weights": { "deal_discount": 0.5, "demand_velocity": 0.3, "supply_tightness": 0.2, "basis": "REC" },
+
+  "decision_thresholds": {
+    "composite_yes": { "value": 60, "basis": "REC" },
+    "composite_pass_below": { "value": 45, "basis": "REC" },
+    "confidence_min_for_yes": { "value": 0.60, "basis": "REC" },
+    "skill_fit_hard_floor": { "value": 0.40, "basis": "REC" }
+  },
+
+  "alert_thresholds": {
+    "require_decision_yes": true,
+    "scarcity_min": { "value": 0.6, "basis": "REC" },
+    "listing_age_hours_max": { "value": 6, "basis": "REC" },
+    "auction_ends_in_hours_max": { "value": 24, "basis": "REC" },
+    "supply_tightness_min": { "value": 0.7, "basis": "REC" },
+    "ev_multiple_of_min_profit": { "value": 2, "basis": "REC" },
+    "deal_discount_min": { "value": 0.35, "basis": "REC" }
+  },
+
+  "distance_rules": {
+    "normal_radius_miles_one_way": { "value": 100, "basis": "REC", "note": "Conway / Central AR per Agent 02; soft, not hard" },
+    "remote_verification_required_beyond_miles": { "value": 60, "basis": "REC" },
+    "travel_cost_fraction_of_ev_max": { "value": 0.35, "basis": "REC", "note": "(trips_cash + travel_hours*w + wasted_trip_ev) <= 0.35 * EV_NetProfit" },
+    "p_waste_formula": { "value": "clamp(0.05 + miles_one_way/1000 - 0.4*evidence_quality, 0, 0.6)", "basis": "REC" }
+  },
+
+  "comps": {
+    "recency_window_days": { "value": 90, "basis": "REC" },
+    "radius_miles": { "value": 150, "basis": "REC", "note": "widen if thin" },
+    "min_comps_for_yes": { "value": 3, "basis": "REC" },
+    "use_sold_not_asking": { "value": true, "basis": "FACT" },
+    "aggregate": { "value": "median with top/bottom outlier trim; 25th/75th as low/high", "basis": "FACT" }
+  }
+}
