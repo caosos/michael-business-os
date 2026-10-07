@@ -5,9 +5,10 @@ Role: Discovery / Source Adapters (DISCOVER + NORMALIZE lane)
 Branch: research/agent-02-opportunity
 Worktree: /home/michaelos/business-os-worktrees/agent-02-opportunity
 State: WORKING
-Claimed: B-02
+Claimed: B-03
 Done: B-01 @ 7c9da45
-Current phase: Round Two — B-01 DONE; working B-02 (ADR-0010: ids.canonical_json → reference; interop row 02 = 10/10)
+Done: B-02 @ cadfdae
+Current phase: Round Two — B-01, B-02 DONE; working B-03 (credential-free GSA Auctions, then Trash Nothing; fixture-first, read-only)
 Started: 2026-10-06 (Round One) · Round Two started 2026-10-07
 Last updated: 2026-10-07
 
@@ -19,7 +20,9 @@ and route `FetchResult.error` / `freeze_requests` to a side channel (R5). Confir
 
 B-01 result (FACT): `mbos_discovery.spine` implements SourceAdapter/Normalizer/Deduper; 02 fixtures run through the
 real `mbos.spine.ingest` on Postgres 16 with identity-first dedup; raw_ref bytes identical in both lanes; 68 tests.
-Receipt: docs/receipts/2026-10-07-b01-spine-seam.md. Next: B-02, then B-03 (now READY after B-01).
+Receipt: docs/receipts/2026-10-07-b01-spine-seam.md.
+B-02 result (FACT): interop_check row 02 = 10/10 CONFORMS @ cadfdae; 89 tests. Receipt: docs/receipts/2026-10-07-b02-adr0010-hashing.md.
+Next after B-03: B-04 (needs E-01 from Agent 05).
 
 ## Proposed tasks
 - (for Agent 01 / ADR-0009) `Deduper.is_duplicate` should receive the candidate's `RawListing` (at least `source`,
