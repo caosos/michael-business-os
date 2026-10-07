@@ -7,7 +7,7 @@ Worktree: /home/michaelos/business-os-worktrees/agent-03-economics
 State: WAITING
 Current phase: ROUND TWO, wave two. Claimed task: RESEARCH/estimate producer (lane C)
 Started: 2026-10-06
-Last updated: 2026-10-07 (reviewed 02 B-16 converter; hardened load_kb; D-17 review in progress)
+Last updated: 2026-10-07 (D-17 reviewed: ACCEPTED; WAITING: no READY lane-C task)
 
 ## Claimed work (wave two). Foreman loop: `docs/COORDINATION.md` @ agent-01 `99e9ec0`
 Claimed: (none)
@@ -128,6 +128,12 @@ Waiting on: any new lane-C task; 02 reading the CPSC programmer's guide (source 
 - **Found, a false-positive risk in its token extraction:** bare numbers (`6500`, `8000`, `2018`) pass as "models". A Northgate "6500 watt" listing of a NON-recalled model then matched a recall entry, which is a false safety claim.
 - **Fixed on my side (fail closed, whatever the source):** `load_kb` now refuses an entry with a purely numeric or under-3-character model token, or a match group without both makes and models. Package 0.10.1; 283 tests pass.
 - **Found, a false-negative bug in its extraction:** `model_tokens("Model 17AWCBYS010 and 17AWCBYZ010")` returns only `['17AWCBYZ010']`, so the label word "Model" makes the first model silently drop. Sent to Agent 02 with a suggested fix.
+
+### Review: D-17 operator-note store (Agent 04 @ `77d1f17`): ACCEPTED (receipt `docs/receipts/2026-10-07-d17-acceptance-review.md`)
+- 8 acceptance tests against a real 0016 database, connected as each role, using my real `new_manual_note` / `load_manual_notes` / CLI. The folded document passes `note check` (exit 0) and the roles behave.
+- **My bug found and fixed:** a retracted note's copied text was still linted, so retraction could not clear a bad note. Retracted notes are now skipped. I also added `load_manual_notes_lenient`, so one bad note no longer disables the rest.
+- **Documented limitation:** the DBOS worker login inherits `approver` and can record notes (by design; no LLM-facing process uses it). Pinned by a test.
+- Package 0.10.2; 294 tests pass with all environments.
 
 ## Proposed tasks (for Agent 01 to triage)
 - **P-03-08 (lane B): CPSC knowledge adapter.** Read the CPSC programmer's guide (response fields, rate limit), then a read-only, fixture-first Tier-1 adapter emitting recall records. 03 supplies the deterministic record-to-KB-entry converter once the fields are known.

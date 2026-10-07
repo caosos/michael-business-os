@@ -126,6 +126,10 @@ def _note_problems(n: dict) -> list[str]:
         p.append("a manual note is owner-stated: basis is always RECOMMENDATION, never FACT")
     if n.get("reference_url") and not str(n["reference_url"]).startswith("https://"):
         p.append("reference_url must be https")
+    if n.get("supersedes") and not re.match(r"^mn_[0-9A-HJKMNP-TV-Z]{26}$", str(n["supersedes"])):
+        p.append("supersedes must be the note_id of the note being edited")
+    if n.get("supersedes") and n.get("supersedes") == n.get("note_id"):
+        p.append("a note cannot supersede itself")
     for k in ("statement", "plan_hint"):
         text = n.get(k) or ""
         if len(text) > MAX_NOTE_CHARS:
@@ -138,7 +142,8 @@ def _note_problems(n: dict) -> list[str]:
 
 def new_manual_note(*, category: str, makes: list[str], models: list[str], kind: str, statement: str, entered_by: str,
                     entered_at: str, basis_of_knowledge: str, plan_hint: str | None = None,
-                    reference_url: str | None = None, review_after: str | None = None) -> dict:
+                    reference_url: str | None = None, review_after: str | None = None,
+                    supersedes: str | None = None) -> dict:
     """Build one validated note plus the HUMAN provenance record the entry step must persist FIRST.
     Pure: writes nothing and reads no clock (``entered_at`` is supplied by the entry channel)."""
     try:                                    # validate the timestamp BEFORE deriving ids from it
@@ -150,7 +155,8 @@ def new_manual_note(*, category: str, makes: list[str], models: list[str], kind:
             "basis_of_knowledge": basis_of_knowledge,
             **({"plan_hint": plan_hint.strip()} if plan_hint else {}),
             **({"reference_url": reference_url} if reference_url else {}),
-            **({"review_after": review_after} if review_after else {})}
+            **({"review_after": review_after} if review_after else {}),
+            **({"supersedes": supersedes} if supersedes else {})}       # an edit: part of the content, so it changes the id
     digest = content_hash(body)
     prov_id = derived_ulid("prov", entered_at, "manual-note|" + digest)
     note = {"note_id": derived_ulid("mn", entered_at, "manual-note|" + digest), **body, "provenance_id": prov_id}
@@ -171,6 +177,11 @@ def load_manual_notes(doc_or_path) -> list[dict]:
         raise NoteError([f"notes_format must be {NOTES_FORMAT}"])
     problems, out, seen = [], [], set()
     for i, n in enumerate(doc.get("notes") or []):
+        if n.get("retracted"):          # out of use: its content is never shown, so its text is not linted (a retraction
+            if n.get("note_id") in seen:  # row copies the retracted note, so linting it would make a retraction useless)
+                problems.append(f"notes[{i}] duplicate note_id")
+            seen.add(n.get("note_id"))
+            continue
         errs = _note_problems(n)
         if n.get("note_id") in seen:
             errs.append("duplicate note_id")
@@ -181,6 +192,32 @@ def load_manual_notes(doc_or_path) -> list[dict]:
     if problems:
         raise NoteError(problems)
     return out
+
+
+def load_manual_notes_lenient(doc_or_path) -> tuple[list[dict], list[dict]]:
+    """For a document read from the STORE: ``(valid_active_notes, problems)``.
+
+    The database accepts any text (the elementary-advice lint lives here, in Python), so one bad note must not switch
+    off every other note. Each bad note is skipped and reported as ``{"note_id", "problems"}``; the strict
+    ``load_manual_notes`` stays the right tool for ``note check`` and for entry-time validation. A malformed
+    document (wrong ``notes_format``) still raises."""
+    doc = doc_or_path if isinstance(doc_or_path, dict) else json.loads(Path(doc_or_path).read_text(encoding="utf-8"))
+    if doc.get("notes_format") != NOTES_FORMAT:
+        raise NoteError([f"notes_format must be {NOTES_FORMAT}"])
+    good, bad, seen = [], [], set()
+    for n in doc.get("notes") or []:
+        if n.get("retracted"):          # out of use: not linted (see load_manual_notes)
+            seen.add(n.get("note_id"))
+            continue
+        errs = _note_problems(n)
+        if n.get("note_id") in seen:
+            errs.append("duplicate note_id")
+        seen.add(n.get("note_id"))
+        if errs:
+            bad.append({"note_id": n.get("note_id"), "problems": errs})
+        else:
+            good.append(n)
+    return good, bad
 
 
 def merge_manual(kb: dict, notes: list[dict]) -> dict:

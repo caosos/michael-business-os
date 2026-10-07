@@ -18,7 +18,7 @@ from helpers import CFG, HERE
 
 from mbos_economics.comps_feed import research_step
 from mbos_economics.config import CONFIG_DIR
-from mbos_economics.valueadd import (NoteError, build_value_add, load_kb, load_manual_notes, merge_manual,
+from mbos_economics.valueadd import (NoteError, build_value_add, load_kb, load_manual_notes, match_entries, merge_manual,
                                      new_manual_note)
 
 KB = load_kb()
@@ -172,6 +172,41 @@ class TestMerge(unittest.TestCase):
         self.assertEqual(len(v["block"]["model_specific_risks"]), 1)                 # only the sourced recall entry
         other, _, _ = dc.zero_turn_mower()
         self.assertNotIn("manual", " ".join(build_value_add(other, dc.AS_OF, cfg=CFG, kb=self.merged(note()))["matched"]))
+
+    def test_a_retracted_note_is_never_linted(self):
+        """A retraction row copies the retracted note's content, so linting it would make retraction useless (found in the D-17 review)."""
+        n = note()["note"]
+        n.update({"statement": "Check the compression first.", "retracted": True})
+        self.assertEqual(load_manual_notes(doc(n)), [])
+        from mbos_economics.valueadd import load_manual_notes_lenient
+        self.assertEqual(load_manual_notes_lenient(doc(n)), ([], []))
+
+    def test_lenient_loader_skips_bad_notes_and_reports_them(self):
+        from mbos_economics.valueadd import load_manual_notes_lenient
+        good, bad = note()["note"], note(models=["X350"])["note"]
+        bad["statement"] = "Look for leaks."
+        live, problems = load_manual_notes_lenient(doc(good, bad))
+        self.assertEqual([n["note_id"] for n in live], [good["note_id"]])
+        self.assertEqual([p["note_id"] for p in problems], [bad["note_id"]])
+        with self.assertRaises(NoteError):
+            load_manual_notes(doc(good, bad))                               # strict stays strict
+
+    def test_edit_links_through_supersedes(self):
+        a = note()["note"]
+        e = note(statement=STATEMENT + " Seen twice.", entered_at="2026-10-08T20:00:00Z", supersedes=a["note_id"])["note"]
+        self.assertEqual(e["supersedes"], a["note_id"])
+        self.assertNotEqual(e["note_id"], a["note_id"])
+        with self.assertRaises(NoteError):
+            note(supersedes="not-a-note-id")
+
+    def test_numeric_model_numbers_are_allowed_in_a_human_note_but_not_in_the_shipped_kb(self):
+        """Asymmetry by design: agency-converted entries must not match on a wattage or year (false safety claims), but a
+        person writing 'John Deere 4020' means a real numeric model and owns the statement (shown as RECOMMENDATION)."""
+        n = note(makes=["john deere"], models=["4020"], category="mower", statement="4020 power-shift clutch pack wears; budget a rebuild.")["note"]
+        item = {"category": "mower", "normalized": {"title": "John Deere 4020 tractor"}}
+        self.assertEqual(len(match_entries(item, merge_manual(KB, load_manual_notes(doc(n))))), 1)
+        other = {"category": "mower", "normalized": {"title": "Ford 4020 tractor"}}                     # make still required
+        self.assertEqual(match_entries(other, merge_manual(KB, load_manual_notes(doc(n)))), [])
 
     def test_retracted_notes_are_ignored(self):
         n = note()["note"]
