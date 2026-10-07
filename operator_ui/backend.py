@@ -1,5 +1,11 @@
 """Operator UI → spine adapter (coordinator ruling R10).
 
+Two state backends, selected by `lane`: "reference" (Agent 01's own DDL, `mbos.spine`) and "lane_d"
+(Agent 04's canonical store, `mbos.spine_d`; F-04). On lane D, reads use lane D's contract-document views
+(`mbos.v_*_documents`, `mbos.receipt_document`, `mbos.panic_read()`) and every write goes through
+`mbos.spine_d`, which writes only via lane D's SQL API. The UI never touches lane D's tables directly
+for writes.
+
 Reads come straight from the spine's Postgres tables (read-only). The write paths are
 `decide()` and `record_outcome()`: `mbos.spine.decide` in ONE transaction (approval + provenance + receipt + status),
 then `mbos.workflows.notify_decision` to wake the item workflow, the same path as `mbos decide` (CLI).
@@ -13,19 +19,30 @@ from typing import Any, Optional
 
 import sqlalchemy as sa
 
-from mbos import spine
 from mbos.ledger import load_receipts, verify_chain
 from mbos.runtime import Components, client, item_workflow_id
 from mbos.workflows import DECISION_TOPIC, notify_decision
 
 from . import mbos_canonical
 
+# (doc view, id column) per entity on lane D; reference reads `body` from the spine's own tables.
+_LD = {"item": ("mbos.v_item_documents", "item_id"), "areq": ("mbos.v_action_request_documents", "action_request_id"),
+       "prov": ("mbos.v_provenance_documents", "provenance_id"), "outc": ("mbos.v_outcome_documents", "outcome_id")}
+
 
 class SpineBackend:
-    def __init__(self, engine: sa.Engine, components: Optional[Components] = None, notify=None):
+    def __init__(self, engine: sa.Engine, components: Optional[Components] = None, notify=None, lane: str = "reference"):
+        if lane not in ("reference", "lane_d"):
+            raise ValueError(f"unknown state backend {lane!r}")
         self.engine = engine
+        self.lane = lane
+        if lane == "lane_d":
+            from mbos import spine_d as _spine
+        else:
+            from mbos import spine as _spine
+        self._spine = _spine
         # Must match the worker's lanes: spine.decide classifies a MODIFY successor with the PDP.
-        self.components = components or Components().with_defaults()
+        self.components = components or Components().with_defaults(lane)
         self._notify = notify or notify_decision  # spine's wake helper (A-07)
 
     # ---- reads ---------------------------------------------------------------------------
@@ -38,28 +55,44 @@ class SpineBackend:
         return rows[0] if rows else None
 
     def item(self, item_id: str) -> Optional[dict]:
+        if self.lane == "lane_d":
+            return self._body("SELECT doc FROM mbos.v_item_documents WHERE item_id = :i", i=item_id)
         return self._body("SELECT body FROM mbos.items WHERE item_id = :i", i=item_id)
 
     def action_request(self, areq_id: str) -> Optional[dict]:
+        if self.lane == "lane_d":
+            return self._body("SELECT doc FROM mbos.v_action_request_documents WHERE action_request_id = :a", a=areq_id)
         return self._body("SELECT body FROM mbos.action_requests WHERE action_request_id = :a", a=areq_id)
 
     def action_requests(self, limit: int = 200) -> list[dict]:
+        if self.lane == "lane_d":
+            return self._bodies("SELECT doc FROM mbos.v_action_request_documents ORDER BY doc->>'created_at' DESC LIMIT :n", n=limit)
         return self._bodies("SELECT body FROM mbos.action_requests ORDER BY body->>'created_at' DESC LIMIT :n", n=limit)
 
     def items_in_states(self, states) -> list[dict]:
+        if self.lane == "lane_d":
+            return self._bodies("SELECT doc FROM mbos.v_item_documents WHERE doc->>'state' = ANY(:s)", s=list(states))
         return self._bodies("SELECT body FROM mbos.items WHERE state = ANY(:s)", s=list(states))
 
     def action_requests_for_item(self, item_id: str) -> list[dict]:
+        if self.lane == "lane_d":
+            return self._bodies("SELECT doc FROM mbos.v_action_request_documents WHERE doc->>'item_id' = :i "
+                                "ORDER BY doc->>'created_at'", i=item_id)
         return self._bodies("SELECT body FROM mbos.action_requests WHERE item_id = :i ORDER BY body->>'created_at'", i=item_id)
 
     def pending(self) -> list[dict]:
         with self.engine.connect() as c:
-            return spine.pending_decisions(c)
+            return self._spine.pending_decisions(c)
 
     def approvals_for(self, areq_id: str) -> list[dict]:
+        if self.lane == "lane_d":
+            return self._bodies("SELECT d.doc FROM mbos.v_approval_documents d JOIN mbos.approvals a USING (approval_id) "
+                                "WHERE a.action_request_id = :a ORDER BY a.seq", a=areq_id)
         return self._bodies("SELECT body FROM mbos.approvals WHERE action_request_id = :a ORDER BY seq", a=areq_id)
 
     def provenance(self, prov_id: str) -> Optional[dict]:
+        if self.lane == "lane_d":
+            return self._body("SELECT doc FROM mbos.v_provenance_documents WHERE provenance_id = :p", p=prov_id)
         return self._body("SELECT body FROM mbos.provenance WHERE provenance_id = :p", p=prov_id)
 
     def receipts(self, item_id: Optional[str] = None, areq_id: Optional[str] = None, limit: int = 500) -> list[dict]:
@@ -70,6 +103,12 @@ class SpineBackend:
         if areq_id:
             where.append("action_request_id = :a")
             params["a"] = areq_id
+        if self.lane == "lane_d":  # contract-shaped documents (seq / prev_hash / row_hash included)
+            w = " AND ".join(x.replace("item_id", "doc->>'item_id'").replace("action_request_id", "doc->>'action_request_id'")
+                             if "doc->>" not in x else x for x in where)
+            rows = self._bodies(f"SELECT doc FROM (SELECT seq, doc FROM mbos.v_receipt_documents WHERE {w} "
+                                f"ORDER BY seq DESC LIMIT :n) t ORDER BY seq", **params)
+            return rows
         sql = f"seq IN (SELECT seq FROM mbos.receipts WHERE {' AND '.join(where)} ORDER BY seq DESC LIMIT :n)"
         with self.engine.connect() as c:
             return load_receipts(c, sql, params)  # adds seq / prev_hash / row_hash (columns, not body)
@@ -84,6 +123,9 @@ class SpineBackend:
     def system_state(self) -> str:
         try:
             with self.engine.connect() as c:
+                if self.lane == "lane_d":  # R5: sealed PANIC state in Postgres; unreadable or FROZEN → FROZEN
+                    r = c.execute(sa.text("SELECT global_state, readable FROM mbos.panic_read()")).one()
+                    return "RUNNING" if (r.readable and r.global_state == "RUNNING") else "FROZEN"
                 v = c.execute(sa.text("SELECT value FROM mbos.governance_flags WHERE key = 'global_freeze'")).scalar_one_or_none()
         except Exception:  # noqa: BLE001
             return "UNREADABLE (fail-closed)"
@@ -93,13 +135,22 @@ class SpineBackend:
 
     def verify_chain(self) -> dict:
         with self.engine.connect() as c:
+            if self.lane == "lane_d":
+                from mbos.adapters.state04 import Pg04Ledger
+
+                return Pg04Ledger().verify_chain(c)
             return verify_chain(c)
 
     def verify_chain_independent(self) -> tuple[bool, str]:
         """Re-verify the exported chain with the vendored ADR-0010 reference (MBOS-RH-1), in Python,
         independent of the database's own verify_chain. Read-only."""
         with self.engine.connect() as c:
-            chain = load_receipts(c)
+            if self.lane == "lane_d":
+                from mbos.adapters.state04 import Pg04Ledger
+
+                chain = Pg04Ledger().export_receipts(c)
+            else:
+                chain = load_receipts(c)
         try:
             return mbos_canonical.verify_chain(chain)
         except Exception as e:  # noqa: BLE001 — a value the reference rejects is a failed verification
@@ -108,7 +159,10 @@ class SpineBackend:
     def held(self) -> list[dict]:
         """HOLD backlog: held requests with their item and the HOLD in force (approval row)."""
         rows = []
-        for areq in self._bodies("SELECT body FROM mbos.action_requests WHERE status = 'held' ORDER BY body->>'created_at'"):
+        held_sql = ("SELECT doc FROM mbos.v_action_request_documents WHERE doc->>'status' = 'held' ORDER BY doc->>'created_at'"
+                    if self.lane == "lane_d" else
+                    "SELECT body FROM mbos.action_requests WHERE status = 'held' ORDER BY body->>'created_at'")
+        for areq in self._bodies(held_sql):
             last = (self.approvals_for(areq["action_request_id"]) or [None])[-1]
             rows.append({"action_request": areq, "item": self.item(areq["item_id"]),
                          "hold": (last or {}).get("hold") or {}, "held_at": (last or {}).get("decided_at"),
@@ -116,6 +170,10 @@ class SpineBackend:
         return rows
 
     def outcomes(self, item_id: Optional[str] = None, limit: int = 100) -> list[dict]:
+        if self.lane == "lane_d":
+            if item_id:
+                return self._bodies("SELECT doc FROM mbos.v_outcome_documents WHERE doc->>'item_id' = :i ORDER BY doc->>'observed_at'", i=item_id)
+            return self._bodies("SELECT doc FROM mbos.v_outcome_documents ORDER BY doc->>'observed_at' DESC LIMIT :n", n=limit)
         if item_id:
             return self._bodies("SELECT body FROM mbos.outcomes WHERE body->>'item_id' = :i ORDER BY body->>'observed_at'", i=item_id)
         return self._bodies("SELECT body FROM mbos.outcomes ORDER BY body->>'observed_at' DESC LIMIT :n", n=limit)
@@ -123,12 +181,12 @@ class SpineBackend:
     def record_outcome(self, item_id: str, kind: str, **kw: Any) -> dict:
         """Second (and last) write path: Michael records what actually happened (feeds LEARN, lane C)."""
         with self.engine.begin() as c:
-            return spine.record_outcome(c, item_id, kind, recorded_by="michael", channel="web", **kw)  # → mbos.web.outcome
+            return self._spine.record_outcome(c, item_id, kind, recorded_by="michael", channel="web", **kw)  # → mbos.web.outcome
 
     # ---- the one write path -----------------------------------------------------------------
     def decide(self, areq_id: str, decision: str, payload_hash_seen: str, **kw: Any) -> dict:
         with self.engine.begin() as c:
-            out = spine.decide(c, areq_id, decision, payload_hash_seen, self.components, channel="web", **kw)
+            out = self._spine.decide(c, areq_id, decision, payload_hash_seen, self.components, channel="web", **kw)
         # Wake-up only: if this message is lost, the workflow still finds the row on its next poll.
         self._notify(out["item_id"], out["approval"]["approval_id"])
         return out

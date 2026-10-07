@@ -4,6 +4,7 @@ python -m operator_ui summary [--out-dir DIR] [--as-of ISO] [--top N]   (F-12; l
 Talks to the spine's database (MBOS_DATABASE_URL / MBOS_SYSTEM_DATABASE_URL, as for `mbos`).
 A worker (`mbos worker`) must be running to act on decisions. The UI never executes anything.
 Step-up PIN for irreversible/money YES comes from MBOS_OPERATOR_PIN (unset = refuse).
+MBOS_STATE_BACKEND=lane_d (+ MBOS_POLICY_PATH) runs the UI on Agent 04's store with Agent 05's gateway (F-04).
 """
 
 import argparse
@@ -30,8 +31,28 @@ def main(argv=None):
     pin = os.environ.get("MBOS_OPERATOR_PIN") or None
     if not pin:
         print("note: MBOS_OPERATOR_PIN unset — YES on irreversible/money requests will be refused (fail-closed)")
-    serve(App(SpineBackend(app_engine()), operator_pin=pin), port=a.port)
+    serve(App(make_backend(), operator_pin=pin), port=a.port)
     return 0
+
+
+def make_backend():
+    """MBOS_STATE_BACKEND=reference (default) | lane_d. On lane D the UI is built with the SAME Components as the
+    worker (F-04): Agent 05's PDP/gateway/kill switch via `lane_e_components`, because `spine_d.decide` classifies a
+    MODIFY successor with the PDP. MBOS_POLICY_PATH = a dev policy file; unset = read lane D's `policy_current`."""
+    from mbos.db.engine import app_engine
+
+    from .backend import SpineBackend
+
+    lane = os.environ.get("MBOS_STATE_BACKEND", "reference")
+    if lane == "reference":
+        return SpineBackend(app_engine())
+    if lane != "lane_d":
+        raise SystemExit(f"MBOS_STATE_BACKEND must be 'reference' or 'lane_d', got {lane!r}")
+    from mbos.adapters.governance import lane_e_components
+    from mbos.config import settings
+
+    comps, _gov = lane_e_components(settings().database_url, os.environ.get("MBOS_POLICY_PATH") or None)
+    return SpineBackend(app_engine(), comps.with_defaults("lane_d"), lane="lane_d")
 
 
 def _summary(a) -> int:

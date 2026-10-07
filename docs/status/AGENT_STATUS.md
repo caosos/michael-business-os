@@ -4,27 +4,22 @@ Agent: 06
 Role: Communications + Operator UI / Approval UX (build lane F)
 Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
-State: WORKING
-Claimed: F-04
-Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe
+State: WAITING
+Claimed: none
+Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe · F-04 @ HEAD_PLACEHOLDER
 Blocked: F-11 on A-15
 Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
 Last updated: 2026-10-07
 
 ## Current objective
-**F-04** (CLAIMED in `d60a731`, IN PROGRESS, no code yet): the UI's `SpineBackend` uses the worker's real `Components` on lane D, via `lane_e_components(dsn, policy_path)` (05 gateway, kill switch, PDP), with `state_backend="lane_d"` and `gateway_mode="lane_e"`.
-
-Findings so far (FACT, spine @ `ca6d056`):
-- Lane D runs through `mbos.spine_d`, which has the same public API (`decide`, `pending_decisions`, `record_outcome`). `mbos.runtime.spine_module()` selects it by `state_backend`.
-- `operator_ui/backend.py` imports `mbos.spine` directly and reads the **reference** tables (`mbos.items`, `mbos.action_requests`, `mbos.approvals`, `mbos.receipts`, `mbos.provenance`, `mbos.outcomes`, `mbos.governance_flags`) with raw SQL. On lane D those reads must move to lane D's schema/API (`mbos.adapters.state04.Pg04Ledger`).
-
-Next steps:
-1. Install 05's `mbos_governance` from its pushed head, and extract the whole `policy/` directory (each file fails closed).
-2. Build a lane-D test database the way `tests/helpers/lane_d.py` does (04's `state/` via git archive, roles.sql, migrator).
-3. Make `SpineBackend` backend-aware (`spine_module()`, plus a lane-D reader) and pass in the worker's `Components` from `lane_e_components`.
-4. Re-run the UI suite on lane D. Consent GRANTED / DNC CLEAR need the gateway role (D-10).
+WAITING. The only remaining lane-F task is **F-11** (follow-up / offer / quote buttons), BLOCKED on **A-15**. I will claim it as soon as A-15 is DONE, or any new F-/ANY task.
 
 ## Done
+- **F-04 @ HEAD_PLACEHOLDER:** the UI runs on lane D with lane E's real Components (`lane_e_components`).
+  - Reads come from lane D's document views; writes only through `spine_d`.
+  - Reference suite 108 passed; lane D + lane E suite 9 passed (`tools/run_tests.sh`).
+  - YES runs through Agent 05's gateway with exactly one EXECUTING and one EXECUTED receipt; the real PDP classifies MODIFY successors; a freeze yields 0 effector calls.
+  - Receipt: `docs/receipts/2026-10-07-f04-ui-on-lane-d-lane-e.md`.
 - **F-12 @ `0e5a3fe`:** local daily summary (`python -m operator_ui summary` writes `.md`/`.html`, plus the `/summary` page), never sent.
   - Contents: digest top-N, HOLD backlog (overdue first), yesterday's outcomes (America/Chicago) with net $, and source health.
   - Deterministic from `as_of`: byte-identical output across runs and shuffled input, with a `summary_hash`.
@@ -113,6 +108,8 @@ None. Live comms stay disabled (MICHAEL_DECISIONS #4).
 - The comms policy values in `comms_spec/data/comms_policy.v1.json` are PROPOSED (conservative). Loosening any of them is a version bump.
 
 ## Proposed tasks
+- **P-06-11 (lane A/E):** after a global freeze, a YES leaves the ActionRequest `approved` (ACTION_FAILED, item FAILED) on lane D + lane E, whereas the reference gateway used `cancelled_by_freeze`. Is that intended? Pinned as observed behaviour.
+- **P-06-12 (lane D/F):** run the UI with a least-privilege approver DSN (R14) and add a test that exercises lane D's role grants (the pgserver user is a superuser).
 - P-06-4 became F-05 (DONE) and P-06-5 became F-06 (DONE).
 - P-06-6 became F-07 (DONE).
 - P-06-7 became F-08 (DONE).

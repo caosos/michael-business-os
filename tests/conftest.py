@@ -4,6 +4,7 @@ Postgres 16 from `pgserver` (project-local) + a launched DBOS runtime with the r
 from __future__ import annotations
 
 import json
+import os
 import threading
 import time
 import uuid
@@ -12,6 +13,15 @@ from pathlib import Path
 
 import pytest
 import sqlalchemy as sa
+
+# DBOS is a per-process singleton, so the reference-backend suite and the lane D suite (F-04) cannot share a process.
+#   .venv/bin/python -m pytest -q tests                      → reference backend (tests/test_*.py)
+#   MBOS_UI_LANE_D=1 .venv/bin/python -m pytest -q tests     → lane D + lane E (tests/lane_d/)
+# tools/run_tests.sh runs both.
+if os.environ.get("MBOS_UI_LANE_D"):
+    collect_ignore_glob = ["test_*.py"]
+else:
+    collect_ignore = ["lane_d"]
 
 FIXTURE = Path(__file__).parent / "fixtures" / "illustrative.json"
 PIN = "4321"

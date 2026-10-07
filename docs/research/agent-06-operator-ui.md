@@ -99,3 +99,6 @@ Every page keeps the loopback, Host-check, CSRF and CSP guards (R14: human chann
 
 ## 8. Daily summary (task F-12)
 `python -m operator_ui summary --out-dir DIR [--as-of ISO]` writes `daily-summary-<date>.md` and `.html` **locally**, and the same content is on `/summary`. It is never sent. Sections: digest top-N, HOLD backlog (overdue first), yesterday's outcomes (America/Chicago calendar day) with net $, and source health. It is deterministic for a given store state and `as_of` (`summary_hash` in the header), and all untrusted text is escaped.
+
+## 9. Lane D + lane E (task F-04)
+`SpineBackend(..., lane="lane_d")` reads lane D's contract-document views and writes only through `mbos.spine_d`. `MBOS_STATE_BACKEND=lane_d python -m operator_ui serve` builds the UI with the worker's Components (`lane_e_components`: Agent 05's gateway, PDP and kill switch). Tests: `tools/run_tests.sh` (reference suite and lane D suite in separate processes).
