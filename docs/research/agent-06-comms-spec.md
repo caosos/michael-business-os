@@ -44,3 +44,8 @@ This document closes the open spec items from integration doc §10, row 06: (1) 
 - `comms_spec/planner.py` `CommsActionPlanner` (an `ActionPlanner`) drafts **first contact only**, from the registry, with a `comms` block in each proposed action. Listing text is sanitized.
 - `comms_spec/effector.py` `CommsDryRunEffector` (an `Effector`) is exactly-once and fail-closed, sends only the frozen draft, and writes its checks to `effector_response.comms`.
 - On a spine run, `audit()` grades E1/E3/E6/E7 PASS, E2 DRY_RUN_EXEMPT and E5 not testable. The integration requests to A-13 are in `docs/receipts/2026-10-07-f06-comms-dry-run-effector.md`.
+
+## Consent ledger and DNC store (F-07)
+- Schema `mbos_comms` (`comms_spec/sql/0001_comms_ledger.sql`, PROPOSED for lane D) is insert-only. Raw contact values live only in `contacts`; everything else uses `cref_…`.
+- `comms_spec/ledger.py` writes each consent, revocation (STOP) or DNC scrub in one transaction with provenance and a chained receipt.
+- `ConsentLedger` feeds `CommsDryRunEffector(consent_lookup=…, dnc_lookup=…)`. With it wired, E2 is graded PASS or FAIL, not DRY_RUN_EXEMPT.
