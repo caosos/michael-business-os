@@ -15,3 +15,8 @@ These four files are byte-for-byte copies of the frozen v1.0.0 contracts (ADR-00
 
 `tests/test_contracts_pinned.py` fails if these drift from the hashes above. Changes go
 through Agent 01 (semver bump), then are re-copied here.
+
+## freeze-request.schema.json (B-04, owned by Agent 02)
+
+- Source: `origin/research/agent-02-opportunity` `docs/integration/freeze-request/freeze-request.schema.json` @ `029356c`.
+- Copied byte for byte on 2026-10-07. The sha256 is pinned in `tests/test_b04_freeze_requests.py`.

@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://michael-business-os/integration/freeze-request.schema.json",
+  "title": "Discovery freeze request v1 (lane B -> lane E L2 capability freeze)",
+  "description": "READY_QUEUE B-04. Emitted by Agent 02 when a source blocks us (2 consecutive 403/429, or any CAPTCHA). Lane E applies it as PanicStore.mutate('L2', capability, engage=True, actor=requested_by, reason=reason) == `mbos-gov panic freeze --level L2 --target <capability> --actor <requested_by> --reason <reason>`. Release is human-only. Discovery enforces the freeze locally regardless, and honours any L1/L2/L3 freeze lane E holds. Invariant checked in code and tests: capability == 'discovery.source.' + source + '.read'.",
+  "type": "object",
+  "required": [
+    "schema",
+    "level",
+    "capability",
+    "source",
+    "reason",
+    "requested_at",
+    "requested_by",
+    "evidence"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "mbos.discovery.freeze_request/1"
+    },
+    "level": {
+      "const": "L2"
+    },
+    "capability": {
+      "type": "string",
+      "pattern": "^discovery\\.source\\.[a-z0-9_]+\\.read$"
+    },
+    "source": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "requested_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "requested_by": {
+      "const": "agent-02-opportunity",
+      "description": "Agent id = branch name (ruling R7)."
+    },
+    "evidence": {
+      "type": "object",
+      "required": [
+        "kind",
+        "consecutive_blocks"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "blocked",
+            "rate_limited",
+            "captcha"
+          ]
+        },
+        "status": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "consecutive_blocks": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  }
+}

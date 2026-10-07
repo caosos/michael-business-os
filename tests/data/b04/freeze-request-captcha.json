@@ -1,0 +1,10 @@
+{
+  "schema": "mbos.discovery.freeze_request/1",
+  "level": "L2",
+  "capability": "discovery.source.gsa_auctions.read",
+  "source": "gsa_auctions",
+  "reason": "captcha (status 200) x1 — stop; no evasion; human must clear",
+  "requested_at": "2026-10-07T12:00:00Z",
+  "requested_by": "agent-02-opportunity",
+  "evidence": { "kind": "captcha", "status": 200, "consecutive_blocks": 1 }
+}
