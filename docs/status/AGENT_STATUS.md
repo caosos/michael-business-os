@@ -5,7 +5,7 @@ Role: Governance / Action Gateway / PANIC — "controlled autonomy"
 Branch: research/agent-05-governance
 Worktree: /home/michaelos/business-os-worktrees/agent-05-governance
 State: WORKING
-Done: E-10 @ <E10> (spine_adapter: Gateway/KillSwitch/PDP over 01's mbos.interfaces on lane D; reconcile(); R4 contract docs/integration/05-spine-adapter-R4-contract.md)
+Done: E-10 @ ebae275 (spine_adapter: Gateway/KillSwitch/PDP over 01's mbos.interfaces on lane D; reconcile(); R4 contract docs/integration/05-spine-adapter-R4-contract.md)
 Claimed: E-06 (policy data into lane D mbos.policy / policy_current)
 Done: B-04 lane-E half @ d3b9948 (02's fixture applies + blocks exactly that source; auto-apply decided, release human-only)
 Done: E-04 @ 4fadbe7 (secret scan refuses + never stores; injection tripwire => tier 0, needs_review, step-up; 205 tests)
