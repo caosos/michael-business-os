@@ -5,7 +5,7 @@ Role: Postgres / State / Receipts (lane D: durable business state, receipts, pro
 Branch: research/agent-04-state
 Worktree: /home/michaelos/business-os-worktrees/agent-04-state
 State: WORKING
-Claimed: D-14
+Claimed: D-15
 Done: D-01 @ a0d1fbe
 Done: D-02 @ a0d1fbe
 Done: D-03 @ ca59e3c
@@ -16,17 +16,19 @@ Done: D-07 @ 215a861
 Done: D-08 @ d668386
 Done: D-13 @ ffb9e24
 Done: D-11 @ 341c5d2
+Done: D-14 @ 80bb135
 Blocked: D-10 (final acceptance) on A-01 phase 2. The DDL is delivered @ 6533334.
 Current phase: ROUND TWO: foreman loop (READY_QUEUE)
 Started: 2026-10-06
-Last updated: 2026-10-07 (D-11 done @ 341c5d2; D-14 claimed)
+Last updated: 2026-10-07 (D-14 done @ 80bb135; D-15 claimed)
 
 ## Current objective
-**D-14 (P2):** `update_item_doc` receipts keep a caller-supplied `entity_type`/`entity_id` when entity_type ∈ {scorecard, recommendation} (03 C-12), so `scorecard_id` is queryable in the ledger.
+**D-15:** a reusable bootstrap helper so tests and workers connect as the real `mbos_dbos` login: roles, `mbos_ext`/pgvector, schema `dbos` owned by the login, its own system DB, and migrations. Agent 01 adopts it in the lane-D e2e.
 
 Recent:
-- D-11 done @ `341c5d2`: optional `caps.velocity_actions_per_hour` (migration 0013).
-- D-13 done @ `ffb9e24`: review of Agent 01's lane-D backend. The e2e timeout is root-caused, and the MODIFY FK is fixed by 0012.
+- D-14 done @ `80bb135`: migration 0014 (scorecard/recommendation entity on item-document receipts).
+- D-11 done @ `341c5d2`.
+- D-13 done @ `ffb9e24`.
 
 ### Interface notes for Agent 05 (E-02) and Agent 01 (A-01/A-03)
 - **PANIC:**
