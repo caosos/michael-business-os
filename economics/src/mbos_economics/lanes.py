@@ -142,9 +142,14 @@ def flip_economics(econ: dict, cfg: ScoringConfig) -> LaneEconomics:
     f_sell = money(r_sell * _g(hold, "sell_fees_rate", ZERO) + _g(hold, "sell_fees_flat", ZERO))
     r_net = r_sell - f_sell
 
-    cost_out = a + f_buy + p + m + trips_cash + c_store
+    # Transport difficulty is an ECONOMIC input, never a gate: a trailer-requiring deal pays extra cash/hours
+    # (borrowed-trailer fuel, wear, hookup, loading) and is still scored on its merits.
+    tr = econ["logistics"].get("transport") or {}
+    tr_cash, tr_hours = _g(tr, "extra_cash", ZERO), _g(tr, "extra_hours", ZERO)
+
+    cost_out = a + f_buy + p + m + trips_cash + tr_cash + c_store
     net = r_net - cost_out
-    total_hours = travel_hours + labor + admin
+    total_hours = travel_hours + tr_hours + labor + admin
     if total_hours <= 0:
         raise ValueError("total hours must be > 0 to compute profit/hour")
     pph = money(net / total_hours)
@@ -154,7 +159,7 @@ def flip_economics(econ: dict, cfg: ScoringConfig) -> LaneEconomics:
     p_r = D(rehab["repair_success_prob"])
     p_s = D(resale["sale_prob"])
     f_diag = cfg.num("capital_and_risk.f_diag_parts_fraction_on_fail")
-    cost_out_fail = money(a + f_buy + trips_cash_acq + f_diag * p + c_disp)
+    cost_out_fail = money(a + f_buy + trips_cash_acq + tr_cash + f_diag * p + c_disp)   # the trailer trip happened
     branches = [
         Branch("repaired_and_sold", p_r * p_s, net, r_net),
         Branch("repaired_unsold", p_r * (ONE - p_s), D(down["salvage_if_unsold"]) - cost_out,
@@ -178,6 +183,8 @@ def flip_economics(econ: dict, cfg: ScoringConfig) -> LaneEconomics:
             "acquisition": a, "buy_fees": f_buy, "parts": p, "materials": m,
             "storage_cost": c_store, "hold_days": hold_days, "sell_fees": f_sell,
             "trips_cash_acquisition": trips_cash_acq, "cost_out_fail": cost_out_fail,
+            **({"transport_mode": tr["mode"], "transport_extra_cash": tr_cash, "transport_extra_hours": tr_hours}
+               if tr else {}),
         },
     )
 

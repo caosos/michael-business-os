@@ -1,11 +1,10 @@
 {
-  "priors_version": "2026.10.4",
-  "supersedes": "2026.10.3",
+  "priors_version": "2026.10.3",
+  "supersedes": "2026.10.2",
   "priors_format": 1,
   "_note": "Category priors for the RESEARCH/estimate producer (C-RESEARCH-01). These are ESTIMATES used to fill Item.economics before evidence exists. They are not scoring policy; scoring policy lives in scoring-config.json. Every value is REC or UNK until LEARN calibrates it from outcomes. Any change bumps priors_version. Research-bundle overrides, which need provenance, always win over priors. The estimator never invents a resale price: no comps means status=insufficient.",
 
   "_changelog": [
-    "2026.10.4 (C-15): transport classification + trailer penalties + difficulty thresholds, opening-offer rule, enrichment bounds; 'concrete saw' vocabulary for mechanical_equipment. Other values unchanged.",
     "2026.10.3 (C-11): coverage. comps_query vocabularies for tool, compressor type, commercial_equipment, mechanical_equipment, project_vehicle; generic other_asset / other_service priors usable ONLY with human scope overrides (requires_scope_override). Other values unchanged.",
     "2026.10.2 (C-07): learn parameters (min outcomes per group, prior weight, minimum relative change). Other values unchanged.",
     "2026.10.1 (C-04): comps_sources registry (ADR-02-0202 tiers, fail-closed) and comps_query vocabulary. Other values unchanged."
@@ -16,47 +15,6 @@
     "min_outcomes_per_group": { "value": 2, "basis": "REC", "note": "small on purpose; shrinkage keeps 2 outcomes from moving a prior much" },
     "prior_weight": { "value": 10, "basis": "REC", "note": "beta-binomial pseudo-count k: posterior = (k*prior + successes)/(k + n)" },
     "min_relative_change": { "value": 0.02, "basis": "REC", "note": "do not propose changes under 2% of the current prior" }
-  },
-
-  "transport": {
-    "_note": "C-15. Transport is an ECONOMIC variable, never a gate (ADR-0011 R19). Michael's capabilities come from config/operator_profile.v1.json (trailer_owned=false, borrowed_trailer_possible=true, truck_bed_fits unspecified). A category/type is classified only where it is DEFINITE; everything else is UNKNOWN and carries no penalty. Numeric penalties live here (03's config), not in the profile.",
-    "basis": "REC",
-    "classification": {
-      "_note": "category -> {type token or 'default': fits_truck | requires_trailer}. A missing entry means UNKNOWN (omitted), not a guess. 'fits_truck' for trailers means TOWED behind the truck (tow rating/hitch not on file).",
-      "trailer": { "default": "fits_truck" },
-      "mower": { "zero turn": "requires_trailer", "zero-turn": "requires_trailer", "lawn tractor": "requires_trailer", "riding": "requires_trailer", "push": "fits_truck" },
-      "generator": { "inverter": "fits_truck", "portable": "fits_truck" },
-      "welder": { "mig": "fits_truck", "tig": "fits_truck", "plasma": "fits_truck" },
-      "compressor": { "pancake": "fits_truck", "hot dog": "fits_truck" },
-      "tool": { "default": "fits_truck" },
-      "commercial_equipment": { "forklift": "requires_trailer", "pallet jack": "fits_truck" },
-      "mechanical_equipment": { "pressure washer": "fits_truck", "tiller": "fits_truck", "transfer pump": "fits_truck", "water pump": "fits_truck", "log splitter": "fits_truck" },
-      "project_vehicle": { "utv": "requires_trailer" }
-    },
-    "towed_categories": { "value": ["trailer", "log splitter"], "basis": "REC", "note": "classified fits_truck because they are towed; the datum note says so" },
-    "default_trailer_status": { "value": "borrowed", "basis": "FACT", "note": "operator_profile.v1.json: trailer_owned=false, borrowed_trailer_possible=true. Used only when the caller passes no profile." },
-    "penalty": {
-      "requires_trailer_borrowed": { "flat_cash": 20, "per_mile_cash": 0.14, "extra_hours": 1.0, "basis": "REC",
-        "note": "flat = courtesy/lights/tires check on a borrowed trailer; per mile = towing fuel premium (3.20/12 - 3.20/18 = 0.089) + trailer tire wear (~0.05); hours = fetch, hook up, load, secure, return" },
-      "requires_trailer_owned": { "flat_cash": 0, "per_mile_cash": 0.14, "extra_hours": 0.5, "basis": "REC" }
-    },
-    "difficulty": {
-      "basis": "REC",
-      "_note": "easy | moderate | hard from mode and one-way miles. Never a rejection: the cash/hours penalty above is what enters the score.",
-      "hard_one_way_miles_with_trailer": 60,
-      "moderate_one_way_miles_without_trailer": 100
-    }
-  },
-
-  "offer": {
-    "_note": "C-15 opening offer = floor_to(min(ask x opening_fraction_of_ask, walk-away price)). Only for fixed-price listings; the walk-away price comes from the scoring engine (highest buy price that still scores YES).",
-    "opening_fraction_of_ask": { "value": 0.70, "basis": "REC" },
-    "round_down_to": { "value": 5, "basis": "REC" }
-  },
-
-  "enrichment": {
-    "_note": "C-15 bounds. Ranges are shown only when the evidence supports them (no comps => omitted).",
-    "min_sold_comps_for_range": { "value": 3, "basis": "REC", "note": "3+ sold comps: p25/median/p75; 2: min/mean/max; 1: likely only" }
   },
 
   "comps_sources": {
@@ -83,7 +41,7 @@
     "compressor": { "size": ["20 gallon", "30 gallon", "60 gallon", "80 gallon"], "type": ["pancake", "hot dog", "twin tank", "vertical"] },
     "tool": { "type": ["impact wrench", "impact driver", "miter saw", "table saw", "circular saw", "chainsaw", "socket set", "tool box", "drill"], "brand": ["milwaukee", "dewalt", "makita", "snap-on", "ryobi"] },
     "commercial_equipment": { "type": ["forklift", "pallet jack", "walk-in cooler", "ice machine", "fryer", "oven", "floor scrubber"] },
-    "mechanical_equipment": { "type": ["concrete saw", "cut-off saw", "walk-behind saw", "pressure washer", "log splitter", "tiller", "transfer pump", "water pump", "engine"] },
+    "mechanical_equipment": { "type": ["pressure washer", "log splitter", "tiller", "transfer pump", "water pump", "engine"] },
     "project_vehicle": { "type": ["atv", "utv", "motorcycle", "dirt bike", "go kart", "go-kart", "pickup", "jeep"] },
     "other_asset": { "_note": "deliberately empty: an uncategorized asset needs human-chosen comps (manual source)" }
   },

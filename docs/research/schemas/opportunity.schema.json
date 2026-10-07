@@ -76,6 +76,16 @@
             }
           }
         },
+        "transport": {
+          "type": "object",
+          "description": "C-15 (additive, optional; engine 0.9.0). ECONOMIC transport input, never a gate: mode fits_truck | requires_trailer, plus the explicit extra cash and extra hours a trailer costs (borrowed/owned penalties live in estimation-priors transport.penalty). The engine adds extra_cash to cost out and extra_hours to total hours; difficulty is never a rejection.",
+          "required": ["mode"],
+          "properties": {
+            "mode": { "enum": ["fits_truck", "requires_trailer"] },
+            "extra_cash": { "type": "number", "minimum": 0 },
+            "extra_hours": { "type": "number", "minimum": 0 }
+          }
+        },
         "fuel_price_per_gal": { "type": "number", "minimum": 0 },
         "vehicle_mpg": { "type": "number", "exclusiveMinimum": 0 },
         "wear_per_mile": { "type": "number", "minimum": 0 },

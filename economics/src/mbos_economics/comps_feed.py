@@ -24,7 +24,6 @@ from __future__ import annotations
 
 import copy
 import json
-import re
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -33,24 +32,7 @@ from .canonical import parse_ts
 from .config import ScoringConfig, load_config
 from .engine import score_item
 from .estimate import apply_estimate, estimate_item, load_priors
-
-_SIZE = re.compile(r"\b(\d+(?:\.\d+)?)\s*[x×]\s*(\d+(?:\.\d+)?)\b")
-
-
-# --------------------------------------------------------------------------- vocabulary keys
-
-def query_key(category: str, title: str | None, priors: ScoringConfig) -> dict[str, str]:
-    """First vocabulary token per group found in ``title`` (lower-case, word-bounded, 'N x M' -> 'NxM')."""
-    vocab = priors.get("comps_query").get(category) or {}
-    text = _SIZE.sub(lambda m: f"{m.group(1)}x{m.group(2)}", (title or "").lower())
-    key: dict[str, str] = {}
-    for group in sorted(k for k in vocab if not k.startswith("_") and k != "basis"):
-        for token in vocab[group]:
-            if re.search(r"(?<![a-z0-9])" + re.escape(token) + r"(?![a-z0-9])", text):
-                key[group] = token
-                break
-    return key
-
+from .vocab import query_key  # noqa: F401  (re-exported: tests and callers import it from here)
 
 # --------------------------------------------------------------------------- selection
 
@@ -167,7 +149,7 @@ def load_fixture_comps(path: Path) -> tuple[list[dict], list[dict]]:
 
 def research_step(item: dict, comp_records: list[dict], provenance_records: list[dict], as_of: str, *,
                   base_bundle: dict | None = None, cfg: ScoringConfig | None = None,
-                  priors: ScoringConfig | None = None) -> dict:
+                  priors: ScoringConfig | None = None, profile: dict | None = None) -> dict:
     """comps → bundle → estimate → score. Pure; proposes a state, persists nothing.
 
     Returns ``proposed_next_state`` "SCORED" (with ``item`` carrying economics + scores +
@@ -183,7 +165,7 @@ def research_step(item: dict, comp_records: list[dict], provenance_records: list
                              priors=pri, cfg=scfg)
     used = set(sel["selected"])
     used_prov = [p for p in provenance_records if p.get("provenance_id") in used]
-    est = estimate_item(item, sel["bundle"], as_of, priors=pri, scoring_cfg=scfg)
+    est = estimate_item(item, sel["bundle"], as_of, priors=pri, scoring_cfg=scfg, profile=profile)
     out: dict[str, Any] = {"comps": {k: sel[k] for k in ("selected", "rejected", "subject_key")},
                            "estimate": {k: est[k] for k in ("status", "gaps", "estimate_hash")}}
     if est["status"] != "estimated":

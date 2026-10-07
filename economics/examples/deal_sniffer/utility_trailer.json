@@ -1,0 +1,164 @@
+{
+ "_note": "C-15 golden. Illustrative fixture data; blocks are what spine.record_enrichment attaches.",
+ "as_of": "2026-10-07T18:00:00Z",
+ "blocks": {
+  "economics": {
+   "days_to_cash": {
+    "basis": "INFERENCE",
+    "high": 16,
+    "low": 10,
+    "note": "lead + repair + expected days on market (range from the comps' days on market)",
+    "provenance_id": "prov_01M4BRBC80DS3QB34VFYQXNH0W",
+    "unit": "days",
+    "value": 13
+   },
+   "max_acquisition": {
+    "basis": "INFERENCE",
+    "note": "highest buy price that clears your $65/h flip target and every hard limit, provided the evidence still outstanding checks out (not a YES yet)",
+    "provenance_id": "prov_01M4BRBC80DS3QB34VFYQXNH0W",
+    "unit": "USD",
+    "value": 1045
+   },
+   "opening_offer": {
+    "basis": "RECOMMENDATION",
+    "note": "70% of the ask, never above the price ceiling",
+    "provenance_id": "prov_01M4BRBC80DS3QB34VFYQXNH0W",
+    "unit": "USD",
+    "value": 490
+   },
+   "resale_conservative": {
+    "basis": "INFERENCE",
+    "note": "3 FACT sold comps: 25th percentile / median / 75th percentile",
+    "provenance_id": "prov_01M4BRBC80DS3QB34VFYQXNH0W",
+    "unit": "USD",
+    "value": 1950
+   },
+   "resale_likely": {
+    "basis": "INFERENCE",
+    "high": 2050,
+    "low": 1950,
+    "note": "3 FACT sold comps: 25th percentile / median / 75th percentile",
+    "provenance_id": "prov_01M4BRBC80DS3QB34VFYQXNH0W",
+    "unit": "USD",
+    "value": 2000
+   },
+   "resale_optimistic": {
+    "basis": "INFERENCE",
+    "note": "3 FACT sold comps: 25th percentile / median / 75th percentile",
+    "provenance_id": "prov_01M4BRBC80DS3QB34VFYQXNH0W",
+    "unit": "USD",
+    "value": 2050
+   },
+   "transport_cost": {
+    "basis": "INFERENCE",
+    "note": "fuel and wear for the trips",
+    "provenance_id": "prov_01M4BRBC80DS3QB34VFYQXNH0W",
+    "unit": "USD",
+    "value": 25.63
+   }
+  },
+  "logistics": {
+   "difficulty": {
+    "basis": "INFERENCE",
+    "note": "fits the truck and is close. An economic input (already in the score), never a rejection",
+    "provenance_id": "prov_01M4BRBC80DS3QB34VFYQXNH0W",
+    "value": "easy"
+   },
+   "fuel_cost": {
+    "basis": "INFERENCE",
+    "note": "fuel at the truck's normal mileage; the towing premium is inside transport_cost",
+    "provenance_id": "prov_01M4BRBC80DS3QB34VFYQXNH0W",
+    "unit": "USD",
+    "value": 7.11
+   },
+   "transport_mode": {
+    "basis": "INFERENCE",
+    "note": "classified when the economics were estimated; towed behind the truck (tow rating and hitch are not on file)",
+    "provenance_id": "prov_01M4BRBC80DS3QB34VFYQXNH0W",
+    "value": "fits_truck"
+   },
+   "trip_hours": {
+    "basis": "INFERENCE",
+    "note": "driving time",
+    "provenance_id": "prov_01M4BRBC80DS3QB34VFYQXNH0W",
+    "unit": "hours",
+    "value": 0.89
+   },
+   "trip_miles_round_trip": {
+    "basis": "INFERENCE",
+    "note": "pickup trip only (inspect and collect); the buyer meeting is a separate local trip",
+    "provenance_id": "prov_01M4BRBC80DS3QB34VFYQXNH0W",
+    "unit": "miles",
+    "value": 40
+   }
+  },
+  "seasonality": {
+   "demand_now": {
+    "basis": "INFERENCE",
+    "note": "October: neither peak nor slow",
+    "provenance_id": "prov_01M4BRBC80DS3QB34VFYQXNH0W",
+    "value": "normal"
+   },
+   "hold_likely": {
+    "basis": "INFERENCE",
+    "provenance_id": "prov_01M4BRBC80DS3QB34VFYQXNH0W",
+    "value": "typical for the category"
+   },
+   "note": {
+    "basis": "INFERENCE",
+    "provenance_id": "prov_01M4BRBC80DS3QB34VFYQXNH0W",
+    "value": "Utility-trailer demand is low in winter, builds from March, peaks May-August (moves, landscaping, construction). Sun Belt markets show a shallower curve than northern ones. [source: BigRentals: How to Keep Your Utility Trailer Rental Busy Year-Round (rental-marketplace guidance; used as evidence for resale demand by inference)]"
+   },
+   "peak_months": [
+    5,
+    6,
+    7,
+    8
+   ]
+  },
+  "why": [
+   "More evidence would settle it: a call with the seller, photos or an inspection of the condition, a diagnosed fault and a verified title.",
+   "Economically it works up to $1,045, once the missing evidence checks out.",
+   "3 sold comparables put likely resale near $2,000 (range $1,950 to $2,050).",
+   "Asking $700 is $345 below the most you should pay ($1,045).",
+   "Towed behind the truck; its tow rating and hitch are not on file."
+  ]
+ },
+ "enrichment_hash": "sha256:ad431cb7c2a1a9bde37bc4f75f2364ec5ed2d397e284e5ba7d584a3407456444",
+ "item_id": "itm_01JK0000000000000000000003",
+ "omitted": {},
+ "provenance": {
+  "actor_type": "system",
+  "agent_name": "agent-03-economics",
+  "basis": "INFERENCE",
+  "config_version": "2026.10.4",
+  "created_at": "2026-10-07T18:00:00Z",
+  "derived_from": [
+   "prov_01JK0000000000000000000050",
+   "prov_01JK0000000000000000000051",
+   "prov_01JK0000000000000000000052",
+   "prov_01JK0000000000000000000300",
+   "prov_01M4BRBC8045C5FYW8S0NQBVBS",
+   "prov_01M4BRBC80K46CBYP1BWZTJ1V9"
+  ],
+  "inputs_used": [
+   {
+    "hash": "sha256:f45993cbf4b1a242db26fc9c50e71d29bdab2c117ecc487b535bb5c35f266d1c",
+    "ref": "scorecard.inputs_hash"
+   },
+   {
+    "hash": "sha256:be7e0b9e903ab4e2e313d71280e94bb2dbbb6c7ade9ff5261717ed856fc7c065",
+    "ref": "estimation-priors@2026.10.4"
+   },
+   {
+    "hash": "sha256:f45d7da08211c068ad4880b716549dd8f65d512c9d69a1da50077a5a5cbd8c7e",
+    "ref": "seasonality@2026.10.0"
+   }
+  ],
+  "provenance_id": "prov_01M4BRBC80DS3QB34VFYQXNH0W",
+  "tool_name": "mbos_economics.enrich",
+  "tool_version": "0.9.0"
+ },
+ "title": "6x12 enclosed utility trailer, needs lights",
+ "verdict": "MAYBE"
+}

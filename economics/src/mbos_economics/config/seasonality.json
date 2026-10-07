@@ -1,0 +1,63 @@
+{
+  "seasonality_version": "2026.10.0",
+  "seasonality_format": 1,
+  "_note": "C-15. Per-category demand seasonality, SOURCED. An entry exists only where a source or an owner statement supports it; a category with no entry is OMITTED (UNKNOWN), never guessed. months are 1-12 and are national/Sun-Belt generalizations: Arkansas weather is not separately sourced (UNKNOWN). Every claim below was taken from a web-search result summary on 2026-10-07; the pages were NOT independently read in full (see `verification`). Entries marked basis RECOMMENDATION rest on an owner statement and need Michael's confirmation.",
+  "demand_rule": "strong if month in peak_months; weak if month in low_months; otherwise normal",
+  "entries": [
+    {
+      "id": "mower_riding",
+      "category": "mower",
+      "type_tokens": ["riding", "zero turn", "zero-turn", "lawn tractor"],
+      "peak_months": [3, 4, 5, 6],
+      "low_months": [10, 11, 12, 1, 2],
+      "basis": "INFERENCE",
+      "note": "Strong spring demand; dealers clear riding mowers in early fall (first week of October) and rarely discount May-September, so October resale is weaker. Dealer new-mower pricing is used as evidence for used-mower demand by inference.",
+      "sources": [
+        { "title": "Consumer Reports: How to Find the Best Deals on a Riding Lawn Mower", "url": "https://www.consumerreports.org/home-garden/lawn-mowers/riding-lawn-mower-sales-a7888512779/", "retrieved": "2026-10-07", "verification": "claim from search-result summary; page not independently read" },
+        { "title": "Bob Vila: Best Time to Buy a Lawn Mower", "url": "https://www.bobvila.com/articles/best-time-to-buy-a-lawn-mower/", "retrieved": "2026-10-07", "verification": "claim from search-result summary; page not independently read" }
+      ],
+      "owner_stated": "Michael's example via Agent 01 (C-15 dispatch, 2026-10-07): strong spring demand for a riding mower, weaker October resale.",
+      "unknown": "Arkansas-specific timing; used-market (as opposed to dealer new-unit) price elasticity"
+    },
+    {
+      "id": "generator_portable",
+      "category": "generator",
+      "type_tokens": [],
+      "peak_months": [8, 9, 10, 12, 1, 2],
+      "low_months": [4, 5],
+      "basis": "INFERENCE",
+      "note": "Event-driven: demand spikes after outages (tropical-storm remnants in late summer/fall, winter ice storms), so timing is partly unpredictable. Spring is the quiet period.",
+      "sources": [
+        { "title": "Generac Holdings Form S-1/A (SEC): demand drivers include power outages from tropical and winter storms", "url": "https://www.sec.gov/Archives/edgar/data/0001474735/000104746910000097/a2195620zs-1a.htm", "retrieved": "2026-10-07", "verification": "claim from search-result summary; filing not independently read" },
+        { "title": "YipitData: How winter storms shift generator and snow blower demand (outage-driven unit-sales spikes in storm weeks)", "url": "https://www.yipitdata.com/resources/blog/corporate-winter-storms-effect-in-ope-category", "retrieved": "2026-10-07", "verification": "claim from search-result summary; page not independently read" }
+      ],
+      "unknown": "Arkansas-specific outage seasonality; the spring-low months are my inference from the absence of storm drivers, not a sourced figure"
+    },
+    {
+      "id": "trailer_utility",
+      "category": "trailer",
+      "type_tokens": [],
+      "peak_months": [5, 6, 7, 8],
+      "low_months": [12, 1, 2],
+      "basis": "INFERENCE",
+      "note": "Utility-trailer demand is low in winter, builds from March, peaks May-August (moves, landscaping, construction). Sun Belt markets show a shallower curve than northern ones.",
+      "sources": [
+        { "title": "BigRentals: How to Keep Your Utility Trailer Rental Busy Year-Round (rental-marketplace guidance; used as evidence for resale demand by inference)", "url": "https://bigrentals.com/rental-resources/trailer-owners/how-to-keep-your-utility-trailer-rental-busy-year-round", "retrieved": "2026-10-07", "verification": "claim from search-result summary; page not independently read" }
+      ],
+      "unknown": "used-trailer SALE seasonality in Arkansas (the source describes rental demand)"
+    },
+    {
+      "id": "concrete_saw",
+      "category": "mechanical_equipment",
+      "type_tokens": ["concrete saw", "cut-off saw", "walk-behind saw"],
+      "peak_months": [],
+      "low_months": [],
+      "basis": "RECOMMENDATION",
+      "note": "Year-round contractor demand; no strong seasonal swing is assumed.",
+      "sources": [],
+      "owner_stated": "Michael's example via Agent 01 (C-15 dispatch, 2026-10-07): a concrete saw has year-round contractor demand.",
+      "search_note": "A web search on 2026-10-07 found rental-market commentary that contractors rent saws to cover peak-season demand, but no usable seasonality data for used concrete saws. Not cited; confirm with Michael.",
+      "unknown": "any seasonal swing in used-saw prices"
+    }
+  ]
+}

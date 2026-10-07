@@ -21,6 +21,9 @@
 
 * versioned category priors (``config/estimation-priors.json``).
 
+Free text: the title is read ONLY through the closed comps vocabulary (``vocab.query_key``) to classify
+fits-truck vs needs-trailer (``logistics``); it can never become a number directly.
+
 Rules: a flip resale price is NEVER guessed from priors (no comps => status
 ``insufficient`` with a blocking gap). Evidence flags are never set by the estimator
 itself. Every estimated field gets an ``estimates_meta.assumptions[]`` entry with a
@@ -41,6 +44,7 @@ from .canonical import CanonicalError, content_hash, derived_ulid, parse_ts
 from .comps import aggregate_sold_comps
 from .config import CONFIG_DIR, ScoringConfig, load_config
 from .inputs import FLIP_CATEGORIES, SERVICE_CATEGORIES
+from .logistics import classify_transport, transport_input
 from .numeric import D, ONE, ZERO, fine, money, to_json_number
 
 ESTIMATE_SPEC = "mbos.economics.estimate/v1"
@@ -225,7 +229,7 @@ def _prior_view(pri: ScoringConfig, key: str, bundle: dict, block: str, cond: st
 
 
 def _estimate_flip(item: dict, bundle: dict, pri: ScoringConfig, miles: Decimal, as_of: str,
-                   led: _Ledger, scoring_cfg: ScoringConfig) -> tuple[dict | None, list[dict]]:
+                   led: _Ledger, scoring_cfg: ScoringConfig, profile: dict | None = None) -> tuple[dict | None, list[dict]]:
     cat = item["category"]
     n = item.get("normalized") or {}
     cond = n.get("condition") if n.get("condition") in _CONDITIONS else "unknown"
@@ -369,7 +373,19 @@ def _estimate_flip(item: dict, bundle: dict, pri: ScoringConfig, miles: Decimal,
     trips = [{"purpose": "inspect_pickup", "round_trip_miles": _num(rt)},
              {"purpose": "buyer_meet", "round_trip_miles": _num(pri.num("distance.buyer_meet_round_trip_miles"))}]
     led.note(f"{E}.logistics.trips", trips, "INFER", "one combined inspect+pickup trip (2 x road miles) + buyer meet prior")
-    return {"acquisition": acq, "rehab": rehab, "logistics": {"trips": trips}, "holding": holding,
+    logistics: dict = {"trips": trips}
+    tr = transport_input(cat, n.get("title"), trips, pri, profile)
+    if tr is not None:
+        logistics["transport"] = tr
+        mode, ev = classify_transport(cat, n.get("title"), pri)
+        note = (f"{mode} ({ev}); " + (f"borrowed-trailer penalty ${tr['extra_cash']} + {tr['extra_hours']} h, an economic "
+                                     "cost already in the score and never a rejection; the loan must be confirmed with the lender"
+                                     if mode == "requires_trailer" else "no trailer needed; transport penalty $0"))
+        led.note(f"{E}.logistics.transport", tr, "INFER", note)
+    else:
+        led.gap("transport_unclassified", f"{cat}: fits-truck vs needs-trailer is not definite for this listing; "
+                "no transport penalty applied (never guessed)", False)
+    return {"acquisition": acq, "rehab": rehab, "logistics": logistics, "holding": holding,
             "resale": resale, "downside": downside}, research
 
 
@@ -452,8 +468,10 @@ def _estimate_service(item: dict, bundle: dict, pri: ScoringConfig, miles: Decim
 
 # --------------------------------------------------------------------------- entry point
 
-def _estimate_hash(item: dict, bundle: dict, pri: ScoringConfig, scfg: ScoringConfig, as_of: str) -> str:
+def _estimate_hash(item: dict, bundle: dict, pri: ScoringConfig, scfg: ScoringConfig, as_of: str,
+                   profile: dict | None = None) -> str:
     return content_hash({
+        "profile": profile,
         "spec": ESTIMATE_SPEC, "estimator_version": ESTIMATOR_VERSION, "priors_version": pri.version,
         "priors_hash": pri.hash, "scoring_config_version": scfg.version, "as_of": as_of,
         "item": {"type": item.get("type"), "category": item.get("category"), "normalized": item.get("normalized"),
@@ -464,7 +482,7 @@ def _estimate_hash(item: dict, bundle: dict, pri: ScoringConfig, scfg: ScoringCo
 
 
 def estimate_item(item: dict, bundle: dict | None, as_of: str, *, priors: ScoringConfig | None = None,
-                  scoring_cfg: ScoringConfig | None = None) -> dict:
+                  scoring_cfg: ScoringConfig | None = None, profile: dict | None = None) -> dict:
     """Return {status, item_patch, gaps, estimate_hash, provenance, receipt_draft}. Pure."""
     bundle = copy.deepcopy(bundle or {})
     _validate_bundle(bundle)
@@ -475,7 +493,7 @@ def estimate_item(item: dict, bundle: dict | None, as_of: str, *, priors: Scorin
     flags = set(((item.get("normalized") or {}).get("flags")) or [])
 
     try:
-        est_hash = _estimate_hash(item, bundle, pri, scfg, as_of)
+        est_hash = _estimate_hash(item, bundle, pri, scfg, as_of, profile)
     except CanonicalError as e:
         raise BundleError([f"item or bundle is not MBOS-CJSON-1 hashable: {e}"]) from e
     prov_id = derived_ulid("prov", as_of, "est|" + est_hash)
@@ -502,8 +520,10 @@ def estimate_item(item: dict, bundle: dict | None, as_of: str, *, priors: Scorin
             miles = _road_miles(item, pri, led)
             miles = D(miles) if miles is not None else None
             if miles is not None:
-                fn = _estimate_flip if lane == "flip" else _estimate_service
-                econ, research = fn(item, bundle, pri, miles, as_of, led, scfg)
+                if lane == "flip":
+                    econ, research = _estimate_flip(item, bundle, pri, miles, as_of, led, scfg, profile)
+                else:
+                    econ, research = _estimate_service(item, bundle, pri, miles, as_of, led, scfg)
 
     blocking = any(g["blocking"] for g in led.gaps)
     status = "insufficient" if (blocking or econ is None) else "estimated"

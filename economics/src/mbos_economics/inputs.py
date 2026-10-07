@@ -116,6 +116,15 @@ def _trips(v: _V, logistics: dict) -> None:
         v.num(logistics, k, "economics.logistics", required=False)
     for k in ("vehicle_mpg", "avg_speed_mph"):
         v.num(logistics, k, "economics.logistics", required=False, positive=True)
+    tr = logistics.get("transport")
+    if tr is not None:
+        if not isinstance(tr, dict):
+            v.problems.append("economics.logistics.transport must be an object")
+        else:
+            if tr.get("mode") not in ("fits_truck", "requires_trailer"):
+                v.problems.append("economics.logistics.transport.mode must be fits_truck or requires_trailer")
+            for k in ("extra_cash", "extra_hours"):
+                v.num(tr, k, "economics.logistics.transport", required=False)
 
 
 def _evidence(v: _V, meta: dict) -> None:
