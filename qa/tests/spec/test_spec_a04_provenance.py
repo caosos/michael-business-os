@@ -1,6 +1,9 @@
 """A4 (real spine): every receipt's provenance_ids resolve under provenance.schema.json's anyOf rule —
 checked independently (pinned contracts + this lane's resolver), and by 01's own audit."""
+import pytest
+
 from mbos_qa.contracts import Contracts
+from mbos_qa.impl_spine import LANE_D
 from mbos_qa.report import provenance_resolution
 
 
@@ -18,6 +21,8 @@ def test_every_receipt_provenance_resolves_independently(qa, led):
             assert "UNRESOLVED" not in provenance_resolution(p)
 
 
+@pytest.mark.skipif(LANE_D, reason="mbos.audit queries the reference DDL (receipts.body). On lane D the same "
+                                    "property is asserted independently by test_every_receipt_provenance_resolves")
 def test_spine_audit_agrees(qa, led):
     from mbos import audit
 

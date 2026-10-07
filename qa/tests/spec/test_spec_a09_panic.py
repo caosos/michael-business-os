@@ -1,15 +1,18 @@
 """A9 (real spine): PANIC fails closed. A frozen or unreadable switch denies execution, with a receipt, and the
-effector is never invoked."""
+effector is never invoked. Backend-neutral: the breakage is applied through `LedgerDB.break_kill_switch`, which
+damages whatever PANIC state the gateway under test actually reads (reference: governance_flags; lane E: lane D's
+sealed panic_state / panic_read())."""
 import pytest
+
+from mbos_qa.impl_spine import LANE_E
 
 from .conftest import effector_calls_for, invocations
 
 
 def _act_after_yes(qa, led, mutate):
-    from mbos import spine
-
     out = led.seed(act=False)
     mutate(led)
+    spine = led._use()
     with led.engine.begin() as c:
         spine.begin_act(c, out["item_id"], out["action_request_id"], out["approval"])
     g = led.gateway(out["action_request_id"], out["approval"]["approval_id"])
@@ -18,40 +21,30 @@ def _act_after_yes(qa, led, mutate):
     return out, g
 
 
-BREAKAGES = {
-    "global row missing": lambda led: led.superuser_sql("DELETE FROM mbos.governance_flags WHERE key = 'global_freeze'"),
-    "malformed value": lambda led: led.superuser_sql(
-        "UPDATE mbos.governance_flags SET value = '{\"frozen\": \"no\"}' WHERE key = 'global_freeze'"),
-    "value not an object": lambda led: led.superuser_sql(
-        "UPDATE mbos.governance_flags SET value = '\"clear\"' WHERE key = 'global_freeze'"),
-    "table unreadable": lambda led: led.superuser_sql("ALTER TABLE mbos.governance_flags RENAME TO governance_flags_gone"),
-    "L3 frozen": lambda led: led.superuser_sql(
-        "UPDATE mbos.governance_flags SET value = '{\"frozen\": true}' WHERE key = 'global_freeze'"),
-}
+BREAKAGES = ["L3 frozen", "state emptied", "checksum corrupted", "reader unavailable"]
 
 
-@pytest.mark.parametrize("breakage", sorted(BREAKAGES))
+@pytest.mark.parametrize("breakage", BREAKAGES)
 def test_unreadable_or_frozen_switch_denies(qa, led, breakage):
-    out, g = _act_after_yes(qa, led, BREAKAGES[breakage])
-    assert not g["ok"] and g["checks"]["kill_switch_clear"] is False and g["frozen"], g
+    out, g = _act_after_yes(qa, led, lambda led: led.break_kill_switch(breakage))
+    assert not g["ok"], g
     areq = qa.areq(out["action_request_id"], led.engine)
-    assert areq["status"] == "cancelled_by_freeze"
+    assert areq["status"] == "cancelled_by_freeze", (areq["status"], g.get("reason"))
     assert qa.item(out["item_id"], led.engine)["state"] == "FAILED"
     assert effector_calls_for(qa, out["action_request_id"], led.engine) == 0 and invocations(qa, areq) == 0
     failed = [r for r in qa.receipts(led.engine, action_request_id=out["action_request_id"]) if r["type"] == "ACTION_FAILED"]
     assert failed, "a denial must itself leave a receipt"
+    if not LANE_E:
+        assert g["checks"]["kill_switch_clear"] is False and g["frozen"]
 
 
-@pytest.mark.parametrize("key", ["capability_freeze:comms.email.send", "agent_freeze:agent-01-coordinator"])
-def test_l2_and_l1_freezes_deny(qa, led, key):
-    import sqlalchemy as sa
-
-    def freeze(led):
-        led.superuser_sql("INSERT INTO mbos.governance_flags (key, value) VALUES (:k, '{\"frozen\": true}')", k=key)
-
-    out, g = _act_after_yes(qa, led, freeze)
-    assert not g["ok"] and key in g["reason"]
-    del sa
+@pytest.mark.parametrize("level,target", [("L2", "comms.email.send"), ("L1", "agent-01-coordinator")])
+def test_l2_and_l1_freezes_deny(qa, led, level, target):
+    out, g = _act_after_yes(qa, led, lambda led: led.freeze_scoped(level, target))
+    assert not g["ok"], g
+    areq = qa.areq(out["action_request_id"], led.engine)
+    assert areq["status"] == "cancelled_by_freeze", (areq["status"], g.get("reason"))
+    assert effector_calls_for(qa, out["action_request_id"], led.engine) == 0 and invocations(qa, areq) == 0
 
 
 def test_l3_freeze_through_the_real_workflow(qa, pending_flip):
@@ -65,3 +58,16 @@ def test_l3_freeze_through_the_real_workflow(qa, pending_flip):
     assert qa.areq(areq["action_request_id"])["status"] == "cancelled_by_freeze"
     assert invocations(qa, areq) == 0
     assert [r for r in qa.receipts() if r["type"] == "KILL_SWITCH_CHANGED"], "freeze must be receipted"
+
+
+def test_a_request_denied_by_a_freeze_cannot_fire_once_the_switch_is_readable_again(qa, led):
+    """A denial at execution time must be final. If the denied request stays `approved`, the stale approval executes
+    the moment the freeze lifts, although the item already reported FAILED (F-24)."""
+    out, g = _act_after_yes(qa, led, lambda led: led.break_kill_switch("reader unavailable"))
+    assert not g["ok"]
+    led.repair_kill_switch()
+    again = led.gateway(out["action_request_id"], out["approval"]["approval_id"])
+    areq = qa.areq(out["action_request_id"], led.engine)
+    assert not again["ok"] or not qa.effector_rows(led.engine, out["action_request_id"]), \
+        f"denied request executed after release: request={areq['status']}, item={qa.item(out['item_id'], led.engine)['state']}"
+    assert effector_calls_for(qa, out["action_request_id"], led.engine) == 0 and invocations(qa, areq) == 0

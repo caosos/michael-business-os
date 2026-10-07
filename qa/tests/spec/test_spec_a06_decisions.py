@@ -111,7 +111,7 @@ def test_hold_wakes_only_on_declared_condition(qa, pending_flip):
 
 
 def test_hold_survives_a_process_restart_and_never_executes(qa):
-    urls = (impl_spine.new_database("qa_hold_app"), impl_spine.new_database("qa_hold_sys"))
+    urls = impl_spine.new_runtime_databases("qa_hold")
     first = impl_spine.child("hold", "FIX-TRAILER-1", urls=urls)
     assert first.returncode == 0, first.stderr[-2000:]
     item_id = next(ln.split()[1] for ln in first.stdout.splitlines() if ln.startswith("ITEM"))

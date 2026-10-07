@@ -3,6 +3,7 @@ the PINNED frozen contracts with this lane's stricter validator (format checks o
 from collections import Counter
 
 from mbos_qa.contracts import Contracts
+from mbos_qa.impl_spine import LANE_D
 
 KINDS = {"item", "action-request", "approval", "receipt", "provenance", "outcome"}
 
@@ -29,10 +30,14 @@ def test_shared_runtime_documents_conform(qa):
     assert not bad, bad[:5]
 
 
-def test_spine_audit_agrees(qa, led):
-    from mbos import audit
-
+def test_chain_and_dry_run_audit_agree(qa, led):
     led.seed()
-    with led.engine.connect() as conn:
-        res = audit.full_audit(conn)
-    assert res["conformance"]["ok"] and res["chain"]["ok"] and res["dry_run"]["ok"], res
+    assert qa.verify_chain(led.engine)["ok"]
+    if not LANE_D:  # 01's own audit targets the reference DDL; lane D has its own A7 view (checked below)
+        from mbos import audit
+
+        with led.engine.connect() as conn:
+            res = audit.full_audit(conn)
+        assert res["conformance"]["ok"] and res["chain"]["ok"] and res["dry_run"]["ok"], res
+    else:
+        assert qa.scalar("SELECT count(*) FROM mbos.v_a7_live_effects", led.engine) == 0

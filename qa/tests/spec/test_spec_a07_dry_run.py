@@ -2,30 +2,40 @@
 import pytest
 import sqlalchemy as sa
 
+from mbos_qa.impl_spine import LANE_D, LANE_E
 
-def test_zero_exceptions_by_independent_query_and_by_spine_audit(qa, led):
-    from mbos import audit
 
+def test_zero_exceptions_by_independent_query_and_by_audit(qa, led):
     for _ in range(2):
         led.seed()
     eff = [r for r in qa.receipts(led.engine) if r["type"] in ("ACTION_EXECUTED", "ACTION_FAILED")]
     assert len(eff) >= 2, "audit must not pass vacuously"
     assert all((r.get("effector_response") or {}).get("dry_run") is True for r in eff)
     assert all(row["dry_run"] is True for row in qa.effector_rows(led.engine))
-    with led.engine.connect() as c:
-        res = audit.dry_run_exceptions(c)
-    assert res["ok"] and res["effector_receipts"] == len(eff), res
+    if LANE_D:
+        assert qa.scalar("SELECT count(*) FROM mbos.v_a7_live_effects", led.engine) == 0
+    else:
+        from mbos import audit
+
+        with led.engine.connect() as c:
+            res = audit.dry_run_exceptions(c)
+        assert res["ok"] and res["effector_receipts"] == len(eff), res
 
 
 def test_database_refuses_a_live_effector_call(qa, led):
     out = led.seed(act=False)
-    with pytest.raises(sa.exc.DBAPIError, match="effector_mvp_dry_run_only|check constraint"):
+    if LANE_D:  # lane D's insert trigger would refuse first (request not `executing`); switch it off to reach the CHECK
+        led.superuser_sql("ALTER TABLE mbos.effector_calls DISABLE TRIGGER USER")
+    with pytest.raises(sa.exc.DBAPIError, match=r"(?i)dry_run"):
         led.superuser_sql(
             "INSERT INTO mbos.effector_calls (idempotency_key, action_request_id, capability, provider, provider_msg_id,"
             " dry_run, request, response) VALUES ('qa-live', :a, 'comms.email.send', 'live', 'x', false, '{}', '{}')",
             a=out["action_request_id"])
 
 
+@pytest.mark.skipif(LANE_E, reason="builds the reference ReferenceGateway around a live effector. Lane E's own "
+                                   "dry-run enforcement is covered by 05's suite (build verification) and by the DB "
+                                   "CHECKs above")
 def test_spine_refuses_to_run_with_a_non_dry_run_effector(qa, led):
     out = led.seed(act=False)
     from mbos import spine

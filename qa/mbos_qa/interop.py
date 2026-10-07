@@ -195,9 +195,17 @@ def check_sql_twins(rep: InteropReport) -> None:
     except ImportError:
         rep.add("4 SQL twins (PostgreSQL)", "SQL implementations", "UNKNOWN", "pgserver/psycopg not installed")
         return
-    vec = json.loads(VECTORS.read_text())
-    root = pathlib.Path(os.environ.get("XDG_RUNTIME_DIR") or tempfile.gettempdir()) / "a07-interop-pg"
-    srv = pgserver.get_server(str(root), cleanup_mode="stop")
+    from . import pgdir
+
+    root = pgdir.make("interop-")
+    try:
+        srv = pgserver.get_server(str(root), cleanup_mode="stop")
+        _run_sql_twins(rep, srv, json.loads(VECTORS.read_text()), psycopg)
+    finally:
+        pgdir.release(root)
+
+
+def _run_sql_twins(rep: InteropReport, srv, vec, psycopg) -> None:
     base = srv.get_uri()
     for i, (label, sql) in enumerate(_sql_sources().items()):
         if sql is None:

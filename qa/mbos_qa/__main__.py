@@ -114,6 +114,34 @@ FINDINGS = [
     ("F-21", "FACT", "01", "FIXED at ca6d056 (P-07-8), verified on the real spine: a proposed action's `draft` gets "
      "its own provenance record, cited in the request's `provenance_ids`, that resolves to its template, prompt hash "
      "and model.", "None. Kept for the record."),
+    ("F-22", "FACT", "05 (policy) + 07", "Release candidate (lane D+E): Agent 05's `policy.v1.json` grants "
+     "`publish.listing.create` to nobody. The PDP denies the spine's proposer: `CAPABILITY_NOT_HELD:agent-01-coordinator "
+     "lacks publish.listing.create`. The whole flip/publishing path (the resale-listing manual-assist lane, ADR-0007) "
+     "cannot run on the RC stack; only email (R7 propose-only grant) can.",
+     "RECOMMENDATION: 05 adds a propose-only grant for `publish.listing.create` (tier 0, category publishing) to the "
+     "proposer identity (R7 pattern), or the spine proposes under the drafting lane's own id. Needs a ruling."),
+    ("F-23", "FACT", "01", "Release candidate: when the PDP DENIES a proposal, `spine_d` still records `awaiting Michael` and "
+     "moves the item to AWAITING_APPROVAL. The request is `rejected`, so there is nothing to decide: the item is stuck "
+     "and the approval queue lies. Receipts show `POLICY_DECIDED … deny` then `ITEM_STATE_CHANGED awaiting Michael`.",
+     "RECOMMENDATION: on a deny, archive or fail the item (and notify) instead of AWAITING_APPROVAL. The reference "
+     "spine has the same shape."),
+    ("F-24", "FACT", "05 + 01 (**release-blocking**)", "Release candidate: a request the gateway DENIES at execution time "
+     "(freeze engaged before the YES, or PANIC state unreadable/corrupt, L1/L2 freeze) stays `approved` while the item "
+     "goes FAILED. When the switch is released or repaired, calling the gateway again EXECUTES that stale approval "
+     "(request `executed`, one effector row, item still FAILED). ADR-0005 and the reference gateway end such a request "
+     "as `cancelled_by_freeze`. Probed directly and as spec A9 (8/8 on the reference backend, 6 of 8 fail on lane E).",
+     "RECOMMENDATION: 05's gateway sets `approved → cancelled_by_freeze` (or `failed`) on a G7 denial, in the same "
+     "transaction as the ACTION_FAILED receipt, so a denied approval can never be replayed. Add a regression "
+     "test (`test_a_request_denied_by_a_freeze_cannot_fire_once_the_switch_is_readable_again`)."),
+    ("F-25", "FACT", "05 + 01 (needs a ruling)", "Release candidate: after a hard kill mid-ACT the lane E gateway never "
+     "duplicates the effector (invariant holds, both crash points), but on restart it reconciles the claim to `FAILED` "
+     "(`RECONCILED:PROVIDER_NOT_FOUND`, not retried) instead of resuming to ACTED. Unified suite A5 says "
+     "'resumes'. Also, the dry-run provider's delivery record is in-process, so for a crash AFTER the effector ran the "
+     "reconciliation records 'provider has no record' although the simulated send happened (a real provider lookup "
+     "would be correct).",
+     "RECOMMENDATION: rule whether A5 means 'resumes' (reference gateway) or 'at-most-once, fail-safe, re-approve' (lane "
+     "E), and amend the unified suite. For a crash BEFORE the effector call a safe retry is possible. The simulated "
+     "provider should keep its delivery log durably (a table), like a real provider."),
     ("F-16", "FACT", "01", "Agent 01's package only finds the contracts by a path relative to the source tree. "
      "With a normal (non-editable) `pip install`, 94 of its 109 tests fail or error with `docs/research/contracts "
      "not found; set MBOS_CONTRACTS_DIR`. With that variable set, 108 pass and 1 is skipped "
@@ -204,15 +232,31 @@ SPEC_GROUPS = OrderedDict([(f"test_spec_a{n:02d}", title) for n, title in enumer
                          + [("test_spec_g_marketing", "G1–G4 marketing on the real approval path (lane-07 planner)")])
 
 
-def cmd_spine() -> int:
+RC_FINDING_BY_TEST = {  # failing/xfail case (substring) → finding. Mapping is data, so the verdict is auditable.
+    "test_spec_a09_panic": "F-24", "test_spec_a05_crash::test_kill_mid_act_then_restart_resumes": "F-25",
+    "publish": "F-22", "test_a_pdp_denied_proposal_never_leaves": "F-23",
+}
+
+
+def _finding_for(module: str, test: str) -> str:
+    key = f"{module}::{test}"
+    for needle, fid in RC_FINDING_BY_TEST.items():
+        if needle in key or needle in test:
+            return fid
+    return "—"
+
+
+def cmd_spine(release: bool = False) -> int:
+    if release:
+        os.environ["MBOS_QA_STATE_BACKEND"], os.environ["MBOS_QA_GATEWAY_MODE"] = "lane_d", "lane_e"
     from . import impl_spine
 
     with tempfile.TemporaryDirectory() as td:
         xml = pathlib.Path(td) / "junit.xml"
         env = dict(os.environ, PYTHONPATH=str(QA_ROOT), MBOS_QA_IMPL="mbos_qa.impl_spine:build")
         t0 = time.time()
-        rc = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", "--timeout=180",
-                             "-W", "ignore", f"--junitxml={xml}", "tests/spec"], cwd=QA_ROOT, env=env).returncode
+        pytest_rc = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", "--timeout=240",
+                                    "-W", "ignore", f"--junitxml={xml}", "tests/spec"], cwd=QA_ROOT, env=env).returncode
         secs = round(time.time() - t0)
         rows = []
         for tc in ET.parse(xml).getroot().iter("testcase"):
@@ -229,40 +273,72 @@ def cmd_spine() -> int:
             rows.append((tc.get("classname").split(".")[-1], tc.get("name"), outcome, note))
     passed = sum(r[2] == "passed" for r in rows)
     failed = sum(r[2] == "FAILED" for r in rows)
-    L = ["# A1–A10 against the REAL spine (task G-02)", "",
-         f"> Generated by `python -m mbos_qa spine`. **Implementation under test:** {impl_spine.IMPLEMENTATION} "
-         f"(`qa/impl_spine_PIN` = `{impl_spine.PIN}`), installed non-editable from `git archive`. Nothing here is "
-         "mocked: every state change, decision, guard check and receipt comes from `mbos`. The adapter "
-         "(`mbos_qa/impl_spine.py`) only boots PostgreSQL/DBOS, feeds 01's own fixture listings, reads state back "
-         "and provides superuser fault/tamper hooks. DRY-RUN only.", "",
-         f"**Result: {'PASS' if rc == 0 and not failed else 'FAIL'}.** {passed} passed, {failed} failed, "
-         f"{sum(r[2].startswith('xfail') for r in rows)} strict-xfail known gaps, "
-         f"{sum(r[2] == 'skipped' for r in rows)} not applicable; {len(rows)} cases, {secs}s.", "",
-         "| Acceptance test | Result | Cases |", "|---|---|---:|"]
-    for prefix, title in SPEC_GROUPS.items():
+    xfailed = sum(r[2].startswith("xfail") for r in rows)
+    na = sum(r[2] == "skipped" for r in rows)
+    title = "Wave-two RELEASE CANDIDATE verdict (task G-04)" if release else "A1–A10 against the REAL spine (task G-02)"
+    L = [f"# {title}", "",
+         f"> Generated by `python -m mbos_qa spine{' --rc' if release else ''}`. **Implementation under test:** "
+         f"{impl_spine.IMPLEMENTATION}. Pins: `qa/impl_spine_PIN` = `{impl_spine.PIN}`; `qa/impl_lane_pins.json`. "
+         "Nothing here is mocked: every state change, decision, guard check and receipt comes from the real lanes. The "
+         "adapter (`mbos_qa/impl_spine.py`) only boots PostgreSQL/DBOS, feeds 01's own fixture listings, reads state "
+         "back, and provides superuser fault/tamper hooks. DRY-RUN only.", ""]
+    if release:
+        blockers = sorted({_finding_for(m_, n_) for m_, n_, o_, _ in rows if o_ == "FAILED"} - {"—"})
+        unmapped = [n_ for m_, n_, o_, _ in rows if o_ == "FAILED" and _finding_for(m_, n_) == "—"]
+        verdict = "READY" if not failed else "NOT READY"
+        L += [f"## Verdict: **{verdict}**", "",
+              f"{passed} passed, {failed} failed, {xfailed} strict-xfail known gaps, {na} not applicable; "
+              f"{len(rows)} cases, {secs}s.", ""]
+        if failed:
+            L += ["Blocking findings: " + ", ".join(blockers) + (f"; **unmapped failures: {unmapped}**" if unmapped else "")
+                  + ". Details in [ACCEPTANCE_REPORT.md](ACCEPTANCE_REPORT.md) (findings table).", ""]
+        if xfailed:
+            L += [f"{xfailed} case(s) are strict xfails tied to open findings (they must fail while the finding is open, "
+                  "and turn into failures when it closes, so the marker is removed rather than forgotten).", ""]
+    else:
+        L += [f"**Result: {'PASS' if pytest_rc == 0 and not failed else 'FAIL'}.** {passed} passed, {failed} failed, "
+              f"{xfailed} strict-xfail known gaps, {na} not applicable; {len(rows)} cases, {secs}s.", ""]
+    L += ["| Acceptance test | Result | Cases |", "|---|---|---:|"]
+    for prefix, title_ in SPEC_GROUPS.items():
         g = [r for r in rows if r[0] == prefix or r[0].startswith(prefix + "_")]
         xf = sum(r[2].startswith("xfail") for r in g)
         sk = sum(r[2] == "skipped" for r in g)
-        res = "FAIL" if any(r[2] == "FAILED" for r in g) else (
+        nf = sum(r[2] == "FAILED" for r in g)
+        res = f"FAIL ({nf} of {len(g)})" if nf else (
             ("PASS" + (f" ({xf} known gap)" if xf else "") + (f" ({sk} not applicable)" if sk else "")) if g else "NOT RUN")
-        L.append(f"| {title} | **{res}** | {len(g)} |")
-    L += ["", "## What is real vs. still pending", "",
-          "- **Real (01's code):** DBOS workflows (discover, item lifecycle, durable approval gate, HOLD timers), "
-          "`spine.decide`, the reference gateway (8 checks) and `DryRunEffector`, the Postgres ledger with "
-          "insert-only triggers, `CHECK` constraints and the MBOS-RH-1 chain, `TableKillSwitch`, `LedgerLLMBudget`, "
-          "and `audit`.",
-          "- **Still 01's *reference* components, so A5/A8/A9 must re-run when they ship:** the gateway, kill "
-          "switch and LLM budget are 01's stand-ins for lane E (Agent 05: A-03/E-02). This run used "
-          f"`state_backend={impl_spine.STATE_BACKEND}`. Destructive ledger-mode tests always use 01's reference DDL. "
-          "The lane-D backend (A-01 phase 2) is the P-07-5 re-run after A-03. The adapter reads through mbos' public API where "
-          "one exists; the remaining raw-SQL reads sit in one marked block.",
-          "- **Crash/restart (A5, A6):** a real child process killed with `os._exit(137)`, then a second process "
+        L.append(f"| {title_} | **{res}** | {len(g)} |")
+    if release:
+        L += ["", "## Failing cases by finding", "", "| Finding | Cases |", "|---|---|"]
+        by = {}
+        for m_, n_, o_, _ in rows:
+            if o_ == "FAILED":
+                by.setdefault(_finding_for(m_, n_), []).append(f"`{n_}`")
+        L += [f"| {k} | {'<br>'.join(v)} |" for k, v in sorted(by.items())]
+    L += ["", "## What is real vs. still pending", ""]
+    if release:
+        L += ["- **Real:** Agent 01's spine and DBOS workflows (`mbos` @ the pin), Agent 04's canonical schema "
+              "(`state_backend=lane_d`, migrated by lane D's own migrator, with roles and pgvector), and Agent 05's real "
+              "`ActionGateway`, PANIC state, PDP and policy (`gateway_mode=lane_e`, the whole `policy/` directory).",
+              "- **Still 01's reference components even here:** `LedgerLLMBudget` (A8; LiteLLM is not wired), the dry-run "
+              "effector (05's simulated provider keeps its delivery record in process), the placeholder scorer, and "
+              "fixture source adapters. Real egress cut / credential revocation (L3 side effects) are not built.",
+              "- **Not run on this stack:** one reference-only test (a ReferenceGateway built around a live effector) is "
+              "skipped with its reason; the same property is covered by lane E's own suite (BUILD_VERIFICATION)."]
+    else:
+        L += ["- **Real (01's code):** DBOS workflows, `spine.decide`, the reference gateway (8 checks) and "
+              "`DryRunEffector`, the Postgres ledger with insert-only triggers, `CHECK` constraints and the MBOS-RH-1 chain, "
+              "`TableKillSwitch`, `LedgerLLMBudget`, and `audit`.",
+              f"- This run used `state_backend={impl_spine.STATE_BACKEND}`, `gateway_mode={impl_spine.GATEWAY_MODE}`. The "
+              "wave-two stack is judged by `python -m mbos_qa spine --rc` (RELEASE_CANDIDATE.md)."]
+    L += ["- **Crash/restart (A5, A6):** a real child process killed with `os._exit(137)`, then a second process "
           "whose `DBOS.launch()` recovers the workflow.", "",
-          "## Every case", "", "| Module | Test | Outcome | Note |", "|---|---|---|---|"]
-    L += [f"| {m} | `{n}` | {o} | {note.replace('|', '/')} |" for m, n, o, note in rows]
-    (OUT / "SPINE_ACCEPTANCE.md").write_text("\n".join(L) + "\n")
-    print(f"wrote {OUT / 'SPINE_ACCEPTANCE.md'}: {passed} passed, {failed} failed")
-    return 0 if rc == 0 and not failed else 1
+          "## Every case", "", "| Module | Test | Outcome | Finding | Note |", "|---|---|---|---|---|"]
+    L += [f"| {m_} | `{n_}` | {o_} | {_finding_for(m_, n_) if o_ in ('FAILED',) or o_.startswith('xfail') else ''} | "
+          f"{note.replace('|', '/')} |" for m_, n_, o_, note in rows]
+    out = OUT / ("RELEASE_CANDIDATE.md" if release else "SPINE_ACCEPTANCE.md")
+    out.write_text("\n".join(L) + "\n")
+    print(f"wrote {out}: {passed} passed, {failed} failed, {xfailed} xfail")
+    return 0 if pytest_rc == 0 and not failed else 1
 
 
 def write_acceptance_report(contract_rep, gaps, test_rc, rows, e2e_ok, drift_ref):
@@ -349,7 +425,9 @@ def main(argv=None):
         p.add_argument("--drift-ref")
     sub.add_parser("e2e")
     sub.add_parser("interop")
-    sub.add_parser("spine")
+    sp = sub.add_parser("spine")
+    sp.add_argument("--rc", action="store_true",
+                    help="release-candidate stack: state_backend=lane_d + gateway_mode=lane_e → docs/qa/RELEASE_CANDIDATE.md")
     p = sub.add_parser("builds")
     p.add_argument("--workdir", required=True, help="scratch dir for archives + venvs (not committed)")
     p.add_argument("--lanes", nargs="*")
@@ -369,7 +447,7 @@ def main(argv=None):
             print(f"{c.status:7} {c.group} · {c.name} — {c.detail[:140]}")
         return 0
     if a.cmd == "spine":
-        return cmd_spine()
+        return cmd_spine(release=a.rc)
     if a.cmd == "builds":
         from . import buildverify
         py = shutil.which("python3.12") or sys.executable

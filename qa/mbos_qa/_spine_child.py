@@ -1,5 +1,6 @@
 """Out-of-process scenarios against the REAL spine for A5/A6. Each mode ends in os._exit (no cleanup); the
-next process must recover from durable state alone.  Env: MBOS_QA_APP_URL, MBOS_QA_SYS_URL.
+next process must recover from durable state alone.  Env: MBOS_QA_APP_URL, MBOS_QA_SYS_URL (+ backend selection
+via MBOS_QA_STATE_BACKEND / MBOS_QA_GATEWAY_MODE / MBOS_POLICY_PATH, set by the parent).
 
     python -m mbos_qa._spine_child crash   <listing> <before_effector|after_effector>
     python -m mbos_qa._spine_child hold    <listing>
@@ -7,8 +8,10 @@ next process must recover from durable state alone.  Env: MBOS_QA_APP_URL, MBOS_
 """
 import json
 import os
+import pathlib
 import sys
 import time
+import uuid
 
 from mbos_qa import impl_spine  # sets MBOS_CONTRACTS_DIR before mbos is imported
 
@@ -17,34 +20,19 @@ def say(*a):
     print(*a, flush=True)
 
 
-def _init(wrap_crash_at=None):
-    import mbos.reference.governance as g
-    from mbos.config import Settings
-    from mbos.runtime import Components, init_runtime
+def _init(crash_at=None):
+    return impl_spine.boot_runtime(os.environ["MBOS_QA_APP_URL"], os.environ["MBOS_QA_SYS_URL"], crash_at=crash_at)
 
-    impl_spine._wrap_effector()  # count invocations in THIS process
-    if wrap_crash_at:
-        inner = g.DryRunEffector.execute
 
-        def crashing(self, engine, areq):
-            if wrap_crash_at == "before_effector":
-                say("CRASH before_effector")
-                os._exit(137)
-            resp = inner(self, engine, areq)  # the effector call is durably recorded …
-            say("CRASH after_effector")
-            os._exit(137)  # … but the process dies before DBOS checkpoints the gateway step
-            return resp
+def _qa():
+    q = impl_spine.SpineQA.__new__(impl_spine.SpineQA)  # read helpers only; the runtime is already booted here
+    from mbos.runtime import runtime
 
-        g.DryRunEffector.execute = crashing
-    s = Settings(database_url=os.environ["MBOS_QA_APP_URL"], system_database_url=os.environ["MBOS_QA_SYS_URL"],
-                 approval_poll_seconds=0.3)
-    return init_runtime(s, Components())
+    q.rt, q.engine, q.workdir = runtime(), runtime().engine, pathlib.Path(os.environ.get("TMPDIR", "/tmp"))
+    return q
 
 
 def _discover(rt, listing):
-    import pathlib
-    import uuid
-
     from dbos import DBOS, SetWorkflowID
 
     from mbos import workflows
@@ -60,33 +48,21 @@ def _discover(rt, listing):
     return item_id
 
 
-def _pending(rt, item_id):
-    import sqlalchemy as sa
-
-    deadline = time.monotonic() + 30
-    while time.monotonic() < deadline:
-        with rt.engine.connect() as c:
-            row = c.execute(sa.text("SELECT body FROM mbos.action_requests WHERE item_id = :i AND status = "
-                                    "'pending_approval'"), {"i": item_id}).one_or_none()
-        if row:
-            return row.body
+def _wait(q, item_id, states, timeout=60):
+    deadline = time.monotonic() + timeout
+    while q.item(item_id)["state"] not in states and time.monotonic() < deadline:
         time.sleep(0.1)
-    raise SystemExit("no pending request")
-
-
-def _state(rt, item_id):
-    import sqlalchemy as sa
-
-    with rt.engine.connect() as c:
-        return c.execute(sa.text("SELECT state FROM mbos.items WHERE item_id = :i"), {"i": item_id}).scalar_one()
+    return q.item(item_id)["state"]
 
 
 def crash(listing, point):
-    rt = _init(wrap_crash_at=point)
+    rt = _init(crash_at=point)
     from mbos import workflows
 
+    q = _qa()
     item_id = _discover(rt, listing)
-    areq = _pending(rt, item_id)
+    _wait(q, item_id, {"AWAITING_APPROVAL"}, 30)
+    areq = q.areqs(item_id=item_id, status="pending_approval")[-1]
     say("AREQ", areq["action_request_id"])
     workflows.record_decision(areq["action_request_id"], "YES", areq["payload_hash"], auth_context=impl_spine.STEP_UP)
     time.sleep(60)
@@ -98,35 +74,31 @@ def hold(listing):
     rt = _init()
     from mbos import workflows
 
+    q = _qa()
     item_id = _discover(rt, listing)
-    areq = _pending(rt, item_id)
+    _wait(q, item_id, {"AWAITING_APPROVAL"}, 30)
+    areq = q.areqs(item_id=item_id, status="pending_approval")[-1]
     say("AREQ", areq["action_request_id"])
     workflows.record_decision(areq["action_request_id"], "HOLD", areq["payload_hash"],
                               hold={"hold_until": "2099-01-01T00:00:00Z", "wake_on": ["michael_ping"],
                                     "renotify_after": "PT1H", "escalate_after": "P30D"})
-    deadline = time.monotonic() + 30
-    while _state(rt, item_id) != "HELD" and time.monotonic() < deadline:
-        time.sleep(0.1)
-    say("STATE", _state(rt, item_id))
+    say("STATE", _wait(q, item_id, {"HELD"}, 30))
     os._exit(0)
 
 
 def resume(item_id, action):
-    rt = _init()  # DBOS.launch() recovers every PENDING workflow from the system database
+    _init()  # DBOS.launch() recovers every PENDING workflow from the system database
+    q = _qa()
     if action == "wait_acted":
-        deadline = time.monotonic() + 60
-        while _state(rt, item_id) not in ("ACTED", "FAILED") and time.monotonic() < deadline:
-            time.sleep(0.1)
+        _wait(q, item_id, {"ACTED", "FAILED"}, 90)
     elif action == "hold_check":
         time.sleep(2.0)  # give the recovered workflow time to prove it does NOT act on its own
-        say("STATE_AFTER_RESTART", _state(rt, item_id))
+        say("STATE_AFTER_RESTART", q.item(item_id)["state"])
         from mbos import workflows
 
         workflows.ping(item_id)
-        deadline = time.monotonic() + 30
-        while _state(rt, item_id) != "AWAITING_APPROVAL" and time.monotonic() < deadline:
-            time.sleep(0.1)
-    say("STATE", _state(rt, item_id))
+        _wait(q, item_id, {"AWAITING_APPROVAL"}, 30)
+    say("STATE", q.item(item_id)["state"])
     say("INVOCATIONS", json.dumps(impl_spine.INVOCATIONS))
     os._exit(0)
 
