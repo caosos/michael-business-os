@@ -9,8 +9,8 @@ Done: G-01 @ 9cbce70
 Done: G-02 @ a1700d9
 Done: G-03 @ 4c2e897
 Done: G-04 @ 6d43d2b — wave-two RC verdict NOT READY (F-24 blocking; F-25 needs a ruling; F-22/F-23 open)
-Claimed: (none; G-05 next)
-Current phase: Round Two — G-04 delivered (RC verdict: NOT READY); G-05 (Deal Sniffer card acceptance) next
+Claimed: G-05
+Current phase: Round Two — G-04 delivered (RC verdict: NOT READY); G-05 (Deal Sniffer card acceptance) claimed
 Started: 2026-10-06 (round one) · 2026-10-07 (round two)
 Last updated: 2026-10-07
 
