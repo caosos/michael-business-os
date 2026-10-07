@@ -22,16 +22,41 @@ REPO = HERE.parents[1]
 EXAMPLES = HERE.parent / "examples"
 
 
-def _validators():
+V11 = "https://michael-business-os/schemas/agent-03/v1.1.0/"
+
+
+def _registry():
+    """Frozen Item v1.0.0 resolves Agent 03's v1.0.0 schemas (vendored copies); this branch's v1.1.0
+    schemas sit beside them under versioned $ids (C-03)."""
+    docs = [HERE / "contracts" / "item.schema.json", HERE / "contracts" / "provenance.schema.json",
+            *sorted((HERE / "contracts" / "vendor" / "agent-03").glob("*.schema.json")),
+            *sorted((REPO / "docs" / "research" / "schemas").glob("*.schema.json"))]
     schemas = {}
-    for p in [HERE / "contracts" / "item.schema.json", HERE / "contracts" / "provenance.schema.json",
-              *sorted((REPO / "docs" / "research" / "schemas").glob("*.schema.json"))]:
+    for p in docs:
         s = json.loads(p.read_text())
         Draft202012Validator.check_schema(s)
-        schemas[p.name] = s
-    reg = Registry().with_resources([(s["$id"], Resource.from_contents(s)) for s in schemas.values()])
-    return (Draft202012Validator(schemas["item.schema.json"], registry=reg),
-            Draft202012Validator(schemas["provenance.schema.json"], registry=reg))
+        schemas[s["$id"]] = s
+    return schemas, Registry().with_resources([(i, Resource.from_contents(s)) for i, s in schemas.items()])
+
+
+def _validators():
+    schemas, reg = _registry()
+    return (Draft202012Validator(schemas["https://michael-business-os/contracts/item.schema.json"], registry=reg),
+            Draft202012Validator(schemas["https://michael-business-os/contracts/provenance.schema.json"], registry=reg))
+
+
+def economics_v11_errors(item: dict) -> list[str]:
+    """Validate each economics block against this branch's v1.1.0 schemas (versioned $ids)."""
+    _, reg = _registry()
+    doc = "opportunity" if item["type"] == "flip" else "service-job"
+    errs = []
+    for block, value in item["economics"].items():
+        v = Draft202012Validator({"$ref": f"{V11}{doc}.schema.json#/properties/{block}"}, registry=reg)
+        errs += [f"{block}{list(e.absolute_path)}: {e.message[:160]}" for e in v.iter_errors(value)]
+    if "scores" in item:
+        v = Draft202012Validator({"$ref": f"{V11}scorecard.schema.json"}, registry=reg)
+        errs += [f"scorecard{list(e.absolute_path)}: {e.message[:160]}" for e in v.iter_errors(item["scores"]["scorecard"])]
+    return errs
 
 
 @unittest.skipIf(Draft202012Validator is None, "jsonschema not installed")
@@ -72,6 +97,14 @@ class TestContracts(unittest.TestCase):
                 self.assertEqual(self.errors(self.prov_v, doc["provenance"]), [])
                 r = replay_item(doc["item"])
                 self.assertTrue(r["match"], r["diffs"])
+                self.assertEqual(economics_v11_errors(doc["item"]), [])
+
+    def test_schema_ids_versioned(self):
+        for p in sorted((REPO / "docs" / "research" / "schemas").glob("*.schema.json")):
+            sid = json.loads(p.read_text())["$id"]
+            self.assertEqual(sid, f"{V11}{p.name}")
+            vendored = json.loads((HERE / "contracts" / "vendor" / "agent-03" / p.name).read_text())["$id"]
+            self.assertNotEqual(sid, vendored)              # v1.0.0 and v1.1.0 can coexist in one registry
 
 
 if __name__ == "__main__":

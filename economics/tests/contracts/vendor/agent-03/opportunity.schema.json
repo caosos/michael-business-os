@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://michael-business-os/schemas/agent-03/v1.1.0/opportunity.schema.json",
-  "title": "Physical Asset Flip Opportunity (economics v1.1.0)",
-  "description": "Canonical economics record for a physical asset flip. Designed to nest inside Agent 02's normalized opportunity and Agent 04's canonical entity/provenance model. Every estimated value should carry a basis tag via estimates_meta.assumptions. v1.1.0 (round two, additive/optional only). $id is versioned (C-03, ADR-0009 item 6); frozen Item v1.0.0 keeps resolving the v1.0.0 copies vendored by Agent 01 until it re-pins: market_buy_median, listing_age_hours, auction_ends_in_hours, acquire_lead_days, repair_days, requires_license_he_lacks, active_comparable_listings, estimates_meta.evidence. Flips use scarcity, not lead_quality (lead_quality is service-only by design; seller quality is the seller_screened evidence item).",
+  "$id": "https://michael-business-os/schemas/opportunity.schema.json",
+  "title": "Physical Asset Flip Opportunity",
+  "description": "Canonical economics record for a physical asset flip. Designed to nest inside Agent 02's normalized opportunity and Agent 04's canonical entity/provenance model. Every estimated value should carry a basis tag via estimates_meta.assumptions.",
   "type": "object",
   "required": ["opportunity_id", "type", "category", "location", "acquisition", "rehab", "logistics", "holding", "resale", "downside", "estimates_meta"],
   "properties": {
@@ -38,11 +38,7 @@
         "ask_price": { "type": "number", "minimum": 0 },
         "expected_buy_price": { "type": "number", "minimum": 0, "description": "A — used in the model." },
         "buy_fees": { "type": "number", "minimum": 0, "description": "F_buy: title, tax, buyer's premium, platform fee." },
-        "negotiation_confidence": { "type": "number", "minimum": 0, "maximum": 1 },
-        "market_buy_median": { "type": "number", "minimum": 0, "description": "v1.1.0. Median price similar as-is items trade for; drives deal_discount (scarcity)." },
-        "listing_age_hours": { "type": "number", "minimum": 0, "description": "v1.1.0. Hours since listed, at scoring time (alert perishability)." },
-        "auction_ends_in_hours": { "type": "number", "minimum": 0, "description": "v1.1.0. Hours to auction close, at scoring time (alert perishability)." },
-        "acquire_lead_days": { "type": "number", "minimum": 0, "description": "v1.1.0. Days from first cash out to possession (time-to-cash)." }
+        "negotiation_confidence": { "type": "number", "minimum": 0, "maximum": 1 }
       }
     },
     "rehab": {
@@ -55,9 +51,7 @@
         "admin_hours": { "type": "number", "minimum": 0, "description": "H_admin: sourcing/negotiating/listing/coordinating" },
         "required_skills": { "type": "array", "items": { "type": "string" } },
         "repair_success_prob": { "type": "number", "minimum": 0, "maximum": 1, "description": "p_repair" },
-        "repair_scope_known": { "type": "boolean", "description": "Has the fault been identified? Evidence gate." },
-        "repair_days": { "type": "number", "minimum": 0, "description": "v1.1.0. Used for hold days only when holding.expected_hold_days is absent." },
-        "requires_license_he_lacks": { "type": "boolean", "description": "v1.1.0. Explicit hard-PASS flag; the engine also derives it from required_skills vs config skills.license_gated_skills." }
+        "repair_scope_known": { "type": "boolean", "description": "Has the fault been identified? Evidence gate." }
       }
     },
     "logistics": {
@@ -101,8 +95,7 @@
         "comp_price_expected": { "type": "number", "minimum": 0 },
         "comp_price_high": { "type": "number", "minimum": 0 },
         "sale_prob": { "type": "number", "minimum": 0, "maximum": 1, "description": "p_sale" },
-        "expected_dom_days": { "type": "number", "minimum": 0 },
-        "active_comparable_listings": { "type": "integer", "minimum": 0, "description": "v1.1.0. Competing active listings; drives supply_tightness." }
+        "expected_dom_days": { "type": "number", "minimum": 0 }
       }
     },
     "downside": {
@@ -118,21 +111,6 @@
       "required": ["scoring_config_version"],
       "properties": {
         "scoring_config_version": { "type": "string" },
-        "evidence": {
-          "type": "object",
-          "description": "v1.1.0. Evidence checklist driving confidence (§9.2) and YES requirements (§15). Unknown = false; missing evidence earns no credit. fault_identified is read from rehab.repair_scope_known (alias allowed here); three_sold_comps is derived from max(len(comps), sold_comps_count); price_distribution is also true when comp_price_low < comp_price_high; skill_fit_high is derived, never input.",
-          "properties": {
-            "sold_comps_count": { "type": "integer", "minimum": 0 },
-            "condition_verified": { "type": "boolean" },
-            "fault_identified": { "type": "boolean" },
-            "title_verified": { "type": "boolean" },
-            "demand_evidence": { "type": "boolean" },
-            "seller_screened": { "type": "boolean" },
-            "price_distribution": { "type": "boolean" },
-            "remote_verification": { "type": "boolean", "description": "Video/serial/title proof sufficient to commit a long trip (§13-2)." },
-            "evidence_quality": { "type": "number", "minimum": 0, "maximum": 1, "description": "Overrides the p_waste evidence term; defaults to confidence." }
-          }
-        },
         "comps": {
           "type": "array",
           "description": "Sold comparables used to set target_sell_price (§14).",

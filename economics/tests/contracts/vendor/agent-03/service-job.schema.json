@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://michael-business-os/schemas/agent-03/v1.1.0/service-job.schema.json",
-  "title": "Service Job Opportunity (economics v1.1.0)",
-  "description": "Canonical economics record for a service job (labor/skill sold on a customer's property or asset). Reuses location/logistics/estimates_meta/scorecard from the flip schema; drops acquisition/resale/downside; adds the job block. Profit/hour is the governing metric. v1.1.0 (round two, additive/optional only; versioned $id, C-03): buy_fees, payment_fee_rate, payment_fee_flat, disposal_cost, estimate_hours, schedule_lag_days, job_days, lead_age_hours, requires_license_he_lacks, estimates_meta.evidence. Trips with purpose estimate_visit are quote trips: spent whether or not the job is won.",
+  "$id": "https://michael-business-os/schemas/service-job.schema.json",
+  "title": "Service Job Opportunity",
+  "description": "Canonical economics record for a service job (labor/skill sold on a customer's property or asset). Reuses location/logistics/estimates_meta/scorecard from the flip schema; drops acquisition/resale/downside; adds the job block. Profit/hour is the governing metric.",
   "type": "object",
   "required": ["opportunity_id", "type", "category", "location", "logistics", "job", "estimates_meta"],
   "properties": {
@@ -65,16 +65,7 @@
         "completion_prob": { "type": "number", "minimum": 0, "maximum": 1, "description": "P(finished clean, no rework/warranty hit)." },
         "payment_terms_days": { "type": "number", "minimum": 0, "description": "Deposit to final collection; drives time-to-cash." },
         "deposit_rate": { "type": "number", "minimum": 0, "maximum": 1, "description": "Reduces cash tied up." },
-        "lead_quality": { "type": "number", "minimum": 0, "maximum": 1, "description": "Replaces scarcity: referral/repeat/urgency." },
-        "buy_fees": { "type": "number", "minimum": 0, "description": "v1.1.0. Lead-acquisition / permit / platform fees paid whether or not the job is won." },
-        "payment_fee_rate": { "type": "number", "minimum": 0, "maximum": 1, "description": "v1.1.0. Card/processor % on quoted_revenue." },
-        "payment_fee_flat": { "type": "number", "minimum": 0, "description": "v1.1.0." },
-        "disposal_cost": { "type": "number", "minimum": 0, "description": "v1.1.0. Dump/haul-away cost." },
-        "estimate_hours": { "type": "number", "minimum": 0, "description": "v1.1.0. On-site quoting time beyond travel; spent win or lose." },
-        "schedule_lag_days": { "type": "number", "minimum": 0, "description": "v1.1.0. Lead to start (time-to-cash)." },
-        "job_days": { "type": "number", "minimum": 0, "description": "v1.1.0. Defaults to ceil(labor_hours / 8)." },
-        "lead_age_hours": { "type": "number", "minimum": 0, "description": "v1.1.0. Hours since the lead arrived (alert perishability)." },
-        "requires_license_he_lacks": { "type": "boolean", "description": "v1.1.0. Explicit hard-PASS flag (also derived from required_skills)." }
+        "lead_quality": { "type": "number", "minimum": 0, "maximum": 1, "description": "Replaces scarcity: referral/repeat/urgency." }
       }
     },
     "estimates_meta": {
@@ -82,20 +73,6 @@
       "required": ["scoring_config_version"],
       "properties": {
         "scoring_config_version": { "type": "string" },
-        "evidence": {
-          "type": "object",
-          "description": "v1.1.0. Service evidence checklist driving confidence. Unknown = false. skill_fit_high is derived, never input.",
-          "properties": {
-            "scope_verified": { "type": "boolean", "description": "Photos / site visit sized the work." },
-            "customer_screened": { "type": "boolean" },
-            "price_agreed_in_writing": { "type": "boolean" },
-            "materials_priced": { "type": "boolean" },
-            "access_and_schedule_confirmed": { "type": "boolean" },
-            "repeat_or_referral": { "type": "boolean" },
-            "remote_verification": { "type": "boolean" },
-            "evidence_quality": { "type": "number", "minimum": 0, "maximum": 1 }
-          }
-        },
         "assumptions": {
           "type": "array",
           "items": {

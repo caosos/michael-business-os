@@ -15,7 +15,7 @@ from mbos_economics.estimate import BundleError, apply_estimate, estimate_item
 from mbos_economics.replay import replay_item
 
 try:
-    from test_contracts import Draft202012Validator, _validators
+    from test_contracts import Draft202012Validator, _validators, economics_v11_errors
 except ImportError:  # pragma: no cover
     Draft202012Validator = None
 
@@ -245,6 +245,7 @@ class TestContractsC01(unittest.TestCase):
                 self.assertEqual([e.message for e in item_v.iter_errors(est)], [])
                 self.assertEqual([e.message for e in prov_v.iter_errors(r["provenance"])], [])
                 if r["status"] == "estimated":
+                    self.assertEqual(economics_v11_errors(est), [])
                     out = score_item(est, CFG, AS_OF)
                     est["scores"], est["recommendation"] = out["scores"], out["recommendation"]
                     est["provenance_ids"] = sorted(set(est["provenance_ids"]) | {out["provenance"]["provenance_id"]})

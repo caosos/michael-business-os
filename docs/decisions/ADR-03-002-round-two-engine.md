@@ -89,7 +89,7 @@ Round two requires a deterministic, testable implementation for both lanes. No L
   - `config_hash` is stored, so a config edited without a version bump is detected.
   - The 13 golden examples were generated on Python 3.12 and replay identically on 3.10.
 
-### 5. Missing inputs added (gap item 2/3; schemas v1.1.0, additive and optional, `$id` unchanged)
+### 5. Missing inputs added (gap item 2/3; schemas v1.1.0, additive and optional; `$id`s versioned by C-03 as `https://michael-business-os/schemas/agent-03/v1.1.0/<name>.schema.json`)
 
 **Flip:**
 - `acquisition.market_buy_median`, `listing_age_hours`, `auction_ends_in_hours`, `acquire_lead_days`
@@ -129,7 +129,7 @@ Round two requires a deterministic, testable implementation for both lanes. No L
 ## Consequences
 - Every coordinator default is **config** (`source: MICHAEL_DECISIONS #n coordinator default`). Changing Michael's numbers means a config version bump, not a code change (test `test_policy_change_is_config_not_code`).
 - 01's illustrative trailer example (`contracts/examples/item-flip-trailer.example.json`) does **not** score as recorded: it scores PASS, with composite 43.06, confidence 0.20 (no evidence block) and EV $44.95/h. The drywall example agrees (MAYBE). Corrected, engine-scored versions are in `economics/examples/`. 01 owns the contract examples and decides whether to replace them.
-- The vendored 03 schemas in `contracts/vendor/agent-03/` are now one minor version behind (v1.1.0, additive). 01 should re-vendor them. The Item v1 `$ref`s keep resolving because `$id`s are unchanged.
+- The vendored 03 schemas in `contracts/vendor/agent-03/` are now one minor version behind (v1.1.0, additive). **Update (C-03, 2026-10-07):** the v1.1.0 schemas now carry versioned `$id`s (`https://michael-business-os/schemas/agent-03/v1.1.0/…`). The v1.0.0 and v1.1.0 copies can share one registry. Frozen Item v1.0.0 keeps resolving the vendored v1.0.0 copies until Agent 01 re-pins under ADR-0009 item 6.
 
 ## Reversibility
 High for thresholds (config). Medium for formulas: an engine version bump, with old scorecards replayed by the old engine version, so the engine version is stored on every scorecard.
