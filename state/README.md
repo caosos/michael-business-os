@@ -34,6 +34,7 @@ state/
   migrations/0011_comms_ledger.sql D-10: 06's mbos_comms consent/DNC ledger under lane D (same names; same-tx receipts,
                                    fail-safe grant/revoke asymmetry, raw contact values readable by gateway only)
   migrations/0012_deferred_approval_provenance.sql  D-13: provenance->approval FK checked at COMMIT (MODIFY ordering)
+  migrations/0013_velocity_actions.sql  D-11: optional caps.velocity_actions_per_hour (unreleased bucket reservations/h)
   mbos_state/mbos_canonical.py     ADR-0010 Python reference (byte-identical vendored copy)
   tests/canonical/vectors.json     ADR-0010 golden vectors (byte-identical vendored copy)
   bootstrap/roles.sql              group + login roles (cluster level)
@@ -42,7 +43,7 @@ state/
   bootstrap/systemd/               user units: postgres, hourly chain verify + anchor
   bootstrap/podman/                Quadlet units for the target runtime (UNTESTED: no Podman on host yet)
   mbos_state/                      Python: migrate, StateStore facade, chain export/anchor/offline verify, CLI
-  tests/                           184 tests; vendored frozen contracts v1.0.0 in tests/contracts-v1.0.0/
+  tests/                           187 tests; vendored frozen contracts v1.0.0 in tests/contracts-v1.0.0/
 ```
 
 ## Tables

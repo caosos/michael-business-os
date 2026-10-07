@@ -256,3 +256,63 @@ def test_parallel_approvals_never_overshoot(db):
     assert len(ok) == 25
     assert s.conn.execute("SELECT sum(amount) FROM mbos.budget_ledger").fetchone()[0] == 25
     assert s.verify_chain().ok
+
+
+# ---------------------------------------------------------------------------
+# D-11: action-count velocity
+# ---------------------------------------------------------------------------
+MONEY = {"per_action": 1500, "daily": 100000, "global_daily": 100000, "velocity_per_hour": None,
+         "velocity_actions_per_hour": 3, "tz": "America/Chicago",
+         "categories": ["offer", "money", "purchase", "external_commitment"]}
+
+
+def test_velocity_actions_counts_unreleased_incl_zero_amount(db):
+    s = db.store()
+    item_id, pid = make_item(s)
+    kw = dict(category="offer", capability="money.offer.make", reversibility="irreversible")
+    a = [make_areq(s, item_id, pid, **kw) for _ in range(5)]
+    gw = db.store("gateway")
+    r = [_reserve(gw, a[0], 0, MONEY), _reserve(gw, a[1], 10, MONEY), _reserve(gw, a[2], 0, MONEY)]   # 3 actions
+    with pytest.raises(psycopg.Error) as ei:
+        _reserve(gw, a[3], 0, MONEY)                              # a zero-amount 4th action still counts
+    assert ei.value.sqlstate == "MB006" and "action velocity" in ei.value.diag.message_primary
+    gw.budget_settle(r[0], "release", None, GATEWAY, "cancelled", [pid], key())
+    _reserve(gw, a[3], 0, MONEY)                                  # a released reservation frees a slot
+    assert gw.conn.execute("SELECT mbos.budget_velocity_actions_hour(%s::text[], 'USD', 'dry_run')",
+                           (MONEY["categories"],)).fetchone()[0] == 3
+
+
+def test_velocity_actions_optional_and_validated(db):
+    s = db.store()
+    item_id, pid = make_item(s)
+    a = make_areq(s, item_id, pid, category="sms", capability="comms.sms.send")
+    gw = db.store("gateway")
+    _reserve(gw, a, 0, COMMS)                                     # key absent: no count cap (05's current calls)
+    _reserve(gw, make_areq(s, item_id, pid, category="sms", capability="comms.sms.send"), 0,
+             {**COMMS, "velocity_actions_per_hour": None})
+    for bad in ("3", -1, 2.5):
+        with pytest.raises(psycopg.Error) as ei:
+            _reserve(gw, make_areq(s, item_id, pid, category="sms", capability="comms.sms.send"), 0,
+                     {**COMMS, "velocity_actions_per_hour": bad})
+        assert ei.value.sqlstate == "MB006", bad
+
+
+def test_velocity_actions_never_overshoot_in_parallel(db):
+    s = db.store()
+    item_id, pid = make_item(s)
+    areqs = [make_areq(s, item_id, pid, category=c, capability="money.x", reversibility="irreversible")
+             for c in ("offer", "money", "purchase", "external_commitment") * 10]
+    ok = []
+
+    def go(x):
+        try:
+            ok.append(_reserve(db.store("gateway"), x, 1, MONEY))
+        except psycopg.Error as e:
+            assert e.sqlstate == "MB006"
+
+    ts = [threading.Thread(target=go, args=(x,)) for x in areqs]
+    for t in ts:
+        t.start()
+    for t in ts:
+        t.join()
+    assert len(ok) == 3
