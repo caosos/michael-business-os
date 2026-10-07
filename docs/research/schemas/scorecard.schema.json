@@ -75,6 +75,8 @@
       "description": "Human-readable justification lines; must be sufficient to explain the decision.",
       "items": { "type": "string" }
     },
+    "pass_on_priors": { "type": "boolean", "description": "R13 (C-05): true when decision is PASS and no decisive input is evidence-backed (basis FACT, or an aggregate marked evidence_backed from FACT evidence). The spine routes such a PASS to RESEARCHING instead of ARCHIVED (A-12). Always false for YES/MAYBE." },
+    "pass_basis": { "type": "object", "description": "R13 audit: decisive_inputs[] for the failed gates (or composite floor) and the evidence_backed_inputs[] among them.", "properties": { "decisive_inputs": { "type": "array", "items": { "type": "string" } }, "evidence_backed_inputs": { "type": "array", "items": { "type": "string" } }, "pass_on_priors": { "type": "boolean" } } },
     "yes_conditions": { "type": "object", "additionalProperties": { "type": "boolean" }, "description": "Step-2 YES conditions; all true (and all gates true) => YES." },
     "alert_checks": { "type": "object", "additionalProperties": { "type": "boolean" } },
     "evidence": { "type": "object", "additionalProperties": { "type": "boolean" }, "description": "Evidence checklist as evaluated (including derived items)." },

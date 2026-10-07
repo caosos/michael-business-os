@@ -80,12 +80,12 @@
       }
     },
     "scores": {
-      "scorecard_id": "scr_01M4B3R6G0747W0EG6XAQ4EQAB",
+      "scorecard_id": "scr_01M4B3R6G0K916EQTW374HHHZE",
       "inputs_hash": "sha256:968d73034554334dff8f81cfc9a9e3b0709b31c2db2f8496675ba6905df91d13",
       "scorecard": {
         "scoring_config_version": "2026.10.1",
         "computed_at": "2026-10-07T12:00:00Z",
-        "engine_version": "0.2.0",
+        "engine_version": "0.3.0",
         "config_hash": "sha256:8b7b98c7d92457d9d0049a0a2d7dd0c4e3bafa735c99c989bf156289aff58b20",
         "lane": "flip",
         "derived": {
@@ -196,6 +196,25 @@
         },
         "composite": 36.95,
         "decision": "PASS",
+        "pass_on_priors": true,
+        "pass_basis": {
+          "decisive_inputs": [
+            "economics.acquisition.ask_price",
+            "economics.acquisition.expected_buy_price",
+            "economics.downside.salvage_if_repair_fails",
+            "economics.downside.salvage_if_unsold",
+            "economics.logistics.trips",
+            "economics.rehab.labor_hours",
+            "economics.rehab.materials_cost",
+            "economics.rehab.parts_cost",
+            "economics.rehab.repair_success_prob",
+            "economics.resale.sale_prob",
+            "economics.resale.target_sell_price",
+            "normalized.location.road_miles_one_way"
+          ],
+          "evidence_backed_inputs": [],
+          "pass_on_priors": true
+        },
         "alert": false,
         "alert_checks": {
           "is_yes": false,
@@ -243,6 +262,7 @@
         "walk_away_price": null,
         "reasons": [
           "GATE FAIL distance_ratio_ok: long-distance travel burden $496.66 exceeds 0.35 x EV = $134.47",
+          "R13: PASS rests only on priors/unattested inputs (no decisive input is evidence-backed): route to RESEARCHING, do not archive",
           "deterministic: net $1,031.34, $66.30/h over 15.5555 h, cash tied up $1,168.66, ROI 0.8825",
           "expected: net $384.20, $24.70/h, max loss $451.50, P(loss) 0.4000, time-to-cash 22 d",
           "evidence is not the blocker: no missing evidence item changes the verdict"
@@ -250,31 +270,32 @@
       }
     },
     "recommendation": {
-      "recommendation_id": "rec_01M4B3R6G0D4XBHR6EVCXH1X41",
+      "recommendation_id": "rec_01M4B3R6G062HSR7JPNDKV86KT",
       "verdict": "PASS",
       "rationale": [
         "GATE FAIL distance_ratio_ok: long-distance travel burden $496.66 exceeds 0.35 x EV = $134.47",
+        "R13: PASS rests only on priors/unattested inputs (no decisive input is evidence-backed): route to RESEARCHING, do not archive",
         "deterministic: net $1,031.34, $66.30/h over 15.5555 h, cash tied up $1,168.66, ROI 0.8825",
         "expected: net $384.20, $24.70/h, max loss $451.50, P(loss) 0.4000, time-to-cash 22 d",
         "evidence is not the blocker: no missing evidence item changes the verdict"
       ],
       "confidence": 0.3,
       "alert": false,
-      "provenance_id": "prov_01M4B3R6G0GQ4J3EAREDJF7W4S"
+      "provenance_id": "prov_01M4B3R6G0JP7C3EK6S46KHPH2"
     },
     "provenance_ids": [
       "prov_01JB0000000000000000000050",
-      "prov_01M4B3R6G0GQ4J3EAREDJF7W4S"
+      "prov_01M4B3R6G0JP7C3EK6S46KHPH2"
     ]
   },
   "provenance": {
-    "provenance_id": "prov_01M4B3R6G0GQ4J3EAREDJF7W4S",
+    "provenance_id": "prov_01M4B3R6G0JP7C3EK6S46KHPH2",
     "created_at": "2026-10-07T12:00:00Z",
     "actor_type": "system",
     "agent_name": "agent-03-economics",
     "basis": "INFERENCE",
     "tool_name": "mbos_economics.engine",
-    "tool_version": "0.2.0",
+    "tool_version": "0.3.0",
     "config_version": "2026.10.1",
     "inputs_used": [
       {
@@ -296,26 +317,26 @@
       "type": "SCORE_RECORDED",
       "item_id": "itm_01JB0000000000000000000005",
       "entity_type": "scorecard",
-      "entity_id": "scr_01M4B3R6G0747W0EG6XAQ4EQAB",
+      "entity_id": "scr_01M4B3R6G0K916EQTW374HHHZE",
       "tool_name": "mbos_economics.engine",
       "inputs_hash": "sha256:968d73034554334dff8f81cfc9a9e3b0709b31c2db2f8496675ba6905df91d13",
-      "payload_hash": "sha256:63fbbcce57fc2b9a5dc4ebf690cef6a849d2e5ced778acfb80c79b8bdbfbaa83",
-      "idempotency_key": "score:scr_01M4B3R6G0747W0EG6XAQ4EQAB",
+      "payload_hash": "sha256:1762e72ba0729a16632cccba82940cda5779e1d1f231ecba177fa02892109a74",
+      "idempotency_key": "score:scr_01M4B3R6G0K916EQTW374HHHZE",
       "provenance_ids": [
-        "prov_01M4B3R6G0GQ4J3EAREDJF7W4S"
+        "prov_01M4B3R6G0JP7C3EK6S46KHPH2"
       ]
     },
     {
       "type": "RECOMMENDATION_RECORDED",
       "item_id": "itm_01JB0000000000000000000005",
       "entity_type": "recommendation",
-      "entity_id": "rec_01M4B3R6G0D4XBHR6EVCXH1X41",
+      "entity_id": "rec_01M4B3R6G062HSR7JPNDKV86KT",
       "tool_name": "mbos_economics.engine",
       "inputs_hash": "sha256:968d73034554334dff8f81cfc9a9e3b0709b31c2db2f8496675ba6905df91d13",
-      "payload_hash": "sha256:685bb0ae83cf21aeadde9c9ff72d3cc89d52dbf372ecfc0b0ad42ed12b1cf036",
-      "idempotency_key": "recommend:rec_01M4B3R6G0D4XBHR6EVCXH1X41",
+      "payload_hash": "sha256:00facc6f496f514ba72a213939b0e5385f7296509ec2546458aeadbc3fa21879",
+      "idempotency_key": "recommend:rec_01M4B3R6G062HSR7JPNDKV86KT",
       "provenance_ids": [
-        "prov_01M4B3R6G0GQ4J3EAREDJF7W4S"
+        "prov_01M4B3R6G0JP7C3EK6S46KHPH2"
       ]
     }
   ]

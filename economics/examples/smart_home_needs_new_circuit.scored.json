@@ -68,12 +68,12 @@
       }
     },
     "scores": {
-      "scorecard_id": "scr_01M4B3R6G06RC7G8HRASGMPDGK",
+      "scorecard_id": "scr_01M4B3R6G0EX4YRFH7Q3Y9XYPY",
       "inputs_hash": "sha256:5e5c62e3cda46d570a1367f37074b0e39f456eb71c3338d1b14f6e7da07d9aec",
       "scorecard": {
         "scoring_config_version": "2026.10.1",
         "computed_at": "2026-10-07T12:00:00Z",
-        "engine_version": "0.2.0",
+        "engine_version": "0.3.0",
         "config_hash": "sha256:8b7b98c7d92457d9d0049a0a2d7dd0c4e3bafa735c99c989bf156289aff58b20",
         "lane": "service",
         "derived": {
@@ -184,6 +184,15 @@
         },
         "composite": 72.05,
         "decision": "PASS",
+        "pass_on_priors": true,
+        "pass_basis": {
+          "decisive_inputs": [
+            "economics.job.required_skills",
+            "economics.job.requires_license_he_lacks"
+          ],
+          "evidence_backed_inputs": [],
+          "pass_on_priors": true
+        },
         "alert": false,
         "alert_checks": {
           "is_yes": false,
@@ -226,6 +235,7 @@
         "min_quote_for_yes": null,
         "reasons": [
           "GATE FAIL license_ok: requires a license Michael lacks (licensed_electrical)",
+          "R13: PASS rests only on priors/unattested inputs (no decisive input is evidence-backed): route to RESEARCHING, do not archive",
           "deterministic: net $834.36, $101.20/h over 8.2444 h, cash tied up $65.64, ROI 12.7112",
           "expected: net $820.86, $99.57/h, max loss $0.00, P(loss) 0.0000, time-to-cash 5 d",
           "skills not in profile: licensed_electrical",
@@ -234,10 +244,11 @@
       }
     },
     "recommendation": {
-      "recommendation_id": "rec_01M4B3R6G0HAXMEQHJK4JZD83T",
+      "recommendation_id": "rec_01M4B3R6G0E1V7T78EC52WHZJB",
       "verdict": "PASS",
       "rationale": [
         "GATE FAIL license_ok: requires a license Michael lacks (licensed_electrical)",
+        "R13: PASS rests only on priors/unattested inputs (no decisive input is evidence-backed): route to RESEARCHING, do not archive",
         "deterministic: net $834.36, $101.20/h over 8.2444 h, cash tied up $65.64, ROI 12.7112",
         "expected: net $820.86, $99.57/h, max loss $0.00, P(loss) 0.0000, time-to-cash 5 d",
         "skills not in profile: licensed_electrical",
@@ -245,21 +256,21 @@
       ],
       "confidence": 0.85,
       "alert": false,
-      "provenance_id": "prov_01M4B3R6G0VBB2E5S2HNZN2RG8"
+      "provenance_id": "prov_01M4B3R6G0GG5MJAY5TP3N7TV3"
     },
     "provenance_ids": [
       "prov_01JB0000000000000000000220",
-      "prov_01M4B3R6G0VBB2E5S2HNZN2RG8"
+      "prov_01M4B3R6G0GG5MJAY5TP3N7TV3"
     ]
   },
   "provenance": {
-    "provenance_id": "prov_01M4B3R6G0VBB2E5S2HNZN2RG8",
+    "provenance_id": "prov_01M4B3R6G0GG5MJAY5TP3N7TV3",
     "created_at": "2026-10-07T12:00:00Z",
     "actor_type": "system",
     "agent_name": "agent-03-economics",
     "basis": "INFERENCE",
     "tool_name": "mbos_economics.engine",
-    "tool_version": "0.2.0",
+    "tool_version": "0.3.0",
     "config_version": "2026.10.1",
     "inputs_used": [
       {
@@ -281,26 +292,26 @@
       "type": "SCORE_RECORDED",
       "item_id": "itm_01JB0000000000000000000023",
       "entity_type": "scorecard",
-      "entity_id": "scr_01M4B3R6G06RC7G8HRASGMPDGK",
+      "entity_id": "scr_01M4B3R6G0EX4YRFH7Q3Y9XYPY",
       "tool_name": "mbos_economics.engine",
       "inputs_hash": "sha256:5e5c62e3cda46d570a1367f37074b0e39f456eb71c3338d1b14f6e7da07d9aec",
-      "payload_hash": "sha256:5271244fa7217099cd38551df14d431bda771e81ef6d005fc4adfe134eb33b89",
-      "idempotency_key": "score:scr_01M4B3R6G06RC7G8HRASGMPDGK",
+      "payload_hash": "sha256:4cb2e3243c88cad3243900f2f571b1034a6b0106cc1cad8b50f4dfa67c33d40b",
+      "idempotency_key": "score:scr_01M4B3R6G0EX4YRFH7Q3Y9XYPY",
       "provenance_ids": [
-        "prov_01M4B3R6G0VBB2E5S2HNZN2RG8"
+        "prov_01M4B3R6G0GG5MJAY5TP3N7TV3"
       ]
     },
     {
       "type": "RECOMMENDATION_RECORDED",
       "item_id": "itm_01JB0000000000000000000023",
       "entity_type": "recommendation",
-      "entity_id": "rec_01M4B3R6G0HAXMEQHJK4JZD83T",
+      "entity_id": "rec_01M4B3R6G0E1V7T78EC52WHZJB",
       "tool_name": "mbos_economics.engine",
       "inputs_hash": "sha256:5e5c62e3cda46d570a1367f37074b0e39f456eb71c3338d1b14f6e7da07d9aec",
-      "payload_hash": "sha256:3df3029bf0f24ee5363f72892c226519a66bf0d0380b2aed832604472f80c898",
-      "idempotency_key": "recommend:rec_01M4B3R6G0HAXMEQHJK4JZD83T",
+      "payload_hash": "sha256:612c4c6ec8ee49861c974eaf068d59c8fcc7da8f3350ed03f048d748e2d09793",
+      "idempotency_key": "recommend:rec_01M4B3R6G0E1V7T78EC52WHZJB",
       "provenance_ids": [
-        "prov_01M4B3R6G0VBB2E5S2HNZN2RG8"
+        "prov_01M4B3R6G0GG5MJAY5TP3N7TV3"
       ]
     }
   ]

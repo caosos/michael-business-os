@@ -85,11 +85,12 @@ class TestGoldensRebaselined(unittest.TestCase):
         for name, prefix in pinned.items():
             self.assertTrue(run(case(name))["scores"]["inputs_hash"].startswith(prefix), name)
 
-    def test_goldens_are_0_2_0_and_replay(self):
+    def test_goldens_are_current_engine_and_replay(self):
+        from mbos_economics import __version__
         from mbos_economics.replay import replay_item
         for p in sorted((HERE.parent / "examples").glob("*.scored.json")):
             doc = json.loads(p.read_text())
-            self.assertEqual(doc["item"]["scores"]["scorecard"]["engine_version"], "0.2.0", p.name)
+            self.assertEqual(doc["item"]["scores"]["scorecard"]["engine_version"], __version__, p.name)
             self.assertTrue(replay_item(doc["item"])["match"], p.name)
         self.assertEqual(CFG.version, "2026.10.1")
 

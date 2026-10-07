@@ -100,6 +100,59 @@ def _evidence_items(lane: str, category: str, econ: dict, skill_fit: Decimal, cf
     }
 
 
+
+# --------------------------------------------------------------------------- R13: PASS on priors
+
+_E = "economics."
+_DECISIVE = {
+    "flip": {
+        "economic": ["acquisition.ask_price", "acquisition.expected_buy_price", "resale.target_sell_price",
+                     "rehab.parts_cost", "rehab.materials_cost", "rehab.labor_hours", "rehab.repair_success_prob",
+                     "resale.sale_prob", "downside.salvage_if_unsold", "downside.salvage_if_repair_fails"],
+        "max_loss_ok": ["acquisition.ask_price", "acquisition.expected_buy_price", "rehab.parts_cost",
+                        "downside.salvage_if_repair_fails"],
+        "cash_ok": ["acquisition.ask_price", "acquisition.expected_buy_price", "acquisition.buy_fees",
+                    "rehab.parts_cost", "rehab.materials_cost"],
+        "skills": ["rehab.required_skills", "rehab.requires_license_he_lacks"],
+    },
+    "service": {
+        "economic": ["job.quoted_revenue", "job.labor_hours", "job.admin_hours", "job.materials_cost",
+                     "job.win_prob", "job.completion_prob"],
+        "max_loss_ok": ["job.quoted_revenue", "job.materials_cost", "job.deposit_rate"],
+        "cash_ok": ["job.quoted_revenue", "job.materials_cost", "job.deposit_rate"],
+        "skills": ["job.required_skills", "job.requires_license_he_lacks"],
+    },
+}
+_DISTANCE = ["normalized.location.road_miles_one_way", "economics.logistics.trips"]
+
+
+def _decisive_fields(lane: str, failed: list[str], composite_floor: bool) -> list[str]:
+    d = _DECISIVE[lane]
+    out: list[str] = []
+    for g in failed:
+        if g in ("max_loss_ok", "cash_ok"):
+            out += [_E + f for f in d[g]]
+        elif g in ("skill_ok", "license_ok"):
+            out += [_E + f for f in d["skills"]]
+        elif g == "distance_ratio_ok":
+            out += _DISTANCE + [_E + f for f in d["economic"]]
+        else:  # ev_positive, pph_floor_ok, min_profit_ok
+            out += [_E + f for f in d["economic"]]
+    if composite_floor:
+        out += [_E + f for f in d["economic"]]
+    return sorted(set(out))
+
+
+def _pass_on_priors(econ: dict, lane: str, failed: list[str], composite_floor: bool) -> dict:
+    """R13: a PASS may archive only when >= 1 decisive input is evidence-backed (basis FACT, or an
+    aggregate the estimator marked ``evidence_backed`` from FACT evidence). Inputs with no assumption
+    record are unattested, hence not evidence-backed."""
+    basis = {a.get("field"): a for a in (econ.get("estimates_meta") or {}).get("assumptions") or []
+             if isinstance(a, dict)}
+    decisive = _decisive_fields(lane, failed, composite_floor)
+    backed = [f for f in decisive if f in basis and (basis[f].get("basis") == "FACT" or basis[f].get("evidence_backed") is True)]
+    return {"decisive_inputs": decisive, "evidence_backed_inputs": backed, "pass_on_priors": not backed}
+
 # --------------------------------------------------------------------------- compute
 
 def compute(inp: dict, cfg: ScoringConfig) -> dict:
@@ -247,6 +300,14 @@ def compute(inp: dict, cfg: ScoringConfig) -> dict:
     else:
         decision = "MAYBE"
         reasons += [f"YES blocked: {yes_text[k]}" for k, ok in yes.items() if not ok]
+    pass_basis = None
+    if decision == "PASS":
+        pass_basis = _pass_on_priors(econ, lane, failed, composite_floor=not failed)
+        if pass_basis["pass_on_priors"]:
+            reasons.append("R13: PASS rests only on priors/unattested inputs (no decisive input is evidence-backed): "
+                           "route to RESEARCHING, do not archive")
+        else:
+            reasons.append("R13: PASS is evidence-backed via " + ", ".join(pass_basis["evidence_backed_inputs"]))
     reasons.append(f"deterministic: net {_usd(le.net_profit)}, {_usd(le.pph)}/h over {le.total_hours} h, "
                    f"cash tied up {_usd(le.cash_tied_up)}, ROI {le.roi}")
     reasons.append(f"expected: net {_usd(le.ev_net_profit)}, {_usd(le.ev_pph)}/h, max loss {_usd(le.max_loss)}, "
@@ -336,6 +397,8 @@ def compute(inp: dict, cfg: ScoringConfig) -> dict:
         "gates": gates,
         "yes_conditions": yes,
         "decision": decision,
+        "pass_on_priors": bool(pass_basis and pass_basis["pass_on_priors"]),
+        "pass_basis": pass_basis,
         "alert": alert,
         "alert_checks": alert_checks,
         "evidence": {k: v for k, v in items.items() if not k.startswith("_")},
@@ -487,6 +550,8 @@ def score(inp: dict, cfg: ScoringConfig, scored_at: str) -> dict:
         "weights_used": core["weights_used"],
         "composite": core["composite"],
         "decision": core["decision"],
+        "pass_on_priors": core["pass_on_priors"],
+        **({"pass_basis": core["pass_basis"]} if core["pass_basis"] else {}),
         "alert": core["alert"],
         "alert_checks": core["alert_checks"],
         "gates": core["gates"],

@@ -86,6 +86,14 @@ class _Ledger:
         self.assumptions.append({"field": field, "value": copy.deepcopy(value), "basis": basis, "note": note})
         return value
 
+    def back(self, field: str, provenance_ids: list[str]) -> None:
+        """Mark the latest assumption for ``field`` as derived purely from FACT evidence (R13)."""
+        for a in reversed(self.assumptions):
+            if a["field"] == field:
+                a["evidence_backed"] = True
+                a["provenance_ids"] = sorted(provenance_ids)
+                return
+
     def gap(self, code: str, detail: str, blocking: bool) -> None:
         self.gaps.append({"code": code, "blocking": blocking, "detail": detail})
 
@@ -259,6 +267,8 @@ def _estimate_flip(item: dict, bundle: dict, pri: ScoringConfig, miles: Decimal,
         med = money(_median(vals))
         acq["market_buy_median"] = led.note(f"{E}.acquisition.market_buy_median", _num(med), "INFER",
                                             f"median of {len(vals)} as-is comps (asking x {ratio})")
+        if all(c["kind"] == "sold" for c in as_is):
+            led.back(f"{E}.acquisition.market_buy_median", [c["provenance_id"] for c in as_is])
         research += [_comp_fact(c, "acquisition.market_buy_median") for c in as_is]
 
     # ---- resale (never guessed)
@@ -271,6 +281,7 @@ def _estimate_flip(item: dict, bundle: dict, pri: ScoringConfig, miles: Decimal,
         target = agg["comp_price_expected"]
         resale["target_sell_price"] = led.note(f"{E}.resale.target_sell_price", _num(target), "INFER",
                                                f"trimmed median of {len(sold)} sold comps (n used {agg['n_used']})")
+        led.back(f"{E}.resale.target_sell_price", [c["provenance_id"] for c in sold])
         resale["comp_price_expected"] = _num(target)
         if agg["n_used"] >= 2:
             resale["comp_price_low"], resale["comp_price_high"] = _num(agg["comp_price_low"]), _num(agg["comp_price_high"])

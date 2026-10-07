@@ -161,6 +161,9 @@ def project_vehicle_truck_over_cap() -> dict:
     d["economics"]["resale"].update({"target_sell_price": 4800, "comp_price_low": 4300, "comp_price_high": 5300})
     d["economics"]["downside"].update({"salvage_if_repair_fails": 1900, "salvage_if_unsold": 3800})
     d["economics"]["rehab"]["parts_cost"] = 320
+    # R13 (C-05): the asking price is attested from the listing, so this cash-cap PASS is evidence-backed
+    d["economics"]["estimates_meta"]["assumptions"] = [
+        {"field": "economics.acquisition.ask_price", "value": 2600, "basis": "FACT", "note": "listing price"}]
     return d
 
 
