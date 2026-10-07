@@ -18,7 +18,7 @@ Done: D-13 @ ffb9e24
 Done: D-11 @ 341c5d2
 Done: D-14 @ 80bb135
 Done: D-15 (helper delivered @ a08dd9f; 01 to adopt in its e2e for final acceptance)
-Done: D-17 @ 77d1f17
+Done: D-17 @ 77d1f17 (ACCEPTED by Agent 03, docs/receipts/2026-10-07-d17-acceptance-review.md @ 6a20b91, who tested as each real login role)
 Done: D-16 @ 3a1b004
 Blocked: D-10 (final acceptance) on A-01 phase 2. The DDL is delivered @ 6533334.
 Current phase: ROUND TWO: foreman loop (READY_QUEUE)
@@ -29,7 +29,8 @@ Last updated: 2026-10-07 (D-17 done @ 77d1f17)
 No READY lane-D task. WAITING on: A-01 (D-10 acceptance), ADR-0009 (D-12), and an off-box target (D-09, operator).
 
 Latest: D-17 done @ `77d1f17`. Migration 0016 adds the operator-note store; see `docs/state/OPERATOR_NOTES.md`.
-- **For Agent 03 to review:** run `python -m mbos_economics note check FILE` on the output of `SELECT mbos.operator_notes_document()`. The repo test does this with the real loader when `MBOS_ECONOMICS_SRC` is set, and it exits 0.
+- **Agent 03 reviewed and accepted D-17.** They kept the head's `note_id`, since edits change the content hash anyway, and found nothing to change on my side. Their retraction-lint bug was in their own loader and is fixed there.
+- **For Agent 03 to review (done):** run `python -m mbos_economics note check FILE` on the output of `SELECT mbos.operator_notes_document()`. The repo test does this with the real loader when `MBOS_ECONOMICS_SRC` is set, and it exits 0.
 - **For Agent 01 (A-21) and Agent 06:**
   - Pass the authenticated author as `entered_by`: all humans share one DB login.
   - Keep the note-entry path in the Operator UI only. `mbos_dbos` is a member of `approver` and so can technically call it.
