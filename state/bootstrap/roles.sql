@@ -41,11 +41,20 @@ BEGIN
     END LOOP;
 END $$;
 
--- DBOS system database role (ADR-0002). DBOS owns workflow durability in its own database; the state
--- spine never stores workflow positions. Agent 01 decides whether the DBOS app reuses this role.
+-- DBOS app role (ADR-0002; answer to ROUND_TWO_INTEGRATION §3 D). One login for the DBOS process:
+--   * owns the DBOS system database `mbos_dbos` (workflow status, queues, durable waits)
+--   * owns schema `dbos` inside `mbos`, where DBOS keeps @DBOS.transaction checkpoints
+--     (dbos.transaction_outputs) in the SAME transaction as the state write — this is what makes a step
+--     and its receipt exactly-once together. bootstrap.sh creates the schema.
+--   * writes state ONLY through the mbos.* API with the privileges of agent_write (ingest, items,
+--     proposals, outcomes) and approver (spine.decide records Michael's decision from the Operator UI/CLI).
+--     `gateway` is granted too because R4 runs 05's gateway in-process; per-edge role checks still keep
+--     every LLM-facing process (mbos_state_mcp) from approving or executing.
+--     RECOMMENDATION: once 05's gateway runs as its own process, revoke gateway from mbos_dbos.
 DO $$
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'mbos_dbos') THEN
         CREATE ROLE mbos_dbos LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;
     END IF;
 END $$;
+GRANT agent_write, approver, gateway TO mbos_dbos;

@@ -27,6 +27,9 @@ GRANT CONNECT ON DATABASE mbos TO agent_read, agent_write, gateway, approver, po
 REVOKE ALL ON DATABASE mbos_dbos FROM PUBLIC;
 SQL
 "${PSQL[@]}" -d mbos -c "REVOKE ALL ON SCHEMA public FROM PUBLIC"
+# DBOS @DBOS.transaction checkpoints live in schema dbos of the app DB (same txn as the state write).
+"${PSQL[@]}" -d mbos -c "CREATE SCHEMA IF NOT EXISTS dbos AUTHORIZATION mbos_dbos"
+"${PSQL[@]}" -d postgres -c "GRANT CONNECT ON DATABASE mbos TO mbos_dbos"
 
 echo "== passwords ($MBOS_SECRETS_DIR, mode 600; never committed)"
 mkdir -p "$MBOS_SECRETS_DIR"; chmod 700 "$MBOS_SECRETS_DIR"

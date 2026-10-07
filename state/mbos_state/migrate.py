@@ -88,6 +88,7 @@ def migrate(dsn: str, directory: Path = MIGRATIONS_DIR, *, log=print) -> list[st
     """Apply pending migrations. Returns the versions applied."""
     applied_now: list[str] = []
     migrations = discover(directory)
+    by_version = {m.version: m for m in migrations}
     with psycopg.connect(dsn, autocommit=True) as conn:
         conn.execute("SELECT pg_advisory_lock(%s)", (LOCK_KEY,))
         try:
@@ -107,13 +108,22 @@ def migrate(dsn: str, directory: Path = MIGRATIONS_DIR, *, log=print) -> list[st
                     cur.execute("SET LOCAL ROLE mbos_owner")
                     cur.execute("SET LOCAL lock_timeout = '30s'")
                     cur.execute(m.sql)
-                    receipt_id = _receipt_for_migration(cur, m)
                     cur.execute(
-                        "INSERT INTO mbos_meta.schema_migrations (version, filename, sha256, receipt_id) VALUES (%s,%s,%s,%s)",
-                        (m.version, m.path.name, m.sha256, receipt_id),
+                        "INSERT INTO mbos_meta.schema_migrations (version, filename, sha256) VALUES (%s,%s,%s)",
+                        (m.version, m.path.name, m.sha256),
                     )
+                    # Receipt every migration not yet receipted, in order, once the ledger exists
+                    # (0000 installs the ADR-0010 functions before 0001 creates the ledger).
+                    receipt_id = None
+                    if cur.execute("SELECT to_regclass('mbos.receipts')").fetchone()[0] is not None:
+                        pending = cur.execute("SELECT version FROM mbos_meta.schema_migrations "
+                                              "WHERE receipt_id IS NULL ORDER BY version").fetchall()
+                        for (version,) in pending:
+                            receipt_id = _receipt_for_migration(cur, by_version[version])
+                            cur.execute("UPDATE mbos_meta.schema_migrations SET receipt_id = %s WHERE version = %s",
+                                        (receipt_id, version))
                 applied_now.append(m.version)
-                log(f"applied {m.path.name} ({receipt_id})")
+                log(f"applied {m.path.name}" + (f" ({receipt_id})" if receipt_id else " (receipt deferred until the ledger exists)"))
             with conn.transaction():
                 conn.execute("SET LOCAL ROLE mbos_owner")
                 conn.execute("GRANT USAGE ON SCHEMA mbos_meta TO agent_read")

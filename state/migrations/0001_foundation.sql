@@ -43,10 +43,10 @@ LANGUAGE sql IMMUTABLE STRICT PARALLEL SAFE AS $$
     SELECT 'sha256:' || encode(sha256(convert_to(t, 'UTF8')), 'hex')
 $$;
 
--- Reference hash for a JSON payload (ActionRequest.payload_hash). RECOMMENDATION to 01/05: use this one
--- function (or an RFC 8785 equivalent) everywhere so the execution guard re-check cannot drift.
+-- ActionRequest.payload_hash / inputs_hash: MBOS-CJSON-1 (ADR-0010; functions from 0000_mbos_canonical.sql).
+-- Never hash jsonb::text.
 CREATE FUNCTION mbos.payload_hash(p jsonb) RETURNS text
-LANGUAGE sql IMMUTABLE STRICT PARALLEL SAFE AS $$ SELECT mbos.sha256_text(p::text) $$;
+LANGUAGE sql IMMUTABLE STRICT PARALLEL SAFE AS $$ SELECT mbos.cjson_sha256(p) $$;
 
 CREATE FUNCTION mbos.utc_iso(t timestamptz) RETURNS text
 LANGUAGE sql IMMUTABLE STRICT PARALLEL SAFE AS $$
@@ -178,13 +178,14 @@ CREATE TABLE mbos.receipts (
     CONSTRAINT receipts_wave1_dry_run_only CHECK (
         effector_response IS NULL OR effector_response->'dry_run' = 'true'::jsonb)
 );
-COMMENT ON COLUMN mbos.receipts.canonical IS 'Canonical JSON text of the Receipt v1 document without row_hash (includes prev_hash). row_hash = sha256(canonical).';
+COMMENT ON COLUMN mbos.receipts.canonical IS 'MBOS-CJSON-1 text of D (ADR-0010 MBOS-RH-1): the Receipt v1 document without row_hash, top-level nulls dropped except prev_hash. row_hash = sha256(canonical).';
 CREATE INDEX receipts_item_idx ON mbos.receipts (item_id) WHERE item_id IS NOT NULL;
 CREATE INDEX receipts_areq_idx ON mbos.receipts (action_request_id) WHERE action_request_id IS NOT NULL;
 CREATE INDEX receipts_tx_idx   ON mbos.receipts (tx_id);
 CREATE INDEX receipts_type_ts_idx ON mbos.receipts (type, ts);
 
--- Receipt v1 document (without row_hash) as the canonical jsonb that is hashed.
+-- D for MBOS-RH-1 (ADR-0010): Receipt v1 document without row_hash, top-level nulls dropped except
+-- prev_hash, ts as YYYY-MM-DDTHH:MM:SS.ffffffZ. Equal to mbos.rh1_hash_document(receipt_document(r)).
 CREATE FUNCTION mbos.receipt_canonical(r mbos.receipts) RETURNS jsonb
 LANGUAGE sql STABLE PARALLEL SAFE AS $$
     SELECT mbos.jsonb_strip_top_nulls(jsonb_build_object(
@@ -237,8 +238,8 @@ BEGIN
     NEW.seq            := coalesce(last_seq, 0) + 1;
     NEW.prev_hash      := last_hash;
     NEW.tx_id          := pg_current_xact_id();
-    NEW.canonical      := mbos.receipt_canonical(NEW)::text;
-    NEW.row_hash       := mbos.sha256_text(NEW.canonical);
+    NEW.canonical      := mbos.cjson(mbos.receipt_canonical(NEW));     -- MBOS-CJSON-1(D)
+    NEW.row_hash       := mbos.sha256_text(NEW.canonical);              -- MBOS-RH-1
     RETURN NEW;
 END $$;
 
@@ -348,7 +349,8 @@ $$;
 --   1. seq is gapless and starts where expected (detects deleted rows)
 --   2. prev_hash equals the previous row's row_hash (detects re-ordering, insertion, rewrites)
 --   3. row_hash = sha256(canonical)                     (detects edits to the hashed bytes)
---   4. canonical::jsonb = receipt_canonical(row)        (detects edits to any column)
+--   4. canonical = cjson(receipt_canonical(row)), i.e.
+--      row_hash = mbos.rh1_row_hash(document)           (detects edits to any column; ADR-0010 MBOS-RH-1)
 --   5. optional anchor: the head must equal or extend a previously exported (seq, row_hash)
 --      (detects tail truncation / whole-tail rewrites, which a self-contained chain cannot)
 CREATE FUNCTION mbos.verify_chain(p_from_seq bigint DEFAULT 1,
@@ -378,7 +380,8 @@ BEGIN
         IF mbos.sha256_text(r.canonical) IS DISTINCT FROM r.row_hash THEN
             RETURN QUERY SELECT false, n, r.seq, 'row_hash does not match canonical bytes'; RETURN;
         END IF;
-        IF r.canonical::jsonb IS DISTINCT FROM mbos.receipt_canonical(r) THEN
+        IF r.canonical IS DISTINCT FROM mbos.cjson(mbos.receipt_canonical(r))
+           OR r.row_hash IS DISTINCT FROM mbos.rh1_row_hash(mbos.receipt_document(r)) THEN
             RETURN QUERY SELECT false, n, r.seq, 'stored columns differ from hashed canonical document'; RETURN;
         END IF;
         IF p_anchor_seq IS NOT NULL AND r.seq = p_anchor_seq THEN

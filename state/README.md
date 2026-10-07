@@ -12,18 +12,23 @@ chain verification, bootstrap scripts for the EliteDesk, and the tests.
 
 ```
 state/
-  migrations/0001_foundation.sql   ULIDs, provenance, receipts (hash chain), outbox, verify_chain
+  migrations/0000_mbos_canonical.sql  ADR-0010 reference (MBOS-CJSON-1 / MBOS-RH-1), byte-identical vendored copy
+  migrations/0001_foundation.sql   ULIDs, provenance, receipts (MBOS-RH-1 hash chain), outbox, verify_chain
   migrations/0002_domain.sql       items, action_requests, approvals, outcomes, lessons, policy, budget_ledger
                                    + state machines + same-transaction receipt invariant
   migrations/0003_api.sql          mbos.* write functions (state + receipt + outbox in one call)
   migrations/0004_views_grants.sql contract-document views, reporting views, least-privilege grants
+  migrations/0005_r1_integration.sql  R1 tables (effector_calls, panic_state, llm_spend, artifacts), R3/ADR-0010
+                                   payload-hash check, R5 PANIC (05 semantics, fail-closed), R8 blocking dedup_key
+  mbos_state/mbos_canonical.py     ADR-0010 Python reference (byte-identical vendored copy)
+  tests/canonical/vectors.json     ADR-0010 golden vectors (byte-identical vendored copy)
   bootstrap/roles.sql              group + login roles (cluster level)
   bootstrap/pg-local.sh            wave-one user-space PG16 cluster (port 55432, loopback only)
   bootstrap/bootstrap.sh           idempotent: roles, DBs, passwords, migrations, verify_chain
   bootstrap/systemd/               user units: postgres, hourly chain verify + anchor
   bootstrap/podman/                Quadlet units for the target runtime (UNTESTED: no Podman on host yet)
   mbos_state/                      Python: migrate, StateStore facade, chain export/anchor/offline verify, CLI
-  tests/                           93 tests; vendored frozen contracts v1.0.0 in tests/contracts-v1.0.0/
+  tests/                           137 tests; vendored frozen contracts v1.0.0 in tests/contracts-v1.0.0/
 ```
 
 ## Tables
@@ -39,6 +44,10 @@ state/
 | `outcomes`, `lessons` | append-only | LEARN inputs |
 | `policy` | append-only, versioned | `policy_current` view; no row = deny; money/purchase/commitment can never be `allow` |
 | `budget_ledger` | append-only | reserve → commit/release; cap checked under an advisory lock; no cap = deny |
+| `effector_calls` | append-only | A5 idempotency anchor; `dry_run` CHECK; only while the request is `executing` (after its ACTION_EXECUTING receipt); gateway only |
+| `panic_state` | append-only, receipted | 05 PANIC body per revision, sealed with `cjson_sha256`; `panic_read()`/`panic_blocks()` fail closed; release = policy_admin only |
+| `llm_spend` | append-only | per-agent daily metering; `llm_spend_authorize()` serializes the cap check; no cap = deny |
+| `artifacts` | append-only | sha256 content-addressed (`put_artifact`); inline now, `storage`/`location` for FS/Garage later |
 
 There are deliberately **no workflow-resume tables**: DBOS owns workflow durability (ADR-0002) in its own
 database (`mbos_dbos`).
@@ -55,8 +64,10 @@ transaction. They work the same from psycopg, SQLAlchemy or a DBOS `@DBOS.transa
 (`SELECT mbos.transition_item(...)`). Every function takes an idempotency key, and replaying it returns the
 original result.
 
+Hashing follows ADR-0010: `row_hash = sha256(mbos.cjson(D))` (MBOS-RH-1), and `mbos.payload_hash = mbos.cjson_sha256`. `jsonb::text` is never hashed.
+
 SQLSTATEs: `MB001` immutable · `MB002` provenance · `MB003` missing receipt · `MB004` illegal transition ·
-`MB005` approval invalid · `MB006` budget · `MB404` not found · `MB409` conflict / stale version.
+`MB005` approval invalid · `MB006` budget · `MB007` payload hash not MBOS-CJSON-1 · `MB404` not found · `MB409` conflict / stale version.
 
 ## Roles
 

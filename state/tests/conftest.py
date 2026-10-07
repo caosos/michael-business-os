@@ -52,6 +52,8 @@ def cluster():
         with psycopg.connect(f"{base} dbname=postgres user=postgres", autocommit=True) as c:
             c.execute((STATE_DIR / "bootstrap" / "roles.sql").read_text())
             c.execute(f"CREATE DATABASE {TEMPLATE_DB} OWNER mbos_owner")
+        with psycopg.connect(f"{base} dbname={TEMPLATE_DB} user=postgres", autocommit=True) as c:
+            c.execute("CREATE SCHEMA dbos AUTHORIZATION mbos_dbos")   # as bootstrap.sh does
         migrate.migrate(f"{base} dbname={TEMPLATE_DB} user=postgres", log=lambda *_: None)
         yield {"base": base, "pg_bin": pg_bin, "root": root}
     finally:
@@ -69,7 +71,7 @@ class DB:
     LOGIN = {
         "superuser": "postgres", "owner": "mbos_migrator", "reader": "mbos_reader", "agent_write": "mbos_state_mcp",
         "gateway": "mbos_gateway", "approver": "mbos_operator_ui", "policy_admin": "mbos_policy",
-        "outbox_relay": "mbos_relay",
+        "outbox_relay": "mbos_relay", "dbos": "mbos_dbos",
     }
 
     def __init__(self, base: str, name: str):

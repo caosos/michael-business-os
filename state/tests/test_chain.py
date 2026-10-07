@@ -82,8 +82,8 @@ def test_concurrent_writers_never_fork(db):
      "row_hash does not match"),
     ("consistent rewrite",
      """UPDATE mbos.receipts SET intent = 'innocent',
-            canonical = (mbos.receipt_canonical(receipts) || '{"intent":"innocent"}')::text,
-            row_hash = mbos.sha256_text((mbos.receipt_canonical(receipts) || '{"intent":"innocent"}')::text)
+            canonical = mbos.cjson(mbos.receipt_canonical(receipts) || '{"intent":"innocent"}'),
+            row_hash = mbos.cjson_sha256(mbos.receipt_canonical(receipts) || '{"intent":"innocent"}')
         WHERE seq = %s""",
      "prev_hash does not match"),
     ("deleted row", "DELETE FROM mbos.receipts WHERE seq = %s", "seq gap"),
@@ -102,7 +102,8 @@ def test_tamper_detected(db, label, sql, reason):
 def test_single_byte_flip_detected(db):
     s = db.store()
     _fill(s, 5)
-    _tamper(db, "UPDATE mbos.receipts SET row_hash = overlay(row_hash placing 'f' from 20 for 1) WHERE seq = 3")
+    _tamper(db, """UPDATE mbos.receipts SET row_hash = overlay(row_hash placing
+              CASE WHEN substr(row_hash, 20, 1) = 'f' THEN 'e' ELSE 'f' END from 20 for 1) WHERE seq = 3""")
     st = s.verify_chain()
     assert not st.ok and st.first_bad_seq in (3, 4)
 
@@ -131,7 +132,7 @@ def test_offline_export_verify_and_tamper(db, tmp_path):
     lines = out.read_text().splitlines()
     i = next(n for n, line in enumerate(lines) if "loop 3" in line)
     rec = json.loads(lines[i])
-    rec["canonical"] = rec["canonical"].replace("loop 3", "loop 4")
+    rec["intent"] = "loop 4"
     bad = tmp_path / "bad.jsonl"
     bad.write_text("\n".join(lines[:i] + [json.dumps(rec)] + lines[i + 1:]) + "\n")
     ok, _, problem = chain.verify_export(bad)
@@ -155,3 +156,20 @@ def test_verify_chain_from_offset(db):
     _fill(s, 6)
     st = s.verify_chain(from_seq=4)
     assert st.ok and st.receipts_checked == s.chain_head()["seq"] - 3
+
+
+def test_db_chain_verifies_with_adr0010_reference(db, tmp_path):
+    """D-02 acceptance: a chain exported from this DB verifies with mbos_canonical.verify_chain."""
+    from mbos_state import mbos_canonical
+    s = db.store()
+    item_id, pid = _fill(s, 5)
+    s.update_item_doc(item_id, {"economics": {"offer": 850.0, "rate": 3.20, "tiny": 1e-7, "neg": -0.0}},
+                      "SCORE_RECORDED", AGENT, "floats per ADR-0010", [pid], key())
+    out = tmp_path / "chain.jsonl"
+    chain.export_chain(s.conn, out)
+    docs = [json.loads(x) for x in out.read_text().splitlines()]
+    ok, msg = mbos_canonical.verify_chain(docs)
+    assert ok, msg
+    for canonical, doc in s.conn.execute(
+            "SELECT r.canonical, mbos.receipt_document(r) FROM mbos.receipts r ORDER BY seq"):
+        assert canonical == mbos_canonical.canonical_json(mbos_canonical.receipt_hash_document(doc))

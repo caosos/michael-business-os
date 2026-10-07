@@ -1,8 +1,9 @@
 """Chain export, external anchoring and an offline verifier that does not trust the database.
 
-Export format (JSONL, one receipt per line): {"seq", "receipt_id", "canonical", "row_hash"} where
-``canonical`` is the exact text whose sha256 is ``row_hash``. The verifier recomputes every hash and
-checks seq continuity and prev_hash linkage using only this file and Python's hashlib.
+Export format (JSONL, one Receipt v1 document per line, ordered by seq, row_hash included). Verification
+uses ONLY the vendored ADR-0010 reference (`mbos_canonical`, stdlib): every row_hash is recomputed as
+MBOS-RH-1 over the document, and seq continuity and prev_hash linkage are checked. Any lane can run the
+same check with its own copy of `mbos_canonical.verify_chain`.
 
 An anchor is the head (seq, row_hash) written somewhere the database host cannot rewrite (off-box
 backup target, git, printed). A chain that no longer contains the anchored row_hash at the anchored
@@ -19,6 +20,8 @@ from pathlib import Path
 
 import psycopg
 
+from . import mbos_canonical
+
 
 def sha256_text(text: str) -> str:
     return "sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest()
@@ -26,13 +29,11 @@ def sha256_text(text: str) -> str:
 
 def export_chain(conn: psycopg.Connection, out: Path, from_seq: int = 1) -> int:
     n = 0
-    # server-side cursor (streams large chains); REPEATABLE READ-like consistency comes from one statement
+    # server-side cursor streams large chains
     with out.open("w", encoding="utf-8") as fh, conn.transaction(), conn.cursor(name="mbos_chain_export") as cur:
-        cur.execute(
-            "SELECT seq, receipt_id, canonical, row_hash FROM mbos.receipts WHERE seq >= %s ORDER BY seq", (from_seq,)
-        )
-        for seq, rid, canonical, row_hash in cur:
-            fh.write(json.dumps({"seq": seq, "receipt_id": rid, "canonical": canonical, "row_hash": row_hash}) + "\n")
+        cur.execute("SELECT doc::text FROM mbos.v_receipt_documents WHERE seq >= %s ORDER BY seq", (from_seq,))
+        for (doc,) in cur:
+            fh.write(doc + "\n")
             n += 1
     return n
 
@@ -52,37 +53,27 @@ def write_anchor(conn: psycopg.Connection, out: Path) -> dict:
 
 def verify_lines(lines: Iterable[str], anchors: Iterable[dict] = ()) -> tuple[bool, int, str | None]:
     """Returns (ok, receipts_checked, problem)."""
-    expected_seq = None
-    prev_hash = None
+    docs = [json.loads(line) for line in lines if line.strip()]
+    if docs and docs[0]["seq"] == 1:
+        ok, msg = mbos_canonical.verify_chain(docs)       # the normative ADR-0010 check, verbatim
+        if not ok:
+            return False, 0, msg
+    prev = docs[0].get("prev_hash") if docs else None     # partial export: trust its first link only
     seen: dict[int, str] = {}
-    n = 0
-    for line in lines:
-        if not line.strip():
-            continue
-        rec = json.loads(line)
-        seq, canonical, row_hash = rec["seq"], rec["canonical"], rec["row_hash"]
-        doc = json.loads(canonical)
-        if expected_seq is None:
-            expected_seq = seq
-            prev_hash = doc.get("prev_hash") if seq > 1 else None
-        if seq != expected_seq:
-            return False, n, f"seq gap at {expected_seq} (found {seq})"
-        if doc.get("seq") != seq or doc.get("receipt_id") != rec["receipt_id"]:
-            return False, n, f"seq {seq}: export metadata does not match canonical document"
-        if doc.get("prev_hash") != prev_hash:
-            return False, n, f"seq {seq}: prev_hash does not link to the previous row_hash"
-        if sha256_text(canonical) != row_hash:
-            return False, n, f"seq {seq}: row_hash does not match canonical bytes"
-        seen[seq] = row_hash
-        prev_hash = row_hash
-        expected_seq = seq + 1
-        n += 1
+    for i, d in enumerate(docs):
+        if i and d["seq"] != docs[i - 1]["seq"] + 1:
+            return False, i, f"seq gap before {d['seq']}"
+        if d.get("prev_hash") != prev:
+            return False, i, f"seq {d['seq']}: prev_hash does not link to the previous row_hash"
+        if mbos_canonical.receipt_row_hash(d) != d["row_hash"]:
+            return False, i, f"seq {d['seq']}: row_hash mismatch (MBOS-RH-1)"
+        seen[d["seq"]] = prev = d["row_hash"]
     for a in anchors:
         if a["seq"] not in seen:
-            return False, n, f"anchored seq {a['seq']} missing (truncated?)"
+            return False, len(docs), f"anchored seq {a['seq']} missing (truncated?)"
         if seen[a["seq"]] != a["row_hash"]:
-            return False, n, f"anchored seq {a['seq']} row_hash differs (rewritten?)"
-    return True, n, None
+            return False, len(docs), f"anchored seq {a['seq']} row_hash differs (rewritten?)"
+    return True, len(docs), None
 
 
 def verify_export(path: Path, anchor_log: Path | None = None) -> tuple[bool, int, str | None]:

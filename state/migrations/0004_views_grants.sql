@@ -121,7 +121,9 @@ GRANT EXECUTE ON FUNCTION
     mbos.ulid(), mbos.new_id(text), mbos.sha256_text(text), mbos.payload_hash(jsonb), mbos.utc_iso(timestamptz),
     mbos.jsonb_strip_top_nulls(jsonb), mbos.receipt_canonical(mbos.receipts), mbos.receipt_document(mbos.receipts),
     mbos.chain_head(), mbos.verify_chain(bigint, bigint, text), mbos.idempotent_receipt(text, text),
-    mbos.require_receipt(text[], text, text, jsonb), mbos.budget_exposure(text, text)
+    mbos.require_receipt(text[], text, text, jsonb), mbos.budget_exposure(text, text),
+    mbos.cjson(jsonb), mbos.cjson_number(jsonb), mbos.cjson_sha256(jsonb),          -- ADR-0010 (0000)
+    mbos.rh1_hash_document(jsonb), mbos.rh1_row_hash(jsonb)
 TO agent_read, agent_write, gateway, approver, policy_admin;
 
 GRANT EXECUTE ON FUNCTION mbos.record_provenance(jsonb), mbos.append_receipt(jsonb)
