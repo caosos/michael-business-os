@@ -1,0 +1,13 @@
+From: PublicSurplus <noreply@publicsurplus.com>
+To: michael@example.invalid
+Subject: PublicSurplus watch list: welder
+Date: Wed, 07 Oct 2026 07:15:00 -0500
+Message-ID: <fixture-ps-1@publicsurplus.com>
+Authentication-Results: mx.example.invalid; dkim=pass header.d=publicsurplus.com
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body><ul>
+<li><a href="https://www.publicsurplus.com/sms/auction/view?auc=3456789">Lincoln AC225 Stick Welder</a>
+ High Bid: $120.00 Closes: 2026-10-09 Little Rock, AR 72201</li>
+</ul></body></html>

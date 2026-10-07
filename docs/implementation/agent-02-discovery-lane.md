@@ -201,3 +201,23 @@ Acceptance (FACT): `test_hold_wakes_on_lane_b_price_change_and_never_executes` r
 5. The evidence provenance is FACT by `agent-02-opportunity`. **No ACTION_EXECUTING or ACTION_EXECUTED receipt exists.** Re-delivery is a no-op.
 
 Mutation check: with the `notify_event` call removed, the item stays HELD.
+
+## 14. Saved-search alert e-mails — READY_QUEUE B-06 (ADR-02-0202 tier 2)
+
+`src/mbos_discovery/adapters/email_alerts.py` has one adapter per origin: `govdeals_email`, `publicsurplus_email` and `estatesales_net_email`. Each is ALLOWED at tier 2. Scraping EstateSales.NET stays FORBIDDEN, and its email alerts are the sanctioned route.
+
+- **Readers.**
+  - `EmlDirReader`: fixtures or exported mail, no network.
+  - `ImapReader`: runs only with `live=True` and a password from an env var. It opens the folder with `select(readonly=True)` (EXAMINE), searches `SINCE`, and fetches `(BODY.PEEK[])` so not even \Seen changes. The module contains no STORE, COPY, MOVE, EXPUNGE or APPEND.
+- **Trust.**
+  - Mail from other senders is skipped and never retained.
+  - Mail that claims the origin's domain but lacks `dkim=pass` for that domain is quarantined, with raw kept for audit.
+  - Only https links on the origin's domain whose path matches its listing pattern become listings.
+  - Text goes through the usual injection flagging.
+- **Replay.** The raw payload is `{origin, email_source, listing_index}` in MBOS-CJSON-1 form. `normalize` re-parses the message deterministically.
+- **Mapping** (INFERENCE; generic parser). Nearby text gives:
+  - the price: "Current/High Bid" → `auction_current`, "Starting at/Opening bid" → `starting_bid`
+  - the end date: an end-of-day UTC upper bound, since alert times have no reliable timezone
+  - the place: "City, ST [zip]"
+- **Estate sales** are events, so they map to `other_asset`, subcategory `estate sale`, with `needs_review`. They are never keyword-classified.
+- **UNKNOWN:** real alert layouts per origin. The fixtures are hand-built. Re-record real alerts on the first live run and tighten each parser.

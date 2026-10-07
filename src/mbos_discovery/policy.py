@@ -43,7 +43,10 @@ REGISTRY: dict[str, SourcePolicy] = {p.source: p for p in [
     _P("ebay_marketplace_insights", Disposition.ALLOWED, 1, "low",
        "eBay Marketplace Insights (sold comps) — Limited Release; needs eBay approval + live flag"),
     # Tier 2 — sanctioned email alerts in our own inbox
-    _P("email_alert", Disposition.ALLOWED, 2, "low", "IMAP saved-search alerts — next adapter"),
+    _P("govdeals_email", Disposition.ALLOWED, 2, "low", "GovDeals saved-search alert emails in our own inbox"),
+    _P("publicsurplus_email", Disposition.ALLOWED, 2, "low", "PublicSurplus alert emails in our own inbox"),
+    _P("estatesales_net_email", Disposition.ALLOWED, 2, "low",
+       "EstateSales.NET alert emails (site scraping stays FORBIDDEN; email is the sanctioned path)"),
     # Tier 5 — human-entered evidence (Michael / Operator UI), with human provenance
     _P("manual", Disposition.ALLOWED, 5, "low", "sold comps recorded by a human, with provenance"),
     # Tier 3/4 — gray zone, needs explicit per-source enablement (P2)

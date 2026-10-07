@@ -1,0 +1,19 @@
+From: GovDeals Alerts <alerts@govdeals.com>
+To: michael@example.invalid
+Subject: New items match your saved search "trailer OR mower"
+Date: Wed, 07 Oct 2026 06:00:00 -0500
+Message-ID: <fixture-gd-1@govdeals.com>
+Authentication-Results: mx.example.invalid; dkim=pass header.d=govdeals.com; spf=pass
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body><p>Items matching your search:</p>
+<table>
+<tr><td><a href="https://www.govdeals.com/asset/1234/5678">Utility Trailer 5x10, Single Axle</a></td>
+<td>Current Bid: $350.00 &middot; Closes: 2026-10-08 &middot; Conway, AR 72032</td></tr>
+<tr><td><a href="https://www.govdeals.com/asset/2222/5678">Kubota Zero Turn Mower 60in</a></td>
+<td>Starting at $500 &middot; Ends: 2026-10-15 &middot; Searcy, AR</td></tr>
+<tr><td><a href="https://evil.example.com/asset/9999/1">Too good to be true trailer</a></td><td>Current Bid: $1</td></tr>
+</table>
+<p><a href="https://www.govdeals.com/account/unsubscribe">Unsubscribe</a></p>
+</body></html>
