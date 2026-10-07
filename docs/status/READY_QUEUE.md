@@ -1,7 +1,7 @@
 # READY QUEUE: Michael Business OS, Round Two
 
 - **Owner:** Agent 01 (coordinator / dispatcher). **Protocol:** `docs/COORDINATION.md`. Read it before claiming.
-- **Last synced:** 2026-10-07 14:50 -0500, against branch heads 02 `41d45a6` · 03 `73a4d32` · 04 `7f0649a` · 05 `16fb86c` · 06 `c125618` · 07 `397101c`.
+- **Last synced:** 2026-10-07 15:00 -0500, against branch heads 02 `41d45a6` · 03 `73a4d32` · 04 `7f0649a` · 05 `16fb86c` · 06 `c125618` · 07 `397101c`.
 - **Read it from any worktree:** `git fetch -q origin && git show origin/research/agent-01-coordinator:docs/status/READY_QUEUE.md`
 - **Status values:** READY · CLAIMED · BLOCKED · DONE.
 - **Priority:** P0 = critical path · P1 = next-up · P2 = useful parallel work.
@@ -58,8 +58,8 @@
 | B-05 | P1 | P-02-1: wake-event producer. On re-sighting (price change, new info) or an auction nearing its end, call `mbos.workflows.notify_event(item_id, kind, evidence)`, where kind ∈ `price_change`/`auction_ending`/`new_info` (defined by A-08). Record each event's provenance | A-08 (API published this push) | **DONE** @ `e439b9b` (`deliver_wake_events`; A-04 runs it after discover) | 02 | A HOLD with `wake_on=price_change` wakes from a 02 fixture re-sighting; it never executes |
 | B-06 | P2 | P-02-2: IMAP alert ingestor (tier 2), fixture-first, no live mailbox without explicit enablement | none | **DONE** @ `bd899f4` (read-only IMAP, DKIM-checked) | 02 | Fixture emails → RawListing; no network in tests |
 | B-07 | P2 | P-02-3: SAM.gov adapter (service lane / gov contracts), fixture-first | none | **DONE** @ `32c148c` | 02 | Fixture tests |
-| B-08 | P2 | P-02-4: eBay Browse *asking* comps for 03's evidence bundle (labelled ASKING, never SOLD) | none | **BLOCKED** on C-10 (source side done @ `a41fedf`) | 02 (+03) | 03's estimator consumes them with the right basis |
-| B-10 | P1 | Discovery acceptance F1–F4 as a runnable harness: F1 every Item has ≥1 `sources[]` with `raw_ref`; F2 duplicate rate after dedup on a 7-day fixture corpus (target <2%); F3 repeated 403/429 → L2 freeze request; F4 no collector touches a do-not-automate source | none | READY | 02 | Harness green; F2 rate reported |
+| B-08 | P2 | P-02-4: eBay Browse *asking* comps for 03's evidence bundle (labelled ASKING, never SOLD) | none | **DONE** @ `be0dd52` (asking-only evidence gives a fenced INFER estimate; never YES) | 02 (+03) | 03's estimator consumes them with the right basis |
+| B-10 | P1 | Discovery acceptance F1–F4 as a runnable harness: F1 every Item has ≥1 `sources[]` with `raw_ref`; F2 duplicate rate after dedup on a 7-day fixture corpus (target <2%); F3 repeated 403/429 → L2 freeze request; F4 no collector touches a do-not-automate source | none | **CLAIMED** (02) | 02 | Harness green; F2 rate reported |
 | B-09 | P2 | P-02-5: source-freeze wiring onto Postgres PANIC | E-02 | BLOCKED | 02 | Freeze round-trips on 04/05's tables |
 
 ### Lane C: Agent 03 (economics)
@@ -75,7 +75,7 @@
 | C-06 | P1 | R13 amended (03 P-03-04): for flips, a PASS archives only if the revenue side AND ≥1 cost-side input are evidence-backed; otherwise `pass_on_priors=true` | none | **DONE** @ `9e36ec9` (engine 0.4.0; revenue requirement on the economic gates only, confirmed by 01) | 03 | Goldens: the floor PASS driven by prior repair costs is flagged |
 | C-07 | P1 | LEARN on 04's outcome store: Brier/MAPE from `predicted_vs_actual`; a config bump is PROPOSED as a tier-0 ActionRequest (`config.scoring.bump`), never auto-applied | none | **DONE** @ `0c3cf4a` (LEARN proposes, never applies; system-scoped areq waits on ADR-0009 item 9) | 03 | Two outcomes → a bump proposal with provenance; nothing applied |
 
-| C-10 | **P1 (do first)** | Fix `comps_feed.entry()` KeyError `sold_date` on ASKING comps (02's repro; unblocks B-08) | none | READY | 03 | 02's B-08 xfail test passes unchanged |
+| C-10 | **P1 (do first)** | Fix `comps_feed.entry()` KeyError `sold_date` on ASKING comps (02's repro; unblocks B-08) | none | **DONE** @ `e1869f2` (engine 0.6.1; verified by 01's lane-C tests) | 03 | 02's B-08 xfail test passes unchanged |
 | C-08 | P1 | Morning digest ranking: a pure function over scored Items → a ranked "what to do first" list (EV $/h, time-to-cash, expiry/auction end, confidence) with one-line reasons and provenance refs, for the Operator UI and a daily summary (72-hour plan) | none | **CLAIMED** | 03 (06 renders) | Deterministic ranking over the 13 goldens + 02 fixtures; explanation per row |
 | C-09 | P1 | Owner-decision support for MICHAEL_DECISIONS #1/#2: a sensitivity report showing how verdicts on current goldens and fixtures change across cash caps and $/h floor/targets. Report only; config untouched | none | READY | 03 | `docs/` report with a table; no config change |
 

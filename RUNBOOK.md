@@ -148,7 +148,13 @@ Not yet built (lane E): egress cut, credential lease revocation, LiteLLM budget 
 - **A9.** Only the gateway part of L3 is built. Egress cut and lease revocation are lane E.
 - **Scoring:** the default `Scorer` is a PLACEHOLDER, not economic advice.
   - Agent 03's real engine plugs in via `mbos.adapters.economics.EconomicsEngineScorer(config_dir=...)`.
-  - Install it from 03's branch: `.tools/uv pip install --python .venv/bin/python "mbos-economics @ git+file://$(git rev-parse --git-common-dir | xargs realpath)@dcd6883#subdirectory=economics"`.
+  - Install it from 03's branch as a clean archive. Remove any committed `build/` tree first: setuptools can otherwise package a stale `build/lib`, and the label will not match the code.
+    ```bash
+    H=$(git rev-parse --short origin/research/agent-03-economics); D=$(mktemp -d)
+    git archive $H economics | tar -x -C $D && rm -rf $D/economics/build
+    .tools/uv pip install --python .venv/bin/python --reinstall-package mbos-economics $D/economics
+    .venv/bin/python -c "import mbos_economics as m; print(m.__version__)"   # must match 03's __init__.py at $H
+    ```
   - `tests/integration/test_lane_c_economics.py` exercises it and skips if the package is not installed.
 - **The state store is the reference DDL** until the port onto Agent 04's schema (integration ruling R1).
 
