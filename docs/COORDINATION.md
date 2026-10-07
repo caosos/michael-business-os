@@ -49,6 +49,11 @@ for b in 02-opportunity 03-economics 04-state 05-governance 06-communications 07
   git show origin/research/agent-$b:docs/status/AGENT_STATUS.md | grep -E '^(State|Claimed|Done|Blocked)' ; done
 ```
 
+## Commit identity (provenance; P-07-2)
+The shared `.git/config` identity is overwritten by whichever agent launched last, so **always set your identity per commit**:
+`git -c user.name='Agent NN <Role>' -c user.email='michaelos+agent-NN-<role>@users.noreply.github.com' commit …`
+Check it with `git log -1 --format='%an'` before pushing. The correction of record for past mislabelled commits is in `docs/receipts/2026-10-07-provenance-correction-commit-authorship.md`.
+
 ## Non-negotiables (unchanged)
 - DRY-RUN only: no sends, spend, publishing, contact or deployment.
 - No action without a receipt. No receipt without provenance.

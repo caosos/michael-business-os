@@ -1,7 +1,7 @@
 # READY QUEUE: Michael Business OS, Round Two
 
 - **Owner:** Agent 01 (coordinator / dispatcher). **Protocol:** `docs/COORDINATION.md`. Read it before claiming.
-- **Last synced:** 2026-10-07 12:40 -0500, against branch heads 02 `41d45a6` · 03 `73a4d32` · 04 `7f0649a` · 05 `16fb86c` · 06 `c125618` · 07 `397101c`.
+- **Last synced:** 2026-10-07 12:52 -0500, against branch heads 02 `41d45a6` · 03 `73a4d32` · 04 `7f0649a` · 05 `16fb86c` · 06 `c125618` · 07 `397101c`.
 - **Read it from any worktree:** `git fetch -q origin && git show origin/research/agent-01-coordinator:docs/status/READY_QUEUE.md`
 - **Status values:** READY · CLAIMED · BLOCKED · DONE.
 - **Priority:** P0 = critical path · P1 = next-up · P2 = useful parallel work.
@@ -24,6 +24,8 @@
 | A-07 | P1 | `notify_decision(item_id, approval_id)` wake helper for the UI and CLI (06 P-06-1) | none | **DONE** (this push) | 01 | `mbos.workflows.notify_decision` exists; F-01 uses it |
 | A-08 | P2 | `_approval_gate` acts on `wake_on` = `new_info` / `price_change` / `auction_ending` via a message kind sent by lanes B/C (06 P-06-2) | none | READY | 01 | Test: a HOLD with `wake_on=price_change` wakes on a price-change message, never executes |
 | A-09 | P1 | Ruling R12: the Item edge table is lane D's (every item passes RESEARCHING; a YES on HELD re-presents first; LEARNED is terminal; follow-up edge ACTED→AWAITING_APPROVAL). The spine is aligned (migration 0004) | none | **DONE** (this push) | 01 | Parity test against 04's live DB passes |
+| A-10 | P1 | Ship the contracts as package data so a non-editable install works without `MBOS_CONTRACTS_DIR` (07 P-07-1/F-16) | none | READY | 01 | `pip install .` into a clean venv; the suite passes with no env var |
+| A-11 | P1 | ADR-0010 interop: `tools/interop_check.py` covers vectors, rejections and vendored-copy byte identity | none | **DONE** (this push) | 01 | All 6 Python lanes CONFORM (12:50) |
 | A-06 | P2 | ADR-0009 v1.1.0: collect lane acknowledgements, then decide | lane acks | READY | 01 | ADR-0009 ACCEPTED or amended; vectors and examples regenerated |
 
 ### Lane D: Agent 04 (state, CRITICAL PATH)
@@ -54,7 +56,10 @@
 |---|---|---|---|---|---|---|
 | E-01 | P1 | R7 propose-only grant for `agent-01-coordinator` + ADR-0010 `payload_hash` (drop the float refusal) + stand-in store `row_hash` → MBOS-RH-1 | none | **DONE** @ `df826c3` | 05 | interop row 05 = 10/10; `vectors.json` `receipt_chain` verifies with 05's code |
 | E-02 | P0 (after D-01) | Postgres-backed `GovernanceStore` + `PanicStore` on 04's tables (R2/R4/R5). Fail-closed is kept | D-01, D-02 | BLOCKED | 05 | 05's suite passes on Postgres; no SQLite in the production path |
-| E-03 | P2 | A8/A9 hardening, dry: per-agent LiteLLM budget config generator (no external calls); L3 hook that cancels unstarted DBOS workflows (`DBOS.cancel_workflows`) and writes the egress deny-all policy file | none | **CLAIMED** | 05 | Tests prove L3 cancels pending workflows and emits deny-all config; nothing reaches the network |
+| E-03 | P2 | A8/A9 hardening, dry: per-agent LiteLLM budget config generator (no external calls); L3 hook that cancels unstarted DBOS workflows (`DBOS.cancel_workflows`) and writes the egress deny-all policy file | none | **DONE** @ `e12caa3` | 05 | Tests prove L3 cancels pending workflows and emits deny-all config; nothing reaches the network |
+
+| E-04 | P1 | Outbound secret scan + `INJECTION_SUSPECTED` tripwire (05 §17 #24–26): scan proposed payloads and effector requests; listing/inbound text matching injection patterns emits an `INJECTION_SUSPECTED` receipt and forces tier 0 + `needs_review` | none | READY | 05 | Tests: a secret in a payload is refused; an injected listing yields at most a tier-0 proposal with the tripwire receipt |
+| E-05 | P2 | Stuck-claim reconciliation job: executions left `executing` past a TTL are reconciled through the gateway (provider-query-before-retry semantics, dry-run) | none | READY | 05 | Test: a crashed claim is reconciled exactly once; no re-send |
 
 ### Lane F: Agent 06 (Operator UI)
 | ID | Pri | Task | Deps | Status | Agent | Acceptance |
@@ -67,9 +72,12 @@
 ### Lane G: Agent 07 (QA)
 | ID | Pri | Task | Deps | Status | Agent | Acceptance |
 |---|---|---|---|---|---|---|
-| G-01 | P1 | ADR-0010: `core.canonical`/`receipt_row_hash` → reference; add `vectors.json` to `mbos_qa interop`; re-run interop across all lanes and publish the matrix | none | **CLAIMED** | 07 | Matrix published; F-13/F-14 closed or re-opened with evidence |
-| G-02 | P1 | **R11 amended: start now.** 07 writes `MBOS_QA_IMPL` = `mbos_qa.impl_spine:build` against 01's public API (`mbos.runtime`, `mbos.spine`, `mbos.ledger`, `mbos.audit`, `mbos.workflows`) on pgserver Postgres. Re-target the store to 04's schema when A-01 lands | none (A-01 later) | READY | 07 | A1–A10 from `qa/` run against the real spine; results reported as real, not mocked |
+| G-01 | P1 | ADR-0010: `core.canonical`/`receipt_row_hash` → reference; add `vectors.json` to `mbos_qa interop`; re-run interop across all lanes and publish the matrix | none | **DONE** @ `9cbce70` (docs/qa/INTEROP_REPORT.md) | 07 | Matrix published; F-13/F-14 closed or re-opened with evidence |
+| G-02 | P1 | **R11 amended: start now.** 07 writes `MBOS_QA_IMPL` = `mbos_qa.impl_spine:build` against 01's public API (`mbos.runtime`, `mbos.spine`, `mbos.ledger`, `mbos.audit`, `mbos.workflows`) on pgserver Postgres. Re-target the store to 04's schema when A-01 lands | none (A-01 later) | **CLAIMED** | 07 | A1–A10 from `qa/` run against the real spine; results reported as real, not mocked |
 | G-03 | P2 | G1–G4 marketing tests against the real ActionRequest/approval path (publishing drafts as dry-run ActionRequests) | G-02 | READY after G-02 | 07 | G1–G4 green on the real spine |
+
+## Operator infrastructure (not a business decision; outside the repo)
+- **X-01 (P1, PROVENANCE):** the shared `.git/config` identity is overwritten by the last-launched agent (07 P-07-2, verified by 01). All of 01's Round Two commits are recorded as "Agent 07 Marketing". The fix is in `~/bin/mbos-agent`: enable `extensions.worktreeConfig`, then set `git config --worktree user.name/user.email`. Interim rule: per-commit `-c user.name/-c user.email` (docs/COORDINATION.md). The correction receipt is in `docs/receipts/2026-10-07-provenance-correction-commit-authorship.md`.
 
 ## Michael (business-policy only; nothing blocks the dry-run MVP)
 - MICHAEL_DECISIONS #1–#5 are unchanged.

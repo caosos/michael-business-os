@@ -26,7 +26,7 @@ LANES = [
     ("03", "research/agent-03-economics", "economics/src/mbos_economics/canonical.py", lambda m: m.content_hash),
     ("05", "research/agent-05-governance", "src/mbos_governance/ids.py", lambda m: m.payload_hash),
     ("06", "research/agent-06-communications", "operator_ui/mbos_canonical.py", lambda m: m.sha256_of),  # vendored reference (F-02)
-    ("07", "research/agent-07-marketing", "qa/mbos_qa/core.py", lambda m: lambda o: m.sha256_ref(o)),
+    ("07", "research/agent-07-marketing", "qa/contracts/canonical/mbos_canonical.py", lambda m: m.sha256_of),  # core.py delegates here
 ]
 
 
@@ -66,9 +66,21 @@ def main() -> int:
                     ok += 1
                 else:
                     fails.append(case["name"])
+            if path.endswith("mbos_canonical.py"):
+                theirs = subprocess.run(["git", "show", f"origin/{branch}:{path}"], cwd=ROOT, capture_output=True).stdout
+                if theirs != (ROOT / "docs/research/contracts/canonical/mbos_canonical.py").read_bytes():
+                    fails.append("vendored mbos_canonical.py is NOT byte-identical to the reference")
+            rej_ok = 0
+            for case in VEC["reject"]:
+                try:
+                    f(json.loads(case["input"]))
+                    fails.append(f"accepts {case['name']}")
+                except Exception:
+                    rej_ok += 1
             all_ok &= not fails
-            rows.append((lane, head, f"{ok}/{len(VEC['cjson'])}", "CONFORMS" if not fails else "differs: " + "; ".join(fails)))
-    print("| Lane | Head | CJSON vectors | Result |\n|---|---|---|---|")
+            rows.append((lane, head, f"{ok}/{len(VEC['cjson'])} · rejects {rej_ok}/{len(VEC['reject'])}",
+                         "CONFORMS" if not fails else "differs: " + "; ".join(fails)))
+    print("| Lane | Head | Vectors · rejections | Result |\n|---|---|---|---|")
     for r in rows:
         print(f"| {r[0]} | `{r[1]}` | {r[2]} | {r[3]} |")
     print("\nReceipt row_hash (MBOS-RH-1): checked by each lane's own test against vectors.json `receipt_chain`;"
