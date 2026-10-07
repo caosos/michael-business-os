@@ -1,27 +1,58 @@
 # Agent Status
 
 Agent: 04
-Role: Postgres / State / Receipts (lane D, durable business state, receipts, provenance)
+Role: Postgres / State / Receipts (lane D: durable business state, receipts, provenance; sole ledger owner per ADR-0010)
 Branch: research/agent-04-state
 Worktree: /home/michaelos/business-os-worktrees/agent-04-state
-State: WORKING (claimed: integration ruling R1 — migration 0005 + R3 canonical hash + DBOS role answer)
-Current phase: ROUND TWO: implementation, Lane D (Postgres state spine)
+State: WORKING
+Claimed: D-03
+Done: D-01 @ a0d1fbe
+Done: D-02 @ a0d1fbe
+Current phase: ROUND TWO: foreman loop (READY_QUEUE)
 Started: 2026-10-06
-Last updated: 2026-10-07 (claimed R1 task from ROUND_TWO_INTEGRATION.md §5 item 1)
+Last updated: 2026-10-07 (D-01 + D-02 done; D-03 claimed)
 
 ## Current objective
-**CLAIMED (2026-10-07):** No READY_QUEUE.md or ACTIVE_WORK.md exists on any branch, so the work assignment is Agent 01's `docs/integration/ROUND_TWO_INTEGRATION.md` §5 item 1 (critical path):
-- migration `0005` with the R1 tables: `effector_calls`, PANIC/governance state (R5), `llm_spend`, `artifacts`
-- the R3 canonical payload hash
-- R8: dedup_key becomes a blocking key
-- answers on the DBOS role and checkpoint schema
+**D-03:** reporting views over the ADR-0010 chain, plus restore drill D1 followed by `verify_chain`.
 
-Deliver the authoritative Postgres state spine per ADR-0001 and ADR-0004 and the frozen contracts
-v1.0.0. **Done for wave one.**
-Next step: wire it to Agent 01's DBOS app, then build the State MCP server (see the 1-week plan in
-`docs/research/agent-04-round-two.md` §4).
+## Answers requested by Agent 01 (ROUND_TWO_INTEGRATION §3 D, READY_QUEUE D-01)
+1. **DBOS login role: `mbos_dbos`.** It is created by `state/bootstrap/roles.sql`.
+   - **Owns:** the DBOS system database `mbos_dbos`.
+   - **Writes state only through the `mbos.*` API, as a member of:**
+     - `agent_write`: ingest, items, proposals, outcomes
+     - `approver`: `spine.decide` records Michael's decisions from the Operator UI and CLI
+     - `gateway`: R4 runs 05's gateway in-process
+   - **Cannot:** UPDATE or DELETE any ledger, or write policy (tested).
+   - The per-edge role checks still stop LLM-facing processes (`mbos_state_mcp`) from approving or executing.
+   - RECOMMENDATION: once 05's gateway runs as its own process, revoke `gateway` from `mbos_dbos`.
+2. **Checkpoint schema: YES.** DBOS datasource checkpoints (`dbos.transaction_outputs`) may and should live in schema **`dbos` of the app DB `mbos`**.
+   - That puts the checkpoint in the same transaction as the state change and its receipt, so a step is exactly-once together with its receipt.
+   - `bootstrap.sh` creates the schema owned by `mbos_dbos`, so the role needs no CREATE on the database.
+   - The `mbos` schema stays owned by `mbos_owner`.
+   - FACT: covered by a test (`test_dbos_role_can_run_the_spine_and_own_its_checkpoint_schema`) and by a fresh bootstrap.
+
+## Notes for Agent 01's port (A-01 phase 2)
+- **Recreate dev DBs.** The chain is MBOS-RH-1 from genesis: `0000_mbos_canonical.sql` was added, and `0001`/`0004` were amended per ADR-0010. A DB created at `7f0649a` or earlier is refused with `MigrationDrift`.
+- **governance_flags is replaced by `panic_state`** (R5, 05 semantics). Use these functions:
+  - `mbos.panic_read()` and `mbos.panic_blocks(agent, capability, category)`. Both fail closed: no row reads as FROZEN.
+  - `mbos.panic_init(...)`, which defaults to FROZEN.
+  - `mbos.panic_mutate(level, target, engage, ...)`. Release is policy_admin only.
+
+  A9's corruption cases must use `SET LOCAL session_replication_role = replica`, because direct writes need a same-transaction receipt.
+- **effector_calls:** use `mbos.record_effector_call(areq, provider, msg_id, request, response)`. It is exactly-once (a replay returns the original response) and is accepted only while the request is `executing`.
+- **llm_spend:** `mbos.llm_spend_authorize(agent, est_usd, cap_usd)` then INSERT. A NULL cap is denied.
+- **artifacts:** use `mbos.put_artifact(bytes, media_type)`. Columns: `sha256`, `media_type`, `byte_size`, `storage`, `location`, `content`.
+- **Payload hashes:** `payload_hash` must be MBOS-CJSON-1 (`MB007` otherwise). If omitted, `propose_action` computes it.
 
 ## Completed (round two)
+- **D-01 + D-02 @ `a0d1fbe`:**
+  - migration `0005`: `effector_calls`, `panic_state`, `llm_spend`, `artifacts`, plus R8
+  - ADR-0010 MBOS-RH-1 ledger, with the reference vendored byte-identical
+  - 137 tests pass (twice), including all `vectors.json` cases in PostgreSQL
+  - a DB-exported chain verifies with `mbos_canonical.verify_chain`
+  - receipt: `docs/receipts/2026-10-07-d01-d02-migration-0005-adr0010.md`
+
+### Wave one (earlier)
 All items below are FACT, verified by 93 passing tests on PostgreSQL 16.2 on this host.
 
 - **Implementation:** `state/`
