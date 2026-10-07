@@ -591,8 +591,7 @@ def record_enrichment(conn: sa.Connection, item_id: str, block: str, data: Any, 
     item = load_item(conn, item_id, for_update=True)
     entry = {"finding": summary or f"card enrichment: {block}", "field": f"card.{block}", "basis": basis,
              "source_uri": f"artifact:{ref}", "provenance_id": provenance_id}
-    mine = [r for r in (item.get("research") or []) if r.get("field") == entry["field"]]
-    if mine and mine[-1].get("source_uri") == entry["source_uri"]:  # skip only if the LATEST entry already says this (A->B->A appends)
+    if any(r.get("field") == entry["field"] and r.get("source_uri") == entry["source_uri"] for r in item.get("research") or []):
         return entry
     update_item(conn, item_id, patch={"research": (item.get("research") or []) + [entry]},
                 intent=f"card enrichment {block} attached by {agent}", provenance_ids=[provenance_id],

@@ -164,8 +164,7 @@ def record_score(conn: sa.Connection, item_id: str, sr: dict) -> dict:
               "scorecard": sr["scorecard"]}
     _to(conn, item_id, "SCORED", "scored", [prov], LANE_C)
     _patch(conn, item_id, {"scores": scores}, f"scorecard {scores['scorecard_id']}: {sr['verdict']}", [prov], LANE_C,
-           receipt_type="SCORE_RECORDED", extra={"entity_type": "scorecard", "entity_id": scores["scorecard_id"],
-                                                 "inputs_hash": sr["inputs_hash"], "payload_hash": sha256_of(sr["scorecard"]),
+           receipt_type="SCORE_RECORDED", extra={"inputs_hash": sr["inputs_hash"], "payload_hash": sha256_of(sr["scorecard"]),
                                                  "tool_name": f"{sr['tool_name']}@{sr['tool_version']}"})
     rec = {k: v for k, v in {
         "recommendation_id": sr.get("recommendation_id") or new_id("rec"), "verdict": sr["verdict"],
@@ -174,8 +173,7 @@ def record_score(conn: sa.Connection, item_id: str, sr: dict) -> dict:
         "alert": sr.get("alert"), "provenance_id": prov}.items() if v is not None}
     _to(conn, item_id, "RECOMMENDED", f"recommended {sr['verdict']}", [prov], LANE_C)
     _patch(conn, item_id, {"recommendation": rec}, f"machine verdict {sr['verdict']} (not Michael's decision)", [prov],
-           LANE_C, receipt_type="RECOMMENDATION_RECORDED", extra={"entity_type": "recommendation", "entity_id": rec["recommendation_id"],
-                                                          "inputs_hash": sr["inputs_hash"]})
+           LANE_C, receipt_type="RECOMMENDATION_RECORDED", extra={"inputs_hash": sr["inputs_hash"]})
     return {"verdict": sr["verdict"], "recommendation_id": rec["recommendation_id"], "scorecard_id": scores["scorecard_id"]}
 
 
@@ -502,17 +500,10 @@ def record_enrichment(conn: sa.Connection, item_id: str, block: str, data: Any, 
     ref = conn.execute(sa.text("SELECT mbos.put_artifact(:c, 'application/json')"), {"c": raw}).scalar_one()
     entry = {"finding": summary or f"card enrichment: {block}", "field": f"card.{block}", "basis": basis,
              "source_uri": f"artifact:{ref}", "provenance_id": provenance_id}
-    # Lock the item row FIRST, then decide from the CURRENT latest entry for this block (04 read-through R1: a value that
-    # returns to an earlier one, A -> B -> A, must still append). The key carries the block's entry count so each real
-    # change is a distinct, replay-safe event.
-    conn.execute(sa.text("SELECT 1 FROM mbos.items WHERE item_id = :i FOR UPDATE"), {"i": item_id})
-    mine = [r for r in (read_item(conn, item_id).get("research") or []) if r.get("field") == entry["field"]]
-    if mine and mine[-1].get("source_uri") == entry["source_uri"]:
-        return entry  # the latest entry already says exactly this
     conn.execute(sa.text("SELECT mbos.append_item_research(:i, CAST(:e AS jsonb), CAST(:a AS jsonb), :t, :p, :k)"),
                  {"i": item_id, "e": canonical_json([entry]).decode(), "a": canonical_json({"type": "agent", "id": agent}).decode(),
                   "t": f"card enrichment {block} attached by {agent}", "p": [provenance_id],
-                  "k": f"{item_id}:enrich:{block}:{len(mine) + 1}:{ref[7:23]}"})
+                  "k": f"{item_id}:enrich:{block}:{ref[7:23]}"})
     return entry
 
 

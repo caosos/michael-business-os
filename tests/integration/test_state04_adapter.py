@@ -208,3 +208,20 @@ def test_michaels_note_reaches_the_card_as_a_recommendation(db04, lifecycle):
         card = cardmod.build_card(it, rc, ar, cardmod.enrichment_from_item(c, it))
     assert cardmod.validate_card(card) == [], cardmod.validate_card(card)
     assert any(r["basis"] == "RECOMMENDATION" for r in card["value_add_plan"]["model_specific_risks"])
+
+
+def test_a_value_that_returns_to_an_earlier_one_still_appends_lane_d(db04, lifecycle):
+    from mbos import card as cardmod
+    from mbos import spine_d
+
+    L = lifecycle["L"]
+    for value in (900, 850, 900, 900):
+        with db04.begin() as c:
+            pid = L.record_provenance(c, actor_type="agent", agent_name="lane-b", basis="FACT", tool_name="seller", tool_version="0")
+            spine_d.record_enrichment(c, lifecycle["item_id"], "distance_miles", {"value": value, "basis": "FACT"}, pid,
+                                      agent="agent-02-opportunity")  # stable content
+    with db04.connect() as c:
+        item = L.load_item(c, lifecycle["item_id"])
+        latest = cardmod.enrichment_from_item(c, item)["distance_miles"]["value"]
+        n = len([r for r in item["research"] if r["field"] == "card.distance_miles"])
+    assert latest == 900 and n == 3, (latest, n)

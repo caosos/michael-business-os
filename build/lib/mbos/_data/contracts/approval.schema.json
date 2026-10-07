@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://michael-business-os/contracts/approval.schema.json",
+  "title": "Approval v1 — Michael's YES / NO / MODIFY / HOLD decision",
+  "description": "Adopted from Agent 05 §4.2 with HOLD wake semantics (01) and channel UX hooks (06). Append-only; a new decision on the same ActionRequest is a new row. Semantics: YES → execute the frozen payload as-is. NO → request rejected, reason feeds LEARN. MODIFY → a NEW ActionRequest is created (derived_from) with new_payload_hash; this request is closed. HOLD → request parked (durable wait, zero compute) until hold_until or a wake condition; TTL re-notifies then escalates; never auto-executes on expiry.",
+  "type": "object",
+  "required": ["approval_id", "action_request_id", "decision", "decider", "decided_at", "channel", "payload_hash_seen", "scope"],
+  "additionalProperties": false,
+  "properties": {
+    "approval_id": { "type": "string", "pattern": "^appr_[0-9A-HJKMNP-TV-Z]{26}$" },
+    "action_request_id": { "type": "string", "pattern": "^areq_[0-9A-HJKMNP-TV-Z]{26}$" },
+    "decision": { "enum": ["YES", "NO", "MODIFY", "HOLD"] },
+    "decider": { "type": "string", "description": "'michael' (multiple approvers = Michael decision, UNKNOWN)." },
+    "decided_at": { "type": "string", "format": "date-time" },
+    "channel": { "enum": ["telegram", "web", "sms_reply", "email_reply", "cli"] },
+    "auth_context": {
+      "type": "object",
+      "properties": {
+        "method": { "type": "string", "examples": ["telegram_user_id", "webauthn", "totp"] },
+        "session_id": { "type": "string" },
+        "step_up": { "type": "boolean", "description": "Required true for money/irreversible (05)." }
+      }
+    },
+    "payload_hash_seen": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$", "description": "Hash of the payload Michael was shown; must equal ActionRequest.payload_hash or the approval is void." },
+    "modifications": {
+      "type": "object",
+      "properties": {
+        "diff": { "type": "object" },
+        "new_action_request_id": { "type": "string", "pattern": "^areq_[0-9A-HJKMNP-TV-Z]{26}$" },
+        "new_payload_hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+      }
+    },
+    "hold": {
+      "type": "object",
+      "properties": {
+        "hold_until": { "type": "string", "format": "date-time" },
+        "wake_on": { "type": "array", "items": { "enum": ["time", "new_info", "price_change", "auction_ending", "michael_ping"] } },
+        "renotify_after": { "type": "string", "description": "ISO-8601 duration, default PT24H." },
+        "escalate_after": { "type": "string", "description": "ISO-8601 duration; on escalation the request is re-presented, never executed." }
+      }
+    },
+    "reason": { "type": "string" },
+    "scope": { "enum": ["once", "session", "standing_rule"], "description": "standing_rule creates a delegation grant (05 §5) and itself requires step_up." },
+    "expires_at": { "type": "string", "format": "date-time" }
+  },
+  "allOf": [
+    { "if": { "properties": { "decision": { "const": "MODIFY" } } }, "then": { "required": ["modifications"] } },
+    { "if": { "properties": { "decision": { "const": "HOLD" } } }, "then": { "required": ["hold"] } },
+    { "if": { "properties": { "decision": { "const": "NO" } } }, "then": { "required": ["reason"] } }
+  ]
+}

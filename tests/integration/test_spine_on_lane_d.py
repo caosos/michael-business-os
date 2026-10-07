@@ -36,6 +36,7 @@ def test_full_lifecycle_on_lane_d(lane_d_urls, tmp_path):
     assert r["reference_chain"][0], r["reference_chain"]          # ADR-0010: verifiable without trusting the DB
     assert r["effector_calls"] == 1 and r["live_effector_calls"] == 0 and r["executed"] == 1
     assert not r["contract_errors"], r["contract_errors"]
+    assert r["id_addressable"][0] == r["id_addressable"][1] > 0, r["id_addressable"]  # 04 R2: scorecard/recommendation receipts carry their ids
     assert not r["card_errors"], r["card_errors"]  # every opportunity renders a valid, honest card on lane D
     assert r["cards"]["trailer"][1] == "CONTACT" and r["cards"]["mower"][1] == "PASS", r["cards"]
     assert r["cards"]["enrichment_roundtrip"] == "medium", r["cards"]  # enrichment survives the lane-D ledger

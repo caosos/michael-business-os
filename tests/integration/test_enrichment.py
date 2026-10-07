@@ -81,3 +81,17 @@ def test_real_lane_c_enricher_in_the_card(ledger_db):
     assert cardmod.validate_card(card) == [], cardmod.validate_card(card)
     assert card["logistics"]["trailer_owned"]["value"] is False
     assert any(not x.startswith("Asking") for x in card["why"]), "lane C's plain-English reasons are on the card"
+
+
+def test_a_value_that_returns_to_an_earlier_one_still_appends_reference(ledger_db):
+    """04 read-through R1: price 900 -> 850 -> 900 must leave the card showing 900."""
+    ids = seed_flow(ledger_db, act=False)
+    for value in (900, 850, 900, 900):  # the repeated last call is a true no-op
+        with ledger_db.begin() as c:
+            prov = ledger.tool_provenance(c, "lane.x")
+            spine.record_enrichment(c, ids["item_id"], "seller", {"rating": {"value": value, "basis": "FACT"}}, prov)  # stable content
+    with ledger_db.connect() as c:
+        item = spine.read_item(c, ids["item_id"])
+        enr = cardmod.enrichment_from_item(c, item)
+        n = len([r for r in item["research"] if r["field"] == "card.seller"])
+    assert enr["seller"]["rating"]["value"] == 900 and n == 3
