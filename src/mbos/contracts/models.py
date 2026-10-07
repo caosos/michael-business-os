@@ -17,7 +17,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any, ClassVar, Literal, Optional
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
 from mbos.contracts import schemas
 
@@ -71,7 +71,17 @@ class ContractModel(_Strict):
 
     @classmethod
     def from_doc(cls, doc: dict[str, Any]):
-        return cls.model_validate(doc)
+        """Parse a contract document. Any breach — type-level or schema-level — raises ContractViolation."""
+        try:
+            return cls.model_validate(doc)
+        except ValidationError as e:
+            for err in e.errors():
+                inner = (err.get("ctx") or {}).get("error")
+                if isinstance(inner, schemas.ContractViolation):
+                    raise inner from None
+            raise schemas.ContractViolation(cls.__contract__, [
+                f"{'/'.join(str(p) for p in err['loc']) or '<root>'}: {err['msg']}" for err in e.errors()
+            ]) from None
 
 
 class Money(BaseModel):
