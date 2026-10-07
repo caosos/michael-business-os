@@ -115,34 +115,20 @@ FINDINGS = [
     ("F-21", "FACT", "01", "FIXED at ca6d056 (P-07-8), verified on the real spine: a proposed action's `draft` gets "
      "its own provenance record, cited in the request's `provenance_ids`, that resolves to its template, prompt hash "
      "and model.", "None. Kept for the record."),
-    ("F-22", "FACT", "05 (policy) + 07", "Release candidate (lane D+E): Agent 05's `policy.v1.json` grants "
-     "`publish.listing.create` to nobody. The PDP denies the spine's proposer: `CAPABILITY_NOT_HELD:agent-01-coordinator "
-     "lacks publish.listing.create`. The whole flip/publishing path (the resale-listing manual-assist lane, ADR-0007) "
-     "cannot run on the RC stack; only email (R7 propose-only grant) can.",
-     "RECOMMENDATION: 05 adds a propose-only grant for `publish.listing.create` (tier 0, category publishing) to the "
-     "proposer identity (R7 pattern), or the spine proposes under the drafting lane's own id. Needs a ruling."),
-    ("F-23", "FACT", "01", "Release candidate: when the PDP DENIES a proposal, `spine_d` still records `awaiting Michael` and "
-     "moves the item to AWAITING_APPROVAL. The request is `rejected`, so there is nothing to decide: the item is stuck "
-     "and the approval queue lies. Receipts show `POLICY_DECIDED … deny` then `ITEM_STATE_CHANGED awaiting Michael`.",
-     "RECOMMENDATION: on a deny, archive or fail the item (and notify) instead of AWAITING_APPROVAL. The reference "
-     "spine has the same shape."),
-    ("F-24", "FACT", "05 + 01 (**release-blocking**)", "Release candidate: a request the gateway DENIES at execution time "
-     "(freeze engaged before the YES, or PANIC state unreadable/corrupt, L1/L2 freeze) stays `approved` while the item "
-     "goes FAILED. When the switch is released or repaired, calling the gateway again EXECUTES that stale approval "
-     "(request `executed`, one effector row, item still FAILED). ADR-0005 and the reference gateway end such a request "
-     "as `cancelled_by_freeze`. Probed directly and as spec A9 (8/8 on the reference backend, 6 of 8 fail on lane E).",
-     "RECOMMENDATION: 05's gateway sets `approved → cancelled_by_freeze` (or `failed`) on a G7 denial, in the same "
-     "transaction as the ACTION_FAILED receipt, so a denied approval can never be replayed. Add a regression "
-     "test (`test_a_request_denied_by_a_freeze_cannot_fire_once_the_switch_is_readable_again`)."),
-    ("F-25", "FACT", "05 + 01 (needs a ruling)", "Release candidate: after a hard kill mid-ACT the lane E gateway never "
-     "duplicates the effector (invariant holds, both crash points), but on restart it reconciles the claim to `FAILED` "
-     "(`RECONCILED:PROVIDER_NOT_FOUND`, not retried) instead of resuming to ACTED. Unified suite A5 says "
-     "'resumes'. Also, the dry-run provider's delivery record is in-process, so for a crash AFTER the effector ran the "
-     "reconciliation records 'provider has no record' although the simulated send happened (a real provider lookup "
-     "would be correct).",
-     "RECOMMENDATION: rule whether A5 means 'resumes' (reference gateway) or 'at-most-once, fail-safe, re-approve' (lane "
-     "E), and amend the unified suite. For a crash BEFORE the effector call a safe retry is possible. The simulated "
-     "provider should keep its delivery log durably (a table), like a real provider."),
+    ("F-22", "FACT", "05", "FIXED by 05's E-13 (verified on the RC stack at e6afc28): `publish.listing.create` is now granted "
+     "propose-only; publishing needs Michael's step-up and then executes once in dry-run (G1/G4 publish cases green). "
+     "Original: the policy granted it to nobody, so the flip/publishing path was denied.", "None. Kept for the record."),
+    ("F-23", "FACT", "01", "FIXED by 01's R21 (verified at f8407c9, lane D+E): a PDP-denied proposal leaves the item RECOMMENDED "
+     "with no pending request instead of AWAITING_APPROVAL (regression test: an ungranted capability).", "None. Kept for the record."),
+    ("F-24", "FACT", "05 + 01", "FIXED by 05's E-13 (verified on the RC stack at e6afc28): a request refused with a "
+     "G7:PANIC_* reason (L1/L2/L3, empty, corrupt or unavailable PANIC state) now goes approved → cancelled_by_freeze in the "
+     "same transaction as ACTION_FAILED. All 8 spec A9 cases pass, including the replay regression "
+     "(`test_a_request_denied_by_a_freeze_cannot_fire_once_the_switch_is_readable_again`). Original: the stale approval "
+     "executed after the freeze lifted.", "None. Kept for the record."),
+    ("F-25", "FACT", "05 + 01", "RULED (R22) and FIXED by 05's E-13 (verified at e6afc28): the dry-run provider ledger is the durable "
+     "`mbos.effector_calls`. A crash AFTER the send settles `executed`/ACTED with no second call; a crash BEFORE the send "
+     "settles failed + RECONCILED with zero calls. The spec A5 now asserts R22, including that the settlement is truthful "
+     "(a send that happened is never recorded as failed).", "None. Kept for the record."),
     ("F-26", "FACT", "01 (card) **high**", "`build_card` raises on malformed lane enrichment (non-dict enrichment or block, non-iterable "
      "`recent_activity`/`why`, non-numeric `peak_months`, non-dict risk entries, string money in the reasons text, ...): "
      "250 of 300 seeded fuzz inputs crash it (`card.py` lines 86, 308, 335, 344, 356, 363, 370). ADR-0011 rule 2 says malformed "
@@ -215,6 +201,20 @@ FINDINGS = [
      "ADR-0004 rule 3 says the two vocabularies are never conflated; 'RECOMMENDATION: HOLD' can be read as the system having "
      "parked the item.",
      "RECOMMENDATION: rename the card's HOLD (e.g. 'GATHER' or 'WAIT') or label it 'research hold'."),
+    ("F-40", "FACT", "01 + 05", "Release candidate: the spine's `decide` requires step-up only for irreversible/money-like requests, "
+     "but lane E's policy stamps `step_up=required` on publishing (`GATED:publishing:tier0`). A YES without step-up is "
+     "ACCEPTED (APPROVAL_DECIDED), then the gateway refuses it (`STEP_UP_REQUIRED`, `AUTH_CONTEXT_REQUIRED`), the item ends "
+     "FAILED and the request is left `approved`: Michael's approval is silently lost. With step-up it executes once.",
+     "RECOMMENDATION: have `decide` consult the PDP decision recorded on the request (or the policy) and refuse a YES "
+     "that lacks the step-up the policy requires, with a clear message; settle a guard-refused request as failed, not `approved`."),
+    ("F-41", "FACT", "05 (least privilege)", "Release candidate: after E-13 the spine's single proposer identity `agent-01-coordinator` holds propose-only grants "
+     "for EVERY gated money-moving capability (`money.payment.send`, `purchase.create`, `offer.*`, `price.change`, "
+     "`commit.external`) as well as comms and publishing; only `comms.voice.call`, `comms.message.send` and "
+     "`schedule.appointment.create` are ungranted. A proposal still needs Michael's YES with step-up (verified: "
+     "`GATED:money:tier0; step_up=required`), so this is not an authority break, but all drafting lanes share this one "
+     "identity, so a buggy or hostile planner can put a payment request in front of Michael.",
+     "RECOMMENDATION: grant per capability to the lanes that actually draft it (06 comms, 07 publishing), keep the spine "
+     "identity to what its default planner emits, and add offer/purchase grants only when their planners exist."),
     ("F-16", "FACT", "01", "FIXED by A-10 (verified at 82632c3: a normal install finds its contracts and operator profile). Original finding: Agent 01's package only finds the contracts by a path relative to the source tree. "
      "With a normal (non-editable) `pip install`, 94 of its 109 tests fail or error with `docs/research/contracts "
      "not found; set MBOS_CONTRACTS_DIR`. With that variable set, 108 pass and 1 is skipped "
@@ -306,8 +306,8 @@ SPEC_GROUPS = OrderedDict([(f"test_spec_a{n:02d}", title) for n, title in enumer
 
 
 RC_FINDING_BY_TEST = {  # failing/xfail case (substring) → finding. Mapping is data, so the verdict is auditable.
-    "test_spec_a09_panic": "F-24", "test_spec_a05_crash::test_kill_mid_act_then_restart_resumes": "F-25",
-    "publish": "F-22", "test_a_pdp_denied_proposal_never_leaves": "F-23",
+    "test_spec_a09_panic": "F-24", "test_spec_a05_crash::test_kill_mid_act_settles": "F-25",
+    "a_yes_the_policy_will_refuse": "F-40", "test_a_pdp_denied_proposal_never_leaves": "F-23",
 }
 
 
@@ -486,6 +486,32 @@ def cmd_spine(release: bool = False) -> int:
     else:
         L += [f"**Result: {'PASS' if pytest_rc == 0 and not failed else 'FAIL'}.** {passed} passed, {failed} failed, "
               f"{xfailed} strict-xfail known gaps, {na} not applicable; {len(rows)} cases, {secs}s.", ""]
+    if release:
+        safety = ["test_spec_a01", "test_spec_a02", "test_spec_a03", "test_spec_a04", "test_spec_a05", "test_spec_a07",
+                  "test_spec_a09", "test_spec_a10"]
+        safe_ok = all(not any(r[2] == "FAILED" for r in rows if r[0].startswith(p)) and any(r[0].startswith(p) for r in rows)
+                      for p in safety)
+        L += ["## Safety invariants", "",
+              f"**{'HOLD' if safe_ok else 'BROKEN'}** (A1 atomicity, A2 insert-only, A3 chain, A4 provenance, A5 no duplicate effect, "
+              "A7 dry-run only, A9 fail-closed PANIC, A10 contract conformance). Nothing left the system, no effect was duplicated, "
+              "no denied approval can fire later, and the receipt chain verifies in lane D and in the ADR-0010 reference alone.", "",
+              "## Still red: exactly what, and who owns it", "", "| Finding | Owner | Impact | What closes it |", "|---|---|---|---|"]
+        owners = {"F-40": ("01 (`spine.decide`) + 05 (policy)", "Fails SAFE: nothing executes. Michael's YES on a publishing request given WITHOUT step-up is accepted, "
+                           "then refused at the gateway (`STEP_UP_REQUIRED`); the item ends FAILED and his approval is lost. With step-up it executes once.",
+                           "`decide` refuses a YES that lacks the step-up the PDP stamped on the request; a guard-refused request settles failed, not `approved`.")}
+        reds = sorted({_finding_for(m_, n_) for m_, n_, o_, _ in rows if o_ == "FAILED"})
+        for f in reds:
+            o = owners.get(f, ("?", "see ACCEPTANCE_REPORT.md", "see ACCEPTANCE_REPORT.md"))
+            L.append(f"| {f} | {o[0]} | {o[1]} | {o[2]} |")
+        if not reds:
+            L.append("| — | — | nothing red | — |")
+        L += ["", "## Closed since the previous verdict (NOT READY, 88/9/6)", "", "| Finding | Closed by | Evidence on this stack |", "|---|---|---|",
+              "| F-24 stale approval executes after a freeze | 05 E-13 | A9 8/8 incl. the replay regression |",
+              "| F-25 crash mid-ACT | R22 + 05 E-13 | A5 5/5: no duplicate; truthful settlement (executed after a send, failed+RECONCILED before) |",
+              "| F-22 no publish grant | 05 E-13 | G1/G4 publish cases pass (with step-up) |",
+              "| F-23 PDP denial leaves the item awaiting Michael | 01 R21 | regression test: ungranted capability → rejected, item not awaiting |",
+              "| F-16 packaging, F-18/19/20/21 | 01 A-10, A-13, … | verified at earlier pins |",
+              "", "New this round (open): F-40 above; F-41 (least privilege, 05) is an observation. Card defects are in [CARD_ACCEPTANCE.md](CARD_ACCEPTANCE.md).", ""]
     L += ["| Acceptance test | Result | Cases |", "|---|---|---:|"]
     for prefix, title_ in SPEC_GROUPS.items():
         g = [r for r in rows if r[0] == prefix or r[0].startswith(prefix + "_")]

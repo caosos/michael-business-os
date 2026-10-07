@@ -2,22 +2,20 @@
 01's runtime Components. Two draft kinds, because they hit different governance rules:
   * email   — service lead → `comms.email.send` quote (held by the propose-only grant, R7)
   * publish — flip → `publish.listing.create` resale listing (manual-assist lane; no grant exists in Agent 05's policy)
-On the lane E stack the publish kind is denied by the PDP (F-22) and the spine then leaves the item stuck in
-AWAITING_APPROVAL (F-23). Those cases are STRICT xfails tied to the findings: they turn into failures the moment
-the gaps close, so the marker has to be removed rather than drift. G3 has no code path in wave one."""
+F-22 (no publish grant) and F-23 (a PDP denial left the item stuck awaiting Michael) are CLOSED (05 E-13, 01 R21),
+verified on the real stack; their strict xfail markers have been removed. Publishing needs Michael's step-up on lane
+E (policy `GATED:publishing:tier0; step_up=required`). G3 has no code path in wave one."""
 import time
 
 import pytest
 
 from mbos_qa.core import sha256_ref
-from mbos_qa.impl_spine import LANE_E
+from mbos_qa.impl_spine import LANE_E, Refused
 from mbos_qa.marketing_planner import MarketingPlanner
 
 from .conftest import FLIP_YES, SERVICE_YES, effector_calls_for, invocations
 
-F22 = pytest.mark.xfail(LANE_E, strict=True, reason="F-22: Agent 05's policy grants `publish.listing.create` to nobody; "
-                                                    "the PDP denies the spine's proposer (CAPABILITY_NOT_HELD)")
-KINDS = [pytest.param("email", id="email"), pytest.param("publish", id="publish", marks=F22)]
+KINDS = ["email", "publish"]
 
 
 @pytest.fixture
@@ -59,7 +57,7 @@ def test_g1_no_means_nothing_is_sent_or_published(qa, planner07, kind):
 @pytest.mark.parametrize("kind", KINDS)
 def test_g1_yes_executes_exactly_once_in_dry_run(qa, planner07, kind):
     item_id, areq = _request(qa, kind)
-    out = qa.decide(areq["action_request_id"], "YES", step_up=(kind == "email"))
+    out = qa.decide(areq["action_request_id"], "YES", step_up=True)
     assert qa.wait_state(item_id, {"ACTED", "FAILED"}) == "ACTED"
     (ex,) = [r for r in qa.receipts(action_request_id=areq["action_request_id"]) if r["type"] == "ACTION_EXECUTED"]
     assert ex["effect"] == ("publish" if kind == "publish" else "send") and ex["effector_response"]["dry_run"] is True
@@ -114,17 +112,41 @@ def test_g2_service_lead_carries_attribution(qa, planner07):
     assert outs and outs[-1]["attribution"]["first_touch_source"] == "google_business_profile"
 
 
-@pytest.mark.xfail(LANE_E, strict=True, reason="F-23: when the PDP DENIES a proposal, the spine still moves the item to "
-                                               "AWAITING_APPROVAL with a rejected request: Michael is told to decide "
-                                               "on nothing and the item is stuck")
-def test_a_pdp_denied_proposal_never_leaves_the_item_awaiting_michael(qa, planner07):
-    item_id = qa.discover(FLIP_YES)
-    time.sleep(3.0)
+class _UngrantedPlanner:
+    """Proposes a capability the spine's proposer does not hold (comms.voice.call): the PDP must deny it."""
+    def plan(self, item):
+        return [{"capability": "comms.voice.call", "summary": "QA: phone the seller (ungranted for the proposer; must be denied)",
+                 "reversibility": "irreversible", "estimated_cost": {"amount": 0, "currency": "USD"}}]
+
+
+@pytest.mark.skipif(not LANE_E, reason="a PDP denial needs lane E's policy")
+def test_a_pdp_denied_proposal_never_leaves_the_item_awaiting_michael(qa):
+    """F-23 regression (fixed by 01's R21): nothing to approve → no AWAITING_APPROVAL, no pending request."""
+    from mbos.runtime import components
+
+    comps = components()
+    saved, comps.planner = comps.planner, _UngrantedPlanner()
+    try:
+        item_id = qa.discover(FLIP_YES)
+        time.sleep(3.0)
+    finally:
+        comps.planner = saved
     reqs = qa.areqs(item_id=item_id)
-    if not reqs or reqs[-1]["status"] != "rejected":
-        pytest.skip("this configuration did not deny the proposal")
+    assert reqs and reqs[-1]["status"] == "rejected", f"the PDP did not deny the ungranted capability: {reqs}"
     assert qa.item(item_id)["state"] != "AWAITING_APPROVAL", "AWAITING_APPROVAL with no request to approve"
     assert not qa.areqs(item_id=item_id, status=("pending_approval", "held"))
+
+
+@pytest.mark.skipif(not LANE_E, reason="step-up policy comes from lane E")
+def test_a_yes_the_policy_will_refuse_is_refused_when_it_is_given(qa, planner07):
+    """The PDP stamps `step_up=required` on a publishing request. A YES without step-up must be refused AT DECISION TIME
+    with a clear message. Today the spine accepts it, the gateway then refuses (STEP_UP_REQUIRED) and the item ends FAILED:
+    Michael's approval is silently lost (F-40)."""
+    item_id, areq = _request(qa, "publish")
+    with pytest.raises(Refused):
+        qa.decide(areq["action_request_id"], "YES", step_up=False)
+    assert qa.item(item_id)["state"] == "AWAITING_APPROVAL"
+    assert qa.areq(areq["action_request_id"])["status"] == "pending_approval"
 
 
 @pytest.mark.skip(reason="G3: wave one has no review-request path in the spine or in lane 06/07 code.")

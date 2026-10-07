@@ -42,15 +42,32 @@ def test_kill_mid_act_never_duplicates_the_effector(qa, point):
         r["eng"].dispose()
 
 
-@pytest.mark.parametrize("point,expected_restart_invocations", [("before_effector", 1), ("after_effector", 0)])
-def test_kill_mid_act_then_restart_resumes_to_acted_exactly_once(qa, point, expected_restart_invocations):
-    """Unified suite A5 as written: the restart RESUMES at the step and the action completes exactly once."""
+@pytest.mark.parametrize("point", ["before_effector", "after_effector"])
+def test_kill_mid_act_settles_truthfully_per_R22(qa, point):
+    """Ruling R22 (Agent 01): A5 means never duplicate the effect, and settle TRUTHFULLY.
+      * if the send happened before the crash (provider/ledger can prove it): the request settles `executed` and the
+        item reaches ACTED, with no second effector call;
+      * if no send happened: either (a) the restart completes it, exactly one effector call, `executed`/ACTED, or
+        (b) it settles `failed` with a RECONCILED receipt and zero effector calls (Michael re-approves).
+    Never two sends, never a settlement that contradicts what happened."""
     r = _crash_and_restart(qa, point)
     try:
-        assert _line(r["second"], "STATE") == "ACTED", _line(r["second"], "STATE")
-        assert r["restart_invocations"] == expected_restart_invocations, r["restart_invocations"]
-        assert len(qa.effector_rows(r["eng"], r["areq_id"])) == 1, "effector recorded more (or less) than once"
-        assert len([x for x in qa.receipts(r["eng"], action_request_id=r["areq_id"]) if x["type"] == "ACTION_EXECUTED"]) == 1
+        calls = r["executed_before_crash"] + r["restart_invocations"]
+        areq = qa.areq(r["areq_id"], r["eng"])
+        item_state = qa.item(r["item_id"], r["eng"])["state"]
+        receipts = qa.receipts(r["eng"], action_request_id=r["areq_id"])
+        executed = [x for x in receipts if x["type"] == "ACTION_EXECUTED"]
+        assert calls <= 1, f"{calls} effector calls: a duplicate send"
+        assert len(executed) <= 1 and len(qa.effector_rows(r["eng"], r["areq_id"])) == 1
+        if r["executed_before_crash"]:
+            assert areq["status"] == "executed" and item_state == "ACTED" and len(executed) == 1, \
+                f"the send happened but the request settled {areq['status']!r} / item {item_state!r} (untruthful)"
+        elif areq["status"] == "executed":
+            assert item_state == "ACTED" and calls == 1 and len(executed) == 1
+        else:
+            assert areq["status"] == "failed" and calls == 0 and not executed
+            assert any("RECONCILED" in (x.get("intent", "") + json.dumps(x.get("details") or {})) for x in receipts), \
+                "failed after a crash without a RECONCILED receipt"
         assert qa.verify_chain(r["eng"])["ok"]
     finally:
         r["eng"].dispose()
