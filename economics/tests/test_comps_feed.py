@@ -148,3 +148,53 @@ class TestVocabularyBoundsFreeText(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestAskingComps(unittest.TestCase):
+    """Regression for Agent 02's report (B-08): a correctly labelled ASKING comp has observed_date and
+    NO sold_date. It must never crash selection, and asking-only evidence must never reach YES or an
+    archiving PASS."""
+
+    ITEM = {"type": "flip", "category": "trailer", "state": "RESEARCHING",
+            "normalized": {"title": "6x12 enclosed trailer", "price": {"amount": 1200, "type": "fixed"}}}
+
+    def asking(self, n: int, price: float) -> tuple[dict, dict]:
+        c = {"kind": "asking", "price": price, "currency": "USD", "observed_date": "2026-10-06",
+             "source": "ebay_browse", "url": f"https://www.ebay.com/itm/{n}", "category": "trailer",
+             "title": "6x12 enclosed trailer", "condition": "used", "provenance_id": f"prov_01M4BQ{n:020d}",
+             "fetched_at": "2026-10-06T12:00:00Z", "raw_ref": "sha256:" + "a" * 64}
+        p = {"provenance_id": c["provenance_id"], "basis": "FACT", "source_uri": c["url"], "fetched_at": c["fetched_at"]}
+        return c, p
+
+    def test_agent02_repro_no_keyerror(self):
+        c, p = self.asking(1, 1500.0)
+        out = build_comps_bundle(self.ITEM, [c], [p], "2026-10-07T12:00:00Z")
+        self.assertEqual(out["selected"], [c["provenance_id"]])
+        entry = out["bundle"]["comps"][0]
+        self.assertEqual((entry["kind"], entry["observed_date"]), ("asking", "2026-10-06"))
+        self.assertNotIn("sold_date", entry)
+
+    def test_asking_only_never_yes_and_never_archives(self):
+        it = trailer()
+        recs = [self.asking(n, p) for n, p in enumerate([2400.0, 2500.0, 2600.0], 1)]
+        r = research_step(it, [c for c, _ in recs], [p for _, p in recs], AS_OF)
+        self.assertEqual(r["estimate"]["status"], "estimated")       # asks x ask-to-sold ratio (research §14.1)
+        self.assertIn("no_sold_comps", [g["code"] for g in r["estimate"]["gaps"]])
+        sc = r["item"]["scores"]["scorecard"]
+        self.assertFalse(sc["yes_conditions"]["sold_comps_ok"])
+        self.assertNotEqual(sc["decision"], "YES")
+        a = [x for x in r["item"]["economics"]["estimates_meta"]["assumptions"]
+             if x["field"] == "economics.resale.target_sell_price"][0]
+        self.assertEqual(a["basis"], "INFER")
+        self.assertNotIn("evidence_backed", a)                        # so any PASS is R13-flagged, never archived
+        if sc["decision"] == "PASS":
+            self.assertTrue(sc["pass_on_priors"])
+        facts = [x for x in r["item"]["research"] if x["basis"] == "FACT"]
+        self.assertTrue(all(x["finding"].startswith("asking comp $") for x in facts))
+        self.assertEqual(len(facts), 3)
+
+    def test_asking_from_sold_only_source_rejected(self):
+        c, p = self.asking(9, 1500.0)
+        c["source"] = "ebay_marketplace_insights"                    # a sold-data source cannot report an ask
+        out = build_comps_bundle(self.ITEM, [c], [p], "2026-10-07T12:00:00Z")
+        self.assertIn("not reportable", out["rejected"][0]["reason"])

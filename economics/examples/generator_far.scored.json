@@ -80,12 +80,12 @@
       }
     },
     "scores": {
-      "scorecard_id": "scr_01M4B3R6G0SCCPPRGP4237ZX35",
+      "scorecard_id": "scr_01M4B3R6G0FRRHWJC8EBJK77PE",
       "inputs_hash": "sha256:968d73034554334dff8f81cfc9a9e3b0709b31c2db2f8496675ba6905df91d13",
       "scorecard": {
         "scoring_config_version": "2026.10.1",
         "computed_at": "2026-10-07T12:00:00Z",
-        "engine_version": "0.6.0",
+        "engine_version": "0.6.1",
         "config_hash": "sha256:8b7b98c7d92457d9d0049a0a2d7dd0c4e3bafa735c99c989bf156289aff58b20",
         "lane": "flip",
         "derived": {
@@ -295,7 +295,7 @@
       }
     },
     "recommendation": {
-      "recommendation_id": "rec_01M4B3R6G0M4FS9PN47JTJ4VEN",
+      "recommendation_id": "rec_01M4B3R6G0KDHSHZFYRNXSFYBY",
       "verdict": "PASS",
       "rationale": [
         "GATE FAIL distance_ratio_ok: long-distance travel burden $496.66 exceeds 0.35 x EV = $134.47",
@@ -306,21 +306,21 @@
       ],
       "confidence": 0.3,
       "alert": false,
-      "provenance_id": "prov_01M4B3R6G0JMWWERR8V6G2N7PN"
+      "provenance_id": "prov_01M4B3R6G0J22RY0HDXDYM8F71"
     },
     "provenance_ids": [
       "prov_01JB0000000000000000000050",
-      "prov_01M4B3R6G0JMWWERR8V6G2N7PN"
+      "prov_01M4B3R6G0J22RY0HDXDYM8F71"
     ]
   },
   "provenance": {
-    "provenance_id": "prov_01M4B3R6G0JMWWERR8V6G2N7PN",
+    "provenance_id": "prov_01M4B3R6G0J22RY0HDXDYM8F71",
     "created_at": "2026-10-07T12:00:00Z",
     "actor_type": "system",
     "agent_name": "agent-03-economics",
     "basis": "INFERENCE",
     "tool_name": "mbos_economics.engine",
-    "tool_version": "0.6.0",
+    "tool_version": "0.6.1",
     "config_version": "2026.10.1",
     "inputs_used": [
       {
@@ -342,26 +342,26 @@
       "type": "SCORE_RECORDED",
       "item_id": "itm_01JB0000000000000000000005",
       "entity_type": "scorecard",
-      "entity_id": "scr_01M4B3R6G0SCCPPRGP4237ZX35",
+      "entity_id": "scr_01M4B3R6G0FRRHWJC8EBJK77PE",
       "tool_name": "mbos_economics.engine",
       "inputs_hash": "sha256:968d73034554334dff8f81cfc9a9e3b0709b31c2db2f8496675ba6905df91d13",
-      "payload_hash": "sha256:433fd17536da9baa2f3c64c0a4f1cc5810ca6b4598b3ec36e6c4163074f23a5c",
-      "idempotency_key": "score:scr_01M4B3R6G0SCCPPRGP4237ZX35",
+      "payload_hash": "sha256:02c91e9f2c5ce800a6c73aaf397eb09800de820a708845309bb425e2608b3ab6",
+      "idempotency_key": "score:scr_01M4B3R6G0FRRHWJC8EBJK77PE",
       "provenance_ids": [
-        "prov_01M4B3R6G0JMWWERR8V6G2N7PN"
+        "prov_01M4B3R6G0J22RY0HDXDYM8F71"
       ]
     },
     {
       "type": "RECOMMENDATION_RECORDED",
       "item_id": "itm_01JB0000000000000000000005",
       "entity_type": "recommendation",
-      "entity_id": "rec_01M4B3R6G0M4FS9PN47JTJ4VEN",
+      "entity_id": "rec_01M4B3R6G0KDHSHZFYRNXSFYBY",
       "tool_name": "mbos_economics.engine",
       "inputs_hash": "sha256:968d73034554334dff8f81cfc9a9e3b0709b31c2db2f8496675ba6905df91d13",
-      "payload_hash": "sha256:e0217ff128c4cf407ee76e5867d772a474921f9a63d10c593071a034485d1d3b",
-      "idempotency_key": "recommend:rec_01M4B3R6G0M4FS9PN47JTJ4VEN",
+      "payload_hash": "sha256:af5df863c676dfbd8668a8cb563b6536f3649256b2c1115c97a92f7a94749f70",
+      "idempotency_key": "recommend:rec_01M4B3R6G0KDHSHZFYRNXSFYBY",
       "provenance_ids": [
-        "prov_01M4B3R6G0JMWWERR8V6G2N7PN"
+        "prov_01M4B3R6G0J22RY0HDXDYM8F71"
       ]
     }
   ]

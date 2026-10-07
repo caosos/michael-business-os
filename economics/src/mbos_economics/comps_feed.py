@@ -106,7 +106,7 @@ def build_comps_bundle(item: dict, comp_records: list[dict], provenance_records:
             continue
         date_field = "sold_date" if c["kind"] == "sold" else "observed_date"
         try:
-            d = date.fromisoformat(str(c.get(date_field) or c.get("sold_date")))
+            d = date.fromisoformat(str(c.get(date_field)))
         except ValueError:
             rejected.append(_reject(c, f"{date_field} missing or invalid"))
             continue
@@ -129,10 +129,15 @@ def build_comps_bundle(item: dict, comp_records: list[dict], provenance_records:
         seen.add(ident)
         selected.append(c)
 
-    selected.sort(key=lambda c: (str(c.get("sold_date")), str(c.get("source")), str(c.get("url"))), reverse=True)
+    def when(c: dict) -> str:
+        return str(c.get("sold_date") if c["kind"] == "sold" else c.get("observed_date"))
+
+    selected.sort(key=lambda c: (when(c), str(c.get("source")), str(c.get("url"))), reverse=True)
 
     def entry(c: dict) -> dict:
-        e = {"kind": c["kind"], "price": c["price"], "sold_date": c["sold_date"], "source": c["source"],
+        # an ASKING comp never carries a sold_date (it is not a sale); it carries observed_date
+        date_key = "sold_date" if c["kind"] == "sold" else "observed_date"
+        e = {"kind": c["kind"], "price": c["price"], date_key: when(c), "source": c["source"],
              "provenance_id": c["provenance_id"]}
         for k in ("url", "dom_days", "fetched_at"):
             if c.get(k) is not None:

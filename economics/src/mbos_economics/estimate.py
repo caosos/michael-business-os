@@ -183,8 +183,8 @@ def _road_miles(item: dict, pri: ScoringConfig, led: _Ledger) -> Decimal | None:
 
 def _comp_fact(c: dict, field: str) -> dict:
     """One FACT research entry per comp, carrying the comp's OWN provenance (C-04)."""
-    verb = "sold" if c["kind"] == "sold" else "asking"
-    r = {"finding": f"{verb} comp ${c['price']} on {c.get('sold_date', '?')} ({c.get('source', 'research')})",
+    verb, when = ("sold", c.get("sold_date")) if c["kind"] == "sold" else ("asking", c.get("observed_date"))
+    r = {"finding": f"{verb} comp ${c['price']} on {when or '?'} ({c.get('source', 'research')})",
          "field": field, "basis": "FACT", "provenance_id": c["provenance_id"]}
     if c.get("url"):
         r["source_uri"] = c["url"]
@@ -299,6 +299,7 @@ def _estimate_flip(item: dict, bundle: dict, pri: ScoringConfig, miles: Decimal,
         led.gap("no_sold_comps", "resale estimated from asking prices only; YES needs sold comps", False)
         research.append({"finding": f"{len(asking)} asking comps x {ratio}; est. ${target}",
                          "field": "resale.target_sell_price", "basis": "INFERENCE"})
+        research += [_comp_fact(c, "resale.target_sell_price") for c in asking]   # FACT = "listed at", not sold
     else:
         led.gap("no_comps", "no comparable prices: resale cannot be estimated (research §14: never guessed)", True)
         return None, []
