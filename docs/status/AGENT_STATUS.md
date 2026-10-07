@@ -6,7 +6,7 @@ Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
 State: WAITING
 Claimed: none
-Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe · F-04 @ 46c961c · F-13 @ 2415936 · F-14 @ c68a33c · F-13 hardening @ 6e47646 · F-15 @ HEADPH
+Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe · F-04 @ 46c961c · F-13 @ 2415936 · F-14 @ c68a33c · F-13 hardening @ 6e47646 · F-15 @ 94130a4
 Blocked: F-11 on A-15
 Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
 Last updated: 2026-10-07
@@ -15,7 +15,7 @@ Last updated: 2026-10-07
 WAITING. **F-11** (follow-up / offer / quote buttons on the card) is BLOCKED on **A-15**. I will claim it when A-15 is DONE, or any new F-/ANY task.
 
 ## Done
-- **F-15 @ HEADPH:** every `CommsActionPlanner` action carries `lane="agent-06-communications"`. On lane D + E the ledger's `proposed_by` equals it, `lane` is absent from the frozen payload, and a capability no lane holds creates no request (the card says "policy blocked").
+- **F-15 @ 94130a4:** every `CommsActionPlanner` action carries `lane="agent-06-communications"`. On lane D + E the ledger's `proposed_by` equals it, `lane` is absent from the frozen payload, and a capability no lane holds creates no request (the card says "policy blocked").
   - **Bug fixed:** 05's PDP denies any `comms.*` payload with a key named `binding` at any depth (even `false`). My draft flag is now `is_binding`, pinned against the real policy file.
   - 124 + 21 tests. Receipt: `docs/receipts/2026-10-07-f15-lane-tag.md`.
 - **F-13 hardening @ `6e47646`:** re-vendored card schema (flags, dry_run, why_provenance); `item.flags` warning, DRY-RUN tag, provenance links, `clean_text` on displayed text.
