@@ -178,3 +178,26 @@ Source names match Agent 03's `comps_sources` registry exactly (`manual`, `ebay_
 - 7 candidates. 03 rejected 2 on vocabulary (5x8 and 7x14) and selected 5.
 - Estimate status `estimated`, state moves RESEARCHING → **SCORED**, verdict **MAYBE**.
 - Every selected comp's provenance is FACT and appears in `Item.research[]`.
+
+## 13. Wake events — READY_QUEUE B-05 (lane-B producer for A-08 `notify_event`)
+
+`src/mbos_discovery/events.py`:
+- **Detect.** `WakeEventDetector.observe()` runs on every sighting, both in `SpineSourceAdapter.fetch` and in the standalone `run_discovery(events=…)`. It compares the sighting with that listing's last snapshot (identity is `(source, source_listing_id)`):
+  - `price_change`: `price.amount` differs.
+  - `new_info`: any other content field differs (status, title, description, bid count…). The changed fields are listed in the summary.
+  - `auction_ending`: `ends_at` is within 24 h of the fetch and that end time hasn't been announced before. A listing already ending when first seen is not an event, because nothing changed.
+- **Outbox.** Events wait in a durable JSON outbox keyed by an `event_id` content hash, so the same evidence is never queued twice.
+- **Deliver.** `deliver_wake_events(engine, detector)` handles each pending event in turn:
+  - It finds the Item by sighting identity (the same JSONB containment query `spine.ingest` uses).
+  - It records the evidence's **Provenance first** (`basis: FACT`, source URI, `fetched_at`, `raw_ref`, `tool mbos_discovery.events`), then calls `mbos.workflows.notify_event(item_id, event, summary, evidence_provenance_id)`.
+  - Events for Items not ingested yet stay pending. Delivery is at-least-once; a repeated notification is harmless, since nothing executes.
+- **Why detection lives in lane B:** `spine.ingest` (correctly) treats a known identity as a no-op, so the spine never sees source-side changes. No spine change is needed. Agent 01 (A-04) can call `deliver_wake_events` as a step after `discover`.
+
+Acceptance (FACT): `test_hold_wakes_on_lane_b_price_change_and_never_executes` runs Agent 01's real DBOS workflows @ `aa88e7a` on Postgres 16.
+1. The eBay fixture trailer is discovered and goes to AWAITING_APPROVAL. Test-only illustrative economics, copied from 01's fixture, stand in for A-05.
+2. HOLD with `wake_on=[price_change]` → HELD.
+3. The source price drops from 950 to 800. Re-discovery is an identity no-op, and one `price_change` event is queued.
+4. Delivery returns the item to AWAITING_APPROVAL, and an `APPROVAL_REQUESTED` receipt names the price change.
+5. The evidence provenance is FACT by `agent-02-opportunity`. **No ACTION_EXECUTING or ACTION_EXECUTED receipt exists.** Re-delivery is a no-op.
+
+Mutation check: with the `notify_event` call removed, the item stays HELD.

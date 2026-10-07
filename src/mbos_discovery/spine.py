@@ -71,9 +71,10 @@ class SpineSourceAdapter:
     def __init__(self, inner: SourceAdapter, profile: SearchProfile, *, raw_store: RawStore,
                  side: SideChannel, health: Optional[HealthBook] = None, health_path: Optional[Path] = None,
                  enabled_sources: frozenset[str] = frozenset(), name: Optional[str] = None,
-                 clock=_now, panic=None) -> None:
+                 clock=_now, panic=None, events=None) -> None:
         self.inner, self.profile, self.raw, self.side = inner, profile, raw_store, side
         self.panic = panic                              # lane E PanicStore (B-04); None = local health only
+        self.events = events                            # WakeEventDetector (B-05); None = no wake events
         self.health_path = Path(health_path) if health_path else None
         self.health = health or HealthBook.from_json(load_json(self.health_path, {}) if self.health_path else {})
         self.enabled = enabled_sources
@@ -127,11 +128,16 @@ class SpineSourceAdapter:
                 self.side.emit("quarantine", source=src, profile_id=pid, at=iso(now), raw_ref=raw_ref,
                                error=f"{type(e).__name__}: {str(e)[:300]}")
                 continue
+            if self.events is not None:
+                self.events.observe(source=src, source_listing_id=n.source_listing_id, url=n.url,
+                                    normalized=n.normalized, fetched_at=rec.fetched_at, raw_ref=raw_ref)
             out.setdefault(n.source_listing_id, RawListing(
                 source=src, source_listing_id=n.source_listing_id, url=n.url, fetched_at=iso(rec.fetched_at),
                 ingestion_method=self.inner.ingestion_method, tos_risk=self.inner.tos_risk, payload=rec.payload))
         self.health.record_success(src, now, len(result.records))
         self._save_health()
+        if self.events is not None:
+            self.events.save()
         return [out[k] for k in sorted(out)]           # deterministic order for DBOS checkpoints
 
     def _save_health(self) -> None:
@@ -180,7 +186,7 @@ class SpineDeduper:
 def discovery_components(jobs: list[tuple[SourceAdapter, SearchProfile]], *, raw_dir: str | os.PathLike,
                          side_path: Optional[str | os.PathLike] = None,
                          health_path: Optional[str | os.PathLike] = None,
-                         enabled_sources: frozenset[str] = frozenset(), clock=_now, panic=None):
+                         enabled_sources: frozenset[str] = frozenset(), clock=_now, panic=None, events=None):
     """Build (adapters, normalizer, deduper, side_channel) for `mbos.runtime.Components`.
     Adapter names are `<source>:<profile_id>` so several profiles of one source can coexist."""
     side = SideChannel(Path(side_path) if side_path else None)
@@ -190,7 +196,7 @@ def discovery_components(jobs: list[tuple[SourceAdapter, SearchProfile]], *, raw
     for inner, profile in jobs:
         a = SpineSourceAdapter(inner, profile, raw_store=raw, side=side, health=health, health_path=health_path,
                                enabled_sources=enabled_sources, name=f"{inner.source}:{profile.profile_id}",
-                               clock=clock, panic=panic)
+                               clock=clock, panic=panic, events=events)
         adapters[a.name] = a
         by_source.setdefault(inner.source, inner)
     return adapters, SpineNormalizer(by_source, side), SpineDeduper(), side

@@ -111,7 +111,7 @@ def _trial_item(adapter: SourceAdapter, n: Normalized, raw_ref: str, prov: dict)
 
 def run_discovery(jobs: list[tuple[SourceAdapter, SearchProfile]], store: ItemStore, raw: RawStore,
                   health: HealthBook, now: datetime,
-                  enabled_sources: frozenset[str] = frozenset(), panic=None) -> RunReport:
+                  enabled_sources: frozenset[str] = frozenset(), panic=None, events=None) -> RunReport:
     report = RunReport(run_id=derived_ulid("run", now, "run", iso(now)), started_at=iso(now))
     for adapter, profile in jobs:
         stats = SourceRunStats(source=adapter.source, profile_id=profile.profile_id)
@@ -146,6 +146,9 @@ def run_discovery(jobs: list[tuple[SourceAdapter, SearchProfile]], store: ItemSt
                 prov = build_provenance(adapter, n, raw_ref, rec.fetched_at, rec.request_uri)
                 check_item(_trial_item(adapter, n, raw_ref, prov))
                 obs = store.observe(adapter, n, raw_ref, prov, rec.fetched_at)
+                if events is not None:              # B-05 wake events (outbox; delivered to the spine separately)
+                    events.observe(source=adapter.source, source_listing_id=n.source_listing_id, url=n.url,
+                                   normalized=n.normalized, fetched_at=rec.fetched_at, raw_ref=raw_ref)
                 check_item(store.items[obs.item_id])
             except (ContractViolation, Exception) as e:  # noqa: BLE001 — per-record isolation
                 stats.quarantined += 1
@@ -158,5 +161,7 @@ def run_discovery(jobs: list[tuple[SourceAdapter, SearchProfile]], store: ItemSt
             setattr(stats, obs.event.lower(), getattr(stats, obs.event.lower()) + 1)
 
         health.record_success(adapter.source, now, stats.fetched)
+    if events is not None:
+        events.save()
     report.finished_at = iso(now)
     return report

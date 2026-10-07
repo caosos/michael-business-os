@@ -1,0 +1,69 @@
+{
+ "_provenance": "Copied from origin/research/agent-01-coordinator@aa88e7a:fixtures/sources/illustrative.json FIX-TRAILER-1 record.economics (ILLUSTRATIVE). Test-only: lets a lane-B fixture Item reach AWAITING_APPROVAL under the spine's placeholder scorer, standing in for the RESEARCH step (A-05) so the wake path can be exercised.",
+ "economics": {
+  "acquisition": {
+   "ask_price": 950,
+   "expected_buy_price": 800,
+   "buy_fees": 25
+  },
+  "rehab": {
+   "parts_cost": 120,
+   "materials_cost": 180,
+   "labor_hours": 6,
+   "admin_hours": 2,
+   "required_skills": [
+    "trailer_wiring",
+    "carpentry"
+   ],
+   "repair_success_prob": 0.95,
+   "repair_scope_known": true
+  },
+  "logistics": {
+   "trips": [
+    {
+     "purpose": "inspect_pickup",
+     "round_trip_miles": 64,
+     "can_combine": false
+    },
+    {
+     "purpose": "buyer_meet",
+     "round_trip_miles": 20
+    }
+   ],
+   "vehicle_mpg": 18,
+   "fuel_price_per_gal": 3.2,
+   "wear_per_mile": 0.28,
+   "avg_speed_mph": 45
+  },
+  "holding": {
+   "storage_cost_per_day": 3,
+   "expected_hold_days": 14,
+   "disposal_cost": 0,
+   "sell_fees_rate": 0,
+   "sell_fees_flat": 0
+  },
+  "resale": {
+   "target_sell_price": 2100,
+   "comp_price_low": 1800,
+   "comp_price_expected": 2100,
+   "comp_price_high": 2400,
+   "sale_prob": 0.85,
+   "expected_dom_days": 14
+  },
+  "downside": {
+   "salvage_if_repair_fails": 900,
+   "salvage_if_unsold": 1000
+  },
+  "estimates_meta": {
+   "scoring_config_version": "2026.10.0",
+   "assumptions": [
+    {
+     "field": "rehab.labor_hours",
+     "value": 6,
+     "basis": "INFER",
+     "note": "illustrative"
+    }
+   ]
+  }
+ }
+}
