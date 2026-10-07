@@ -85,3 +85,18 @@ r = research_step(item, comps, prov, as_of)   # comps -> bundle -> estimate -> s
   - no fixed-vocabulary conflict (type/size)
   - not a duplicate
 - **Condition routing.** `parts` sales feed the as-is market median, never the resale target.
+
+## Deal Sniffer enrichment (C-15; ADR-0011)
+```python
+from mbos_economics.enrich import build_enrichment, load_seasonality
+e = build_enrichment(scored_item, as_of, cfg=load_config(), priors=load_priors(), seasonality=load_seasonality(),
+                     profile=load_profile(), listing_activity=lane_b_block_or_None)
+# 1. persist e["provenance"] first (record_provenance), then for each block:
+for block, data in e["blocks"].items():       # economics | logistics | seasonality | why
+    spine.record_enrichment(conn, item_id, block, data, e["provenance"]["provenance_id"], agent="agent-03-economics")
+# e["omitted"] lists, per block, what the evidence could not support (the card shows those as UNKNOWN)
+```
+- **Honest by construction.** Every datum is `{value, basis, provenance_id}`. No FACT sold comps means no resale range. An unclassifiable transport leaves the mode and difficulty out. A category with no sourced seasonality entry is omitted.
+- **Transport is an economic input, never a gate.** `research_step(..., profile=)` classifies fits-truck vs needs-trailer and adds an explicit `economics.logistics.transport` input (extra cash and hours). The engine puts that into the arithmetic, so a trailer-requiring deal scores a little lower but is never rejected for it. The borrowed trailer stays UNKNOWN until a person confirms it.
+- **Sourced seasonality.** `config/seasonality.json` records where each claim came from; entries resting only on Michael's example are marked RECOMMENDATION.
+- **Tests.** The card integration tests need agent-01's package and `MBOS_CONTRACTS_DIR=<archive>/docs/research/contracts`; they skip cleanly otherwise.

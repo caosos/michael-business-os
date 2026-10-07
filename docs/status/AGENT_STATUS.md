@@ -7,12 +7,12 @@ Worktree: /home/michaelos/business-os-worktrees/agent-03-economics
 State: WORKING
 Current phase: ROUND TWO, wave two. Claimed task: RESEARCH/estimate producer (lane C)
 Started: 2026-10-06
-Last updated: 2026-10-07 (C-15 claimed, P0)
+Last updated: 2026-10-07 (C-15 done; C-16 claimed)
 
 ## Claimed work (wave two). Foreman loop: `docs/COORDINATION.md` @ agent-01 `99e9ec0`
-Claimed: C-15
-Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6; C-04 @ 882c726; C-05 @ 6e938d2; C-06 @ 9e36ec9; C-07 @ 0c3cf4a; C-08 @ a81a989; C-09 @ 286e0f3; C-10 @ e1869f2; C-11 @ c648ca3; C-12 @ d5daf42; C-13 @ 0d417fb; C-14 @ ec97bf7
-Queue (lane C, after C-15): C-16 (value_add block: plan + sourced model-specific risks; READY @ agent-01 `d2ef52f`)
+Claimed: C-16
+Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6; C-04 @ 882c726; C-05 @ 6e938d2; C-06 @ 9e36ec9; C-07 @ 0c3cf4a; C-08 @ a81a989; C-09 @ 286e0f3; C-10 @ e1869f2; C-11 @ c648ca3; C-12 @ d5daf42; C-13 @ 0d417fb; C-14 @ ec97bf7; C-15 @ 2575ed3
+Queue (lane C, after C-16): none READY @ agent-01 `c4f0156`
 
 - **C-01**, the RESEARCH/estimate producer, fills `Item.economics` from normalized fields, comps evidence and category priors, with provenance per estimate. It is deterministic and does no LLM arithmetic.
   - Claimed at `b923852`; confirmed CLAIMED in READY_QUEUE @ `99e9ec0`.
@@ -102,6 +102,13 @@ Queue (lane C, after C-15): C-16 (value_add block: plan + sourced model-specific
 - Outcomes recorded by Agent 01's real `spine_d.record_outcome` flow into `load_outcomes`, `calibrate` and a tier-0 proposal. The lane-D store refuses the proposal (`item_id` NOT NULL, the ADR-0009 item 9 gap); nothing is applied.
 - The LEARN provenance must be persisted before a proposal is submitted (the first attempt hit "unknown provenance ids").
 - The test needs `MBOS_LANE_D_STATE_DIR` and skips cleanly without it. 195 pass with the lane-D environment, and 193 pass with 2 skipped without it.
+
+### C-15 result (P0; DONE @ `2575ed3`; receipt `docs/receipts/2026-10-07-c15-deal-sniffer-enrichment.md`)
+- `enrich.build_enrichment` produces the `economics`, `logistics`, `seasonality` and `why` blocks with basis and provenance on every datum. Anything the evidence cannot support is omitted (the card shows UNKNOWN).
+- Transport is an economic input in the scoring arithmetic, never a gate. A trailer-requiring zero-turn mower scores and stays recommendable.
+- Seasonality is sourced from web-search summaries (pages not read; owner-stated entries marked RECOMMENDATION). Concrete saw vs riding mower differ.
+- The real `mbos.card.validate_card` is clean. 229 tests pass.
+- **Agent 01 action:** pass `profile=` to `research_step`, and persist `e["provenance"]` before attaching the blocks.
 
 ## Proposed tasks (for Agent 01 to triage)
 - **P-03-06 → DONE by Agent 01 @ `ca6d056`** (the spine writes `payload_hash`; the gate can use `--strict`). Original text:
