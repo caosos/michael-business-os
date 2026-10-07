@@ -1,106 +1,99 @@
 # Agent Status
 
 Agent: 05
-Role: Governance / Approval / Security — "controlled autonomy"
+Role: Governance / Action Gateway / PANIC — "controlled autonomy"
 Branch: research/agent-05-governance
 Worktree: /home/michaelos/business-os-worktrees/agent-05-governance
-State: WORKING
-Current phase: ROUND TWO — implementation: Action Gateway + fail-closed governance (wave one, DRY-RUN only)
+State: WAVE ONE COMPLETE — awaiting Agent 01 review of ADR-05-003 + integration
+Current phase: ROUND TWO — implementation, wave one (DRY-RUN only)
 Started: 2026-10-06
-Last updated: 2026-10-07 (round two start)
+Last updated: 2026-10-07 (wave one gateway delivered)
 
 ## Current objective
-ROUND TWO wave one: implement the Action Gateway, PDP (policy as data), execution guard
-(8 checks), approval validation, idempotency, budget/capability guards, L1/L2/L3 PANIC with
-fail-closed enforcement, forced dry-run. Per ADR-0004/ADR-0005 and frozen contracts v1.0.0.
+Wave one: Action Gateway + fail-closed governance layer per ADR-0004/ADR-0005 against frozen
+contracts v1.0.0. **Delivered.**
 
-## Completed
-- Full governance/approval/security architecture design.
-- External-tool survey (HITL/workflow, policy engines, capability tokens, identity,
-  secrets, prompt-injection references) with URLs, licenses, and activity — verified by
-  read-only web research.
-- Approval object/schema, delegation model, capability model, kill switch, spend/comms
-  limits, receipt/audit schema, idempotency, authority-boundary enforcement.
-- Prompt-injection defense design (architectural, not filter-based).
-- 28 acceptance tests; threat→control traceability table.
-- 2 decision records (ADR-001, ADR-002) and a tooling-survey receipt.
+## Completed (round two, wave one)
+FACT — 114 tests pass (`docs/receipts/2026-10-07-round-two-gateway-build.md`).
+Package `src/mbos_governance/` (Python 3.12, only dependency `jsonschema`):
+- **ActionRequest validation** — frozen contract + payload_hash recomputation, caller ==
+  proposed_by, initial status `drafted`, on_behalf_of michael, created/expiry sanity, lifetime
+  cap, provenance must exist ("no action without provenance"), derived_from must exist.
+- **Policy decision interface** — `decide(action_request) → {allow|deny|require_approval,
+  tier, policy_decision_ref}`; pure non-LLM code over **policy data** (`policy/policy.v1.json`
+  + `policy.schema.json`), hot-reloaded, never serves a stale policy.
+- **Approval validation** — YES/NO/MODIFY/HOLD semantics, approvers, channels, scope=once,
+  step-up, auth context; latest decision wins; invalid YES is recorded but not executable.
+- **payload_hash equality** — recomputed = stored = `payload_hash_seen`; floats refused.
+- **Approval expiry** — approval expires_at, 24h policy TTL cap, ActionRequest expires_at.
+- **Idempotency enforcement** — duplicate proposals collapse; execution claim UNIQUE per key;
+  second delivery returns stored result; crashed in-flight claim is never blind-retried.
+- **Budget guard** — reserve → commit/release; per-action / daily-bucket / global-daily /
+  money-velocity caps; live caps pinned 0; dry-run shadow caps enforced; 100 parallel
+  approvals never overshoot (FACT).
+- **Capability guard** — least-privilege `agent_grants` data; re-checked at execution on the
+  current policy.
+- **PANIC L1/L2/L3** — checksum-sealed atomic state file outside the DB; missing/corrupt/
+  tampered = FROZEN; L3 cancels queued requests; late PANIC read just before the effector;
+  release only by Michael and rolled back if its receipt fails; CLI `mbos-gov`.
+- **Dry-run guard** — `system_mode` can only be round_one|mvp; only effector is
+  `DryRunEffector`; an effector reporting `dry_run≠true` trips L3 PANIC.
+- **Fail closed** — unreadable policy or PANIC state ⇒ all 8 checks fail, proposals rejected.
+- **8 guard checks** (ADR-0005) in one transaction, all failures reported with codes.
+- **Receipts** — every transition, same transaction, validated against receipt.schema.json,
+  provenance must exist, hash-chained, insert-only; `verify_chain` detects tampering.
+- **No bypass** — effectors require a gateway-minted HMAC guard token;
+  `tools/check_no_bypass.py` lints for network/messaging/payment imports outside effectors.
+- Docs: `docs/governance/ACTION_GATEWAY.md` (integration guide, guard table, PANIC runbook),
+  ADR-05-003, build receipt.
 
 ## Findings
-Key verified facts (full detail + sources in docs/research/agent-05-governance.md §15):
-- **Temporal** (MIT, self-hostable) and **LangGraph** (MIT) give durable pause→resume
-  for approval gates out of the box; Temporal uses indefinite Signal-waits + timeout,
-  LangGraph uses `interrupt()`+checkpointer (gotcha: node re-runs from top on resume).
-- **"AgentGate" is NOT a citable project** — the name is reused across several unrelated
-  early-stage repos; no mature standard. Use HumanLayer (noting it has pivoted away from
-  the approval product), LangGraph interrupts, Temporal signals as real anchors.
-- **OPA/Rego** (Apache-2.0, CNCF Graduated) and **Cedar** (Apache-2.0, formally verified)
-  are the strongest fits for the policy decision point. Oso's OSS lib was deprecated
-  Dec 2023 — avoid for self-hosting.
-- **Biscuit** (Apache-2.0, public-key signed, offline attenuation) is the best modern fit
-  for agent capability/delegation tokens; macaroons are the symmetric-key alternative.
-- **SPIFFE/SPIRE** (Apache-2.0) for agent workload identity; OAuth2 token-exchange for
-  short-lived scoped tokens.
-- **Vault is BUSL-1.1 since v1.15 (Aug 2023)** — no longer OSI-open; **OpenBao** (MPL-2.0)
-  is the open fork. Dynamic short-lived secrets + encryption-as-a-service keep raw secrets
-  out of agent/model context.
-- OWASP LLM01, Simon Willison (dual-LLM, lethal trifecta), and DeepMind's CaMeL
-  (arXiv:2503.18813) all converge: the model proposes, a non-LLM engine authorizes.
-  There is no reliable prompt-level filter — defense must be architectural.
+- FACT: contract v1.0.0 does not define `payload_hash` canonicalization; the frozen example
+  `action-request-email-held` has a payload_hash not reproducible from its payload, so the
+  gateway would reject it (`PAYLOAD_HASH_MISMATCH`). → ADR-05-003 R1.
+- FACT: receipt `type` enum lacks a guard-refused / expired event; wave one maps onto
+  `ACTION_FAILED` / `POLICY_DECIDED`. → ADR-05-003 R2.
+- INFERENCE: the in-process guard token stops accidental bypass only; real isolation needs
+  process/Unix-user separation + default-deny egress (1-week path).
 
 ## Decisions made
-- **ADR-001 (PROPOSED):** single Action Gateway choke point + external Policy Decision
-  Point + execution guard; agents hold no effector credentials; default-deny; everything
-  is a receipt. Maps to the standard PEP/PDP/PIP split.
-- **ADR-002 (PROPOSED):** adopt Temporal (durable workflow) + OPA/Rego or Cedar (policy) +
-  Biscuit (capabilities) + SPIFFE or cloud IAM (identity) + Vault/OpenBao or cloud secret
-  manager (secrets); build thin custom gateway/ledger/trust-tagging; borrow (not depend on)
-  HumanLayer/OpenAI `needs_approval` patterns for approval UX.
-- Core invariant: no world-affecting side effect executes without a matching approved,
-  un-expired, un-replayed approval whose payload-hash still matches.
+- ADR-05-003 (PROPOSED): confirms merged 3-level PANIC; accepts Biscuit/SPIFFE deferral;
+  policy-as-data with schema-pinned wave-one invariants; SQLite reference store behind a
+  swappable seam; contract v1.1 requests R1–R3.
 
 ## Unknowns
-- Exact current license of any remaining Oso OSS component (lib deprecated).
-- Precise Vault BUSL acceptability for our use (OpenBao is the fallback).
-- Agent/non-human-identity standards are active but unsettled — SPIFFE+OAuth is the
-  defensible-today path.
-- No production-grade CaMeL implementation exists — it's a pattern, not a library.
-- Final deployment target (self-hosted vs cloud) determines the identity/secrets stack.
+- Recipient-local timezone for quiet hours (policy tz America/Chicago used until Agent 06's
+  consent ledger supplies it).
+- Agent 04's Postgres DDL for action_requests / approvals / budget_ledger / policy (store swap).
+- Operator UI authentication (lane F) — `record_approval` assumes an authenticated surface.
 
 ## Blockers
-None. Round-One scope fully delivered.
+None for wave one.
 
 ## Needs Michael decision
-(See research file §18 for full context.)
-1. Dollar limits: per-action, per-category/day, per-counterparty, global/month.
-2. Comms limits: messages/day per recipient, quiet hours, which categories may ever
-   reach delegated (Tier 1+) autonomy.
-3. Acceptable step-up auth (2FA) method for approving money/irreversible actions.
-4. Approval channel(s): web UI only, or also SMS/email approve-by-reply.
-5. Dead-man's switch: auto-freeze if Michael unreachable for N hours? What N?
-6. Receipt strength: is hash-chaining enough, or want signed/externally-anchored receipts?
-7. Will anyone besides Michael ever approve actions (multi-approver)?
-8. Deployment target: self-hosted box vs cloud (drives identity/secrets stack).
+Unchanged; wave one ships conservative defaults as data (`MICHAEL_DECISIONS.md` #1, #3, #5):
+dollar caps (dry-run shadow caps $1,500/deal, comms $5/day, publishing $50/day; live $0),
+step-up method, no delegation.
 
 ## Needs coordinator review (Agent 01)
-- ADR-001 and ADR-002 affect the whole system — require cross-agent reconciliation.
-- Interface with Agent 04 (state): the receipt/audit event schema and the append-only
-  hash-chained ledger must be jointly owned; Agent 05 defines required governance events,
-  Agent 04 owns storage. Need alignment on the shared receipt object.
-- Interface with Agent 03 (economics): `provenance.score_ref` on each ActionRequest links
-  to Agent 03's score — confirm the score object has a stable ID.
-- Interface with Agent 06 (communications): comms approval points, first-contact gate,
-  quiet hours, consent/recording legal findings must feed the comms capability policy.
-- Interface with Agent 01's core flow: the gate sits at "MICHAEL APPROVES → ACT → RECEIPT".
+- ADR-05-003 requests R1 (payload canonicalization + regenerate example), R2 (receipt
+  types), R3 (`pdp_` prefix).
+- Integration: DBOS workflow should call `ActionGateway.execute()` inside a step; agent ids
+  must be the branch names (`agent-0N-*`).
+- Agent 04: `GovernanceStore` method seam for the Postgres swap.
 
-## Files produced
-- docs/research/agent-05-governance.md — full Round-One deliverable (architecture,
-  schemas, delegation, capabilities, identity, kill switch, limits, receipts, idempotency,
-  authority boundaries, prompt-injection defenses, tool survey, 28 acceptance tests).
-- docs/decisions/ADR-001-governance-control-plane.md
-- docs/decisions/ADR-002-governance-tech-stack.md
-- docs/receipts/2026-10-06-governance-tooling-survey.md
-- docs/status/AGENT_STATUS.md (this file)
+## Files produced (round two)
+- pyproject.toml, .gitignore
+- src/mbos_governance/{__init__,ids,contracts,policy,panic,store,effectors,gateway,cli}.py
+- src/mbos_governance/schemas/ (frozen v1.0.0 copies + PROVENANCE.md)
+- policy/policy.v1.json, policy/policy.schema.json
+- tools/check_no_bypass.py
+- tests/{conftest,test_gateway,test_policy_and_panic,test_static}.py
+- docs/governance/ACTION_GATEWAY.md
+- docs/decisions/ADR-05-003-wave-one-gateway-implementation.md
+- docs/receipts/2026-10-07-round-two-gateway-build.md
 
 ## Next action
-Await Agent 01 coordinator review of ADR-001/ADR-002 and Michael's answers to the 8
-decisions above. No Round-Two build until scope is authorized.
+1-week path (ACTION_GATEWAY.md §8): Postgres store on Agent 04 DDL; L3 hooks (egress
+deny-all, OpenBao, LiteLLM budget→0, DBOS cancel); sandbox + egress allow-list; governance
+alerts; stuck-claim reconciliation job; output secret scan + INJECTION_SUSPECTED tripwire.

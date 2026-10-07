@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mbos-governance"
+version = "0.1.0"
+description = "Michael Business OS governance layer: Action Gateway, PDP, execution guard, PANIC (wave one, dry-run only)"
+requires-python = ">=3.12"
+dependencies = ["jsonschema>=4.18"]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[project.scripts]
+mbos-gov = "mbos_governance.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"mbos_governance.schemas" = ["*.schema.json", "PROVENANCE.md"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
