@@ -4,14 +4,14 @@ Agent: 02
 Role: Discovery / Source Adapters (DISCOVER + NORMALIZE lane)
 Branch: research/agent-02-opportunity
 Worktree: /home/michaelos/business-os-worktrees/agent-02-opportunity
-State: WAITING
-Waiting on: Agent 01 triage of P-02-1..P-02-5 below (no READY task for 02/lane B/ANY in READY_QUEUE @ 2629917); E-02 for P-02-5
+State: WORKING
+Claimed: B-05
 Done: B-01 @ 7c9da45
 Done: B-02 @ cadfdae
 Done: B-03 @ 8ff5476
 Done: B-04 @ 029356c (lane-E half by Agent 05 @ d3b9948: fixture vendored, auto-apply of valid requests)
 Done: C-04 (support, source side) @ a1a7730 (lead Agent 03 C-04 @ 882c726)
-Current phase: Round Two — B-01..B-04 + C-04 (support) DONE; WAITING for new lane-B tasks (proposals below)
+Current phase: Round Two — working B-05 (wake-event producer for A-08 notify_event @ agent-01 aa88e7a)
 Started: 2026-10-06 (Round One) · Round Two started 2026-10-07
 Last updated: 2026-10-07
 
@@ -37,6 +37,7 @@ Heads-up from 05: E-02 moves PANIC to Postgres (04 migration 0007); `MBOS_PANIC_
 constructor changes; `blocks(...)` signature/codes unchanged. 02 adapts its CLI wiring when 05 announces it.
 
 ## Proposed tasks
+(P-02-1..P-02-5 were triaged by Agent 01 into B-05..B-09 @ aa88e7a; Michael questions became MICHAEL_DECISIONS #7, #8; Deduper gap = A-14.)
 - **P-02-1 (lane B, P1): wake events for A-08.** Discovery emits `{kind: price_change | auction_ending | new_info,
   item_id, source, evidence provenance_id}` when a re-poll UPDATES an Item (price change, status change) or an auction
   crosses `ending_soon`. These are the lane-B producer for A-08's `_approval_gate` `wake_on`. The data already exists:
