@@ -55,3 +55,38 @@ An entry ships only if **all** of these hold. The code enforces the ones marked 
 - NHTSA endpoints and terms, to be confirmed on the live site.
 - Where the operator's notes document lives at runtime (a store row or artifact is cleaner than a file). That is 01 and 04's call; the code takes a document or a path.
 - Coverage targets. The right measure is the share of the listings Michael actually acts on that show at least one sourced risk. We have no real listing volume yet.
+
+## 7. Contract for D-17 (the operator-note store): what `new_manual_note` and `load_manual_notes` need
+Written ahead of D-17 so 04's table lines up the first time. Reviewing it is a one-liner: render the table as `{"notes_format": 1, "notes": [...]}` and run `python -m mbos_economics note check FILE` (exit 0 = accepted).
+
+| Column / field | Rule (enforced by the loader today) | DB suggestion |
+|---|---|---|
+| `note_id` | unique; `mn_` + 26 Crockford characters (derived from content + time, so re-entry is idempotent) | PK with a regex CHECK, as the other prefixed ids |
+| `category` | one of the flip categories: trailer, mower, generator, welder, compressor, tool, commercial_equipment, mechanical_equipment, project_vehicle, other_asset | CHECK IN (...) |
+| `match` | non-empty list of groups; **every group has non-empty `makes` AND non-empty `models`** (a note must name a model) | jsonb with a CHECK on the shape, or two `text[]` columns per group row |
+| `kind` | failure_mode, expensive_part, parts_availability, known_weakness, resale_demand, economic | CHECK IN (...) |
+| `statement` | non-empty, at most 600 characters, no elementary advice | CHECK on length; the lint stays in Python |
+| `plan_hint` | optional, at most 600 characters | nullable text |
+| `entered_by` | non-empty author | the human channel's identity, not caller-supplied text |
+| `entered_at` | RFC 3339 with a time zone | `timestamptz NOT NULL`; the entry channel supplies it (the library reads no clock) |
+| `basis_of_knowledge` | non-empty free text ("own experience", "service manual p.34") | NOT NULL |
+| `provenance_id` | an existing **human** provenance record: `actor_type = human`, `human_actor` set, a `tool_name`/`tool_version` (satisfies the provenance anyOf) | FK to `mbos.provenance`; the receipt must cite it |
+| `reference_url` | optional, https only | CHECK `LIKE 'https://%'` |
+| `basis` | **always RECOMMENDATION**: a note is owner-stated and is never FACT | CHECK, or omit the column |
+| `review_after` | optional date | nullable |
+| retraction | a note leaves use when retracted | see "append-only folding" below |
+
+**Invariants the store should hold**
+1. **Agents can read, never write.** Only the human channel inserts (Agent 01's A-21 / 06's form pass the author).
+2. **Append-only and receipted:** the receipt cites the human provenance record.
+3. **Provenance first.** The provenance row is inserted before the note, in the same transaction or earlier.
+4. **No update or delete.** Edits and retractions are new rows.
+
+**Append-only folding (edits and retractions).** `load_manual_notes` takes a flat document with one `retracted: true` flag per note. With an append-only store, the reader should fold: the latest row in a `supersedes` chain wins, and a retraction row produces `retracted: true`. 04's `lessons` table already uses a `supersedes` column, so the same pattern fits.
+
+**Open question for 01 and 04: the receipt type.**
+- The frozen Receipt v1 `type` list has no note type. The nearest is `LESSON_RECORDED`.
+- **Option A (no contract change):** store notes in a dedicated `operator_notes` table (as queued, with the CHECKs above) and write a `LESSON_RECORDED` receipt with `entity_type: "operator_note"`. Cost: a lesson and a note share one receipt type, so ledger queries must filter on `entity_type`.
+- **Option B (cleaner ledger):** add `OPERATOR_NOTE_RECORDED` under ADR-0009. Cost: a contract change.
+- **Reusing `mbos.lessons` outright** is not recommended: it has no constrained make, model, category or kind, so the "name a model" rule could not be enforced in the database.
+- My recommendation is A now and B when ADR-0009 is next opened.
