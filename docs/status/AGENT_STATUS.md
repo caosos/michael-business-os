@@ -4,15 +4,15 @@ Agent: 03
 Role: Economics / Scoring (Round-Two build lane C)
 Branch: research/agent-03-economics
 Worktree: /home/michaelos/business-os-worktrees/agent-03-economics
-State: WORKING
+State: WAITING
 Current phase: ROUND TWO, wave two. Claimed task: RESEARCH/estimate producer (lane C)
 Started: 2026-10-06
-Last updated: 2026-10-07 (C-18 claimed)
+Last updated: 2026-10-07 (C-18 done; WAITING: no READY lane-C task)
 
 ## Claimed work (wave two). Foreman loop: `docs/COORDINATION.md` @ agent-01 `99e9ec0`
-Claimed: C-18
-Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6; C-04 @ 882c726; C-05 @ 6e938d2; C-06 @ 9e36ec9; C-07 @ 0c3cf4a; C-08 @ a81a989; C-09 @ 286e0f3; C-10 @ e1869f2; C-11 @ c648ca3; C-12 @ d5daf42; C-13 @ 0d417fb; C-14 @ ec97bf7; C-15 @ 2575ed3; C-16 @ c88cd5a; C-17 @ 3569efb
-Queue (lane C, after C-18): none READY @ agent-01 (latest push). B-18 (02) flips KB_SUPPORTS_MODEL_YEARS once C-18 lands
+Claimed: (none)
+Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6; C-04 @ 882c726; C-05 @ 6e938d2; C-06 @ 9e36ec9; C-07 @ 0c3cf4a; C-08 @ a81a989; C-09 @ 286e0f3; C-10 @ e1869f2; C-11 @ c648ca3; C-12 @ d5daf42; C-13 @ 0d417fb; C-14 @ ec97bf7; C-15 @ 2575ed3; C-16 @ c88cd5a; C-17 @ 3569efb; C-18 @ d9bceea
+Queue (lane C): none READY @ agent-01 `37abd48`\nWaiting on: 02 B-18 (flip KB_SUPPORTS_MODEL_YEARS, emit `years`); any new lane-C task; Michael decisions #1/#2/#6
 
 - **C-01**, the RESEARCH/estimate producer, fills `Item.economics` from normalized fields, comps evidence and category priors, with provenance per estimate. It is deterministic and does no LLM arithmetic.
   - Claimed at `b923852`; confirmed CLAIMED in READY_QUEUE @ `99e9ec0`.
@@ -133,6 +133,11 @@ Queue (lane C, after C-18): none READY @ agent-01 (latest push). B-18 (02) flips
 - **My bug found and fixed:** a retracted note's copied text was still linted, so retraction could not clear a bad note. Retracted notes are now skipped. I also added `load_manual_notes_lenient`, so one bad note no longer disables the rest.
 - **Documented limitation:** the DBOS worker login inherits `approver` and can record notes (by design; no LLM-facing process uses it). Pinned by a test.
 - Package 0.10.2; 294 tests pass with all environments.
+
+### C-18 result (DONE @ `d9bceea`; receipt `docs/receipts/2026-10-07-c18-model-years.md`)
+- `match[].years` (list, range or `"2010-2014"`): a year-specific entry applies only when the LISTING states a covered year (read from the title: inference, evidence shown). A yearless listing never matches; every blocked match is recorded as UNKNOWN in `year_blocked` and `omitted`.
+- Preserved: the numeric-token asymmetry. Yearless entries behave exactly as before.
+- 318 tests pass with all environments.
 
 ## Proposed tasks (for Agent 01 to triage)
 - **P-03-08 (lane B): CPSC knowledge adapter.** Read the CPSC programmer's guide (response fields, rate limit), then a read-only, fixture-first Tier-1 adapter emitting recall records. 03 supplies the deterministic record-to-KB-entry converter once the fields are known.
