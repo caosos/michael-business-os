@@ -4,8 +4,8 @@ Agent: 04
 Role: Postgres / State / Receipts (lane D: durable business state, receipts, provenance; sole ledger owner per ADR-0010)
 Branch: research/agent-04-state
 Worktree: /home/michaelos/business-os-worktrees/agent-04-state
-State: WORKING
-Claimed: D-15
+State: WAITING (D-15 delivered; acceptance = 01 adopting it in the lane-D e2e; usage limit reached this session)
+Claimed: none
 Done: D-01 @ a0d1fbe
 Done: D-02 @ a0d1fbe
 Done: D-03 @ ca59e3c
@@ -17,10 +17,11 @@ Done: D-08 @ d668386
 Done: D-13 @ ffb9e24
 Done: D-11 @ 341c5d2
 Done: D-14 @ 80bb135
+Done: D-15 (helper delivered; 01 to adopt in its e2e for final acceptance)
 Blocked: D-10 (final acceptance) on A-01 phase 2. The DDL is delivered @ 6533334.
 Current phase: ROUND TWO: foreman loop (READY_QUEUE)
 Started: 2026-10-06
-Last updated: 2026-10-07 (D-14 done @ 80bb135; D-15 claimed)
+Last updated: 2026-10-07 (D-15 delivered)
 
 ## Current objective
 **D-15:** a reusable bootstrap helper so tests and workers connect as the real `mbos_dbos` login: roles, `mbos_ext`/pgvector, schema `dbos` owned by the login, its own system DB, and migrations. Agent 01 adopts it in the lane-D e2e.

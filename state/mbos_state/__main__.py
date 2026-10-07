@@ -7,6 +7,8 @@
   export-chain --out F         export the chain as JSONL
   verify-export F [--anchor F] offline verification of an export (no database)
   verify-artifacts [--root D]  re-hash every indexed artifact (default root $MBOS_ARTIFACT_ROOT)
+  provision --admin-dsn D [--app-db mbos] [--sys-db mbos_dbos] [--login mbos_dbos]
+                               superuser-only setup so workers connect as the real login (D-15)
 
 Exit code 0 = ok, 1 = verification failed, 2 = usage/config error.
 """
@@ -50,11 +52,19 @@ def main(argv: list[str] | None = None) -> int:
     e = sub.add_parser("export-chain"); e.add_argument("--out", required=True)
     x = sub.add_parser("verify-export"); x.add_argument("path"); x.add_argument("--anchor")
     va = sub.add_parser("verify-artifacts"); va.add_argument("--root")
+    pv = sub.add_parser("provision"); pv.add_argument("--admin-dsn", required=True)
+    pv.add_argument("--app-db", default="mbos"); pv.add_argument("--sys-db"); pv.add_argument("--login", default="mbos_dbos")
     args = ap.parse_args(argv)
 
     if args.cmd == "migrate":
         applied = migrate.migrate(_dsn("MBOS_ADMIN_DSN"))
         print(f"{len(applied)} migration(s) applied" if applied else "schema up to date")
+        return 0
+    if args.cmd == "provision":
+        from .provision import provision
+        p = provision(args.admin_dsn, args.app_db, args.sys_db, args.login, log=print)
+        print(json.dumps({"login": p.login, "app_url": p.app_url, "sys_url": p.sys_url,
+                          "migrations_applied": p.migrations_applied}))
         return 0
     if args.cmd == "verify-export":
         ok, n, problem = chain.verify_export(Path(args.path), Path(args.anchor) if args.anchor else None)
