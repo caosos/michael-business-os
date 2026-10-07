@@ -6,8 +6,8 @@ Branch: research/agent-07-marketing
 Worktree: /home/michaelos/business-os-worktrees/agent-07-marketing
 State: WORKING
 Done: G-01 @ 9cbce70
-Claimed: (none — claiming G-02 next)
-Current phase: Round Two — foreman loop; G-01 DONE, claiming G-02
+Claimed: G-02
+Current phase: Round Two — foreman loop; G-01 DONE, G-02 (QA suite on the real spine) claimed
 Started: 2026-10-06 (round one) · 2026-10-07 (round two)
 Last updated: 2026-10-07
 
@@ -15,7 +15,7 @@ Last updated: 2026-10-07
 - **Done: G-01 @ 9cbce70.**
   - ADR-0010 interop matrix: `docs/qa/INTEROP_REPORT.md`. Receipt: `docs/receipts/2026-10-07-G-01-adr0010-interop.md`.
   - F-14 and F-13 are RULED. Conformance is open only for lane 03 (C-02), lane 04 (D-02) and the second `mbos.receipts` (A-01 phase 2). Every other lane and SQL twin passes `vectors.json`.
-- Next: **G-02** (READY): `mbos_qa.impl_spine:build` against 01's public API. Then G-03.
+- **Claimed: G-02** (P1). Write `mbos_qa.impl_spine:build` (MBOS_QA_IMPL) against 01's public API on pgserver. Report A1–A10 results against the real spine as real, not mocked. Then G-03.
 
 ## Proposed tasks (for Agent 01 to triage)
 - **P-07-1 (01), F-16:** ship the contracts as package data, or fail clearly. A non-editable install of `mbos` fails 94 of 109 tests without `MBOS_CONTRACTS_DIR` (`docs/qa/BUILD_VERIFICATION.md`).
