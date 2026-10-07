@@ -5,19 +5,22 @@ Role: ROUND TWO — QA / End-to-End Integration / Manual-Assist Outputs (lane G)
 Branch: research/agent-07-marketing
 Worktree: /home/michaelos/business-os-worktrees/agent-07-marketing
 State: WORKING
-Claimed: G-01
-Current phase: Round Two — foreman loop; G-01 (ADR-0010 interop) claimed, G-02 next
+Done: G-01 @ 9cbce70
+Claimed: (none — claiming G-02 next)
+Current phase: Round Two — foreman loop; G-01 DONE, claiming G-02
 Started: 2026-10-06 (round one) · 2026-10-07 (round two)
 Last updated: 2026-10-07
 
 ## Work queue (foreman loop, docs/COORDINATION.md)
-- Source: `origin/research/agent-01-coordinator` @ `99e9ec0`, `docs/status/READY_QUEUE.md`. G-01 and G-02 are READY for 07, and both are unclaimed.
-- **Claimed: G-01** (P1). Steps:
-  - Move `core.canonical`/`receipt_row_hash` onto the ADR-0010 reference (MBOS-CJSON-1 / MBOS-RH-1).
-  - Add `vectors.json` to `mbos_qa interop`.
-  - Re-run interop across all lanes and publish the matrix.
-- Next: **G-02** (P1, READY): `mbos_qa.impl_spine:build` against 01's public API on pgserver. Then G-03 (READY after G-02).
-- Earlier note, superseded: at 11:5x no READY_QUEUE existed and R11 was WAITING. The amended R11 removes that wait.
+- **Done: G-01 @ 9cbce70.**
+  - ADR-0010 interop matrix: `docs/qa/INTEROP_REPORT.md`. Receipt: `docs/receipts/2026-10-07-G-01-adr0010-interop.md`.
+  - F-14 and F-13 are RULED. Conformance is open only for lane 03 (C-02), lane 04 (D-02) and the second `mbos.receipts` (A-01 phase 2). Every other lane and SQL twin passes `vectors.json`.
+- Next: **G-02** (READY): `mbos_qa.impl_spine:build` against 01's public API. Then G-03.
+
+## Proposed tasks (for Agent 01 to triage)
+- **P-07-1 (01), F-16:** ship the contracts as package data, or fail clearly. A non-editable install of `mbos` fails 94 of 109 tests without `MBOS_CONTRACTS_DIR` (`docs/qa/BUILD_VERIFICATION.md`).
+- **P-07-2 (launcher owner / Agent 01), F-17, provenance:** the git identity is stored in the shared `.git/config`, so the last-launched agent signs everyone's commits. 01's commits `acb6f3b`, `c6c5ad4`, `7ed5705` and `bed7609` are authored "Agent 07 Marketing". Fix: `extensions.worktreeConfig=true` plus `git config --worktree user.*` in `~/bin/mbos-agent`. I have not changed any shared config.
+- **P-07-3 (01):** refresh the test-count claims in ALL_AGENTS from `docs/qa/BUILD_VERIFICATION.md`. Collected counts: 01 has 109 vs 111 claimed, 03 has 114 vs 75, 05 has 121 vs 114.
 
 ## Current objective
 Independent QA/integration lane against the frozen contracts v1.0.0. DRY-RUN ONLY.
