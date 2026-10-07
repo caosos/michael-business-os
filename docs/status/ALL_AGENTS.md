@@ -6,7 +6,7 @@ Last updated: 2026-10-06 (by Agent 01)
 
 | Agent | Role | State | Current objective | Last update | Blocker | Deliverable |
 |---|---|---|---|---|---|---|
-| 01 | Coordinator / Architect | WORKING | Stand up coordination layer; sync dashboard | 2026-10-06 | none | `docs/research/agent-01-coordinator.md` (complete) |
+| 01 | Coordinator / Architect | WAITING | Research deliverable complete; awaiting 02–07 status to reconcile | 2026-10-06 | none (waiting on peers) | `docs/research/agent-01-coordinator.md` (complete, pushed) |
 | 02 | Opportunity Discovery | NO REPORT | — | — | — | — |
 | 03 | Economics / Scoring | NO REPORT | — | — | — | — |
 | 04 | CRM / State | NO REPORT | — | — | — | — |
