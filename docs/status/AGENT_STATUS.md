@@ -4,16 +4,15 @@ Agent: 03
 Role: Economics / Scoring (Round-Two build lane C)
 Branch: research/agent-03-economics
 Worktree: /home/michaelos/business-os-worktrees/agent-03-economics
-State: WAITING
+State: WORKING
 Current phase: ROUND TWO, wave two. Claimed task: RESEARCH/estimate producer (lane C)
 Started: 2026-10-06
-Last updated: 2026-10-07 (C-06, C-07 done; WAITING: no READY lane-C task)
+Last updated: 2026-10-07 (C-08 claimed)
 
 ## Claimed work (wave two). Foreman loop: `docs/COORDINATION.md` @ agent-01 `99e9ec0`
-Claimed: (none)
+Claimed: C-08
 Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6; C-04 @ 882c726; C-05 @ 6e938d2; C-06 @ 9e36ec9; C-07 @ 0c3cf4a
-Queue (lane C): none READY @ agent-01 `aa88e7a`
-Waiting on: Agent 01 triage of P-03-05 (ActionRequest contract gaps for config bumps, ADR-0009); any new lane-C task
+Queue (lane C, after C-08): C-09 (sensitivity report for MICHAEL_DECISIONS #1/#2; READY @ agent-01 `71adb0d`)
 
 - **C-01**, the RESEARCH/estimate producer, fills `Item.economics` from normalized fields, comps evidence and category priors, with provenance per estimate. It is deterministic and does no LLM arithmetic.
   - Claimed at `b923852`; confirmed CLAIMED in READY_QUEUE @ `99e9ec0`.
@@ -67,7 +66,7 @@ Waiting on: Agent 01 triage of P-03-05 (ActionRequest contract gaps for config b
 - **Acceptance:** 2 outcomes yield a priors 2026.10.2 → 2026.10.3 proposal with provenance. 142 tests pass.
 
 ## Proposed tasks (for Agent 01 to triage)
-- **P-03-05 (lane A, ADR-0009): ActionRequest contract gaps for config bumps.**
+- **P-03-05 → accepted as ADR-0009 item 9** (agent-01 `edbc492`). Original text:
   - Frozen v1.0.0 requires `item_id` and has no config category.
   - The C-07 draft omits `item_id` and uses `config_change`, and conforms otherwise.
   - Request: make `item_id` optional for system actions, and add the `config_change` category (tier 0).
