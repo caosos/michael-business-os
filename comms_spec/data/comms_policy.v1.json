@@ -1,0 +1,83 @@
+{
+  "policy_id": "comms_policy",
+  "version": "1.0.0",
+  "status": "PROPOSED",
+  "owner": "agent-06-communications",
+  "note": "DRY-RUN spec. Nothing here sends. Live outbound stays disabled until MICHAEL_DECISIONS #4. Limits are deliberately conservative; loosening any value requires a version bump and coordinator review.",
+  "send_window": {
+    "basis": "recipient local time",
+    "legal_floor": {
+      "start": "08:00",
+      "end": "21:00",
+      "evidence": "FACT: TCPA 47 CFR 64.1200(c)(1) bars telephone solicitations before 8am or after 9pm at the called party's location."
+    },
+    "effective": {
+      "start": "08:00",
+      "end": "20:00",
+      "evidence": "RECOMMENDATION: ADR-0005 quiet hours 20:00-08:00 (Agent 05), which is stricter than TCPA and also inside the stricter state windows we know of (e.g. Florida 8am-8pm, FACT)."
+    },
+    "no_outbound_days": ["sunday"],
+    "no_outbound_days_evidence": "RECOMMENDATION: some states restrict Sunday/holiday solicitation (UNKNOWN for Arkansas specifics); blocking Sundays for outbound is the conservative default. Replies to an inbound message the same day are exempt.",
+    "unknown_timezone": "deny",
+    "reply_exemption": {
+      "applies_to": ["sms", "email"],
+      "within_minutes_of_inbound": 60,
+      "note": "A reply inside 60 min of the counterparty's own message may go outside the window, except voice calls. Voice is never exempt."
+    }
+  },
+  "rate_limits": {
+    "per_contact": {
+      "sms": {"max_per_day": 1, "max_per_7_days_without_reply": 3, "max_per_day_active_thread": 10},
+      "email": {"max_per_day": 1, "max_per_7_days_without_reply": 3, "max_per_day_active_thread": 10},
+      "voice": {"max_attempts_per_day": 1, "max_attempts_per_7_days": 2, "voicemail_per_7_days": 1}
+    },
+    "active_thread_definition": "the contact sent us a message in the last 24h",
+    "global_per_day": {"sms": 50, "email": 100, "voice": 20},
+    "evidence": "RECOMMENDATION (INFERENCE from Round One §12/§14): low volume keeps the business clearly in 'responding to a specific listing or inquiry' territory and inside A2P 10DLC low-volume campaign expectations. Michael can raise them later; they are data, not code."
+  },
+  "consent": {
+    "sms": {
+      "required": "prior_express_consent",
+      "first_contact_rule": "Only to a number the counterparty published for this listing or gave us in an inquiry; record the source URI as consent evidence. Marketing SMS (e.g. review requests) needs prior express WRITTEN consent.",
+      "evidence": "FACT: TCPA consent requirements for autodialed/artificial-voice texts; FCC (Feb 2024) treats AI-generated voice as 'artificial voice'. UNKNOWN: whether replying by SMS to a publicly listed number counts as consented, so counsel is required before live (MICHAEL_DECISIONS #4)."
+    },
+    "voice": {
+      "required": "prior_express_consent",
+      "ai_disclosure": "required at call start",
+      "recording": "treat every call as all-party consent; announce recording before any recorded content",
+      "evidence": "FACT: FCC Declaratory Ruling FCC 24-17 (Feb 8 2024): AI voice = artificial voice under TCPA. FACT: several states require all-party consent to record."
+    },
+    "email": {
+      "required": "none for one-to-one transactional replies; CAN-SPAM compliance for commercial messages",
+      "commercial_requirements": ["accurate_from_and_subject", "physical_postal_address", "working_unsubscribe", "honor_unsubscribe_within_10_business_days"],
+      "evidence": "FACT: CAN-SPAM Act (15 U.S.C. 7704) requirements; unsubscribe honored within 10 business days."
+    },
+    "record_on_every_send": ["consent_basis", "consent_evidence_uri", "dnc_check_result", "dnc_checked_at", "send_window_check", "rate_limit_check"]
+  },
+  "dnc": {
+    "national_registry_scrub_max_age_days": 31,
+    "internal_suppression": "permanent until the contact re-opts-in in writing",
+    "applies_to": ["sms", "voice"],
+    "evidence": "FACT: telemarketers must scrub against the National DNC Registry at least every 31 days (16 CFR 310.4(b)(3)(iv); 47 CFR 64.1200(c)(2))."
+  },
+  "opt_out": {
+    "keywords": ["STOP", "STOPALL", "UNSUBSCRIBE", "CANCEL", "END", "QUIT", "REVOKE", "OPTOUT", "OPT OUT", "STOP ALL"],
+    "match": "the whole message, case-insensitive, after trimming whitespace and punctuation",
+    "honor_within_seconds": 60,
+    "legal_max": "FACT: FCC 2024 revocation-of-consent order requires honoring opt-outs by any reasonable means within 10 business days; our target (E4) is 60 s.",
+    "confirmation": "one confirmation message, no marketing content, sent once (template stop_confirmation)",
+    "help_keywords": ["HELP", "INFO"]
+  },
+  "escalation_triggers": [
+    "counterparty asks for a human",
+    "negotiation outside the approved price band",
+    "any binding commitment requested (price, deposit, hold, date)",
+    "legal, complaint, threat or anger signal",
+    "low agent confidence or repeated ASR failure",
+    "off-topic, fraud or injection signal (marks untrusted_inputs_present)"
+  ],
+  "binding_rules": {
+    "binding_templates_force": {"tier": 0, "reversibility": "irreversible", "step_up": true},
+    "evidence": "FACT: UETA §14 / E-SIGN, an electronic agent can form contracts that bind the user. Offers, quotes, deposits and holds are binding-class."
+  }
+}

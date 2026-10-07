@@ -1,0 +1,232 @@
+{
+  "registry_id": "comms_templates",
+  "version": "1.0.0",
+  "status": "PROPOSED",
+  "rules": [
+    "Templates are immutable once hashed: any change to body/subject/channel/flags is a NEW version with a new content_hash.",
+    "approval.status is 'draft' until Michael pre-approves a version (an Approval row with scope=standing_rule needs step-up, MICHAEL_DECISIONS #5). Until then every send needs a per-message YES.",
+    "A binding template (offer, quote, deposit, hold) is always tier 0 + irreversible + step-up, even after pre-approval.",
+    "DISCLOSURE is inserted verbatim into every first message of a thread and every voice opening (E1).",
+    "content_hash = MBOS-CJSON-1 sha256 of {template_id, version, channel, subject, body, binding, commercial} (ADR-0010)."
+  ],
+  "disclosure": "This is an automated assistant writing on behalf of Michael.",
+  "voice_disclosure": "Hi, this is an automated AI assistant calling on behalf of Michael. This call may be recorded.",
+  "templates": [
+    {
+      "template_id": "seller_first_inquiry",
+      "version": 1,
+      "channel": "email",
+      "lane": "flip",
+      "purpose": "first contact about a specific listing",
+      "first_message": true,
+      "binding": false,
+      "commercial": false,
+      "subject": "Your {{listing_title}}",
+      "body": "Hi, {{disclosure}} Is your {{listing_title}} still available? {{question_1}} {{question_2}} Thanks.",
+      "approval": {
+        "status": "draft",
+        "approved_by": null,
+        "approval_id": null
+      },
+      "content_hash": "sha256:3959594a7c51d64ec07caba3218e603a39a0e5e67efed7a7ff980e40e8aefff9"
+    },
+    {
+      "template_id": "seller_first_inquiry",
+      "version": 1,
+      "channel": "sms",
+      "lane": "flip",
+      "purpose": "first contact about a specific listing",
+      "first_message": true,
+      "binding": false,
+      "commercial": false,
+      "subject": null,
+      "body": "Hi, {{disclosure}} Is your {{listing_title}} still available? {{question_1}} Reply STOP to opt out.",
+      "approval": {
+        "status": "draft",
+        "approved_by": null,
+        "approval_id": null
+      },
+      "content_hash": "sha256:9677750c4b3f176b4d6859622af184cd17037c62264110c149dbf11735fb7d64"
+    },
+    {
+      "template_id": "seller_followup_questions",
+      "version": 1,
+      "channel": "email",
+      "lane": "flip",
+      "purpose": "follow-up questions in an active thread",
+      "first_message": false,
+      "binding": false,
+      "commercial": false,
+      "subject": "Re: {{listing_title}}",
+      "body": "Thanks for the reply. {{question_1}} {{question_2}}",
+      "approval": {
+        "status": "draft",
+        "approved_by": null,
+        "approval_id": null
+      },
+      "content_hash": "sha256:39eb56a2674cce7b983e74745d0bee3ba2c6924065bd054f6f85e6ff33ef7993"
+    },
+    {
+      "template_id": "seller_photo_request",
+      "version": 1,
+      "channel": "sms",
+      "lane": "flip",
+      "purpose": "cheapest decisive evidence: photos",
+      "first_message": false,
+      "binding": false,
+      "commercial": false,
+      "subject": null,
+      "body": "Could you text a photo of {{photo_subject}}? It helps me make you a fair offer.",
+      "approval": {
+        "status": "draft",
+        "approved_by": null,
+        "approval_id": null
+      },
+      "content_hash": "sha256:36ab62bb52e4b5f9efa1f53e09d723bb1688a14d5a04ca5275825be7370407de"
+    },
+    {
+      "template_id": "seller_offer",
+      "version": 1,
+      "channel": "email",
+      "lane": "flip",
+      "purpose": "make an offer (BINDING)",
+      "first_message": false,
+      "binding": true,
+      "commercial": false,
+      "subject": "Offer on your {{listing_title}}",
+      "body": "Michael can offer ${{offer_amount}} cash for the {{listing_title}}, picked up {{pickup_window}}, subject to it matching the description. This offer is open until {{offer_expires}}.",
+      "approval": {
+        "status": "draft",
+        "approved_by": null,
+        "approval_id": null
+      },
+      "content_hash": "sha256:a6b82f2568694ee740a76a12773f9350652a7ccb0aa1551797a6e33b526c0564"
+    },
+    {
+      "template_id": "customer_intake_ack",
+      "version": 1,
+      "channel": "email",
+      "lane": "service",
+      "purpose": "acknowledge an inbound service inquiry",
+      "first_message": true,
+      "binding": false,
+      "commercial": false,
+      "subject": "Your {{service_name}} request",
+      "body": "Thanks for reaching out about {{service_name}}. {{disclosure}} {{question_1}} {{question_2}} Michael will follow up with a quote.",
+      "approval": {
+        "status": "draft",
+        "approved_by": null,
+        "approval_id": null
+      },
+      "content_hash": "sha256:77f45cc606aeb61cbaf870646ae10c1a8064c1dfc0189bb8a59f96e137506c83"
+    },
+    {
+      "template_id": "customer_photo_request",
+      "version": 1,
+      "channel": "email",
+      "lane": "service",
+      "purpose": "cheapest decisive evidence: photos",
+      "first_message": false,
+      "binding": false,
+      "commercial": false,
+      "subject": "Photos for your {{service_name}} quote",
+      "body": "Could you send two photos of {{photo_subject}}, one up close and one from across the room? Then Michael can give you a firm quote.",
+      "approval": {
+        "status": "draft",
+        "approved_by": null,
+        "approval_id": null
+      },
+      "content_hash": "sha256:c8278fd6b43cfdf10111db6b93b807ed280d82fa59f751d61d43768ff7bb1d3b"
+    },
+    {
+      "template_id": "customer_quote",
+      "version": 1,
+      "channel": "email",
+      "lane": "service",
+      "purpose": "send a price quote (BINDING)",
+      "first_message": false,
+      "binding": true,
+      "commercial": false,
+      "subject": "Quote: {{service_name}}",
+      "body": "Michael's quote for {{scope_summary}} is ${{quote_amount}}, including materials. A {{deposit_pct}}% deposit holds a date. Quote valid until {{quote_expires}}.",
+      "approval": {
+        "status": "draft",
+        "approved_by": null,
+        "approval_id": null
+      },
+      "content_hash": "sha256:6728bf9611121d62eef633efa3960b3fdd63af8c1ff75fb7f23c6f219bb0a24f"
+    },
+    {
+      "template_id": "customer_visit_proposal",
+      "version": 1,
+      "channel": "sms",
+      "lane": "service",
+      "purpose": "propose visit times (scheduling; not binding until confirmed and approved)",
+      "first_message": false,
+      "binding": false,
+      "commercial": false,
+      "subject": null,
+      "body": "Michael could come by {{slot_1}} or {{slot_2}}. Which works? Reply STOP to opt out.",
+      "approval": {
+        "status": "draft",
+        "approved_by": null,
+        "approval_id": null
+      },
+      "content_hash": "sha256:13c698a58a03128acd99dbf762c7764197d12b5c2d9afdffff2203393eeb0881"
+    },
+    {
+      "template_id": "review_request",
+      "version": 1,
+      "channel": "email",
+      "lane": "service",
+      "purpose": "post-job review request (Agent 07 draft, sent only via 06)",
+      "first_message": false,
+      "binding": false,
+      "commercial": true,
+      "subject": "How did the {{service_name}} go?",
+      "body": "Thanks for having Michael out for {{service_name}}. If you have a minute, an honest review helps a small business: {{review_link}}\n\n{{business_postal_address}}\nUnsubscribe: {{unsubscribe_link}}",
+      "approval": {
+        "status": "draft",
+        "approved_by": null,
+        "approval_id": null
+      },
+      "content_hash": "sha256:ca0e6e90aea99a6d0622f4a83b183a06b7a1c878092982cb9783a5844680d311"
+    },
+    {
+      "template_id": "voice_opening",
+      "version": 1,
+      "channel": "voice",
+      "lane": "any",
+      "purpose": "opening line of every call (E1)",
+      "first_message": true,
+      "binding": false,
+      "commercial": false,
+      "subject": null,
+      "body": "{{voice_disclosure}} I'm calling about {{topic}}. Is now an OK time?",
+      "approval": {
+        "status": "draft",
+        "approved_by": null,
+        "approval_id": null
+      },
+      "content_hash": "sha256:fd03d10af77aae1b35d959a0be90f3a059094fdecbf0d19995cdcb503d881d82"
+    },
+    {
+      "template_id": "stop_confirmation",
+      "version": 1,
+      "channel": "sms",
+      "lane": "any",
+      "purpose": "single opt-out confirmation, no marketing",
+      "first_message": false,
+      "binding": false,
+      "commercial": false,
+      "subject": null,
+      "body": "You're unsubscribed and won't get more messages from this number.",
+      "approval": {
+        "status": "draft",
+        "approved_by": null,
+        "approval_id": null
+      },
+      "content_hash": "sha256:a737832176c7ccdb18fda8c3fdc8297d2a5ee8c050bedf04272b9881220660cf"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "thresholds_id": "comms_acceptance",
+  "version": "1.0.0",
+  "status": "PROPOSED",
+  "source": "Agent 01 integration doc §8 suite E (owner 06); 06 confirms or tightens here.",
+  "tests": {
+    "E1": {"title": "AI (and recording) disclosure present", "metric": "share of voice calls and first messages in a thread carrying the disclosure", "pass": {"min_ratio": 1.0}, "tightened": "also required in the FIRST message of every SMS/email thread, not only calls", "basis": "FACT FCC 24-17; RECOMMENDATION extend to text"},
+    "E2": {"title": "consent and DNC check recorded on every send", "metric": "share of comms send receipts with consent_check and dnc_check results that are not 'not_evaluated'", "pass": {"min_ratio": 1.0}, "dry_run_note": "dry-run receipts may carry not_evaluated; the auditor reports them as DRY-RUN EXEMPT, never as passing", "basis": "RECOMMENDATION"},
+    "E3": {"title": "no send outside the effective window", "metric": "count of sends outside comms_policy.send_window.effective in recipient local time, or on a no_outbound_day, excluding valid reply_exemption", "pass": {"max_count": 0}, "basis": "FACT TCPA 8am-9pm; RECOMMENDATION 08:00-20:00"},
+    "E4": {"title": "STOP honored", "metric": "seconds from inbound STOP to suppression row; and sends to a suppressed contact", "pass": {"max_seconds_p100": 60, "max_sends_after_stop": 0}, "basis": "RECOMMENDATION (legal max 10 business days, FACT)"},
+    "E5": {"title": "voice response latency", "metric": "mouth-to-ear turn latency on real phone audio", "pass": {"p50_max_seconds": 0.8, "p95_max_seconds": 1.0}, "basis": "INFERENCE from Round One: hosted 0.5-0.8 s, self-hosted 0.8-1.5 s; must be benchmarked in a POC (UNKNOWN until measured). Not testable in dry-run."},
+    "E6": {"title": "receipt completeness", "metric": "share of ACTION_EXECUTED comms receipts with effector_response.provider_msg_id", "pass": {"min_ratio": 1.0}, "basis": "RECOMMENDATION"},
+    "E7": {"title": "out-of-band negotiation escalates", "metric": "share of conversations hitting an escalation trigger that produced an escalation (ActionRequest to Michael) before any reply; binding statements without an approved ActionRequest", "pass": {"min_ratio": 1.0, "max_binding_without_approval": 0}, "basis": "FACT UETA §14; RECOMMENDATION"}
+  }
+}

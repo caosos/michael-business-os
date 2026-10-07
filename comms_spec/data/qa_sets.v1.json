@@ -1,0 +1,122 @@
+{
+  "qa_id": "qa_sets",
+  "version": "1.0.0",
+  "status": "PROPOSED",
+  "note": "Questions an agent may ASK (never answer for Michael). Each question says which economics input it decides, so the cheapest decisive question is asked first. Every category in item.schema.json has a set. Answers from a counterparty are untrusted input (untrusted_inputs_present=true).",
+  "flip_common": [
+    {"id": "avail", "q": "Is it still available?", "decides": "normalized.listing_status"},
+    {"id": "price_firm", "q": "Is the price firm, or is there room?", "decides": "acquisition.expected_buy_price"},
+    {"id": "ownership", "q": "Are you the owner, and do you have a title, bill of sale or receipt?", "decides": "gate: provenance / theft risk"},
+    {"id": "photos", "q": "Could you send a couple of photos of the problem areas?", "decides": "rehab.repair_scope_known"},
+    {"id": "pickup", "q": "Where would pickup be, and what days work?", "decides": "logistics.trips"}
+  ],
+  "flip": {
+    "trailer": [
+      {"id": "title", "q": "Does it have a title or registration in your name?", "decides": "gate: titled trailers need title"},
+      {"id": "floor_frame", "q": "Is the floor solid, and is there rust on the frame or tongue?", "decides": "rehab.materials_cost"},
+      {"id": "axles", "q": "Do the axles, bearings and tires hold up? When were bearings last packed?", "decides": "rehab.parts_cost"},
+      {"id": "lights", "q": "Do the lights and brakes (if any) work?", "decides": "rehab.labor_hours"},
+      {"id": "gvwr", "q": "What's the size and the GVWR on the VIN plate?", "decides": "resale.comp_price_expected"}
+    ],
+    "mower": [
+      {"id": "runs", "q": "Does it start and run? If not, what happens when you try?", "decides": "rehab.repair_success_prob"},
+      {"id": "hours", "q": "How many hours are on it?", "decides": "resale.comp_price_expected"},
+      {"id": "deck", "q": "Any rust-through on the deck, and do the blades engage?", "decides": "rehab.parts_cost"},
+      {"id": "drive", "q": "Does it drive forward and reverse normally (hydro or belt)?", "decides": "rehab.repair_scope_known"},
+      {"id": "model", "q": "What's the make, model and engine?", "decides": "resale.comp_price_expected"}
+    ],
+    "generator": [
+      {"id": "runs", "q": "Does it start? Does it run on the choke only or surge?", "decides": "rehab.repair_success_prob"},
+      {"id": "output", "q": "Does it produce power under a load?", "decides": "rehab.repair_scope_known"},
+      {"id": "hours_storage", "q": "Roughly how many hours, and how long has it sat with fuel in it?", "decides": "rehab.parts_cost"},
+      {"id": "watts", "q": "What's the running and starting wattage, and is it inverter or conventional?", "decides": "resale.comp_price_expected"}
+    ],
+    "welder": [
+      {"id": "type", "q": "What process (stick, MIG, TIG, multi), amperage, and 120V or 240V?", "decides": "resale.comp_price_expected"},
+      {"id": "tested", "q": "Have you struck an arc with it recently?", "decides": "rehab.repair_success_prob"},
+      {"id": "accessories", "q": "Are the leads, ground clamp, gun or torch, and regulator included?", "decides": "resale.target_sell_price"},
+      {"id": "engine_drive", "q": "If engine-driven: hours, and does the engine run well?", "decides": "rehab.parts_cost"}
+    ],
+    "compressor": [
+      {"id": "pressure", "q": "Does it build to full pressure and shut off on its own?", "decides": "rehab.repair_success_prob"},
+      {"id": "leaks", "q": "Any air leaks, or oil in the air line?", "decides": "rehab.parts_cost"},
+      {"id": "tank", "q": "Tank size, and any rust inside the tank (drain water)?", "decides": "gate: tank safety"},
+      {"id": "power", "q": "120V or 240V, and single- or two-stage?", "decides": "resale.comp_price_expected"}
+    ],
+    "tool": [
+      {"id": "works", "q": "Does it work as it should? Any noises or smells?", "decides": "rehab.repair_success_prob"},
+      {"id": "batteries", "q": "Are batteries and a charger included, and do they hold a charge?", "decides": "resale.target_sell_price"},
+      {"id": "model", "q": "What brand and model number?", "decides": "resale.comp_price_expected"}
+    ],
+    "commercial_equipment": [
+      {"id": "power_utility", "q": "What power, gas or water hookup does it need?", "decides": "logistics / resale buyer pool"},
+      {"id": "working", "q": "Was it working when last used, and why is it being sold?", "decides": "rehab.repair_success_prob"},
+      {"id": "size_weight", "q": "Rough size and weight, and is there a dock or forklift at pickup?", "decides": "logistics.trips"},
+      {"id": "model_serial", "q": "Make, model and serial plate photo?", "decides": "resale.comp_price_expected"}
+    ],
+    "mechanical_equipment": [
+      {"id": "runs", "q": "Does the engine or motor run, and does the main function (hydraulics, pump, drive) work?", "decides": "rehab.repair_success_prob"},
+      {"id": "hours", "q": "Hours on the meter?", "decides": "resale.comp_price_expected"},
+      {"id": "leaks", "q": "Any hydraulic or oil leaks?", "decides": "rehab.parts_cost"},
+      {"id": "transport", "q": "Can it be loaded under its own power?", "decides": "logistics.trips"}
+    ],
+    "project_vehicle": [
+      {"id": "title", "q": "Is there a clean title in your name? Any liens?", "decides": "gate: title / curbstoning risk"},
+      {"id": "runs_drives", "q": "Does it start, run and drive? Any warning lights?", "decides": "rehab.repair_success_prob"},
+      {"id": "known_issues", "q": "What's wrong with it that you know of?", "decides": "rehab.repair_scope_known"},
+      {"id": "mileage_vin", "q": "Mileage, and could you share the VIN?", "decides": "resale.comp_price_expected"},
+      {"id": "rust_accident", "q": "Any frame rust or accident damage?", "decides": "downside.salvage_if_repair_fails"}
+    ],
+    "other_asset": [
+      {"id": "describe", "q": "What is it exactly (brand/model), and what condition is it in?", "decides": "category + resale.comp_price_expected"},
+      {"id": "works", "q": "Does it work? What's wrong if not?", "decides": "rehab.repair_success_prob"}
+    ]
+  },
+  "service_common": [
+    {"id": "scope", "q": "What needs to be done, and where?", "decides": "job.labor_hours"},
+    {"id": "photos", "q": "Could you send two photos, one close and one wide?", "decides": "job.materials_cost + cheapest_decisive_evidence"},
+    {"id": "timing", "q": "When do you need it done?", "decides": "scheduling"},
+    {"id": "address_area", "q": "What town or ZIP is the job in?", "decides": "logistics.trips"},
+    {"id": "budget", "q": "Do you have a budget in mind?", "decides": "job.quoted_revenue"}
+  ],
+  "service": {
+    "mobile_repair": [
+      {"id": "device", "q": "Which device and model, and what's broken?", "decides": "job.materials_cost"},
+      {"id": "water", "q": "Has it been dropped in water?", "decides": "job.completion_prob"}
+    ],
+    "equipment_repair": [
+      {"id": "symptom", "q": "What does it do (or not do) when you try to use it?", "decides": "job.labor_hours"},
+      {"id": "model", "q": "Make and model (a photo of the label helps)?", "decides": "job.materials_cost"},
+      {"id": "onsite", "q": "Can it come to me, or does it need an on-site visit?", "decides": "logistics.trips"}
+    ],
+    "drywall_repair": [
+      {"id": "size", "q": "Roughly how big are the holes or damaged areas?", "decides": "job.labor_hours"},
+      {"id": "texture_paint", "q": "Is the wall textured, and do you have the paint?", "decides": "job.materials_cost"},
+      {"id": "cause", "q": "What caused it? Is any leak fixed and dry?", "decides": "gate: moisture"}
+    ],
+    "assembly": [
+      {"id": "items", "q": "What items, how many, and the brand/model?", "decides": "job.labor_hours"},
+      {"id": "wall_mount", "q": "Does anything need to be anchored to a wall?", "decides": "job.materials_cost"}
+    ],
+    "handyman": [
+      {"id": "list", "q": "Could you list each task?", "decides": "job.labor_hours"},
+      {"id": "permit", "q": "Does any of it involve electrical panels, gas or structural changes?", "decides": "gate: requires_license_he_lacks"}
+    ],
+    "smart_home_install": [
+      {"id": "devices", "q": "Which devices (brand/model), and how many?", "decides": "job.labor_hours"},
+      {"id": "wiring", "q": "Is there existing wiring (e.g. C-wire for a thermostat, a neutral for switches)?", "decides": "job.completion_prob"},
+      {"id": "network", "q": "Is the Wi-Fi reliable where the devices go?", "decides": "job.completion_prob"}
+    ],
+    "technical_service": [
+      {"id": "problem", "q": "What's the problem, and when did it start?", "decides": "job.labor_hours"},
+      {"id": "remote", "q": "Could it be done remotely?", "decides": "logistics.trips"}
+    ],
+    "mechanical_service": [
+      {"id": "machine", "q": "What machine, and what's it doing?", "decides": "job.labor_hours"},
+      {"id": "parts", "q": "Do you know which parts are needed, or should I diagnose?", "decides": "job.materials_cost"}
+    ],
+    "other_service": [
+      {"id": "describe", "q": "Could you describe the job in a few sentences?", "decides": "category + job.labor_hours"}
+    ]
+  }
+}
