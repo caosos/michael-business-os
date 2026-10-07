@@ -23,7 +23,7 @@ Done: D-16 @ 3a1b004
 Blocked: D-10 (final acceptance) on A-01 phase 2. The DDL is delivered @ 6533334.
 Current phase: ROUND TWO: foreman loop (READY_QUEUE)
 Started: 2026-10-06
-Last updated: 2026-10-07 (D-17 done @ 77d1f17)
+Last updated: 2026-10-07 (read-through of spine_d @ f4c6529; D-18 proposed)
 
 ## Current objective
 No READY lane-D task. WAITING on: A-01 (D-10 acceptance), ADR-0009 (D-12), and an off-box target (D-09, operator).
