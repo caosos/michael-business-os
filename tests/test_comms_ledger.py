@@ -25,8 +25,9 @@ RAW_PHONE = "(501) 555-0142"
 
 @pytest.fixture()
 def ledger(rt):
-    L.ensure_schema(rt.engine)
-    L.ensure_schema(rt.engine)  # idempotent
+    first = L.ensure_schema(rt.engine)
+    assert first in ("created", "skipped")
+    assert L.ensure_schema(rt.engine) == "skipped"  # owner-managed on lane D: never re-create (Agent 04, D-10)
     return L.ConsentLedger(rt.engine)
 
 

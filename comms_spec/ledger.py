@@ -1,6 +1,9 @@
 """F-07: consent ledger + DNC scrub store. Data only, dry-run. Nothing here contacts anyone.
 
-* Insert-only tables in schema `mbos_comms` (`sql/0001_comms_ledger.sql`; PROPOSED for lane D to adopt).
+* Insert-only tables in schema `mbos_comms` (`sql/0001_comms_ledger.sql`). Adopted by lane D as migration
+  0011 (D-10, agent-04 @ 6533334) with identical names. There, only the gateway role may record consent
+  GRANTED or DNC CLEAR, anyone with write access may record STOP/revocation/listing, and only the gateway
+  can read `contacts.value` (which `register_contact` needs).
 * Every consent change and every DNC scrub result is written in ONE transaction with a hash-chained
   receipt in `mbos.receipts` (`mbos.ledger.append_receipt`), plus provenance. No receipt carries a raw
   contact value: they reference `contact_ref` only.
@@ -33,9 +36,16 @@ TOOL = "comms_spec.ledger"
 VERSION = "0.1.0"
 
 
-def ensure_schema(engine: sa.Engine) -> None:
-    with engine.begin() as conn:  # raw driver call: no parameter parsing, so plpgsql '%' format specs survive
-        conn.connection.driver_connection.execute(SQL.read_text())
+def ensure_schema(engine: sa.Engine) -> str:
+    """Create the dev/test schema if absent. Returns 'created' or 'skipped'.
+
+    SKIPS whenever `mbos_comms.contacts` already exists. On lane D (migration 0011, D-10) the objects are
+    owner-managed, and app roles cannot and must not CREATE OR REPLACE them (Agent 04, 2026-10-07)."""
+    with engine.begin() as conn:
+        if conn.execute(sa.text("SELECT to_regclass('mbos_comms.contacts')")).scalar() is not None:
+            return "skipped"
+        conn.connection.driver_connection.execute(SQL.read_text())  # raw: plpgsql '%' format specs survive
+    return "created"
 
 
 def _norm(channel: str, value: str) -> str:
