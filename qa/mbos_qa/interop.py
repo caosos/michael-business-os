@@ -282,7 +282,7 @@ def verdicts(rep: InteropReport) -> dict[str, str]:
     rh = {c.name.split(":")[0]: c.status for c in rep.checks if c.group.startswith("3") and "row_hash" in c.name}
     sql = [c for c in rep.checks if c.group.startswith("4")]
     led = {c.name: c.status for c in rep.checks if c.group.startswith("5")}
-    f14_open = sorted(k for k, v in py.items() if v != "PASS") + sorted(c.name.split(":")[0] for c in sql if c.status != "PASS")
+    f14_open = sorted(k for k, v in py.items() if v not in ("PASS", "INFO")) + sorted(c.name.split(":")[0] for c in sql if c.status != "PASS")
     f13_open = sorted(k for k, v in rh.items() if v != "PASS") + [k for k, v in led.items() if v != "PASS"]
     return {
         "F-14": "CLOSED: every lane hasher and SQL twin matches vectors.json" if not f14_open else

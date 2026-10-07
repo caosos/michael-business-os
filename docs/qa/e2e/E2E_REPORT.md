@@ -79,34 +79,34 @@
 
 | seq | type | actor | intent | dry_run | row_hash |
 |---:|---|---|---|---|---|
-| 1 | `ITEM_STATE_CHANGED` | agent:agent-02-discovery | discovered flip/trailer from craigslist |  | `86b107722957…` |
-| 2 | `INJECTION_SUSPECTED` | agent:agent-02-discovery | prompt-injection pattern in untrusted listing text; quarantined from drafts |  | `0e2fff7d054b…` |
-| 3 | `ITEM_STATE_CHANGED` | agent:agent-02-discovery | raw → Item v1 normalized |  | `a81ae4c1e41a…` |
-| 4 | `ITEM_STATE_CHANGED` | agent:agent-01-workflow | 4 research findings recorded |  | `c422af635d09…` |
-| 5 | `ITEM_STATE_CHANGED` | agent:agent-03-economics | scored YES composite 83.5 |  | `74c737eaeac9…` |
-| 6 | `SCORE_RECORDED` | agent:agent-03-economics | scorecard scr_01M4B3R6G0DD64M8YNJRH1FFND (YES) |  | `4509f041bbd4…` |
-| 7 | `ITEM_STATE_CHANGED` | agent:agent-03-economics | machine verdict YES (NOT Michael's decision) |  | `63c8a6eca861…` |
-| 8 | `RECOMMENDATION_RECORDED` | agent:agent-03-economics | verdict YES |  | `7bc134c1e970…` |
-| 9 | `ACTION_PROPOSED` | agent:agent-06-communications | Ask seller about axles/title; non-binding $850 cash question |  | `53c9952f946a…` |
-| 10 | `POLICY_DECIDED` | system:pdp | PDP: require_approval at tier 0 |  | `ff16fb3afa62…` |
-| 11 | `APPROVAL_REQUESTED` | agent:agent-01-workflow | presented to Michael: YES / NO / MODIFY / HOLD |  | `451ff641ded2…` |
-| 12 | `ITEM_STATE_CHANGED` | agent:agent-01-workflow | action(s) awaiting Michael |  | `dbdfd00a5ad9…` |
-| 13 | `ACTION_PROPOSED` | agent:agent-07-marketing | Pre-draft resale listing (manual-assist; posted by Michael after rehab) |  | `48c62f5cff73…` |
-| 14 | `POLICY_DECIDED` | system:pdp | PDP: require_approval at tier 0 |  | `a5d13af97199…` |
-| 15 | `APPROVAL_REQUESTED` | agent:agent-01-workflow | presented to Michael: YES / NO / MODIFY / HOLD |  | `429827962970…` |
-| 16 | `APPROVAL_DECIDED` | human:michael | [SIMULATED by QA fixture] Michael: YES |  | `c0af744efada…` |
-| 17 | `ACTION_PROPOSED` | agent:agent-07-marketing | MODIFY of areq_01M4B3R6G096V75SPC7AXBSV90 |  | `065f8d266872…` |
-| 18 | `POLICY_DECIDED` | system:pdp | PDP: require_approval at tier 0 |  | `15ae897a722d…` |
-| 19 | `APPROVAL_REQUESTED` | agent:agent-01-workflow | presented to Michael: YES / NO / MODIFY / HOLD |  | `e57292695e33…` |
-| 20 | `APPROVAL_DECIDED` | human:michael | [SIMULATED by QA fixture] Michael: MODIFY |  | `070e53ff02f9…` |
-| 21 | `APPROVAL_DECIDED` | human:michael | [SIMULATED by QA fixture] Michael: YES |  | `fcea50af9cbe…` |
-| 22 | `ITEM_STATE_CHANGED` | agent:agent-01-workflow | all requests decided → APPROVED |  | `1a4e55c7ec5e…` |
-| 23 | `ACTION_EXECUTING` | system:gateway | execute comms.email.send (dry-run) |  | `b05609924b84…` |
-| 24 | `ITEM_STATE_CHANGED` | system:gateway | action execution started |  | `b0fb4d89926a…` |
-| 25 | `ACTION_EXECUTED` | system:gateway | comms.email.send executed in DRY-RUN — nothing left the system | True | `2ed1aa595303…` |
-| 26 | `ACTION_EXECUTING` | system:gateway | execute publish.listing.create (dry-run) |  | `2ab21efeece2…` |
-| 27 | `ACTION_EXECUTED` | system:gateway | publish.listing.create executed in DRY-RUN — nothing left the system | True | `3a7e8d19cfa3…` |
-| 28 | `ITEM_STATE_CHANGED` | system:gateway | all approved actions executed (dry-run) |  | `1dda2db5f681…` |
+| 1 | `ITEM_STATE_CHANGED` | agent:agent-02-discovery | discovered flip/trailer from craigslist |  | `a8bc4885ae8f…` |
+| 2 | `INJECTION_SUSPECTED` | agent:agent-02-discovery | prompt-injection pattern in untrusted listing text; quarantined from drafts |  | `2f725ec6e879…` |
+| 3 | `ITEM_STATE_CHANGED` | agent:agent-02-discovery | raw → Item v1 normalized |  | `381ac2e888ff…` |
+| 4 | `ITEM_STATE_CHANGED` | agent:agent-01-workflow | 4 research findings recorded |  | `02bccd11e482…` |
+| 5 | `ITEM_STATE_CHANGED` | agent:agent-03-economics | scored YES composite 83.5 |  | `29202e52a5b5…` |
+| 6 | `SCORE_RECORDED` | agent:agent-03-economics | scorecard scr_01M4B3R6G0DD64M8YNJRH1FFND (YES) |  | `1cfc2b5777e6…` |
+| 7 | `ITEM_STATE_CHANGED` | agent:agent-03-economics | machine verdict YES (NOT Michael's decision) |  | `f45d67aebe55…` |
+| 8 | `RECOMMENDATION_RECORDED` | agent:agent-03-economics | verdict YES |  | `d12729e4f099…` |
+| 9 | `ACTION_PROPOSED` | agent:agent-06-communications | Ask seller about axles/title; non-binding $850 cash question |  | `1f49410d84a2…` |
+| 10 | `POLICY_DECIDED` | system:pdp | PDP: require_approval at tier 0 |  | `23450deb52da…` |
+| 11 | `APPROVAL_REQUESTED` | agent:agent-01-workflow | presented to Michael: YES / NO / MODIFY / HOLD |  | `a4e566caa6c0…` |
+| 12 | `ITEM_STATE_CHANGED` | agent:agent-01-workflow | action(s) awaiting Michael |  | `2209a57cf78b…` |
+| 13 | `ACTION_PROPOSED` | agent:agent-07-marketing | Pre-draft resale listing (manual-assist; posted by Michael after rehab) |  | `3306ff0df6ed…` |
+| 14 | `POLICY_DECIDED` | system:pdp | PDP: require_approval at tier 0 |  | `9f0e2a019f0b…` |
+| 15 | `APPROVAL_REQUESTED` | agent:agent-01-workflow | presented to Michael: YES / NO / MODIFY / HOLD |  | `0cd6038370cc…` |
+| 16 | `APPROVAL_DECIDED` | human:michael | [SIMULATED by QA fixture] Michael: YES |  | `24861d09744a…` |
+| 17 | `ACTION_PROPOSED` | agent:agent-07-marketing | MODIFY of areq_01M4B3R6G096V75SPC7AXBSV90 |  | `02f652f1ba8b…` |
+| 18 | `POLICY_DECIDED` | system:pdp | PDP: require_approval at tier 0 |  | `ef2299a80145…` |
+| 19 | `APPROVAL_REQUESTED` | agent:agent-01-workflow | presented to Michael: YES / NO / MODIFY / HOLD |  | `7592f00dd8aa…` |
+| 20 | `APPROVAL_DECIDED` | human:michael | [SIMULATED by QA fixture] Michael: MODIFY |  | `335bf439e947…` |
+| 21 | `APPROVAL_DECIDED` | human:michael | [SIMULATED by QA fixture] Michael: YES |  | `cddb6d510b9f…` |
+| 22 | `ITEM_STATE_CHANGED` | agent:agent-01-workflow | all requests decided → APPROVED |  | `776bf9efb348…` |
+| 23 | `ACTION_EXECUTING` | system:gateway | execute comms.email.send (dry-run) |  | `f7e9c5e43591…` |
+| 24 | `ITEM_STATE_CHANGED` | system:gateway | action execution started |  | `536a44f1db7d…` |
+| 25 | `ACTION_EXECUTED` | system:gateway | comms.email.send executed in DRY-RUN — nothing left the system | True | `914dcb8ab390…` |
+| 26 | `ACTION_EXECUTING` | system:gateway | execute publish.listing.create (dry-run) |  | `00b62a786c9c…` |
+| 27 | `ACTION_EXECUTED` | system:gateway | publish.listing.create executed in DRY-RUN — nothing left the system | True | `4cbcc0cabb0c…` |
+| 28 | `ITEM_STATE_CHANGED` | system:gateway | all approved actions executed (dry-run) |  | `632a08a29a59…` |
 
 Ledger `verify_chain`: **PASS** (54 receipts in the whole ledger)
 
@@ -186,32 +186,32 @@ Ledger `verify_chain`: **PASS** (54 receipts in the whole ledger)
 
 | seq | type | actor | intent | dry_run | row_hash |
 |---:|---|---|---|---|---|
-| 29 | `ITEM_STATE_CHANGED` | agent:agent-02-discovery | discovered service/drywall_repair from website_lead |  | `29cd545572c8…` |
-| 30 | `ITEM_STATE_CHANGED` | agent:agent-02-discovery | raw → Item v1 normalized |  | `4b77ff3b9e0d…` |
-| 31 | `OUTCOME_RECORDED` | agent:agent-07-marketing | lead attribution captured at intake |  | `47f83277ac86…` |
-| 32 | `ITEM_STATE_CHANGED` | agent:agent-01-workflow | 2 research findings recorded |  | `93de11e7c297…` |
-| 33 | `ITEM_STATE_CHANGED` | agent:agent-03-economics | scored YES composite 65.9 |  | `d2e38140b8cb…` |
-| 34 | `SCORE_RECORDED` | agent:agent-03-economics | scorecard scr_01M4B3R6G0GFVXQX58PARC8C9D (YES) |  | `3ab853f04db0…` |
-| 35 | `ITEM_STATE_CHANGED` | agent:agent-03-economics | machine verdict YES (NOT Michael's decision) |  | `e22c83895f87…` |
-| 36 | `RECOMMENDATION_RECORDED` | agent:agent-03-economics | verdict YES |  | `d3fe22534c39…` |
-| 37 | `ACTION_PROPOSED` | agent:agent-06-communications | Reply to inbound form with a $425 estimate |  | `522dd236ccf0…` |
-| 38 | `POLICY_DECIDED` | system:pdp | PDP: require_approval at tier 0 |  | `6d3f284e3507…` |
-| 39 | `APPROVAL_REQUESTED` | agent:agent-01-workflow | presented to Michael: YES / NO / MODIFY / HOLD |  | `08bfb603cb2f…` |
-| 40 | `ITEM_STATE_CHANGED` | agent:agent-01-workflow | action(s) awaiting Michael |  | `29f056755d34…` |
-| 41 | `APPROVAL_DECIDED` | human:michael | [SIMULATED by QA fixture] Michael: HOLD |  | `c377c375c0b5…` |
-| 42 | `ITEM_STATE_CHANGED` | agent:agent-01-workflow | all requests decided → HELD |  | `4a100d7ec85a…` |
-| 43 | `APPROVAL_REQUESTED` | agent:agent-01-workflow | HOLD woke: hold_until reached → re-presented to Michael (NOT executed) |  | `2e9187160738…` |
-| 44 | `ITEM_STATE_CHANGED` | agent:agent-01-workflow | all requests decided → AWAITING_APPROVAL |  | `ef1b318af8f2…` |
-| 45 | `ACTION_PROPOSED` | agent:agent-06-communications | MODIFY of areq_01M4B3R6G056671K7C64TQ308A |  | `4dd9c641e1bc…` |
-| 46 | `POLICY_DECIDED` | system:pdp | PDP: require_approval at tier 0 |  | `17c4824e9f72…` |
-| 47 | `APPROVAL_REQUESTED` | agent:agent-01-workflow | presented to Michael: YES / NO / MODIFY / HOLD |  | `c768070d5d2c…` |
-| 48 | `APPROVAL_DECIDED` | human:michael | [SIMULATED by QA fixture] Michael: MODIFY |  | `07ca56663863…` |
-| 49 | `APPROVAL_DECIDED` | human:michael | [SIMULATED by QA fixture] Michael: YES |  | `add001a773dc…` |
-| 50 | `ITEM_STATE_CHANGED` | agent:agent-01-workflow | all requests decided → APPROVED |  | `87b304c5f427…` |
-| 51 | `ACTION_EXECUTING` | system:gateway | execute comms.email.send (dry-run) |  | `b73f11c0a6ee…` |
-| 52 | `ITEM_STATE_CHANGED` | system:gateway | action execution started |  | `746198b26477…` |
-| 53 | `ACTION_EXECUTED` | system:gateway | comms.email.send executed in DRY-RUN — nothing left the system | True | `9ff1cb24a964…` |
-| 54 | `ITEM_STATE_CHANGED` | system:gateway | all approved actions executed (dry-run) |  | `64695732fab4…` |
+| 29 | `ITEM_STATE_CHANGED` | agent:agent-02-discovery | discovered service/drywall_repair from website_lead |  | `5d8c7c6d205c…` |
+| 30 | `ITEM_STATE_CHANGED` | agent:agent-02-discovery | raw → Item v1 normalized |  | `f609ebc67bd5…` |
+| 31 | `OUTCOME_RECORDED` | agent:agent-07-marketing | lead attribution captured at intake |  | `5fcbb10b25c5…` |
+| 32 | `ITEM_STATE_CHANGED` | agent:agent-01-workflow | 2 research findings recorded |  | `3dea5af15317…` |
+| 33 | `ITEM_STATE_CHANGED` | agent:agent-03-economics | scored YES composite 65.9 |  | `7618c967463d…` |
+| 34 | `SCORE_RECORDED` | agent:agent-03-economics | scorecard scr_01M4B3R6G0GFVXQX58PARC8C9D (YES) |  | `ff0f42f8f77c…` |
+| 35 | `ITEM_STATE_CHANGED` | agent:agent-03-economics | machine verdict YES (NOT Michael's decision) |  | `8ea133fabb1e…` |
+| 36 | `RECOMMENDATION_RECORDED` | agent:agent-03-economics | verdict YES |  | `a8bf36c8d061…` |
+| 37 | `ACTION_PROPOSED` | agent:agent-06-communications | Reply to inbound form with a $425 estimate |  | `ff61c88a95be…` |
+| 38 | `POLICY_DECIDED` | system:pdp | PDP: require_approval at tier 0 |  | `b8870a652d6f…` |
+| 39 | `APPROVAL_REQUESTED` | agent:agent-01-workflow | presented to Michael: YES / NO / MODIFY / HOLD |  | `bf0d5e35d14c…` |
+| 40 | `ITEM_STATE_CHANGED` | agent:agent-01-workflow | action(s) awaiting Michael |  | `9835896dd24b…` |
+| 41 | `APPROVAL_DECIDED` | human:michael | [SIMULATED by QA fixture] Michael: HOLD |  | `944d1a861473…` |
+| 42 | `ITEM_STATE_CHANGED` | agent:agent-01-workflow | all requests decided → HELD |  | `a0892ec23c4b…` |
+| 43 | `APPROVAL_REQUESTED` | agent:agent-01-workflow | HOLD woke: hold_until reached → re-presented to Michael (NOT executed) |  | `28d359ddf861…` |
+| 44 | `ITEM_STATE_CHANGED` | agent:agent-01-workflow | all requests decided → AWAITING_APPROVAL |  | `eaf6b2da1c97…` |
+| 45 | `ACTION_PROPOSED` | agent:agent-06-communications | MODIFY of areq_01M4B3R6G056671K7C64TQ308A |  | `c4d4235096cf…` |
+| 46 | `POLICY_DECIDED` | system:pdp | PDP: require_approval at tier 0 |  | `cfef843badc1…` |
+| 47 | `APPROVAL_REQUESTED` | agent:agent-01-workflow | presented to Michael: YES / NO / MODIFY / HOLD |  | `451a3e5fe7ef…` |
+| 48 | `APPROVAL_DECIDED` | human:michael | [SIMULATED by QA fixture] Michael: MODIFY |  | `7d7f715dc9a5…` |
+| 49 | `APPROVAL_DECIDED` | human:michael | [SIMULATED by QA fixture] Michael: YES |  | `c25b0989bab4…` |
+| 50 | `ITEM_STATE_CHANGED` | agent:agent-01-workflow | all requests decided → APPROVED |  | `d81f4977c5e3…` |
+| 51 | `ACTION_EXECUTING` | system:gateway | execute comms.email.send (dry-run) |  | `04bc0621a5a4…` |
+| 52 | `ITEM_STATE_CHANGED` | system:gateway | action execution started |  | `aebaac4ba165…` |
+| 53 | `ACTION_EXECUTED` | system:gateway | comms.email.send executed in DRY-RUN — nothing left the system | True | `860147dea667…` |
+| 54 | `ITEM_STATE_CHANGED` | system:gateway | all approved actions executed (dry-run) |  | `0c3997cb1c50…` |
 
 Ledger `verify_chain`: **PASS** (54 receipts in the whole ledger)
 

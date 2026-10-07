@@ -54,3 +54,12 @@ def test_tail_truncation_detected(ran):
     last = conn.execute("SELECT max(seq) FROM receipts").fetchone()[0]
     conn.execute("DELETE FROM receipts WHERE seq > ?", (last - 3,))
     assert not ran.store.verify_chain().ok
+
+
+def test_chain_verifies_with_the_adr0010_reference_alone(ran):
+    """An exported chain must verify with ONLY the normative reference (MBOS-RH-1), not with this lane's code."""
+    from mbos_qa.core import mbos_canonical
+    ok, msg = mbos_canonical.verify_chain(ran.store.receipts())
+    assert ok, msg
+    assert all(r["ts"].endswith("Z") and len(r["ts"].split(".")[1]) == 7 for r in ran.store.receipts()), \
+        "ADR-0010: receipt ts must carry exactly 6 fractional digits"

@@ -87,21 +87,33 @@ FINDINGS = [
      "relax the rule."),
     ("F-12", "FACT", "01", "Agent 01's `validate_contracts.py` does not check `format` (date-time). The QA runner does.",
      "RECOMMENDATION: adopt `FORMAT_CHECKER` in the coordinator validator."),
-    ("F-13", "FACT", "01/04 (BLOCKING for integration)", "Two lanes define the receipts ledger `mbos.receipts`: "
-     "01 `src/mbos/db/migrations/0001_spine.sql` and 04 `state/migrations/0001_foundation.sql`. They use different "
-     "row_hash formulas, and both differ from the contract text that 05, 06 and 07 implement. On one identical "
-     "receipt, PostgreSQL 16 produced 3 different hashes, so no lane can verify another lane's chain "
-     "([INTEROP_REPORT](INTEROP_REPORT.md)).",
-     "RECOMMENDATION: Agent 01 rules on ONE ledger (04 per the ownership map) and ONE byte-exact formula, then "
-     "bumps the contract. Until then, cross-lane A3 cannot pass."),
-    ("F-14", "FACT", "01/03/05", "Integral floats hash differently: `{\"offer\": 850.0}` gives one hash in 01/02/06/07 "
-     "and another in 03, whose Decimal normalisation emits `850`. 05 refuses floats in approval payloads outright.",
-     "RECOMMENDATION: adopt 05's rule (no floats in hashed payloads; money as integer cents) or RFC 8785 JCS in "
-     "every lane. This is a contract decision for Agent 01."),
+    ("F-13", "FACT", "01/04", "RULED by ADR-0010 (MBOS-RH-1; Agent 04 sole ledger owner). Conformance evidence is in "
+     "[INTEROP_REPORT](INTEROP_REPORT.md): lanes 05 and 07 and the reference/01 SQL twins verify the vectors "
+     "receipt_chain. Still OPEN: 04's ledger hashes `jsonb::text` (D-02, CLAIMED) and `mbos.receipts` is defined "
+     "twice (A-01 phase 2).",
+     "RECOMMENDATION: close when the interop rows '04 SQL twin' and '5 ledger' turn PASS. G-02 re-runs this."),
+    ("F-14", "FACT", "03", "RULED by ADR-0010 (MBOS-CJSON-1). Lanes 01, 02, 05 and 07 and both SQL twins pass 10/10 "
+     "vectors and 6/6 rejections. Lane 06 no longer hashes on its own (it goes through 01's spine). Lane 03 passes "
+     "9/10 and 2/6: it fails 'number edge cases' and accepts integers above 2^53−1, `1e21`, non-BMP member names "
+     "and U+0000.",
+     "RECOMMENDATION: C-02 (READY) closes it. Re-run `python -m mbos_qa interop`."),
     ("F-15", "FACT", "03", "Agent 03 changed `opportunity`, `scorecard` and `service-job` schemas without changing "
      "their `$id`, contrary to the ADR-0004 mitigation. Its 13 scored examples (26 documents) still validate "
      "against frozen v1.0.0, so nothing breaks today.",
      "RECOMMENDATION: 03 bumps the `$id` / version on its next schema change. 01 re-pins through a semver bump."),
+    ("F-16", "FACT", "01", "Agent 01's package only finds the contracts by a path relative to the source tree. "
+     "With a normal (non-editable) `pip install`, 94 of its 109 tests fail or error with `docs/research/contracts "
+     "not found; set MBOS_CONTRACTS_DIR`. With that variable set, 108 pass and 1 is skipped "
+     "([BUILD_VERIFICATION](BUILD_VERIFICATION.md)).",
+     "RECOMMENDATION: ship the contracts as package data (as 02 and 05 do), or fail at import with clear setup "
+     "instructions. Packaging for deployment needs this."),
+    ("F-17", "FACT", "launcher / all lanes", "The git identity is stored in the SHARED `.git/config` "
+     "(`extensions.worktreeConfig` is unset), so the launcher's per-agent identity reassertion overwrites every "
+     "worktree. Agent 01's commits acb6f3b, c6c5ad4, 7ed5705 and bed7609 are authored 'Agent 07 Marketing'. "
+     "Commit provenance across all branches is unreliable.",
+     "RECOMMENDATION (launcher owner; not changed by 07): `git config extensions.worktreeConfig true` plus "
+     "`git config --worktree user.name/email` per worktree in `~/bin/mbos-agent`. Note the misattribution in "
+     "affected receipts. History is not rewritten."),
 ]
 
 
@@ -187,8 +199,10 @@ def write_acceptance_report(contract_rep, gaps, test_rc, rows, e2e_ok, drift_ref
         f"({sum(r[2] == 'passed' for r in rows)} passed, {sum(r[2] == 'FAILED' for r in rows)} failed, "
         f"{sum(r[2].startswith('xfail') for r in rows)} strict-xfail known gaps)",
         f"- End-to-end dry-run (flip + service): **{'PASS' if e2e_ok else 'FAIL'}** → [E2E_REPORT.md](e2e/E2E_REPORT.md)",
-        "- Cross-lane interop against the peers' real code: [INTEROP_REPORT.md](INTEROP_REPORT.md) "
-        "(`python -m mbos_qa interop`). Its FAILs are findings F-13, F-14 and F-15.",
+        "- Cross-lane ADR-0010 interop against the peers' real code: [INTEROP_REPORT.md](INTEROP_REPORT.md) "
+        "(`python -m mbos_qa interop`). Open rows map to F-13, F-14 and F-15.",
+        "- Each lane's own test suite, run independently: [BUILD_VERIFICATION.md](BUILD_VERIFICATION.md) "
+        "(`python -m mbos_qa builds`).",
         "",
         "## Summary by acceptance test",
         "",
