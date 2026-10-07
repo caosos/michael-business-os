@@ -4,15 +4,16 @@ Agent: 03
 Role: Economics / Scoring (Round-Two build lane C)
 Branch: research/agent-03-economics
 Worktree: /home/michaelos/business-os-worktrees/agent-03-economics
-State: WORKING
+State: WAITING
 Current phase: ROUND TWO, wave two. Claimed task: RESEARCH/estimate producer (lane C)
 Started: 2026-10-06
-Last updated: 2026-10-07 (C-12 claimed)
+Last updated: 2026-10-07 (C-12 done; WAITING: no READY lane-C task)
 
 ## Claimed work (wave two). Foreman loop: `docs/COORDINATION.md` @ agent-01 `99e9ec0`
-Claimed: C-12
-Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6; C-04 @ 882c726; C-05 @ 6e938d2; C-06 @ 9e36ec9; C-07 @ 0c3cf4a; C-08 @ a81a989; C-09 @ 286e0f3; C-10 @ e1869f2; C-11 @ c648ca3
-Queue (lane C, after C-12): none READY @ agent-01 `8c3e4fd`
+Claimed: (none)
+Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6; C-04 @ 882c726; C-05 @ 6e938d2; C-06 @ 9e36ec9; C-07 @ 0c3cf4a; C-08 @ a81a989; C-09 @ 286e0f3; C-10 @ e1869f2; C-11 @ c648ca3; C-12 @ d5daf42
+Queue (lane C): none READY @ agent-01 `8c3e4fd`
+Waiting on: any new lane-C task; Michael decisions #1/#2/#6
 
 - **C-01**, the RESEARCH/estimate producer, fills `Item.economics` from normalized fields, comps evidence and category priors, with provenance per estimate. It is deterministic and does no LLM arithmetic.
   - Claimed at `b923852`; confirmed CLAIMED in READY_QUEUE @ `99e9ec0`.
@@ -88,6 +89,11 @@ Queue (lane C, after C-12): none READY @ agent-01 `8c3e4fd`
 - Vocabularies now cover every named flip category.
 - `other_*` categories estimate only with human scope overrides.
 - Fixed: scope overrides now feed the quote and hold-day computations.
+
+### C-12 result (DONE @ `d5daf42`; receipt `docs/receipts/2026-10-07-c12-replay-audit.md`)
+- `replay_audit.audit` is read-only. It covers `inputs_hash`, config, verdict, byte replay and ledger receipts.
+- **Zero drift** on the 14 goldens and on a REAL lane-D export: 19 Items written via Agent 04's StateStore into a throwaway PG16 cluster, with `verify_chain` ok.
+- Every planted drift kind is detected. Package 0.8.0.
 
 ## Proposed tasks (for Agent 01 to triage)
 - **P-03-05 → accepted as ADR-0009 item 9** (agent-01 `edbc492`). Original text:
