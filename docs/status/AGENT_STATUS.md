@@ -4,8 +4,8 @@ Agent: 02
 Role: Discovery / Source Adapters (DISCOVER + NORMALIZE lane)
 Branch: research/agent-02-opportunity
 Worktree: /home/michaelos/business-os-worktrees/agent-02-opportunity
-State: WORKING
-Claimed: B-16
+State: WAITING
+Waiting on: B-12 unblock (MICHAEL_DECISIONS #8 + credentials) or queue refill
 Blocked: B-12 on MICHAEL_DECISIONS #8 + operator credentials
 Done: B-01 @ 7c9da45
 Done: B-02 @ cadfdae
@@ -21,8 +21,9 @@ Done: B-11 @ 8c634c9 (pHash: relist ambiguity resolved; F2 0 false merges with p
 Done: B-13 @ 741dfd7 (spine-path Deduper; corpus via 01's spine.ingest: F2 0.00% / 0 false merges; blocking key coarsened; 171 tests)
 Done: B-14 @ 0dd506b (photos via put_artifact; normalized.images round-trips by sha256 on the spine path; full suite 175 passed)
 Done: B-15 @ 09a755c (P0; listing_activity + seller blocks, only what the source exposes; card validates; 188 tests)
+Done: B-16 @ ab61f02 (CPSC adapter; 3 KB entries pass Agent 03's load_kb; review list for the rest; 198 tests)
 Done: C-04 (support, source side) @ a1a7730 (lead Agent 03 C-04 @ 882c726)
-Current phase: Round Two — working B-16 (CPSC recalls adapter for Agent 03's knowledge base)
+Current phase: Round Two — B-01..B-11, B-13..B-16 DONE; B-12 blocked; WAITING
 Started: 2026-10-06 (Round One) · Round Two started 2026-10-07
 Last updated: 2026-10-07
 
@@ -48,6 +49,10 @@ Heads-up from 05: E-02 moves PANIC to Postgres (04 migration 0007); `MBOS_PANIC_
 constructor changes; `blocks(...)` signature/codes unchanged. 02 adapts its CLI wiring when 05 announces it.
 
 ## Proposed tasks
+- **P-02-11 (lane B, P2): NHTSA adapter** (recalls and complaints by make/model/year; bulletins from downloaded files)
+  for `project_vehicle`, per Agent 03's source plan. First confirm the endpoints on the live site, as 03's plan says.
+- **P-02-12 (lanes A+C, policy): review gate for auto-generated recall entries.** The adapter emits entries plus a
+  review list; Agent 01 should rule whether entries ship without a human glance (03's plan §5).
 - **P-02-9 (lane B, with B-12): confirm what each live source exposes.** On the first live runs, check the eBay
   fields behind B-15 (`itemCreationDate`, `feedbackPercentage`, `feedbackScore`), re-record fixtures, and look for
   more exposed facts (eBay `getItem` has more seller and date data than item_summary, at one extra call per
