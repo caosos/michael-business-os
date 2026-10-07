@@ -67,10 +67,17 @@ def test_dedup_key_is_a_blocking_key(db):
     assert (a,) in hit
 
 
-def test_spine_item_edges(db):
+def test_r12_strict_item_edges(db):
+    """D-05: the strict ADR-0004 set is canonical (R12); 0006 removed the 0005 accommodations."""
     s = db.store()
     item_id, pid = make_item(s, "NORMALIZED")
-    s.transition_item(item_id, "SCORED", AGENT, "score directly", [pid], key())
+    with pytest.raises(psycopg.Error) as ei:
+        s.transition_item(item_id, "SCORED", AGENT, "skip research", [pid], key())
+    assert ei.value.sqlstate == "MB004"
+    edges = {tuple(r) for r in s.conn.execute("SELECT from_state, to_state FROM mbos.item_state_transitions")}
+    assert not edges & {("NORMALIZED", "SCORED"), ("HELD", "APPROVED"), ("LEARNED", "ARCHIVED"), ("LEARNED", "FAILED")}
+    assert ("ACTED", "AWAITING_APPROVAL") in edges and ("HELD", "AWAITING_APPROVAL") in edges
+    assert s.conn.execute("SELECT terminal FROM mbos.item_states WHERE state='LEARNED'").fetchone()[0]
 
 
 # ---------------------------------------------------------------------------
