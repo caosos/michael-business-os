@@ -4,11 +4,12 @@ Agent: 07
 Role: ROUND TWO — QA / End-to-End Integration / Manual-Assist Outputs (lane G)
 Branch: research/agent-07-marketing
 Worktree: /home/michaelos/business-os-worktrees/agent-07-marketing
-State: WORKING
+State: WAITING
 Done: G-01 @ 9cbce70
 Done: G-02 @ a1700d9
 Blocked: G-03 on P-07-6 (F-19) and P-07-7 (F-20), lane 01. G1 is green @ 46ac715
-Claimed: (none — no other READY task for 07; see Next)
+Claimed: (none)
+Waiting on: P-07-6, P-07-7 (01; finish G-03) · A-01 phase 2 + A-03 (01; P-07-5 re-run of `mbos_qa spine` on lane D/E). Queue checked @ 8c3e4fd: no other READY task for 07 or ANY.
 Current phase: Round Two — foreman loop; G-01 + G-02 DONE; G-03 partial (G1 green), blocked on F-19/F-20
 Started: 2026-10-06 (round one) · 2026-10-07 (round two)
 Last updated: 2026-10-07
