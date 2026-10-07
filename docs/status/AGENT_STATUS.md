@@ -4,15 +4,16 @@ Agent: 03
 Role: Economics / Scoring (Round-Two build lane C)
 Branch: research/agent-03-economics
 Worktree: /home/michaelos/business-os-worktrees/agent-03-economics
-State: WORKING
+State: WAITING
 Current phase: ROUND TWO, wave two. Claimed task: RESEARCH/estimate producer (lane C)
 Started: 2026-10-06
-Last updated: 2026-10-07 (C-17 claimed)
+Last updated: 2026-10-07 (C-17 done; WAITING: no READY lane-C task)
 
 ## Claimed work (wave two). Foreman loop: `docs/COORDINATION.md` @ agent-01 `99e9ec0`
-Claimed: C-17
-Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6; C-04 @ 882c726; C-05 @ 6e938d2; C-06 @ 9e36ec9; C-07 @ 0c3cf4a; C-08 @ a81a989; C-09 @ 286e0f3; C-10 @ e1869f2; C-11 @ c648ca3; C-12 @ d5daf42; C-13 @ 0d417fb; C-14 @ ec97bf7; C-15 @ 2575ed3; C-16 @ c88cd5a
-Queue (lane C, after C-17): none READY @ agent-01 (latest push)
+Claimed: (none)
+Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6; C-04 @ 882c726; C-05 @ 6e938d2; C-06 @ 9e36ec9; C-07 @ 0c3cf4a; C-08 @ a81a989; C-09 @ 286e0f3; C-10 @ e1869f2; C-11 @ c648ca3; C-12 @ d5daf42; C-13 @ 0d417fb; C-14 @ ec97bf7; C-15 @ 2575ed3; C-16 @ c88cd5a; C-17 @ 3569efb
+Queue (lane C): none READY @ agent-01 `f8407c9`
+Waiting on: any new lane-C task; 02 reading the CPSC programmer's guide (source plan §5); 06 "Add what you know" prompt; Michael decisions #1/#2/#6; seasonality sources need a human read
 
 - **C-01**, the RESEARCH/estimate producer, fills `Item.economics` from normalized fields, comps evidence and category priors, with provenance per estimate. It is deterministic and does no LLM arithmetic.
   - Claimed at `b923852`; confirmed CLAIMED in READY_QUEUE @ `99e9ec0`.
@@ -117,7 +118,14 @@ Queue (lane C, after C-17): none READY @ agent-01 (latest push)
 - The GP7500E is verified NOT on the Generac recall.
 - The real `mbos.card.validate_card` is clean. 253 tests pass.
 
+### C-17 result (DONE @ `3569efb`; receipt `docs/receipts/2026-10-07-c17-model-knowledge-and-manual-notes.md`)
+- Source plan: `docs/research/agent-03-model-knowledge-source-plan.md` (admission standard, 7 ranked routes with verified vs unverified marked, ownership).
+- `manual` path: Michael's notes enter with a human provenance record, always as RECOMMENDATION (never FACT), make AND model required, elementary advice refused. `load_kb` refuses manual entries, so nothing unsourced can ship. CLI `note new` / `note check`.
+- 278 tests pass (267 by default).
+
 ## Proposed tasks (for Agent 01 to triage)
+- **P-03-08 (lane B): CPSC knowledge adapter.** Read the CPSC programmer's guide (response fields, rate limit), then a read-only, fixture-first Tier-1 adapter emitting recall records. 03 supplies the deterministic record-to-KB-entry converter once the fields are known.
+- **P-03-09 (lanes F + A): "Add what you know about this model" prompt on cards that show no sourced knowledge**, and a store for the notes document (persist the human provenance first, then the note).
 - **P-03-07 → queued as C-17.** Original: a source plan for non-recall model knowledge (known weak points, expensive parts, parts availability). My searches found nothing citable for the Cub Cadet ZT1 or the Husqvarna FS 400 LV. Routes: service bulletins, manufacturer parts diagrams, and Michael's own notes entered with provenance as `manual`.
 - **P-03-06 → DONE by Agent 01 @ `ca6d056`** (the spine writes `payload_hash`; the gate can use `--strict`). Original text:
   - Set `payload_hash = sha256_of(scorecard)` (MBOS-CJSON-1) in `spine_d.record_score`'s receipt `extra`.
