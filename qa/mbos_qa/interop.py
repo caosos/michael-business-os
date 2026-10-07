@@ -1,62 +1,54 @@
-"""Cross-lane interoperability checks against the peers' ACTUAL code on their branches (read-only).
+"""Cross-lane interoperability against the peers' ACTUAL code on their pushed branches (read-only).
 
-Lane G's integration question is: can each lane verify what another lane wrote? This runs three
-groups of checks:
-  1. Contract pins. Every lane's vendored copy of the frozen contracts must be byte-identical to
-     the pin, and any changed schema must carry a new `$id`.
-  2. Peer outputs. Example documents a lane emits must validate against the frozen contracts.
-  3. Hash agreement. Each lane's own canonical-JSON / sha256 function is run on shared test
-     vectors, and each lane's row_hash formula is applied to one receipt.
+Since ADR-0010 the yardstick is the normative `contracts/canonical/vectors.json`: 10 canonical vectors,
+6 rejections and a 2-receipt chain. For every lane:
+  * payload hash: the lane's own function runs on every vector (MBOS-CJSON-1 → `sha256:`) and every rejection
+  * row hash:     the lane's own receipt-hash function (where it has a ledger or stand-in) re-derives the chain (MBOS-RH-1)
+  * SQL twins:    each PostgreSQL implementation present (pinned reference, 01 spine, 04 state) runs the same
+                  vectors on a throwaway local PostgreSQL 16
+plus contract-pin consistency, peer-output conformance and single-ledger ownership.
 
-Peer modules are extracted with `git show` into a scratch directory and only stdlib-only hashing
-modules are imported. Postgres-side formulas run on a throwaway local PostgreSQL 16 (pgserver)
-when it is available; otherwise they are reported as UNKNOWN.
+Each lane is probed in its own subprocess over a `git archive` of its branch head, so its package imports
+resolve normally and lanes never share module state. Nothing is written to any other branch or worktree.
 """
 from __future__ import annotations
 
 import hashlib
-import importlib.util
 import json
 import os
 import pathlib
 import subprocess
+import sys
 import tempfile
 from dataclasses import dataclass, field
 
 from .contracts import CONTRACTS_DIR, Contracts
 
 REPO = pathlib.Path(__file__).resolve().parent.parent.parent
+VECTORS = CONTRACTS_DIR / "canonical" / "vectors.json"
+REF_SQL = CONTRACTS_DIR / "canonical" / "mbos_canonical.sql"
+PROBE = pathlib.Path(__file__).resolve().parent / "_probe.py"
 LANES = {
     "01": "research/agent-01-coordinator", "02": "research/agent-02-opportunity",
     "03": "research/agent-03-economics", "04": "research/agent-04-state",
     "05": "research/agent-05-governance", "06": "research/agent-06-communications",
+    "07": "research/agent-07-marketing",
+}
+# lane → (source root inside the archive, probe spec). 04 has no Python hasher: its hashing is SQL (see SQL twins).
+PROBES = {
+    "01": ("src", {"payload": "mbos.hashing:sha256_of", "row": None}),
+    "02": ("src", {"payload": "mbos_discovery.ids:canonical_json|mbos_discovery.ids:sha256_ref", "row": None}),
+    "03": ("economics/src", {"payload": "mbos_economics.canonical:content_hash", "row": None}),
+    "05": ("src", {"payload": "mbos_governance.ids:payload_hash",
+                   "row": "mbos_governance.store:compute_row_hash", "row_style": "split"}),
+    "06": (".", {"payload": "operator_ui.util:sha256_of", "row": "operator_ui.store:row_hash_of", "row_style": "split"}),
+    "07": ("qa", {"payload": "mbos_qa.core:sha256_ref", "row": "mbos_qa.core:receipt_row_hash", "row_style": "doc"}),
 }
 
-# (lane, path on branch, callable name, adapter) — adapter turns the module function into obj -> "sha256:…"
-HASHERS = [
-    ("01", "src/mbos/hashing.py", "sha256_of", lambda f: f),
-    ("02", "src/mbos_discovery/ids.py", "canonical_json", lambda f: lambda o: _tag(f(o))),
-    ("03", "economics/src/mbos_economics/canonical.py", "content_hash", lambda f: f),
-    ("05", "src/mbos_governance/ids.py", "payload_hash", lambda f: f),
-    ("06", "operator_ui/util.py", "sha256_of", lambda f: f),
-]
 
-VECTORS = {
-    "ints + strings": {"offer": 850, "template_id": "seller_inquiry_v1", "to_ref": "relay:QA-1"},
-    "integral float (850.0)": {"offer": 850.0, "to_ref": "relay:QA-1"},
-    "decimal float (3.20)": {"fuel_price_per_gal": 3.20, "to_ref": "relay:QA-1"},
-    "unicode + nested + bool/null": {"body": "Héllo — ok", "meta": {"b": True, "z": None, "list": [2, 1]}},
-}
-
-# Receipt row_hash formulas, cited to the source line that defines them.
-ROW_HASH_FORMULAS = {
-    "contract text / 05 / 06 / 07": "sha256(compact_sorted_json(row − row_hash) ‖ prev_hash)  "
-                                    "[receipt.schema.json row_hash; 05 store.compute_row_hash; 06 store.row_hash_of]",
-    "04 state (Postgres)": "sha256(jsonb::text(row − row_hash, prev_hash included))  "
-                           "[agent-04 state/migrations/0001_foundation.sql receipt_canonical + receipts_before_insert]",
-    "01 spine (Postgres)": "sha256(seq ‖ '|' ‖ jsonb::text(body − seq/prev_hash/row_hash) ‖ '|' ‖ prev_hash)  "
-                           "[agent-01 src/mbos/db/migrations/0001_spine.sql mbos.receipt_row_hash]",
-}
+def _git(*args, binary=False):
+    r = subprocess.run(["git", *args], cwd=REPO, capture_output=True, check=True)
+    return r.stdout if binary else r.stdout.decode()
 
 
 def _tag(data) -> str:
@@ -65,67 +57,63 @@ def _tag(data) -> str:
     return "sha256:" + hashlib.sha256(data).hexdigest()
 
 
-def _git(*args, binary=False):
-    r = subprocess.run(["git", *args], cwd=REPO, capture_output=True, check=True)
-    return r.stdout if binary else r.stdout.decode()
-
-
 @dataclass
 class Check:
     group: str
     name: str
-    status: str  # PASS | FAIL | UNKNOWN | INFO
+    status: str  # PASS | FAIL | PENDING | UNKNOWN | INFO | RULED-PENDING
     detail: str = ""
-    tag: str = "FACT"
 
 
 @dataclass
 class InteropReport:
     refs: dict = field(default_factory=dict)
     checks: list[Check] = field(default_factory=list)
-    hash_matrix: dict = field(default_factory=dict)
-    row_hashes: dict = field(default_factory=dict)
+    lanes: dict = field(default_factory=dict)  # lane → probe output
+    sql: dict = field(default_factory=dict)    # implementation → result
 
-    def add(self, *a, **k):
-        self.checks.append(Check(*a, **k))
+    def add(self, *a):
+        self.checks.append(Check(*a))
 
 
+# ------------------------------------------------------------------ 1 pins
 def check_pins(rep: InteropReport) -> None:
     pin = json.loads((CONTRACTS_DIR / "PIN.json").read_text())
     by_name: dict[str, set] = {}
     for rel, h in pin["files"].items():
         by_name.setdefault(rel.split("/")[-1], set()).add(h)
-    pinned_ids = {json.loads((CONTRACTS_DIR / rel).read_text()).get("$id"): h
-                  for rel, h in pin["files"].items() if rel.endswith(".schema.json")}
+    pinned_ids = {json.loads((CONTRACTS_DIR / rel).read_text()).get("$id")
+                  for rel in pin["files"] if rel.endswith(".schema.json")}
     for lane, br in LANES.items():
+        if lane == "07":
+            continue
         ref = f"origin/{br}"
         files = [f for f in _git("ls-tree", "-r", "--name-only", ref).split()
                  if f.split("/")[-1] in by_name and not f.startswith("docs/research/contracts/")]
         same, differ, same_id = 0, [], []
         for f in files:
             blob = _git("show", f"{ref}:{f}", binary=True)
-            h = _tag(blob)
-            if h in by_name[f.split("/")[-1]]:
+            if _tag(blob) in by_name[f.split("/")[-1]]:
                 same += 1
                 continue
             differ.append(f)
             try:
-                sid = json.loads(blob).get("$id")
+                if json.loads(blob).get("$id") in pinned_ids:
+                    same_id.append(f)
             except ValueError:
-                sid = None
-            if sid in pinned_ids:
-                same_id.append(f)
+                pass
         if not files:
-            rep.add("1 contract pins", f"lane {lane}: vendored copies", "INFO", "no vendored copies (reads coordinator path)")
+            rep.add("1 contract pins", f"lane {lane}: vendored copies", "INFO", "none vendored (reads the coordinator path)")
             continue
         rep.add("1 contract pins", f"lane {lane}: vendored copies byte-identical to pin",
                 "PASS" if not differ else "FAIL", f"{same} identical" + (f"; differ: {differ}" if differ else ""))
         if same_id:
             rep.add("1 contract pins", f"lane {lane}: changed schema keeps the pinned $id", "FAIL",
-                    f"{same_id} — ADR-0004 requires a new $id/version when a vendored schema changes")
+                    f"{same_id}: ADR-0004 requires a new $id when a vendored schema changes (queued as C-03)")
 
 
-def check_peer_outputs(rep: InteropReport, scratch: pathlib.Path) -> None:
+# ------------------------------------------------------------------ 2 peer outputs
+def check_peer_outputs(rep: InteropReport) -> None:
     c = Contracts()
     ref = f"origin/{LANES['03']}"
     files = [f for f in _git("ls-tree", "-r", "--name-only", ref).split() if f.endswith(".scored.json")]
@@ -133,8 +121,7 @@ def check_peer_outputs(rep: InteropReport, scratch: pathlib.Path) -> None:
     for f in files:
         d = json.loads(_git("show", f"{ref}:{f}"))
         prov = d.get("provenance") or []
-        docs = [("item", d["item"])] + [("provenance", p) for p in (prov if isinstance(prov, list) else [prov])]
-        for kind, doc in docs:
+        for kind, doc in [("item", d["item"])] + [("provenance", p) for p in (prov if isinstance(prov, list) else [prov])]:
             n += 1
             if c.errors(kind, doc):
                 bad.append(f"{f.split('/')[-1]}:{kind}")
@@ -142,133 +129,205 @@ def check_peer_outputs(rep: InteropReport, scratch: pathlib.Path) -> None:
             "PASS" if not bad else "FAIL", f"{n} documents" + (f"; invalid: {bad}" if bad else ""))
 
 
-def _load_peer(lane: str, path: str, scratch: pathlib.Path):
-    src = _git("show", f"origin/{LANES[lane]}:{path}")
-    d = scratch / f"lane{lane}"
-    d.mkdir(parents=True, exist_ok=True)
-    f = d / pathlib.Path(path).name
-    f.write_text(src)
-    spec = importlib.util.spec_from_file_location(f"peer{lane}_{f.stem}", f)
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
-
-
-def check_payload_hashes(rep: InteropReport, scratch: pathlib.Path) -> None:
-    from .core import sha256_ref
-    fns = {"07": sha256_ref}
-    for lane, path, name, adapt in HASHERS:
-        try:
-            fns[lane] = adapt(getattr(_load_peer(lane, path, scratch), name))
-        except Exception as e:  # noqa: BLE001
-            rep.add("3 hash agreement", f"lane {lane}: load {path}", "UNKNOWN", f"{type(e).__name__}: {e}", "UNKNOWN")
-    for vname, vec in VECTORS.items():
-        row = {}
-        for lane, fn in sorted(fns.items()):
-            try:
-                row[lane] = fn(json.loads(json.dumps(vec)))
-            except Exception as e:  # noqa: BLE001
-                row[lane] = f"REFUSED ({type(e).__name__})"
-        rep.hash_matrix[vname] = row
-        hashes = {v for v in row.values() if v.startswith("sha256:")}
-        refused = [k for k, v in row.items() if not v.startswith("sha256:")]
-        if len(hashes) == 1:
-            rep.add("3 hash agreement", f"payload hash agrees across lanes: {vname}", "PASS",
-                    f"{len(row) - len(refused)} lanes agree" + (f"; refused by {refused}" if refused else ""))
-        else:
-            groups = {}
-            for lane, h in row.items():
-                groups.setdefault(h[:19] if h.startswith("sha256:") else h, []).append(lane)
-            rep.add("3 hash agreement", f"payload hash agrees across lanes: {vname}", "FAIL",
-                    "; ".join(f"{'+'.join(v)} → {k}" for k, v in groups.items()))
-
-
-def _receipt_vector() -> tuple[dict, str]:
-    prev = "sha256:" + "a" * 64
-    row = {"receipt_id": "rcpt_01M4B3R6G0000000000000000A", "seq": 2, "ts": "2026-10-07T12:00:00Z",
-           "schema_version": "1.0.0", "type": "ITEM_STATE_CHANGED", "actor": {"type": "agent", "id": "agent-07"},
-           "intent": "interop vector — Héllo", "provenance_ids": ["prov_01M4B3R6G0000000000000000A"],
-           "idempotency_key": "interop-1", "before_state": {"state": "NORMALIZED"},
-           "after_state": {"state": "RESEARCHING"}, "prev_hash": prev}
-    return row, prev
-
-
-def check_row_hashes(rep: InteropReport) -> None:
-    row, prev = _receipt_vector()
-    compact = json.dumps(row, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
-    rep.row_hashes["contract text / 05 / 06 / 07"] = _tag(compact + prev)
-    pg = _pg_jsonb_text([row, {k: v for k, v in row.items() if k not in ("seq", "prev_hash")}])
-    if pg is None:
-        rep.row_hashes["04 state (Postgres)"] = "UNKNOWN (no local PostgreSQL)"
-        rep.row_hashes["01 spine (Postgres)"] = "UNKNOWN (no local PostgreSQL)"
+# ------------------------------------------------------------------ 3 lane hashers on vectors.json
+def _archive(lane: str, dest: pathlib.Path) -> pathlib.Path:
+    if lane == "07":  # this lane: the committed HEAD of this worktree (identical to what is pushed after commit)
+        commit = _git("rev-parse", "HEAD").strip()
     else:
-        rep.row_hashes["04 state (Postgres)"] = _tag(pg[0])
-        rep.row_hashes["01 spine (Postgres)"] = _tag(f"{row['seq']}|{pg[1]}|{prev}")
-    vals = set(rep.row_hashes.values())
-    status = "UNKNOWN" if pg is None else ("PASS" if len(vals) == 1 else "FAIL")
-    rep.add("3 hash agreement", "receipt row_hash formula agrees across ledgers (01 spine, 04 state, contract)", status,
-            "; ".join(f"{k} → {v[:19]}…" for k, v in rep.row_hashes.items()), "UNKNOWN" if pg is None else "FACT")
-    if pg is not None:
-        rep.add("3 hash agreement", "Postgres jsonb::text equals the Python canonical form", "FAIL" if pg[0] != compact else "PASS",
-                f"jsonb: {pg[0][:70]}… vs python: {compact[:70]}…")
+        commit = _git("rev-parse", f"origin/{LANES[lane]}").strip()
+    d = dest / f"lane{lane}"
+    d.mkdir(parents=True)
+    subprocess.run(["tar", "-x", "-C", str(d)], input=_git("archive", commit, binary=True), check=True)
+    return d
 
 
-def _pg_jsonb_text(docs: list[dict]) -> list[str] | None:
-    try:
-        import pgserver  # noqa: PLC0415
-    except ImportError:
-        return None
-    root = pathlib.Path(os.environ.get("XDG_RUNTIME_DIR") or tempfile.gettempdir()) / "a07-interop-pg"
-    srv = pgserver.get_server(str(root), cleanup_mode="stop")
-    out = []
-    for d in docs:
-        res = srv.psql(f"SELECT ($json${json.dumps(d, ensure_ascii=False)}$json$)::jsonb::text;")
-        out.append(res.strip().splitlines()[2].strip())
-    return out
+def check_lane_hashers(rep: InteropReport, scratch: pathlib.Path) -> None:
+    vec = json.loads(VECTORS.read_text())
+    n_c, n_r = len(vec["cjson"]), len(vec["reject"])
+    for lane, (sub, spec) in PROBES.items():
+        root = _archive(lane, scratch) / sub
+        env = {k: v for k, v in os.environ.items() if k not in ("PYTHONPATH",)}
+        p = subprocess.run([sys.executable, str(PROBE), str(root), str(VECTORS), json.dumps(spec)],
+                           capture_output=True, text=True, env=env, cwd=root, timeout=120)
+        try:
+            out = json.loads(p.stdout.strip().splitlines()[-1])
+        except (ValueError, IndexError):
+            out = {"load_error": (p.stderr.strip().splitlines() or ["no output"])[-1]}
+        rep.lanes[lane] = out
+        if out.get("load_error"):
+            rep.add("3 lane hashers (vectors.json)", f"lane {lane}: payload hash", "UNKNOWN", out["load_error"])
+            continue
+        ok_c = sum(c["ok"] for c in out["cjson"])
+        ok_r = sum(r["ok"] for r in out["reject"])
+        bad = [c["name"] for c in out["cjson"] if not c["ok"]] + [f"reject:{r['name']}" for r in out["reject"] if not r["ok"]]
+        rep.add("3 lane hashers (vectors.json)", f"lane {lane}: payload hash = MBOS-CJSON-1",
+                "PASS" if not bad else "FAIL", f"{ok_c}/{n_c} vectors, {ok_r}/{n_r} rejections"
+                + (f"; failing: {', '.join(bad)}" if bad else ""))
+        if out.get("chain") is not None:
+            rep.add("3 lane hashers (vectors.json)", f"lane {lane}: receipt row_hash = MBOS-RH-1 (vectors receipt_chain)",
+                    "PASS" if out["chain"]["ok"] else "FAIL", out["chain"]["detail"])
 
 
-def check_ledger_ownership(rep: InteropReport) -> None:
-    owners = []
+# ------------------------------------------------------------------ 4 SQL twins on PostgreSQL
+def _sql_sources() -> dict[str, str | None]:
+    src = {"ADR-0010 reference SQL (pinned)": REF_SQL.read_text()}
     for lane in ("01", "04"):
         ref = f"origin/{LANES[lane]}"
-        sql = [f for f in _git("ls-tree", "-r", "--name-only", ref).split() if f.endswith(".sql")]
-        if any("CREATE TABLE mbos.receipts" in _git("show", f"{ref}:{f}") or
-               "CREATE TABLE IF NOT EXISTS mbos.receipts" in _git("show", f"{ref}:{f}") for f in sql):
+        files = [f for f in _git("ls-tree", "-r", "--name-only", ref).split() if f.endswith(".sql")]
+        hit = [f for f in files if "FUNCTION mbos.cjson(" in _git("show", f"{ref}:{f}")]
+        label = f"lane {lane} SQL ({hit[0].split('/')[-1]})" if hit else f"lane {lane} SQL"
+        src[label] = _git("show", f"{ref}:{hit[0]}") if hit else None
+    return src
+
+
+def check_sql_twins(rep: InteropReport) -> None:
+    try:
+        import pgserver  # noqa: PLC0415
+        import psycopg  # noqa: PLC0415
+    except ImportError:
+        rep.add("4 SQL twins (PostgreSQL)", "SQL implementations", "UNKNOWN", "pgserver/psycopg not installed")
+        return
+    vec = json.loads(VECTORS.read_text())
+    root = pathlib.Path(os.environ.get("XDG_RUNTIME_DIR") or tempfile.gettempdir()) / "a07-interop-pg"
+    srv = pgserver.get_server(str(root), cleanup_mode="stop")
+    base = srv.get_uri()
+    for i, (label, sql) in enumerate(_sql_sources().items()):
+        if sql is None:
+            status = "PENDING" if label.startswith("lane 04") else "INFO"
+            rep.add("4 SQL twins (PostgreSQL)", f"{label}: MBOS-CJSON-1 / MBOS-RH-1", status,
+                    "no `mbos.cjson` function on the branch yet (D-02 is CLAIMED by 04)" if status == "PENDING"
+                    else "no SQL twin on the branch")
+            continue
+        db = f"a07_twin_{i}"
+        with psycopg.connect(base, autocommit=True) as c:
+            c.execute(f"DROP DATABASE IF EXISTS {db}")
+            c.execute(f"CREATE DATABASE {db}")
+        head, _, query = base.partition("?")
+        uri = head.rsplit("/", 1)[0] + f"/{db}" + (f"?{query}" if query else "")
+        res = {"cjson": 0, "reject": 0, "chain": None, "fail": []}
+        with psycopg.connect(uri, autocommit=True) as c:
+            c.execute(sql)
+            for case in vec["cjson"]:
+                canon, h = c.execute("SELECT mbos.cjson(%s::jsonb), mbos.cjson_sha256(%s::jsonb)",
+                                     (case["input"], case["input"])).fetchone()
+                if canon == case["canonical"] and h == case["sha256"]:
+                    res["cjson"] += 1
+                else:
+                    res["fail"].append(case["name"])
+            for case in vec["reject"]:
+                try:
+                    c.execute("SELECT mbos.cjson(%s::jsonb)", (case["input"],)).fetchone()
+                    res["fail"].append("reject:" + case["name"])
+                except psycopg.Error:
+                    res["reject"] += 1
+            has_rh = c.execute("SELECT to_regproc('mbos.rh1_row_hash') IS NOT NULL").fetchone()[0]
+            if has_rh:
+                bad = [r["seq"] for r in vec["receipt_chain"]
+                       if c.execute("SELECT mbos.rh1_row_hash(%s::jsonb)", (json.dumps(r),)).fetchone()[0] != r["row_hash"]]
+                res["chain"] = not bad
+                if bad:
+                    res["fail"].append(f"chain seq {bad}")
+        with psycopg.connect(base, autocommit=True) as c:
+            c.execute(f"DROP DATABASE IF EXISTS {db}")
+        rep.sql[label] = res
+        rep.add("4 SQL twins (PostgreSQL)", f"{label}: MBOS-CJSON-1" + (" + MBOS-RH-1" if res["chain"] is not None else ""),
+                "PASS" if not res["fail"] else "FAIL",
+                f"{res['cjson']}/{len(vec['cjson'])} vectors, {res['reject']}/{len(vec['reject'])} rejections"
+                + (", chain verified" if res["chain"] else "") + (f"; failing: {res['fail']}" if res["fail"] else ""))
+
+
+# ------------------------------------------------------------------ 5 ownership / ledger conformance
+def check_ledger(rep: InteropReport) -> None:
+    owners, cjson_rowhash = [], {}
+    for lane in ("01", "04"):
+        ref = f"origin/{LANES[lane]}"
+        sql = {f: _git("show", f"{ref}:{f}") for f in _git("ls-tree", "-r", "--name-only", ref).split() if f.endswith(".sql")}
+        if any("CREATE TABLE mbos.receipts" in t or "CREATE TABLE IF NOT EXISTS mbos.receipts" in t for t in sql.values()):
             owners.append(lane)
-    rep.add("4 ownership", "exactly one lane defines the receipts ledger (`mbos.receipts`)",
-            "PASS" if len(owners) == 1 else "FAIL",
-            f"defined by lanes {owners}; ownership map (integration §5) assigns DDL/ledger to 04")
+        cjson_rowhash[lane] = any("row_hash" in t and "mbos.cjson" in t for t in sql.values())
+    rep.add("5 ledger", "single receipts ledger (ADR-0010: Agent 04 sole owner)",
+            "PASS" if owners == ["04"] else "RULED-PENDING",
+            f"`mbos.receipts` defined by lanes {owners}. 01's DDL is a reference spine until A-01 phase 2.")
+    rep.add("5 ledger", "lane 04 ledger computes row_hash with MBOS-CJSON-1 (D-02)",
+            "PASS" if cjson_rowhash["04"] else "PENDING",
+            "found in 04 migrations" if cjson_rowhash["04"] else
+            "04 @ head still hashes `jsonb::text` (`0001_foundation.sql`); D-02 is CLAIMED by 04")
 
 
 def run(fetch: bool = False) -> InteropReport:
     if fetch:
         subprocess.run(["git", "fetch", "-q", "origin"], cwd=REPO, check=False)
-    rep = InteropReport(refs={lane: _git("rev-parse", "--short", f"origin/{br}").strip() for lane, br in LANES.items()})
+    rep = InteropReport(refs={lane: _git("rev-parse", "--short", "HEAD" if lane == "07" else f"origin/{br}").strip()
+                              for lane, br in LANES.items()})
     with tempfile.TemporaryDirectory() as td:
-        scratch = pathlib.Path(td)
         check_pins(rep)
-        check_peer_outputs(rep, scratch)
-        check_payload_hashes(rep, scratch)
-        check_row_hashes(rep)
-        check_ledger_ownership(rep)
+        check_peer_outputs(rep)
+        check_lane_hashers(rep, pathlib.Path(td))
+        check_sql_twins(rep)
+        check_ledger(rep)
     return rep
 
 
+def verdicts(rep: InteropReport) -> dict[str, str]:
+    """F-13 / F-14 status from the evidence (G-01 acceptance: closed or re-opened with evidence)."""
+    py = {c.name.split(":")[0]: c.status for c in rep.checks if c.group.startswith("3") and "payload" in c.name}
+    rh = {c.name.split(":")[0]: c.status for c in rep.checks if c.group.startswith("3") and "row_hash" in c.name}
+    sql = [c for c in rep.checks if c.group.startswith("4")]
+    led = {c.name: c.status for c in rep.checks if c.group.startswith("5")}
+    f14_open = sorted(k for k, v in py.items() if v != "PASS") + sorted(c.name.split(":")[0] for c in sql if c.status != "PASS")
+    f13_open = sorted(k for k, v in rh.items() if v != "PASS") + [k for k, v in led.items() if v != "PASS"]
+    return {
+        "F-14": "CLOSED: every lane hasher and SQL twin matches vectors.json" if not f14_open else
+                "RULED (ADR-0010), conformance OPEN for: " + "; ".join(f14_open),
+        "F-13": "CLOSED: one ledger, MBOS-RH-1 everywhere" if not f13_open else
+                "RULED (ADR-0010), conformance OPEN for: " + "; ".join(f13_open),
+    }
+
+
 def render(rep: InteropReport) -> str:
-    L = ["# Cross-lane interoperability report (lane G)", "",
-         "> Generated by `python -m mbos_qa interop`. Runs the peers' **actual** hashing code (extracted read-only "
-         "from their branches) and PostgreSQL 16 for the Postgres-side formulas. Nothing was modified on any other "
-         "branch.", "",
-         "Peer refs checked: " + ", ".join(f"{k} `{v}`" for k, v in rep.refs.items()), "",
-         "| Group | Check | Result | Detail |", "|---|---|---|---|"]
+    vec = json.loads(VECTORS.read_text())
+    v = verdicts(rep)
+    L = ["# Cross-lane interoperability report: ADR-0010 conformance (lane G, task G-01)", "",
+         "> Generated by `python -m mbos_qa interop`. It runs each lane's **own** hashing code from a `git archive` "
+         "of its pushed head, one subprocess per lane, against the normative `contracts/canonical/vectors.json`. "
+         "Every PostgreSQL implementation present runs the same vectors on a throwaway PostgreSQL 16. "
+         "Nothing was written to any other branch or worktree.", "",
+         "Heads: " + ", ".join(f"{k} `{h}`" for k, h in rep.refs.items()), "",
+         f"- **F-14 (number canonicalisation):** {v['F-14']}",
+         f"- **F-13 (one ledger, one row_hash):** {v['F-13']}", "",
+         "## Lane × vector matrix (✔ = the lane's own function reproduces the vector's sha256 / rejects the input)", ""]
+    lanes = list(rep.lanes)
+    L += ["| Vector | " + " | ".join(f"{x}" for x in lanes) + " | " + " | ".join(rep.sql) + " |",
+          "|---|" + "---|" * (len(lanes) + len(rep.sql))]
+
+    def cell(out, kind, name):
+        if out.get("load_error"):
+            return "?"
+        for c in out.get(kind, []):
+            if c["name"] == name:
+                if c["ok"]:
+                    return "✔"
+                got = str(c["got"])
+                return "✘ " + ("raised" if got.startswith("RAISED") else got[7:15] if got.startswith("sha256:") else got)
+        return "—"
+
+    for case in vec["cjson"]:
+        sqlc = ["✔" if case["name"] not in r["fail"] else "✘" for r in rep.sql.values()]
+        L.append(f"| {case['name']} | " + " | ".join(cell(rep.lanes[x], "cjson", case["name"]) for x in lanes)
+                 + " | " + " | ".join(sqlc) + " |")
+    for case in vec["reject"]:
+        sqlc = ["✔" if "reject:" + case["name"] not in r["fail"] else "✘" for r in rep.sql.values()]
+        L.append(f"| reject: {case['name']} | " + " | ".join(cell(rep.lanes[x], "reject", case["name"]) for x in lanes)
+                 + " | " + " | ".join(sqlc) + " |")
+    chain_row = []
+    for x in lanes:
+        ch = rep.lanes[x].get("chain")
+        chain_row.append("—" if ch is None else ("✔" if ch["ok"] else "✘"))
+    L.append("| receipt_chain (MBOS-RH-1) | " + " | ".join(chain_row) + " | "
+             + " | ".join("—" if r["chain"] is None else ("✔" if r["chain"] else "✘") for r in rep.sql.values()) + " |")
+    L += ["", "— = this lane has no such function (02/03 have no ledger; 01's ledger hashing is SQL). "
+          "? = could not load. A ✘ with hex shows the first hex digits of the hash the lane produced.", "",
+          "## All checks", "", "| Group | Check | Result | Detail |", "|---|---|---|---|"]
     L += [f"| {c.group} | {c.name} | **{c.status}** | {c.detail.replace('|', '/')} |" for c in rep.checks]
-    lanes = sorted({lane for row in rep.hash_matrix.values() for lane in row})
-    L += ["", "## Payload-hash matrix (same input, each lane's own function)", "",
-          "| Vector | " + " | ".join(f"lane {x}" for x in lanes) + " |", "|---|" + "---|" * len(lanes)]
-    for v, row in rep.hash_matrix.items():
-        L.append(f"| {v} | " + " | ".join(f"`{row.get(x, '—')[7:17]}`" if row.get(x, "").startswith("sha256:")
-                                           else row.get(x, "—") for x in lanes) + " |")
-    L += ["", "## Receipt row_hash formulas (one identical receipt)", "", "| Ledger | Formula | row_hash |", "|---|---|---|"]
-    L += [f"| {k} | {ROW_HASH_FORMULAS[k].replace('|', chr(92) + '|')} | `{v[:23]}…` |" for k, v in rep.row_hashes.items()]
     L.append("")
     return "\n".join(L)

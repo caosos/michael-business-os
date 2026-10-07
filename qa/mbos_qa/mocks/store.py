@@ -21,7 +21,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass, field
 
 from ..contracts import ContractViolation, Contracts
-from ..core import Clock, IdGen, iso, receipt_row_hash
+from ..core import Clock, IdGen, iso, iso_receipt, receipt_row_hash
 from ..statemachine import check_item_transition
 
 IMPLEMENTATION = "MOCK reference store (SQLite) — stands in for Agent 04 Postgres"
@@ -120,7 +120,7 @@ class Tx:
         row = self.cur.execute("SELECT seq, row_hash FROM receipts ORDER BY seq DESC LIMIT 1").fetchone()
         seq, prev_hash = (row[0] + 1, row[1]) if row else (1, None)
         doc = {
-            "receipt_id": self.store.ids.new("rcpt"), "seq": seq, "ts": iso(self.store.clock.now()),
+            "receipt_id": self.store.ids.new("rcpt"), "seq": seq, "ts": iso_receipt(self.store.clock.now()),
             "schema_version": "1.0.0", "type": type, "actor": actor, "intent": intent,
             "provenance_ids": list(provenance_ids), "idempotency_key": idempotency_key,
             **fields, "prev_hash": prev_hash,

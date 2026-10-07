@@ -144,7 +144,8 @@ def run_contract_checks(root: pathlib.Path = CONTRACTS_DIR, drift_ref: str | Non
         got = "sha256:" + hashlib.sha256(p.read_bytes()).hexdigest() if p.exists() else "missing"
         if got != want:
             bad.append(rel)
-    extra = {str(p.relative_to(root)) for p in root.rglob("*.json")} - set(pin["files"]) - {"PIN.json"}
+    extra = {str(p.relative_to(root)) for p in root.rglob("*") if p.is_file() and "__pycache__" not in p.parts} \
+        - set(pin["files"]) - {"PIN.json"}
     rep.checks.append(CheckResult("pin integrity (byte-exact vs PIN.json)", not bad and not extra,
                                   f"modified={bad} unpinned={sorted(extra)}" if bad or extra else f"{len(pin['files'])} files"))
 

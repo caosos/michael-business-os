@@ -3,6 +3,7 @@
   python -m mbos_qa contracts [--drift-ref REF]   contract validation runner only
   python -m mbos_qa e2e                            run flip + service fixtures, write reports + packets
   python -m mbos_qa interop                        cross-lane checks against peers' actual code
+  python -m mbos_qa builds --workdir DIR            run every lane's own suite from a clean archive
   python -m mbos_qa run [--drift-ref REF]          everything; writes docs/qa/ACCEPTANCE_REPORT.md
   python -m mbos_qa pin --ref COMMIT               re-pin contracts after an Agent 01 semver bump
 
@@ -227,7 +228,7 @@ def cmd_pin(ref: str):
                            check=True, cwd=REPO).stdout.split()
     manifest = {}
     for f in files:
-        if not f.endswith(".json"):
+        if f.endswith("validate_contracts.py"):  # coordinator's own validator; the QA runner replaces it
             continue
         blob = subprocess.run(["git", "show", f"{ref}:{f}"], capture_output=True, check=True, cwd=REPO).stdout
         rel = f[len(src):]
@@ -249,6 +250,9 @@ def main(argv=None):
         p.add_argument("--drift-ref")
     sub.add_parser("e2e")
     sub.add_parser("interop")
+    p = sub.add_parser("builds")
+    p.add_argument("--workdir", required=True, help="scratch dir for archives + venvs (not committed)")
+    p.add_argument("--lanes", nargs="*")
     p = sub.add_parser("pin")
     p.add_argument("--ref", required=True)
     a = ap.parse_args(argv)
@@ -264,6 +268,15 @@ def main(argv=None):
         for c in rep.checks:
             print(f"{c.status:7} {c.group} · {c.name} — {c.detail[:140]}")
         return 0
+    if a.cmd == "builds":
+        from . import buildverify
+        py = shutil.which("python3.12") or sys.executable
+        ver = subprocess.run([py, "--version"], capture_output=True, text=True).stdout.strip()
+        res = buildverify.run(pathlib.Path(a.workdir), a.lanes, py)
+        buildverify.save(res, OUT, ver)
+        for r in res:
+            print(r["lane"], r["status"], {k: r.get(k) for k in ("tests", "passed", "failures", "errors", "claim_check", "detail")})
+        return 0 if all(r["status"] == "PASS" for r in res) else 1
     if a.cmd == "pin":
         cmd_pin(a.ref)
         return 0

@@ -1,13 +1,17 @@
 {
   "source_repo": "caosos/michael-business-os",
   "source_branch": "research/agent-01-coordinator",
-  "source_commit": "acb6f3b628dd5e3319341a088520fa90c0346ff4",
+  "source_commit": "99e9ec0cee1d999d8f6c3524226dd26869f2a33f",
   "source_path": "docs/research/contracts/",
   "contracts_version": "1.0.0",
   "note": "Byte-exact pinned copy of the FROZEN contracts (ADR-0004). Do not edit. Re-pin only via `python -m mbos_qa pin --ref <commit>` after an Agent 01 semver bump.",
   "files": {
     "action-request.schema.json": "sha256:38be3f152c69b343bddc54edc0d86d29cc9f0b8c09250e66cd5f9f49304055b3",
     "approval.schema.json": "sha256:d8593684adf1c622e7916f6e4aa068f73ff1bb38f62817f5606ce40e69072bc5",
+    "canonical/README.md": "sha256:cf3920c9dcb70e3215bc0a2b42c6cdcd43e9c21b84fa96c113ae4fdb0899ed4e",
+    "canonical/mbos_canonical.py": "sha256:da2745456f4ac1d1c6aa7a23350c76d65e9e06427422e23ebf9b9eb578799628",
+    "canonical/mbos_canonical.sql": "sha256:9fe2d24ceda4d1e9bf4e18ecf8cf3df2317108326433a9d154f4810ce0fed9c3",
+    "canonical/vectors.json": "sha256:4ff072e400a8517af73b3d38062cf9538629b9adca14d35031bebab385069082",
     "examples/action-request-email-held.example.json": "sha256:14e7a343c7550ed6b67371b7325096e21a0bc734f8cf6083d5bc967296d17ed5",
     "examples/approval-hold.example.json": "sha256:99f2f703c675beac7efe067c16e956cba68589b9d6413fd3897b069a3d059bfe",
     "examples/item-flip-trailer.example.json": "sha256:5fa97c15e4a8b013a6c5ebe2925fe2e0e495c6f26c07a73e6800bf9fcaa08602",
