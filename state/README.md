@@ -24,6 +24,9 @@ state/
   migrations/0007_lane_e_requirements.sql   D-04 / Lane E: panic_set + panic_events/panic_current (bootstrap
                                    FROZEN, release = approver, L3 cancels approved), effector_calls as execution
                                    claim, gateway edges, budget modes + bucket multi-cap reserve
+  migrations/0008_mcp_calls.sql    D-06: append-only audit of every State MCP call; ok write rows must cite receipts
+  mbos_state/mcp_tools.py          D-06: State MCP tool layer (identity/scope -> provenance, narrow intent tools)
+  mbos_state/mcp_server.py         D-06: MCP server (mcp 2.x MCPServer, stdio): python -m mbos_state.mcp_server
   mbos_state/mbos_canonical.py     ADR-0010 Python reference (byte-identical vendored copy)
   tests/canonical/vectors.json     ADR-0010 golden vectors (byte-identical vendored copy)
   bootstrap/roles.sql              group + login roles (cluster level)
@@ -32,7 +35,7 @@ state/
   bootstrap/systemd/               user units: postgres, hourly chain verify + anchor
   bootstrap/podman/                Quadlet units for the target runtime (UNTESTED: no Podman on host yet)
   mbos_state/                      Python: migrate, StateStore facade, chain export/anchor/offline verify, CLI
-  tests/                           149 tests; vendored frozen contracts v1.0.0 in tests/contracts-v1.0.0/
+  tests/                           162 tests; vendored frozen contracts v1.0.0 in tests/contracts-v1.0.0/
 ```
 
 ## Tables
@@ -96,3 +99,33 @@ cd state && .venv/bin/python -m pytest          # spins up a throwaway cluster; 
 ```
 
 The operations side (startup, reboot, verification, backups) is in `docs/state/RUNBOOK-STATE.md`.
+
+## State MCP server (D-06, ADR-0003): the only agent write path
+
+Agent processes get **no database write credential**; at most they get `mbos_reader`. They write only through
+this server, which holds the `mbos_state_mcp` login (`agent_write`). One server process runs per agent
+identity:
+
+```json
+{"mcpServers": {"mbos-state": {
+  "command": "/home/michaelos/mbos/state/.venv/bin/python", "args": ["-m", "mbos_state.mcp_server"],
+  "env": {"PYTHONPATH": "/home/michaelos/mbos/state", "PGPASSFILE": "/home/michaelos/.config/mbos/pgpass",
+          "MBOS_DSN": "host=127.0.0.1 port=55432 dbname=mbos user=mbos_state_mcp",
+          "MBOS_MCP_AGENT_ID": "agent-02-opportunity",
+          "MBOS_MCP_SCOPE": "get_item,list_items,create_item,transition_item,patch_item"}}}}
+```
+
+**Tools by profile:**
+- `agent` profile:
+  - reads: `get_item`, `list_items`
+  - writes: `create_item`, `transition_item`, `patch_item`, `propose_action`, `record_outcome`, `record_lesson`
+- `operator` profile: adds `record_approval`. It is set with `MBOS_MCP_PROFILE=operator` and the `mbos_operator_ui` login, for the non-LLM Operator UI backend only. Never give it to an agent.
+
+There is no SQL tool.
+
+**Rules:**
+- Caller identity and scope come from the server's environment. Each call writes a provenance row: `agent_name` = caller, `tool_name` = `mbos-state-mcp/<tool>`, and `inputs_used` holds the MBOS-CJSON-1 argument hash plus caller, profile and scope.
+- Receipt `actor` and `proposed_by` are forced to the caller.
+- Write tools accept `evidence` (inline source or model provenance; the identity is forced, and human or approval provenance is refused) and `evidence_provenance_ids`.
+- Every call is logged in `mbos.mcp_calls`: reads, refusals and errors included.
+- A successful write call commits its state change, its receipt(s) and its `mcp_calls` row in one transaction. The DB refuses an `ok` write row that doesn't cite existing receipts.
