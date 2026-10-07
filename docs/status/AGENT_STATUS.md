@@ -5,15 +5,21 @@ Role: Communications + Operator UI / Approval UX (build lane F)
 Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
 State: WORKING
-Claimed: F-02
-Done: F-01 @ 190bb9b
+Claimed: F-03
+Done: F-01 @ 190bb9b · F-02 @ fc31896
 Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
 Last updated: 2026-10-07
 
 ## Current objective
-**F-02** (READY_QUEUE @ `99e9ec0`): ADR-0010 conformance for lane 06. Next in queue: **F-03** (comms dry-run spec as data).
+**F-03** (READY_QUEUE @ `99e9ec0`): comms dry-run spec items (1)(3)(4)(6) as data files and tests (template registry, seller Q&A and service intake, rate and consent rules, E1–E7 thresholds). No sends.
 
 ## Done
+- **F-02 @ `fc31896`** (ADR-0010):
+  - `operator_ui/mbos_canonical.py` is a byte-identical copy of the reference.
+  - The card verifies `payload_hash` independently, and offers YES only on a match.
+  - The ledger re-verifies the chain with MBOS-RH-1 in Python.
+  - **Interop row 06 = 10/10 CONFORMS** (with row 06 repointed; see coordinator review).
+  - The spine is re-pinned to `99e9ec0`. 15 tests pass. Receipt: `docs/receipts/2026-10-07-f02-adr0010-conformance.md`.
 - **F-01 @ `190bb9b`** (ruling R10): the Operator UI runs on the spine.
   - Every YES/NO/MODIFY/HOLD is `mbos.spine.decide(channel="web")` in one transaction, plus a DBOS wake.
   - HOLD timers live in the item workflow. "Wake now" sends `michael_ping`.
@@ -37,7 +43,7 @@ None.
 None. Live comms stay disabled (MICHAEL_DECISIONS #4).
 
 ## Needs coordinator review
-- `tools/interop_check.py` row 06 points at `operator_ui/util.py`, which F-01 removed under R10. F-02 vendors the reference byte-identical at `operator_ui/mbos_canonical.py`. Please repoint row 06 there (adapter `lambda m: m.sha256_of`).
+- `tools/interop_check.py` row 06 points at `operator_ui/util.py`, which F-01 removed under R10. F-02 vendors the reference byte-identical at `operator_ui/mbos_canonical.py`. Please repoint row 06 there (adapter `lambda m: m.sha256_of`); with that one-line change the tool reports row 06 = 10/10 at `fc31896`.
 
 ## Proposed tasks
 - **P-06-1 (lane A):** a `spine.notify_decision(item_id, approval_id)` helper (named in R10), so the UI and CLI share one wake path.
