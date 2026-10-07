@@ -4,14 +4,15 @@ Agent: 05
 Role: Governance / Approval / Security — "controlled autonomy"
 Branch: research/agent-05-governance
 Worktree: /home/michaelos/business-os-worktrees/agent-05-governance
-State: COMPLETE
-Current phase: Round One — research & design (no live external actions taken)
+State: WORKING
+Current phase: ROUND TWO — implementation: Action Gateway + fail-closed governance (wave one, DRY-RUN only)
 Started: 2026-10-06
-Last updated: 2026-10-06
+Last updated: 2026-10-07 (round two start)
 
 ## Current objective
-Round-One deliverable is complete. Holding for Agent 01 (coordinator) reconciliation
-and for Michael's decisions on the open items listed below before any Round-Two build.
+ROUND TWO wave one: implement the Action Gateway, PDP (policy as data), execution guard
+(8 checks), approval validation, idempotency, budget/capability guards, L1/L2/L3 PANIC with
+fail-closed enforcement, forced dry-run. Per ADR-0004/ADR-0005 and frozen contracts v1.0.0.
 
 ## Completed
 - Full governance/approval/security architecture design.
