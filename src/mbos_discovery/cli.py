@@ -1,0 +1,104 @@
+"""`mbos-discover` — run the DISCOVER + NORMALIZE lane from a TOML config.
+
+    mbos-discover run    --config config/discovery.example.toml [--fixtures tests/fixtures/ebay]
+    mbos-discover health [--data-dir var/discovery]
+    mbos-discover clear-freeze ebay --by michael
+
+State lives under --data-dir: raw/ (content-addressed payloads), items.json, health.json,
+runs/<run_id>.json. Exit code 0 even when a source fails (that is reported, not fatal);
+2 for a bad config.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import sys
+import tomllib
+from datetime import datetime, timezone
+from pathlib import Path
+
+from .adapter import SearchProfile
+from .adapters import EbayBrowseAdapter, ServiceIntakeAdapter
+from .health import HealthBook
+from .pipeline import run_discovery
+from .rawstore import FileRawStore
+from .store import ItemStore, load_json, save_json_atomic
+
+
+def _now() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+def build_jobs(cfg: dict, base: Path, fixtures: Path | None):
+    jobs = []
+    for p in cfg.get("profile", []):
+        src = p["source"]
+        profile = SearchProfile(
+            profile_id=p["id"], lane=p["lane"], keywords=tuple(p.get("keywords", [])),
+            postal_code=str(p.get("postal_code", "72034")), radius_miles=int(p.get("radius_miles", 100)),
+            max_price=p.get("max_price"), limit=int(p.get("limit", 50)), max_pages=int(p.get("max_pages", 2)))
+        if src == "ebay":
+            adapter = (EbayBrowseAdapter.from_fixture(fixtures, _now) if fixtures
+                       else EbayBrowseAdapter.from_env(os.environ, clock=_now))
+        elif src in ("website_lead", "referral"):
+            adapter = ServiceIntakeAdapter(src, base / p["inbox"], _now)
+        else:
+            raise SystemExit(f"config: no adapter implemented for source {src!r} (profile {p['id']})")
+        jobs.append((adapter, profile))
+    return jobs
+
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(prog="mbos-discover")
+    ap.add_argument("--data-dir", default="var/discovery")
+    sub = ap.add_subparsers(dest="cmd", required=True)
+    r = sub.add_parser("run")
+    r.add_argument("--config", required=True)
+    r.add_argument("--fixtures", help="serve eBay from recorded responses in this directory")
+    sub.add_parser("health")
+    c = sub.add_parser("clear-freeze")
+    c.add_argument("source")
+    c.add_argument("--by", required=True, help="the human clearing the freeze")
+    a = ap.parse_args(argv)
+
+    data = Path(a.data_dir)
+    hb = HealthBook.from_json(load_json(data / "health.json", {}))
+
+    if a.cmd == "health":
+        print(json.dumps(hb.to_json(), indent=1))
+        return 0
+    if a.cmd == "clear-freeze":
+        hb.clear_freeze(a.source, a.by, _now())
+        save_json_atomic(data / "health.json", hb.to_json())
+        print(f"{a.source}: freeze cleared by {a.by}")
+        return 0
+
+    cfg_path = Path(a.config)
+    try:
+        cfg = tomllib.loads(cfg_path.read_text())
+    except (OSError, tomllib.TOMLDecodeError) as e:
+        print(f"config error: {e}", file=sys.stderr)
+        return 2
+    jobs = build_jobs(cfg, Path.cwd(), Path(a.fixtures) if a.fixtures else None)
+    store = ItemStore.from_json(load_json(data / "items.json", {}))
+    report = run_discovery(jobs, store, FileRawStore(data / "raw"), hb, _now(),
+                           frozenset(cfg.get("enabled_sources", [])))
+    save_json_atomic(data / "items.json", store.to_json())
+    save_json_atomic(data / "health.json", hb.to_json())
+    save_json_atomic(data / "runs" / f"{report.run_id}.json", report.to_json())
+
+    for s in report.sources:
+        line = (f"{s.source:<13} {s.profile_id:<22} {s.status:<7} fetched={s.fetched} new={s.created} "
+                f"merged={s.merged} updated={s.updated} seen={s.seen} quarantined={s.quarantined}")
+        detail = s.skipped_reason or (s.error or {}).get("message")
+        print(line + (f"  [{detail}]" if detail else ""))
+    for f in report.freeze_requests:
+        print(f"FREEZE {f['capability']}: {f['reason']}")
+    print(f"items in store: {len(store.items)}  run: {report.run_id}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

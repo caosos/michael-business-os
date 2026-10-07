@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://michael-business-os/schemas/opportunity.schema.json",
+  "title": "Physical Asset Flip Opportunity",
+  "description": "Canonical economics record for a physical asset flip. Designed to nest inside Agent 02's normalized opportunity and Agent 04's canonical entity/provenance model. Every estimated value should carry a basis tag via estimates_meta.assumptions.",
+  "type": "object",
+  "required": ["opportunity_id", "type", "category", "location", "acquisition", "rehab", "logistics", "holding", "resale", "downside", "estimates_meta"],
+  "properties": {
+    "opportunity_id": { "type": "string", "format": "uuid" },
+    "type": { "const": "flip" },
+    "category": { "type": "string", "examples": ["trailer", "mower", "generator", "appliance", "tool", "vehicle"] },
+    "title": { "type": "string" },
+    "source": {
+      "type": "object",
+      "description": "Provenance (Agent 02 / Agent 04 territory).",
+      "properties": {
+        "platform": { "type": "string", "examples": ["facebook_marketplace", "craigslist", "govdeals", "auction", "estate_sale"] },
+        "listing_url": { "type": "string" },
+        "listing_posted_at": { "type": "string", "format": "date-time" },
+        "observed_at": { "type": "string", "format": "date-time" },
+        "seller_ref": { "type": "string" }
+      }
+    },
+    "location": {
+      "type": "object",
+      "required": ["road_miles_one_way"],
+      "properties": {
+        "home_base": { "type": "string", "default": "Conway, AR" },
+        "item_lat_lng": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+        "road_miles_one_way": { "type": "number", "minimum": 0, "description": "Road miles, not straight-line." },
+        "estimated_drive_minutes_one_way": { "type": "number", "minimum": 0 }
+      }
+    },
+    "acquisition": {
+      "type": "object",
+      "required": ["expected_buy_price"],
+      "properties": {
+        "ask_price": { "type": "number", "minimum": 0 },
+        "expected_buy_price": { "type": "number", "minimum": 0, "description": "A — used in the model." },
+        "buy_fees": { "type": "number", "minimum": 0, "description": "F_buy: title, tax, buyer's premium, platform fee." },
+        "negotiation_confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "rehab": {
+      "type": "object",
+      "required": ["parts_cost", "materials_cost", "labor_hours", "required_skills", "repair_success_prob"],
+      "properties": {
+        "parts_cost": { "type": "number", "minimum": 0, "description": "P" },
+        "materials_cost": { "type": "number", "minimum": 0, "description": "M" },
+        "labor_hours": { "type": "number", "minimum": 0, "description": "H_labor" },
+        "admin_hours": { "type": "number", "minimum": 0, "description": "H_admin: sourcing/negotiating/listing/coordinating" },
+        "required_skills": { "type": "array", "items": { "type": "string" } },
+        "repair_success_prob": { "type": "number", "minimum": 0, "maximum": 1, "description": "p_repair" },
+        "repair_scope_known": { "type": "boolean", "description": "Has the fault been identified? Evidence gate." }
+      }
+    },
+    "logistics": {
+      "type": "object",
+      "required": ["trips"],
+      "properties": {
+        "trips": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["purpose", "round_trip_miles"],
+            "properties": {
+              "purpose": { "type": "string", "examples": ["inspect", "pickup", "inspect_pickup", "material_run", "deliver", "buyer_meet"] },
+              "round_trip_miles": { "type": "number", "minimum": 0 },
+              "can_combine": { "type": "boolean" }
+            }
+          }
+        },
+        "fuel_price_per_gal": { "type": "number", "minimum": 0 },
+        "vehicle_mpg": { "type": "number", "exclusiveMinimum": 0 },
+        "wear_per_mile": { "type": "number", "minimum": 0 },
+        "avg_speed_mph": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "holding": {
+      "type": "object",
+      "properties": {
+        "storage_cost_per_day": { "type": "number", "minimum": 0 },
+        "expected_hold_days": { "type": "number", "minimum": 0 },
+        "disposal_cost": { "type": "number", "minimum": 0, "description": "C_disp, fail branch" },
+        "sell_fees_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "sell_fees_flat": { "type": "number", "minimum": 0 }
+      }
+    },
+    "resale": {
+      "type": "object",
+      "required": ["target_sell_price", "sale_prob"],
+      "properties": {
+        "target_sell_price": { "type": "number", "minimum": 0, "description": "R_sell gross, from comps median" },
+        "comp_price_low": { "type": "number", "minimum": 0 },
+        "comp_price_expected": { "type": "number", "minimum": 0 },
+        "comp_price_high": { "type": "number", "minimum": 0 },
+        "sale_prob": { "type": "number", "minimum": 0, "maximum": 1, "description": "p_sale" },
+        "expected_dom_days": { "type": "number", "minimum": 0 }
+      }
+    },
+    "downside": {
+      "type": "object",
+      "required": ["salvage_if_repair_fails", "salvage_if_unsold"],
+      "properties": {
+        "salvage_if_repair_fails": { "type": "number", "minimum": 0, "description": "S_fail" },
+        "salvage_if_unsold": { "type": "number", "minimum": 0, "description": "S_unsold" }
+      }
+    },
+    "estimates_meta": {
+      "type": "object",
+      "required": ["scoring_config_version"],
+      "properties": {
+        "scoring_config_version": { "type": "string" },
+        "comps": {
+          "type": "array",
+          "description": "Sold comparables used to set target_sell_price (§14).",
+          "items": {
+            "type": "object",
+            "required": ["sold_price", "sold_date", "source"],
+            "properties": {
+              "url": { "type": "string" },
+              "sold_price": { "type": "number", "minimum": 0 },
+              "asking_price": { "type": "number", "minimum": 0 },
+              "sold_date": { "type": "string", "format": "date" },
+              "dom_days": { "type": "number", "minimum": 0 },
+              "distance_miles": { "type": "number", "minimum": 0 },
+              "condition_note": { "type": "string" },
+              "source": { "type": "string" }
+            }
+          }
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["field", "basis"],
+            "properties": {
+              "field": { "type": "string" },
+              "value": {},
+              "basis": { "enum": ["FACT", "INFER", "REC", "UNK"] },
+              "note": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "scorecard": { "$ref": "scorecard.schema.json" }
+  }
+}

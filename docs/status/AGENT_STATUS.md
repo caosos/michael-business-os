@@ -4,22 +4,49 @@ Agent: 02
 Role: Discovery / Source Adapters (DISCOVER + NORMALIZE lane)
 Branch: research/agent-02-opportunity
 Worktree: /home/michaelos/business-os-worktrees/agent-02-opportunity
-State: WORKING
-Current phase: Round Two — implementation, wave one
+State: WAITING
+Current phase: Round Two — wave one implemented; waiting on eBay credentials (live data) and coordinator review
 Started: 2026-10-06 (Round One) · Round Two started 2026-10-07
 Last updated: 2026-10-07
 
 ## Current objective
-Implement the read-only DISCOVER + NORMALIZE lane against frozen contracts v1.0.0
-(agent-01-coordinator @ 1269405): SourceAdapter abstraction, raw retention via `raw_ref`,
-normalization to Item v1, dedup, flip + service lanes, source health, provenance, no side effects.
+Read-only DISCOVER + NORMALIZE lane against frozen contracts v1.0.0 (agent-01-coordinator @ 1269405).
 
-## Inputs read (authoritative)
-- origin/research/agent-01-coordinator:docs/research/agent-01-integration.md (§5 ownership, §7a, §8-F)
-- origin/research/agent-01-coordinator:docs/research/ROUND_ONE_SYNTHESIS.md (§7 staged sources)
-- origin/research/agent-01-coordinator:docs/decisions/INDEX.md (ADR-02-0201 ACCEPTED-WITH-CHANGES, ADR-02-0202 ACCEPTED)
-- origin/research/agent-01-coordinator:docs/research/contracts/ (frozen v1.0.0)
-- docs/research/agent-02-opportunity.md (own Round One)
+## Completed (FACT — verified by tests on this branch)
+- Python package `src/mbos_discovery` (3.12; runtime dep: jsonschema). CLI `mbos-discover run|health|clear-freeze`.
+- `SourceAdapter` abstraction: `fetch` (never raises) + pure `normalize`; no effector methods.
+- Read-only HTTP boundary: GET to allow-listed hosts + POST only to OAuth token URLs; everything else refused.
+- Raw retention: content-addressed immutable `raw_ref` stored *before* normalization; replay from raw tested.
+- Normalization into Item v1 for **both** lanes; every Item/Provenance validated against vendored frozen contracts (hash-pinned).
+- Dedup: intra-source identity, cross-source merge (flip), contact-fingerprint merge (service, 14-day window).
+- Source health HEALTHY/DEGRADED/FROZEN; repeated 403/429 or any CAPTCHA → FROZEN + L2 `freeze_request`; human-only clear.
+- Policy registry per ADR-02-0202: FORBIDDEN (Facebook, Nextdoor, Thumbtack/Angi sites, EstateSales.*) cannot run; gray-zone sources need explicit enablement; unknown sources fail closed.
+- Adapters: **eBay Browse** (flip; live OAuth path + fixture mode on the same code), **service intake** (website form + referral inbox).
+- Per-record provenance (source URI + fetched_at + tool@version + raw hash) and `receipt_intent`s with idempotency keys for Agent 04.
+- 56 tests green incl. acceptance F1, F3, F4 and the five required proofs (sources[], raw_ref, determinism, no duplicates, safe failure).
+
+## Files produced (Round Two)
+- src/mbos_discovery/** · tests/** · config/discovery.example.toml · pyproject.toml
+- docs/implementation/agent-02-discovery-lane.md — design, invariant→test map, raw→Item field mapping, raw_ref rule, hand-offs, contract gaps
+- docs/runbooks/ebay-live-credentials.md — path to live eBay data
+- docs/receipts/2026-10-07-round-two-wave-one.md
+
+## Blockers
+- Live eBay data needs an eBay developer keyset (EBAY_CLIENT_ID / EBAY_CLIENT_SECRET). Not a build blocker: fixture mode runs the identical code path. Steps in docs/runbooks/ebay-live-credentials.md.
+
+## Needs Michael decision
+- None new. (Unchanged: MICHAEL_DECISIONS #3 gray-zone sources; Craigslist/GovDeals/HiBid stay disabled.)
+- Action item (not a decision): create the free eBay developer keyset per the runbook.
+
+## Needs coordinator review (Agent 01)
+- Contract gaps (docs/implementation §6): make `sources[].raw_ref` required in v1.1; add an `ITEM_UPDATED`-type receipt event for merges/source-side updates; receipt type for source freezes (with 05).
+- Hand-off shape for 04 (`events[].receipt_intent`, `raw/` layout) and 05 (`freeze_requests[]`).
+
+## Unknowns
+- eBay filter names / `distanceFromPickupLocation` behaviour on a live call (fixtures are hand-built from docs, not recorded).
+- F2 duplicate rate on a 7-day live sample.
+- Real items/day per source (gap request 02-(1)) — needs live runs.
 
 ## Next action
-Scaffold Python package `mbos_discovery`, vendor frozen contracts, build adapters + tests.
+On credentials: live eBay smoke run, record a real fixture, tune the mapping. Otherwise next adapters in order:
+GSA Auctions API → Trash Nothing API → IMAP alert ingestor → SAM.gov.

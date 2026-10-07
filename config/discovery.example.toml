@@ -1,0 +1,28 @@
+# Discovery config — wave one. Only ALLOWED (tier 1/2) sources run.
+# `enabled_sources` is the explicit per-source switch for PENDING_MICHAEL sources
+# (MICHAEL_DECISIONS #3). Leave empty until Michael decides P2. FORBIDDEN sources
+# (Facebook, Nextdoor, ...) cannot be enabled here or anywhere.
+enabled_sources = []
+
+[[profile]]
+id = "flip-core-100mi"
+source = "ebay"
+lane = "flip"
+keywords = ["utility trailer", "zero turn mower", "generator", "welder", "air compressor"]
+postal_code = "72034"     # Conway, AR
+radius_miles = 100        # normal radius, not a hard limit
+max_price = 5000
+limit = 50
+max_pages = 2
+
+[[profile]]
+id = "service-website-form"
+source = "website_lead"
+lane = "service"
+inbox = "var/intake/website_form"   # relative to the working directory
+
+[[profile]]
+id = "service-referrals"
+source = "referral"
+lane = "service"
+inbox = "var/intake/referral"
