@@ -49,3 +49,9 @@ This document closes the open spec items from integration doc §10, row 06: (1) 
 - Schema `mbos_comms` (`comms_spec/sql/0001_comms_ledger.sql`, PROPOSED for lane D) is insert-only. Raw contact values live only in `contacts`; everything else uses `cref_…`.
 - `comms_spec/ledger.py` writes each consent, revocation (STOP) or DNC scrub in one transaction with provenance and a chained receipt.
 - `ConsentLedger` feeds `CommsDryRunEffector(consent_lookup=…, dnc_lookup=…)`. With it wired, E2 is graded PASS or FAIL, not DRY_RUN_EXEMPT.
+
+## Follow-ups, offers and quotes (F-08)
+- `CommsActionPlanner.plan_followup` / `plan_offer` / `plan_quote` each draft their **own** ActionRequest.
+- Binding drafts use the `offer.<channel>.send` capability (category `offer`, tier 0, step-up). An offer is never drafted above the asking price.
+- The effector blocks a binding draft under a `comms.*` capability.
+- Creating these requests on an existing item still needs a lane-A API (`propose_followup`, proposed as P-06-8).

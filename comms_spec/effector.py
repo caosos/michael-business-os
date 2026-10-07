@@ -1,4 +1,4 @@
-"""F-06: CommsDryRunEffector, a DRY-RUN `mbos.interfaces.Effector` for `comms.*` capabilities.
+"""F-06: CommsDryRunEffector, a DRY-RUN `mbos.interfaces.Effector` for `comms.*` and (binding) `offer.*` capabilities.
 
 It never sends: there are no network imports (test-enforced) and `dry_run` is always True. For every
 call it evaluates, in order, the checks a live comms effector must pass, and records them:
@@ -30,6 +30,7 @@ import comms_spec as cs
 from mbos.clock import iso, utcnow
 from operator_ui import mbos_canonical
 
+COMMS_PREFIXES = ("comms.", "offer.")  # offer.<channel>.send = a BINDING comms draft (category offer, step-up)
 DncLookup = Callable[[str, str], tuple[Optional[datetime], Optional[bool], bool]]   # (ref, channel) → (scrubbed_at, listed, suppressed)
 ConsentLookup = Callable[[str, str], dict]                                          # (ref, channel) → {"result", "reason", ...}
 
@@ -58,9 +59,9 @@ class CommsDryRunEffector:
     def execute(self, engine: sa.Engine, action_request: dict[str, Any]) -> dict[str, Any]:
         if self.dry_run is not True:
             raise RuntimeError("CommsDryRunEffector is dry-run only")
-        if not action_request["capability"].startswith("comms."):
+        if not action_request["capability"].startswith(COMMS_PREFIXES):
             if self.fallback is None:
-                raise ValueError(f"{self.name} handles comms.* only; no fallback for {action_request['capability']}")
+                raise ValueError(f"{self.name} handles comms.* / offer.* only; no fallback for {action_request['capability']}")
             return self.fallback.execute(engine, action_request)
         key = action_request["idempotency_key"]
         with engine.begin() as conn:
@@ -101,6 +102,11 @@ class CommsDryRunEffector:
                      binding=bool(c.get("binding")), delivery=c.get("delivery", "effector"), recipient_ref=ref)
         if c.get("channel") != channel:
             blocked.append(f"draft channel {c.get('channel')!r} != capability channel {channel!r}")
+        is_offer_cap = areq["capability"].startswith("offer.")
+        if block["binding"] and not is_offer_cap:
+            blocked.append("binding draft under a non-offer capability (must be offer.<channel>.send: category offer, step-up)")
+        if is_offer_cap and not block["binding"]:
+            blocked.append("offer capability carrying a non-binding draft")
 
         # template integrity: the draft is recorded as conforming or not. A Michael-approved MODIFY may
         # differ, so it is not blocking, but the hash must name a real registry version.
