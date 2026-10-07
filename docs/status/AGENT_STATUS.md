@@ -4,15 +4,16 @@ Agent: 03
 Role: Economics / Scoring (Round-Two build lane C)
 Branch: research/agent-03-economics
 Worktree: /home/michaelos/business-os-worktrees/agent-03-economics
-State: WORKING
+State: WAITING
 Current phase: ROUND TWO, wave two. Claimed task: RESEARCH/estimate producer (lane C)
 Started: 2026-10-06
-Last updated: 2026-10-07 (C-14 IN PROGRESS; paused at usage limit)
+Last updated: 2026-10-07 (C-14 done; WAITING: no READY lane-C task)
 
 ## Claimed work (wave two). Foreman loop: `docs/COORDINATION.md` @ agent-01 `99e9ec0`
-Claimed: C-14
-Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6; C-04 @ 882c726; C-05 @ 6e938d2; C-06 @ 9e36ec9; C-07 @ 0c3cf4a; C-08 @ a81a989; C-09 @ 286e0f3; C-10 @ e1869f2; C-11 @ c648ca3; C-12 @ d5daf42; C-13 @ 0d417fb
-Queue (lane C, after C-14): none READY @ agent-01 `ca6d056`
+Claimed: (none)
+Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6; C-04 @ 882c726; C-05 @ 6e938d2; C-06 @ 9e36ec9; C-07 @ 0c3cf4a; C-08 @ a81a989; C-09 @ 286e0f3; C-10 @ e1869f2; C-11 @ c648ca3; C-12 @ d5daf42; C-13 @ 0d417fb; C-14 @ ec97bf7
+Queue (lane C): none READY @ agent-01 `772f99c`
+Waiting on: any new lane-C task; ADR-0009 item 9 (then C-14's refusal assertion flips to acceptance); Michael decisions #1/#2/#6
 
 - **C-01**, the RESEARCH/estimate producer, fills `Item.economics` from normalized fields, comps evidence and category priors, with provenance per estimate. It is deterministic and does no LLM arithmetic.
   - Claimed at `b923852`; confirmed CLAIMED in READY_QUEUE @ `99e9ec0`.
@@ -98,19 +99,10 @@ Queue (lane C, after C-14): none READY @ agent-01 `ca6d056`
 - The gate command is `python -m mbos_economics audit --dsn "$MBOS_DSN"` (exit 0/1/2). It is documented with expected output in `docs/research/agent-03-release-gate-at1.md`.
 - 01's spine receipts lack `payload_hash`, so they are reported as `receipt_weak` (not drift). `--strict` fails them.
 
-### C-14 progress (IN PROGRESS, not done; paused at the session usage limit)
-**Done:**
-- Shared throwaway lane-D harness: `economics/tests/lane_d.py` (`cluster()`, `write_scored()`). `scripts/lane_d_export.py` now uses it; verified that the export runs and `verify_chain` is ok.
-- Verified that Agent 01's real `mbos.spine_d.record_outcome` (@ `ca6d056`) can be imported in the scratch venv (01's package installed `--no-deps` from a read-only archive, plus sqlalchemy, pydantic, dbos and python-ulid).
-
-**Remaining:** `tests/test_learn_lane_d.py`, which skips unless `MBOS_LANE_D_STATE_DIR` is set. It must:
-1. Write 2 scored trailers via `lane_d.write_scored`.
-2. Record outcomes through `spine_d.record_outcome` (SQLAlchemy psycopg engine on the same DSN).
-3. Run `learn.load_outcomes(conn)`, then `calibrate`, then `propose_learn_bump`, and get a proposal.
-4. Call `StateStore.propose_action(draft)`. It must be refused (ADR-0009 item 9 is pending), with no `config.scoring.bump` row written.
-5. Show `verify_chain` ok, the priors file byte-identical, and `audit --strict` clean.
-
-After that: the receipt, then `Done: C-14`.
+### C-14 result (DONE @ `ec97bf7`; receipt `docs/receipts/2026-10-07-c14-learn-lane-d.md`)
+- Outcomes recorded by Agent 01's real `spine_d.record_outcome` flow into `load_outcomes`, `calibrate` and a tier-0 proposal. The lane-D store refuses the proposal (`item_id` NOT NULL, the ADR-0009 item 9 gap); nothing is applied.
+- The LEARN provenance must be persisted before a proposal is submitted (the first attempt hit "unknown provenance ids").
+- The test needs `MBOS_LANE_D_STATE_DIR` and skips cleanly without it. 195 pass with the lane-D environment, and 193 pass with 2 skipped without it.
 
 ## Proposed tasks (for Agent 01 to triage)
 - **P-03-06 → DONE by Agent 01 @ `ca6d056`** (the spine writes `payload_hash`; the gate can use `--strict`). Original text:
