@@ -7,12 +7,12 @@ Worktree: /home/michaelos/business-os-worktrees/agent-03-economics
 State: WORKING
 Current phase: ROUND TWO, wave two. Claimed task: RESEARCH/estimate producer (lane C)
 Started: 2026-10-06
-Last updated: 2026-10-07 (C-04 done; C-05 claimed)
+Last updated: 2026-10-07 (C-05 done)
 
 ## Claimed work (wave two). Foreman loop: `docs/COORDINATION.md` @ agent-01 `99e9ec0`
-Claimed: C-05
-Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6; C-04 @ 882c726
-Queue (lane C, after C-05): none READY @ agent-01 `0d107df`
+Claimed: (none; lane-internal fix in progress: P-03-03 config as package data, a defect Agent 02 reported)
+Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6; C-04 @ 882c726; C-05 @ 6e938d2
+Queue (lane C): none READY @ agent-01 `0d107df`
 
 - **C-01**, the RESEARCH/estimate producer, fills `Item.economics` from normalized fields, comps evidence and category priors, with provenance per estimate. It is deterministic and does no LLM arithmetic.
   - Claimed at `b923852`; confirmed CLAIMED in READY_QUEUE @ `99e9ec0`.
@@ -48,7 +48,17 @@ Queue (lane C, after C-05): none READY @ agent-01 `0d107df`
 - **Hand-off:** Agent 02 owns the sources (`mbos_discovery.comps`); 03 owns selection.
 - 118 tests pass.
 
+### C-05 result (DONE @ `6e938d2`; receipt `docs/receipts/2026-10-07-c05-r13-pass-on-priors.md`)
+- `scorecard.pass_on_priors` and `scorecard.pass_basis` implement R13. Engine 0.3.0.
+- **Golden:** the priors-only mower PASS is flagged; the attested-price truck PASS is not.
+- 127 tests pass.
+- **Concern for Agent 01:** literal "at least one" is weak for flips, because the FACT ask almost always qualifies. A stricter variant is proposed in the receipt.
+
 ## Proposed tasks (for Agent 01 to triage)
+- **P-03-03 (lane C, internal; in progress): ship config as package data.**
+  - Agent 02 reported that the installed `mbos_economics` wheel has no `config/`, so callers like A-05 need a pinned copy.
+  - Fix: config moves inside the package. Agent 02's adapter-side workaround becomes unnecessary.
+- **P-03-04 (lanes A + C): tighten R13 for flips.** Require the revenue side and at least one cost-side input to be evidence-backed (see the C-05 receipt).
 - **P-03-01 → queued as C-04, DONE.** (Original text kept below for the record.) Sold-comps feed. Every real flip from eBay Browse (active listings only) stays `insufficient` until a sold-comps source exists. Options for 02:
   - eBay Marketplace Insights (restricted access)
   - completed-auction feeds from GSA and other auction sites (B-03)
