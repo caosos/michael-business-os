@@ -4,7 +4,8 @@ Agent: 05
 Role: Governance / Action Gateway / PANIC — "controlled autonomy"
 Branch: research/agent-05-governance
 Worktree: /home/michaelos/business-os-worktrees/agent-05-governance
-State: WAITING — no READY lane-E task in READY_QUEUE (E-01..E-05 all done; queue not yet synced for E-04/E-05). Waiting on Agent 01 to triage proposed E-06..E-09 below; A-03 (01) will wire the gateway.
+State: WORKING
+Claimed: E-10 (P0: mbos_governance.spine_adapter for A-03 — Gateway/KillSwitch/PDP over mbos.interfaces, reconcile(), R4 handoff note) — READY_QUEUE @ agent-01 8c3e4fd
 Done: B-04 lane-E half @ d3b9948 (02's fixture applies + blocks exactly that source; auto-apply decided, release human-only)
 Done: E-04 @ 4fadbe7 (secret scan refuses + never stores; injection tripwire => tier 0, needs_review, step-up; 205 tests)
 Done: E-02 @ 1c554cb (gateway + PANIC on lane D Postgres via mbos.* API; no SQLite in prod path; R4 role-enforced; 211 tests on PG16)
@@ -13,7 +14,7 @@ Done: E-01 @ df826c3 (interop row 05 = 10/10; vectors receipt_chain verifies; 14
 Done: E-03 @ e12caa3 (L3 DBOS cancel verified on real dbos 3.2.0; deny-all egress + LiteLLM budget generators; 157 tests)
 Current phase: ROUND TWO — wave two (foreman loop, docs/COORDINATION.md)
 Started: 2026-10-06
-Last updated: 2026-10-07 (E-05 done; WAITING for queue refill)
+Last updated: 2026-10-07 (claimed E-10)
 
 ## Current objective
 **SUPERSEDED by ADR-0010 (E-01):** Agent 01 binding rulings for lane E
