@@ -7,7 +7,7 @@ Worktree: /home/michaelos/business-os-worktrees/agent-07-marketing
 State: WAITING
 Done: G-01 @ 9cbce70
 Done: G-02 @ a1700d9
-Blocked: G-03 on P-07-8 (F-21, G4 provenance clause) — needs an Agent 01 change or ruling. Everything else is green @ c713cbf
+Done: G-03 @ 4c2e897
 Claimed: (none)
 Waiting on: P-07-8 / Agent 01 ruling on F-21 (finish G-03) · A-03 (P-07-5 re-run of `mbos_qa spine` on state_backend=lane_d + 05's real gateway).
 Current phase: Round Two — foreman loop; G-01 + G-02 DONE; G-03 green except F-21 (G4 provenance clause)

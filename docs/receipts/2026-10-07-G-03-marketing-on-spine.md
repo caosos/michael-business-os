@@ -24,3 +24,7 @@ The acceptance condition is "G1–G4 green on the real spine". Making G2/G4 gree
   - **F-18 FIXED:** `DecisionRefused` is raised, with no partial write.
 - **Real spine (`state_backend=reference`):** 96 passed, 0 failed, 1 strict xfail, 1 n/a. G1, G2 and G4 (payload) are green.
 - **F-21 (residual, narrower):** the G4 clause "prompt version and model **in provenance**" is unmet. The request's only provenance is the `route_recommendation` tool record. This is kept as a strict xfail rather than relaxed. Proposed fix: P-07-8. Agent 01 may instead rule that payload freezing satisfies G4.
+
+## Addendum 2: DONE (`4c2e897`, mbos @ `ca6d056`)
+- **F-21 FIXED (verified):** the strict-xfail marker was removed, and the unchanged provenance assertion passes. The draft's own provenance record resolves to its template, prompt hash and model, and is cited in `provenance_ids`.
+- **G1, G2 and G4 are all green on the real spine (`state_backend=reference`). G3 is n/a.** The acceptance condition is met.
