@@ -111,6 +111,7 @@ class EconomicsEnricher:
     """
 
     AGENT = "agent-03-economics"
+    skipped_notes: list = []
 
     def __init__(self, profile: dict | None = None):
         from mbos import card
@@ -145,7 +146,7 @@ class EconomicsEnricher:
         """C-16: plan from the deal's own numbers + SOURCED model-specific risks (CPSC recalls etc.). Whatever matches
         no sourced knowledge is omitted, so the card prints UNKNOWN."""
         from mbos_economics.config import load_config
-        from mbos_economics.valueadd import build_value_add, load_kb, load_manual_notes, merge_manual
+        from mbos_economics.valueadd import build_value_add, load_kb, load_manual_notes_lenient, merge_manual
 
         from mbos.card import enrichment_from_item
 
@@ -153,7 +154,14 @@ class EconomicsEnricher:
         kb = load_kb()
         doc = spine.operator_notes_document(conn)  # Michael's own notes (RECOMMENDATION); a sourced recall stays first
         if doc.get("notes"):
-            kb = merge_manual(kb, load_manual_notes(doc))
+            # lenient: one bad stored note must not disable the others (03 D-17 review); rejected ones are skipped
+            good, problems = load_manual_notes_lenient(doc)
+            if problems:  # never silent: a stored note that fails the lint is skipped AND reported
+                import logging
+
+                logging.getLogger("mbos.enrich").warning("operator notes skipped by lane C loader: %s", problems)
+                self.skipped_notes = problems
+            kb = merge_manual(kb, good)
         v = build_value_add(item, as_of, cfg=load_config(), kb=kb, make_model=mm if isinstance(mm, str) else None)
         if not v.get("block"):
             return 0
