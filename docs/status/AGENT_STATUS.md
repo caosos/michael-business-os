@@ -4,13 +4,14 @@ Agent: 05
 Role: Governance / Action Gateway / PANIC — "controlled autonomy"
 Branch: research/agent-05-governance
 Worktree: /home/michaelos/business-os-worktrees/agent-05-governance
-State: WORKING
+State: WAITING
 Done: E-01 @ df826c3 (interop row 05 = 10/10; vectors receipt_chain verifies; 141 tests)
-Claimed: E-03 (A8/A9 hardening, dry: L3 DBOS-cancel hook, egress deny-all policy file, per-agent LiteLLM budget config generator)
+Done: E-03 @ <E03_COMMIT> (L3 DBOS cancel verified on real dbos 3.2.0; deny-all egress + LiteLLM budget generators; 157 tests)
+Waiting on: E-02 (BLOCKED on D-01, D-02 — Agent 04 migration 0005 + ADR-0010 ledger). No other READY task is assigned to lane E.
 Blocked: E-02 on D-01, D-02 (Agent 04 migration 0005 + ADR-0010 ledger)
 Current phase: ROUND TWO — wave two (foreman loop, docs/COORDINATION.md)
 Started: 2026-10-06
-Last updated: 2026-10-07 (E-01 done; claimed E-03)
+Last updated: 2026-10-07 (E-01 + E-03 done; WAITING on D-01/D-02 for E-02)
 
 ## Current objective
 **SUPERSEDED by ADR-0010 (E-01):** Agent 01 binding rulings for lane E
@@ -111,6 +112,13 @@ step-up method, no delegation.
 - docs/receipts/2026-10-07-round-two-gateway-build.md
 
 ## Proposed tasks
+- B-04 (02-led, +05): lane E side is ready now. L2 PANIC already accepts the key
+  `discovery.source.<src>.read` (exact) or `discovery.source.*` (prefix), and any actor —
+  including `agent-02-opportunity` — may ENGAGE (only Michael releases). Proposed request shape:
+  `gw.engage_panic("L2", "discovery.source.<src>.read", actor="agent-02-opportunity",
+  reason="<health code>: <detail>")`. Agent 02 to confirm; I will add the shared fixture test then.
+- A-03 wiring note for Agent 01: construct `ActionGateway(..., panic_hooks=[DbosCancelHook(DBOS),
+  EgressPolicyHook(path, ps), LiteLLMBudgetHook(path, ps)])`.
 - (E-02 prep, done as a handoff, no DDL touched) `docs/integration/05-requirements-for-04-migration-0005.md`:
   what lane E needs from 04's 0005 — panic_events table + panic_set, effector_calls claims, three
   missing status edges (approved→expired, approved→failed, executing→cancelled_by_freeze), budget

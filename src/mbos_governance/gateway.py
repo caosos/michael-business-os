@@ -35,6 +35,7 @@ from zoneinfo import ZoneInfo
 
 from . import __version__, contracts
 from .effectors import DryRunEffector, Effector, TokenMinter
+from .hooks import run_hooks
 from .ids import fmt_ts, fmt_ts_us, new_id, new_ulid, parse_ts, payload_hash, utcnow
 from .panic import PanicStore
 from .policy import DENY, REQUIRE_APPROVAL, Policy, PolicyStore, PolicyUnavailable, decide
@@ -69,7 +70,7 @@ def to_micros(amount) -> int:
 
 class ActionGateway:
     def __init__(self, store, policy_store: PolicyStore, panic_store: PanicStore, clock=utcnow,
-                 journal_path: str | Path | None = None):
+                 journal_path: str | Path | None = None, panic_hooks: list | None = None):
         self.store = store
         self.policies = policy_store
         self.panic = panic_store
@@ -77,6 +78,7 @@ class ActionGateway:
         self._minter = TokenMinter(secrets.token_bytes(32))
         self._effectors: dict[str, Effector] = {"dryrun": DryRunEffector(self._minter)}
         self._journal = Path(journal_path) if journal_path else Path(str(panic_store.path) + ".journal.jsonl")
+        self.panic_hooks = list(panic_hooks or [])  # hooks.py: DBOS cancel, egress, LiteLLM (E-03)
 
     # ------------------------------------------------------------------ helpers
     def _policy(self) -> tuple[Policy | None, str | None]:
@@ -546,17 +548,18 @@ class ActionGateway:
 
     # ------------------------------------------------------------------ PANIC
     def _panic_receipt(self, cur, level: str, target: str | None, engage: bool, actor: str, reason: str,
-                       before: dict, after: dict, config_version: str) -> dict:
+                       before: dict, after: dict, config_version: str, hooks: dict | None = None,
+                       intent_prefix: str = "PANIC") -> dict:
         prov = self._tool_provenance(cur, config_version, tool="mbos_governance.panic", human=actor if actor == "michael" else None)
         strip = lambda b: {k: v for k, v in b.items() if k != "checksum"}  # noqa: E731
         return self.store.append_receipt(cur, {
             "type": "KILL_SWITCH_CHANGED",
             "actor": {"type": "human" if actor == "michael" else "system", "id": actor},
-            "intent": f"PANIC {level} {'ENGAGE' if engage else 'RELEASE'} {target or 'global'}: {reason}",
+            "intent": f"{intent_prefix} {level} {'ENGAGE' if engage else 'RELEASE'} {target or 'global'}: {reason}",
             "entity_type": "panic_state", "entity_id": f"{level}:{target or 'global'}",
             "effect": "update", "before_state": strip(before), "after_state": strip(after),
             "provenance_ids": [prov], "idempotency_key": f"panic:{after['revision']}:{new_ulid()}",
-            "details": {"kind": "generic", "level": level, "engage": engage},
+            "details": {"kind": "generic", "level": level, "engage": engage, **({"hooks": hooks} if hooks is not None else {})},
         })
 
     def engage_panic(self, level: str, target: str | None, actor: str, reason: str) -> dict:
@@ -564,22 +567,26 @@ class ActionGateway:
         FIRST so a broken database can never prevent a freeze; the receipt follows. If the
         receipt cannot be written the freeze stands and the event is journaled for replay."""
         before, after = self.panic.mutate(level, target, True, actor, reason)
+        # Side effects (cancel unstarted workflows, deny-all egress, zero LLM budgets) run right
+        # after the freeze is durable and BEFORE anything that could fail on the database.
+        hook_results = run_hooks(self.panic_hooks, level, target, True, self.panic.read())
         policy, _ = self._policy()
         cancelled: list[str] = []
         try:
             with self.store.tx() as cur:
                 self._panic_receipt(cur, level, target, True, actor, reason, before, after,
-                                    policy.version if policy else "UNAVAILABLE")
+                                    policy.version if policy else "UNAVAILABLE", hooks=hook_results)
                 if level == "L3":
                     cancelled = self._cancel_queued(cur, policy)
         except Exception as exc:  # noqa: BLE001
             line = json.dumps({"ts": fmt_ts(self.clock()), "event": "KILL_SWITCH_CHANGED", "level": level,
                                "target": target, "actor": actor, "reason": reason, "revision": after["revision"],
+                               "hooks": hook_results,
                                "receipt_error": f"{type(exc).__name__}: {exc}"})
             with open(self._journal, "a", encoding="utf-8") as fh:
                 fh.write(line + "\n")
             print(f"WARNING: freeze engaged but receipt failed ({exc}); journaled to {self._journal}", file=sys.stderr)
-        return {"state": after, "cancelled": cancelled}
+        return {"state": after, "cancelled": cancelled, "hooks": hook_results}
 
     def release_panic(self, level: str, target: str | None, actor: str, reason: str) -> dict:
         """Unfreeze. Only a policy approver may release, the policy must be readable, and the
@@ -600,7 +607,13 @@ class ActionGateway:
             if before_raw is not None and self.panic.read().readable:
                 self.panic.mutate(level, target, True, "action-gateway", "release rolled back: receipt failed")
             raise
-        return {"state": after}
+        # Loosening side effects only after the release itself is receipted.
+        hook_results = run_hooks(self.panic_hooks, level, target, False, self.panic.read())
+        if self.panic_hooks:
+            with self.store.tx() as cur:
+                self._panic_receipt(cur, level, target, False, actor, reason, after, after, policy.version,
+                                    hooks=hook_results, intent_prefix="PANIC side effects applied:")
+        return {"state": after, "hooks": hook_results}
 
     def _cancel_queued(self, cur, policy: Policy | None) -> list[str]:
         """L3: approved-but-not-started requests become cancelled_by_freeze (never retried)."""

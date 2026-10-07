@@ -6,8 +6,11 @@
   mbos-gov panic release --level L3|L2|L1 [--target X] --actor michael --reason "..."
   mbos-gov policy check
   mbos-gov ledger verify
+  mbos-gov render egress|litellm [--out FILE]   (generators; stdout if no --out; no network)
 
 Paths: --db / --policy / --panic, or env MBOS_GOV_DB, MBOS_POLICY, MBOS_PANIC_STATE.
+freeze/release also re-render MBOS_EGRESS_FILE (var/egress_policy.json) and MBOS_LITELLM_FILE
+(var/litellm_keys.json). The DBOS cancel hook is wired by the DBOS runtime (Agent 01), not here.
 `freeze` works even if the database cannot be opened (state file first, receipt best-effort).
 Exit codes: 0 ok, 1 refused/invalid, 2 frozen (status) — scripts can test `panic status`.
 """
@@ -17,8 +20,10 @@ import argparse
 import json
 import os
 import sys
+from pathlib import Path
 
 from .gateway import ActionGateway, GatewayRefused
+from .hooks import EgressPolicyHook, LiteLLMBudgetHook, render_egress, render_litellm_keys
 from .panic import PanicStore
 from .policy import PolicyStore, PolicyUnavailable
 from .store import GovernanceStore
@@ -44,6 +49,9 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--reason", default="")
     sub.add_parser("policy").add_argument("action", choices=["check"])
     sub.add_parser("ledger").add_argument("action", choices=["verify"])
+    r = sub.add_parser("render")
+    r.add_argument("what", choices=["egress", "litellm"])
+    r.add_argument("--out")
     a = ap.parse_args(argv)
     db, policy_path, panic_path = _paths(a)
     panic = PanicStore(panic_path)
@@ -61,6 +69,19 @@ def main(argv: list[str] | None = None) -> int:
             print(exc, file=sys.stderr)
             return 1
         print(f"initialized {panic_path} (FROZEN). Release with: mbos-gov panic release --level L3 --actor michael --reason ...")
+        return 0
+    if a.cmd == "render":
+        try:
+            data = PolicyStore(policy_path).current().data
+        except PolicyUnavailable:
+            data = None  # renders the frozen form
+        doc = (render_egress if a.what == "egress" else render_litellm_keys)(data, panic.read())
+        text = json.dumps(doc, indent=2, sort_keys=True)
+        if a.out:
+            from .hooks import _atomic_write
+            _atomic_write(Path(a.out), doc)
+        else:
+            print(text)
         return 0
     if a.cmd == "policy":
         try:
@@ -88,7 +109,10 @@ def main(argv: list[str] | None = None) -> int:
         ok, msg = store.verify_chain()
         print(msg)
         return 0 if ok else 1
-    gw = ActionGateway(store, PolicyStore(policy_path), panic)
+    ps = PolicyStore(policy_path)
+    hooks = [EgressPolicyHook(os.environ.get("MBOS_EGRESS_FILE", "var/egress_policy.json"), ps),
+             LiteLLMBudgetHook(os.environ.get("MBOS_LITELLM_FILE", "var/litellm_keys.json"), ps)]
+    gw = ActionGateway(store, ps, panic, panic_hooks=hooks)
     try:
         if a.action == "freeze":
             out = gw.engage_panic(a.level, a.target, a.actor, a.reason or "cli freeze")
@@ -98,7 +122,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"refused: {exc}", file=sys.stderr)
         return 1
     print(json.dumps({"revision": out["state"]["revision"], "global": out["state"]["global"]["state"],
-                      "cancelled": out.get("cancelled", [])}, indent=2))
+                      "cancelled": out.get("cancelled", []), "hooks": out.get("hooks", {})}, indent=2))
     return 0
 
 

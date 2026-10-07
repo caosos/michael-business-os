@@ -1,7 +1,7 @@
 {
   "policy_schema": "mbos.governance.policy/1",
   "policy_id": "wave-one-default-deny",
-  "version": "2026.10.07-w1.1",
+  "version": "2026.10.07-w1.2",
   "description": "Round Two wave one. Everything tier 0, every externally consequential action needs Michael's YES, every effector DRY-RUN, no delegation, no real-world spend. Anything not listed here is DENIED.",
   "system_mode": "mvp",
   "delegation_enabled": false,
@@ -95,6 +95,12 @@
     "velocity": {
       "money_bucket_actions_per_hour": 3
     }
+  },
+
+  "egress": {
+    "default": "deny",
+    "note": "Per-agent outbound host allow-lists for the default-deny egress proxy. Wave one: every list is empty (fixture/dry-run only). Opening a host is a policy.schema.json change (Agent 05 + 01 review), e.g. Agent 02 read-only discovery sources.",
+    "allow": {}
   },
 
   "llm_spend": {

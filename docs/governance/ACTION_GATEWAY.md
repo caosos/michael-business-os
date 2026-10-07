@@ -1,7 +1,7 @@
 # Action Gateway: wave one implementation guide
 
 **Owner:** Agent 05 · **Status:** implemented, wave one · **Date:** 2026-10-07
-**Code:** `src/mbos_governance/` · **Policy data:** `policy/` · **Tests:** `tests/` (141 passing)
+**Code:** `src/mbos_governance/` · **Policy data:** `policy/` · **Tests:** `tests/` (157 passing)
 
 > Core law: no action without a receipt, and no receipt without provenance.
 > Governance rule: models may PROPOSE. Non-LLM policy code AUTHORIZES.
@@ -82,7 +82,13 @@ mbos-gov policy check
 - **Fail-closed rule:** a missing, corrupt, schema-invalid, unknown-state or checksum-mismatched file reads as FROZEN. No mutation can "repair" an unreadable file into RUNNING.
 - **Who can release:** only a policy approver (`michael`), with a reason, and only while the policy is readable. A release stands only if its `KILL_SWITCH_CHANGED` receipt commits. If the receipt fails, the state is re-frozen.
 - **What L3 does in wave one (FACT):** the gateway refuses every execution and every new proposal. Approved requests that have not started become `cancelled_by_freeze`, their reservations are released, and receipts are written. If an effector call is already in flight, the late PANIC read stops it before the effector runs.
-- **Not yet in wave one:** OpenBao lease revocation, egress proxy deny-all, LiteLLM budget→0, and DBOS queue cancel. None of that infrastructure exists yet. These are hooks for the 1-week path (§8).
+- **L3/L1 side-effect hooks (E-03, `hooks.py`, all dry with no network):**
+  - **`DbosCancelHook(DBOS)`.** On L3 engage it runs `DBOS.cancel_workflows` on `ENQUEUED`/`DELAYED` workflows. `PENDING` (already running) workflows are reported as `in_flight_at_freeze`, and the gateway's late PANIC read stops them. FACT: tested against real `dbos` 3.2.0 (Agent 01's pin) on SQLite: 3 queued workflows cancelled, 1 running workflow finished.
+  - **`EgressPolicyHook(path)`.** It writes a sealed `mbos.egress/1` file with `default: deny`. The per-agent allow-lists come from `policy.egress.allow`, which the wave-one schema pins to empty. L3, an unreadable PANIC state or an unreadable policy produces `deny_all: true`. L1 removes that agent's list. A proxy reading this file must treat a missing file or a bad checksum as deny-all.
+  - **`LiteLLMBudgetHook(path)`.** It writes `mbos.litellm.keys/1`: one key spec per agent (`key_alias mbos-<agent>`, `max_budget` from `llm_spend`, `budget_duration 1d`). L3 or an unreadable state sets every budget to 0. L1 sets that agent's budget to 0. *Applying* the spec to a LiteLLM proxy is an operator step, and this code never calls it. INFERENCE: the field names follow the LiteLLM key API; re-check them once a LiteLLM version is pinned.
+  - **When hooks run.** Engage hooks run right after the freeze is durable, and their results go into the `KILL_SWITCH_CHANGED` receipt. A failing hook never blocks the freeze. Release hooks run **only after** the release receipt commits, and their results go into a follow-up receipt. A rolled-back release leaves egress and budgets frozen.
+  - **Generators.** `mbos-gov render egress|litellm [--out]`.
+- **Still not done:** OpenBao lease revocation (no OpenBao yet), the actual proxy and LiteLLM processes, and B29 against a live proxy.
 
 ## 5. Policy as data
 

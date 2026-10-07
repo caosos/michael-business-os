@@ -4,56 +4,192 @@
   "title": "Governance policy data — wave one",
   "description": "Validates policy/*.json before the PDP will use it. A policy file that fails this schema is treated as UNREADABLE and the gateway denies everything. The `const` values below are the WAVE-ONE invariants (tier 0 only, no delegation, no live mode, zero live spend). Loosening them is a deliberate schema change reviewed by Agent 05 + Agent 01 — not a data edit.",
   "type": "object",
-  "required": ["policy_schema", "policy_id", "version", "system_mode", "delegation_enabled", "clock_skew_seconds", "approval", "action_request", "categories", "capabilities", "agent_grants", "quiet_hours", "budgets"],
+  "required": [
+    "policy_schema",
+    "policy_id",
+    "version",
+    "system_mode",
+    "delegation_enabled",
+    "clock_skew_seconds",
+    "approval",
+    "action_request",
+    "categories",
+    "capabilities",
+    "agent_grants",
+    "quiet_hours",
+    "budgets",
+    "egress",
+    "llm_spend"
+  ],
   "properties": {
-    "policy_schema": { "const": "mbos.governance.policy/1" },
-    "policy_id": { "type": "string", "minLength": 1 },
-    "version": { "type": "string", "minLength": 1 },
-    "description": { "type": "string" },
-    "system_mode": { "enum": ["round_one", "mvp"] },
-    "delegation_enabled": { "const": false },
-    "clock_skew_seconds": { "type": "integer", "minimum": 0, "maximum": 900 },
+    "policy_schema": {
+      "const": "mbos.governance.policy/1"
+    },
+    "policy_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string"
+    },
+    "system_mode": {
+      "enum": [
+        "round_one",
+        "mvp"
+      ]
+    },
+    "delegation_enabled": {
+      "const": false
+    },
+    "clock_skew_seconds": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 900
+    },
     "approval": {
       "type": "object",
-      "required": ["approvers", "allowed_channels", "allowed_scopes", "max_approval_ttl_seconds", "step_up_required"],
+      "required": [
+        "approvers",
+        "allowed_channels",
+        "allowed_scopes",
+        "max_approval_ttl_seconds",
+        "step_up_required"
+      ],
       "properties": {
-        "approvers": { "type": "array", "minItems": 1, "items": { "type": "string" } },
-        "allowed_channels": { "type": "array", "items": { "enum": ["telegram", "web", "sms_reply", "email_reply", "cli"] } },
-        "allowed_scopes": { "type": "array", "minItems": 1, "items": { "const": "once" } },
-        "max_approval_ttl_seconds": { "type": "integer", "minimum": 60 },
+        "approvers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "allowed_channels": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "telegram",
+              "web",
+              "sms_reply",
+              "email_reply",
+              "cli"
+            ]
+          }
+        },
+        "allowed_scopes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "const": "once"
+          }
+        },
+        "max_approval_ttl_seconds": {
+          "type": "integer",
+          "minimum": 60
+        },
         "step_up_required": {
           "type": "object",
-          "required": ["categories", "reversibility"],
+          "required": [
+            "categories",
+            "reversibility"
+          ],
           "properties": {
-            "categories": { "type": "array", "items": { "type": "string" } },
-            "reversibility": { "type": "array", "items": { "enum": ["reversible", "partially_reversible", "irreversible"] } }
+            "categories": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "reversibility": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "reversible",
+                  "partially_reversible",
+                  "irreversible"
+                ]
+              }
+            }
           }
         }
       }
     },
     "action_request": {
       "type": "object",
-      "required": ["max_lifetime_seconds", "allowed_initial_status", "on_behalf_of_required"],
+      "required": [
+        "max_lifetime_seconds",
+        "allowed_initial_status",
+        "on_behalf_of_required"
+      ],
       "properties": {
-        "max_lifetime_seconds": { "type": "integer", "minimum": 60 },
-        "allowed_initial_status": { "type": "array", "items": { "const": "drafted" } },
-        "on_behalf_of_required": { "const": "michael" }
+        "max_lifetime_seconds": {
+          "type": "integer",
+          "minimum": 60
+        },
+        "allowed_initial_status": {
+          "type": "array",
+          "items": {
+            "const": "drafted"
+          }
+        },
+        "on_behalf_of_required": {
+          "const": "michael"
+        }
       }
     },
     "categories": {
       "type": "object",
       "minProperties": 1,
-      "propertyNames": { "enum": ["message", "offer", "money", "purchase", "publishing", "scheduling", "price_change", "phone_call", "sms", "email", "external_commitment"] },
+      "propertyNames": {
+        "enum": [
+          "message",
+          "offer",
+          "money",
+          "purchase",
+          "publishing",
+          "scheduling",
+          "price_change",
+          "phone_call",
+          "sms",
+          "email",
+          "external_commitment"
+        ]
+      },
       "additionalProperties": {
         "type": "object",
-        "required": ["decision", "tier", "max_tier", "budget_bucket", "require_cost_estimate", "quiet_hours"],
+        "required": [
+          "decision",
+          "tier",
+          "max_tier",
+          "budget_bucket",
+          "require_cost_estimate",
+          "quiet_hours"
+        ],
         "properties": {
-          "decision": { "enum": ["require_approval", "deny"] },
-          "tier": { "const": 0 },
-          "max_tier": { "const": 0 },
-          "budget_bucket": { "type": "string" },
-          "require_cost_estimate": { "type": "boolean" },
-          "quiet_hours": { "type": "boolean" }
+          "decision": {
+            "enum": [
+              "require_approval",
+              "deny"
+            ]
+          },
+          "tier": {
+            "const": 0
+          },
+          "max_tier": {
+            "const": 0
+          },
+          "budget_bucket": {
+            "type": "string"
+          },
+          "require_cost_estimate": {
+            "type": "boolean"
+          },
+          "quiet_hours": {
+            "type": "boolean"
+          }
         }
       }
     },
@@ -61,68 +197,193 @@
       "type": "object",
       "additionalProperties": {
         "type": "object",
-        "required": ["category", "effector"],
+        "required": [
+          "category",
+          "effector"
+        ],
         "properties": {
-          "category": { "type": "string" },
-          "effector": { "const": "dryrun" }
+          "category": {
+            "type": "string"
+          },
+          "effector": {
+            "const": "dryrun"
+          }
         }
       }
     },
     "agent_grants": {
       "type": "object",
-      "additionalProperties": { "type": "array", "items": { "type": "string", "pattern": "^[a-z]+(\\.[a-z_]+)+$" } }
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "pattern": "^[a-z]+(\\.[a-z_]+)+$"
+        }
+      }
     },
     "quiet_hours": {
       "type": "object",
-      "required": ["start", "end", "timezone"],
+      "required": [
+        "start",
+        "end",
+        "timezone"
+      ],
       "properties": {
-        "start": { "type": "string", "pattern": "^[0-2][0-9]:[0-5][0-9]$" },
-        "end": { "type": "string", "pattern": "^[0-2][0-9]:[0-5][0-9]$" },
-        "timezone": { "type": "string" }
+        "start": {
+          "type": "string",
+          "pattern": "^[0-2][0-9]:[0-5][0-9]$"
+        },
+        "end": {
+          "type": "string",
+          "pattern": "^[0-2][0-9]:[0-5][0-9]$"
+        },
+        "timezone": {
+          "type": "string"
+        }
       }
     },
     "budgets": {
       "type": "object",
-      "required": ["currency", "live", "dry_run", "velocity"],
+      "required": [
+        "currency",
+        "live",
+        "dry_run",
+        "velocity"
+      ],
       "properties": {
-        "currency": { "const": "USD" },
+        "currency": {
+          "const": "USD"
+        },
         "live": {
           "type": "object",
-          "required": ["global_daily_hard_cap", "buckets"],
+          "required": [
+            "global_daily_hard_cap",
+            "buckets"
+          ],
           "properties": {
-            "global_daily_hard_cap": { "const": 0 },
+            "global_daily_hard_cap": {
+              "const": 0
+            },
             "buckets": {
               "type": "object",
               "additionalProperties": {
                 "type": "object",
-                "required": ["per_action_hard_cap", "daily_hard_cap"],
-                "properties": { "per_action_hard_cap": { "const": 0 }, "daily_hard_cap": { "const": 0 } }
+                "required": [
+                  "per_action_hard_cap",
+                  "daily_hard_cap"
+                ],
+                "properties": {
+                  "per_action_hard_cap": {
+                    "const": 0
+                  },
+                  "daily_hard_cap": {
+                    "const": 0
+                  }
+                }
               }
             }
           }
         },
         "dry_run": {
           "type": "object",
-          "required": ["global_daily_hard_cap", "buckets"],
+          "required": [
+            "global_daily_hard_cap",
+            "buckets"
+          ],
           "properties": {
-            "global_daily_hard_cap": { "type": "number", "minimum": 0 },
+            "global_daily_hard_cap": {
+              "type": "number",
+              "minimum": 0
+            },
             "buckets": {
               "type": "object",
               "additionalProperties": {
                 "type": "object",
-                "required": ["per_action_hard_cap", "daily_hard_cap"],
-                "properties": { "per_action_hard_cap": { "type": "number", "minimum": 0 }, "daily_hard_cap": { "type": "number", "minimum": 0 } }
+                "required": [
+                  "per_action_hard_cap",
+                  "daily_hard_cap"
+                ],
+                "properties": {
+                  "per_action_hard_cap": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "daily_hard_cap": {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                }
               }
             }
           }
         },
         "velocity": {
           "type": "object",
-          "required": ["money_bucket_actions_per_hour"],
-          "properties": { "money_bucket_actions_per_hour": { "type": "integer", "minimum": 0 } }
+          "required": [
+            "money_bucket_actions_per_hour"
+          ],
+          "properties": {
+            "money_bucket_actions_per_hour": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
         }
       }
     },
-    "llm_spend": { "type": "object" }
+    "llm_spend": {
+      "type": "object",
+      "required": [
+        "default_agent_daily_usd",
+        "per_agent_daily_usd",
+        "max_tokens_per_call"
+      ],
+      "properties": {
+        "enforced_by": {
+          "type": "string"
+        },
+        "default_agent_daily_usd": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 50
+        },
+        "per_agent_daily_usd": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 50
+          }
+        },
+        "max_tokens_per_call": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32768
+        }
+      }
+    },
+    "egress": {
+      "type": "object",
+      "required": [
+        "default",
+        "allow"
+      ],
+      "properties": {
+        "default": {
+          "const": "deny"
+        },
+        "allow": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "maxItems": 0,
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": "Wave one: no agent may reach any host (maxItems 0)."
+        }
+      }
+    }
   }
 }
