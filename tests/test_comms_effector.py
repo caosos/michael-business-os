@@ -192,6 +192,7 @@ def test_a13_blocked_send_is_action_failed_and_checks_are_in_details(rt, discove
                                              "AND type = 'ACTION_FAILED'", a=areq["action_request_id"])]
     d = failed["details"]
     assert d["kind"] == "comms" and d["dry_run"] is True and any("send window" in x for x in d["blocked_reasons"])
+    assert "send window" in failed["intent"]  # P-06-9 (c23bee8): the intent names the actual block reason
     g = cs.audit([failed])
     assert g["sends"] == 0
 

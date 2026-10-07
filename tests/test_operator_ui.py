@@ -291,12 +291,11 @@ def test_f02_card_verifies_payload_hash_and_hides_yes_on_mismatch(rt, discover, 
 
 
 def test_f02_ledger_independent_rh1_check_agrees_with_spine(rt, discover, ui):
-    """Every row_hash and prev_hash link verifies under the vendored reference. The only disagreement
-    allowed is a seq GAP, which the spine creates on rollback (see the finding test below)."""
+    """The spine chain verifies under the vendored ADR-0010 reference: links, hashes and contiguity."""
     item_id, areq = ready(rt, discover)
     assert ui.store.verify_chain()["ok"] is True
     ok, msg = ui.store.verify_chain_independent()
-    assert ok or msg.startswith("gap before seq"), msg
+    assert ok, msg  # strict since A-16 (c23bee8): no gaps, both verifiers agree
     from operator_ui import mbos_canonical
     from mbos.ledger import load_receipts
 
@@ -310,30 +309,28 @@ def test_f02_ledger_independent_rh1_check_agrees_with_spine(rt, discover, ui):
     assert "independent MBOS-RH-1 check (vendored reference): " in body
 
 
-def test_finding_spine_seq_gap_after_rollback_is_flagged_only_by_the_reference(rt, ui):
-    """FINDING (reported to Agent 01): spine @ aa88e7a assigns receipt seq with nextval(), which is not
-    rolled back, so a rolled-back receipt transaction (exactly what A1 fault injection does) leaves a
-    seq gap. mbos.verify_chain() checks links only and stays ok; the ADR-0010 reference rejects gaps.
-    The Operator UI shows both results, so the disagreement is visible."""
+def test_regression_no_seq_gap_after_rollback_both_verifiers_agree(rt, ui):
+    """Was FINDING (06 → 01, aa88e7a): nextval() seq left gaps after a rollback. Fixed in A-16 (c23bee8,
+    migration 0005: seq = max+1 under the chain lock; verify_chain checks contiguity). Now a rolled-back
+    receipt transaction leaves no gap, and the DB verifier and the ADR-0010 reference agree."""
     import pytest
-    import sqlalchemy as sa
     from mbos.ledger import append_receipt, tool_provenance
 
     with pytest.raises(RuntimeError):
         with rt.engine.begin() as c:
-            prov = tool_provenance(c, "tests.finding.rollback")
+            prov = tool_provenance(c, "tests.regression.rollback")
             append_receipt(c, type="ITEM_STATE_CHANGED", intent="rolled back on purpose", provenance_ids=[prov],
                            entity_type="test", entity_id="rollback", effect="none")
             raise RuntimeError("rollback")
     with rt.engine.begin() as c:
-        prov = tool_provenance(c, "tests.finding.after")
+        prov = tool_provenance(c, "tests.regression.after")
         append_receipt(c, type="ITEM_STATE_CHANGED", intent="committed after the rollback", provenance_ids=[prov],
                        entity_type="test", entity_id="after", effect="none")
-    assert ui.store.verify_chain()["ok"] is True                  # DB: links only
+    assert ui.store.verify_chain()["ok"] is True
     ok, msg = ui.store.verify_chain_independent()
-    assert ok is False and msg.startswith("gap before seq")       # ADR-0010 reference: gap
+    assert ok is True, msg
     _, _, body = req(ui, "GET", "/ledger")
-    assert "FAILED — gap before seq" in body
+    assert "FAILED" not in body.split("independent MBOS-RH-1 check")[1].split("</span>")[0]
 
 
 def test_yes_on_a_held_request_re_presents_then_executes(rt, discover, ui):
