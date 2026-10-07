@@ -109,6 +109,19 @@ FINDINGS = [
      "as the Operator UI must catch two exception types.",
      "RECOMMENDATION: validate the approval document before any write, and raise `DecisionRefused` for every "
      "invalid decision."),
+    ("F-19", "FACT", "01 + 06/07 (G4; approval integrity)", "`spine._propose` freezes a payload of only "
+     "{capability, summary, item_id, recommendation_id, target, dry_run}. The draft content a drafting lane writes "
+     "(listing title/body, email subject/body) and its G4 provenance never enter the hash-frozen payload, so Michael "
+     "approves a one-line summary, not the text that would go out. Strict xfail "
+     "`test_g4_approved_payload_carries_the_draft_and_its_provenance` (real spine).",
+     "RECOMMENDATION: extend the `ActionPlanner` contract with an optional `draft` (content, content_hash, "
+     "template_version, prompt_hash, model_id) that `_propose` copies into the payload, so it is hash-frozen and "
+     "shown in the Operator UI, plus a draft provenance row. `mbos_qa.marketing_planner` already emits it."),
+    ("F-20", "FACT", "01 (G2)", "No spine API records lead attribution: `spine.record_outcome` has no "
+     "`attribution` parameter, although `outcome.schema.json` supports it. Strict xfail "
+     "`test_g2_service_lead_carries_attribution` (real spine).",
+     "RECOMMENDATION: add `attribution=` to `record_outcome` (or a `record_attribution` call at intake) and "
+     "capture it for every `service_lead`."),
     ("F-16", "FACT", "01", "Agent 01's package only finds the contracts by a path relative to the source tree. "
      "With a normal (non-editable) `pip install`, 94 of its 109 tests fail or error with `docs/research/contracts "
      "not found; set MBOS_CONTRACTS_DIR`. With that variable set, 108 pass and 1 is skipped "
@@ -195,7 +208,8 @@ SPEC_GROUPS = OrderedDict([(f"test_spec_a{n:02d}", title) for n, title in enumer
     "A4 provenance resolution (independent + 01 audit)", "A5 hard kill mid-ACT → DBOS restart → effector exactly once",
     "A6 YES / NO / MODIFY / HOLD (DBOS approval gate, restart)", "A7 100% dry-run (receipts, effector calls, DB CHECK)",
     "A8 LLM spend cap (LedgerLLMBudget)", "A9 PANIC fail-closed (L1/L2/L3, unreadable switch)",
-    "A10 contract conformance (pinned contracts, format-checked)"], start=1)])
+    "A10 contract conformance (pinned contracts, format-checked)"], start=1)]
+                         + [("test_spec_g_marketing", "G1–G4 marketing on the real approval path (lane-07 planner)")])
 
 
 def cmd_spine() -> int:
@@ -215,7 +229,9 @@ def cmd_spine() -> int:
                 if child.tag in ("failure", "error"):
                     outcome, note = "FAILED", (child.get("message") or "")[:160]
                 elif child.tag == "skipped":
-                    outcome = "skipped"
+                    xf = "xfail" in (child.get("type", "") + child.get("message", ""))
+                    outcome = "xfail (known gap)" if xf else "skipped"
+                    note = (child.get("message") or "")[:200]
                 elif child.tag == "properties":
                     note = "; ".join(f"{p.get('name')}: {p.get('value')}" for p in child)
             rows.append((tc.get("classname").split(".")[-1], tc.get("name"), outcome, note))
@@ -228,11 +244,15 @@ def cmd_spine() -> int:
          "(`mbos_qa/impl_spine.py`) only boots PostgreSQL/DBOS, feeds 01's own fixture listings, reads state back "
          "and provides superuser fault/tamper hooks. DRY-RUN only.", "",
          f"**Result: {'PASS' if rc == 0 and not failed else 'FAIL'}.** {passed} passed, {failed} failed, "
-         f"{len(rows)} cases, {secs}s.", "",
+         f"{sum(r[2].startswith('xfail') for r in rows)} strict-xfail known gaps, "
+         f"{sum(r[2] == 'skipped' for r in rows)} not applicable; {len(rows)} cases, {secs}s.", "",
          "| Acceptance test | Result | Cases |", "|---|---|---:|"]
     for prefix, title in SPEC_GROUPS.items():
         g = [r for r in rows if r[0] == prefix or r[0].startswith(prefix + "_")]
-        res = "FAIL" if any(r[2] == "FAILED" for r in g) else ("PASS" if g else "NOT RUN")
+        xf = sum(r[2].startswith("xfail") for r in g)
+        sk = sum(r[2] == "skipped" for r in g)
+        res = "FAIL" if any(r[2] == "FAILED" for r in g) else (
+            ("PASS" + (f" ({xf} known gap)" if xf else "") + (f" ({sk} not applicable)" if sk else "")) if g else "NOT RUN")
         L.append(f"| {title} | **{res}** | {len(g)} |")
     L += ["", "## What is real vs. still pending", "",
           "- **Real (01's code):** DBOS workflows (discover, item lifecycle, durable approval gate, HOLD timers), "
