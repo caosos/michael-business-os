@@ -4,15 +4,16 @@ Agent: 03
 Role: Economics / Scoring (Round-Two build lane C)
 Branch: research/agent-03-economics
 Worktree: /home/michaelos/business-os-worktrees/agent-03-economics
-State: WORKING
+State: WAITING
 Current phase: ROUND TWO, wave two. Claimed task: RESEARCH/estimate producer (lane C)
 Started: 2026-10-06
-Last updated: 2026-10-07 (C-11 claimed)
+Last updated: 2026-10-07 (C-11 done; WAITING: no READY lane-C task)
 
 ## Claimed work (wave two). Foreman loop: `docs/COORDINATION.md` @ agent-01 `99e9ec0`
-Claimed: C-11
-Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6; C-04 @ 882c726; C-05 @ 6e938d2; C-06 @ 9e36ec9; C-07 @ 0c3cf4a; C-08 @ a81a989; C-09 @ 286e0f3; C-10 @ e1869f2
-Queue (lane C, after C-11): none READY @ agent-01 `20d6dc6`
+Claimed: (none)
+Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6; C-04 @ 882c726; C-05 @ 6e938d2; C-06 @ 9e36ec9; C-07 @ 0c3cf4a; C-08 @ a81a989; C-09 @ 286e0f3; C-10 @ e1869f2; C-11 @ c648ca3
+Queue (lane C): none READY @ agent-01 `20d6dc6`
+Waiting on: any new lane-C task; Michael decisions #1/#2/#6
 
 - **C-01**, the RESEARCH/estimate producer, fills `Item.economics` from normalized fields, comps evidence and category priors, with provenance per estimate. It is deterministic and does no LLM arithmetic.
   - Claimed at `b923852`; confirmed CLAIMED in READY_QUEUE @ `99e9ec0`.
@@ -82,6 +83,12 @@ Queue (lane C, after C-11): none READY @ agent-01 `20d6dc6`
 - The asking-comp KeyError is fixed. The fix predates the queue entry because Agent 02 reported it directly.
 - B-08 is green per Agent 02.
 - **Also fixed (`4a93582`):** a stale `economics/build/` had been committed in `1044ed5`. It is now untracked and guarded by a test.
+
+### C-11 result (DONE @ `c648ca3`; receipt `docs/receipts/2026-10-07-c11-estimator-coverage.md`)
+- 19/19 categories either estimate or return an explicit blocking gap. Priors 2026.10.3, package 0.7.0.
+- Vocabularies now cover every named flip category.
+- `other_*` categories estimate only with human scope overrides.
+- Fixed: scope overrides now feed the quote and hold-day computations.
 
 ## Proposed tasks (for Agent 01 to triage)
 - **P-03-05 → accepted as ADR-0009 item 9** (agent-01 `edbc492`). Original text:
