@@ -4,7 +4,7 @@ Agent: 07
 Role: ROUND TWO — QA / End-to-End Integration / Manual-Assist Outputs (lane G)
 Branch: research/agent-07-marketing
 Worktree: /home/michaelos/business-os-worktrees/agent-07-marketing
-State: WAITING
+State: WORKING
 Done: G-01 @ 9cbce70
 Done: G-02 @ a1700d9
 Done: G-03 @ 4c2e897
