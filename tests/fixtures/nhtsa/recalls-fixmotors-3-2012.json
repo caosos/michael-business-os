@@ -1,0 +1,23 @@
+{
+ "Count": 1,
+ "Message": "ok",
+ "results": [
+  {
+   "Manufacturer": "Fixmotors Motor Co.",
+   "NHTSACampaignNumber": "26V000201",
+   "NHTSAActionNumber": "",
+   "ReportReceivedDate": "04/01/2026",
+   "ModelYear": "2012",
+   "Make": "FIXMOTORS",
+   "Model": "3",
+   "Component": "STEERING",
+   "Summary": "(fixture)",
+   "Consequence": "Loss of steering assist, increasing crash risk.",
+   "Remedy": "Dealers will update software.",
+   "Notes": "(fixture)",
+   "parkIt": false,
+   "parkOutSide": false,
+   "overTheAirUpdate": true
+  }
+ ]
+}

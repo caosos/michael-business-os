@@ -1,0 +1,314 @@
+{
+ "count": 14,
+ "message": "Results returned successfully",
+ "results": [
+  {
+   "odiNumber": 9000,
+   "manufacturer": "Fixmotors Motor Co.",
+   "crash": false,
+   "fire": true,
+   "numberOfInjuries": 0,
+   "numberOfDeaths": 0,
+   "dateOfIncident": "01/05/2026",
+   "dateComplaintFiled": "01/06/2026",
+   "vin": "1FIXTUR3E12",
+   "components": "ELECTRICAL SYSTEM",
+   "summary": "(fixture narrative; never copied to an entry) contact owner 555-0100",
+   "products": [
+    {
+     "type": "Vehicle",
+     "productYear": "2012",
+     "productMake": "FIXMOTORS",
+     "productModel": "ROADSTER",
+     "manufacturer": "Fixmotors Motor Co."
+    }
+   ]
+  },
+  {
+   "odiNumber": 9001,
+   "manufacturer": "Fixmotors Motor Co.",
+   "crash": false,
+   "fire": true,
+   "numberOfInjuries": 0,
+   "numberOfDeaths": 0,
+   "dateOfIncident": "01/05/2026",
+   "dateComplaintFiled": "01/06/2026",
+   "vin": "1FIXTUR3E12",
+   "components": "ELECTRICAL SYSTEM",
+   "summary": "(fixture narrative; never copied to an entry) contact owner 555-0100",
+   "products": [
+    {
+     "type": "Vehicle",
+     "productYear": "2012",
+     "productMake": "FIXMOTORS",
+     "productModel": "ROADSTER",
+     "manufacturer": "Fixmotors Motor Co."
+    }
+   ]
+  },
+  {
+   "odiNumber": 9002,
+   "manufacturer": "Fixmotors Motor Co.",
+   "crash": false,
+   "fire": false,
+   "numberOfInjuries": 0,
+   "numberOfDeaths": 0,
+   "dateOfIncident": "01/05/2026",
+   "dateComplaintFiled": "01/06/2026",
+   "vin": "1FIXTUR3E12",
+   "components": "ELECTRICAL SYSTEM",
+   "summary": "(fixture narrative; never copied to an entry) contact owner 555-0100",
+   "products": [
+    {
+     "type": "Vehicle",
+     "productYear": "2012",
+     "productMake": "FIXMOTORS",
+     "productModel": "ROADSTER",
+     "manufacturer": "Fixmotors Motor Co."
+    }
+   ]
+  },
+  {
+   "odiNumber": 9003,
+   "manufacturer": "Fixmotors Motor Co.",
+   "crash": false,
+   "fire": false,
+   "numberOfInjuries": 0,
+   "numberOfDeaths": 0,
+   "dateOfIncident": "01/05/2026",
+   "dateComplaintFiled": "01/06/2026",
+   "vin": "1FIXTUR3E12",
+   "components": "ELECTRICAL SYSTEM",
+   "summary": "(fixture narrative; never copied to an entry) contact owner 555-0100",
+   "products": [
+    {
+     "type": "Vehicle",
+     "productYear": "2012",
+     "productMake": "FIXMOTORS",
+     "productModel": "ROADSTER",
+     "manufacturer": "Fixmotors Motor Co."
+    }
+   ]
+  },
+  {
+   "odiNumber": 9004,
+   "manufacturer": "Fixmotors Motor Co.",
+   "crash": false,
+   "fire": false,
+   "numberOfInjuries": 0,
+   "numberOfDeaths": 0,
+   "dateOfIncident": "01/05/2026",
+   "dateComplaintFiled": "01/06/2026",
+   "vin": "1FIXTUR3E12",
+   "components": "ELECTRICAL SYSTEM",
+   "summary": "(fixture narrative; never copied to an entry) contact owner 555-0100",
+   "products": [
+    {
+     "type": "Vehicle",
+     "productYear": "2012",
+     "productMake": "FIXMOTORS",
+     "productModel": "ROADSTER",
+     "manufacturer": "Fixmotors Motor Co."
+    }
+   ]
+  },
+  {
+   "odiNumber": 9005,
+   "manufacturer": "Fixmotors Motor Co.",
+   "crash": false,
+   "fire": false,
+   "numberOfInjuries": 0,
+   "numberOfDeaths": 0,
+   "dateOfIncident": "01/05/2026",
+   "dateComplaintFiled": "01/06/2026",
+   "vin": "1FIXTUR3E12",
+   "components": "ELECTRICAL SYSTEM",
+   "summary": "(fixture narrative; never copied to an entry) contact owner 555-0100",
+   "products": [
+    {
+     "type": "Vehicle",
+     "productYear": "2012",
+     "productMake": "FIXMOTORS",
+     "productModel": "ROADSTER",
+     "manufacturer": "Fixmotors Motor Co."
+    }
+   ]
+  },
+  {
+   "odiNumber": 9006,
+   "manufacturer": "Fixmotors Motor Co.",
+   "crash": false,
+   "fire": false,
+   "numberOfInjuries": 0,
+   "numberOfDeaths": 0,
+   "dateOfIncident": "01/05/2026",
+   "dateComplaintFiled": "01/06/2026",
+   "vin": "1FIXTUR3E12",
+   "components": "ELECTRICAL SYSTEM",
+   "summary": "(fixture narrative; never copied to an entry) contact owner 555-0100",
+   "products": [
+    {
+     "type": "Vehicle",
+     "productYear": "2012",
+     "productMake": "FIXMOTORS",
+     "productModel": "ROADSTER",
+     "manufacturer": "Fixmotors Motor Co."
+    }
+   ]
+  },
+  {
+   "odiNumber": 9010,
+   "manufacturer": "Fixmotors Motor Co.",
+   "crash": true,
+   "fire": false,
+   "numberOfInjuries": 0,
+   "numberOfDeaths": 0,
+   "dateOfIncident": "01/05/2026",
+   "dateComplaintFiled": "01/06/2026",
+   "vin": "1FIXTUR3E12",
+   "components": "POWER TRAIN,ENGINE",
+   "summary": "(fixture narrative; never copied to an entry) contact owner 555-0100",
+   "products": [
+    {
+     "type": "Vehicle",
+     "productYear": "2012",
+     "productMake": "FIXMOTORS",
+     "productModel": "ROADSTER",
+     "manufacturer": "Fixmotors Motor Co."
+    }
+   ]
+  },
+  {
+   "odiNumber": 9011,
+   "manufacturer": "Fixmotors Motor Co.",
+   "crash": false,
+   "fire": false,
+   "numberOfInjuries": 0,
+   "numberOfDeaths": 0,
+   "dateOfIncident": "01/05/2026",
+   "dateComplaintFiled": "01/06/2026",
+   "vin": "1FIXTUR3E12",
+   "components": "POWER TRAIN,ENGINE",
+   "summary": "(fixture narrative; never copied to an entry) contact owner 555-0100",
+   "products": [
+    {
+     "type": "Vehicle",
+     "productYear": "2012",
+     "productMake": "FIXMOTORS",
+     "productModel": "ROADSTER",
+     "manufacturer": "Fixmotors Motor Co."
+    }
+   ]
+  },
+  {
+   "odiNumber": 9012,
+   "manufacturer": "Fixmotors Motor Co.",
+   "crash": false,
+   "fire": false,
+   "numberOfInjuries": 0,
+   "numberOfDeaths": 0,
+   "dateOfIncident": "01/05/2026",
+   "dateComplaintFiled": "01/06/2026",
+   "vin": "1FIXTUR3E12",
+   "components": "POWER TRAIN,ENGINE",
+   "summary": "(fixture narrative; never copied to an entry) contact owner 555-0100",
+   "products": [
+    {
+     "type": "Vehicle",
+     "productYear": "2012",
+     "productMake": "FIXMOTORS",
+     "productModel": "ROADSTER",
+     "manufacturer": "Fixmotors Motor Co."
+    }
+   ]
+  },
+  {
+   "odiNumber": 9013,
+   "manufacturer": "Fixmotors Motor Co.",
+   "crash": false,
+   "fire": false,
+   "numberOfInjuries": 0,
+   "numberOfDeaths": 0,
+   "dateOfIncident": "01/05/2026",
+   "dateComplaintFiled": "01/06/2026",
+   "vin": "1FIXTUR3E12",
+   "components": "POWER TRAIN,ENGINE",
+   "summary": "(fixture narrative; never copied to an entry) contact owner 555-0100",
+   "products": [
+    {
+     "type": "Vehicle",
+     "productYear": "2012",
+     "productMake": "FIXMOTORS",
+     "productModel": "ROADSTER",
+     "manufacturer": "Fixmotors Motor Co."
+    }
+   ]
+  },
+  {
+   "odiNumber": 9014,
+   "manufacturer": "Fixmotors Motor Co.",
+   "crash": false,
+   "fire": false,
+   "numberOfInjuries": 0,
+   "numberOfDeaths": 0,
+   "dateOfIncident": "01/05/2026",
+   "dateComplaintFiled": "01/06/2026",
+   "vin": "1FIXTUR3E12",
+   "components": "POWER TRAIN,ENGINE",
+   "summary": "(fixture narrative; never copied to an entry) contact owner 555-0100",
+   "products": [
+    {
+     "type": "Vehicle",
+     "productYear": "2012",
+     "productMake": "FIXMOTORS",
+     "productModel": "ROADSTER",
+     "manufacturer": "Fixmotors Motor Co."
+    }
+   ]
+  },
+  {
+   "odiNumber": 9020,
+   "manufacturer": "Fixmotors Motor Co.",
+   "crash": false,
+   "fire": false,
+   "numberOfInjuries": 0,
+   "numberOfDeaths": 0,
+   "dateOfIncident": "01/05/2026",
+   "dateComplaintFiled": "01/06/2026",
+   "vin": "1FIXTUR3E12",
+   "components": "SUSPENSION",
+   "summary": "(fixture narrative; never copied to an entry) contact owner 555-0100",
+   "products": [
+    {
+     "type": "Vehicle",
+     "productYear": "2012",
+     "productMake": "FIXMOTORS",
+     "productModel": "ROADSTER",
+     "manufacturer": "Fixmotors Motor Co."
+    }
+   ]
+  },
+  {
+   "odiNumber": 9021,
+   "manufacturer": "Fixmotors Motor Co.",
+   "crash": false,
+   "fire": false,
+   "numberOfInjuries": 0,
+   "numberOfDeaths": 0,
+   "dateOfIncident": "01/05/2026",
+   "dateComplaintFiled": "01/06/2026",
+   "vin": "1FIXTUR3E12",
+   "components": "SUSPENSION",
+   "summary": "(fixture narrative; never copied to an entry) contact owner 555-0100",
+   "products": [
+    {
+     "type": "Vehicle",
+     "productYear": "2012",
+     "productMake": "FIXMOTORS",
+     "productModel": "ROADSTER",
+     "manufacturer": "Fixmotors Motor Co."
+    }
+   ]
+  }
+ ]
+}

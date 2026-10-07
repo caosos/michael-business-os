@@ -445,3 +445,37 @@ Verified (FACT). `tests/test_b15_enrichment.py` has 13 tests. On the real `mbos.
 - **Elementary-advice lint.** A recall whose own CPSC wording trips the lint is no longer silently dropped. It goes to the review list as "needs a human glance" with the withheld `candidate_entry` attached.
 - **Truncation.** Quoted hazard and remedy text is cut at a word boundary and ends with "…".
 - **R23 (Agent 01).** Complete entries are admitted automatically; review-list entries stay out of the KB until a human reviews them with provenance. The converter already behaves this way.
+
+## 23. NHTSA recalls and complaints for `project_vehicle` — READY_QUEUE B-17 (R23)
+
+**Endpoints confirmed on the live API (FACT, 2026-10-07).** The documentation page returns 403 to a plain fetcher, so I made one read-only GET per endpoint using the documented example vehicle (2012 Acura RDX) and recorded the response shapes. Nothing was stored from the responses.
+
+| | Recalls | Complaints |
+|---|---|---|
+| URL | `GET https://api.nhtsa.gov/recalls/recallsByVehicle?make=&model=&modelYear=` | `GET https://api.nhtsa.gov/complaints/complaintsByVehicle?make=&model=&modelYear=` |
+| Top level | `{Count, Message, results[]}` | `{count, message, results[]}` (**lowercase**: the two endpoints differ) |
+| Record | `Manufacturer, NHTSACampaignNumber, NHTSAActionNumber, ReportReceivedDate ("MM/DD/YYYY"), ModelYear, Make, Model, Component, Summary, Consequence, Remedy, Notes, parkIt, parkOutSide, overTheAirUpdate` | `odiNumber, manufacturer, crash, fire, numberOfInjuries, numberOfDeaths, dateOfIncident, dateComplaintFiled, vin (partial), components, summary, products[{type, productYear, productMake, productModel, manufacturer}]` |
+
+- **UNKNOWN:** rate limits and terms. The responses state none.
+- **Not covered:** technical service bulletins. They are downloadable files, not an API, as Agent 03's plan says.
+
+**Adapter and converter** (`adapters/nhtsa.py`, `vehicle_safety.py`):
+- Queries are explicit `(make, model, year)` values, validated. They are never parsed from listing text, because a guessed vehicle would put a recall on the wrong car.
+- The adapter is read-only GET to `api.nhtsa.gov`, tier 1, and live only behind `live=True`.
+- Retention: each recall is a raw record; a complaints response is retained whole per query.
+- Each record gets a FACT provenance record citing the exact API URL.
+- **Recall entry** (`failure_mode`): make and model are discrete API fields, so there is no extraction guesswork. The text is a template over NHTSA's own fields (campaign, date, component, consequence, remedy, park-it flag), and remedy status is UNKNOWN.
+- **Complaint statistic** (`known_weakness`): the count of complaints per vehicle and component (at least 5, with fire and crash mentions). Narratives, VINs and contact details never leave raw, and the wording says "unverified consumer reports, not NHTSA findings".
+
+**Model-year gate (important finding).** Both outputs are specific to a model year, but Agent 03's KB matcher has no year field (checked at engine 0.10.1). A make+model entry would therefore also flag other model years, which is a false safety claim. So `KB_SUPPORTS_MODEL_YEARS = False` holds every entry on the **review list** with its complete `candidate_entry`, which carries `match[0].years`. Admission is a single flag flip once Agent 03 supports years.
+
+Also held for review:
+- a model name that is too short or purely numeric (e.g. "3"), since 03's loader refuses these
+- missing consequence or remedy text
+- NHTSA wording that trips the elementary-advice lint ("needs a human glance")
+
+**Verified (FACT).** `tests/test_b17_nhtsa.py`, 7 tests on illustrative fixtures:
+- The fixtures use the fictional make FIXMOTORS and the confirmed response shape.
+- With the flag off, no entries ship and everything is on the review list.
+- With the flag on (monkeypatched), the entries that pass the standard load through Agent 03's `load_kb` once `years` is removed from the match groups.
+- A freeze on 429 works and the output is deterministic.

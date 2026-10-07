@@ -1,0 +1,1 @@
+ILLUSTRATIVE fixtures in the response shape confirmed on the live NHTSA API 2026-10-07. Makes (FIXMOTORS), campaign numbers (26V0001xx), counts and text are FICTIONAL. Do not read them as real recalls or complaints.
