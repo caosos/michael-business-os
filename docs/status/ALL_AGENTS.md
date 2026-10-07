@@ -1,42 +1,75 @@
 # Michael Business OS — Agent Dashboard
 
-Last updated: 2026-10-06 (by Agent 01)
+Last updated: 2026-10-07 (Aria reconciliation)
 
-> Source of truth: each agent's `docs/status/AGENT_STATUS.md` on its `research/agent-XX-*` branch. Agent 01 refreshes this table by reading those branches. "NO REPORT" = that agent has not yet committed/pushed a status file (verified: all of 02–07 are still at the initial commit `2e60f38` with no `docs/` committed as of this update). Progress is never invented.
+> Source of truth: each agent's `docs/status/AGENT_STATUS.md` on its own `research/agent-XX-*` branch.
 
-| Agent | Role | State | Current objective | Last update | Blocker | Deliverable |
-|---|---|---|---|---|---|---|
-| 01 | Coordinator / Architect | WAITING | Research deliverable complete; awaiting 02–07 status to reconcile | 2026-10-06 | none (waiting on peers) | `docs/research/agent-01-coordinator.md` (complete, pushed) |
-| 02 | Opportunity Discovery | NO REPORT | — | — | — | — |
-| 03 | Economics / Scoring | NO REPORT | — | — | — | — |
-| 04 | CRM / State | NO REPORT | — | — | — | — |
-| 05 | Governance / Security | NO REPORT | — | — | — | — |
-| 06 | Communications | NO REPORT | — | — | — | — |
-| 07 | Marketing | NO REPORT | — | — | — | — |
+| Agent | Role | State | Current objective | Blocker | Deliverable |
+|---|---|---|---|---|---|
+| 01 | Coordinator / Architect | COMPLETE | Round-One research + reconciliation complete | none | `docs/research/agent-01-coordinator.md`, `docs/research/ROUND_ONE_SYNTHESIS.md` |
+| 02 | Opportunity Discovery | COMPLETE | Await Round-Two implementation gate | none | `docs/research/agent-02-opportunity.md` |
+| 03 | Economics / Scoring | COMPLETE | Await threshold calibration + implementation gate | none | `docs/research/agent-03-economics.md` |
+| 04 | CRM / State | COMPLETE | Await coordinator state-model decision | none | `docs/research/agent-04-state.md` |
+| 05 | Governance / Security | COMPLETE | Await policy values + implementation gate | none | `docs/research/agent-05-governance.md` |
+| 06 | Communications | COMPLETE | Await legal/architecture gate before live comms | none | `docs/research/agent-06-communications.md` |
+| 07 | Marketing | COMPLETE | Await Round-Two implementation gate | none | `docs/research/agent-07-marketing.md` |
 
-## Cross-Agent Conflicts
-None yet (02–07 have not reported). One intra-coordinator tension was already resolved: durable backbone **Temporal vs DBOS/Hatchet** → DBOS (see ADR-0002). Conflicts will be scored through the comparison framework in `docs/research/agent-01-coordinator.md` §7.
+## Cross-Agent Conflicts — reconciled
 
-## Shared Decisions Pending
-- ADR-0001 Postgres spine — PROPOSED, needs cross-agent review (esp. 03 scoring storage, 04 CRM/state).
-- ADR-0002 DBOS durable backbone — PROPOSED, needs 05 (governance hooks) + 06 (approval waits) review.
-- ADR-0003 MCP tool boundary / A2A deferred — PROPOSED, needs 06 + 02 (tool/source access) review.
-- Primary implementation language (Python vs TS) — affects every agent's tool/code choices.
+1. **DBOS vs Temporal**
+   - Decision: **DBOS for MVP / single-operator deployment; Temporal deferred as scale-out option.**
+   - Reason: same-Postgres durability and materially lower operator burden fit the current single-box requirement better. Governance semantics are engine-independent.
+
+2. **Postgres source-of-truth vs CRM as primary**
+   - Decision: **Postgres is authoritative. No CRM is authoritative.**
+   - A CRM/UI may be added later as a projection if it clearly improves operator workflow.
+
+3. **Core orchestration vs n8n**
+   - Decision: **n8n is not the core runtime.**
+   - It may be used later at the marketing/integration edge for reversible workflows. Core state transitions remain in the durable application workflow.
+
+4. **Receipt/provenance ownership**
+   - Decision: **one project-wide receipt/provenance schema in Postgres.**
+   - Specialist-specific receipts extend the shared schema; they do not create separate ledgers.
+
+5. **Communications ownership vs marketing**
+   - Decision: **one communications service owns email/SMS/voice delivery.**
+   - Marketing requests communication actions through that service; it does not own separate send infrastructure.
+
+6. **Opportunity schema vs economics/state schemas**
+   - Decision: **single canonical Opportunity envelope with typed economic and state extensions.**
+   - Discovery owns source/raw fields; Economics owns scorecard fields; State owns durable IDs/history; all versioned.
+
+## Architecture direction — accepted for Round Two
+
+- Python-first implementation.
+- PostgreSQL as system of record.
+- DBOS as durable workflow backbone for MVP.
+- MCP as tool boundary.
+- Custom Opportunity + Action + Approval + Receipt + Provenance schemas.
+- Approval semantics: YES / NO / MODIFY / HOLD.
+- Postgres append-only receipts/provenance + transactional outbox.
+- No external side effect without governance authorization.
+- No CRM as a second source of truth.
+- No live phone/SMS/email in the first vertical slice.
+- Official/sanctioned data sources first; riskier collectors isolated behind source adapters and governance flags.
+- OSS/self-hosted core; paid services only where reliability/ROI clearly wins.
 
 ## Michael Decisions Needed
-- **Primary implementation language** (recommend Python). Not urgent until Round-Two build. Low interrupt priority.
+See `docs/status/MICHAEL_DECISIONS.md`.
 
 ## Integration Risks
-1. License traps — source-available (not OSI) tools: Restate/BSL, Inngest/SSPL, Twenty/AGPL, Phoenix/ELv2, Vault+Nomad/BSL, KurrentDB/KLv1. Mitigation: MIT/Apache/MPL core.
-2. Two-sources-of-truth if a CRM becomes authoritative. Mitigation: Postgres is system-of-record; CRM is a projection.
-3. OTel GenAI semconv unstable → abstract attribute names.
-4. HOLD backlog / approval latency → TTL + escalation.
-5. Cost runaway before cap reset (LiteLLM ~10 min) → conservative caps + rate limits + per-call token cap.
-6. Prompt injection → excessive agency (OWASP #1/#3 2026) → authorization outside the model + least privilege.
-7. Single-server SPOF → off-box backups + tested restore.
-(Full list with mitigations: `docs/research/agent-01-coordinator.md` §11.)
+- ToS/ban risk for certain listing sources.
+- Outbound AI calling/texting legal exposure.
+- Overbuilding infrastructure before the first useful loop works.
+- Approval fatigue if too many low-value actions require manual confirmation.
+- License contamination from AGPL/source-available components.
+- Duplicate side effects after retries if idempotency is not enforced at tool boundary.
+- Single-server failure; mitigate with off-box backups after MVP.
 
-## Current Recommended Direction
-**PROVISIONAL until 02–07 research lands and cross-agent review completes.**
+## Next move
+Start Round Two with a thin vertical slice:
 
-Postgres as the spine, with the receipt + state change committed atomically (the governance invariant made mechanical). DBOS Transact as the Postgres-native durable backbone running the DISCOVER→…→LEARN state machine; LangGraph/Pydantic AI for agent reasoning; MCP as the authenticated tool boundary; LiteLLM as the cost gateway + spend kill-switch; Langfuse + Prometheus/Grafana for observability; OpenBao + SOPS for secrets; gVisor + self-hosted E2B + default-deny egress for sandboxing; pgBackRest for backups. Governance = a composed, model-unmodifiable control plane with one atomic PANIC action (revoke creds + cut egress + drain queues).
+**DISCOVER → NORMALIZE → SCORE → RECOMMEND → APPROVE → DRY-RUN ACT → RECEIPT**
+
+Use real read-only opportunity data, but keep external world-changing actions mocked until acceptance tests pass.
