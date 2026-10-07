@@ -5,12 +5,12 @@ Role: Discovery / Source Adapters (DISCOVER + NORMALIZE lane)
 Branch: research/agent-02-opportunity
 Worktree: /home/michaelos/business-os-worktrees/agent-02-opportunity
 State: WORKING
-Claimed: C-04 (support role: source-access side under ADR-02-0202; lead = Agent 03, who holds the C-04 claim)
 Done: B-01 @ 7c9da45
 Done: B-02 @ cadfdae
 Done: B-03 @ 8ff5476
-Done: B-04 @ 029356c
-Current phase: Round Two — B-01..B-04 DONE; supporting C-04 (sold-comps feed; Agent 03 leads, 02 owns source access)
+Done: B-04 @ 029356c (lane-E half by Agent 05 @ d3b9948: fixture vendored, auto-apply of valid requests)
+Done: C-04 (support, source side) @ a1a7730 (lead Agent 03 C-04 @ 882c726)
+Current phase: Round Two — B-01..B-04 + C-04 (support) DONE; checking READY_QUEUE for next lane-B task
 Started: 2026-10-06 (Round One) · Round Two started 2026-10-07
 Last updated: 2026-10-07
 
@@ -29,12 +29,16 @@ keys never in provenance; 101 tests. Receipt: docs/receipts/2026-10-07-b03-gsa-t
 B-04 result (FACT): shared freeze contract docs/integration/freeze-request/ (schema + examples); discovery honours lane E
 PANIC L1/L2/L3 fail-closed; round trip through Agent 05's real PanicStore @ b632583; 114 tests, 0 skipped.
 Receipt: docs/receipts/2026-10-07-b04-freeze-contract.md. Agent id aligned to `agent-02-opportunity` (R7).
-Next: C-04 support (dispatch from Agent 01 @ 0d107df).
+C-04 support result (FACT): manual + eBay Marketplace Insights comp sources, SoldComp hand-off agreed with Agent 03;
+02 fixture trailer + comps → 03 research_step @ 882c726 → SCORED (MAYBE), FACT comp provenance; 122 tests.
+Receipt: docs/receipts/2026-10-07-c04-comps-source-side.md.
+Heads-up from 05: E-02 moves PANIC to Postgres (04 migration 0007); `MBOS_PANIC_STATE` becomes a DSN and the store
+constructor changes; `blocks(...)` signature/codes unchanged. 02 adapts its CLI wiring when 05 announces it.
 
 ## Proposed tasks
-- (for Agent 05, B-04 lane-E side) run `docs/integration/freeze-request/examples/*.json` (on `research/agent-02-opportunity`)
-  through `PanicStore.mutate("L2", capability, True, requested_by, reason)` + `blocks(...)` in 05's suite; and decide
-  whether lane E auto-applies discovery freeze requests from the side channel (02 never writes lane E state).
+- (follow-up, 02 + 05, after E-02) re-point `mbos-discover` PANIC wiring to 05's Postgres-backed store (DSN).
+- (Michael, via Agent 01) enable eBay Marketplace Insights only after eBay grants Limited Release access; until then
+  sold comps come from manual entry (source `manual`).
 - (for Agent 01 / ADR-0009) `Deduper.is_duplicate` should receive the candidate's `RawListing` (at least `source`,
   `fetched_at`) so same-source look-alikes are never merged on the spine path. See implementation doc §9.
 
