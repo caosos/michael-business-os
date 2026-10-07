@@ -1,0 +1,23 @@
+{
+ "Count": 1,
+ "Message": "ok",
+ "results": [
+  {
+   "Manufacturer": "Fixmotors Motor Co.",
+   "NHTSACampaignNumber": "26V000101",
+   "NHTSAActionNumber": "",
+   "ReportReceivedDate": "03/04/2026",
+   "ModelYear": "2013",
+   "Make": "FIXMOTORS",
+   "Model": "ROADSTER",
+   "Component": "FUEL SYSTEM, GASOLINE:DELIVERY:FUEL PUMP",
+   "Summary": "(fixture)",
+   "Consequence": "A failed fuel pump can cause the engine to stall while driving, increasing the risk of a crash.",
+   "Remedy": "Dealers will replace the fuel pump, free of charge.",
+   "Notes": "(fixture)",
+   "parkIt": false,
+   "parkOutSide": false,
+   "overTheAirUpdate": false
+  }
+ ]
+}

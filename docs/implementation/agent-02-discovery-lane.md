@@ -500,3 +500,16 @@ Also held for review:
 - an unknown source exits 2 and is rejected by `--source`
 
 Example config: `config/discovery.example.toml` now has a profile for every source, all with live flags off.
+
+## 25. NHTSA entries admitted with model years — READY_QUEUE B-18 (Agent 03 C-18 @ `d9bceea`, engine 0.11.0)
+
+- **`KB_SUPPORTS_MODEL_YEARS` is now True.** Agent 03's matcher takes `match[].years` as a list, a range or a string, with years 1950–2035. A listing must state a covered year to match. No year, or an uncovered year, means no match and an UNKNOWN on the card. Several stated years must ALL be covered.
+- **Every NHTSA entry carries `years`.** A recall that NHTSA returns for several queried years is merged into **one entry per (campaign, make, model)**, with all covered years in one list. Complaint statistics stay one entry per year and component, because their counts differ by year.
+- **Still held on the review list:** numeric or too-short model names (Mazda "3"), missing consequence or remedy text, and NHTSA wording that trips the elementary-advice lint.
+- **Re-tested against Agent 03's real loader and matcher** (`tests/test_b17_nhtsa.py`):
+  - `load_kb` accepts the entries, including their `years`.
+  - A listing titled "2012 Fixmotors Roadster" **hits**, with the year read from the title.
+  - "2018 Fixmotors Roadster" gets no hit (the entry is recorded as blocked), and a yearless "Fixmotors Roadster project car" gets none either.
+  - "2012 and 2018 …" does not match, because every stated year must be covered.
+  - With the flag turned off, the entries go back to the review list with their candidates.
+- **Open (from Agent 03):** real listings may state a year as `'18` or `MY2018`, or only in the description. Those read as yearless, which is the safe side. When real listings are available, I'll report which forms appear.

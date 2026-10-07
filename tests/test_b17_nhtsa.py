@@ -1,4 +1,4 @@
-"""B-17: NHTSA recalls/complaints → sourced KB candidates; model-year gate (R23) until Agent 03's matcher has years."""
+"""B-17/B-18: NHTSA recalls/complaints → sourced KB entries with model years (Agent 03 C-18)."""
 
 from __future__ import annotations
 
@@ -19,6 +19,7 @@ from mbos_discovery.rawstore import MemoryRawStore
 
 PROFILE = SearchProfile("vehicles", "flip")
 VEH = [VehicleQuery("FIXMOTORS", "ROADSTER", 2012), VehicleQuery("FIXMOTORS", "3", 2012)]
+VEH2 = [VehicleQuery("FIXMOTORS", "ROADSTER", 2012), VehicleQuery("FIXMOTORS", "ROADSTER", 2013)]
 
 
 def _run(world, **kw):
@@ -48,31 +49,42 @@ def test_live_flag_request_shape_and_read_only(world):
     assert q == {"make": ["FIXMOTORS"], "model": ["ROADSTER"], "modelYear": ["2012"]}
 
 
-def test_fixture_run_provenance_and_year_gate(world):
+def test_fixture_run_entries_with_years_and_review(world):
     _, raw, rep = _run(world)
-    assert rep.entries == []                                           # nothing ships while the KB has no year matching
     assert rep.sources[0]["recalls"] == 4 and rep.sources[0]["complaint_queries"] == 2
     for r in rep.records.values():
         assert raw.exists(r["raw_ref"]) and r["url"].startswith("https://api.nhtsa.gov/")
         p = rep.provenance[r["provenance_id"]]
         check_provenance(p)
         assert (p["actor_type"], p["basis"], p["source_uri"]) == ("external", "FACT", r["url"])
-    by_reason = {}
-    for item in rep.review:
-        by_reason.setdefault(item["reason"].split(":")[0], []).append(item)
-    assert len(by_reason[vs.YEAR_REVIEW.split(":")[0]]) == 5          # 2 fuel/airbag recalls + 3 complaint statistics
-    assert any("too short or purely numeric" in i["reason"] for i in rep.review)           # model "3"
-    assert any("elementary-advice wording" in i["reason"] for i in rep.review)             # injected text, glance
-    c = next(i["candidate_entry"] for i in rep.review if i["recall_id"] == "26V000102" and "candidate_entry" in i)
+    assert {e["id"] for e in rep.entries} == {
+        "nhtsa_26v000101_fixmotors_roadster", "nhtsa_26v000102_fixmotors_roadster",
+        "nhtsa_complaints_fixmotors_roadster_2012_electrical_system",
+        "nhtsa_complaints_fixmotors_roadster_2012_power_train", "nhtsa_complaints_fixmotors_roadster_2012_engine"}
+    for e in rep.entries:                                              # every per-year entry carries years (a bug if not)
+        assert e["match"][0]["years"] and all(1950 <= y <= 2035 for y in e["match"][0]["years"])
+    reasons = [i["reason"] for i in rep.review]
+    assert any("too short or purely numeric" in r for r in reasons)    # model "3" still held
+    assert any("elementary-advice wording" in r for r in reasons)      # glance
+    assert not any("model-year" in r for r in reasons)                  # the old gate is gone
+    c = next(e for e in rep.entries if e["id"] == "nhtsa_26v000102_fixmotors_roadster")
     assert c["match"] == [{"makes": ["fixmotors"], "models": ["ROADSTER"], "years": [2012]}]
     assert "do not drive until repaired" in c["risk"] and "UNKNOWN" in c["risk"] and "free of charge" in c["risk"]
     assert c["source"]["url"].startswith("https://api.nhtsa.gov/recalls/recallsByVehicle?")
 
 
+def test_one_campaign_across_years_is_one_entry_with_all_years(world):
+    ad = NhtsaAdapter.from_fixture(CPSC_FIX := FIX / "nhtsa", VEH2, world.clock, include_complaints=False)
+    rep = vs.collect(ad, PROFILE, MemoryRawStore(), HealthBook(), world.clock())
+    e = next(x for x in rep.entries if x["id"] == "nhtsa_26v000101_fixmotors_roadster")
+    assert e["match"] == [{"makes": ["fixmotors"], "models": ["ROADSTER"], "years": [2012, 2013]}]      # one group
+    assert "2012, 2013 Fixmotors ROADSTER recall" in e["risk"]
+    assert len([x for x in rep.entries if x["id"].startswith("nhtsa_26v000101")]) == 1
+
+
 def test_complaint_statistics_are_counts_without_personal_data(world):
     _, _, rep = _run(world)
-    stats = {i["candidate_entry"]["id"]: i["candidate_entry"] for i in rep.review
-             if i.get("candidate_entry", {}).get("kind") == "known_weakness"}
+    stats = {e["id"]: e for e in rep.entries if e["kind"] == "known_weakness"}
     # SUSPENSION has 2 < 5 and is not reported; "POWER TRAIN,ENGINE" is NHTSA's list of two components, counted for each
     assert set(stats) == {"nhtsa_complaints_fixmotors_roadster_2012_electrical_system",
                           "nhtsa_complaints_fixmotors_roadster_2012_power_train",
@@ -80,32 +92,40 @@ def test_complaint_statistics_are_counts_without_personal_data(world):
     el = stats["nhtsa_complaints_fixmotors_roadster_2012_electrical_system"]
     assert "7 consumer complaints" in el["risk"] and "of 14 complaints" in el["risk"] and "2 mention a fire" in el["risk"]
     assert "unverified consumer reports" in el["risk"] and el["evidence"]["complaints"] == 7
-    blob = json.dumps(rep.review)
+    blob = json.dumps(rep.entries + rep.review)
     assert "555-0100" not in blob and "1FIXTUR3E12" not in blob and "narrative" not in blob
 
 
-def test_flag_admits_entries_that_pass_the_standard(world, monkeypatch):
-    monkeypatch.setattr(vs, "KB_SUPPORTS_MODEL_YEARS", True)
+def test_flag_off_holds_entries_for_review_again(world, monkeypatch):
+    monkeypatch.setattr(vs, "KB_SUPPORTS_MODEL_YEARS", False)
     _, _, rep = _run(world)
-    ids = {e["id"] for e in rep.entries}
-    assert ids == {"nhtsa_26v000101_fixmotors_roadster_2012", "nhtsa_26v000102_fixmotors_roadster_2012",
-                   "nhtsa_complaints_fixmotors_roadster_2012_electrical_system",
-                   "nhtsa_complaints_fixmotors_roadster_2012_power_train",
-                   "nhtsa_complaints_fixmotors_roadster_2012_engine"}
-    assert not any("3" == e["match"][0]["models"][0] for e in rep.entries)                    # numeric model still held
-    assert all(i["reason"] != vs.YEAR_REVIEW for i in rep.review)
-    pytest.importorskip("mbos_economics.valueadd")
+    assert rep.entries == [] and sum("model-year" in i["reason"] for i in rep.review) == 5
+    assert all(i["candidate_entry"]["match"][0]["years"] for i in rep.review if "candidate_entry" in i)
 
 
-def test_admitted_entries_load_in_agent_03(world, monkeypatch, tmp_path):
+def test_entries_load_in_agent_03_and_match_years_correctly(world, tmp_path):
     vo = pytest.importorskip("mbos_economics.valueadd")
-    monkeypatch.setattr(vs, "KB_SUPPORTS_MODEL_YEARS", True)
-    _, _, rep = _run(world)
-    p = tmp_path / "kb.json"
-    p.write_text(json.dumps({"kb_version": "fixture", "kb_format": 1, "entries": [
-        {k: v for k, v in e.items() if k != "match"} | {"match": [{"makes": e["match"][0]["makes"], "models": e["match"][0]["models"]}]}
-        for e in rep.entries]}))
-    assert {e["id"] for e in vo.load_kb(p)["entries"]} == {e["id"] for e in rep.entries}     # passes 03's admission checks
+    if not hasattr(vo, "match_hits"):
+        pytest.skip("Agent 03 engine < 0.11.0 (no model-year matching)")
+    ad = NhtsaAdapter.from_fixture(FIX / "nhtsa", VEH2, world.clock)
+    rep = vs.collect(ad, PROFILE, MemoryRawStore(), HealthBook(), world.clock())
+    path = tmp_path / "kb.json"
+    path.write_text(json.dumps({"kb_version": "fixture", "kb_format": 1, "entries": rep.entries}))
+    kb = vo.load_kb(path)                                                # years validated by Agent 03's loader
+    assert {e["id"] for e in kb["entries"]} == {e["id"] for e in rep.entries}
+
+    def item(title):
+        return {"category": "project_vehicle", "normalized": {"title": title}}
+
+    hits, blocked = vo.match_hits(item("2012 Fixmotors Roadster, runs good"), kb)
+    assert "nhtsa_26v000101_fixmotors_roadster" in {h["entry"]["id"] for h in hits}
+    assert all(h["year_evidence"] for h in hits)                         # the year was read from the listing title
+    hits, blocked = vo.match_hits(item("2018 Fixmotors Roadster"), kb)   # uncovered year: no claim
+    assert hits == [] and any(b["entry_id"] == "nhtsa_26v000101_fixmotors_roadster" for b in blocked)
+    hits, blocked = vo.match_hits(item("Fixmotors Roadster project car"), kb)   # no year: no claim (UNKNOWN)
+    assert hits == [] and blocked
+    hits, _ = vo.match_hits(item("2012 and 2018 Fixmotors Roadster"), kb)        # every stated year must be covered
+    assert hits == []
 
 
 def test_block_freeze_and_determinism(world):

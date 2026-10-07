@@ -74,9 +74,9 @@ def test_nhtsa_fixture_vehicles_from_config(work, capsys, tmp_path):
     cfg = tmp_path / "nhtsa.toml"
     cfg.write_text(NHTSA_CFG)
     _, out = _run(["--data-dir", "nh", "run", "--config", str(cfg), "--fixtures", str(FIX)], capsys)
-    assert "records=6" in out and "entries=0" in out
+    assert "records=6" in out and "entries=5" in out
     k = json.loads((work / "nh" / "knowledge" / "nhtsa.json").read_text())
-    assert len(k["records"]) == 6 and k["entries"] == []        # 4 recalls + 2 complaint queries; all held for review
+    assert len(k["records"]) == 6 and len(k["entries"]) == 5    # 4 recalls + 2 complaint queries; entries carry years
 
 
 def test_asking_comps_derive_from_stored_items_without_requests(work, capsys):
@@ -95,7 +95,8 @@ def test_knowledge_outputs_are_written_and_entries_are_review_gated(work, capsys
     cpsc = json.loads((work / "k" / "knowledge" / "cpsc_recalls.json").read_text())
     assert len(cpsc["entries"]) == 3 and len(cpsc["review"]) == 3
     nhtsa = json.loads((work / "k" / "knowledge" / "nhtsa.json").read_text())
-    assert nhtsa["entries"] == [] and any("model-year" in r["reason"] for r in nhtsa["review"])   # held until years
+    assert len(nhtsa["entries"]) == 5 and all(e["match"][0]["years"] for e in nhtsa["entries"])
+    assert any("too short or purely numeric" in r["reason"] for r in nhtsa["review"])
 
 
 def test_dry_lists_exact_requests_for_every_network_source(work, capsys):

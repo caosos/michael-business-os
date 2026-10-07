@@ -5,10 +5,11 @@
 * **Complaint statistic** (kind `known_weakness`): per vehicle and component, the COUNT of consumer complaints that
   NHTSA holds (with how many mention a fire or crash). It is a count of agency records, worded as unverified consumer
   reports; narratives, VINs and any personal details never leave the raw artifact.
-* **Model years.** Both are year-specific (the query includes `modelYear`). Agent 03's KB matcher has no year field
-  yet (checked at engine 0.10.1), so a make+model entry would also flag other model years: a false safety claim.
-  Until 03 supports years, `KB_SUPPORTS_MODEL_YEARS` is False and every entry is held on the REVIEW list with its
-  complete `candidate_entry` (carrying `match[0].years`). One flag flips the ones that pass the standard into the KB.
+* **Model years (B-18).** Both are year-specific (the query includes `modelYear`). Agent 03's KB matcher supports
+  `match[].years` since engine 0.11.0 (C-18): a listing must state a covered year, and no year or an uncovered year
+  means NO match (UNKNOWN on the card). Every NHTSA entry therefore carries `years`; a per-year source without
+  `years` would be a bug. A recall that NHTSA returns for several queried years is ONE entry (one match group per
+  make+model) listing all covered years. If the flag is turned off, entries are held on the REVIEW list instead.
 * Also held for review: a model name too short or purely numeric for 03's matcher (Mazda "3"), no consequence or
   remedy text, and any NHTSA wording that trips the elementary-advice lint.
 """
@@ -29,7 +30,7 @@ from .normalize import clean_text
 from .rawstore import RawStore
 from .recalls import RecallsReport, _ELEMENTARY, _cut, _slug
 
-KB_SUPPORTS_MODEL_YEARS = False          # flip when Agent 03's match groups support `years` (see module doc)
+KB_SUPPORTS_MODEL_YEARS = True           # Agent 03 engine >= 0.11.0 (C-18, d9bceea): match[].years supported
 MIN_COMPLAINTS = 5                        # a component needs at least this many complaints to be reported
 YEAR_REVIEW = "recall/complaints are model-year specific and the KB matcher has no year field yet: held for review"
 
@@ -68,10 +69,15 @@ def _finish(entry: dict, rep: RecallsReport, key: str, title: str, prov_id: str,
         rep.entries.append(entry)
 
 
-def recall_entry(rec: dict, query: dict, url: str, ref: dict) -> tuple[Optional[dict], Optional[str]]:
+def _years_label(years: list[int]) -> str:
+    ys = sorted(set(years))
+    return f"{ys[0]}–{ys[-1]}" if len(ys) > 2 and ys[-1] - ys[0] == len(ys) - 1 else ", ".join(map(str, ys))
+
+
+def recall_entry(rec: dict, years: list[int], url: str, ref: dict) -> tuple[Optional[dict], Optional[str]]:
     make, model = clean_text(rec.get("Make")).lower(), clean_text(rec.get("Model"))
     num, date = clean_text(rec.get("NHTSACampaignNumber"), 30), _date(rec.get("ReportReceivedDate"))
-    year = int(query["year"])
+    years = sorted(set(years))
     if not (make and model and num and date):
         return None, "recall record lacks make, model, campaign number or a valid date"
     if not _model_ok(model):
@@ -81,16 +87,16 @@ def recall_entry(rec: dict, query: dict, url: str, ref: dict) -> tuple[Optional[
         return None, "recall has no consequence or no remedy text"
     flags = [t for t, k in (("do not drive until repaired", "parkIt"), ("park outside", "parkOutSide"),
                             ("remedy is an over-the-air update", "overTheAirUpdate")) if rec.get(k) is True]
-    risk = (f"{year} {make.title()} {model} recall, NHTSA campaign {num} (reported {date}): component "
+    risk = (f"{_years_label(years)} {make.title()} {model} recall, NHTSA campaign {num} (reported {date}): component "
             f"{clean_text(rec.get('Component'), 160)}. Consequence as stated by NHTSA: {_cut(cons, 300)} "
             f"Remedy as stated by NHTSA: {_cut(remedy, 240)}"
             + (f" NHTSA flags: {', '.join(flags)}." if flags else "")
             + " Whether the remedy was completed on this vehicle is UNKNOWN.")
-    return ({"id": f"nhtsa_{num}_{_slug(make)}_{_slug(model)}_{year}".lower(), "category": "project_vehicle",
-             "match": [{"makes": [make], "models": [model], "years": [year]}], "kind": "failure_mode", "risk": risk,
+    return ({"id": f"nhtsa_{num}_{_slug(make)}_{_slug(model)}".lower(), "category": "project_vehicle",
+             "match": [{"makes": [make], "models": [model], "years": years}], "kind": "failure_mode", "risk": risk,
              "plan_hint": f"Ask a {make.title()} dealer, with the VIN, whether NHTSA campaign {num} is still open on this "
                           f"vehicle before budgeting related repairs.",
-             "source": {"title": f"NHTSA recall {num}: {year} {make.title()} {model}, reported {date}", "url": url,
+             "source": {"title": f"NHTSA recall {num}: {_years_label(years)} {make.title()} {model}, reported {date}", "url": url,
                         "retrieved": ref["fetched_at"][:10]},
              "evidence": {"provenance_id": ref["provenance_id"], "raw_ref": ref["raw_ref"], "campaign": num,
                           "tool": "mbos_discovery.vehicle_safety"}}, None)
@@ -147,6 +153,7 @@ def collect(adapter: SourceAdapter, profile: SearchProfile, raw: RawStore, healt
         if fr:
             rep.freeze_requests.append(fr)
         return rep
+    groups: dict[tuple, dict] = {}               # (campaign, make, model) -> merged recall across queried years
     for r in res.records:
         raw_ref = raw.put(r.raw_bytes)
         try:
@@ -165,18 +172,23 @@ def collect(adapter: SourceAdapter, profile: SearchProfile, raw: RawStore, healt
         if p["endpoint"] == "recalls":
             row["recalls"] += 1
             rep.records[str(key)] = {"endpoint": "recalls", "query": p["query"], "url": p["url"], **ref}
-            entry, reason = recall_entry(p["record"], p["query"], p["url"], ref)
-            title = clean_text(p["record"].get("Component"), 120) or str(key)
-            if entry is None:
-                rep.review.append({"recall_id": str(key), "recall_number": str(key), "title": title, "reason": reason,
-                                   "provenance_id": prov["provenance_id"]})
-            else:
-                _finish(entry, rep, str(key), title, prov["provenance_id"], None)
+            gk = (str(key), clean_text(p["record"].get("Make")).lower(), clean_text(p["record"].get("Model")).lower())
+            g = groups.setdefault(gk, {"rec": p["record"], "years": set(), "url": p["url"], "ref": ref,
+                                       "prov": prov["provenance_id"], "key": str(key)})
+            g["years"].add(int(p["query"]["year"]))
         else:
             row["complaint_queries"] += 1
             rep.records[str(key)] = {"endpoint": "complaints", "query": p["query"], "url": p["url"], "count": len(p["results"]), **ref}
             for e in complaint_entries(p["results"], p["query"], p["url"], ref):
                 _finish(e, rep, e["id"], e["source"]["title"], prov["provenance_id"], None)
+    for g in groups.values():                    # one entry per (campaign, make, model) with all covered years
+        entry, reason = recall_entry(g["rec"], sorted(g["years"]), g["url"], g["ref"])
+        title = clean_text(g["rec"].get("Component"), 120) or g["key"]
+        if entry is None:
+            rep.review.append({"recall_id": g["key"], "recall_number": g["key"], "title": title, "reason": reason,
+                               "provenance_id": g["prov"]})
+        else:
+            _finish(entry, rep, g["key"], title, g["prov"], None)
     row.update(entries=len(rep.entries), review=len(rep.review))
     health.record_success(adapter.source, now, len(res.records))
     rep.entries.sort(key=lambda e: e["id"])
