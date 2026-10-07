@@ -96,10 +96,18 @@ systemctl --user enable --now mbos-postgres.service mbos-chain-check.timer
   - `SHA256SUMS`
 
   Copy `~/.local/share/mbos/backups/` and the anchor log **off-box**.
-- **Drill** (`bootstrap/restore-drill.sh <dump>`): restores into a scratch DB, runs `verify_chain`
-  against the anchor, then drops the scratch DB. **FACT:** it passed on 2026-10-07 (206 receipts,
-  same-host restore). *Not yet done:* a restore to a fresh host, which is the full D1. It needs a second
-  machine or VM.
+- **Drill, same cluster** (`bootstrap/restore-drill.sh <dump>`): restores into a scratch DB, runs `verify_chain` against the anchor, then drops the scratch DB.
+- **Drill D1, fresh cluster** (`bootstrap/restore-drill.sh --fresh-cluster <dump>`):
+  1. `initdb` a brand-new cluster with its own port and socket.
+  2. Bootstrap the roles from scratch.
+  3. `pg_restore` the dump.
+  4. Run `verify_chain` against the anchor, as `mbos_reader`.
+  5. Export the chain and verify it offline.
+  6. Verify it again with the **ADR-0010 reference** `mbos_canonical.verify_chain`.
+  7. Tear the cluster down.
+
+  **FACT (2026-10-07):** the drill passed on a 179-receipt seeded dry-run history (`bootstrap/seed_demo.py`): flip and service lanes, HOLD and YES, dry-run effector calls, outcomes, PANIC. The reference result was `(True, '179 receipts verified')`.
+  - *Caveat:* the "fresh host" was a fresh cluster on the same machine. The procedure is identical on a second machine (copy the dump and the anchor log over first).
 - **PITR:** `wal_level=replica` is already set. pgBackRest (`archive_command`, a repo on off-box storage)
   lands once an off-box target exists. **UNKNOWN:** the target (NAS, USB or cloud).
 
