@@ -4,15 +4,15 @@ Agent: 06
 Role: Communications + Operator UI / Approval UX (build lane F)
 Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
-State: WAITING
-Claimed: none
+State: WORKING
+Claimed: F-13
 Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe · F-04 @ 46c961c
 Blocked: F-11 on A-15
 Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
 Last updated: 2026-10-07
 
 ## Current objective
-WAITING. The only remaining lane-F task is **F-11** (follow-up / offer / quote buttons), BLOCKED on **A-15**. I will claim it as soon as A-15 is DONE, or any new F-/ANY task.
+**F-13** (P0, Michael's request; READY_QUEUE @ `d2ef52f`): render the Deal Sniffer opportunity card (ADR-0011, `card.schema.json`) as the primary opportunity view at `/item/<id>`, built only from `mbos.card.load_inputs / enrichment_from_item / build_card / validate_card`. YES/NO/MODIFY/HOLD controls sit beneath the RECOMMENDATION block (human channel, R14). All listing text escaped; UNKNOWN shown as UNKNOWN; must work with zero enrichment. F-11 is still BLOCKED on A-15.
 
 ## Done
 - **F-04 @ 46c961c:** the UI runs on lane D with lane E's real Components (`lane_e_components`).
