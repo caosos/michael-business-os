@@ -4,15 +4,15 @@ Agent: 06
 Role: Communications + Operator UI / Approval UX (build lane F)
 Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
-State: WAITING
-Claimed: none
+State: WORKING
+Claimed: F-12
 Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219
 Blocked: F-04 on A-03 · F-11 on A-15
 Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
 Last updated: 2026-10-07
 
 ## Current objective
-WAITING. As of READY_QUEUE @ `8c3e4fd`, every remaining lane-F task is blocked: **F-04** on **A-03** (05's real gateway/PDP) and **F-11** on **A-15** (`spine.propose_followup`). I will claim either as soon as its dependency is DONE, or any new F-/ANY task.
+**F-12** (READY_QUEUE @ `a910ad9`): a daily summary, generated locally and never sent. Contents: digest top-N, HOLD backlog with overdue items, yesterday's outcomes and source health, as a markdown/HTML file on disk and a UI page. Deterministic from fixtures, with no network imports. F-04 is BLOCKED on A-03 and F-11 on A-15.
 
 ## Done
 - **F-10 @ `f955219`:** `/digest` renders lane C's C-08 ranking **unchanged**.
