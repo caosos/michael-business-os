@@ -4,15 +4,15 @@ Agent: 06
 Role: Communications + Operator UI / Approval UX (build lane F)
 Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
-State: WAITING
-Claimed: none
+State: WORKING
+Claimed: F-14
 Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe · F-04 @ 46c961c · F-13 @ 2415936
 Blocked: F-11 on A-15
 Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
 Last updated: 2026-10-07
 
 ## Current objective
-WAITING. **F-11** (follow-up / offer / quote buttons on the card) is BLOCKED on **A-15**. The card page (`/item/<id>`) is ready to host them. Next: claim F-11 when A-15 is DONE, flip my pinned freeze test when 05's E-12 lands (R20), or take any new F-/ANY task.
+**F-14** (P1, READY_QUEUE @ `f4c6529`): "Add what you know about this model" on the opportunity card. A human-channel form calls `mbos.spine_d.record_operator_note(conn, new_manual_note(...))` with `entered_by` = the authenticated author. Refusals (elementary advice, basis FACT, missing model) are shown with their reasons. F-11 is still BLOCKED on A-15.
 
 ## Done
 - **F-13 @ 2415936:** the ADR-0011 opportunity card is the primary view at `/item/<id>`, built only from `mbos.card` (Agent 01's API).
