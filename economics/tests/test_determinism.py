@@ -155,3 +155,18 @@ class TestConfigShipsAsPackageData(unittest.TestCase):
             self.assertTrue((CONFIG_DIR / f).exists(), f)
         toml = (pkg.parents[1] / "pyproject.toml").read_text()
         self.assertIn('mbos_economics = ["config/*.json", "config/history/*.json"]', toml)
+
+
+class TestNoBuildArtifactsTracked(unittest.TestCase):
+    """Agent 02 report: a committed economics/build/ made `git archive` installs ship stale code
+    (setuptools saw build/lib as up to date). Build output must never be tracked."""
+
+    def test_git_tracks_no_build_output(self):
+        import subprocess
+        root = Path(__file__).resolve().parents[2]
+        try:
+            out = subprocess.run(["git", "ls-files", "economics"], cwd=root, capture_output=True, text=True, check=True).stdout
+        except (OSError, subprocess.CalledProcessError):
+            self.skipTest("not a git checkout")
+        bad = [f for f in out.splitlines() if f.startswith(("economics/build/", "economics/dist/")) or ".egg-info/" in f]
+        self.assertEqual(bad, [])
