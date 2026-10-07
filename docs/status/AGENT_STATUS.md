@@ -13,8 +13,9 @@ Done: G-05 @ 3c330e8 — 148 pass / 87 fail → F-26..F-39 (3 of the highs: F-26
 Done: G-06 @ e7434f4 — RC re-run NOT READY on ONE red case (F-40, fails safe); safety invariants HOLD; F-22/23/24/25 verified closed
 Done: G-07 @ 5e66a02 — RC READY (105/0, dry-run scope, stable x2); card 232 pass / 11 residual; F-40 and F-41 closed with direct tests
 Done: G-07 final re-run @ 40170f6 — card 245 pass / 2 low residuals (F-28 numeric date, F-30 ADR/contract marker); RC still READY 105/0 at mbos deec1d1
+Done: G-07 final pass @ 5312f47 — card 248/0; RC READY 105/0; reference 104/0 at mbos e755b38 + 05 E-16 716098e; every card finding closed or accepted (F-39, R25)
 Claimed: (none; no READY task for 07)
-Waiting on: nothing queued for 07 (Agent 01: no further tasks). Optional: F-28 numeric dates (01), F-30 model-specific marker (ADR/contract; 01+03). Re-run: `python -m mbos_qa install-pins`, then `card` and `spine --rc`.
+Waiting on: nothing. No open findings in the card or RC suites. Re-run any time: `python -m mbos_qa install-pins`, then `card` and `spine --rc`.
 Current phase: Round Two — G-07 delivered; waiting on the remaining card fixes
 Started: 2026-10-06 (round one) · 2026-10-07 (round two)
 Last updated: 2026-10-07

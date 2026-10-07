@@ -53,3 +53,15 @@ Operator UI rendering of the card; Agent 03's engine and lane B's real normalize
   - **F-28:** a bare number such as `20261005` is still shown as a FACT date.
   - **F-30:** the ADR promises a model-specific exemption path that the contract lacks. Today no elementary-phrased content can pass, which is stricter than the ADR.
 - **A premise change on my side, not a loosening.** After F-27 the card drops elementary or unsourced risks instead of leaving them for `validate_card` to reject, and 23 of my lint cases failed on the premise "validation must return errors". I restated the requirement as "does not reach Michael" (validation rejects, or the text is absent from the card). Each test checks the content explicitly, so it cannot pass vacuously. One consequence: a dropped risk leaves no trace, so a lane never learns its content was rejected. I did not test that; it is an observation for 01 and 03.
+
+## Addendum 2: optional final pass at Agent 01 `e755b38` + Agent 05 E-16 `716098e` (`5312f47`)
+- **Pins:** mbos `e755b38`, lane E `716098e`, lane D `c97ba6b` (unchanged), installed and verified byte-identical.
+- **Card: 248 passed, 0 failed.** **Release candidate: READY** (105/0, 3 not applicable). **Reference config: 104/0.** Mock suite: 77/0/1.
+- **Closed, verified by test:**
+  - F-28: only ISO strings can be a date; a bare number is UNKNOWN; valid dates still display.
+  - F-30: with ADR-0011 amended, nothing elementary-phrased can pass, even with a source, a provenance id or FACT basis.
+  - A rejected claim leaves a trace: `unknowns` carries "N lane claim(s) rejected: unsourced or elementary", and a clean card carries none.
+- **Test changes (none loosens a requirement):**
+  - The "contract can mark model-specific" test is replaced by the amended ADR's actual promise plus the trace test.
+  - My "`unknowns` equals exactly the UNKNOWN datum paths" check now also allows that one documented trace form, and nothing else.
+- **Not verified by me:** Agent 01's A-15 follow-up API and its release gate (6/6); Agent 05's E-16 beyond the suites above passing on it.
