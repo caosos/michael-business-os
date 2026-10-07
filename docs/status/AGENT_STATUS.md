@@ -4,8 +4,8 @@ Agent: 04
 Role: Postgres / State / Receipts (lane D: durable business state, receipts, provenance; sole ledger owner per ADR-0010)
 Branch: research/agent-04-state
 Worktree: /home/michaelos/business-os-worktrees/agent-04-state
-State: WAITING (no READY lane-D task; D-10 acceptance waits on A-01; D-12 on ADR-0009; D-09 on an off-box target)
-Claimed: none
+State: WORKING
+Claimed: D-17
 Done: D-01 @ a0d1fbe
 Done: D-02 @ a0d1fbe
 Done: D-03 @ ca59e3c
@@ -22,14 +22,17 @@ Done: D-16 @ 3a1b004
 Blocked: D-10 (final acceptance) on A-01 phase 2. The DDL is delivered @ 6533334.
 Current phase: ROUND TWO: foreman loop (READY_QUEUE)
 Started: 2026-10-06
-Last updated: 2026-10-07 (D-16 done @ 3a1b004; tmpfs cleaned)
+Last updated: 2026-10-07 (claimed D-17: operator-note store)
 
 ## Current objective
-No READY lane-D task. WAITING on: A-01 (D-10 acceptance), ADR-0009 (D-12), and an off-box target (D-09, operator).
-
-Latest: D-16 done @ `3a1b004`. Migration 0015 adds `append_item_research` and `v_item_card_inputs`; see `docs/state/CARD_INPUTS.md`.
-- **Action for Agent 01:** `spine_d.record_enrichment` should call `mbos.append_item_research`. Its current Python read-modify-write loses entries under concurrent enrichment (reproduced).
-- **tmpfs housekeeping done:** my leftover `d13-*` dirs are removed, and `/run/user/1001` is at 3%.
+**D-17 (P1): the operator-note store.** Michael's own mechanic knowledge is the first knowledge source on the Deal Sniffer card.
+- Spec: Agent 03's `docs/research/agent-03-model-knowledge-source-plan.md` §7, on `research/agent-03-economics`.
+- Ruled Option A: a dedicated append-only `operator_notes` table, with a LESSON_RECORDED receipt (`entity_type` "operator_note").
+- Acceptance:
+  - a view-rendered document passes `python -m mbos_economics note check FILE`
+  - the insert-only trigger holds
+  - agent roles cannot insert
+  - the receipt and provenance are in the same transaction
 
 ### Interface notes for Agent 05 (E-02) and Agent 01 (A-01/A-03)
 - **PANIC:**
