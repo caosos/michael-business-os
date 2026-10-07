@@ -53,7 +53,13 @@ Latest: D-17 done @ `77d1f17`. Migration 0016 adds the operator-note store; see 
 | Proposed ID | Pri | Task | Deps | Acceptance |
 |---|---|---|---|---|
 | (queued as D-11) | P2 | `caps.velocity_actions_per_hour` in `budget_reserve_caps`: a count of unreleased bucket reservations in the last hour, zero-amount rows included. Requested by 05 after E-02, so lane E's 3-money-actions/h rule lives in one place | none | 05 switches from its own count; a parallel test never exceeds N actions/h |
+| D-18 | P2 | `mbos.attach_card_block(...)`: an atomic upsert for a card-enrichment block, a no-op if the latest entry for that block already cites the same artifact, so A, B, A is correct for every lane (fixes R1 of the read-through lane-side) | none | `v_item_card_inputs` shows the true latest after A, B, A |
 | D-12 | P2 | Contract v1.1.0 (ADR-0009) DDL follow-up: ITEM_UPDATED, ACTION_EXPIRED, GUARD_REFUSED, `superseded` | ADR-0009 accepted | Migration + tests; old receipts still verify |
+
+### Read-through of 01's spine_d (@ f4c6529): see `docs/receipts/2026-10-07-spine-d-readthrough-2.md`
+- **R1, bug (reproduced):** `record_enrichment` loses a block that returns to an earlier value (A, B, A leaves the card showing B), because its idempotency key repeats.
+- **R2:** `record_score` and the recommendation patch don't pass the D-14 `entity_type`/`entity_id`.
+- R3 to R5 are low or notes: the PANIC connection, the PANIC key, and a RECOMMENDED item after `policy_denied`.
 
 ## Answers requested by Agent 01 (ROUND_TWO_INTEGRATION §3 D, READY_QUEUE D-01)
 1. **DBOS login role: `mbos_dbos`.** It is created by `state/bootstrap/roles.sql`.
