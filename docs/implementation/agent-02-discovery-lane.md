@@ -87,3 +87,37 @@ EBAY_CLIENT_ID=... EBAY_CLIENT_SECRET=... .venv/bin/mbos-discover run --config c
 .venv/bin/mbos-discover health
 .venv/bin/mbos-discover clear-freeze ebay --by michael
 ```
+
+## 9. Spine seam — READY_QUEUE B-01 (rulings R5, R8; ROUND_TWO_INTEGRATION §3-B)
+
+`src/mbos_discovery/spine.py` implements Agent 01's `mbos.interfaces` (@ `99e9ec0`) without touching the spine:
+
+| Protocol | Class | Behaviour |
+|---|---|---|
+| `SourceAdapter` | `SpineSourceAdapter` (one per adapter × profile, named `<source>:<profile_id>`) | policy → freeze check → `fetch` → retain raw → `normalize` (for identity only) → `RawListing`. Sorted by listing id; never raises for a source problem; `version` = adapter version (used by the workflow for provenance) |
+| `Normalizer` | `SpineNormalizer` | dispatch on `raw.source` to the adapter's pure `normalize`; emits `NormalizedListing` with blocking `dedup_key` + `content_hash`; `economics=None` (RESEARCH producer is C-01) |
+| `Deduper` | `SpineDeduper` | flip: `is_cross_source_duplicate` (same type/category, price ±15 %, same place, title ≥ 0.85); service: same `fp-` blocking key and the existing Item not in a terminal state |
+| side channel | `SideChannel` (JSONL) | `skipped`, `source_error`, `freeze_request` (`{level: L2, capability: discovery.source.<s>.read}`), `quarantine` — outside the DBOS-checkpointed listing stream (R5) |
+
+**`raw_ref` (ruling: hash of the stored raw bytes).** JSON payloads are now retained as MBOS-CJSON-1 bytes (ADR-0010
+reference, vendored byte-identical and hash-pinned). That is exactly what `mbos.spine.ingest` writes to
+`mbos.artifacts`, so both lanes store the same bytes under the same `raw_ref`, with no spine change needed (FACT:
+`test_fixtures_through_real_spine_identity_first` compares the bytes in `mbos.artifacts` with ours). Payloads outside
+the profile, and unparseable files, are kept as received and quarantined.
+
+**Service blocking key** is now `<category>|lead|fp-<first 16 hex of sha256(contact)>`. The spine's `Deduper`
+call carries no contact, so the fingerprint has to travel in the key. It is a pseudonymous hash; raw contact
+values stay in the raw artifact only.
+
+**Seam gap (for Agent 01 / ADR-0009):** `Deduper.is_duplicate(existing_item, candidate)` gets no candidate
+`source`, so the wave-one rule "never merge two listings from the same source" cannot be enforced on the spine
+path. Effect: two identical listings from one seller on one source can become one Item with two sightings.
+Nothing is lost (both listing ids stay in `sources[]`); inventory can be undercounted. Request: pass the
+`RawListing` (or `source`, `fetched_at`) to `is_duplicate`.
+
+**Install the spine for these tests** (read-only, nothing merged):
+```bash
+git archive 99e9ec0 | tar -x -C /tmp/mbos-99e9ec0 && .venv/bin/pip install "/tmp/mbos-99e9ec0[dev]"
+```
+`tests/test_spine_seam.py` skips if `mbos` is not importable. It uses a pinned test copy of 01's contracts
+(`tests/fixtures/mbos_contracts_99e9ec0/`) as `MBOS_CONTRACTS_DIR`, and pgserver for PostgreSQL 16.

@@ -54,11 +54,14 @@ def geo_cell(location: dict | None) -> str:
     return "nogeo"
 
 
-def dedup_key(item_type: str, category: str, normalized: dict) -> str:
-    """Human-readable blocking key in the contract example's format, e.g.
-    `trailer|1000-1500|cell-35.1-92.4`. Service leads use `lead` instead of a price band."""
-    band = "lead" if item_type == "service" else price_band(normalized.get("price"))
-    return f"{category}|{band}|{geo_cell(normalized.get('location'))}"
+def dedup_key(item_type: str, category: str, normalized: dict, contact_fp: str | None = None) -> str:
+    """Blocking key (never an identity — ruling R8) in the contract example's format, e.g.
+    `trailer|1000-1500|cell-35.1-92.4`. Service leads with a contact block on a 64-bit prefix of the
+    contact fingerprint (`drywall_repair|lead|fp-<16 hex>`) so the same customer's leads meet in one
+    bucket; without one they fall back to the geo cell."""
+    if item_type == "service":
+        return f"{category}|lead|" + (f"fp-{contact_fp[:16]}" if contact_fp else geo_cell(normalized.get("location")))
+    return f"{category}|{price_band(normalized.get('price'))}|{geo_cell(normalized.get('location'))}"
 
 
 def content_hash(normalized: dict) -> str:

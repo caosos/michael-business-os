@@ -129,7 +129,7 @@ class ItemStore:
         item["category"] = n.category
         if n.subcategory:
             item["subcategory"] = n.subcategory
-        item["dedup_key"] = dedup_key(n.type, n.category, new)
+        item["dedup_key"] = dedup_key(n.type, n.category, new, n.match_hints.get("contact_fp"))
         item["content_hash"] = chash
 
     def _find_duplicate(self, n: Normalized, fetched_at: datetime, source: str) -> dict | None:

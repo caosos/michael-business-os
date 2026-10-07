@@ -25,7 +25,7 @@ from urllib.parse import parse_qs, urlencode, urlsplit
 from ..adapter import (FetchResult, NormalizationError, Normalized, RawRecord, SearchProfile,
                        SourceAdapter, SourceError)
 from ..http import CallbackTransport, HttpResponse, ReadOnlyTransport, Transport, TransportError, UrllibTransport
-from ..ids import canonical_json
+from ..canonical import CanonicalError, raw_json_bytes
 from ..normalize import (MAX_DESCRIPTION, base_flags, classify, clean_text, geo_tier, match_text,
                          money, norm_ts)
 
@@ -125,7 +125,10 @@ class EbayBrowseAdapter(SourceAdapter):
                         continue                    # same listing hit by two keywords
                     if iid:
                         seen.add(iid)
-                    res.records.append(RawRecord(canonical_json(s), s, fetched_at, url))
+                    try:
+                        res.records.append(RawRecord(raw_json_bytes(s), s, fetched_at, url))
+                    except CanonicalError:      # out of MBOS-CJSON-1 profile: keep bytes, quarantine
+                        res.records.append(RawRecord(json.dumps(s).encode(), None, fetched_at, url))
                 pages += 1
                 nxt = body.get("next")
                 url = nxt if nxt and urlsplit(nxt).hostname == urlsplit(self.base).hostname else None

@@ -24,6 +24,7 @@ from pathlib import Path
 from typing import Callable
 
 from ..adapter import FetchResult, NormalizationError, Normalized, RawRecord, SearchProfile, SourceAdapter, SourceError
+from ..canonical import CanonicalError, raw_json_bytes
 from ..normalize import MAX_DESCRIPTION, base_flags, classify, clean_text, match_text, money, norm_ts
 
 MAX_FILE_BYTES = 256 * 1024
@@ -69,8 +70,9 @@ class ServiceIntakeAdapter(SourceAdapter):
             if len(raw) <= MAX_FILE_BYTES:
                 try:
                     payload = json.loads(raw)
-                except ValueError:
-                    payload = None                  # retained raw, then quarantined by the pipeline
+                    raw = raw_json_bytes(payload)   # retained as MBOS-CJSON-1 (same bytes the spine stores)
+                except (ValueError, CanonicalError):
+                    payload = None                  # retained as received, then quarantined by the pipeline
             res.records.append(RawRecord(raw, payload, fetched_at, f"intake://{CHANNELS[self.source]}/{p.name}"))
         return res
 

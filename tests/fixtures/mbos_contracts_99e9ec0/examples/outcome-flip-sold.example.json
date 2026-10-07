@@ -1,0 +1,31 @@
+{
+  "outcome_id": "outc_01JA0000000000000000000001",
+  "item_id": "itm_01JA0000000000000000000001",
+  "action_request_id": "areq_01JA0000000000000000000001",
+  "scorecard_id": "scr_01JA0000000000000000000001",
+  "observed_at": "2026-10-25T18:00:00Z",
+  "kind": "flip_sold",
+  "predicted_vs_actual": [
+    {
+      "field": "resale.target_sell_price",
+      "predicted": 2100,
+      "actual": 1950
+    },
+    {
+      "field": "rehab.labor_hours",
+      "predicted": 6,
+      "actual": 8.5
+    }
+  ],
+  "realized": {
+    "revenue": 1950,
+    "total_cost": 1490,
+    "net_profit": 460,
+    "hours": 13,
+    "days_to_cash": 19
+  },
+  "notes": "ILLUSTRATIVE ONLY",
+  "provenance_ids": [
+    "prov_01JA0000000000000000000030"
+  ]
+}

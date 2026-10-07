@@ -1,0 +1,33 @@
+{
+  "receipt_id": "rcpt_01JA0000000000000000000001",
+  "seq": 42,
+  "ts": "2026-10-06T14:30:00Z",
+  "schema_version": "1.0.0",
+  "type": "APPROVAL_DECIDED",
+  "actor": {
+    "type": "human",
+    "id": "michael"
+  },
+  "intent": "Michael parked the seller email until tomorrow noon",
+  "item_id": "itm_01JA0000000000000000000001",
+  "action_request_id": "areq_01JA0000000000000000000001",
+  "approval_id": "appr_01JA0000000000000000000001",
+  "capability": "comms.email.send",
+  "effect": "none",
+  "payload_hash": "sha256:00832c10697b47c632aee2c3326d5b2f872c27f6527269b847feff0744f06b58",
+  "idempotency_key": "appr-1",
+  "before_state": {
+    "status": "pending_approval"
+  },
+  "after_state": {
+    "status": "held"
+  },
+  "provenance_ids": [
+    "prov_01JA0000000000000000000020"
+  ],
+  "details": {
+    "kind": "generic"
+  },
+  "prev_hash": "sha256:4840e6b7f2cceb645d5c8faa4b776073bfca5b917a17f14b610b7ba6c8fb02f3",
+  "row_hash": "sha256:4aed7eeb466400644c1d5e590c5354128433bab09a98aa1f648ae19842c42558"
+}

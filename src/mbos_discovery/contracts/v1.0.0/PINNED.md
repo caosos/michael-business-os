@@ -14,3 +14,10 @@ come from Agent 01 and be re-vendored here; Agent 02 never edits these files.
 | vendor/agent-03/service-job.schema.json | 9e1fddc22fb50324999a4dda683d8268458a424bb462463a6933c3e5001d1506 |
 
 `tests/test_contract_pin.py` fails if any byte drifts.
+
+## canonical/ (ADR-0010, ACCEPTED) — vendored from agent-01-coordinator @ `99e9ec0`
+
+| file | sha256 |
+|---|---|
+| ../canonical/mbos_canonical.py | da2745456f4ac1d1c6aa7a23350c76d65e9e06427422e23ebf9b9eb578799628 |
+| ../canonical/vectors.json | 4ff072e400a8517af73b3d38062cf9538629b9adca14d35031bebab385069082 |

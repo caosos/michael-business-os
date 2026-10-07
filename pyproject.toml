@@ -19,7 +19,7 @@ mbos-discover = "mbos_discovery.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-mbos_discovery = ["contracts/v1.0.0/*.json", "contracts/v1.0.0/vendor/agent-03/*.json"]
+mbos_discovery = ["contracts/v1.0.0/*.json", "contracts/v1.0.0/*.md", "contracts/v1.0.0/vendor/agent-03/*.json", "contracts/canonical/*.json", "contracts/canonical/*.md"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
