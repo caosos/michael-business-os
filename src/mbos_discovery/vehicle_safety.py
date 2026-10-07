@@ -28,7 +28,7 @@ from .health import HealthBook
 from .ids import derived_ulid, iso
 from .normalize import clean_text
 from .rawstore import RawStore
-from .recalls import RecallsReport, _ELEMENTARY, _cut, _slug
+from .recalls import RecallsReport, _ELEMENTARY, _cut, _slug, enforce_unique_ids
 
 KB_SUPPORTS_MODEL_YEARS = True           # Agent 03 engine >= 0.11.0 (C-18, d9bceea): match[].years supported
 MIN_COMPLAINTS = 5                        # a component needs at least this many complaints to be reported
@@ -189,7 +189,8 @@ def collect(adapter: SourceAdapter, profile: SearchProfile, raw: RawStore, healt
                                "provenance_id": g["prov"]})
         else:
             _finish(entry, rep, g["key"], title, g["prov"], None)
+    rep.entries.sort(key=lambda e: e["id"])
+    enforce_unique_ids(rep)
     row.update(entries=len(rep.entries), review=len(rep.review))
     health.record_success(adapter.source, now, len(res.records))
-    rep.entries.sort(key=lambda e: e["id"])
     return rep

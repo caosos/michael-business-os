@@ -513,3 +513,5 @@ Example config: `config/discovery.example.toml` now has a profile for every sour
   - "2012 and 2018 …" does not match, because every stated year must be covered.
   - With the flag turned off, the entries go back to the review list with their candidates.
 - **Open (from Agent 03):** real listings may state a year as `'18` or `MY2018`, or only in the description. Those read as yearless, which is the safe side. When real listings are available, I'll report which forms appear.
+
+**Unique entry ids (Agent 03, engine 0.11.1).** `load_kb` now refuses a KB with a duplicate or missing entry `id`, and the matcher keys year evidence by id. `recalls.enforce_unique_ids` runs in both the CPSC and NHTSA collectors. The first entry keeps its id; a later entry with the same id goes to the review list with its candidate, so a collision can't make the whole file fail to load or attach the wrong year to a safety claim. Tests pin the invariant for CPSC and NHTSA, and the duplicate-held path.

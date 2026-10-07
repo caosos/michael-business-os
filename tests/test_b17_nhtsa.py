@@ -136,3 +136,20 @@ def test_block_freeze_and_determinism(world):
     _, _, a = _run(world)
     _, _, b = _run(world)
     assert a.review == b.review
+
+
+def test_entry_ids_are_unique_before_the_file_is_written(world):
+    """Agent 03's load_kb (0.11.1) refuses duplicate ids and the matcher keys year evidence by id."""
+    ad = NhtsaAdapter.from_fixture(FIX / "nhtsa", VEH2, world.clock)
+    rep = vs.collect(ad, PROFILE, MemoryRawStore(), HealthBook(), world.clock())
+    ids = [e["id"] for e in rep.entries]
+    assert len(ids) == len(set(ids)) and all(ids)
+
+
+def test_a_duplicate_id_is_held_not_shipped():
+    from mbos_discovery.recalls import RecallsReport, enforce_unique_ids
+    e = {"id": "x", "source": {"title": "t"}, "evidence": {"provenance_id": "prov_" + "0" * 26}}
+    rep = RecallsReport(entries=[e, dict(e, source={"title": "t2"})])
+    enforce_unique_ids(rep)
+    assert len(rep.entries) == 1 and rep.review[0]["candidate_entry"]["source"]["title"] == "t2"
+    assert "duplicate KB entry id" in rep.review[0]["reason"]

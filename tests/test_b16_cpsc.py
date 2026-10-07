@@ -173,3 +173,9 @@ def test_long_text_is_cut_at_a_word_boundary():
     hazard = e["risk"].split("Hazard as stated by CPSC: ")[1].split(" Listed models")[0]
     assert hazard.endswith("…") and not hazard[:-1].endswith(" ") and len(hazard) <= 301
     assert hazard[:-1].split(" ")[-1] in {"monoxide.", "carbon", "emit", "can", "generator", "The"}   # whole words only
+
+
+def test_cpsc_entry_ids_are_unique(world):
+    _, _, rep = _run(world)
+    ids = [e["id"] for e in rep.entries]
+    assert len(ids) == len(set(ids)) and all(ids)

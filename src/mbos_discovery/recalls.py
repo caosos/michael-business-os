@@ -218,6 +218,23 @@ def to_kb_entries(rec: dict, record_ref: dict) -> tuple[list[dict], Optional[str
     return [entry], None, None
 
 
+def enforce_unique_ids(rep: "RecallsReport") -> None:
+    """Agent 03's `load_kb` refuses a KB with a duplicate entry id (0.11.1), and the matcher keys year evidence by id.
+    Keep ids unique before anything is written: the first entry keeps its id; a later entry with the same id goes to the
+    review list (it would otherwise collide)."""
+    seen: set[str] = set()
+    kept = []
+    for e in rep.entries:
+        if e["id"] in seen:
+            rep.review.append({"recall_id": e["id"], "recall_number": e["id"], "title": e["source"]["title"],
+                               "reason": "duplicate KB entry id; held so it cannot collide with the first entry",
+                               "provenance_id": e["evidence"]["provenance_id"], "candidate_entry": e})
+        else:
+            seen.add(e["id"])
+            kept.append(e)
+    rep.entries = kept
+
+
 def _provenance(adapter: SourceAdapter, rec: dict, raw_ref: str, fetched_at: datetime, request_uri: str) -> dict:
     prov = {"provenance_id": derived_ulid("prov", fetched_at, "recall", rec["recall_id"], raw_ref),
             "created_at": iso(fetched_at), "actor_type": "external", "agent_name": AGENT_ID, "basis": "FACT",
@@ -273,7 +290,8 @@ def collect_recalls(adapter: SourceAdapter, profile: SearchProfile, raw: RawStor
             if candidate:
                 item["candidate_entry"] = candidate
             rep.review.append(item)
+    rep.entries.sort(key=lambda e: e["id"])
+    enforce_unique_ids(rep)
     row.update(recalls=len(rep.records), entries=len(rep.entries), review=len(rep.review))
     health.record_success(adapter.source, now, len(res.records))
-    rep.entries.sort(key=lambda e: e["id"])
     return rep
