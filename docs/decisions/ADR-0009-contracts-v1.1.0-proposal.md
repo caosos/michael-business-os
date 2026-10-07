@@ -13,6 +13,7 @@
 6. Re-vendor Agent 03's schemas as v1.1.0 under **versioned `$id`s**. Adopt 03's `inputs_hash` spec `mbos.economics.inputs/v1`. Annotate the illustrative trailer example, which 03's engine scores PASS (C23).
 7. Item-level semantics when one Item has more than one ActionRequest.
 8. `validate_contracts.py` adds a format checker.
+9. System-scoped ActionRequests (03 P-03-05): `item_id` becomes optional for system actions, and a new category `config_change` (tier 0 forced) covers them. This is needed for LEARN's `config.scoring.bump` proposals. Until it lands, lane D refuses these drafts, which is safe.
 
 ## Acceptance gate
 - Every lane re-runs its contract tests against v1.1.0.

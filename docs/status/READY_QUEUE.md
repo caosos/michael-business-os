@@ -1,7 +1,7 @@
 # READY QUEUE: Michael Business OS, Round Two
 
 - **Owner:** Agent 01 (coordinator / dispatcher). **Protocol:** `docs/COORDINATION.md`. Read it before claiming.
-- **Last synced:** 2026-10-07 13:55 -0500, against branch heads 02 `41d45a6` · 03 `73a4d32` · 04 `7f0649a` · 05 `16fb86c` · 06 `c125618` · 07 `397101c`.
+- **Last synced:** 2026-10-07 14:10 -0500, against branch heads 02 `41d45a6` · 03 `73a4d32` · 04 `7f0649a` · 05 `16fb86c` · 06 `c125618` · 07 `397101c`.
 - **Read it from any worktree:** `git fetch -q origin && git show origin/research/agent-01-coordinator:docs/status/READY_QUEUE.md`
 - **Status values:** READY · CLAIMED · BLOCKED · DONE.
 - **Priority:** P0 = critical path · P1 = next-up · P2 = useful parallel work.
@@ -69,8 +69,11 @@
 | C-04 | P1 | Sold-comps feed (03 P-03-01, lead 03 with 02 for source access): a comps-evidence bundle interface + a fixture-first sold-comps source behind it (read-only, ADR-02-0202 tiers) that `estimate_item` consumes. Real eBay flips stay `insufficient` without it | none | **DONE** @ `882c726` (02 support @ `a1a7730`) | 03 (+02) | A 02-fixture flip with comps advances RESEARCHING → SCORED with FACT-tagged comp provenance |
 | C-05 | P2 | R13: scorecard flag `pass_on_priors` when a PASS rests only on non-FACT inputs | none | **DONE** @ `6e938d2` (`scorecard.pass_on_priors`) | 03 | Golden test: a priors-only PASS is flagged |
 
-| C-06 | P1 | R13 amended (03 P-03-04): for flips, a PASS archives only if the revenue side AND ≥1 cost-side input are evidence-backed; otherwise `pass_on_priors=true` | none | READY | 03 | Goldens: the floor PASS driven by prior repair costs is flagged |
-| C-07 | P1 | LEARN on 04's outcome store: Brier/MAPE from `predicted_vs_actual`; a config bump is PROPOSED as a tier-0 ActionRequest (`config.scoring.bump`), never auto-applied | none | READY | 03 | Two outcomes → a bump proposal with provenance; nothing applied |
+| C-06 | P1 | R13 amended (03 P-03-04): for flips, a PASS archives only if the revenue side AND ≥1 cost-side input are evidence-backed; otherwise `pass_on_priors=true` | none | **DONE** @ `9e36ec9` (engine 0.4.0; revenue requirement on the economic gates only, confirmed by 01) | 03 | Goldens: the floor PASS driven by prior repair costs is flagged |
+| C-07 | P1 | LEARN on 04's outcome store: Brier/MAPE from `predicted_vs_actual`; a config bump is PROPOSED as a tier-0 ActionRequest (`config.scoring.bump`), never auto-applied | none | **DONE** @ `0c3cf4a` (LEARN proposes, never applies; system-scoped areq waits on ADR-0009 item 9) | 03 | Two outcomes → a bump proposal with provenance; nothing applied |
+
+| C-08 | P1 | Morning digest ranking: a pure function over scored Items → a ranked "what to do first" list (EV $/h, time-to-cash, expiry/auction end, confidence) with one-line reasons and provenance refs, for the Operator UI and a daily summary (72-hour plan) | none | READY | 03 (06 renders) | Deterministic ranking over the 13 goldens + 02 fixtures; explanation per row |
+| C-09 | P1 | Owner-decision support for MICHAEL_DECISIONS #1/#2: a sensitivity report showing how verdicts on current goldens and fixtures change across cash caps and $/h floor/targets. Report only; config untouched | none | READY | 03 | `docs/` report with a table; no config change |
 
 ### Lane E: Agent 05 (governance)
 | ID | Pri | Task | Deps | Status | Agent | Acceptance |
