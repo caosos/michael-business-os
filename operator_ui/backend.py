@@ -123,7 +123,7 @@ class SpineBackend:
     def record_outcome(self, item_id: str, kind: str, **kw: Any) -> dict:
         """Second (and last) write path: Michael records what actually happened (feeds LEARN, lane C)."""
         with self.engine.begin() as c:
-            return spine.record_outcome(c, item_id, kind, recorded_by="michael", **kw)
+            return spine.record_outcome(c, item_id, kind, recorded_by="michael", channel="web", **kw)  # → mbos.web.outcome
 
     # ---- the one write path -----------------------------------------------------------------
     def decide(self, areq_id: str, decision: str, payload_hash_seen: str, **kw: Any) -> dict:

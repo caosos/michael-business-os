@@ -41,6 +41,8 @@ def test_outcome_entry_records_via_spine_with_learn_pairs(rt, discover, ui):
     assert item_state(rt.engine, item_id) == "OUTCOME_RECORDED"
     ((r,),) = q(rt.engine, "SELECT body FROM mbos.receipts WHERE item_id = :i AND type = 'OUTCOME_RECORDED'", i=item_id)
     assert r["actor"] == {"type": "human", "id": "michael"} and r["outcome_id"] == o["outcome_id"]
+    ((pv,),) = q(rt.engine, "SELECT body FROM mbos.provenance WHERE provenance_id = :p", p=o["provenance_ids"][0])
+    assert pv["tool_name"] == "mbos.web.outcome" and pv["human_actor"] == "michael"  # P-06-10 (a910ad9)
     _, _, card = req(ui, "GET", f"/areq/{areq['action_request_id']}")
     assert "flip_sold" in card and "resale.target_sell_price" in card and "&lt;b&gt;neighbor" in card
     _, _, page = req(ui, "GET", "/outcomes")
