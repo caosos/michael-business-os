@@ -5,8 +5,7 @@ Role: Discovery / Source Adapters (DISCOVER + NORMALIZE lane)
 Branch: research/agent-02-opportunity
 Worktree: /home/michaelos/business-os-worktrees/agent-02-opportunity
 State: WORKING
-Claimed: B-10
-Blocked: B-09 on E-02 (Postgres PANIC)
+Claimed: B-09 (E-02 landed @ agent-05 1c554cb)
 Done: B-01 @ 7c9da45
 Done: B-02 @ cadfdae
 Done: B-03 @ 8ff5476
@@ -15,8 +14,9 @@ Done: B-05 @ e439b9b (HOLD wake_on=price_change wakes from a 02 fixture re-sight
 Done: B-06 @ bd899f4 (GovDeals/PublicSurplus/EstateSales.NET alert e-mails; read-only IMAP; DKIM-checked; 137 tests)
 Done: B-07 @ 32c148c (SAM.gov gov_contract leads, NAICS mapping, key redacted; 142 tests)
 Done: B-08 @ be0dd52 (asking comps; vs Agent 03 @ e1869f2: INFER-only, fenced — no YES, pass_on_priors; 146 tests)
+Done: B-10 @ e439d04 (F1-F4 harness green; F2 missed-duplicate rate 0.00%, false merges 0, 36 Items/36 objects)
 Done: C-04 (support, source side) @ a1a7730 (lead Agent 03 C-04 @ 882c726)
-Current phase: Round Two — working B-10 (discovery acceptance F1–F4 harness); B-09 blocked on E-02
+Current phase: Round Two — working B-09 (freeze/honour wiring onto lane E's Postgres PANIC)
 Started: 2026-10-06 (Round One) · Round Two started 2026-10-07
 Last updated: 2026-10-07
 
