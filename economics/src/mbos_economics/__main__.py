@@ -5,6 +5,7 @@
     python -m mbos_economics estimate ITEM.json --as-of 2026-10-07T18:00:00Z [--bundle BUNDLE.json]
     python -m mbos_economics digest ITEMS.json --as-of 2026-10-07T18:00:00Z [--text] [--limit N]
     python -m mbos_economics audit EXPORT.json     # {items, receipts} (lane-D export) or a list of Items
+    python -m mbos_economics audit --dsn "host=... dbname=mbos user=agent_read" [--strict]   # live lane-D DB
 
 ITEM.json may be a bare Item v1 or an examples/*.scored.json wrapper ({item, provenance, ...}).
 
@@ -36,7 +37,9 @@ def main(argv: list[str] | None = None) -> int:
     r = sub.add_parser("replay")
     r.add_argument("item", type=Path)
     a = sub.add_parser("audit")
-    a.add_argument("item", type=Path, help="lane-D export {items, receipts} or a JSON list of scored Items")
+    a.add_argument("item", type=Path, nargs="?", help="lane-D export {items, receipts} or a JSON list of scored Items")
+    a.add_argument("--dsn", help="read a live lane-D database (SELECT only; needs psycopg)")
+    a.add_argument("--strict", action="store_true", help="treat receipts without payload_hash as drift")
     g = sub.add_parser("digest")
     g.add_argument("item", type=Path, help="JSON list of scored Items")
     g.add_argument("--as-of", required=True)
@@ -48,16 +51,26 @@ def main(argv: list[str] | None = None) -> int:
     e.add_argument("--bundle", type=Path, help="research bundle JSON (comps, evidence, overrides; all with provenance)")
     args = ap.parse_args(argv)
 
-    item = json.loads(args.item.read_text(encoding="utf-8"))
     if args.cmd == "audit":
-        from .replay_audit import audit
-        items, receipts = (item["items"], item.get("receipts")) if isinstance(item, dict) else (item, None)
-        rep = audit(items, receipts=receipts)
+        from .replay_audit import audit, load_scored_items
+        if args.dsn:
+            import psycopg  # optional dependency, only for --dsn
+            with psycopg.connect(args.dsn) as conn:
+                items, receipts = load_scored_items(conn)
+        elif args.item:
+            doc = json.loads(args.item.read_text(encoding="utf-8"))
+            items, receipts = (doc["items"], doc.get("receipts")) if isinstance(doc, dict) else (doc, None)
+        else:
+            ap.error("audit needs EXPORT.json or --dsn")
+        rep = audit(items, receipts=receipts, strict=args.strict)
         print(json.dumps({k: v for k, v in rep.items() if k != "rows"} |
                          {"drift": [r for r in rep["rows"] if any(f["drift"] for f in r["findings"])],
-                          "engine_changes": [r for r in rep["rows"] if any(f["kind"] == "engine_change" for f in r["findings"])]},
+                          "engine_changes": [r for r in rep["rows"] if any(f["kind"] == "engine_change" for f in r["findings"])],
+                          "weak_receipts": [r["item_id"] for r in rep["rows"] if any(f["kind"] == "receipt_weak" for f in r["findings"])],
+                          "not_engine": [r["item_id"] for r in rep["rows"] if any(f["kind"] == "not_engine_scorecard" for f in r["findings"])]},
                          indent=2))
         return 0 if rep["ok"] else 1
+    item = json.loads(args.item.read_text(encoding="utf-8"))
     if args.cmd == "digest":
         from .digest import build_digest, render_text
         d = build_digest(item, args.as_of, limit=args.limit)

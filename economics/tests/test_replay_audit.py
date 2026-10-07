@@ -152,3 +152,79 @@ class TestReadOnly(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def spine_style(export: dict) -> dict:
+    """Shape of Agent 01's spine_d.record_score receipts (@a910ad9): inputs_hash only, no payload_hash."""
+    d = copy.deepcopy(export)
+    for rc in d["receipts"]:
+        rc.pop("payload_hash", None)
+        rc["tool_name"] = "mbos_economics.engine@0.8.1"
+    return d
+
+
+class TestSpineReceipts(unittest.TestCase):
+    """C-13: the gate runs over Agent 01's e2e exports, whose receipts bind inputs_hash only."""
+
+    def test_weak_binding_reported_not_failed(self):
+        d = spine_style(D)
+        r = audit(d["items"], receipts=d["receipts"])
+        self.assertTrue(r["ok"])
+        self.assertEqual((r["drift_count"], r["weak_receipt_count"], r["receipts_matched"]), (0, 19, 19))
+
+    def test_strict_mode_fails_weak_binding(self):
+        d = spine_style(D)
+        r = audit(d["items"], receipts=d["receipts"], strict=True)
+        self.assertFalse(r["ok"])
+        self.assertEqual(r["drift_count"], 19)
+
+    def test_weak_receipt_with_wrong_inputs_hash_is_drift(self):
+        d = spine_style(D)
+        d["receipts"][0]["inputs_hash"] = "sha256:" + "0" * 64
+        r = audit(d["items"], receipts=d["receipts"])
+        drifted = [x for x in r["rows"] if any(f["drift"] for f in x["findings"])]
+        self.assertEqual(len(drifted), 1)
+        self.assertEqual([f["kind"] for f in drifted[0]["findings"]], ["receipt"])
+        self.assertEqual(drifted[0]["item_id"], d["receipts"][0]["item_id"])
+
+    def test_spine_fallback_card_is_not_replayed(self):
+        """01's adapter writes a minimal card when inputs are missing; the engine never produced it."""
+        items = copy.deepcopy(D["items"])
+        items[0]["scores"]["scorecard"] = {"scoring_config_version": "2026.10.1", "derived": {}, "sub_scores": {},
+                                           "composite": 0, "decision": "MAYBE", "gates": {},
+                                           "reasons": ["Economics inputs missing or invalid"]}
+        r = audit(items)
+        self.assertTrue(r["ok"])
+        self.assertEqual((r["not_engine_count"], kinds(r)), (1, ["not_engine_scorecard"]))
+
+    def test_cli_dsn_reads_db_select_only(self):
+        import types
+        from mbos_economics.__main__ import main
+
+        class Cur:
+            def execute(self, sql, params=None):
+                assert sql.lstrip().upper().startswith("SELECT")
+                self.rows = [(x,) for x in (D["items"] if "v_item_documents" in sql else D["receipts"])]
+            def fetchall(self): return self.rows
+
+        class Conn:
+            def cursor(self): return Cur()
+            def __enter__(self): return self
+            def __exit__(self, *a): return False
+
+        fake = types.SimpleNamespace(connect=lambda dsn: Conn())
+        saved = sys.modules.get("psycopg")
+        sys.modules["psycopg"] = fake
+        try:
+            import contextlib, io
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                code = main(["audit", "--dsn", "host=x dbname=mbos user=agent_read"])
+            self.assertEqual(code, 0)
+            out = json.loads(buf.getvalue())
+            self.assertEqual((out["scorecards_audited"], out["drift_count"]), (19, 0))
+        finally:
+            if saved is None:
+                sys.modules.pop("psycopg", None)
+            else:
+                sys.modules["psycopg"] = saved

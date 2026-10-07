@@ -16,6 +16,9 @@ In ledger mode (``receipts`` given) every scorecard must have a SCORE_RECORDED r
     - ``decision``: same engine version, different verdict
     - ``scorecard``: same engine version, byte replay differs (e.g. a tampered number)
     - ``receipt``: the SCORE_RECORDED receipt does not match the scorecard
+* ``receipt_weak`` (reported; fails only with ``strict``): the ledger receipt carries ``inputs_hash`` but no
+  ``payload_hash``, so the scorecard content itself is not bound by the ledger.
+* ``not_engine_scorecard`` (reported): a scorecard the engine never produced (no engine_version/derived).
 * ``engine_change`` (reported, does not fail): an OLDER engine version scored it and the current engine
   reaches a different verdict on identical inputs + config; expected after a ruling, listed for review.
 
@@ -49,7 +52,7 @@ def load_scored_items(conn) -> tuple[list[dict], list[dict]]:
     return items, receipts
 
 
-def _audit_item(item: dict, receipts_by_item: dict | None, config_dir: Path) -> dict:
+def _audit_item(item: dict, receipts_by_item: dict | None, config_dir: Path, strict: bool = False) -> dict:
     scores = item["scores"]
     sc = scores["scorecard"]
     version = sc.get("scoring_config_version")
@@ -58,6 +61,13 @@ def _audit_item(item: dict, receipts_by_item: dict | None, config_dir: Path) -> 
 
     def add(kind: str, detail: str) -> None:
         findings.append({"kind": kind, "drift": kind in DRIFT_KINDS, "detail": detail})
+
+    if not sc.get("engine_version") or "derived" not in sc or not sc.get("derived"):
+        # e.g. a spine fallback card written when inputs were missing: the engine never produced it
+        add("not_engine_scorecard", "scorecard was not produced by mbos_economics (no engine_version/derived); "
+                                    "nothing to replay")
+        return {"item_id": item.get("item_id"), "scorecard_id": scores.get("scorecard_id"), "engine_version": None,
+                "config_version": version, "decision": sc.get("decision"), "receipts_matched": 0, "findings": findings}
 
     try:
         inp = build_engine_input(item)
@@ -98,12 +108,18 @@ def _audit_item(item: dict, receipts_by_item: dict | None, config_dir: Path) -> 
         mine = receipts_by_item.get(item.get("item_id"), []) + [
             r for r in receipts_by_item.get("__by_scorecard__", {}).get(scores["scorecard_id"], [])]
         want = content_hash(sc)
-        hits = [rc for rc in mine if rc.get("payload_hash") == want]
-        matched = len(hits)
-        if not hits:
+        strong = [rc for rc in mine if rc.get("payload_hash") == want]
+        weak = [rc for rc in mine if not rc.get("payload_hash") and rc.get("inputs_hash") == scores["inputs_hash"]]
+        matched = len(strong) + len(weak)
+        if not strong and not weak:
             add("receipt", "no SCORE_RECORDED receipt in the ledger matches this scorecard "
-                           f"(payload_hash {want}); {len(mine)} SCORE_RECORDED receipt(s) for the item")
-        for rc in hits:
+                           f"(payload_hash {want}, inputs_hash {scores['inputs_hash']}); "
+                           f"{len(mine)} SCORE_RECORDED receipt(s) for the item")
+        elif not strong:
+            add("receipt_weak" if not strict else "receipt",
+                "ledger receipt binds inputs_hash only (no payload_hash), so the scorecard CONTENT is not bound by the "
+                "ledger; the writer should add payload_hash = MBOS-CJSON-1 hash of the scorecard")
+        for rc in strong:
             if rc.get("inputs_hash") and rc["inputs_hash"] != scores["inputs_hash"]:
                 add("receipt", f"receipt {rc.get('receipt_id')} inputs_hash {rc['inputs_hash']} != item {scores['inputs_hash']}")
     return {"item_id": item.get("item_id"), "scorecard_id": scores["scorecard_id"], "engine_version": produced_by,
@@ -111,7 +127,7 @@ def _audit_item(item: dict, receipts_by_item: dict | None, config_dir: Path) -> 
 
 
 def audit(items: list[dict], *, receipts: list[dict] | None = None, config_dir: Path = CONFIG_DIR,
-          audited_at: str | None = None) -> dict:
+          audited_at: str | None = None, strict: bool = False) -> dict:
     """Audit every scored Item. Pure apart from reading config files; writes nothing."""
     by_item: dict | None = None
     if receipts is not None:                       # ledger mode: every scorecard must have a matching receipt
@@ -124,7 +140,7 @@ def audit(items: list[dict], *, receipts: list[dict] | None = None, config_dir: 
             elif rc.get("entity_id"):
                 by_item["__by_scorecard__"].setdefault(rc["entity_id"], []).append(rc)
     scored = sorted((i for i in items if i.get("scores")), key=lambda i: str(i.get("item_id")))
-    rows = [_audit_item(i, by_item, config_dir) for i in scored]
+    rows = [_audit_item(i, by_item, config_dir, strict) for i in scored]
     drift = [r for r in rows if any(f["drift"] for f in r["findings"])]
     changed = [r for r in rows if any(f["kind"] == "engine_change" for f in r["findings"])]
     body = {
@@ -132,7 +148,10 @@ def audit(items: list[dict], *, receipts: list[dict] | None = None, config_dir: 
         "items_seen": len(items), "scorecards_audited": len(rows),
         "ledger_mode": receipts is not None,
         "receipts_matched": sum(r["receipts_matched"] for r in rows),
+        "strict": strict,
         "drift_count": len(drift), "engine_change_count": len(changed),
+        "weak_receipt_count": sum(1 for r in rows if any(f["kind"] == "receipt_weak" for f in r["findings"])),
+        "not_engine_count": sum(1 for r in rows if any(f["kind"] == "not_engine_scorecard" for f in r["findings"])),
         "ok": not drift,
         "rows": rows,
     }
