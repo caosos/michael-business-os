@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mbos-governance"
-version = "0.1.0"
+version = "0.2.0"
 description = "Michael Business OS governance layer: Action Gateway, PDP, execution guard, PANIC (wave one, dry-run only)"
 requires-python = ">=3.12"
-dependencies = ["jsonschema>=4.18"]
+dependencies = ["jsonschema>=4.18", "psycopg[binary]>=3.1"]
 
 [project.optional-dependencies]
-test = ["pytest>=8"]
+test = ["pytest>=8", "pgserver>=0.1"]   # pgserver: PostgreSQL 16 binaries for the test cluster (no root)
 
 [project.scripts]
 mbos-gov = "mbos_governance.cli:main"

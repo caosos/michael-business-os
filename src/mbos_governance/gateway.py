@@ -3,24 +3,26 @@
 Core law: no action without a receipt; no receipt without provenance.
 Governance rule: models PROPOSE (ActionRequest); this non-LLM code AUTHORIZES.
 
-Lifecycle (statuses from action-request.schema.json; every transition writes a receipt
-in the same transaction as the status change):
+Storage is lane D's canonical Postgres schema through `mbos.*` (E-02; R1/R2/R4/R5). Every status change
+and its receipt commit in one transaction, and lane D's deferred triggers refuse a commit without one.
+R4: the gateway owns the action-status edges and their receipts.
 
-  propose()          drafted -> pending_approval | rejected      ACTION_PROPOSED, POLICY_DECIDED, APPROVAL_REQUESTED
-  record_approval()  YES -> approved (+BUDGET_RESERVED) | NO -> rejected | HOLD -> held | MODIFY -> rejected(closed)
-  execute()          approved -> executing -> executed | failed | expired | cancelled_by_freeze
+  propose()          drafted -> classified -> pending_approval | rejected
+                     receipts: ACTION_PROPOSED, POLICY_DECIDED, APPROVAL_REQUESTED (+INJECTION_SUSPECTED)
+  record_approval()  valid YES -> approved (+BUDGET_RESERVED) | NO -> rejected | HOLD -> held | MODIFY -> rejected(closed)
+                     an invalid YES is NOT recorded as an approval (lane D refuses it too); POLICY_DECIDED notes it
+  execute()          approved -> executing (+claim) -> executed | failed | cancelled_by_freeze; approved -> expired | failed
 
-Execution guard — all 8 checks (ADR-0005 §2), evaluated inside one write transaction:
+Execution guard — all 8 checks (ADR-0005 §2), evaluated in one transaction with the request row locked:
   G1 approval valid      latest Approval is YES, by an allowed approver/channel/scope, step-up when required
   G2 not expired         approval expiry, approval TTL cap, ActionRequest.expires_at
-  G3 payload_hash        sha256(canonical(payload)) == ActionRequest.payload_hash == Approval.payload_hash_seen
-  G4 idempotency         no execution claim for this idempotency_key (exactly-once effect)
-  G5 budget reserved     reservation exists (or can be made now) within per-action/daily/global/velocity caps
-  G6 grant constraints   PDP re-run on CURRENT policy: capability still held, category still gated, tier 0,
-                         scope=once (no delegation), quiet hours
+  G3 payload_hash        sha256(CJSON(payload)) == ActionRequest.payload_hash == Approval.payload_hash_seen
+  G4 idempotency         no execution claim (mbos.effector_calls) for this request (exactly-once effect)
+  G5 budget reserved     reservation exists or is made now (mbos.budget_reserve_caps + money velocity count)
+  G6 grant constraints   PDP re-run on CURRENT policy, tier 0, quiet hours, secret re-scan
   G7 kill switch clear   PANIC L3 / L1 agent / L2 capability|category; unreadable => FROZEN
   G8 dry-run forced      system_mode round_one|mvp => dry_run=True; effector must support it and must echo it
-Policy unreadable => every check fails closed.
+Policy unreadable => every check fails closed. Lane D re-checks G1–G3 at the approved->executing edge.
 """
 from __future__ import annotations
 
@@ -33,16 +35,19 @@ from decimal import ROUND_CEILING, Decimal
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+import psycopg
+
 from . import __version__, contracts
 from .content_guard import ContentRulesStore, ContentRulesUnavailable, injection_findings, secret_findings
 from .effectors import DryRunEffector, Effector, TokenMinter
 from .hooks import run_hooks
-from .ids import fmt_ts, fmt_ts_us, new_id, new_ulid, parse_ts, payload_hash, utcnow
-from .panic import PanicStore
+from .ids import fmt_ts, new_ulid, parse_ts, payload_hash, utcnow
 from .policy import DENY, REQUIRE_APPROVAL, Policy, PolicyStore, PolicyUnavailable, decide
+from .store_pg import PgGovernanceStore, PgPanicStore
 
 GATEWAY_ACTOR = {"type": "system", "id": "action-gateway"}
 DRY_RUN_MODES = ("round_one", "mvp")
+CURRENCY = "USD"
 
 EFFECT_BY_CATEGORY = {
     "message": "send", "sms": "send", "email": "send", "phone_call": "send",
@@ -65,12 +70,21 @@ class Result:
     effector_response: dict | None = None
 
 
-def to_micros(amount) -> int:
-    return int((Decimal(str(amount)) * 1_000_000).to_integral_value(rounding=ROUND_CEILING))
+def to_amount(value) -> Decimal:
+    """Money to lane D's numeric(14,6), rounded UP (never under-reserve)."""
+    return Decimal(str(value)).quantize(Decimal("0.000001"), rounding=ROUND_CEILING)
+
+
+def actor_json(actor: str) -> dict:
+    if actor == "michael":
+        return {"type": "human", "id": actor}
+    if actor.startswith("agent-"):
+        return {"type": "agent", "id": actor}
+    return {"type": "system", "id": actor}
 
 
 class ActionGateway:
-    def __init__(self, store, policy_store: PolicyStore, panic_store: PanicStore, clock=utcnow,
+    def __init__(self, store: PgGovernanceStore, policy_store: PolicyStore, panic_store: PgPanicStore, clock=utcnow,
                  journal_path: str | Path | None = None, panic_hooks: list | None = None,
                  content_rules: ContentRulesStore | None = None):
         self.store = store
@@ -79,7 +93,7 @@ class ActionGateway:
         self.clock = clock
         self._minter = TokenMinter(secrets.token_bytes(32))
         self._effectors: dict[str, Effector] = {"dryrun": DryRunEffector(self._minter)}
-        self._journal = Path(journal_path) if journal_path else Path(str(panic_store.path) + ".journal.jsonl")
+        self._journal = Path(journal_path) if journal_path else Path("var/panic.journal.jsonl")
         self.panic_hooks = list(panic_hooks or [])  # hooks.py: DBOS cancel, egress, LiteLLM (E-03)
         # E-04: secret scan + injection tripwire rules (data). Default: next to the policy file.
         self.content_rules = content_rules or ContentRulesStore(Path(policy_store.path).with_name("content_rules.v1.json"))
@@ -91,38 +105,20 @@ class ActionGateway:
         except PolicyUnavailable as exc:
             return None, f"POLICY_UNREADABLE:{exc}"
 
-    def _tool_provenance(self, cur, config_version: str, tool: str = "mbos_governance.gateway",
-                         human: str | None = None) -> str:
-        prov = {
-            "provenance_id": new_id("prov"),
-            "created_at": fmt_ts(self.clock()),
-            "actor_type": "human" if human else "system",
-            "basis": "FACT",
-            "tool_name": tool,
-            "tool_version": __version__,
-            "config_version": config_version,
-        }
-        if human:
-            prov["human_actor"] = human
-        self.store.insert_provenance(cur, prov)
-        return prov["provenance_id"]
+    def _tool_provenance(self, cur, config_version: str, tool: str = "mbos_governance.gateway") -> str:
+        return self.store.record_provenance(cur, {"actor_type": "system", "basis": "FACT", "tool_name": tool,
+                                                  "tool_version": __version__, "config_version": config_version})
 
-    def _action_receipt(self, cur, rtype: str, ar: dict, intent: str, prov_ids: list[str], *,
-                        actor: dict = GATEWAY_ACTOR, key: str | None = None, **extra) -> dict:
-        partial = {
-            "type": rtype,
-            "actor": actor,
-            "intent": intent,
-            "item_id": ar["item_id"],
-            "action_request_id": ar["action_request_id"],
-            "capability": ar["capability"],
-            "payload_hash": ar["payload_hash"],
-            "provenance_ids": prov_ids,
+    @staticmethod
+    def _receipt(cur, store, rtype: str, ar: dict, intent: str, prov_ids: list[str], *,
+                 actor: dict = GATEWAY_ACTOR, key: str | None = None, **extra) -> dict:
+        """A receipt WITHOUT a status change (refusals, tripwires). Status changes use set_status."""
+        return store.append_receipt(cur, {
+            "type": rtype, "actor": actor, "intent": intent, "item_id": ar["item_id"],
+            "action_request_id": ar["action_request_id"], "capability": ar["capability"],
+            "payload_hash": ar["payload_hash"], "provenance_ids": prov_ids,
             "idempotency_key": key or f"{ar['action_request_id']}:{rtype}:{new_ulid()}",
-            "details": {"kind": "generic"},
-            **extra,
-        }
-        return self.store.append_receipt(cur, partial)
+            "details": {"kind": "generic"}, **extra})
 
     def _now_local(self, policy: Policy) -> datetime:
         return self.clock().astimezone(ZoneInfo(policy.data["quiet_hours"]["timezone"]))
@@ -140,9 +136,9 @@ class ActionGateway:
 
     # ------------------------------------------------------------------ provenance
     def record_provenance(self, prov: dict) -> str:
-        with self.store.tx() as cur:
-            self.store.insert_provenance(cur, prov)
-        return prov["provenance_id"]
+        contracts.require_valid("provenance", prov)
+        with self.store.tx("gateway") as cur:
+            return self.store.record_provenance(cur, prov)
 
     # ------------------------------------------------------------------ propose
     def _proposal_problems(self, ar: dict, caller: str, policy: Policy | None) -> list[str]:
@@ -150,11 +146,6 @@ class ActionGateway:
         now = self.clock()
         if ar["proposed_by"] != caller:
             p.append(f"CALLER_MISMATCH:{caller} cannot propose as {ar['proposed_by']}")
-        try:
-            if payload_hash(ar["payload"]) != ar["payload_hash"]:
-                p.append("PAYLOAD_HASH_MISMATCH")
-        except (ValueError, TypeError) as exc:
-            p.append(f"PAYLOAD_NOT_HASHABLE:{exc}")
         if policy is None:
             return p
         rules = policy.data["action_request"]
@@ -184,12 +175,15 @@ class ActionGateway:
     def _tripwire_receipt(self, cur, ar: dict, intent: str, details: dict, config_version: str) -> dict:
         """INJECTION_SUSPECTED. Findings carry rule ids + JSON paths only, never matched values."""
         prov = self._tool_provenance(cur, config_version, tool="mbos_governance.content_guard")
+        stored = details.get("stored", True)
+        link = ({"action_request_id": ar["action_request_id"]} if stored   # FK: only a stored request can be linked
+                else {})
         return self.store.append_receipt(cur, {
             "type": "INJECTION_SUSPECTED", "actor": GATEWAY_ACTOR, "intent": intent,
-            "item_id": ar["item_id"], "action_request_id": ar["action_request_id"], "capability": ar["capability"],
+            "item_id": ar["item_id"], **link, "capability": ar["capability"],
             "payload_hash": ar["payload_hash"], "effect": "none", "provenance_ids": [prov] + ar["provenance_ids"],
             "idempotency_key": f"{ar['action_request_id']}:INJECTION_SUSPECTED:{new_ulid()}",
-            "details": {"kind": "generic", **details},
+            "details": {"kind": "generic", "proposed_action_request_id": ar["action_request_id"], **details},
         })
 
     def propose(self, ar: dict, caller: str, untrusted_texts: list[dict] | None = None) -> Result:
@@ -200,10 +194,12 @@ class ActionGateway:
         (tier 0, step-up on YES); injection markers in them or in the payload fire the tripwire."""
         contracts.require_valid("action-request", ar)
         try:
-            payload_hash(ar["payload"])
+            recomputed = payload_hash(ar["payload"])
         except (ValueError, TypeError) as exc:
             # Not canonical JSON (NaN/Infinity/non-JSON type): it cannot be stored or receipted faithfully.
             raise GatewayRefused(f"PAYLOAD_NOT_HASHABLE:{exc}") from exc
+        if recomputed != ar["payload_hash"]:
+            raise GatewayRefused("PAYLOAD_HASH_MISMATCH")  # lane D refuses it too (MB007): never stored
         if untrusted_texts is not None and not (isinstance(untrusted_texts, list) and all(
                 isinstance(t, dict) and isinstance(t.get("text"), str) and isinstance(t.get("ref"), str)
                 for t in untrusted_texts)):
@@ -214,7 +210,7 @@ class ActionGateway:
         secrets_found = secret_findings(rules, ar["payload"])
         if secrets_found:
             # Refused at the door: the payload (and the secret) is never stored. Receipt has paths only.
-            with self.store.tx() as cur:
+            with self.store.tx("gateway") as cur:
                 self._tripwire_receipt(cur, ar, "secret-shaped content in an outbound payload; proposal refused, not stored",
                                        {"finding": "secret_in_outbound_payload", "rules_version": rules.version,
                                         "findings": [f.as_dict() for f in secrets_found], "stored": False},
@@ -225,17 +221,17 @@ class ActionGateway:
             ar = {**ar, "untrusted_inputs_present": True, "tier": 0}  # taint: schema then pins tier 0
         policy, policy_err = self._policy()
         panic_state = self.panic.read()
-        with self.store.tx() as cur:
+        areq = ar["action_request_id"]
+        with self.store.tx("gateway") as cur:
             existing = self.store.find_by_idempotency_key(cur, ar["idempotency_key"])
             if existing is not None:
                 return Result("duplicate", existing["action_request_id"], existing["status"],
                               ["IDEMPOTENCY_KEY_ALREADY_PROPOSED"])
-            if self.store.get_action_request(cur, ar["action_request_id"]) is not None:
-                raise GatewayRefused(f"{ar['action_request_id']} already exists")
-            try:
-                self.store.require_provenance(cur, ar["provenance_ids"])
-            except ValueError as exc:
-                raise GatewayRefused(f"no action without provenance: {exc}") from exc
+            if self.store.get_action_request(cur, areq) is not None:
+                raise GatewayRefused(f"{areq} already exists")
+            missing = self.store.missing_provenance(cur, ar["provenance_ids"])
+            if missing:
+                raise GatewayRefused(f"no action without provenance: {missing} not recorded")
             if ar.get("derived_from") and self.store.get_action_request(cur, ar["derived_from"]) is None:
                 raise GatewayRefused(f"derived_from {ar['derived_from']} unknown")
 
@@ -249,41 +245,40 @@ class ActionGateway:
                 if decision.decision != REQUIRE_APPROVAL:
                     reasons += decision.reasons or [f"PDP_{decision.decision.upper()}"]
             config_version = policy.version if policy else "UNAVAILABLE"
-            gw_prov = self._tool_provenance(cur, config_version)
-            pdp_ref = decision.policy_decision_ref if decision else new_id("pdp")
-            final_status = "rejected" if reasons else "pending_approval"
-            stored = {**ar, "status": final_status, "policy_decision_ref": pdp_ref}
-            if decision and not reasons:
-                stored["tier"] = decision.tier
-            self.store.insert_action_request(cur, stored)
+            gw = self._tool_provenance(cur, config_version)
+            pdp_ref = decision.policy_decision_ref if decision else f"pdp_{new_ulid()}"
+            prov = [gw] + ar["provenance_ids"]
+
+            doc = {k: v for k, v in ar.items() if k not in ("status", "policy_decision_ref")}
+            self.store.propose_action(cur, doc, {"type": "agent", "id": ar["proposed_by"]},
+                                      f"{ar['proposed_by']} proposed {ar['capability']}", f"{areq}:PROPOSED")
             if injections:
-                self._tripwire_receipt(cur, stored, "prompt-injection markers in inputs feeding this proposal; "
+                self._tripwire_receipt(cur, ar, "prompt-injection markers in inputs feeding this proposal; "
                                        "forced tier 0, needs review, step-up required",
                                        {"finding": "injection_suspected", "rules_version": rules.version,
                                         "findings": [f.as_dict() for f in injections], "needs_review": True,
                                         "untrusted_refs": [t["ref"] for t in (untrusted_texts or [])]},
                                        rules.version)
-
-            agent_actor = {"type": "agent", "id": ar["proposed_by"]}
-            rids = [self._action_receipt(cur, "ACTION_PROPOSED", ar, f"{ar['proposed_by']} proposed {ar['capability']}",
-                                         ar["provenance_ids"], actor=agent_actor, effect="none",
-                                         before_state=None, after_state={"status": "drafted"})["receipt_id"]]
             verdict = DENY if reasons else REQUIRE_APPROVAL
-            rids.append(self._action_receipt(
-                cur, "POLICY_DECIDED", stored, f"PDP: {verdict}", [gw_prov] + ar["provenance_ids"],
-                policy_decision_ref=pdp_ref, effect="none",
-                before_state={"status": "drafted"}, after_state={"status": final_status},
-                details={"kind": "generic", "decision": verdict, "tier": 0, "reasons": reasons,
-                         "policy_version": config_version})["receipt_id"])
-            if not reasons:
-                rids.append(self._action_receipt(
-                    cur, "APPROVAL_REQUESTED", stored, "Michael's YES/NO/MODIFY/HOLD required (tier 0)"
-                    + (" — NEEDS REVIEW: injection tripwire fired" if injections else ""),
-                    [gw_prov] + ar["provenance_ids"], policy_decision_ref=pdp_ref, effect="none",
-                    details={"kind": "generic", "needs_review": bool(injections),
-                             "tainted": bool(stored.get("untrusted_inputs_present"))})["receipt_id"])
-            return Result("rejected" if reasons else "pending_approval", ar["action_request_id"], final_status,
-                          reasons, rids)
+            details = {"kind": "generic", "decision": verdict, "tier": 0, "reasons": reasons, "policy_version": config_version}
+            rids = [self.store.set_status(cur, areq, "classified", "POLICY_DECIDED", GATEWAY_ACTOR, f"PDP: {verdict}",
+                                          prov, f"{areq}:CLASSIFIED",
+                                          {"policy_decision_ref": pdp_ref, "effect": "none", "details": details},
+                                          tier=decision.tier if decision and not reasons else 0)]
+            if reasons:
+                final = "rejected"
+                rids.append(self.store.set_status(cur, areq, "rejected", "POLICY_DECIDED", GATEWAY_ACTOR,
+                                                  "PDP: deny — " + "; ".join(reasons)[:300], prov, f"{areq}:REJECTED",
+                                                  {"effect": "none", "details": details}))
+            else:
+                final = "pending_approval"
+                rids.append(self.store.set_status(
+                    cur, areq, "pending_approval", "APPROVAL_REQUESTED", GATEWAY_ACTOR,
+                    "Michael's YES/NO/MODIFY/HOLD required (tier 0)" + (" — NEEDS REVIEW: injection tripwire fired" if injections else ""),
+                    prov, f"{areq}:APPROVAL_REQUESTED",
+                    {"effect": "none", "details": {"kind": "generic", "needs_review": bool(injections),
+                                                   "tainted": bool(ar.get("untrusted_inputs_present"))}}))
+            return Result(final, areq, final, reasons, rids)
 
     # ------------------------------------------------------------------ approvals
     def _approval_problems(self, approval: dict, ar: dict, policy: Policy) -> list[str]:
@@ -325,105 +320,98 @@ class ActionGateway:
         return p
 
     def record_approval(self, approval: dict) -> Result:
-        """Record Michael's decision (append-only). Called by the Operator UI / CLI approval
-        surface, never by an agent. Validity is re-checked at execution time (G1–G3)."""
+        """Record Michael's decision (append-only, role approver). Called by the Operator UI / CLI
+        approval surface, never by an agent. A YES that fails validation is not recorded as an
+        approval (lane D's trigger would refuse it as well); a POLICY_DECIDED receipt notes the attempt.
+        Validity is re-checked at execution time (G1–G3)."""
         contracts.require_valid("approval", approval)
+        d = approval["decision"]
+        if d == "MODIFY" and not {"new_action_request_id", "new_payload_hash"} <= set(approval["modifications"]):
+            raise GatewayRefused("MODIFY needs modifications.new_action_request_id and new_payload_hash")
         policy, policy_err = self._policy()
-        with self.store.tx() as cur:
-            ar = self.store.get_action_request(cur, approval["action_request_id"])
+        areq = approval["action_request_id"]
+        with self.store.tx("approver") as cur:
+            ar = self.store.get_action_request(cur, areq, lock=True)
             if ar is None:
-                raise GatewayRefused(f"unknown action request {approval['action_request_id']}")
+                raise GatewayRefused(f"unknown action request {areq}")
             if ar["status"] not in ("pending_approval", "held"):
-                raise GatewayRefused(f"{ar['action_request_id']} is {ar['status']}; not awaiting a decision")
-            self.store.insert_approval(cur, approval)
-            human_prov = {"provenance_id": new_id("prov"), "created_at": fmt_ts(self.clock()), "actor_type": "human",
-                          "human_actor": approval["decider"], "basis": "FACT", "approval_id": approval["approval_id"]}
-            self.store.insert_provenance(cur, human_prov)
-
+                raise GatewayRefused(f"{areq} is {ar['status']}; not awaiting a decision")
             problems = [policy_err] if policy_err else (
                 self._approval_problems(approval, ar, policy) + self._expiry_problems(approval, ar, policy))
-            d = approval["decision"]
-            if d == "YES":
-                new_status = "approved" if not problems else ar["status"]
-            elif d == "NO":
-                new_status = "rejected"
-            elif d == "HOLD":
-                new_status = "held"
-            else:  # MODIFY: this request is closed; the new one is proposed with derived_from
-                new_status = "rejected"
-            before = ar["status"]
-            ar = self.store.set_status(cur, ar, new_status)
-            rids = [self._action_receipt(
-                cur, "APPROVAL_DECIDED", ar, f"Michael decided {d}" + (" (INVALID: not executable)" if problems and d == "YES" else ""),
-                [human_prov["provenance_id"]], actor={"type": "human", "id": approval["decider"]},
-                approval_id=approval["approval_id"], effect="none",
-                before_state={"status": before}, after_state={"status": new_status},
-                details={"kind": "generic", "decision": d, "problems": problems,
-                         **({"closed_by": "MODIFY", "new_action_request_id": approval["modifications"].get("new_action_request_id")}
-                            if d == "MODIFY" else {})})["receipt_id"]]
-            if d == "YES" and not problems:
-                reasons, rid = self._reserve(cur, ar, policy, approval["approval_id"])
-                if rid:
-                    rids.append(rid)
-                problems += reasons
-            return Result("recorded", ar["action_request_id"], new_status, problems, rids)
+            if d == "YES" and problems:
+                prov = self._tool_provenance(cur, policy.version if policy else "UNAVAILABLE")
+                r = self._receipt(cur, self.store, "POLICY_DECIDED", ar, "YES refused at the door; not recorded as an approval",
+                                  [prov] + ar["provenance_ids"], effect="none",
+                                  before_state={"status": ar["status"]}, after_state={"status": ar["status"]},
+                                  details={"kind": "generic", "refused_approval": {
+                                      "approval_id": approval["approval_id"], "decision": d, "decider": approval["decider"],
+                                      "channel": approval["channel"], "problems": problems}})
+                return Result("refused", areq, ar["status"], problems, [r["receipt_id"]])
+            try:
+                with cur.connection.transaction():  # savepoint
+                    self.store.record_approval(cur, approval, {"type": "human", "id": approval["decider"]},
+                                               f"Michael decided {d}", f"{approval['approval_id']}:DECIDED")
+            except psycopg.Error as exc:
+                if not (exc.sqlstate or "").startswith("MB"):
+                    raise
+                raise GatewayRefused(f"lane D refused the decision: {exc.diag.message_primary or exc}") from exc
+            status = self.store.get_action_request(cur, areq)["status"]
+        reasons: list[str] = []
+        if d == "YES":
+            with self.store.tx("gateway") as cur:
+                ar = self.store.get_action_request(cur, areq, lock=True)
+                reasons, _ = self._reserve(cur, ar, policy, approval["approval_id"])
+        return Result("recorded", areq, status, reasons)
 
     # ------------------------------------------------------------------ budget (G5)
-    def _required_micros(self, ar: dict) -> int:
-        est = to_micros(ar["estimated_cost"]["amount"]) if "estimated_cost" in ar else 0
-        mx = to_micros(ar["max_cost"]["amount"]) if "max_cost" in ar else None
-        return max(est, mx if mx is not None else 0)
+    def _required(self, ar: dict) -> Decimal:
+        est = to_amount(ar["estimated_cost"]["amount"]) if "estimated_cost" in ar else Decimal(0)
+        mx = to_amount(ar["max_cost"]["amount"]) if "max_cost" in ar else Decimal(0)
+        return max(est, mx)
 
-    def _budget_problems(self, cur, ar: dict, policy: Policy, mode: str, exclude_own: int = 0) -> list[str]:
-        p: list[str] = []
-        caps = policy.data["budgets"][mode]
-        bucket = policy.bucket_for(ar["category"])
-        bcaps = caps["buckets"][bucket]
-        need = self._required_micros(ar)
-        if "estimated_cost" in ar and "max_cost" in ar and ar["estimated_cost"]["amount"] > ar["max_cost"]["amount"]:
-            p.append("ESTIMATE_EXCEEDS_MAX_COST")
-        day = self._now_local(policy).date().isoformat()
-        if need > to_micros(bcaps["per_action_hard_cap"]):
-            p.append(f"BUDGET_PER_ACTION_CAP:{bucket}:{mode}")
-        if self.store.spent_micros(cur, mode, day, bucket) - exclude_own + need > to_micros(bcaps["daily_hard_cap"]):
-            p.append(f"BUDGET_DAILY_CAP:{bucket}:{mode}")
-        if self.store.spent_micros(cur, mode, day) - exclude_own + need > to_micros(caps["global_daily_hard_cap"]):
-            p.append(f"BUDGET_GLOBAL_DAILY_CAP:{mode}")
-        if bucket == "money" and not exclude_own:
-            since = fmt_ts_us(self.clock() - timedelta(hours=1))
-            limit = policy.data["budgets"]["velocity"]["money_bucket_actions_per_hour"]
-            if self.store.bucket_actions_since(cur, mode, bucket, since) + 1 > limit:
-                p.append("BUDGET_VELOCITY_CAP:money")
-        return p
+    @staticmethod
+    def _bucket(policy: Policy, category: str) -> tuple[str, list[str]]:
+        bucket = policy.bucket_for(category)
+        return bucket, sorted(c for c, spec in policy.data["categories"].items() if spec["budget_bucket"] == bucket)
 
     def _reserve(self, cur, ar: dict, policy: Policy, approval_id: str | None) -> tuple[list[str], str | None]:
+        """Reserve under lane D's single budget lock: bucket per-action / daily / global caps in
+        mbos.budget_reserve_caps; the money ACTION-COUNT velocity is checked here under the same lock."""
         mode = "dry_run" if self._dry_run_forced(policy) else "live"
-        problems = self._budget_problems(cur, ar, policy, mode)
-        if problems:
-            return problems, None
-        need = self._required_micros(ar)
-        day = self._now_local(policy).date().isoformat()
-        self.store.reserve(cur, ar["action_request_id"], mode, policy.bucket_for(ar["category"]), need, day,
-                           fmt_ts_us(self.clock()))
-        gw = self._tool_provenance(cur, policy.version)
-        extra = {"approval_id": approval_id} if approval_id else {}
-        r = self._action_receipt(cur, "BUDGET_RESERVED", ar, f"reserved {need / 1e6:.6f} USD ({mode})",
-                                 [gw] + ar["provenance_ids"], effect="none", **extra,
-                                 budget_effect={"category": policy.bucket_for(ar["category"]),
-                                                "amount": need / 1e6, "currency": "USD"},
-                                 details={"kind": "money", "mode": mode, "state": "reserved"})
-        return [], r["receipt_id"]
+        if "estimated_cost" in ar and "max_cost" in ar and ar["estimated_cost"]["amount"] > ar["max_cost"]["amount"]:
+            return ["ESTIMATE_EXCEEDS_MAX_COST"], None
+        bucket, cats = self._bucket(policy, ar["category"])
+        caps = policy.data["budgets"][mode]
+        bcaps = caps["buckets"][bucket]
+        self.store.budget_lock(cur, CURRENCY)
+        if bucket == "money":
+            limit = policy.data["budgets"]["velocity"]["money_bucket_actions_per_hour"]
+            if self.store.actions_last_hour(cur, cats, CURRENCY, mode) + 1 > limit:
+                return ["BUDGET_VELOCITY_CAP:money"], None
+        need = self._required(ar)
+        cap_doc = {"per_action": bcaps["per_action_hard_cap"], "daily": bcaps["daily_hard_cap"],
+                   "global_daily": caps["global_daily_hard_cap"], "velocity_per_hour": None,
+                   "tz": policy.data["quiet_hours"]["timezone"], "categories": cats}
+        prov = [self._tool_provenance(cur, policy.version)] + ar["provenance_ids"]
+        try:
+            with cur.connection.transaction():  # savepoint: a cap refusal must not abort the guard txn
+                rid = self.store.reserve_caps(cur, ar["action_request_id"], need, CURRENCY, cap_doc, mode, GATEWAY_ACTOR,
+                                              f"reserve {need} {CURRENCY} ({mode}, bucket {bucket})", prov,
+                                              f"{ar['action_request_id']}:BUDGET_RESERVED")
+        except psycopg.Error as exc:
+            if exc.sqlstate != "MB006":
+                raise
+            msg = str(exc)
+            code = ("BUDGET_PER_ACTION_CAP" if "per_action" in msg else "BUDGET_GLOBAL_DAILY_CAP" if "global daily" in msg
+                    else "BUDGET_DAILY_CAP" if "daily cap" in msg else "BUDGET_DENIED")
+            return [f"{code}:{bucket}:{mode}"], None
+        return [], rid
 
-    def _release(self, cur, ar: dict, prov: list[str], approval_id: str | None, why: str) -> None:
-        res = self.store.reservation(cur, ar["action_request_id"])
-        if res is None or res["state"] != "reserved":
-            return
-        self.store.settle(cur, ar["action_request_id"], "released")
-        extra = {"approval_id": approval_id} if approval_id else {}
-        self._action_receipt(cur, "BUDGET_RELEASED", ar, f"released reservation: {why}", prov + ar["provenance_ids"],
-                             effect="none", **extra,
-                             budget_effect={"category": res["bucket"], "amount": res["amount_micros"] / 1e6, "currency": "USD"},
-                             details={"kind": "money", "mode": res["mode"], "state": "released"})
+    def _release(self, cur, ar: dict, prov: list[str], why: str) -> None:
+        res = self.store.open_reservation(cur, ar["action_request_id"])
+        if res is not None:
+            self.store.settle(cur, res["reservation_id"], "release", None, GATEWAY_ACTOR, f"release reservation: {why}",
+                              prov + ar["provenance_ids"], f"{res['reservation_id']}:RELEASE")
 
     # ------------------------------------------------------------------ execution guard
     def _guard(self, cur, ar: dict, policy: Policy | None, policy_err: str | None) -> tuple[dict[str, list[str]], dict | None, bool]:
@@ -431,11 +419,11 @@ class ActionGateway:
         f: dict[str, list[str]] = {f"G{i}": [] for i in range(1, 9)}
         # G7 first: kill switch (fail closed on unreadable).
         f["G7"] += self.panic.read().blocks(ar["proposed_by"], ar["capability"], ar["category"])
+        approval = self.store.latest_approval(cur, ar["action_request_id"])
         if policy is None:
             for k in f:
                 f[k].append(policy_err or "POLICY_UNREADABLE")
-            return f, self.store.latest_approval(cur, ar["action_request_id"]), True
-        approval = self.store.latest_approval(cur, ar["action_request_id"])
+            return f, approval, True
         # G1 approval valid
         if approval is None:
             f["G1"].append("NO_APPROVAL")
@@ -457,7 +445,7 @@ class ActionGateway:
         if approval is not None and approval["payload_hash_seen"] != ar["payload_hash"]:
             f["G3"].append("APPROVAL_PAYLOAD_HASH_MISMATCH")
         # G4 idempotency
-        if self.store.get_claim(cur, ar["idempotency_key"]) is not None:
+        if self.store.claim_state(cur, ar["action_request_id"]) is not None:
             f["G4"].append("IDEMPOTENCY_KEY_ALREADY_CLAIMED")
         # G6 grant constraints: re-run the PDP against the CURRENT policy.
         try:
@@ -490,15 +478,11 @@ class ActionGateway:
             f["G8"].append(f"EFFECTOR_CANNOT_DRY_RUN:{eff.name}")
         # G5 budget (only meaningful once the request is otherwise executable)
         if not any(f.values()):
-            res = self.store.reservation(cur, ar["action_request_id"])
+            res = self.store.open_reservation(cur, ar["action_request_id"])
             mode = "dry_run" if dry_run else "live"
-            if res is not None and res["state"] == "reserved":
-                if res["mode"] != mode or res["amount_micros"] < self._required_micros(ar):
+            if res is not None:
+                if res["mode"] != mode or Decimal(res["reserved"]) < self._required(ar):
                     f["G5"].append("RESERVATION_DOES_NOT_COVER_ACTION")
-                else:
-                    f["G5"] += self._budget_problems(cur, ar, policy, mode, exclude_own=res["amount_micros"])
-            elif res is not None:
-                f["G5"].append(f"RESERVATION_{res['state'].upper()}")
             else:
                 reasons, _ = self._reserve(cur, ar, policy, approval["approval_id"] if approval else None)
                 f["G5"] += reasons
@@ -507,53 +491,56 @@ class ActionGateway:
     def execute(self, action_request_id: str) -> Result:
         """Run the guard; on success call the effector (DRY-RUN) and receipt the outcome."""
         policy, policy_err = self._policy()
-        # ---- Phase A: guard + claim + ACTION_EXECUTING, one transaction --------------
-        with self.store.tx() as cur:
-            ar = self.store.get_action_request(cur, action_request_id)
+        areq = action_request_id
+        # ---- Phase A: guard + ACTION_EXECUTING + claim, one transaction, row locked ----
+        with self.store.tx("gateway") as cur:
+            ar = self.store.get_action_request(cur, areq, lock=True)
             if ar is None:
-                raise GatewayRefused(f"unknown action request {action_request_id}")
-            claim = self.store.get_claim(cur, ar["idempotency_key"])
+                raise GatewayRefused(f"unknown action request {areq}")
+            claim = self.store.claim_state(cur, areq)
             if claim is not None and claim["state"] == "executed":
-                return Result("duplicate", action_request_id, ar["status"], ["ALREADY_EXECUTED"],
-                              effector_response=json.loads(claim["result"]))
+                return Result("duplicate", areq, ar["status"], ["ALREADY_EXECUTED"], effector_response=claim["response"])
             if claim is not None and claim["state"] == "executing":
-                return Result("refused", action_request_id, ar["status"],
+                return Result("refused", areq, ar["status"],
                               ["IN_FLIGHT_OR_CRASHED: reconciliation required, never blind-retry"])
+            if claim is not None:
+                return Result("refused", areq, ar["status"], [f"CLAIM_{claim['state'].upper()}"])
             failures, approval, dry_run = self._guard(cur, ar, policy, policy_err)
             gw = self._tool_provenance(cur, policy.version if policy else "UNAVAILABLE")
+            prov = [gw] + ar["provenance_ids"]
             flat = [f"{k}:{r}" for k, rs in failures.items() for r in rs]
             if flat:
-                new_status = ar["status"]
-                if failures["G2"] and ar["status"] in ("approved", "held", "pending_approval"):
-                    new_status = "expired"
-                elif failures["G3"] and ar["status"] == "approved":
-                    new_status = "failed"
                 before = ar["status"]
-                ar = self.store.set_status(cur, ar, new_status)
-                if new_status in ("expired", "failed"):
-                    self._release(cur, ar, [gw], approval["approval_id"] if approval else None, new_status)
+                new_status = before
+                if failures["G2"] and before in ("approved", "held", "pending_approval"):
+                    new_status = "expired"
+                elif failures["G3"] and before == "approved":
+                    new_status = "failed"
                 details = {"kind": "generic", "guard": "refused", "failed_checks": failures}
                 if approval is not None:
-                    r = self._action_receipt(cur, "ACTION_FAILED", ar, "execution guard refused; effector NOT called",
-                                             [gw] + ar["provenance_ids"], approval_id=approval["approval_id"],
-                                             effect="none", before_state={"status": before}, after_state={"status": new_status},
-                                             effector_response={"provider": "none", "status": "guard_refused", "dry_run": True},
-                                             details=details)
+                    rtype, extra = "ACTION_FAILED", {"approval_id": approval["approval_id"], "effect": "none",
+                                                     "effector_response": {"provider": "none", "status": "guard_refused",
+                                                                           "dry_run": True}}
                 else:
-                    r = self._action_receipt(cur, "POLICY_DECIDED", ar, "execution guard refused: no approval",
-                                             [gw] + ar["provenance_ids"], effect="none",
-                                             before_state={"status": before}, after_state={"status": new_status},
-                                             details={**details, "decision": DENY})
-                return Result("refused", action_request_id, new_status, flat, [r["receipt_id"]])
-            self.store.claim(cur, ar["idempotency_key"], action_request_id)
-            ar = self.store.set_status(cur, ar, "executing")
-            r_exec = self._action_receipt(cur, "ACTION_EXECUTING", ar, f"guard passed (8/8); calling effector dry_run={dry_run}",
-                                          [gw] + ar["provenance_ids"], approval_id=approval["approval_id"],
-                                          key=f"{ar['idempotency_key']}:EXECUTING", effect="none",
-                                          policy_decision_ref=ar.get("policy_decision_ref"),
-                                          before_state={"status": "approved"}, after_state={"status": "executing"},
-                                          details={"kind": "generic", "guard": "passed", "dry_run": dry_run})
-            prov = [gw]
+                    rtype, extra = "POLICY_DECIDED", {"effect": "none"}
+                    details["decision"] = DENY
+                intent = "execution guard refused; effector NOT called"
+                if new_status != before:
+                    rid = self.store.set_status(cur, areq, new_status, rtype, GATEWAY_ACTOR, intent, prov,
+                                                f"{areq}:GUARD:{new_ulid()}", {**extra, "details": details})
+                    self._release(cur, ar, [gw], new_status)
+                else:
+                    rid = self._receipt(cur, self.store, rtype, ar, intent, prov, before_state={"status": before},
+                                        after_state={"status": before}, details=details, **extra)["receipt_id"]
+                return Result("refused", areq, new_status, flat, [rid])
+            r_exec = self.store.set_status(cur, areq, "executing", "ACTION_EXECUTING", GATEWAY_ACTOR,
+                                           f"guard passed (8/8); calling effector dry_run={dry_run}", prov,
+                                           f"{ar['idempotency_key']}:EXECUTING",
+                                           {"approval_id": approval["approval_id"], "effect": "none",
+                                            "policy_decision_ref": ar.get("policy_decision_ref"),
+                                            "details": {"kind": "generic", "guard": "passed", "dry_run": dry_run}})
+            self.store.effector_claim(cur, areq, {"capability": ar["capability"], "payload_hash": ar["payload_hash"],
+                                                  "dry_run": dry_run})
         approval_id = approval["approval_id"]
 
         # ---- Phase B: last-instant kill-switch read, then the effector ------------
@@ -563,7 +550,7 @@ class ActionGateway:
             error = "FROZE_BEFORE_EFFECTOR:" + ",".join(late)
         else:
             effector = self._effectors[policy.capability(ar["capability"])["effector"]]
-            token = self._minter.mint(action_request_id, ar["payload_hash"], ar["idempotency_key"], dry_run)
+            token = self._minter.mint(areq, ar["payload_hash"], ar["idempotency_key"], dry_run)
             try:
                 response = effector.execute(token, ar)
             except Exception as exc:  # noqa: BLE001 - any effector failure is receipted
@@ -572,85 +559,92 @@ class ActionGateway:
                 error = "DRY_RUN_INVARIANT_VIOLATED: effector did not confirm dry_run"
                 self.engage_panic("L3", None, actor="action-gateway", reason=error)
 
-        # ---- Phase C: outcome receipts + budget settle, one transaction -----------
-        with self.store.tx() as cur:
+        # ---- Phase C: outcome receipts + claim finish + budget settle, one transaction ----
+        with self.store.tx("gateway") as cur:
             if error:
                 status = "cancelled_by_freeze" if error.startswith("FROZE_BEFORE") else "failed"
-                self.store.finish_claim(cur, ar["idempotency_key"], "failed", {"error": error})
-                ar = self.store.set_status(cur, ar, status)
-                self._release(cur, ar, prov, approval_id, status)
-                r = self._action_receipt(cur, "ACTION_FAILED", ar, error, prov + ar["provenance_ids"],
-                                         approval_id=approval_id, key=f"{ar['idempotency_key']}:FAILED", effect="none",
-                                         before_state={"status": "executing"}, after_state={"status": status},
-                                         # Recorded as returned — an invariant violation must stay visible.
-                                         effector_response=response or {"provider": "none", "status": "not_called",
-                                                                        "dry_run": True},
-                                         details={"kind": "generic", "error": error})
-                return Result("failed", action_request_id, status, [error], [r_exec["receipt_id"], r["receipt_id"]], response)
-            res = self.store.reservation(cur, action_request_id)
-            self.store.settle(cur, action_request_id, "committed")
-            self.store.finish_claim(cur, ar["idempotency_key"], "executed", response)
-            ar = self.store.set_status(cur, ar, "executed")
-            rids = [r_exec["receipt_id"]]
+                # Lane D CHECKs dry_run=true on every stored response (A7). What the effector actually
+                # reported is kept verbatim under `effector_reported` so a violation stays visible.
+                reported = {"effector_reported": response} if response is not None else {}
+                resp = {"provider": (response or {}).get("provider", "none"), "status": "not_called" if response is None
+                        else "invariant_violation" if "INVARIANT" in error else "error", "dry_run": True, "error": error}
+                self.store.effector_finish(cur, areq, "failed", resp["provider"], None, {**resp, **reported})
+                self._release(cur, ar, [gw], status)
+                rid = self.store.set_status(cur, areq, status, "ACTION_FAILED", GATEWAY_ACTOR, error[:300], prov,
+                                            f"{ar['idempotency_key']}:FAILED",
+                                            {"approval_id": approval_id, "effect": "none", "effector_response": resp,
+                                             "details": {"kind": "generic", "error": error, **reported}})
+                return Result("failed", areq, status, [error], [r_exec, rid], response)
+            self.store.effector_finish(cur, areq, "executed", response.get("provider"), response.get("provider_msg_id"),
+                                       response)
+            rids = [r_exec]
+            res = self.store.open_reservation(cur, areq)
             if res is not None:
-                rids.append(self._action_receipt(
-                    cur, "BUDGET_COMMITTED", ar, f"committed ({res['mode']}; no real money moved)" if dry_run else "committed",
-                    prov + ar["provenance_ids"], approval_id=approval_id, effect="none",
-                    budget_effect={"category": res["bucket"], "amount": res["amount_micros"] / 1e6, "currency": "USD"},
-                    details={"kind": "money", "mode": res["mode"], "state": "committed"})["receipt_id"])
-            rids.append(self._action_receipt(
-                cur, "ACTION_EXECUTED", ar, f"{ar['capability']} executed (DRY-RUN)" if dry_run else f"{ar['capability']} executed",
-                prov + ar["provenance_ids"], approval_id=approval_id, key=f"{ar['idempotency_key']}:EXECUTED",
-                effect=EFFECT_BY_CATEGORY[ar["category"]], tool_name=f"effector:{response['provider']}",
-                before_state={"status": "executing"}, after_state={"status": "executed"},
-                effector_response=response, details={"kind": "generic", "dry_run": dry_run})["receipt_id"])
-            return Result("executed", action_request_id, "executed", [], rids, response)
+                rids.append(self.store.settle(cur, res["reservation_id"], "commit", None, GATEWAY_ACTOR,
+                                              "commit (dry_run; no real money moved)" if dry_run else "commit",
+                                              prov, f"{res['reservation_id']}:COMMIT"))
+            rids.append(self.store.set_status(
+                cur, areq, "executed", "ACTION_EXECUTED", GATEWAY_ACTOR,
+                f"{ar['capability']} executed (DRY-RUN)" if dry_run else f"{ar['capability']} executed",
+                prov, f"{ar['idempotency_key']}:EXECUTED",
+                {"approval_id": approval_id, "effect": EFFECT_BY_CATEGORY[ar["category"]],
+                 "tool_name": f"effector:{response['provider']}", "effector_response": response,
+                 "details": {"kind": "generic", "dry_run": dry_run}}))
+            return Result("executed", areq, "executed", [], rids, response)
 
-    # ------------------------------------------------------------------ PANIC
-    def _panic_receipt(self, cur, level: str, target: str | None, engage: bool, actor: str, reason: str,
-                       before: dict, after: dict, config_version: str, hooks: dict | None = None,
-                       intent_prefix: str = "PANIC") -> dict:
-        prov = self._tool_provenance(cur, config_version, tool="mbos_governance.panic", human=actor if actor == "michael" else None)
-        strip = lambda b: {k: v for k, v in b.items() if k != "checksum"}  # noqa: E731
-        return self.store.append_receipt(cur, {
-            "type": "KILL_SWITCH_CHANGED",
-            "actor": {"type": "human" if actor == "michael" else "system", "id": actor},
-            "intent": f"{intent_prefix} {level} {'ENGAGE' if engage else 'RELEASE'} {target or 'global'}: {reason}",
-            "entity_type": "panic_state", "entity_id": f"{level}:{target or 'global'}",
-            "effect": "update", "before_state": strip(before), "after_state": strip(after),
-            "provenance_ids": [prov], "idempotency_key": f"panic:{after['revision']}:{new_ulid()}",
-            "details": {"kind": "generic", "level": level, "engage": engage, **({"hooks": hooks} if hooks is not None else {})},
-        })
+    # ------------------------------------------------------------------ PANIC (lane D mbos.panic_set)
+    def _state_summary(self) -> dict:
+        st = self.panic.read()
+        return {"revision": st.revision, "global": {"state": st.global_state}, "readable": st.readable,
+                "agents": sorted(st.frozen_agents), "capabilities": sorted(st.frozen_capabilities)}
+
+    def _hooks_receipt(self, level: str, target: str | None, engage: bool, actor: str, reason: str, results: dict,
+                       config_version: str) -> None:
+        with self.store.tx("gateway") as cur:
+            prov = self._tool_provenance(cur, config_version, tool="mbos_governance.hooks")
+            self.store.append_receipt(cur, {
+                "type": "KILL_SWITCH_CHANGED", "actor": actor_json(actor), "effect": "update",
+                "intent": f"PANIC side effects applied: {level} {'ENGAGE' if engage else 'RELEASE'} {target or 'global'}: {reason}"[:500],
+                "entity_type": "panic_hooks", "entity_id": f"{level}:{target or 'global'}",
+                "provenance_ids": [prov], "idempotency_key": f"panic-hooks:{new_ulid()}",
+                "details": {"kind": "generic", "level": level, "engage": engage, "hooks": results}})
 
     def engage_panic(self, level: str, target: str | None, actor: str, reason: str) -> dict:
-        """Freeze. Anyone (human, gateway, ops script) may engage. The state file is written
-        FIRST so a broken database can never prevent a freeze; the receipt follows. If the
-        receipt cannot be written the freeze stands and the event is journaled for replay."""
-        before, after = self.panic.mutate(level, target, True, actor, reason)
-        # Side effects (cancel unstarted workflows, deny-all egress, zero LLM budgets) run right
-        # after the freeze is durable and BEFORE anything that could fail on the database.
-        hook_results = run_hooks(self.panic_hooks, level, target, True, self.panic.read())
+        """Freeze (role gateway). Anyone may engage: the gateway, an approver, or a discovery freeze
+        request applied on an agent's behalf. State + KILL_SWITCH_CHANGED commit atomically in
+        mbos.panic_set, which also cancels approved-but-unstarted requests on L3. If the database is
+        unreachable the freeze cannot be written — but then PANIC also cannot be READ, which is FROZEN
+        for every reader (fail closed); the attempt is journaled locally."""
         policy, _ = self._policy()
+        cv = policy.version if policy else "UNAVAILABLE"
         cancelled: list[str] = []
         try:
-            with self.store.tx() as cur:
-                self._panic_receipt(cur, level, target, True, actor, reason, before, after,
-                                    policy.version if policy else "UNAVAILABLE", hooks=hook_results)
+            with self.store.tx("gateway") as cur:
                 if level == "L3":
-                    cancelled = self._cancel_queued(cur, policy)
+                    cancelled = [r["action_request_id"] for r in cur.execute(
+                        "SELECT action_request_id FROM mbos.action_requests WHERE status IN ('approved','auto_approved')")]
+                prov = self._tool_provenance(cur, cv, tool="mbos_governance.panic")
+                self.store.panic_set(cur, level, target, True, actor_json(actor), reason, [prov], f"panic:engage:{new_ulid()}")
+                for areq in cancelled:
+                    ar = self.store.get_action_request(cur, areq)
+                    self._release(cur, ar, [prov], "cancelled_by_freeze")
         except Exception as exc:  # noqa: BLE001
-            line = json.dumps({"ts": fmt_ts(self.clock()), "event": "KILL_SWITCH_CHANGED", "level": level,
-                               "target": target, "actor": actor, "reason": reason, "revision": after["revision"],
-                               "hooks": hook_results,
-                               "receipt_error": f"{type(exc).__name__}: {exc}"})
             with open(self._journal, "a", encoding="utf-8") as fh:
-                fh.write(line + "\n")
-            print(f"WARNING: freeze engaged but receipt failed ({exc}); journaled to {self._journal}", file=sys.stderr)
-        return {"state": after, "cancelled": cancelled, "hooks": hook_results}
+                fh.write(json.dumps({"ts": fmt_ts(self.clock()), "event": "KILL_SWITCH_ENGAGE_FAILED", "level": level,
+                                     "target": target, "actor": actor, "reason": reason,
+                                     "error": f"{type(exc).__name__}: {exc}"}) + "\n")
+            print(f"WARNING: freeze could not be written ({exc}); PANIC reads fail closed; journaled to {self._journal}",
+                  file=sys.stderr)
+            return {"state": self._state_summary(), "cancelled": [], "hooks": {}, "error": str(exc)}
+        # Side effects (cancel unstarted workflows, deny-all egress, zero LLM budgets) after the freeze is durable.
+        hook_results = run_hooks(self.panic_hooks, level, target, True, self.panic.read())
+        if self.panic_hooks:
+            self._hooks_receipt(level, target, True, actor, reason, hook_results, cv)
+        return {"state": self._state_summary(), "cancelled": cancelled, "hooks": hook_results}
 
     def release_panic(self, level: str, target: str | None, actor: str, reason: str) -> dict:
-        """Unfreeze. Only a policy approver may release, the policy must be readable, and the
-        release only stands if its receipt commits; otherwise the previous state is restored."""
+        """Unfreeze (role approver). Only a policy approver may release, the policy must be readable,
+        and the release is atomic with its receipt in mbos.panic_set."""
         policy, err = self._policy()
         if policy is None:
             raise GatewayRefused(f"cannot release PANIC while policy is unreadable: {err}")
@@ -658,35 +652,11 @@ class ActionGateway:
             raise GatewayRefused(f"{actor} may not release PANIC")
         if not reason.strip():
             raise GatewayRefused("release requires a reason")
-        before_raw = self.panic.read_raw()
-        before, after = self.panic.mutate(level, target, False, actor, reason)
-        try:
-            with self.store.tx() as cur:
-                self._panic_receipt(cur, level, target, False, actor, reason, before, after, policy.version)
-        except BaseException:
-            if before_raw is not None and self.panic.read().readable:
-                self.panic.mutate(level, target, True, "action-gateway", "release rolled back: receipt failed")
-            raise
-        # Loosening side effects only after the release itself is receipted.
+        with self.store.tx("approver") as cur:
+            prov = self._tool_provenance(cur, policy.version, tool="mbos_governance.panic")
+            self.store.panic_set(cur, level, target, False, actor_json(actor), reason, [prov], f"panic:release:{new_ulid()}")
+        # Loosening side effects only after the release itself is committed with its receipt.
         hook_results = run_hooks(self.panic_hooks, level, target, False, self.panic.read())
         if self.panic_hooks:
-            with self.store.tx() as cur:
-                self._panic_receipt(cur, level, target, False, actor, reason, after, after, policy.version,
-                                    hooks=hook_results, intent_prefix="PANIC side effects applied:")
-        return {"state": after, "hooks": hook_results}
-
-    def _cancel_queued(self, cur, policy: Policy | None) -> list[str]:
-        """L3: approved-but-not-started requests become cancelled_by_freeze (never retried)."""
-        out = []
-        gw = self._tool_provenance(cur, policy.version if policy else "UNAVAILABLE")
-        for ar in self.store.requests_with_status(cur, ("approved",)):
-            approval = self.store.latest_approval(cur, ar["action_request_id"])
-            ar = self.store.set_status(cur, ar, "cancelled_by_freeze")
-            self._release(cur, ar, [gw], approval["approval_id"] if approval else None, "cancelled_by_freeze")
-            if approval is not None:
-                self._action_receipt(cur, "ACTION_FAILED", ar, "cancelled by L3 PANIC before start", [gw] + ar["provenance_ids"],
-                                     approval_id=approval["approval_id"], effect="none",
-                                     before_state={"status": "approved"}, after_state={"status": "cancelled_by_freeze"},
-                                     effector_response={"provider": "none", "status": "cancelled_by_freeze", "dry_run": True})
-            out.append(ar["action_request_id"])
-        return out
+            self._hooks_receipt(level, target, False, actor, reason, hook_results, policy.version)
+        return {"state": self._state_summary(), "hooks": hook_results}

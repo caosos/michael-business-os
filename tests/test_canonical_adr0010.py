@@ -8,7 +8,6 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
-import sqlite3
 from pathlib import Path
 
 import pytest
@@ -45,16 +44,15 @@ def test_receipt_chain_vector_verifies_with_05_code():
         prev = r["row_hash"]
 
 
-def test_receipt_chain_vector_verifies_in_05_store(env):
-    """Load the vector chain into the stand-in store and run its verify_chain."""
-    conn = sqlite3.connect(env.store.path)
-    for r in VEC["receipt_chain"]:
-        conn.execute("INSERT INTO receipts (seq, receipt_id, idempotency_key, type, action_request_id, body, prev_hash, row_hash)"
-                     " VALUES (?,?,?,?,?,?,?,?)", (r["seq"], r["receipt_id"], r["idempotency_key"], r["type"],
-                                                   r.get("action_request_id"), json.dumps(r), r["prev_hash"], r["row_hash"]))
-    conn.commit()
-    ok, msg = env.store.verify_chain()
-    assert ok, msg
+def test_lane_d_chain_verifies_with_05_reference_code(env):
+    """R2/ADR-0010: lane D owns the ledger; a chain it wrote verifies with 05's MBOS-RH-1 code too."""
+    env.gw.execute(env.approved("purchase")["action_request_id"])
+    rs = env.store.receipts()
+    prev = None
+    for r in rs:
+        assert r["prev_hash"] == prev and ids.receipt_row_hash(r) == r["row_hash"], r["seq"]
+        prev = r["row_hash"]
+    assert len(rs) > 10 and env.store.verify_chain()[0]
 
 
 def test_integral_float_and_int_hash_equal():

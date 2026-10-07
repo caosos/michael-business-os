@@ -2,8 +2,8 @@
 from __future__ import annotations
 
 import json
-import sqlite3
-import threading
+import psycopg
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 
 import pytest
@@ -27,9 +27,9 @@ def assert_ledger_sound(env):
         contracts.require_valid("receipt", r)
         if "effector_response" in r:
             assert r["effector_response"]["dry_run"] is True, r  # A7: 100% dry-run
-    conn = sqlite3.connect(env.store.path)
-    for (body,) in conn.execute("SELECT body FROM provenance"):
-        contracts.require_valid("provenance", json.loads(body))
+    for (doc,) in env.sql("SELECT doc FROM mbos.v_provenance_documents"):
+        contracts.require_valid("provenance", doc)
+    assert env.sql("SELECT count(*) FROM mbos.v_a7_live_effects")[0][0] == 0  # lane D's A7 audit view
 
 
 # ---------------------------------------------------------------- happy path
@@ -66,7 +66,7 @@ def test_every_category_blocked_without_approval(env, category):
     res = env.gw.execute(ar["action_request_id"])
     assert res.outcome == "refused" and any("NO_APPROVAL" in r for r in res.reasons)
     assert receipt_types(env, ar["action_request_id"])[-1] == "POLICY_DECIDED"
-    assert env.store.get_claim(env.store._conn(), ar["idempotency_key"]) is None
+    assert env.sql("SELECT count(*) FROM mbos.effector_calls WHERE action_request_id=%s", (ar["action_request_id"],))[0][0] == 0
 
 
 @pytest.mark.parametrize("category", sorted(CATEGORY_CAPABILITY))
@@ -103,9 +103,12 @@ def test_modify_closes_original_and_new_request_is_gated(env):
     appr = env.approval(ar, "MODIFY", modifications={"diff": {"template_id": "t2"},
                                                       "new_action_request_id": new["action_request_id"],
                                                       "new_payload_hash": new["payload_hash"]})
+    # Lane D requires the successor (derived_from) to exist before MODIFY is recorded.
+    with pytest.raises(GatewayRefused, match="MODIFY must reference a new request"):
+        env.gw.record_approval(appr)
+    assert env.gw.propose(new, new["proposed_by"]).outcome == "pending_approval"
     assert env.gw.record_approval(appr).status == "rejected"
     assert env.gw.execute(ar["action_request_id"]).outcome == "refused"
-    assert env.gw.propose(new, new["proposed_by"]).outcome == "pending_approval"
     assert env.gw.execute(new["action_request_id"]).outcome == "refused"  # needs its own YES
     env.gw.record_approval(env.approval(new))
     assert env.gw.execute(new["action_request_id"]).outcome == "executed"
@@ -128,10 +131,14 @@ def test_later_decision_supersedes_yes(env):
     ({"auth_context": {"step_up": True}}, "AUTH_CONTEXT_REQUIRED"),
     ({"payload_hash_seen": "sha256:" + "1" * 64}, "APPROVAL_PAYLOAD_HASH_MISMATCH"),
 ])
-def test_invalid_yes_is_recorded_but_not_executable(env, over, reason):
+def test_invalid_yes_is_refused_and_not_recorded(env, over, reason):
+    """An invalid YES never becomes an approval row (lane D would refuse it too); a receipt notes it."""
     ar = env.propose("money")  # money => step-up required
     res = env.gw.record_approval(env.approval(ar, **over))
-    assert res.status == "pending_approval" and any(reason in r for r in res.reasons)
+    assert res.outcome == "refused" and res.status == "pending_approval" and any(reason in r for r in res.reasons)
+    assert env.sql("SELECT count(*) FROM mbos.approvals")[0][0] == 0
+    note = env.store.receipts(ar["action_request_id"])[-1]
+    assert note["type"] == "POLICY_DECIDED" and reason in " ".join(note["details"]["refused_approval"]["problems"])
     out = env.gw.execute(ar["action_request_id"])
     assert out.outcome == "refused"
 
@@ -160,7 +167,7 @@ def test_approval_ttl_capped_by_policy(env):
 
 
 def test_expired_action_request_refused(env):
-    ar = env.approved("email", expires_at=fmt_ts(datetime(2026, 10, 7, 16, 0, tzinfo=timezone.utc)))
+    ar = env.approved("email", expires_at=fmt_ts(env.clock() + timedelta(hours=1)))
     env.clock.advance(hours=2)
     res = env.gw.execute(ar["action_request_id"])
     assert res.status == "expired" and any("ACTION_REQUEST_EXPIRED" in r for r in res.reasons)
@@ -170,12 +177,8 @@ def test_expired_action_request_refused(env):
 def test_payload_mutated_after_approval_refused(env):
     """§17 #8."""
     ar = env.approved("sms")
-    conn = sqlite3.connect(env.store.path)
-    body = json.loads(conn.execute("SELECT body FROM action_requests WHERE action_request_id=?",
-                                   (ar["action_request_id"],)).fetchone()[0])
-    body["payload"]["template_id"] = "send-500-deposit"
-    conn.execute("UPDATE action_requests SET body=? WHERE action_request_id=?", (json.dumps(body), ar["action_request_id"]))
-    conn.commit()
+    # Lane D freezes the payload column; only an attacker bypassing triggers can change it.
+    env.tamper_payload(ar["action_request_id"], "template_id", "send-500-deposit")
     res = env.gw.execute(ar["action_request_id"])
     assert res.outcome == "refused" and res.status == "failed"
     assert any("PAYLOAD_MUTATED_AFTER_PROPOSAL" in r for r in res.reasons)
@@ -184,7 +187,8 @@ def test_payload_mutated_after_approval_refused(env):
 def test_payload_hash_mismatch_rejected_at_proposal(env):
     ar = env.ar("email")
     ar["payload_hash"] = "sha256:" + "a" * 64
-    assert env.gw.propose(ar, ar["proposed_by"]).reasons[0] == "PAYLOAD_HASH_MISMATCH"
+    with pytest.raises(GatewayRefused, match="PAYLOAD_HASH_MISMATCH"):  # never stored (lane D: MB007)
+        env.gw.propose(ar, ar["proposed_by"])
 
 
 def test_float_money_payload_executes(env):
@@ -192,7 +196,7 @@ def test_float_money_payload_executes(env):
     ar = env.approved("offer", payload={"listing_ref": "x", "offer": 850.0})
     res = env.gw.execute(ar["action_request_id"])
     assert res.outcome == "executed"
-    stored = env.store.get_action_request(None, ar["action_request_id"])
+    stored = env.store.action_request(ar["action_request_id"])
     assert stored["payload"]["offer"] == 850
     assert payload_hash(stored["payload"]) == ar["payload_hash"] == payload_hash({"listing_ref": "x", "offer": 850})
 
@@ -234,14 +238,16 @@ def test_crash_in_flight_is_never_blind_retried(env, monkeypatch):
     """§17 #16 (wave-one form): a claim stuck in 'executing' blocks re-execution."""
     ar = env.approved("sms")
 
-    def crash(self, cur, *a, **k):
+    def crash(*a, **k):
         raise RuntimeError("simulated crash after effector call")
-    monkeypatch.setattr(type(env.store), "finish_claim", crash)
+    monkeypatch.setattr(type(env.store), "effector_finish", staticmethod(crash))
     with pytest.raises(RuntimeError):
         env.gw.execute(ar["action_request_id"])
     monkeypatch.undo()
     res = env.gw.execute(ar["action_request_id"])
     assert res.outcome == "refused" and "reconciliation required" in res.reasons[0]
+    assert env.sql("SELECT state FROM mbos.effector_calls WHERE action_request_id=%s",
+                   (ar["action_request_id"],))[0][0] == "executing"   # claim survives the crash for E-05
 
 
 def test_duplicate_proposal_collapses(env):
@@ -291,15 +297,12 @@ def test_parallel_approvals_never_overshoot(env):
             env.gw.execute(ar["action_request_id"])
         except Exception as exc:  # noqa: BLE001
             errors.append(exc)
-    threads = [threading.Thread(target=worker, args=(a,)) for a in ars]
-    [t.start() for t in threads]
-    [t.join() for t in threads]
+    with ThreadPoolExecutor(max_workers=20) as pool:   # 20 concurrent connections per role
+        list(pool.map(worker, ars))
     assert not errors, errors[:3]
-    conn = sqlite3.connect(env.store.path)
-    committed = conn.execute("SELECT COALESCE(SUM(amount_micros),0) FROM budget_reservations "
-                             "WHERE state IN ('reserved','committed')").fetchone()[0]
-    executed = conn.execute("SELECT COUNT(*) FROM action_requests WHERE status='executed'").fetchone()[0]
-    assert committed <= 1500 * 1_000_000 and executed == 37  # floor(1500/40)
+    spent = env.sql("SELECT coalesce(sum(reserved - released), 0) FROM mbos.v_budget_reservations")[0][0]
+    executed = env.sql("SELECT count(*) FROM mbos.action_requests WHERE status='executed'")[0][0]
+    assert spent <= 1500 and executed == 37  # floor(1500/40)
     assert_ledger_sound(env)
 
 
@@ -328,7 +331,7 @@ def test_grant_revoked_between_approval_and_execution(env):
 def test_quiet_hours_refuses_sms_and_calls(env):
     """§17 #14: 21:30 America/Chicago."""
     sms, call, email = env.approved("sms"), env.approved("phone_call"), env.approved("email")
-    env.clock.now = datetime(2026, 10, 8, 2, 30, tzinfo=timezone.utc)
+    env.clock.advance(hours=11, minutes=30)  # 15:00Z -> 02:30Z next day = 21:30 America/Chicago
     assert "G6:QUIET_HOURS" in env.gw.execute(sms["action_request_id"]).reasons
     assert "G6:QUIET_HOURS" in env.gw.execute(call["action_request_id"]).reasons
     assert env.gw.execute(email["action_request_id"]).outcome == "executed"
@@ -353,7 +356,7 @@ def test_l3_freeze_refuses_execution_and_proposals_and_cancels_queue(env):
     queued = env.approved("email")
     out = env.gw.engage_panic("L3", None, "michael", "test")
     assert out["cancelled"] == [queued["action_request_id"]]
-    assert env.store.get_action_request(None, queued["action_request_id"])["status"] == "cancelled_by_freeze"
+    assert env.store.action_request(queued["action_request_id"])["status"] == "cancelled_by_freeze"
     ar = env.ar("email")
     res = env.gw.propose(ar, ar["proposed_by"])
     assert res.outcome == "rejected" and "PANIC_L3_FROZEN" in res.reasons
@@ -363,9 +366,10 @@ def test_l3_freeze_refuses_execution_and_proposals_and_cancels_queue(env):
 
 def test_l3_freeze_between_approval_and_execute(env):
     ar = env.approved("email")
-    env.panic.mutate("L3", None, True, "michael", "out-of-band freeze")  # e.g. CLI with DB down
+    env.freeze_sql("L3")  # another operator process freezes through lane D directly
     res = env.gw.execute(ar["action_request_id"])
     assert res.outcome == "refused" and "G7:PANIC_L3_FROZEN" in res.reasons
+    assert res.status == "cancelled_by_freeze"  # lane D's panic_set cancelled the unstarted request
 
 
 def test_freeze_after_guard_before_effector(env, monkeypatch):
@@ -376,7 +380,7 @@ def test_freeze_after_guard_before_effector(env, monkeypatch):
     def flip():
         calls["n"] += 1
         if calls["n"] == 2:  # 1st read = guard G7, 2nd = last-instant check
-            env.panic.mutate("L3", None, True, "michael", "race")
+            env.freeze_sql("L3", reason="race")
         return real()
     monkeypatch.setattr(env.panic, "read", flip)
     res = env.gw.execute(ar["action_request_id"])
@@ -384,18 +388,21 @@ def test_freeze_after_guard_before_effector(env, monkeypatch):
     assert receipt_types(env, ar["action_request_id"])[-2:] == ["BUDGET_RELEASED", "ACTION_FAILED"]
 
 
-@pytest.mark.parametrize("breakage", ["delete", "garbage", "tamper"])
+@pytest.mark.parametrize("breakage", ["empty", "wrong_schema", "tamper", "no_database"])
 def test_unreadable_panic_state_fails_closed(env, breakage):
-    """§17 #20 / A9."""
+    """§17 #20 / A9: an empty, malformed or tampered panic_state — or no database — reads as FROZEN."""
     ar = env.approved("email")
-    if breakage == "delete":
-        env.panic.path.unlink()
-    elif breakage == "garbage":
-        env.panic.path.write_text("{")
+    if breakage == "empty":
+        env.sql("DELETE FROM mbos.panic_state", replica=True)
+    elif breakage == "wrong_schema":
+        env.sql("UPDATE mbos.panic_state SET body = jsonb_set(body, '{schema}', '\"x\"') "
+                "WHERE revision = (SELECT max(revision) FROM mbos.panic_state)", replica=True)
+    elif breakage == "tamper":  # someone flips L3 to RUNNING / clears freezes without re-sealing
+        env.freeze_sql("L2", "comms.*")
+        env.sql("UPDATE mbos.panic_state SET body = jsonb_set(body, '{capabilities}', '{}') "
+                "WHERE revision = (SELECT max(revision) FROM mbos.panic_state)", replica=True)
     else:
-        raw = json.loads(env.panic.path.read_text())
-        raw["revision"] += 1
-        env.panic.path.write_text(json.dumps(raw))
+        env.gw.panic = type(env.panic)(env.dsn("gateway").replace("dbname=", "dbname=does_not_exist_"))
     res = env.gw.execute(ar["action_request_id"])
     assert res.outcome == "refused" and any(r.startswith("G7:PANIC_STATE_UNREADABLE") for r in res.reasons)
     new = env.ar("email")
@@ -446,19 +453,30 @@ def test_release_refused_while_policy_unreadable(env):
     assert env.panic.read().globally_frozen
 
 
-def test_release_rolled_back_if_receipt_fails(env, monkeypatch):
+def test_release_needs_approver_role_in_the_database(env):
+    """R5: even code that skips the gateway's checks cannot release as the gateway (or agent) login."""
     env.gw.engage_panic("L3", None, "michael", "x")
-    monkeypatch.setattr(type(env.store), "append_receipt", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("db down")))
-    with pytest.raises(RuntimeError):
-        env.gw.release_panic("L3", None, "michael", "try")
+    for role in ("gateway", "agent_write"):
+        with psycopg.connect(env.dsn(role), autocommit=True) as c, pytest.raises(psycopg.errors.InsufficientPrivilege):
+            c.execute("SELECT mbos.panic_set('L3', NULL, false, '{\"type\":\"human\",\"id\":\"michael\"}'::jsonb, "
+                      "'sneaky release', ARRAY['prov_00000000000000000000000000'], 'k')")
     assert env.panic.read().globally_frozen
 
 
-def test_freeze_stands_even_if_receipt_fails(env, monkeypatch):
-    monkeypatch.setattr(type(env.store), "append_receipt", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("db down")))
-    env.gw.engage_panic("L3", None, "michael", "db is down")
-    assert env.panic.read().globally_frozen
-    assert "db down" in env.gw._journal.read_text()
+def test_agents_cannot_engage_panic_directly(env):
+    with psycopg.connect(env.dsn("agent_write"), autocommit=True) as c, pytest.raises(psycopg.errors.InsufficientPrivilege):
+        c.execute("SELECT mbos.panic_set('L3', NULL, true, '{\"type\":\"agent\",\"id\":\"agent-02-opportunity\"}'::jsonb, "
+                  "'x', ARRAY['prov_00000000000000000000000000'], 'k')")
+
+
+def test_freeze_when_database_unreachable_fails_closed(env):
+    from mbos_governance import ActionGateway, PgGovernanceStore, PgPanicStore
+    bad = env.dsn("gateway").replace("dbname=", "dbname=gone_")
+    gw = ActionGateway(PgGovernanceStore(bad), env.gw.policies, PgPanicStore(bad), clock=env.clock,
+                       journal_path=env.tmp / "j.jsonl")
+    out = gw.engage_panic("L3", None, "michael", "db is down")
+    assert out["error"] and out["state"]["readable"] is False and gw.panic.read().globally_frozen
+    assert "KILL_SWITCH_ENGAGE_FAILED" in (env.tmp / "j.jsonl").read_text()
 
 
 # ---------------------------------------------------------------- dry-run guard / bypass
@@ -485,28 +503,48 @@ def test_effector_claiming_live_trips_l3_panic(env, monkeypatch):
     assert res.outcome == "failed" and "DRY_RUN_INVARIANT_VIOLATED" in res.reasons[0]
     assert env.panic.read().globally_frozen
     last = env.store.receipts(ar["action_request_id"])[-1]
-    assert last["type"] == "ACTION_FAILED" and last["effector_response"]["dry_run"] is False  # recorded truthfully
+    # Lane D CHECKs dry_run=true on stored responses (A7); what the effector claimed is kept verbatim.
+    assert last["type"] == "ACTION_FAILED" and last["effector_response"]["status"] == "invariant_violation"
+    assert last["details"]["effector_reported"]["dry_run"] is False
 
 
 # ---------------------------------------------------------------- ledger integrity
 def test_receipts_are_insert_only(env):
-    env.approved("email")
-    conn = sqlite3.connect(env.store.path)
-    for sql in ("UPDATE receipts SET type='X'", "DELETE FROM receipts", "UPDATE approvals SET body='{}'",
-                "DELETE FROM provenance"):
-        with pytest.raises(sqlite3.IntegrityError, match="insert-only"):
-            conn.execute(sql)
+    env.gw.execute(env.approved("purchase")["action_request_id"])  # rows in every ledger incl. effector_calls/budget
+    for role in ("gateway", "superuser"):
+        with psycopg.connect(env.dsn(role), autocommit=True) as c:
+            for q in ("UPDATE mbos.receipts SET intent='x'", "DELETE FROM mbos.receipts", "UPDATE mbos.approvals SET reason='x'",
+                      "DELETE FROM mbos.provenance", "DELETE FROM mbos.panic_state", "DELETE FROM mbos.effector_calls",
+                      "UPDATE mbos.budget_ledger SET amount = 0"):
+                with pytest.raises(psycopg.Error):
+                    c.execute(q)
 
 
 def test_tampering_detected(env):
     """§17 #28 / A3."""
     env.gw.execute(env.approved("email")["action_request_id"])
     assert env.store.verify_chain()[0]
-    conn = sqlite3.connect(env.store.path)
-    conn.execute("DROP TRIGGER receipts_no_update")  # attacker with DDL rights
-    body = json.loads(conn.execute("SELECT body FROM receipts WHERE seq=2").fetchone()[0])
-    body["intent"] = "nothing to see here"
-    conn.execute("UPDATE receipts SET body=? WHERE seq=2", (json.dumps(body),))
-    conn.commit()
+    env.sql("UPDATE mbos.receipts SET intent='nothing to see here' WHERE seq=5", replica=True)  # attacker bypassing triggers
     ok, msg = env.store.verify_chain()
-    assert not ok and "seq 2" in msg
+    assert not ok and "seq 5" in msg
+
+
+# ---------------------------------------------------------------- R4: the gateway owns action-status edges
+@pytest.mark.parametrize("to,rtype", [("executing", "ACTION_EXECUTING"), ("executed", "ACTION_EXECUTED"),
+                                      ("cancelled_by_freeze", "KILL_SWITCH_CHANGED")])
+def test_agents_cannot_move_action_status(env, to, rtype):
+    ar = env.approved("email")
+    with psycopg.connect(env.dsn("agent_write"), autocommit=True) as c, pytest.raises(psycopg.errors.InsufficientPrivilege):
+        c.execute("SELECT mbos.set_action_status(%s, %s, %s, '{\"type\":\"agent\",\"id\":\"agent-06-communications\"}'::jsonb,"
+                  " 'self-execute', %s, %s)", (ar["action_request_id"], to, rtype, ar["provenance_ids"], new_id("k")))
+    assert env.status(ar["action_request_id"]) == "approved"
+
+
+def test_every_status_edge_is_receipted_by_the_gateway(env):
+    """R4: every ACTION_EXECUTING/EXECUTED receipt is the gateway's, and lane D saw a receipt for each move."""
+    ar = env.approved("email")
+    env.gw.execute(ar["action_request_id"])
+    rs = {r["type"]: r for r in env.store.receipts(ar["action_request_id"])}
+    for t in ("POLICY_DECIDED", "APPROVAL_REQUESTED", "ACTION_EXECUTING", "ACTION_EXECUTED"):
+        assert rs[t]["actor"] == {"type": "system", "id": "action-gateway"}, t
+    assert rs["APPROVAL_DECIDED"]["actor"] == {"type": "human", "id": "michael"}

@@ -5,7 +5,7 @@ import json
 
 import pytest
 
-from mbos_governance.panic import FROZEN, RUNNING, PanicStore
+from mbos_governance.panic import FROZEN, RUNNING
 from mbos_governance.policy import DENY, REQUIRE_APPROVAL, PolicyStore, PolicyUnavailable, decide
 
 from .conftest import CATEGORY_CAPABILITY
@@ -100,52 +100,69 @@ def test_money_requires_cost_estimate(env):
     assert decide(ar, pol).reasons[-1].startswith("COST_ESTIMATE_REQUIRED")
 
 
-# ---------------------------------------------------------------- PANIC state
-def test_missing_panic_file_is_frozen(tmp_path):
-    st = PanicStore(tmp_path / "nope.json").read()
-    assert st.globally_frozen and not st.readable
-    assert st.blocks("a", "b", "c")
+# ---------------------------------------------------------------- PANIC state (lane D panic_state via PgPanicStore)
+def test_fresh_database_bootstraps_frozen(cluster, tmp_path):
+    import psycopg
+    from mbos_governance import PgPanicStore
+    from .conftest import TEMPLATE_DB
+    name = "t05_bootstrap_frozen"
+    with psycopg.connect(f"{cluster['base']} dbname=postgres user=postgres", autocommit=True) as c:
+        c.execute(f"DROP DATABASE IF EXISTS {name}")
+        c.execute(f"CREATE DATABASE {name} TEMPLATE {TEMPLATE_DB}")
+    st = PgPanicStore(f"{cluster['base']} dbname={name} user=mbos_gateway").read()
+    assert st.readable and st.global_state == FROZEN  # lane D 0007 bootstrap: releasing is Michael's act
 
 
-@pytest.mark.parametrize("content", ["", "{", "[]", '{"schema":"mbos.governance.panic/1"}', "\x00\x01"])
-def test_garbage_panic_file_is_frozen(tmp_path, content):
-    p = tmp_path / "panic.json"
-    p.write_text(content)
-    st = PanicStore(p).read()
-    assert st.globally_frozen and st.blocks(None, None, None)
+def test_unreachable_database_is_frozen():
+    from mbos_governance import PgPanicStore
+    st = PgPanicStore("host=/nonexistent-socket-dir port=1 dbname=x user=y", connect_timeout=1).read()
+    assert st.globally_frozen and not st.readable and st.blocks("a", "b", "c")
 
 
-def test_hand_edited_panic_file_fails_checksum(env):
-    raw = json.loads(env.panic.path.read_text())
-    raw["global"]["state"] = RUNNING
-    raw["agents"] = {}
-    raw["revision"] = 99  # any edit without re-sealing
-    env.panic.path.write_text(json.dumps(raw))
+def test_empty_panic_state_is_frozen(env):
+    env.sql("DELETE FROM mbos.panic_state", replica=True)
+    st = env.panic.read()
+    assert st.globally_frozen and not st.readable and st.blocks(None, None, None)
+
+
+def test_hand_edited_panic_state_fails_checksum(env):
+    env.freeze_sql("L1", "agent-07-marketing")
+    env.sql("UPDATE mbos.panic_state SET body = jsonb_set(body, '{agents}', '{}') "
+            "WHERE revision = (SELECT max(revision) FROM mbos.panic_state)", replica=True)
     st = env.panic.read()
     assert not st.readable and "checksum" in st.error
 
 
-def test_init_defaults_to_frozen(tmp_path):
-    ps = PanicStore(tmp_path / "p.json")
-    ps.init("michael", "bootstrap")
-    assert ps.read().global_state == FROZEN
-
-
-def test_mutation_never_repairs_unreadable_into_running(env):
-    env.panic.path.write_text("{garbage")
-    env.panic.mutate("L1", "agent-07-marketing", True, "michael", "x")
+def test_engage_on_unreadable_state_rebuilds_frozen(env):
+    env.sql("UPDATE mbos.panic_state SET body = jsonb_set(body, '{schema}', '\"x\"') "
+            "WHERE revision = (SELECT max(revision) FROM mbos.panic_state)", replica=True)
+    env.gw.engage_panic("L1", "agent-07-marketing", "michael", "x")
     st = env.panic.read()
-    assert st.readable and st.global_state == FROZEN  # rebuilt FROZEN, not RUNNING
+    assert st.readable and st.global_state == FROZEN  # rebuilt FROZEN, never repaired into RUNNING
 
 
 def test_levels(env):
-    env.panic.mutate("L1", "agent-07-marketing", True, "michael", "misbehaving")
-    env.panic.mutate("L2", "money.*", True, "michael", "freeze money")
-    env.panic.mutate("L2", "category:sms", True, "michael", "freeze sms")
+    env.gw.engage_panic("L1", "agent-07-marketing", "michael", "misbehaving")
+    env.gw.engage_panic("L2", "money.*", "michael", "freeze money")
+    env.gw.engage_panic("L2", "category:sms", "michael", "freeze sms")
     st = env.panic.read()
     assert st.blocks("agent-07-marketing", "publish.listing.create", "publishing") == ["PANIC_L1_AGENT:agent-07-marketing"]
     assert st.blocks("agent-01-coordinator", "money.payment.send", "money") == ["PANIC_L2_CAPABILITY:money.*"]
     assert st.blocks("agent-06-communications", "comms.sms.send", "sms") == ["PANIC_L2_CATEGORY:sms"]
     assert st.blocks("agent-06-communications", "comms.email.send", "email") == []
-    env.panic.mutate("L3", None, True, "michael", "stop")
+    env.gw.engage_panic("L3", None, "michael", "stop")
     assert "PANIC_L3_FROZEN" in env.panic.read().blocks("agent-06-communications", "comms.email.send", "email")
+
+
+def test_python_and_sql_blocks_agree(env):
+    """PanicState.blocks (05) and mbos.panic_blocks (lane D) give the same reasons."""
+    env.gw.engage_panic("L1", "agent-07-marketing", "michael", "a")
+    env.gw.engage_panic("L2", "discovery.source.*", "michael", "b")
+    env.gw.engage_panic("L2", "category:sms", "michael", "c")
+    st = env.panic.read()
+    for args in [("agent-07-marketing", "publish.listing.create", "publishing"),
+                 ("agent-02-opportunity", "discovery.source.ebay.read", "discovery"),
+                 ("agent-06-communications", "comms.sms.send", "sms"),
+                 ("agent-06-communications", "comms.email.send", "email")]:
+        sql = env.sql("SELECT mbos.panic_blocks(%s, %s, %s)", args)[0][0]
+        assert sorted(sql) == sorted(st.blocks(*args)), args

@@ -1,7 +1,7 @@
 # Action Gateway: wave one implementation guide
 
 **Owner:** Agent 05 · **Status:** implemented, wave one · **Date:** 2026-10-07
-**Code:** `src/mbos_governance/` · **Policy data:** `policy/` · **Tests:** `tests/` (157 passing)
+**Code:** `src/mbos_governance/` · **Policy data:** `policy/` · **Tests:** `tests/` (211 passing, on PostgreSQL 16)
 
 > Core law: no action without a receipt, and no receipt without provenance.
 > Governance rule: models may PROPOSE. Non-LLM policy code AUTHORIZES.
@@ -27,11 +27,13 @@ Tags: **FACT** = verified by the test suite in this branch. **INFERENCE**, **REC
 ## 2. How other lanes use it (the only path to an external effect)
 
 ```python
-from mbos_governance import ActionGateway, GovernanceStore, PolicyStore, PanicStore
+from mbos_governance import ActionGateway, PgGovernanceStore, PgPanicStore, PolicyStore
 
-gw = ActionGateway(GovernanceStore("var/governance.sqlite3"),
-                   PolicyStore("policy/policy.v1.json"),
-                   PanicStore("var/panic_state.json"))
+# One login per role (privileges checked by Postgres), or one DSN for all (e.g. mbos_dbos).
+store = PgGovernanceStore({"agent_write": DSN_STATE_MCP, "gateway": DSN_GATEWAY,
+                           "approver": DSN_OPERATOR_UI, "policy_admin": DSN_POLICY})
+gw = ActionGateway(store, PolicyStore("policy/policy.v1.json"), PgPanicStore(DSN_GATEWAY),
+                   panic_hooks=[DbosCancelHook(DBOS), EgressPolicyHook(...), LiteLLMBudgetHook(...)])
 
 gw.record_provenance(prov)              # provenance.schema.json; must exist before it is cited
 res = gw.propose(action_request, caller="agent-06-communications")   # agent → gateway
@@ -69,7 +71,7 @@ A refusal writes `ACTION_FAILED` (`effect: none`, `effector_response.status: gua
 
 ```bash
 mbos-gov panic status                       # exit 0 RUNNING, 2 FROZEN/unreadable
-mbos-gov panic init --actor michael         # first boot: creates the state FROZEN
+# A fresh database is FROZEN (lane D 0007 bootstrap). Connection: --dsn / MBOS_GOV_DSN / MBOS_GOV_DSN_<ROLE>.
 mbos-gov panic release --level L3 --actor michael --reason "go live (dry-run)"
 mbos-gov panic freeze                        # L3 global; anyone on the host may freeze
 mbos-gov panic freeze --level L2 --target 'money.*'      # or category:sms
@@ -78,12 +80,19 @@ mbos-gov ledger verify                      # hash-chain check
 mbos-gov policy check
 ```
 
-- **Where the state lives:** `var/panic_state.json`, written atomically and sealed with a sha256 checksum. It is deliberately kept **out** of the database, so `freeze` still works when the database is down. In that case the event goes to `panic_state.json.journal.jsonl` for later receipting.
+- **Where the state lives (E-02, ruling R5):** lane D's sealed, append-only `mbos.panic_state`. It is written only by `mbos.panic_set`, together with its `KILL_SWITCH_CHANGED` receipt in the same transaction, and read through `PgPanicStore` (`mbos.panic_read`). The wave-one JSON file is gone. There is one source of truth, and it is backed up and receipted.
+- **When the database is unreachable:** a freeze cannot be written, but PANIC also cannot be **read**, and every reader treats that as FROZEN. The attempt is journaled locally.
+- **Role enforcement by the database:**
+  - engage: `gateway`, `approver` or `policy_admin`
+  - release: `approver` only
+  - agents (`agent_write`): no PANIC rights at all
+
+  Tests check this with real logins.
 - **Fail-closed rule:** a missing, corrupt, schema-invalid, unknown-state or checksum-mismatched file reads as FROZEN. No mutation can "repair" an unreadable file into RUNNING.
 - **Who can release:** only a policy approver (`michael`), with a reason, and only while the policy is readable. A release stands only if its `KILL_SWITCH_CHANGED` receipt commits. If the receipt fails, the state is re-frozen.
 - **What L3 does in wave one (FACT):** the gateway refuses every execution and every new proposal. Approved requests that have not started become `cancelled_by_freeze`, their reservations are released, and receipts are written. If an effector call is already in flight, the late PANIC read stops it before the effector runs.
 - **L3/L1 side-effect hooks (E-03, `hooks.py`, all dry with no network):**
-  - **`DbosCancelHook(DBOS)`.** On L3 engage it runs `DBOS.cancel_workflows` on `ENQUEUED`/`DELAYED` workflows. `PENDING` (already running) workflows are reported as `in_flight_at_freeze`, and the gateway's late PANIC read stops them. FACT: tested against real `dbos` 3.2.0 (Agent 01's pin) on SQLite: 3 queued workflows cancelled, 1 running workflow finished.
+  - **`DbosCancelHook(DBOS)`.** On L3 engage it runs `DBOS.cancel_workflows` on `ENQUEUED`/`DELAYED` workflows. `PENDING` (already running) workflows are reported as `in_flight_at_freeze`, and the gateway's late PANIC read stops them. FACT: tested against real `dbos` 3.2.0 (Agent 01's pin) (local SQLite system DB, DBOS's own): 3 queued workflows cancelled, 1 running workflow finished.
   - **`EgressPolicyHook(path)`.** It writes a sealed `mbos.egress/1` file with `default: deny`. The per-agent allow-lists come from `policy.egress.allow`, which the wave-one schema pins to empty. L3, an unreadable PANIC state or an unreadable policy produces `deny_all: true`. L1 removes that agent's list. A proxy reading this file must treat a missing file or a bad checksum as deny-all.
   - **`LiteLLMBudgetHook(path)`.** It writes `mbos.litellm.keys/1`: one key spec per agent (`key_alias mbos-<agent>`, `max_budget` from `llm_spend`, `budget_duration 1d`). L3 or an unreadable state sets every budget to 0. L1 sets that agent's budget to 0. *Applying* the spec to a LiteLLM proxy is an operator step, and this code never calls it. INFERENCE: the field names follow the LiteLLM key API; re-check them once a LiteLLM version is pinned.
   - **When hooks run.** Engage hooks run right after the freeze is durable, and their results go into the `KILL_SWITCH_CHANGED` receipt. A failing hook never blocks the freeze. Release hooks run **only after** the release receipt commits, and their results go into a follow-up receipt. A rolled-back release leaves egress and budgets frozen.
@@ -124,11 +133,15 @@ These defaults wait on Michael's decisions (`MICHAEL_DECISIONS.md`):
   - `record_approval` is exposed only to the authenticated Operator UI, never to agent processes
 
   Wave one has no live credentials anywhere, so nothing exists to steal yet.
-- **Storage:** `GovernanceStore` is a SQLite reference implementation with insert-only triggers, a hash chain and same-transaction receipts. RECOMMENDATION: Agent 04's Postgres DDL replaces it behind the same methods. The gateway logic does not change.
+- **Storage (E-02):** `PgGovernanceStore` writes only through lane D's `mbos.*` API (`agent-04` 0007), and there is no SQLite on the production path.
+  - Lane D owns the ledger (R2): MBOS-RH-1 chain, insert-only, and a receipt required for every state change.
+  - The gateway owns the action-status edges and their receipts (R4).
+  - Lane D re-checks G1–G3 at the `approved→executing` edge (defense in depth). Execution claims are `mbos.effector_calls` (`effector_claim`/`effector_finish`).
+  - Budgets use `mbos.budget_reserve_caps` (bucket per-action/daily/global caps under one lock). The money **action-count** velocity is checked by the gateway under the same lock, because lane D's `velocity_per_hour` caps dollars.
 
 ## 8. Next (1-week path, ADR-0005 §7)
 
-1. Postgres `GovernanceStore` on Agent 04's DDL. Roles: `gateway` writes, agents read.
+1. ~~Postgres store on Agent 04's DDL~~ **DONE (E-02).**
 2. L3 hooks: egress proxy deny-all, OpenBao lease revoke, LiteLLM per-agent budget 0, DBOS `cancel` for unstarted workflows. Plus B29.
 3. Sandbox policy (gVisor or E2B) and an egress allow-list for each adapter and effector.
 4. Governance alerts on FREEZE, budget breach, INJECTION_SUSPECTED and stuck `executing` claims.

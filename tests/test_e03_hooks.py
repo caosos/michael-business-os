@@ -97,7 +97,7 @@ def test_failing_hook_never_blocks_the_freeze(env):
 
 @pytest.mark.skipif(subprocess.run([sys.executable, "-c", "import dbos"], capture_output=True).returncode != 0,
                     reason="dbos not installed (pip install 'dbos>=3.2,<4')")
-def test_l3_cancels_real_dbos_queue(tmp_path):
+def test_l3_cancels_real_dbos_queue(env, tmp_path):
     """Real DBOS 3.2 on a local SQLite system DB, in a subprocess (DBOS is process-global),
     with outbound sockets disabled inside the subprocess too."""
     script = textwrap.dedent(f"""
@@ -107,11 +107,12 @@ def test_l3_cancels_real_dbos_queue(tmp_path):
         sys.path.insert(0, {str(REPO / "src")!r})
         from pathlib import Path
         from dbos import DBOS
-        from mbos_governance import ActionGateway, GovernanceStore, PanicStore, PolicyStore
+        from mbos_governance import ActionGateway, PgGovernanceStore, PgPanicStore, PolicyStore
         from mbos_governance.hooks import DbosCancelHook
-        tmp = Path({str(tmp_path)!r})
+        tmp = Path({str(tmp_path)!r}) / "sub"
+        tmp.mkdir()
         (tmp / "policy").mkdir()
-        for f in ("policy.v1.json", "policy.schema.json"):
+        for f in ("policy.v1.json", "policy.schema.json", "content_rules.v1.json"):
             shutil.copy({str(REPO / "policy")!r} + "/" + f, tmp / "policy" / f)
         DBOS(config={{"name": "mbos-e03", "system_database_url": "sqlite:///" + str(tmp / "dbos.sqlite")}})
         gate = threading.Event()
@@ -125,9 +126,10 @@ def test_l3_cancels_real_dbos_queue(tmp_path):
         deadline = time.time() + 15
         while time.time() < deadline and not DBOS.list_workflows(status=["PENDING"]):
             time.sleep(0.1)
-        panic = PanicStore(tmp / "panic.json"); panic.init("michael", "t", state="RUNNING")
-        gw = ActionGateway(GovernanceStore(tmp / "g.sqlite3"), PolicyStore(tmp / "policy/policy.v1.json"), panic,
-                           panic_hooks=[DbosCancelHook(DBOS)])
+        dsns = json.loads({json.dumps(env.dsns)!r})
+        gw = ActionGateway(PgGovernanceStore(dsns), PolicyStore(tmp / "policy/policy.v1.json"),
+                           PgPanicStore(dsns["gateway"]), panic_hooks=[DbosCancelHook(DBOS)],
+                           journal_path=tmp / "j.jsonl")
         out = gw.engage_panic("L3", None, "michael", "real dbos test")
         gate.set(); time.sleep(2)
         final = sorted(w.status for w in DBOS.list_workflows())
@@ -209,24 +211,27 @@ def test_l1_zeroes_only_that_agent(env):
     assert zero == ["agent-07-marketing"]
 
 
-def test_release_side_effects_not_applied_if_release_rolls_back(env, monkeypatch):
+def test_release_side_effects_not_applied_if_release_refused(env):
+    """Loosening side effects run only after the release committed; a DB-refused release applies none."""
     hooked(env).gw.engage_panic("L3", None, "michael", "stop")
-    monkeypatch.setattr(type(env.store), "append_receipt", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("db down")))
-    with pytest.raises(RuntimeError):
+    env.store.dsns["approver"] = env.dsn("gateway")   # a login WITHOUT the approver role
+    env.store.close()
+    with pytest.raises(Exception, match="approver"):
         env.gw.release_panic("L3", None, "michael", "try")
+    assert env.panic.read().globally_frozen
     assert json.loads((env.tmp / "litellm.json").read_text())["frozen"]
     assert json.loads((env.tmp / "egress.json").read_text())["deny_all"]
 
 
 def test_unreadable_panic_renders_zero_budgets(env):
-    env.panic.path.write_text("{")
+    env.sql("DELETE FROM mbos.panic_state", replica=True)
     doc = render_litellm_keys(PolicyStore(env.policy_path).current().data, env.panic.read())
     assert doc["frozen"] and all(k["max_budget"] == 0 for k in doc["keys"])
 
 
 def test_cli_render_commands(env, capsys):
     from mbos_governance.cli import main
-    base = ["--policy", str(env.policy_path), "--panic", str(env.panic.path)]
+    base = ["--dsn", env.dsn("gateway"), "--policy", str(env.policy_path)]
     assert main(base + ["render", "litellm"]) == 0
     assert json.loads(capsys.readouterr().out)["schema"] == "mbos.litellm.keys/1"
     out = env.tmp / "eg.json"

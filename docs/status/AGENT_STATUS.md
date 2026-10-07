@@ -7,12 +7,13 @@ Worktree: /home/michaelos/business-os-worktrees/agent-05-governance
 State: WORKING
 Done: B-04 lane-E half @ d3b9948 (02's fixture applies + blocks exactly that source; auto-apply decided, release human-only)
 Done: E-04 @ 4fadbe7 (secret scan refuses + never stores; injection tripwire => tier 0, needs_review, step-up; 205 tests)
-Claimed: E-02 (P0) — unblocked: D-04 DONE @ agent-04 14bd690 (migration 0007)
+Done: E-02 @ <E02> (gateway + PANIC on lane D Postgres via mbos.* API; no SQLite in prod path; R4 role-enforced; 211 tests on PG16)
+Claimed: E-05 (stuck-claim reconciliation, dry) — next READY lane-E task
 Done: E-01 @ df826c3 (interop row 05 = 10/10; vectors receipt_chain verifies; 141 tests)
 Done: E-03 @ e12caa3 (L3 DBOS cancel verified on real dbos 3.2.0; deny-all egress + LiteLLM budget generators; 157 tests)
 Current phase: ROUND TWO — wave two (foreman loop, docs/COORDINATION.md)
 Started: 2026-10-06
-Last updated: 2026-10-07 (E-04 done; E-02 resumed on 04's 0007)
+Last updated: 2026-10-07 (E-02 done on 04's 0007; claimed E-05)
 
 ## Current objective
 **SUPERSEDED by ADR-0010 (E-01):** Agent 01 binding rulings for lane E
@@ -113,6 +114,10 @@ step-up method, no delegation.
 - docs/receipts/2026-10-07-round-two-gateway-build.md
 
 ## Proposed tasks
+- (for 04) count-based velocity in budget_reserve_caps (e.g. caps.velocity_actions_per_hour): lane E's
+  money cap is ACTIONS/hour; 0007's velocity_per_hour is DOLLARS/hour. Interim: gateway counts under
+  mbos.budget_lock in the same txn (correct, but two places).
+- (for 05/04) move PDP policy data from policy/policy.v1.json into lane D's mbos.policy/policy_current.
 - B-04 (02-led, +05): lane E side is ready now. L2 PANIC already accepts the key
   `discovery.source.<src>.read` (exact) or `discovery.source.*` (prefix), and any actor —
   including `agent-02-opportunity` — may ENGAGE (only Michael releases). Proposed request shape:

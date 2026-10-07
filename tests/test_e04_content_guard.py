@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import json
-import sqlite3
 from pathlib import Path
 
 import pytest
@@ -79,10 +78,11 @@ def test_bad_rules_files_are_unavailable(tmp_path, content):
 
 # ---------------------------------------------------------------- gateway: secret scan (§17 #25)
 def _all_db_bytes(env) -> bytes:
-    conn = sqlite3.connect(env.store.path)
+    """Every row of every mbos table, as text (superuser): the secret must appear nowhere."""
+    tables = [r[0] for r in env.sql("SELECT tablename FROM pg_tables WHERE schemaname = 'mbos'")]
     rows = []
-    for t in ("action_requests", "receipts", "provenance", "approvals"):
-        rows += [r[0] for r in conn.execute(f"SELECT body FROM {t}")]
+    for t in tables:
+        rows += [r[0] for r in env.sql(f"SELECT to_jsonb(x)::text FROM mbos.{t} x")]
     return "\n".join(rows).encode()
 
 
@@ -91,7 +91,7 @@ def test_secret_in_payload_refused_and_never_stored(env, rule):
     ar = env.ar("email", payload={"to_ref": "relay:EXAMPLE-0001", "body": SECRETS[rule]})
     with pytest.raises(GatewayRefused, match=f"SECRET_IN_PAYLOAD:{rule}@\\$.body"):
         env.gw.propose(ar, ar["proposed_by"])
-    assert env.store.get_action_request(None, ar["action_request_id"]) is None
+    assert env.store.action_request(ar["action_request_id"]) is None
     trip = [r for r in env.store.receipts() if r["type"] == "INJECTION_SUSPECTED"]
     assert len(trip) == 1 and trip[0]["details"]["finding"] == "secret_in_outbound_payload"
     assert trip[0]["details"]["findings"] == [{"rule": rule, "path": "$.body"}]
@@ -102,12 +102,7 @@ def test_secret_in_payload_refused_and_never_stored(env, rule):
 def test_secret_inserted_after_proposal_blocked_at_execution(env):
     """Defense in depth: G6 re-scans at execution (e.g. a rules update or a tampered row)."""
     ar = env.approved("email")
-    conn = sqlite3.connect(env.store.path)
-    body = json.loads(conn.execute("SELECT body FROM action_requests WHERE action_request_id=?",
-                                   (ar["action_request_id"],)).fetchone()[0])
-    body["payload"]["leak"] = SECRETS["aws_access_key_id"]
-    conn.execute("UPDATE action_requests SET body=? WHERE action_request_id=?", (json.dumps(body), ar["action_request_id"]))
-    conn.commit()
+    env.tamper_payload(ar["action_request_id"], "leak", SECRETS["aws_access_key_id"])  # bypasses lane D triggers
     res = env.gw.execute(ar["action_request_id"])
     assert res.outcome == "refused" and "G6:SECRET_IN_PAYLOAD:aws_access_key_id@$.leak" in res.reasons
 
@@ -132,7 +127,7 @@ def test_injected_listing_yields_at_most_a_tier0_proposal_with_tripwire(env):
                 payload={"to_ref": "relay:EXAMPLE-0002", "amount_usd": 500, "memo": "deposit"})
     res = env.gw.propose(ar, ar["proposed_by"], untrusted_texts=[{"ref": "listing:gen-7500", "text": INJECTED_LISTING}])
     assert res.outcome == "pending_approval"                              # a proposal, nothing more
-    stored = env.store.get_action_request(None, ar["action_request_id"])
+    stored = env.store.action_request(ar["action_request_id"])
     assert stored["tier"] == 0 and stored["untrusted_inputs_present"] is True
     rs = {r["type"]: r for r in env.store.receipts(ar["action_request_id"])}
     trip = rs["INJECTION_SUSPECTED"]["details"]
@@ -155,7 +150,7 @@ def test_tainted_request_needs_step_up_even_for_reversible_email(env):
 def test_clean_untrusted_input_taints_without_tripwire(env):
     ar = env.ar("email")
     env.gw.propose(ar, ar["proposed_by"], untrusted_texts=[{"ref": "listing:1", "text": BENIGN[0]}])
-    assert env.store.get_action_request(None, ar["action_request_id"])["untrusted_inputs_present"] is True
+    assert env.store.action_request(ar["action_request_id"])["untrusted_inputs_present"] is True
     assert "INJECTION_SUSPECTED" not in [r["type"] for r in env.store.receipts(ar["action_request_id"])]
 
 
