@@ -1,69 +1,105 @@
 # Agent Status
 
 Agent: 04
-Role: CRM / State (durable business-state, memory, receipts, provenance)
+Role: Postgres / State / Receipts (lane D, durable business state, receipts, provenance)
 Branch: research/agent-04-state
 Worktree: /home/michaelos/business-os-worktrees/agent-04-state
-State: WORKING
-Current phase: ROUND TWO — implementation, Lane D (Postgres state spine / receipts)
+State: COMPLETE (round-two wave one); awaiting coordinator review of the flagged interpretations
+Current phase: ROUND TWO: implementation, Lane D (Postgres state spine)
 Started: 2026-10-06
-Last updated: 2026-10-07 (round two start)
+Last updated: 2026-10-07 (round two, wave one delivered)
 
 ## Current objective
-ROUND TWO (implementation). Build the authoritative Postgres state spine per ADR-0001/ADR-0004 and frozen contracts v1.0.0: DDL for items, action_requests, approvals, receipts, provenance, outcomes, outbox, policy, budget_ledger, lessons; append-only + hash-chained ledger; verify_chain; state+receipt+outbox in one transaction; least-privilege roles; EliteDesk bootstrap; tests. Round-one material below is retained for history.
+Deliver the authoritative Postgres state spine per ADR-0001 and ADR-0004 and the frozen contracts
+v1.0.0. **Done for wave one.**
+Next step: wire it to Agent 01's DBOS app, then build the State MCP server (see the 1-week plan in
+`docs/research/agent-04-round-two.md` §4).
 
-## Completed
-- Fanned out 3 parallel research streams: (1) open-source CRM/ERP backbones, (2) agent-native CRMs + agent-memory frameworks + NakatomiCRM, (3) durable-state architecture patterns.
-- Synthesized into the full Round-One design: `docs/research/agent-04-state.md`.
-- Covered every required RETURN item: candidate systems (URLs/licenses/activity), recommended architecture, 23 canonical entities + relationships, receipt schema (DDL), provenance schema (DDL), agent read/write model, concurrency controls, version/history model, backup/recovery, search strategy, vector-memory role, data that must never live only in model memory, 24-hour MVP, migration path.
-- Filed ADR-0001 (PROPOSED) for the whole-system state architecture.
-- Filed research receipts under `docs/receipts/`.
+## Completed (round two)
+All items below are FACT, verified by 93 passing tests on PostgreSQL 16.2 on this host.
+
+- **Implementation:** `state/`
+  - Migrations `0001`–`0004` cover these tables: `items`, `action_requests`, `approvals`, `receipts`,
+    `provenance`, `outcomes`, `outbox`, `policy`, `budget_ledger`, `lessons`.
+  - The Python package `mbos_state` provides the migrator, a StateStore facade, and chain
+    export/anchor/offline verify plus a CLI.
+  - Bootstrap: `roles.sql`, `bootstrap.sh`, `pg-local.sh`, backup and restore-drill scripts, and
+    systemd user units.
+  - Quadlet units are written but untested.
+- **Append-only:** approvals, provenance, receipts, outcomes, lessons, policy and budget_ledger reject
+  UPDATE/DELETE/TRUNCATE by trigger (owner and superuser included) and by privilege (all agent roles).
+- **IDs and chain fields:**
+  - Prefixed ULIDs come from both SQL and Python, in the same format.
+  - Receipt `seq` is gapless and monotonic, including under 8 concurrent writers.
+  - `prev_hash` and `row_hash` are computed by the trigger; the writer cannot set them.
+- **`verify_chain`:**
+  - It detects:
+    - column edits
+    - canonical edits
+    - consistent rewrites
+    - deleted rows
+    - single-byte flips
+    - tail truncation (with an external anchor)
+  - An offline JSONL verifier also exists.
+- **Same-transaction rule:** a state change, its receipt and its outbox row commit in ONE transaction.
+  Deferred constraint triggers refuse COMMIT for any state row without a same-transaction receipt.
+  Rollback, receipt failure, a killed backend, and a SIGKILLed postmaster all leave both or neither.
+- **Least-privilege roles:** agent_read, agent_write, gateway, approver, policy_admin, outbox_relay and
+  mbos_owner, plus a role allow-list for each ActionRequest status edge.
+- **A10:** stored documents validate against the vendored frozen schemas.
+- **Docs:**
+  - `docs/research/agent-04-round-two.md`: report, gap-list answers, Twenty mapping, 1-week plan.
+  - `docs/state/RUNBOOK-STATE.md`: startup/reboot plan, verification, backups, tamper response, RPO/RTO.
+  - `docs/receipts/2026-10-07-round-two-state-spine.md`.
 
 ## Findings
-- **No turnkey "append-only + receipt/provenance CRM" exists.** `[FACT]` Every surveyed CRM (Twenty, EspoCRM, ERPNext, Odoo, NakatomiCRM) is mutable CRUD + a mutable "audit table" — cannot satisfy "no action without a receipt." A CRM can only be an optional read/UI surface projected from our own ledger.
-- **Postgres can be the whole backbone** `[FACT/INFER]`: canonical store + append-only hash-chained receipt ledger + outbox + pgvector, in one instance.
-- **Twenty** (AGPL-3.0, Postgres, native MCP, ~58k★) is the best-shaped agent-native CRM *surface*; EE-gated files + mutable. `[FACT]`
-- **Directus** (Postgres, native MCP, best built-in audit) is technically ideal but **MSCL license gate** (<$5M rev AND <50 staff) is a commercial blocker. `[FACT]`
-- **Baserow** (MIT core) = most permissive licensed Postgres backbone w/ built-in row history + snapshots. `[FACT]`
-- **EspoCRM** (AGPL-3.0, PG15+, free official MCP, strong native audit) = batteries-included auditable CRM; PHP/REST-only. `[FACT]`
-- **ERPNext** disqualified: **MariaDB-only** (Postgres experimental). `[FACT]`
-- **NakatomiCRM** (MIT, FastAPI/PG16, `/mcp` ~30 tools) is closest in spirit but solo/unproven (~9★, 0 releases) and **not append-only**. Fork-and-own candidate only. `[FACT]`
-- **Graphiti** (Apache-2.0, bi-temporal, provenance-native, first-party MCP) = strongest optional memory/recall layer (projection, not source of truth). `[FACT]`
-- Concurrency: idempotency keys + transactional outbox + optimistic (version-column) locking + advisory locks. `[FACT]`
-- Backups: pgBackRest WAL/PITR + nightly pg_dump + replicated object store; 3-2-1; scheduled restore drills. `[FACT]`
-- **Avoid:** MinIO CE (EOL ~Apr 2026), EventStoreDB (relicensed source-available ESLv2), Anthropic SQLite MCP server (archived, unpatched SQLi). `[FACT]`
-- Content-addressed (SHA-256) artifact storage; pgvector only below ~5M vectors (far above solo scale). `[FACT]`
+- **FACT:** Podman is not installed on the EliteDesk.
+  - Wave one runs PostgreSQL 16.2 from the `pgserver` wheel: user-space, port 55432, isolated from
+    port 5432 and CAOSCare.
+  - `pg-local.sh` switches to PGDG or Quadlet binaries without any schema change.
+- **FACT:** host Python is 3.10.12, while ADR-0008 says 3.12+. The code is 3.10-compatible.
+  Agent 01's venv appears to use 3.12.
+- **FACT:** `Linger=no` for user michaelos, so user units will not start at boot until it is enabled.
+- **INFERENCE:** a monthly partition of receipts is unnecessary at solo volume and complicates the
+  UNIQUE(seq) chain invariants, so it is deferred.
 
-## Decisions made
-- Architecture = **one Postgres, CRUD current-state + append-only hash-chained receipt ledger** (not full event sourcing, not a CRM's mutable audit). See ADR-0001.
-- Agent reaches state **only via a custom MCP server** (narrow intent-tools, strict schemas, idempotency keys, server-side write guards, human-approval gates). No raw-SQL writes.
-- Vectors (pgvector) are a **rebuildable index**, never a source of truth — every embedding carries FK + content-hash to its canonical row.
-- Clarified the overloaded term "receipt": **action-receipt** (ledger row) vs **financial receipt** (artifact document).
+## Decisions made (lane-internal, reversible)
+- Receipts store their exact hashed `canonical` text. `verify_chain` checks that the hash matches it and
+  that it is semantically equal to the columns, so verification does not depend on jsonb text format
+  staying stable across PG upgrades.
+- Every receipt gets its outbox row via an AFTER INSERT trigger, so the outbox can never be forgotten.
+- Wave-one dry-run is enforced as a CHECK constraint (`receipts_wave1_dry_run_only`). Going live requires a
+  reviewed migration, not a toggle.
+- Schema migrations are themselves receipted. The genesis receipt is migration 0001.
 
 ## Unknowns
-- Expected volume (txns/artifacts/vectors per month) → drives partitioning/backup tooling.
-- RPO/RTO the business will accept.
-- Which actions require human approval + spend thresholds.
-- Single host vs HA; object-store trust boundary/hosting.
-- Regulatory/retention constraints → plain hash chain vs externally anchored.
-- Whether a CRM UI is wanted at all.
-- Per-entity attribute detail (quote line-items, job scheduling fields).
-- MCP server stack (Python/FastAPI vs TS); fork NakatomiCRM vs start clean.
+- Off-box backup target for pgBackRest and dumps. This blocks RPO 15 min and the full D1 fresh-host restore.
+- Expected volume per day (Agent 02).
+- Payload-hash canonicalization standard: `mbos.payload_hash` vs RFC 8785.
 
 ## Blockers
-None.
+None for wave one.
 
 ## Needs Michael decision
-- Business-owner choices only: RPO/RTO tolerance; which actions must be human-approved and spend thresholds; whether a CRM UI is desired. (All deferrable to round-2 build gate.)
+- RPO/RTO. Proposal: 15 min / 4 h once WAL ships off-box. Today: 0 for a crash, 24 h for host loss.
+- Off-box backup location.
+- Host operations (or delegate to Agent 01 / ops):
+  - `sudo loginctl enable-linger michaelos`
+  - install Podman (or PGDG `postgresql-16`) for the target runtime
 
 ## Needs coordinator review
-- ADR-0001 is a whole-system state decision (PROPOSED). Agent 01 must reconcile with Agents 03 (economics/scoring data shapes), 05 (governance/security — approval gates, RLS, tamper-evidence), and 06 (communications — messages/outbox). Flagged for cross-agent review; NOT self-accepted.
-
-## Files produced
-- `docs/research/agent-04-state.md` — full Round-One design (primary deliverable).
-- `docs/status/AGENT_STATUS.md` — this file.
-- `docs/decisions/ADR-0001-durable-state-architecture.md` — architecture decision (PROPOSED).
-- `docs/receipts/2026-10-07-state-architecture-research.md` — research provenance receipt.
-
-## Next action
-Round One complete. Commit and push to `research/agent-04-state`. Await coordinator (Agent 01) review of ADR-0001 and round-2 build gate (operator answers to the open UNKNOWNs).
+These are Agent 04 interpretations and are NOT self-accepted. Details are in
+`docs/research/agent-04-round-two.md` §3.
+1. New ID prefixes: `lsn_`, `pol_`, `bud_`, `obx_`.
+2. Item state edges added:
+   - HELD→AWAITING_APPROVAL
+   - HELD→REJECTED
+   - ACTED→AWAITING_APPROVAL
+   - RECOMMENDED→RESEARCHING
+3. Receipt vocabulary gaps:
+   - no `ITEM_UPDATED`
+   - no `ACTION_EXPIRED`
+   - `ACTION_EXECUTED` requires `approval_id`, which blocks tier ≥ 1 auto-approved execution later
+4. Payload-hash canonicalization.
+5. DB-level guards that duplicate 05's execution guard. Agent 05 to confirm.
+6. Which login role(s) the DBOS app uses for state writes. One role per process is recommended.

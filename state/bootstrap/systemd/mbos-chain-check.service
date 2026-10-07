@@ -1,0 +1,17 @@
+# Verifies the receipt chain against the last anchor, then appends a new anchor.
+# Fails (and so alerts via OnFailure= / Alertmanager once wired) on any tamper or truncation.
+# MBOS_ANCHOR_LOG should live on storage the DB host cannot silently rewrite (off-box sync target).
+[Unit]
+Description=MBOS receipt chain verify + anchor
+After=mbos-postgres.service
+Requires=mbos-postgres.service
+
+[Service]
+Type=oneshot
+Environment=PYTHONPATH=%h/mbos/state
+Environment=PGPASSFILE=%h/.config/mbos/pgpass
+Environment=MBOS_DSN=host=127.0.0.1 port=55432 dbname=mbos user=mbos_reader
+Environment=MBOS_ANCHOR_LOG=%h/.local/share/mbos/anchors/chain-anchors.jsonl
+ExecStartPre=/usr/bin/mkdir -p %h/.local/share/mbos/anchors
+ExecStart=%h/mbos/state/.venv/bin/python -m mbos_state verify-chain --anchor ${MBOS_ANCHOR_LOG}
+ExecStartPost=%h/mbos/state/.venv/bin/python -m mbos_state anchor --out ${MBOS_ANCHOR_LOG}

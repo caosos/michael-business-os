@@ -1,0 +1,135 @@
+{
+  "item_id": "itm_01JA0000000000000000000002",
+  "schema_version": "1.0.0",
+  "type": "service",
+  "category": "drywall_repair",
+  "subcategory": "two 12in patches + texture match",
+  "opportunity_kind": "service_lead",
+  "state": "RESEARCHING",
+  "created_at": "2026-10-06T15:00:00Z",
+  "sources": [
+    {
+      "source": "website_lead",
+      "url": "https://example.invalid/form/2",
+      "ingestion_method": "inbound_form",
+      "first_seen_at": "2026-10-06T15:00:00Z",
+      "provenance_id": "prov_01JA0000000000000000000010"
+    }
+  ],
+  "dedup_key": "drywall|lead|cell-35.09-92.44",
+  "normalized": {
+    "title": "Drywall patch after plumbing repair",
+    "condition": "n/a",
+    "price": {
+      "type": "quote_requested"
+    },
+    "location": {
+      "city": "Conway",
+      "state": "AR",
+      "road_miles_one_way": 8
+    },
+    "counterparty": {
+      "role": "customer",
+      "contact_method": "email"
+    },
+    "listing_status": "open"
+  },
+  "economics": {
+    "logistics": {
+      "trips": [
+        {
+          "purpose": "estimate_visit",
+          "round_trip_miles": 16
+        },
+        {
+          "purpose": "work_day",
+          "round_trip_miles": 16
+        },
+        {
+          "purpose": "work_day",
+          "round_trip_miles": 16
+        }
+      ]
+    },
+    "job": {
+      "quoted_revenue": 450,
+      "materials_cost": 40,
+      "labor_hours": 4,
+      "admin_hours": 1,
+      "required_skills": [
+        "drywall"
+      ],
+      "win_prob": 0.6,
+      "completion_prob": 0.95,
+      "deposit_rate": 0.25,
+      "lead_quality": 0.6
+    },
+    "estimates_meta": {
+      "scoring_config_version": "2026.10.0"
+    }
+  },
+  "scores": {
+    "scorecard_id": "scr_01JA0000000000000000000002",
+    "inputs_hash": "sha256:a454567c7f8caf90f525f577e8c75b9a690c9d5a9212c73f72dc579d5cc51827",
+    "scorecard": {
+      "scoring_config_version": "2026.10.0",
+      "computed_at": "2026-10-06T14:00:00Z",
+      "derived": {
+        "ev_net_profit": 410.0,
+        "ev_profit_per_hour": 68.0,
+        "confidence": 0.7,
+        "max_loss": 520.0,
+        "cash_tied_up": 900.0
+      },
+      "sub_scores": {
+        "ev_score": 51,
+        "pph_score": 57,
+        "roi_score": 40,
+        "ttc_score": 70,
+        "risk_score": 62,
+        "conf_score": 70,
+        "skill_score": 90,
+        "scarcity_score": 65
+      },
+      "weights_used": {
+        "ev": 0.2,
+        "pph": 0.35,
+        "roi": 0,
+        "ttc": 0.1,
+        "risk": 0.08,
+        "conf": 0.07,
+        "skill": 0.15,
+        "scarcity": 0.05
+      },
+      "composite": 55.0,
+      "decision": "MAYBE",
+      "alert": false,
+      "gates": {
+        "ev_positive": true,
+        "max_loss_ok": true,
+        "cash_ok": true,
+        "skill_ok": true,
+        "pph_floor_ok": true,
+        "min_profit_ok": true
+      },
+      "reasons": [
+        "ILLUSTRATIVE ONLY",
+        "Scope unknown until photos"
+      ],
+      "cheapest_decisive_evidence": "Photo of damaged wall area to size the patch"
+    }
+  },
+  "recommendation": {
+    "recommendation_id": "rec_01JA0000000000000000000002",
+    "verdict": "MAYBE",
+    "rationale": [
+      "Need photos before quoting"
+    ],
+    "cheapest_decisive_evidence": "Photo of damaged wall area",
+    "provenance_id": "prov_01JA0000000000000000000011"
+  },
+  "provenance_ids": [
+    "prov_01JA0000000000000000000010",
+    "prov_01JA0000000000000000000011"
+  ]
+}

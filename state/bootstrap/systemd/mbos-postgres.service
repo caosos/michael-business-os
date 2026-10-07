@@ -1,0 +1,23 @@
+# Wave-one user unit: the user-space PostgreSQL 16 cluster from pg-local.sh.
+# Install (operator):  cp mbos-postgres.service ~/.config/systemd/user/ && systemctl --user daemon-reload
+#                      systemctl --user enable --now mbos-postgres.service
+# Start at boot without a login session requires:  sudo loginctl enable-linger michaelos   (currently: Linger=no)
+# Set WorkingDirectory/paths below to the durable checkout (not an agent worktree) before enabling.
+[Unit]
+Description=MBOS state spine PostgreSQL 16 (wave one, user-space, port 55432)
+After=network-online.target
+
+[Service]
+Type=simple
+Environment=MBOS_HOME=%h/.local/share/mbos
+Environment=MBOS_PGPORT=55432
+ExecStart=%h/mbos/state/bootstrap/pg-local.sh start-foreground
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=mixed
+KillSignal=SIGINT
+TimeoutStopSec=120
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
