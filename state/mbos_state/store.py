@@ -129,6 +129,19 @@ class StateStore:
         return self._one("SELECT mbos.budget_settle(%s, %s, %s, %s, %s, %s, %s)",
                          (reservation_id, kind, amount, actor.as_json(), intent, provenance_ids, idempotency_key))
 
+    # -- operator notes (D-17) -------------------------------------------------
+    def record_operator_note(self, bundle: dict) -> str:
+        """bundle = mbos_economics.new_manual_note(...) output {"note", "provenance"}. Human channel (approver) only."""
+        return self._one("SELECT mbos.record_operator_note(%s)", (Jsonb(bundle),))
+
+    def retract_operator_note(self, note_id: str, entered_by: str, entered_at: str, reason: str) -> str:
+        return self._one("SELECT mbos.retract_operator_note(%s, %s, %s::timestamptz, %s)",
+                         (note_id, entered_by, entered_at, reason))
+
+    def operator_notes_document(self, include_retracted: bool = True) -> dict:
+        """The flat {"notes_format": 1, "notes": [...]} document that valueadd.load_manual_notes reads."""
+        return self._one("SELECT mbos.operator_notes_document(%s)", (include_retracted,))
+
     # -- chain ----------------------------------------------------------------
     def verify_chain(self, from_seq: int = 1, anchor: dict | None = None) -> ChainStatus:
         row = self.conn.execute(
