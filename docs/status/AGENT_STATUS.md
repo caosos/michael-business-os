@@ -9,7 +9,7 @@ Done: E-10 @ ebae275 (spine_adapter: Gateway/KillSwitch/PDP over 01's mbos.inter
 Done: E-06 @ e957680 (policy publish -> mbos.policy, receipted; PgPolicyStore reads policy_current, pinned schema, row-drift/tamper => fail closed; same decisions as file)
 Done: E-09 @ c68f3b2 (alerts.collect read-only over lane D: freeze/unreadable/stuck/chain/A7/budget/injection/dry-run/reconciled; ntfy-ready JSON, never sent; CLI exit 2 on critical)
 Done: E-07 @ 2d65401 (egress.catalog as policy data, all disabled in wave one; check_catalog in the fail-closed loader; effective_allow feeds render_egress)
-Done: E-08 @ <E08> (sandbox spec as data + I1–I8 checker; host has no runsc/podman/docker/e2b — report only)
+Done: E-08 @ 0b55f52 (sandbox spec as data + I1–I8 checker; host has no runsc/podman/docker/e2b — report only)
 Done: B-04 lane-E half @ d3b9948 (02's fixture applies + blocks exactly that source; auto-apply decided, release human-only)
 Done: E-04 @ 4fadbe7 (secret scan refuses + never stores; injection tripwire => tier 0, needs_review, step-up; 205 tests)
 Done: E-02 @ 1c554cb (gateway + PANIC on lane D Postgres via mbos.* API; no SQLite in prod path; R4 role-enforced; 211 tests on PG16)
