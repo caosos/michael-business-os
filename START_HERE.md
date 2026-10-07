@@ -203,6 +203,18 @@ Aria should inspect GitHub and report:
 - whether architecture is converging
 - the next best move
 
+### Durable Aria → coordinator inbox
+
+Aria can pass owner context, training signals, project facts, and task requests directly to Agent 01 without Michael acting as messenger.
+
+Inbound branch:
+`origin/liaison/aria-to-agent-01`
+
+Inbox:
+`docs/messages/inbox/`
+
+Agent 01 must process unacknowledged inbox messages as part of the permanent foreman loop defined in `docs/COORDINATION.md`, then record disposition under `docs/messages/acks/`.
+
 ## Coordinator role
 Agent 01 is the technical coordinator.
 
