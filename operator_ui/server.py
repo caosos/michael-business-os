@@ -169,10 +169,13 @@ def render_card(c, csrf):
     if c["decidable"]:
         pin = ('<label>Step-up PIN (irreversible / money)<input name="pin" type="password" autocomplete="off" required></label>'
                if c["step_up"] else "")
-        decide = f"""<div class="decide">
-<form method="post" action="/areq/{e(a['action_request_id'])}/decide">{common}<input type="hidden" name="decision" value="YES">
+        yes = (f"""<form method="post" action="/areq/{e(a['action_request_id'])}/decide">{common}<input type="hidden" name="decision" value="YES">
 <p class="small">Executes <b>exactly</b> the frozen payload above (hash <code>{e(a['payload_hash'][7:19])}</code>). Dry-run only.</p>{pin}
-<button class="b-YES">YES</button></form>
+<button class="b-YES">YES</button></form>""" if c["payload_hash_verified"] else
+               "<div class='flash err'>YES unavailable: the payload shown does not hash to this request's payload_hash "
+               "(ADR-0010 check). Use NO, MODIFY or HOLD, and report it.</div>")
+        decide = f"""<div class="decide">
+{yes}
 <form method="post" action="/areq/{e(a['action_request_id'])}/decide">{common}<input type="hidden" name="decision" value="NO">
 <label>Reason (required)<input name="reason" required maxlength="500"></label>
 <p class="small mut">The opportunity is archived; the reason feeds LEARN.</p>
@@ -196,7 +199,7 @@ def render_card(c, csrf):
 <div class="row small"><span><code>{e(a['capability'])}</code></span><span>category {e(a['category'])}</span><span>proposed by {e(a['proposed_by'])}</span>
 <span>target {e((a.get('target') or {}).get('ref'))}</span></div>
 <pre>{e(json.dumps(a['payload'], indent=2))}</pre>
-<div class="small mut">payload_hash <code>{e(a['payload_hash'])}</code> · idempotency <code>{e(a['idempotency_key'])}</code></div></div>
+<div class="small mut">payload_hash <code>{e(a['payload_hash'])}</code> · {"<span class='ok'>verified (MBOS-CJSON-1)</span>" if c["payload_hash_verified"] else "<span class='bad'>DOES NOT MATCH payload</span>"} · idempotency <code>{e(a['idempotency_key'])}</code></div></div>
 <div class="card"><h2>Decide</h2>{decide}</div>
 <div class="card"><h2>Sources</h2><table><tr><th>Source</th><th>URL</th><th>Method</th><th>First seen</th><th>raw_ref</th></tr>{sources}</table>
 {'<h2 style="margin-top:12px">Research findings</h2><ul>' + research + '</ul>' if research else ''}</div>
@@ -209,6 +212,9 @@ def render_ledger(store):
     v = store.verify_chain()
     status = (f"<span class='ok'>chain verified ({e(v['checked'])} receipts)</span>" if v["ok"]
               else f"<span class='bad'>CHAIN BROKEN at seq {e(v['first_bad_seq'])}: {e(v['reason'])}</span>")
+    ok2, msg2 = store.verify_chain_independent()
+    status += (f"<br><span class='{'ok' if ok2 else 'bad'}'>independent MBOS-RH-1 check (vendored reference): "
+               f"{'' if ok2 else 'FAILED — '}{e(msg2)}</span>")
     rows = "".join(
         f"<tr><td class='num'>{r['seq']}</td><td>{e(r['ts'])}</td><td>{e(r['type'])}</td><td>{e(r['actor']['id'])}</td>"
         f"<td>{'<a href=/areq/' + e(r['action_request_id']) + '>' + e(r['action_request_id'][:13]) + '…</a>' if r.get('action_request_id') else ''}</td>"

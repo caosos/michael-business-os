@@ -5,7 +5,17 @@ Pure data (no HTML) so the same model backs the web page and the JSON API.
 
 from mbos.clock import parse as parse_iso
 
+from . import mbos_canonical
 from .ux import HOLD_PRESETS, requires_step_up
+
+
+def payload_hash_verified(areq):
+    """Recompute the payload hash with the vendored ADR-0010 reference (MBOS-CJSON-1), independent of
+    the spine. The card offers YES only when what Michael is shown hashes to the request's payload_hash."""
+    try:
+        return mbos_canonical.sha256_of(areq["payload"]) == areq["payload_hash"]
+    except Exception:  # noqa: BLE001 — a payload the reference rejects cannot be verified
+        return False
 
 
 def _prov_kind(p):
@@ -127,6 +137,7 @@ def card(store, areq_id, now):
         "provenance": provenance,
         "action_summary": action_summary,
         "step_up": requires_step_up(areq),
+        "payload_hash_verified": payload_hash_verified(areq),
         "decidable": areq["status"] in ("pending_approval", "held") and expires > now,
         "expires_in_hours": round((expires - now).total_seconds() / 3600, 1),
         "approvals": approvals,

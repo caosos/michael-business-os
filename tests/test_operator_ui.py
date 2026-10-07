@@ -89,7 +89,8 @@ def test_ui_owns_no_gateway_timer_or_ledger():
     for banned in ("sqlite3", "DryRunGateway", "def tick", "Effector", "append_receipt", "INSERT INTO", "UPDATE mbos"):
         assert banned not in src, banned
     assert "spine.decide(" in (PKG / "backend.py").read_text()
-    assert {p.name for p in PKG.glob("*.py")} == {"__init__.py", "__main__.py", "backend.py", "server.py", "ux.py", "views.py"}
+    assert {p.name for p in PKG.glob("*.py")} == {"__init__.py", "__main__.py", "backend.py", "mbos_canonical.py",
+                                               "server.py", "ux.py", "views.py"}
 
 
 # ---------------------------------------------------------------- cards
@@ -239,3 +240,60 @@ def test_ledger_page_uses_spine_verify_chain(rt, discover, ui):
     ready(rt, discover)
     s, _, body = req(ui, "GET", "/ledger")
     assert s == 200 and "chain verified" in body
+
+
+# ---------------------------------------------------------------- F-02: ADR-0010 conformance
+CANON = PKG.parent / "docs/research/contracts/canonical"
+
+
+def _isolated_reference():
+    """Load operator_ui/mbos_canonical.py exactly as tools/interop_check.py does: by path, no package."""
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("lane06_canonical", PKG / "mbos_canonical.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_f02_vendored_reference_is_byte_identical():
+    assert (PKG / "mbos_canonical.py").read_bytes() == (CANON / "mbos_canonical.py").read_bytes()
+
+
+def test_f02_interop_row_06_is_10_of_10_and_rh1_chain_verifies():
+    import pytest
+
+    m = _isolated_reference()
+    vec = json.loads((CANON / "vectors.json").read_text())
+    ok = [c["name"] for c in vec["cjson"] if m.sha256_of(json.loads(c["input"])) == c["sha256"]]
+    assert len(ok) == len(vec["cjson"]) == 10
+    for c in vec["cjson"]:
+        assert m.canonical_json(json.loads(c["input"])) == c["canonical"], c["name"]
+    for c in vec["reject"]:
+        with pytest.raises(Exception):
+            m.canonical_json(json.loads(c["input"]))
+    assert m.verify_chain(vec["receipt_chain"]) == (True, "2 receipts verified")
+    assert m.sha256_of({"offer": 850.0}) == m.sha256_of({"offer": 850})  # the F-13 difference, now closed
+
+
+def test_f02_card_verifies_payload_hash_and_hides_yes_on_mismatch(rt, discover, ui):
+    from operator_ui import server, views
+
+    _, areq = ready(rt, discover)
+    _, _, body = req(ui, "GET", f"/areq/{areq['action_request_id']}")
+    assert "verified (MBOS-CJSON-1)" in body and ">YES<" in body
+    assert views.payload_hash_verified(areq) is True
+    assert views.payload_hash_verified(dict(areq, payload=dict(areq["payload"], extra=1))) is False
+    card = views.card(ui.store, areq["action_request_id"], utcnow())
+    card["payload_hash_verified"] = False
+    html = server.render_card(card, ui.csrf)
+    assert ">YES<" not in html and "YES unavailable" in html and ">HOLD<" in html
+
+
+def test_f02_ledger_independent_rh1_check_agrees_with_spine(rt, discover, ui):
+    item_id, areq = ready(rt, discover)
+    assert ui.store.verify_chain()["ok"] is True
+    ok, msg = ui.store.verify_chain_independent()
+    assert ok, msg
+    _, _, body = req(ui, "GET", "/ledger")
+    assert "independent MBOS-RH-1 check (vendored reference): " in body and "FAILED" not in body

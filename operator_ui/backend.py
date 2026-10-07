@@ -18,6 +18,8 @@ from mbos.ledger import load_receipts, verify_chain
 from mbos.runtime import Components, client, item_workflow_id
 from mbos.workflows import DECISION_TOPIC
 
+from . import mbos_canonical
+
 
 class SpineBackend:
     def __init__(self, engine: sa.Engine, components: Optional[Components] = None, wake=None):
@@ -89,6 +91,16 @@ class SpineBackend:
     def verify_chain(self) -> dict:
         with self.engine.connect() as c:
             return verify_chain(c)
+
+    def verify_chain_independent(self) -> tuple[bool, str]:
+        """Re-verify the exported chain with the vendored ADR-0010 reference (MBOS-RH-1), in Python,
+        independent of the database's own verify_chain. Read-only."""
+        with self.engine.connect() as c:
+            chain = load_receipts(c)
+        try:
+            return mbos_canonical.verify_chain(chain)
+        except Exception as e:  # noqa: BLE001 — a value the reference rejects is a failed verification
+            return False, f"reference rejected the chain: {type(e).__name__}: {e}"
 
     # ---- the one write path -----------------------------------------------------------------
     def decide(self, areq_id: str, decision: str, payload_hash_seen: str, **kw: Any) -> dict:

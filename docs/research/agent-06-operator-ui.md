@@ -1,7 +1,7 @@
 # Agent 06: Operator UI / Approval UX (build lane F)
 
 **Updated:** 2026-10-07 (wave two, task **F-01** = ruling R10) · **Branch:** `research/agent-06-communications`
-**Spine:** Agent 01's `mbos` @ `bed7609`, installed into this worktree's `.venv` from a `git archive` copy. Not merged.
+**Spine:** Agent 01's `mbos` @ `99e9ec0` (re-pinned for F-02; F-01 was built on `bed7609`), installed into this worktree's `.venv` from a `git archive` copy. Not merged.
 
 **Dry-run only.** The UI cannot send, spend, publish or contact anyone. It records Michael's decision and nothing else. Execution happens only in the spine's DBOS item workflow, which goes through the lane E gateway to the dry-run effector.
 
@@ -38,9 +38,9 @@ cd /home/michaelos/business-os-worktrees/agent-06-communications
 eval "$(.venv/bin/mbos devdb up)"                                                 # pgserver Postgres 16, exports MBOS_* URLs
 .venv/bin/mbos worker --fixture tests/fixtures/illustrative.json &                # spine worker, ILLUSTRATIVE fixtures
 MBOS_OPERATOR_PIN=<pin> .venv/bin/python -m operator_ui serve                     # http://127.0.0.1:8765/
-.venv/bin/python -m pytest -q tests -p no:cacheprovider                           # 11 tests, real spine
+.venv/bin/python -m pytest -q tests -p no:cacheprovider                           # 15 tests, real spine
 ```
-The setup for `.venv` (uv, Python 3.12, `mbos[dev]` from the pinned `bed7609` archive) is in the F-01 receipt.
+The setup for `.venv` (uv, Python 3.12, `mbos[dev]` from the pinned `99e9ec0` archive) is in the F-01 receipt.
 
 ## 2. Decision rules: who enforces what (FACT; tests in `tests/test_operator_ui.py`)
 
@@ -74,3 +74,11 @@ FACT (`bed7609`): the workflow acts on `hold_until`, `escalate_after`, `renotify
 - **`SpineBackend.components`** must match the worker's lanes, because `spine.decide` classifies a MODIFY successor with the PDP. The default is the reference lanes, the same as `mbos decide`. When lane E's real PDP is wired (A-03), the UI must be built with the same `Components`.
 - **Step-up method** is `local_pin`. WebAuthn/TOTP and remote access remain lane E work. The UI stays loopback-only.
 - The wave-one record (SQLite stand-in, 29 tests) is in git history at `3e51ba4`.
+
+## 5. ADR-0010 conformance (task F-02)
+- `operator_ui/mbos_canonical.py` is a **byte-identical** vendored copy of `docs/research/contracts/canonical/mbos_canonical.py`, at coordinator commit `99e9ec0`. A test enforces the byte identity.
+- The old `util.canonical_json` (sorted keys; `850.0` → `850.0`) and the stand-in `row_hash` (`… || prev_hash`) were already deleted in F-01. **Lane 06 has no other hashing code.**
+- The UI uses the reference in two read-only places:
+  1. **Card:** it recomputes `sha256_of(payload)`, independent of the spine. The card shows "verified (MBOS-CJSON-1)", and **offers YES only when what Michael sees hashes to `payload_hash`.** Otherwise it shows "YES unavailable", and NO/MODIFY/HOLD remain.
+  2. **Ledger page:** besides the DB's `verify_chain()`, it re-verifies the exported chain in Python with `mbos_canonical.verify_chain` (MBOS-RH-1).
+- FACT: the spine's real chain at `99e9ec0` passes the independent MBOS-RH-1 check in the tests.
