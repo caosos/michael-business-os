@@ -4,15 +4,16 @@ Agent: 03
 Role: Economics / Scoring (Round-Two build lane C)
 Branch: research/agent-03-economics
 Worktree: /home/michaelos/business-os-worktrees/agent-03-economics
-State: WORKING
+State: WAITING
 Current phase: ROUND TWO, wave two. Claimed task: RESEARCH/estimate producer (lane C)
 Started: 2026-10-06
-Last updated: 2026-10-07 (C-08 done; C-09 claimed)
+Last updated: 2026-10-07 (C-09, C-10 done; WAITING: no READY lane-C task)
 
 ## Claimed work (wave two). Foreman loop: `docs/COORDINATION.md` @ agent-01 `99e9ec0`
-Claimed: C-09
-Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6; C-04 @ 882c726; C-05 @ 6e938d2; C-06 @ 9e36ec9; C-07 @ 0c3cf4a; C-08 @ a81a989
-Queue (lane C, after C-09): none READY @ agent-01 `71adb0d`
+Claimed: (none)
+Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6; C-04 @ 882c726; C-05 @ 6e938d2; C-06 @ 9e36ec9; C-07 @ 0c3cf4a; C-08 @ a81a989; C-09 @ 286e0f3; C-10 @ e1869f2
+Queue (lane C): none READY @ agent-01 `c23bee8`
+Waiting on: any new lane-C task; Michael decisions #1/#2/#6 (report in docs/research/agent-03-sensitivity-michael-decisions.md)
 
 - **C-01**, the RESEARCH/estimate producer, fills `Item.economics` from normalized fields, comps evidence and category priors, with provenance per estimate. It is deterministic and does no LLM arithmetic.
   - Claimed at `b923852`; confirmed CLAIMED in READY_QUEUE @ `99e9ec0`.
@@ -70,6 +71,18 @@ Queue (lane C, after C-09): none READY @ agent-01 `71adb0d`
 - Over the 14 goldens and 10 fixtures it gives 17 rows and 7 listed exclusions.
 - CLI: `digest --text` for the 72-hour plan.
 - Agent 06 renders it and must escape `title`.
+
+### C-09 result (DONE @ `286e0f3`; receipt `docs/receipts/2026-10-07-c09-sensitivity-report.md`)
+- `docs/research/agent-03-sensitivity-michael-decisions.md` is a report only; config untouched (hash-checked).
+- **Main findings:**
+  - The flip target is the most sensitive setting: the round-one trailer is YES only at ≤ $62/h.
+  - The cash cap binds on vehicles: project car ≥ $1,400, truck ≥ $3,000.
+  - The service target is coupled to quote-rate decision #6.
+
+### C-10 result (DONE @ `e1869f2`; receipt `docs/receipts/2026-10-07-c10-asking-comps.md`)
+- The asking-comp KeyError is fixed. The fix predates the queue entry because Agent 02 reported it directly.
+- B-08 is green per Agent 02.
+- **Also fixed (`4a93582`):** a stale `economics/build/` had been committed in `1044ed5`. It is now untracked and guarded by a test.
 
 ## Proposed tasks (for Agent 01 to triage)
 - **P-03-05 → accepted as ADR-0009 item 9** (agent-01 `edbc492`). Original text:
