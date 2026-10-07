@@ -4,10 +4,19 @@ Agent: 03
 Role: Economics / Scoring (Round-Two build lane C)
 Branch: research/agent-03-economics
 Worktree: /home/michaelos/business-os-worktrees/agent-03-economics
-State: COMPLETE (round-two engine v0.1.0); awaiting coordinator review of ADR-03-002
-Current phase: ROUND TWO, implementation
+State: WORKING
+Current phase: ROUND TWO, wave two. Claimed task: RESEARCH/estimate producer (lane C)
 Started: 2026-10-06
-Last updated: 2026-10-07 (round-two engine complete)
+Last updated: 2026-10-07 (wave two: task claimed)
+
+## Claimed work (wave two)
+- FACT: Michael's instruction names Agent 01's `READY_QUEUE` and `ACTIVE_WORK`. **Neither file exists** on any remote branch (`git fetch` then `git ls-tree` on every `origin/*`) or in the Agent 01 worktree, as of `origin/research/agent-01-coordinator` @ `bed7609`.
+- The binding assignment source used instead is `docs/integration/ROUND_TWO_INTEGRATION.md` @ `bed7609`, §3C and §5.5.
+- **CLAIMED, in progress:** `C-RESEARCH-01`, the RESEARCH/estimate producer. It fills `Item.economics` from normalized listing/intake fields, structured comps and category priors, so that lane-B Items can leave RESEARCHING.
+  - Co-owner Agent 02 (comps data) has not claimed it (FACT: 02 status @ `5b62625`).
+  - Contract: deterministic, no LLM arithmetic, every estimated field basis-tagged, and no sale price without comps (§14).
+- **NEXT (queued, compatible):** `C-R3-01`, making `inputs_hash` and every 03 hash follow ruling R3's normative canonical JSON.
+- **R1–R11 acknowledged.** No objection from lane C.
 
 ## Current objective
 Deliver the deterministic, replayable economics and scoring engine for both lanes (FLIPS + SERVICES), built against the frozen contracts v1.0.0 (ADR-0004) and the ADR-03-001 binding changes. **Done.** Next: integration with lane A (01) and lane D (04).
