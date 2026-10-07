@@ -281,7 +281,7 @@ def test_velocity_cap(env):
     """§17 #12: N+1 money actions within the hour -> refused (N=3)."""
     ok = [env.approved("money", estimated_cost={"amount": 1, "currency": "USD"}) for _ in range(3)]
     fourth = env.propose("money", estimated_cost={"amount": 1, "currency": "USD"})
-    assert "BUDGET_VELOCITY_CAP:money" in env.gw.record_approval(env.approval(fourth)).reasons
+    assert "BUDGET_VELOCITY_CAP:money:dry_run" in env.gw.record_approval(env.approval(fourth)).reasons
     assert all(env.gw.execute(a["action_request_id"]).outcome == "executed" for a in ok)
 
 
@@ -548,3 +548,16 @@ def test_every_status_edge_is_receipted_by_the_gateway(env):
     for t in ("POLICY_DECIDED", "APPROVAL_REQUESTED", "ACTION_EXECUTING", "ACTION_EXECUTED"):
         assert rs[t]["actor"] == {"type": "system", "id": "action-gateway"}, t
     assert rs["APPROVAL_DECIDED"]["actor"] == {"type": "human", "id": "michael"}
+
+
+def test_velocity_cap_is_enforced_by_lane_d_under_concurrency(env):
+    """E-11 / D-11: the money action-count cap (3/h) lives in mbos.budget_reserve_caps under the budget lock;
+    20 concurrent approvals across the money bucket's categories yield exactly 3 reservations."""
+    cats = ["money", "purchase", "offer", "external_commitment"]
+    ars = [env.propose(cats[i % 4], estimated_cost={"amount": 1, "currency": "USD"}) for i in range(20)]
+    with ThreadPoolExecutor(max_workers=10) as pool:
+        out = list(pool.map(lambda ar: env.gw.record_approval(env.approval(ar)), ars))
+    assert sum(not r.reasons for r in out) == 3
+    assert all("BUDGET_VELOCITY_CAP:money:dry_run" in r.reasons for r in out if r.reasons)
+    assert env.sql("SELECT count(*) FROM mbos.budget_ledger WHERE kind='reserve'")[0][0] == 3
+    assert not hasattr(type(env.store), "actions_last_hour")        # the in-Python count is gone

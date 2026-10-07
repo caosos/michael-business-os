@@ -170,15 +170,6 @@ class PgGovernanceStore:
         cur.execute("SELECT mbos.budget_lock(%s)", (currency,))
 
     @staticmethod
-    def actions_last_hour(cur, categories: list[str], currency: str, mode: str) -> int:
-        """Reservations (count, incl. zero-amount) in the last hour over the bucket, not released."""
-        return int(cur.execute(
-            "SELECT count(*) AS n FROM mbos.budget_ledger r WHERE r.kind='reserve' AND r.category = ANY(%s) "
-            "AND r.currency=%s AND r.mode=%s AND r.ts > now() - interval '1 hour' AND NOT EXISTS "
-            "(SELECT 1 FROM mbos.budget_ledger x WHERE x.reservation_id=r.entry_id AND x.kind='release')",
-            (categories, currency, mode)).fetchone()["n"])
-
-    @staticmethod
     def reserve_caps(cur, areq: str, amount, currency: str, caps: dict, mode: str, actor: dict, intent: str,
                      prov: list[str], key: str) -> str:
         return cur.execute("SELECT mbos.budget_reserve_caps(%s,%s,%s,%s,%s,%s,%s,%s,%s) AS id",

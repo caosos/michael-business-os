@@ -1,5 +1,5 @@
 """Test harness (E-02): a throwaway PostgreSQL 16 cluster per session with lane D's canonical schema
-(tests/vendor/agent04_state @ 14bd690, migrations 0000–0007, test-only copy), migrated once into a
+(tests/vendor/agent04_state @ a08dd9f, migrations 0000–0014, test-only copy), migrated once into a
 template; one fresh database per test. Every role connects as its own login over a private unix socket,
 so privilege checks are real (gateway / approver / agent_write / policy_admin), not simulated.
 """
@@ -74,6 +74,8 @@ def cluster():
             c.execute(f"CREATE DATABASE {TEMPLATE_DB} OWNER mbos_owner")
         with psycopg.connect(f"{base} dbname={TEMPLATE_DB} user=postgres", autocommit=True) as c:
             c.execute("CREATE SCHEMA dbos AUTHORIZATION mbos_dbos")
+            c.execute("CREATE SCHEMA mbos_ext; CREATE EXTENSION vector WITH SCHEMA mbos_ext; "     # lane D 0010 (pgvector)
+                      "GRANT USAGE ON SCHEMA mbos_ext TO agent_read, agent_write, gateway, approver, policy_admin, mbos_owner")
         sys.path.insert(0, str(VENDOR))
         try:
             from mbos_state import migrate  # vendored lane D migrator (test-only)

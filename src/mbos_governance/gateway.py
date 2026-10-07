@@ -18,7 +18,7 @@ Execution guard — all 8 checks (ADR-0005 §2), evaluated in one transaction wi
   G2 not expired         approval expiry, approval TTL cap, ActionRequest.expires_at
   G3 payload_hash        sha256(CJSON(payload)) == ActionRequest.payload_hash == Approval.payload_hash_seen
   G4 idempotency         no execution claim (mbos.effector_calls) for this request (exactly-once effect)
-  G5 budget reserved     reservation exists or is made now (mbos.budget_reserve_caps + money velocity count)
+  G5 budget reserved     reservation exists or is made now (mbos.budget_reserve_caps: per-action/daily/global/velocity)
   G6 grant constraints   PDP re-run on CURRENT policy, tier 0, quiet hours, secret re-scan
   G7 kill switch clear   PANIC L3 / L1 agent / L2 capability|category; unreadable => FROZEN
   G8 dry-run forced      system_mode round_one|mvp => dry_run=True; effector must support it and must echo it
@@ -384,22 +384,21 @@ class ActionGateway:
         return bucket, sorted(c for c, spec in policy.data["categories"].items() if spec["budget_bucket"] == bucket)
 
     def _reserve(self, cur, ar: dict, policy: Policy, approval_id: str | None) -> tuple[list[str], str | None]:
-        """Reserve under lane D's single budget lock: bucket per-action / daily / global caps in
-        mbos.budget_reserve_caps; the money ACTION-COUNT velocity is checked here under the same lock."""
+        """Reserve under lane D's single budget lock: bucket per-action / daily / global caps and the money
+        ACTION-COUNT velocity (0013) all inside mbos.budget_reserve_caps."""
         mode = "dry_run" if self._dry_run_forced(policy) else "live"
         if "estimated_cost" in ar and "max_cost" in ar and ar["estimated_cost"]["amount"] > ar["max_cost"]["amount"]:
             return ["ESTIMATE_EXCEEDS_MAX_COST"], None
         bucket, cats = self._bucket(policy, ar["category"])
         caps = policy.data["budgets"][mode]
         bcaps = caps["buckets"][bucket]
-        self.store.budget_lock(cur, CURRENCY)
-        if bucket == "money":
-            limit = policy.data["budgets"]["velocity"]["money_bucket_actions_per_hour"]
-            if self.store.actions_last_hour(cur, cats, CURRENCY, mode) + 1 > limit:
-                return ["BUDGET_VELOCITY_CAP:money"], None
         need = self._required(ar)
+        # Lane D 0013 (D-11): the money ACTION-count cap is enforced inside budget_reserve_caps under the
+        # per-currency lock (count of unreleased bucket reservations in the last hour, zero-amount included).
+        velocity = policy.data["budgets"]["velocity"]["money_bucket_actions_per_hour"] if bucket == "money" else None
         cap_doc = {"per_action": bcaps["per_action_hard_cap"], "daily": bcaps["daily_hard_cap"],
                    "global_daily": caps["global_daily_hard_cap"], "velocity_per_hour": None,
+                   "velocity_actions_per_hour": velocity,
                    "tz": policy.data["quiet_hours"]["timezone"], "categories": cats}
         prov = [self._tool_provenance(cur, policy.version)] + ar["provenance_ids"]
         try:
@@ -412,6 +411,7 @@ class ActionGateway:
                 raise
             msg = str(exc)
             code = ("BUDGET_PER_ACTION_CAP" if "per_action" in msg else "BUDGET_GLOBAL_DAILY_CAP" if "global daily" in msg
+                    else "BUDGET_VELOCITY_CAP" if "velocity" in msg
                     else "BUDGET_DAILY_CAP" if "daily cap" in msg else "BUDGET_DENIED")
             return [f"{code}:{bucket}:{mode}"], None
         return [], rid
