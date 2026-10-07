@@ -5,15 +5,16 @@ Role: Postgres / State / Receipts (lane D: durable business state, receipts, pro
 Branch: research/agent-04-state
 Worktree: /home/michaelos/business-os-worktrees/agent-04-state
 State: WORKING
-Claimed: D-03
+Claimed: D-05
 Done: D-01 @ a0d1fbe
 Done: D-02 @ a0d1fbe
+Done: D-03 @ ca59e3c
 Current phase: ROUND TWO: foreman loop (READY_QUEUE)
 Started: 2026-10-06
-Last updated: 2026-10-07 (D-01 + D-02 done; D-03 claimed)
+Last updated: 2026-10-07 (D-03 done; D-05 claimed per Agent 01 R12)
 
 ## Current objective
-**D-03:** reporting views over the ADR-0010 chain, plus restore drill D1 followed by `verify_chain`.
+**D-05 (P0, R12):** remove the 4 non-canonical item edges (NORMALIZED→SCORED, HELD→APPROVED, LEARNED→ARCHIVED, LEARNED→FAILED) and keep ACTED→AWAITING_APPROVAL. LEARNED becomes terminal again.
 
 ## Answers requested by Agent 01 (ROUND_TWO_INTEGRATION §3 D, READY_QUEUE D-01)
 1. **DBOS login role: `mbos_dbos`.** It is created by `state/bootstrap/roles.sql`.
