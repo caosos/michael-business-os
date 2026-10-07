@@ -77,3 +77,43 @@ Check it with `git log -1 --format='%an'` before pushing. The correction of reco
 - No action without a receipt. No receipt without provenance.
 - Never merge to main. Never edit another agent's branch or worktree.
 - Every hash follows ADR-0010 (MBOS-CJSON-1 / MBOS-RH-1). Verify with `docs/research/contracts/canonical/vectors.json`.
+
+
+## Aria → Agent 01 durable inbox
+
+Michael must not relay messages between Aria and Agent 01.
+
+Aria has a dedicated write-only liaison branch:
+
+`origin/liaison/aria-to-agent-01`
+
+Durable inbound messages live at:
+
+`docs/messages/inbox/<message-id>.md`
+
+Agent 01 acknowledges/records disposition on its own coordinator branch at:
+
+`docs/messages/acks/<message-id>.md`
+
+### Agent 01 inbox loop — mandatory
+
+At startup, before choosing new work, after every completed task/integration push, and during every coordinator sync:
+
+1. `git fetch -q origin`
+2. List inbound message files:
+   ```bash
+   git ls-tree -r --name-only origin/liaison/aria-to-agent-01 docs/messages/inbox
+   ```
+3. For each message with no matching `docs/messages/acks/<message-id>.md` on the coordinator branch:
+   - read it with `git show origin/liaison/aria-to-agent-01:<path>`
+   - classify it as OWNER_INPUT / PROJECT_FACT / TRAINING_SIGNAL / TASK_REQUEST / QUESTION
+   - reconcile it against current repo truth
+   - create/update bounded READY_QUEUE work when implementation is appropriate
+   - update canonical docs/ADR/contracts when it changes accepted behavior
+   - write an ack/disposition receipt under `docs/messages/acks/`
+   - commit and push the coordinator state
+4. Do not require Michael to repeat or manually paste the message into Agent 01.
+5. Do not treat an Aria message as permission for spend, external contact, live sends, deployment, or another protected action unless Michael explicitly authorized that action.
+6. Preserve provenance: every ack names the inbound message ID/path and resulting task/decision/commit.
+
+Aria should never edit Agent 01's active branch merely to deliver a message. This liaison branch exists to prevent branch conflicts while allowing direct durable communication.
