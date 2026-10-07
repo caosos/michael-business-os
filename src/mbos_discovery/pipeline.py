@@ -136,6 +136,14 @@ def run_discovery(jobs: list[tuple[SourceAdapter, SearchProfile]], store: ItemSt
             continue
 
         stats.fetched = len(result.records)
+        present = set()                                  # listing ids in THIS fetch (relist detection)
+        for rec in result.records:
+            try:
+                if rec.payload is not None:
+                    present.add(adapter.normalize(rec.payload, rec.fetched_at).source_listing_id)
+            except Exception:  # noqa: BLE001 — bad records are quarantined below
+                pass
+        present = frozenset(present)
         for rec in result.records:
             raw_ref = None
             try:
@@ -145,7 +153,7 @@ def run_discovery(jobs: list[tuple[SourceAdapter, SearchProfile]], store: ItemSt
                 n = adapter.normalize(rec.payload, rec.fetched_at)
                 prov = build_provenance(adapter, n, raw_ref, rec.fetched_at, rec.request_uri)
                 check_item(_trial_item(adapter, n, raw_ref, prov))
-                obs = store.observe(adapter, n, raw_ref, prov, rec.fetched_at)
+                obs = store.observe(adapter, n, raw_ref, prov, rec.fetched_at, present_ids=present)
                 if events is not None:              # B-05 wake events (outbox; delivered to the spine separately)
                     events.observe(source=adapter.source, source_listing_id=n.source_listing_id, url=n.url,
                                    normalized=n.normalized, fetched_at=rec.fetched_at, raw_ref=raw_ref)

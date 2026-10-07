@@ -1,0 +1,10 @@
+From: GovDeals Alerts <alerts@govdeals.com>
+To: michael@example.invalid
+Subject: Saved search results day 4
+Date: Mon, 05 Oct 2026 06:00:00 +0000
+Message-ID: <corpus-4@govdeals.com>
+Authentication-Results: mx.example.invalid; dkim=pass header.d=govdeals.com
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body><table><tr><td><a href="https://www.govdeals.com/asset/4102/9001">Utility trailer 5x8</a></td><td>Current Bid: $400.00 Closes: 2026-10-10 Searcy, AR</td></tr><tr><td><a href="https://www.govdeals.com/asset/4103/9002">Pressure washer 3000 PSI</a></td><td>Current Bid: $175.00 Closes: 2026-10-10 Benton, AR</td></tr><tr><td><a href="https://www.govdeals.com/asset/4104/9002">Shop air compressor 80 gal</a></td><td>Current Bid: $320.00 Closes: 2026-10-10 Little Rock, AR 72201</td></tr></table></body></html>

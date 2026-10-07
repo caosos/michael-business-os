@@ -1,0 +1,434 @@
+{
+ "itemSummaries": [
+  {
+   "buyingOptions": [
+    "FIXED_PRICE"
+   ],
+   "categories": [
+    {
+     "categoryName": "Mower"
+    }
+   ],
+   "condition": "Used",
+   "conditionId": "3000",
+   "distanceFromPickupLocation": {
+    "unitOfMeasure": "MILE",
+    "value": "27"
+   },
+   "itemId": "v1|500000000002|0",
+   "itemLocation": {
+    "city": "Searcy",
+    "country": "US",
+    "postalCode": "721**",
+    "stateOrProvince": "AR"
+   },
+   "itemWebUrl": "https://www.ebay.com/itm/500000000002",
+   "price": {
+    "currency": "USD",
+    "value": "1896.00"
+   },
+   "seller": {
+    "sellerAccountType": "INDIVIDUAL",
+    "username": "seller_02"
+   },
+   "title": "Husqvarna zero turn mower 3500in"
+  },
+  {
+   "buyingOptions": [
+    "FIXED_PRICE"
+   ],
+   "categories": [
+    {
+     "categoryName": "Generator"
+    }
+   ],
+   "condition": "Used",
+   "conditionId": "3000",
+   "distanceFromPickupLocation": {
+    "unitOfMeasure": "MILE",
+    "value": "73"
+   },
+   "itemId": "v1|500000000003|0",
+   "itemLocation": {
+    "city": "Little Rock",
+    "country": "US",
+    "postalCode": "722**",
+    "stateOrProvince": "AR"
+   },
+   "itemWebUrl": "https://www.ebay.com/itm/500000000003",
+   "price": {
+    "currency": "USD",
+    "value": "454.00"
+   },
+   "seller": {
+    "sellerAccountType": "INDIVIDUAL",
+    "username": "seller_03"
+   },
+   "title": "Craftsman 48W portable generator"
+  },
+  {
+   "buyingOptions": [
+    "FIXED_PRICE"
+   ],
+   "categories": [
+    {
+     "categoryName": "Welder"
+    }
+   ],
+   "condition": "Used",
+   "conditionId": "3000",
+   "distanceFromPickupLocation": {
+    "unitOfMeasure": "MILE",
+    "value": "52"
+   },
+   "itemId": "v1|500000000004|0",
+   "itemLocation": {
+    "city": "Searcy",
+    "country": "US",
+    "postalCode": "721**",
+    "stateOrProvince": "AR"
+   },
+   "itemWebUrl": "https://www.ebay.com/itm/500000000004",
+   "price": {
+    "currency": "USD",
+    "value": "765.00"
+   },
+   "seller": {
+    "sellerAccountType": "INDIVIDUAL",
+    "username": "seller_04"
+   },
+   "title": "Campbell 60 MIG welder"
+  },
+  {
+   "buyingOptions": [
+    "FIXED_PRICE"
+   ],
+   "categories": [
+    {
+     "categoryName": "Compressor"
+    }
+   ],
+   "condition": "Used",
+   "conditionId": "3000",
+   "distanceFromPickupLocation": {
+    "unitOfMeasure": "MILE",
+    "value": "85"
+   },
+   "itemId": "v1|500000000005|0",
+   "itemLocation": {
+    "city": "Russellville",
+    "country": "US",
+    "postalCode": "728**",
+    "stateOrProvince": "AR"
+   },
+   "itemWebUrl": "https://www.ebay.com/itm/500000000005",
+   "price": {
+    "currency": "USD",
+    "value": "399.00"
+   },
+   "seller": {
+    "sellerAccountType": "INDIVIDUAL",
+    "username": "seller_05"
+   },
+   "title": "Campbell 140 gallon air compressor"
+  },
+  {
+   "buyingOptions": [
+    "FIXED_PRICE"
+   ],
+   "categories": [
+    {
+     "categoryName": "Mower"
+    }
+   ],
+   "condition": "Used",
+   "conditionId": "3000",
+   "distanceFromPickupLocation": {
+    "unitOfMeasure": "MILE",
+    "value": "37"
+   },
+   "itemId": "v1|500000000008|0",
+   "itemLocation": {
+    "city": "Hot Springs",
+    "country": "US",
+    "postalCode": "719**",
+    "stateOrProvince": "AR"
+   },
+   "itemWebUrl": "https://www.ebay.com/itm/500000000008",
+   "price": {
+    "currency": "USD",
+    "value": "1712.00"
+   },
+   "seller": {
+    "sellerAccountType": "BUSINESS",
+    "username": "dealer_outdoor_power"
+   },
+   "title": "Honda zero turn mower 180in - NEW STOCK"
+  },
+  {
+   "buyingOptions": [
+    "FIXED_PRICE"
+   ],
+   "categories": [
+    {
+     "categoryName": "Generator"
+    }
+   ],
+   "condition": "Used",
+   "conditionId": "3000",
+   "distanceFromPickupLocation": {
+    "unitOfMeasure": "MILE",
+    "value": "75"
+   },
+   "itemId": "v1|500000000009|0",
+   "itemLocation": {
+    "city": "Conway",
+    "country": "US",
+    "postalCode": "720**",
+    "stateOrProvince": "AR"
+   },
+   "itemWebUrl": "https://www.ebay.com/itm/500000000009",
+   "price": {
+    "currency": "USD",
+    "value": "539.00"
+   },
+   "seller": {
+    "sellerAccountType": "INDIVIDUAL",
+    "username": "seller_09"
+   },
+   "title": "Generac 3500W portable generator"
+  },
+  {
+   "buyingOptions": [
+    "FIXED_PRICE"
+   ],
+   "categories": [
+    {
+     "categoryName": "Welder"
+    }
+   ],
+   "condition": "Used",
+   "conditionId": "3000",
+   "distanceFromPickupLocation": {
+    "unitOfMeasure": "MILE",
+    "value": "86"
+   },
+   "itemId": "v1|500000000010|0",
+   "itemLocation": {
+    "city": "Russellville",
+    "country": "US",
+    "postalCode": "728**",
+    "stateOrProvince": "AR"
+   },
+   "itemWebUrl": "https://www.ebay.com/itm/500000000010",
+   "price": {
+    "currency": "USD",
+    "value": "333.00"
+   },
+   "seller": {
+    "sellerAccountType": "INDIVIDUAL",
+    "username": "seller_10"
+   },
+   "title": "Craftsman 7500 MIG welder"
+  },
+  {
+   "buyingOptions": [
+    "FIXED_PRICE"
+   ],
+   "categories": [
+    {
+     "categoryName": "Compressor"
+    }
+   ],
+   "condition": "Used",
+   "conditionId": "3000",
+   "distanceFromPickupLocation": {
+    "unitOfMeasure": "MILE",
+    "value": "66"
+   },
+   "itemId": "v1|500000000011|0",
+   "itemLocation": {
+    "city": "Searcy",
+    "country": "US",
+    "postalCode": "721**",
+    "stateOrProvince": "AR"
+   },
+   "itemWebUrl": "https://www.ebay.com/itm/500000000011",
+   "price": {
+    "currency": "USD",
+    "value": "285.00"
+   },
+   "seller": {
+    "sellerAccountType": "INDIVIDUAL",
+    "username": "seller_11"
+   },
+   "title": "Campbell 211 gallon air compressor"
+  },
+  {
+   "buyingOptions": [
+    "FIXED_PRICE"
+   ],
+   "categories": [
+    {
+     "categoryName": "Mower"
+    }
+   ],
+   "condition": "Used",
+   "conditionId": "3000",
+   "distanceFromPickupLocation": {
+    "unitOfMeasure": "MILE",
+    "value": "91"
+   },
+   "itemId": "v1|500000000014|0",
+   "itemLocation": {
+    "city": "Benton",
+    "country": "US",
+    "postalCode": "720**",
+    "stateOrProvince": "AR"
+   },
+   "itemWebUrl": "https://www.ebay.com/itm/500000000014",
+   "price": {
+    "currency": "USD",
+    "value": "2066.00"
+   },
+   "seller": {
+    "sellerAccountType": "INDIVIDUAL",
+    "username": "seller_14"
+   },
+   "title": "Generac zero turn mower 60in"
+  },
+  {
+   "buyingOptions": [
+    "FIXED_PRICE"
+   ],
+   "categories": [
+    {
+     "categoryName": "Generator"
+    }
+   ],
+   "condition": "Used",
+   "conditionId": "3000",
+   "distanceFromPickupLocation": {
+    "unitOfMeasure": "MILE",
+    "value": "79"
+   },
+   "itemId": "v1|500000000015|0",
+   "itemLocation": {
+    "city": "Searcy",
+    "country": "US",
+    "postalCode": "721**",
+    "stateOrProvince": "AR"
+   },
+   "itemWebUrl": "https://www.ebay.com/itm/500000000015",
+   "price": {
+    "currency": "USD",
+    "value": "846.00"
+   },
+   "seller": {
+    "sellerAccountType": "INDIVIDUAL",
+    "username": "seller_15"
+   },
+   "title": "Champion 7500W portable generator"
+  },
+  {
+   "buyingOptions": [
+    "FIXED_PRICE"
+   ],
+   "categories": [
+    {
+     "categoryName": "Welder"
+    }
+   ],
+   "condition": "Used",
+   "conditionId": "3000",
+   "distanceFromPickupLocation": {
+    "unitOfMeasure": "MILE",
+    "value": "38"
+   },
+   "itemId": "v1|500000000016|0",
+   "itemLocation": {
+    "city": "Hot Springs",
+    "country": "US",
+    "postalCode": "719**",
+    "stateOrProvince": "AR"
+   },
+   "itemWebUrl": "https://www.ebay.com/itm/500000000016",
+   "price": {
+    "currency": "USD",
+    "value": "415.00"
+   },
+   "seller": {
+    "sellerAccountType": "INDIVIDUAL",
+    "username": "seller_16"
+   },
+   "title": "Champion 60 MIG welder"
+  },
+  {
+   "buyingOptions": [
+    "FIXED_PRICE"
+   ],
+   "categories": [
+    {
+     "categoryName": "Compressor"
+    }
+   ],
+   "condition": "Used",
+   "conditionId": "3000",
+   "distanceFromPickupLocation": {
+    "unitOfMeasure": "MILE",
+    "value": "25"
+   },
+   "itemId": "v1|500000000017|0",
+   "itemLocation": {
+    "city": "Hot Springs",
+    "country": "US",
+    "postalCode": "719**",
+    "stateOrProvince": "AR"
+   },
+   "itemWebUrl": "https://www.ebay.com/itm/500000000017",
+   "price": {
+    "currency": "USD",
+    "value": "504.00"
+   },
+   "seller": {
+    "sellerAccountType": "INDIVIDUAL",
+    "username": "seller_17"
+   },
+   "title": "Honda 60 gallon air compressor"
+  },
+  {
+   "buyingOptions": [
+    "FIXED_PRICE"
+   ],
+   "categories": [
+    {
+     "categoryName": "Mower"
+    }
+   ],
+   "condition": "Used",
+   "conditionId": "3000",
+   "distanceFromPickupLocation": {
+    "unitOfMeasure": "MILE",
+    "value": "37"
+   },
+   "itemId": "v1|52000000001|0",
+   "itemLocation": {
+    "city": "Hot Springs",
+    "country": "US",
+    "postalCode": "719**",
+    "stateOrProvince": "AR"
+   },
+   "itemWebUrl": "https://www.ebay.com/itm/52000000001",
+   "price": {
+    "currency": "USD",
+    "value": "1712.00"
+   },
+   "seller": {
+    "sellerAccountType": "BUSINESS",
+    "username": "dealer_outdoor_power"
+   },
+   "title": "Honda zero turn mower 180in - NEW STOCK"
+  }
+ ],
+ "total": 13
+}

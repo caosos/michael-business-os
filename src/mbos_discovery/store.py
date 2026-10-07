@@ -18,7 +18,7 @@ from pathlib import Path
 
 from . import AGENT_ID, CONTRACT_VERSION
 from .adapter import Normalized, SourceAdapter
-from .dedup import SERVICE_WINDOW, content_hash, dedup_key, is_cross_source_duplicate
+from .dedup import RELIST_WINDOW, SERVICE_WINDOW, content_hash, dedup_key, is_cross_source_duplicate, is_relist
 from .ids import canonical_json, derived_ulid, iso, parse_ts
 
 CREATED, MERGED, UPDATED, SEEN = "CREATED", "MERGED", "UPDATED", "SEEN"
@@ -46,7 +46,9 @@ class ItemStore:
 
     # ---- the one write path --------------------------------------------------------
     def observe(self, adapter: SourceAdapter, n: Normalized, raw_ref: str, prov: dict,
-                fetched_at: datetime) -> Observation:
+                fetched_at: datetime, present_ids: frozenset[str] | None = None) -> Observation:
+        """`present_ids`: every listing id in the current fetch from this source. Only when it is given can an
+        absent (ended) listing be recognised as relisted under a new id."""
         key = _k(adapter.source, n.source_listing_id)
         ts = iso(fetched_at)
         chash = content_hash(n.normalized)
@@ -71,6 +73,10 @@ class ItemStore:
             return Observation(UPDATED, existing_id)
 
         dup = self._find_duplicate(n, fetched_at, adapter.source)
+        relist = False
+        if dup is None and present_ids is not None:
+            dup = self._find_relist(n, fetched_at, adapter.source, present_ids)
+            relist = dup is not None
         sighting = {
             "source": adapter.source,
             "source_listing_id": n.source_listing_id,
@@ -88,7 +94,8 @@ class ItemStore:
             dup["provenance_ids"].append(prov["provenance_id"])
             dup["updated_at"] = ts
             self._by_listing[key] = dup["item_id"]
-            self._event(MERGED, dup, adapter, n, raw_ref, prov, ts, effect="update")
+            self._event(MERGED, dup, adapter, n, raw_ref, prov, ts, effect="update",
+                        note="relisted by the same seller under a new listing id" if relist else None)
             return Observation(MERGED, dup["item_id"])
 
         item_id = derived_ulid("itm", fetched_at, "item", adapter.source, n.source_listing_id)
@@ -149,11 +156,23 @@ class ItemStore:
                 return cand
         return None
 
+    def _find_relist(self, n: Normalized, fetched_at: datetime, source: str, present: frozenset[str]) -> dict | None:
+        if n.type != "flip":
+            return None
+        for iid in sorted(self.items):
+            cand = self.items[iid]
+            for s in cand["sources"]:
+                if (s["source"] == source and s.get("source_listing_id") not in present
+                        and fetched_at - parse_ts(s.get("last_seen_at") or s["first_seen_at"]) <= RELIST_WINDOW
+                        and is_relist(cand, s, n.type, n.category, n.normalized)):
+                    return cand
+        return None
+
     def _add_prov(self, prov: dict) -> str:
         self.provenance.setdefault(prov["provenance_id"], prov)   # append-only
         return prov["provenance_id"]
 
-    def _event(self, kind, item, adapter, n, raw_ref, prov, ts, effect) -> None:
+    def _event(self, kind, item, adapter, n, raw_ref, prov, ts, effect, note=None) -> None:
         idem = (f"discovery:{item['item_id']}:normalized" if kind == CREATED
                 else f"discovery:{item['item_id']}:{adapter.source}:{n.source_listing_id}:{raw_ref}")
         self.events.append({
@@ -171,7 +190,8 @@ class ItemStore:
                 "actor": {"type": "agent", "id": AGENT_ID},
                 "intent": {
                     CREATED: f"discovered {adapter.source}:{n.source_listing_id}; normalized to Item v1",
-                    MERGED: f"cross-source duplicate {adapter.source}:{n.source_listing_id} merged as a sighting",
+                    MERGED: (f"{adapter.source}:{n.source_listing_id} {note}; merged as a sighting" if note else
+                             f"cross-source duplicate {adapter.source}:{n.source_listing_id} merged as a sighting"),
                     UPDATED: f"{adapter.source}:{n.source_listing_id} changed at source; re-normalized",
                 }[kind],
                 "item_id": item["item_id"],

@@ -261,3 +261,43 @@ Acceptance (FACT, Agent 03 @ `e1869f2`, engine 0.6.1):
 - **With SOLD comps added**, the item reaches SCORED and still carries the asking comp as kind `asking`.
 - **History:** Agent 03's `entry()` used to raise KeyError `sold_date` on asking comps. I reported it, and 03 fixed it at `e1869f2` with my repro as a regression test.
 - **Install note:** `research/agent-03-economics` commits a stale `economics/build/` tree (0.3.0). `git archive` gives every file the same mtime, so setuptools packages those stale files. Delete `economics/build` before `pip install`. Reported to Agent 03.
+
+## 17. Discovery acceptance F1–F4 harness — READY_QUEUE B-10
+
+To run it: `mbos-discover acceptance [--corpus tests/fixtures/corpus7d] [--out report.json]`. It is offline, uses the real adapters on fixture transports, and exits 1 on any failure. The code is in `src/mbos_discovery/acceptance.py`.
+
+**Corpus.** `tools/make_corpus.py` generates it deterministically (seeded, byte-stable; a test regenerates and compares).
+- Seven days across eBay Browse, GSA Auctions, GovDeals alert e-mails, the web form and referrals.
+- 41 sightings of **36 physical objects**. `labels.json` holds the ground truth and is used only for scoring.
+- Scenarios:
+  - persistence and price drops
+  - the same listing in two eBay queries
+  - 3 eBay **relists** (same seller, new itemId after the original ended)
+  - a pair of dealer **twin units** (two objects listed at once)
+  - GSA lots re-polled daily
+  - repeated GovDeals alerts
+  - a customer using both web form and referral, and another submitting twice
+
+**Result (FACT, this commit):**
+
+| Check | Result |
+|---|---|
+| F1 | PASS: 36 Items, every sighting has a `raw_ref` whose bytes are retained and hash-verified |
+| F2 | PASS: **missed-duplicate rate 0.00%** (target < 2%), **false merges 0**, 36 Items for 36 objects |
+| F3 | PASS: 403 and 429 each produce exactly 1 schema-valid L2 freeze request after 2 fetches, then 0 requests |
+| F4 | PASS: all 8 FORBIDDEN sources are refused before fetch even when "enabled"; no adapter allow-lists a forbidden host |
+
+**How F2 was reached (honest record).** The first measurement was **7.69%**, all of it from the 3 relists. The original dedup rule never merged same-source listings. I added a **relist rule** (`dedup.is_relist`, used by `ItemStore.observe` with the current fetch's listing ids). It merges a new same-source listing id into an earlier one only when all of these hold:
+- the earlier listing is **absent from the current fetch**, i.e. it ended
+- the seller name is identical and non-empty
+- the category is the same
+- title similarity is ≥ 0.90
+- the price is within ±15%
+- the earlier listing was last seen ≤ 14 days ago
+
+Twins can never merge, because both are present in the same fetch.
+
+**Stated limitations.**
+- **Known ambiguity**, pinned by a test: a dealer's *second identical unit*, listed after the first ended, looks like a relist and merges. No data is lost, but inventory is undercounted. Image pHash (wave two) is the planned fix.
+- **The corpus is synthetic.** Agent 01's original F2 target is a 7-day **live** sample, which still needs live credentials.
+- **The spine path doesn't have the relist rule yet.** Its `Deduper` call carries no source or fetch context. That's queued as A-14 for Agent 01.

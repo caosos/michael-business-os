@@ -1,0 +1,60 @@
+{
+ "results": [
+  {
+   "AgencyName": "GENERAL SERVICES ADMINISTRATION",
+   "AucEndDt": "2026-10-08",
+   "AuctionStatus": "A",
+   "BiddersCount": 1,
+   "HighBidAmount": 100.0,
+   "ItemDescURL": "https://www.gsaauctions.gov/corpus/71QSCI26100/1",
+   "ItemName": "UTILITY TRAILER 6X10",
+   "LotNo": 1,
+   "PropertyCity": "CONWAY",
+   "PropertyState": "AR",
+   "PropertyZip": "72001",
+   "SaleNo": "71QSCI26100"
+  },
+  {
+   "AgencyName": "GENERAL SERVICES ADMINISTRATION",
+   "AucEndDt": "2026-10-08",
+   "AuctionStatus": "A",
+   "BiddersCount": 0,
+   "HighBidAmount": 0.0,
+   "ItemDescURL": "https://www.gsaauctions.gov/corpus/71QSCI26101/2",
+   "ItemName": "GENERATOR 5500W",
+   "LotNo": 2,
+   "PropertyCity": "LITTLE ROCK",
+   "PropertyState": "AR",
+   "PropertyZip": "72201",
+   "SaleNo": "71QSCI26101"
+  },
+  {
+   "AgencyName": "GENERAL SERVICES ADMINISTRATION",
+   "AucEndDt": "2026-10-08",
+   "AuctionStatus": "A",
+   "BiddersCount": 1,
+   "HighBidAmount": 100.0,
+   "ItemDescURL": "https://www.gsaauctions.gov/corpus/71QSCI26103/4",
+   "ItemName": "WELDER, MIG 180",
+   "LotNo": 4,
+   "PropertyCity": "BENTON",
+   "PropertyState": "AR",
+   "PropertyZip": "72001",
+   "SaleNo": "71QSCI26103"
+  },
+  {
+   "AgencyName": "GENERAL SERVICES ADMINISTRATION",
+   "AucEndDt": "2026-10-06",
+   "AuctionStatus": "A",
+   "BiddersCount": 0,
+   "HighBidAmount": 0.0,
+   "ItemDescURL": "https://www.gsaauctions.gov/corpus/71QSCI26104/5",
+   "ItemName": "MOWER, ZERO TURN 60IN",
+   "LotNo": 5,
+   "PropertyCity": "RUSSELLVILLE",
+   "PropertyState": "AR",
+   "PropertyZip": "72801",
+   "SaleNo": "71QSCI26104"
+  }
+ ]
+}

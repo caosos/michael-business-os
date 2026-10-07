@@ -3,6 +3,7 @@
     mbos-discover run    --config config/discovery.example.toml [--fixtures tests/fixtures]
     mbos-discover health [--data-dir var/discovery]
     mbos-discover clear-freeze ebay --by michael
+    mbos-discover acceptance [--corpus tests/fixtures/corpus7d] [--out report.json]   (F1-F4, offline)
 
 State lives under --data-dir: raw/ (content-addressed payloads), items.json, health.json,
 runs/<run_id>.json. Exit code 0 even when a source fails (that is reported, not fatal);
@@ -79,6 +80,10 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("--config", required=True)
     r.add_argument("--fixtures", help="fixture root (ebay/, gsa/, trashnothing/ subdirs); no network")
     sub.add_parser("health")
+    acc = sub.add_parser("acceptance", help="run discovery acceptance F1-F4 on a fixture corpus (offline)")
+    acc.add_argument("--corpus", default="tests/fixtures/corpus7d")
+    acc.add_argument("--schema", default="docs/integration/freeze-request/freeze-request.schema.json")
+    acc.add_argument("--out", help="write the full JSON report here")
     c = sub.add_parser("clear-freeze")
     c.add_argument("source")
     c.add_argument("--by", required=True, help="the human clearing the freeze")
@@ -90,6 +95,13 @@ def main(argv: list[str] | None = None) -> int:
     if a.cmd == "health":
         print(json.dumps(hb.to_json(), indent=1))
         return 0
+    if a.cmd == "acceptance":
+        from .acceptance import render, run_acceptance
+        report = run_acceptance(Path(a.corpus), Path(a.schema))
+        if a.out:
+            save_json_atomic(Path(a.out), report)
+        print(render(report))
+        return 0 if report["pass"] else 1
     if a.cmd == "clear-freeze":
         hb.clear_freeze(a.source, a.by, _now())
         save_json_atomic(data / "health.json", hb.to_json())

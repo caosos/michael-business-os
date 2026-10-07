@@ -21,6 +21,8 @@ TITLE_SIMILARITY = 0.85
 PRICE_TOLERANCE = 0.15
 NEAR_MILES = 10.0
 SERVICE_WINDOW = timedelta(days=14)
+RELIST_WINDOW = timedelta(days=14)
+RELIST_TITLE_SIMILARITY = 0.90
 
 _PRICE_BANDS = [0, 1, 100, 250, 500, 1000, 1500, 2500, 5000, 10000]
 _STOP = frozenset("a an and the for with of in on to or w/ w obo firm sale used good great nice".split())
@@ -101,6 +103,18 @@ def _same_place(a: dict | None, b: dict | None) -> bool:
         return (a["city"].lower(), (a.get("state") or "").lower()) == \
                (b["city"].lower(), (b.get("state") or "").lower())
     return False
+
+
+def is_relist(cand: dict, cand_sighting: dict, item_type: str, category: str, normalized: dict) -> bool:
+    """Same-source relist: the earlier listing ENDED (caller checks it is absent from the current fetch) and the
+    same seller re-posts the same unit under a new id. Requires an identical non-empty seller name, same
+    category, title similarity ≥ 0.90 and price within 15%. Two units listed at the same time (dealer twins)
+    are never relists, because both are present in the same fetch."""
+    seller_a = ((cand.get("normalized") or {}).get("counterparty") or {}).get("name")
+    seller_b = (normalized.get("counterparty") or {}).get("name")
+    return (cand["type"] == item_type and cand["category"] == category and bool(seller_a) and seller_a == seller_b
+            and _prices_close((cand["normalized"]).get("price"), normalized.get("price"))
+            and title_similarity(cand["normalized"].get("title", ""), normalized.get("title", "")) >= RELIST_TITLE_SIMILARITY)
 
 
 def is_cross_source_duplicate(cand: dict, item_type: str, category: str, normalized: dict) -> bool:
