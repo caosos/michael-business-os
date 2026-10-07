@@ -4,13 +4,15 @@ Agent: 06
 Role: Communications (voice / SMS / email layer)
 Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
-State: COMPLETE
-Current phase: Round One — research complete, reported via GitHub
+State: WORKING
+Current phase: Round Two — Wave One, build lane F (Operator UI / approval UX)
 Started: 2026-10-06
-Last updated: 2026-10-06
+Last updated: 2026-10-07
 
 ## Current objective
-Round-One research on the future communications layer (inbound/outbound phone, SMS, email, seller Q&A, customer intake, negotiation guardrails, approvals, receipts, compliance) is complete and committed. No live communications performed.
+ROUND TWO (2026-10-07): build the minimal Operator UI (opportunity cards, YES/NO/MODIFY/HOLD) against the frozen v1.0.0 contracts from `research/agent-01-coordinator` @ `acb6f3b`. Dry-run only; no live SMS/email/voice.
+
+Round One (historical): Round-One research on the future communications layer (inbound/outbound phone, SMS, email, seller Q&A, customer intake, negotiation guardrails, approvals, receipts, compliance) is complete and committed. No live communications performed.
 
 ## Completed
 - Researched hosted voice-AI platforms: Vapi, Retell, AgentLine, Patter, VoiceOS.
