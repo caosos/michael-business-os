@@ -38,6 +38,7 @@ git fetch -q origin && git show origin/research/agent-01-coordinator:docs/status
   3. Reflect claims and DONEs into `READY_QUEUE.md` and `ACTIVE_WORK.md`.
   4. Unblock dependents.
   5. Push.
+- **Only mark a task CLAIMED after the agent's own claim is pushed** (06 caught me pre-marking F-07). Use "assigned" in ACTIVE_WORK until then.
 - **Never leave an agent idle while compatible READY work exists.** If a lane runs dry, create tasks from integration gaps.
 - **Never become passively WAITING myself.** When my next task is blocked, I take another READY task (`A-0x`).
 - **Technical decisions are mine.** Only business-policy questions go to Michael (`docs/status/MICHAEL_DECISIONS.md`).

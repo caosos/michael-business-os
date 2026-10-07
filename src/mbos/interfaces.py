@@ -10,6 +10,7 @@ labelled with the lane that replaces it.
 | SourceAdapter      | B Discovery (Agent 02)     | reference.fixture_adapter.FixtureSourceAdapter |
 | Normalizer         | B Discovery (Agent 02)     | reference.fixture_adapter.FixtureNormalizer    |
 | Deduper            | B Discovery (Agent 02)     | reference.fixture_adapter.ExactKeyDeduper      |
+| Researcher         | C Economics (Agent 03) + B comps | adapters.economics.EconomicsResearcher (real) |
 | Scorer             | C Economics (Agent 03)     | adapters.economics.EconomicsEngineScorer (real) / reference.placeholder_scorer |
 | ActionPlanner      | 06 Comms / 07 Marketing    | reference.action_planner.DefaultActionPlanner  |
 | PolicyDecisionPoint| E Governance (Agent 05)    | reference.governance.DenyByDefaultPDP          |
@@ -106,6 +107,24 @@ class ScoreResult:
     # Lane C may mint deterministic ids (replay, AT-1). When set, the spine stores them as-is.
     scorecard_id: Optional[str] = None
     recommendation_id: Optional[str] = None
+
+
+@dataclass(frozen=True)
+class ResearchResult:
+    """Lane C's RESEARCH step (A-05). Pure: the spine persists provenance and owns every transition."""
+
+    next_state: str  # SCORED | RESEARCHING
+    economics: Optional[dict[str, Any]]  # Item.economics after estimation (None if insufficient)
+    research: list[dict[str, Any]]  # Item.research[] entries (each cites a provenance_id)
+    provenance_records: list[dict[str, Any]]  # full Provenance v1 docs to persist (comps, estimate, score)
+    score: Optional[ScoreResult]  # set when next_state == SCORED
+    gaps: list[str] = field(default_factory=list)  # what to research next when insufficient
+
+
+@runtime_checkable
+class Researcher(Protocol):
+    def research(self, item: dict[str, Any]) -> ResearchResult:
+        """Gather evidence (comps via lane B), estimate economics, and score if sufficient. Deterministic."""
 
 
 @runtime_checkable

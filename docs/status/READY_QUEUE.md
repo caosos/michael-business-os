@@ -1,7 +1,7 @@
 # READY QUEUE: Michael Business OS, Round Two
 
 - **Owner:** Agent 01 (coordinator / dispatcher). **Protocol:** `docs/COORDINATION.md`. Read it before claiming.
-- **Last synced:** 2026-10-07 14:15 -0500, against branch heads 02 `41d45a6` · 03 `73a4d32` · 04 `7f0649a` · 05 `16fb86c` · 06 `c125618` · 07 `397101c`.
+- **Last synced:** 2026-10-07 14:50 -0500, against branch heads 02 `41d45a6` · 03 `73a4d32` · 04 `7f0649a` · 05 `16fb86c` · 06 `c125618` · 07 `397101c`.
 - **Read it from any worktree:** `git fetch -q origin && git show origin/research/agent-01-coordinator:docs/status/READY_QUEUE.md`
 - **Status values:** READY · CLAIMED · BLOCKED · DONE.
 - **Priority:** P0 = critical path · P1 = next-up · P2 = useful parallel work.
@@ -20,13 +20,15 @@
 | A-02 | P1 | Release gate `tools/release_gate.sh` (pytest + interop_check + `mbos audit` + contract validator), plus `docs/status/RELEASE_GATE.md` with results | none | READY | 01 | One command, non-zero on any failure, results committed |
 | A-03 | P1 | Wire 05 `ActionGateway`/`PanicState`/`policy.decide` behind `Gateway`/`KillSwitch`/`PDP`. The gateway owns action-status receipts (R4) | E-02 | BLOCKED | 01 | A5 and A9 pass with 05's real gateway |
 | A-04 | P2 | Wire 02's B adapter + Deduper into `Components`; end-to-end fixture discovery → RESEARCHING | B-01 | **CLAIMED** | 01 | Integration test: 02 fixtures through the DBOS workflow |
-| A-05 | P2 | Wire 03's RESEARCH producer as a workflow step (RESEARCHING → SCORED) | C-01 | **CLAIMED** (01) | 01 | A real discovered Item advances past RESEARCHING in a test |
+| A-05 | P2 | Wire 03's RESEARCH producer as a workflow step (RESEARCHING → SCORED) | C-01 | **DONE** (this push): `Researcher` interface + `EconomicsResearcher`; lane-B items through lane C's research_step in the workflow | 01 | A real discovered Item advances past RESEARCHING in a test |
 | A-07 | P1 | `notify_decision(item_id, approval_id)` wake helper for the UI and CLI (06 P-06-1) | none | **DONE** (this push) | 01 | `mbos.workflows.notify_decision` exists; F-01 uses it |
 | A-08 | P2 | `_approval_gate` acts on `wake_on` = `new_info` / `price_change` / `auction_ending` via a message kind sent by lanes B/C (06 P-06-2) | none | **DONE** (this push): `mbos.workflows.notify_event(item_id, event, summary, evidence_provenance_id)` | 01 | Test: a HOLD with `wake_on=price_change` wakes on a price-change message, never executes |
 | A-09 | P1 | Ruling R12: the Item edge table is lane D's (every item passes RESEARCHING; a YES on HELD re-presents first; LEARNED is terminal; follow-up edge ACTED→AWAITING_APPROVAL). The spine is aligned (migration 0004) | none | **DONE** (this push) | 01 | Parity test against 04's live DB passes |
 | A-12 | P2 | R13 routing: PASS with `pass_on_priors` → RESEARCHING, not ARCHIVED | C-05 | READY (C-05 done; key on `scorecard.pass_on_priors`, after C-06 the stricter rule) | 01 | Test with 03's flag |
 | A-13 | P2 | Wire 06's `CommsActionPlanner` (F-05) and comms dry-run `Effector` (F-06) into `Components`; behind 05's gateway once A-03 lands | F-05, F-06 | **DONE** (this push): payload extension merged before hashing; effector `blocked` → ACTION_FAILED; comms checks in `details` | 01 | End-to-end dry-run comms receipts graded by 06's audit |
 | A-14 | P2 | Deduper seam gap (02): `Deduper.is_duplicate` also receives the candidate's source sighting, so same-source look-alikes are not merged | none | READY | 01 | Test: two same-source look-alikes stay separate |
+| A-15 | P1 | P-06-8: public `spine.propose_followup(conn, item_id, proposed_action)` plus a gate workflow for follow-up requests on an existing item (R12 `ACTED→AWAITING_APPROVAL`) | none | READY | 01 | Test: follow-up on an ACTED item → new areq → approval gate → dry-run act |
+| A-16 | P1 | Gapless receipt seq (06 finding): migration 0005; DB `verify_chain` checks contiguity; both verifiers agree after a rollback | none | **DONE** (this push) | 01 | A3 tests |
 | A-10 | P1 | Ship the contracts as package data so a non-editable install works without `MBOS_CONTRACTS_DIR` (07 P-07-1/F-16) | none | READY | 01 | `pip install .` into a clean venv; the suite passes with no env var |
 | A-11 | P1 | ADR-0010 interop: `tools/interop_check.py` covers vectors, rejections and vendored-copy byte identity | none | **DONE** (this push) | 01 | All 6 Python lanes CONFORM (12:50) |
 | A-06 | P2 | ADR-0009 v1.1.0: collect lane acknowledgements, then decide | lane acks | READY | 01 | ADR-0009 ACCEPTED or amended; vectors and examples regenerated |
@@ -53,10 +55,11 @@
 | B-03 | P2 | Credential-free sources: GSA Auctions API, then Trash Nothing, as fixture-first adapters, read-only, honouring ADR-02-0202 | B-01 | **DONE** @ `8ff5476` | 02 | Fixture tests; no live calls without explicit enablement |
 | B-04 | P2 | Source-health → L2 freeze request shape, agreed with 05 (`discovery.source.<src>.read`) | E-01 | **DONE** @ `029356c` (05 half @ `d3b9948`) | 02 (+05) | A shared fixture both lanes test against |
 
-| B-05 | P1 | P-02-1: wake-event producer. On re-sighting (price change, new info) or an auction nearing its end, call `mbos.workflows.notify_event(item_id, kind, evidence)`, where kind ∈ `price_change`/`auction_ending`/`new_info` (defined by A-08). Record each event's provenance | A-08 (API published this push) | READY | 02 | A HOLD with `wake_on=price_change` wakes from a 02 fixture re-sighting; it never executes |
-| B-06 | P2 | P-02-2: IMAP alert ingestor (tier 2), fixture-first, no live mailbox without explicit enablement | none | READY | 02 | Fixture emails → RawListing; no network in tests |
-| B-07 | P2 | P-02-3: SAM.gov adapter (service lane / gov contracts), fixture-first | none | READY | 02 | Fixture tests |
-| B-08 | P2 | P-02-4: eBay Browse *asking* comps for 03's evidence bundle (labelled ASKING, never SOLD) | none | READY | 02 (+03) | 03's estimator consumes them with the right basis |
+| B-05 | P1 | P-02-1: wake-event producer. On re-sighting (price change, new info) or an auction nearing its end, call `mbos.workflows.notify_event(item_id, kind, evidence)`, where kind ∈ `price_change`/`auction_ending`/`new_info` (defined by A-08). Record each event's provenance | A-08 (API published this push) | **DONE** @ `e439b9b` (`deliver_wake_events`; A-04 runs it after discover) | 02 | A HOLD with `wake_on=price_change` wakes from a 02 fixture re-sighting; it never executes |
+| B-06 | P2 | P-02-2: IMAP alert ingestor (tier 2), fixture-first, no live mailbox without explicit enablement | none | **DONE** @ `bd899f4` (read-only IMAP, DKIM-checked) | 02 | Fixture emails → RawListing; no network in tests |
+| B-07 | P2 | P-02-3: SAM.gov adapter (service lane / gov contracts), fixture-first | none | **DONE** @ `32c148c` | 02 | Fixture tests |
+| B-08 | P2 | P-02-4: eBay Browse *asking* comps for 03's evidence bundle (labelled ASKING, never SOLD) | none | **BLOCKED** on C-10 (source side done @ `a41fedf`) | 02 (+03) | 03's estimator consumes them with the right basis |
+| B-10 | P1 | Discovery acceptance F1–F4 as a runnable harness: F1 every Item has ≥1 `sources[]` with `raw_ref`; F2 duplicate rate after dedup on a 7-day fixture corpus (target <2%); F3 repeated 403/429 → L2 freeze request; F4 no collector touches a do-not-automate source | none | READY | 02 | Harness green; F2 rate reported |
 | B-09 | P2 | P-02-5: source-freeze wiring onto Postgres PANIC | E-02 | BLOCKED | 02 | Freeze round-trips on 04/05's tables |
 
 ### Lane C: Agent 03 (economics)
@@ -72,7 +75,8 @@
 | C-06 | P1 | R13 amended (03 P-03-04): for flips, a PASS archives only if the revenue side AND ≥1 cost-side input are evidence-backed; otherwise `pass_on_priors=true` | none | **DONE** @ `9e36ec9` (engine 0.4.0; revenue requirement on the economic gates only, confirmed by 01) | 03 | Goldens: the floor PASS driven by prior repair costs is flagged |
 | C-07 | P1 | LEARN on 04's outcome store: Brier/MAPE from `predicted_vs_actual`; a config bump is PROPOSED as a tier-0 ActionRequest (`config.scoring.bump`), never auto-applied | none | **DONE** @ `0c3cf4a` (LEARN proposes, never applies; system-scoped areq waits on ADR-0009 item 9) | 03 | Two outcomes → a bump proposal with provenance; nothing applied |
 
-| C-08 | P1 | Morning digest ranking: a pure function over scored Items → a ranked "what to do first" list (EV $/h, time-to-cash, expiry/auction end, confidence) with one-line reasons and provenance refs, for the Operator UI and a daily summary (72-hour plan) | none | READY | 03 (06 renders) | Deterministic ranking over the 13 goldens + 02 fixtures; explanation per row |
+| C-10 | **P1 (do first)** | Fix `comps_feed.entry()` KeyError `sold_date` on ASKING comps (02's repro; unblocks B-08) | none | READY | 03 | 02's B-08 xfail test passes unchanged |
+| C-08 | P1 | Morning digest ranking: a pure function over scored Items → a ranked "what to do first" list (EV $/h, time-to-cash, expiry/auction end, confidence) with one-line reasons and provenance refs, for the Operator UI and a daily summary (72-hour plan) | none | **CLAIMED** | 03 (06 renders) | Deterministic ranking over the 13 goldens + 02 fixtures; explanation per row |
 | C-09 | P1 | Owner-decision support for MICHAEL_DECISIONS #1/#2: a sensitivity report showing how verdicts on current goldens and fixtures change across cash caps and $/h floor/targets. Report only; config untouched | none | READY | 03 | `docs/` report with a table; no config change |
 
 ### Lane E: Agent 05 (governance)
@@ -96,8 +100,13 @@
 | F-05 | P1 | P-06-4: `CommsActionPlanner` implementing `mbos.interfaces.ActionPlanner` from the comms_spec template registry. The payload carries `template_id`, `template_hash` (MBOS-CJSON-1) and the rendered draft; action constraints (window, consent prerequisites) go in the payload | none | **DONE** @ `acb7c52` | 06 | Contract-valid proposals for 1 flip + 1 service fixture; 01 wires it into `Components` (A-13) |
 | F-06 | P1 | P-06-5: dry-run comms `Effector` implementing `mbos.interfaces.Effector`: exactly-once per idempotency key; `effector_response.dry_run=true`; `details.kind=comms` carries consent/DNC/window/disclosure check results; `audit(receipts)` grades E1–E7. No network imports | none | **DONE** @ `5abf51e` | 06 | E1–E7 graded on a spine run; A7 still zero exceptions |
 
-| F-07 | P1 | P-06-6: consent ledger + DNC scrub store as data (append-only, receipted), so E2 grades PASS/FAIL instead of DRY_RUN_EXEMPT. Raw contact values stay in the ledger and are referenced, never copied | none | **CLAIMED** (06) | 06 (+04 for DDL if it needs tables) | E2 graded PASS/FAIL on a spine run |
-| F-08 | P2 | P-06-7: follow-up and binding offer/quote templates as their own step-up ActionRequests (tier 0, irreversible) | F-07 | READY after F-07 | 06 | Templates + tests; nothing auto-sends |
+| F-07 | P1 | P-06-6: consent ledger + DNC scrub store as data (append-only, receipted), so E2 grades PASS/FAIL instead of DRY_RUN_EXEMPT. Raw contact values stay in the ledger and are referenced, never copied | none | **DONE** @ `36ce9a4` (consent ledger + DNC; E2/E4 PASS) | 06 (+04 for DDL if it needs tables) | E2 graded PASS/FAIL on a spine run |
+| F-08 | P2 | P-06-7: follow-up and binding offer/quote templates as their own step-up ActionRequests (tier 0, irreversible) | F-07 | **DONE** @ `9d75e44` (follow-up/offer/quote as separate step-up areqs) | 06 | Templates + tests; nothing auto-sends |
+
+| F-09 | P1 | Operator UI pages from the 72-hour plan: **outcome entry** (via `spine.record_outcome`), **source health** panel (02's health data, read-only), **HOLD backlog**. Human channel only (R14) | none | READY | 06 | Pages + tests on the real spine; outcomes receipted |
+| F-10 | P2 | Morning digest page rendering 03's C-08 ranking | C-08 | BLOCKED | 06 | Ranked list with reasons and provenance links |
+| F-11 | P2 | Follow-up / offer / quote buttons on the card | A-15 | BLOCKED | 06 | Each creates its own step-up ActionRequest via the public API |
+| D-10 | P2 | Adopt 06's `mbos_comms` consent/DNC schema (`comms_spec/sql/0001_comms_ledger.sql`) into lane D migrations (R1: one DDL owner) | none | READY | 04 | 06's F-07 tests pass on lane D's schema |
 
 ### Lane G: Agent 07 (QA)
 | ID | Pri | Task | Deps | Status | Agent | Acceptance |

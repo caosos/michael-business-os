@@ -44,7 +44,7 @@ def test_deleted_row_detected(ledger_db):
     _tamper(ledger_db, "DELETE FROM mbos.receipts WHERE seq = :s", s=seq)
     with ledger_db.connect() as c:
         res = ledger.verify_chain(c)
-    assert not res["ok"] and "prev_hash" in res["reason"]
+    assert not res["ok"] and ("gap" in res["reason"] or "prev_hash" in res["reason"])
 
 
 def test_concurrent_writers_keep_one_linear_chain(ledger_db):
@@ -79,3 +79,30 @@ def test_snapshot_isolation_writers_refused(ledger_db):
         with ledger_db.connect().execution_options(isolation_level="REPEATABLE READ") as c:
             with c.begin():
                 ledger.append_receipt(c, type="LESSON_RECORDED", intent="rr", provenance_ids=[prov], entity_id="rr")
+
+
+def test_rolled_back_receipt_leaves_no_seq_gap(ledger_db):
+    """Agent 06 finding: both verifiers (DB and the ADR-0010 reference) must agree after a rollback."""
+    from mbos.ledger import load_receipts, verify_exported_chain
+    seed_flow(ledger_db)
+    with pytest.raises(RuntimeError):
+        with ledger_db.begin() as c:
+            prov = ledger.tool_provenance(c, "tests.a3")
+            ledger.append_receipt(c, type="LESSON_RECORDED", intent="rolled back", provenance_ids=[prov], entity_id="x")
+            raise RuntimeError("abort after the receipt insert")
+    with ledger_db.begin() as c:
+        prov = ledger.tool_provenance(c, "tests.a3")
+        ledger.append_receipt(c, type="LESSON_RECORDED", intent="after rollback", provenance_ids=[prov], entity_id="y")
+    with ledger_db.connect() as c:
+        assert ledger.verify_chain(c)["ok"]
+        ok, msg = verify_exported_chain(load_receipts(c))
+    assert ok, msg
+
+
+def test_db_verify_chain_detects_a_seq_gap(ledger_db):
+    seed_flow(ledger_db)
+    _tamper(ledger_db, "DELETE FROM mbos.receipts WHERE seq = (SELECT max(seq) FROM mbos.receipts)")
+    _tamper(ledger_db, "UPDATE mbos.receipts SET seq = seq + 1 WHERE seq = (SELECT max(seq) FROM mbos.receipts)")
+    with ledger_db.connect() as c:
+        res = ledger.verify_chain(c)
+    assert not res["ok"] and ("gap" in res["reason"] or "row_hash" in res["reason"])

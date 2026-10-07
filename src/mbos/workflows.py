@@ -52,6 +52,12 @@ def normalize_step(raw: dict[str, Any]) -> Optional[dict[str, Any]]:
 
 
 @DBOS.step()
+def research_step(item: dict[str, Any]) -> dict[str, Any]:
+    rr = components().researcher.research(item)
+    return asdict(rr)
+
+
+@DBOS.step()
 def score_step(item: dict[str, Any]) -> dict[str, Any]:
     return asdict(components().scorer.score(item))
 
@@ -85,7 +91,14 @@ def item_lifecycle(item_id: str) -> dict[str, Any]:
     item = tx(spine.read_item, item_id)
     if item["state"] not in ("NORMALIZED", "RESEARCHING"):
         return {"status": "skipped", "state": item["state"]}
-    sr = score_step(item)
+    if components().researcher is not None:  # A-05: RESEARCH (lane C, comps via lane B) before SCORE
+        rr = research_step(item)
+        out = tx(spine.record_research, item_id, rr, components())
+        if out["next_state"] != "SCORED":
+            return {"status": "researching", "gaps": out["gaps"]}
+        sr = rr["score"]
+    else:
+        sr = score_step(item)
     tx(spine.record_score, item_id, sr)
     routed = tx(spine.route_recommendation, item_id, components())
     if routed["verdict"] != "YES":

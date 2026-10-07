@@ -112,6 +112,41 @@ def read_item(conn: sa.Connection, item_id: str) -> dict[str, Any]:
     return load_item(conn, item_id)
 
 
+def record_research(conn: sa.Connection, item_id: str, rr: dict[str, Any], components: Any) -> dict[str, Any]:
+    """Persist a RESEARCH result (A-05): lane C's provenance records as-is, then RESEARCHING + evidence.
+
+    The item enters (or stays in) RESEARCHING with its evidence attached. When the result is SCORED, the
+    workflow then records the score through `record_score`, so the state path is always
+    NORMALIZED → RESEARCHING → SCORED → RECOMMENDED (R12).
+    """
+    from mbos.contracts.models import Provenance
+
+    existing = set(conn.execute(sa.text("SELECT provenance_id FROM mbos.provenance WHERE provenance_id = ANY(:ids)"),
+                                {"ids": [p["provenance_id"] for p in rr["provenance_records"]]}).scalars())
+    for doc in rr["provenance_records"]:
+        if doc["provenance_id"] in existing:  # deterministic ids: a replayed research step re-proposes the same rows
+            continue
+        Provenance.from_doc(doc)
+        conn.execute(sa.text("INSERT INTO mbos.provenance (body) VALUES (CAST(:b AS jsonb))"), {"b": _j(doc)})
+        existing.add(doc["provenance_id"])
+    prov_ids = [p["provenance_id"] for p in rr["provenance_records"]] or [
+        tool_provenance(conn, "mbos.spine.record_research", inputs=[item_id])]
+    item = load_item(conn, item_id, for_update=True)
+    actor = {"type": "agent", "id": "agent-03-economics"}
+    if item["state"] == "NORMALIZED":
+        update_item(conn, item_id, to_state="RESEARCHING", intent="RESEARCH: gathering evidence (comps) and estimating",
+                    provenance_ids=prov_ids, actor=actor)
+    patch = {k: v for k, v in {"economics": rr.get("economics"), "research": rr.get("research") or None}.items() if v}
+    if patch:
+        update_item(conn, item_id, patch=patch, intent=f"RESEARCH result: {rr['next_state']}"
+                    + (f"; gaps: {', '.join(rr['gaps'])[:200]}" if rr.get("gaps") else ""),
+                    provenance_ids=prov_ids, actor=actor)
+    if rr["next_state"] != "SCORED":
+        components.notifier.notify(conn, kind="research_needed", item_id=item_id, action_request_id=None,
+                                   summary=f"{item['normalized']['title']}: needs {', '.join(rr.get('gaps') or ['evidence'])}")
+    return {"next_state": rr["next_state"], "gaps": rr.get("gaps", [])}
+
+
 def record_score(conn: sa.Connection, item_id: str, sr: dict[str, Any]) -> dict[str, Any]:
     """Item → SCORED (SCORE_RECORDED) → RECOMMENDED (RECOMMENDATION_RECORDED), one transaction."""
     item = load_item(conn, item_id, for_update=True)
@@ -437,7 +472,8 @@ def finish_act(conn: sa.Connection, item_id: str, action_request_id: str, approv
         details.update(response["comms"])
         details.update(kind="comms", dry_run=True)  # never overridable by an effector
     if guard["ok"] and response.get("status") == "blocked":  # the effector itself refused (fail-closed check)
-        guard = {**guard, "ok": False, "reason": "effector blocked: " + ", ".join(response.get("blocked", []) or ["see details"])}
+        reasons = response.get("blocked") or (response.get("comms") or {}).get("blocked_reasons") or ["see details"]
+        guard = {**guard, "ok": False, "reason": "effector blocked: " + ", ".join(map(str, reasons))}
     if guard["ok"]:
         _areq_receipt(conn, areq, "ACTION_EXECUTED", f"DRY-RUN {areq['capability']} executed via gateway (no external effect)",
                       [prov], approval_id=approval["approval_id"], effect=effect, tool_name=GATEWAY_TOOL,

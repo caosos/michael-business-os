@@ -57,3 +57,46 @@ class EconomicsEngineScorer:
             cheapest_decisive_evidence=rec.get("cheapest_decisive_evidence"), alert=bool(rec.get("alert")),
             scorecard_id=scores["scorecard_id"], recommendation_id=rec["recommendation_id"],
         )
+
+
+class EconomicsResearcher:
+    """Lane C's RESEARCH step (`mbos_economics.comps_feed.research_step`) behind `Researcher` (task A-05).
+
+    `comps_source(item) -> (comp_records, provenance_records)` is lane B's sold-comps source (Agent 02,
+    `mbos_discovery.comps`); in tests, 03's `load_fixture_comps`. `as_of` is the Item's own timestamp, never
+    wall-clock, so the step replays exactly.
+    """
+
+    def __init__(self, comps_source):
+        self.comps_source = comps_source
+
+    def research(self, item: dict[str, Any]):
+        from mbos_economics import __version__ as engine_version
+        from mbos_economics.comps_feed import research_step
+
+        from mbos.interfaces import ResearchResult
+
+        as_of = item.get("updated_at") or item["created_at"]
+        comps, prov = self.comps_source(item)
+        out = research_step(item, comps, prov, as_of)
+        new = out["item"]
+        score = None
+        if out["proposed_next_state"] == "SCORED":
+            sc, rec = new["scores"], new["recommendation"]
+            score = ScoreResult(
+                scorecard=sc["scorecard"], inputs_hash=sc["inputs_hash"], verdict=rec["verdict"],
+                rationale=rec["rationale"], confidence=rec.get("confidence", 0.0),
+                scoring_config_version=sc["scorecard"]["scoring_config_version"],
+                tool_name="mbos_economics.engine", tool_version=engine_version,
+                cheapest_decisive_evidence=rec.get("cheapest_decisive_evidence"), alert=bool(rec.get("alert")),
+                scorecard_id=sc["scorecard_id"], recommendation_id=rec["recommendation_id"])
+        return ResearchResult(next_state=out["proposed_next_state"], economics=new.get("economics"),
+                              research=new.get("research") or [], provenance_records=out["provenance_records"],
+                              score=score, gaps=[_gap_text(g) for g in out["estimate"].get("gaps") or []])
+
+
+def _gap_text(g: Any) -> str:
+    """Lane C gaps are {code, blocking, detail}; the spine carries readable strings (blocking ones first)."""
+    if isinstance(g, dict):
+        return f"{'BLOCKING ' if g.get('blocking') else ''}{g.get('code', 'gap')}: {g.get('detail', '')}".strip(": ")
+    return str(g)
