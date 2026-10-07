@@ -4,16 +4,15 @@ Agent: 03
 Role: Economics / Scoring (Round-Two build lane C)
 Branch: research/agent-03-economics
 Worktree: /home/michaelos/business-os-worktrees/agent-03-economics
-State: WAITING
+State: WORKING
 Current phase: ROUND TWO, wave two. Claimed task: RESEARCH/estimate producer (lane C)
 Started: 2026-10-06
-Last updated: 2026-10-07 (C-15, C-16 done; WAITING: no READY lane-C task)
+Last updated: 2026-10-07 (C-17 claimed)
 
 ## Claimed work (wave two). Foreman loop: `docs/COORDINATION.md` @ agent-01 `99e9ec0`
-Claimed: (none)
+Claimed: C-17
 Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6; C-04 @ 882c726; C-05 @ 6e938d2; C-06 @ 9e36ec9; C-07 @ 0c3cf4a; C-08 @ a81a989; C-09 @ 286e0f3; C-10 @ e1869f2; C-11 @ c648ca3; C-12 @ d5daf42; C-13 @ 0d417fb; C-14 @ ec97bf7; C-15 @ 2575ed3; C-16 @ c88cd5a
-Queue (lane C): none READY @ agent-01 `c4f0156`
-Waiting on: any new lane-C task; Agent 01 wiring of enrichment (profile=, persist provenance first); Michael decisions #1/#2/#6; seasonality sources need a human read
+Queue (lane C, after C-17): none READY @ agent-01 (latest push)
 
 - **C-01**, the RESEARCH/estimate producer, fills `Item.economics` from normalized fields, comps evidence and category priors, with provenance per estimate. It is deterministic and does no LLM arithmetic.
   - Claimed at `b923852`; confirmed CLAIMED in READY_QUEUE @ `99e9ec0`.
@@ -119,7 +118,7 @@ Waiting on: any new lane-C task; Agent 01 wiring of enrichment (profile=, persis
 - The real `mbos.card.validate_card` is clean. 253 tests pass.
 
 ## Proposed tasks (for Agent 01 to triage)
-- **P-03-07 (lanes B + C): a source plan for non-recall model knowledge** (known weak points, expensive parts, parts availability). My searches found nothing citable for the Cub Cadet ZT1 or the Husqvarna FS 400 LV. Routes: service bulletins, manufacturer parts diagrams, and Michael's own notes entered with provenance as `manual`.
+- **P-03-07 → queued as C-17.** Original: a source plan for non-recall model knowledge (known weak points, expensive parts, parts availability). My searches found nothing citable for the Cub Cadet ZT1 or the Husqvarna FS 400 LV. Routes: service bulletins, manufacturer parts diagrams, and Michael's own notes entered with provenance as `manual`.
 - **P-03-06 → DONE by Agent 01 @ `ca6d056`** (the spine writes `payload_hash`; the gate can use `--strict`). Original text:
   - Set `payload_hash = sha256_of(scorecard)` (MBOS-CJSON-1) in `spine_d.record_score`'s receipt `extra`.
   - The ledger then binds the scorecard content, not just its inputs, and the release gate can run `audit --strict`.
