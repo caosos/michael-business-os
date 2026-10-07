@@ -210,12 +210,26 @@ def _num(x: Decimal) -> int | float:
 
 # --------------------------------------------------------------------------- flip
 
+def _prior_view(pri: ScoringConfig, key: str, bundle: dict, block: str, cond: str | None) -> dict:
+    """Category priors with any ``<block>.<field>`` overrides merged in, so derived numbers (the quote,
+    hold days) are computed from the human-supplied scope rather than the prior it replaces."""
+    p = dict(pri.group(key))
+    for path, o in (bundle.get("overrides") or {}).items():
+        blk, field = path.split(".")
+        if blk != block or field not in p:
+            continue
+        v = o["value"]
+        v = D(v) if isinstance(v, (int, float)) and not isinstance(v, bool) else v
+        p[field] = {**p[field], cond: v} if isinstance(p[field], dict) and cond else v
+    return p
+
+
 def _estimate_flip(item: dict, bundle: dict, pri: ScoringConfig, miles: Decimal, as_of: str,
                    led: _Ledger, scoring_cfg: ScoringConfig) -> tuple[dict | None, list[dict]]:
     cat = item["category"]
     n = item.get("normalized") or {}
-    p = pri.group(f"flip.{cat}")
     cond = n.get("condition") if n.get("condition") in _CONDITIONS else "unknown"
+    p = _prior_view(pri, f"flip.{cat}", bundle, "rehab", cond)
     E = "economics"
 
     # ---- acquisition
@@ -365,7 +379,7 @@ def _estimate_service(item: dict, bundle: dict, pri: ScoringConfig, miles: Decim
                       led: _Ledger, scfg: ScoringConfig) -> tuple[dict, list[dict]]:
     cat = item["category"]
     n = item.get("normalized") or {}
-    p = pri.group(f"service.{cat}")
+    p = _prior_view(pri, f"service.{cat}", bundle, "job", None)
     sg = "service_general"
     E = "economics.job"
     source = item["sources"][0]["source"]
@@ -472,18 +486,24 @@ def estimate_item(item: dict, bundle: dict | None, as_of: str, *, priors: Scorin
     econ = None
     research: list[dict] = []
     miles = None
-    if lane == "flip" and cat in FLIP_CATEGORIES and cat != "other_asset":
-        miles = _road_miles(item, pri, led)
-        miles = D(miles) if miles is not None else None
-        if miles is not None:
-            econ, research = _estimate_flip(item, bundle, pri, miles, as_of, led, scfg)
-    elif lane == "service" and cat in SERVICE_CATEGORIES and cat != "other_service":
-        miles = _road_miles(item, pri, led)
-        miles = D(miles) if miles is not None else None
-        if miles is not None:
-            econ, research = _estimate_service(item, bundle, pri, miles, as_of, led, scfg)
+    known = (lane == "flip" and cat in FLIP_CATEGORIES) or (lane == "service" and cat in SERVICE_CATEGORIES)
+    prior_key = f"{lane}.{cat}"
+    has_priors = known and cat in (pri.get(lane) or {})
+    if not has_priors:
+        led.gap("category_unestimable", f"{lane}/{cat}: no priors for this category", True)
     else:
-        led.gap("category_unestimable", f"{lane}/{cat}: no priors (other_* needs human categorization)", True)
+        need = [f for f in pri.group(prior_key).get("requires_scope_override", [])
+                if f not in (bundle.get("overrides") or {})]
+        if need:
+            led.gap("scope_override_required",
+                    f"{lane}/{cat} is uncategorized: a human must supply {', '.join(need)} "
+                    "as provenance-carrying overrides (scope is never guessed)", True)
+        else:
+            miles = _road_miles(item, pri, led)
+            miles = D(miles) if miles is not None else None
+            if miles is not None:
+                fn = _estimate_flip if lane == "flip" else _estimate_service
+                econ, research = fn(item, bundle, pri, miles, as_of, led, scfg)
 
     blocking = any(g["blocking"] for g in led.gaps)
     status = "insufficient" if (blocking or econ is None) else "estimated"

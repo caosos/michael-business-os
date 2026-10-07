@@ -59,7 +59,8 @@ class TestAcceptanceC07(unittest.TestCase):
     def test_two_outcomes_produce_a_proposal(self):
         p = self.out["proposal"]
         self.assertIsNotNone(p)
-        self.assertEqual((p["from_version"], p["to_version"]), ("2026.10.2", "2026.10.3"))
+        y, m, n = self.priors.version.split(".")
+        self.assertEqual((p["from_version"], p["to_version"]), (self.priors.version, f"{y}.{m}.{int(n) + 1}"))
         diff = {d["path"]: (d["from"], d["to"]) for d in p["diff"]}
         # repair: (10 x 0.95 + 1 success) / (10 + 2) = 0.875
         self.assertEqual(diff["flip.trailer.repair_success_prob.used"], (0.95, 0.875))
@@ -75,13 +76,13 @@ class TestAcceptanceC07(unittest.TestCase):
         self.assertEqual(sorted(self.out["provenance"]["derived_from"]), ["prov_01JG" + f"{n:022d}" for n in (1, 2)])
         self.assertEqual(a["payload"]["evidence_refs"], [o["outcome_id"] for o in TWO])
         self.assertTrue(verify_proposal(a))
-        self.assertEqual(a["payload"]["document"]["priors_version"], "2026.10.3")
+        self.assertEqual(a["payload"]["document"]["priors_version"], self.out["proposal"]["to_version"])
         self.assertEqual(a["payload"]["document"]["flip"]["trailer"]["repair_success_prob"]["used"], 0.875)
 
     def test_nothing_applied(self):
         self.assertEqual(_sha(self.priors_file), self.before)
-        self.assertEqual(load_priors().version, "2026.10.2")
-        self.assertFalse((CONFIG_DIR / "history" / "estimation-priors-2026.10.2.json").exists())
+        self.assertEqual(load_priors().version, self.priors.version)
+        self.assertFalse((CONFIG_DIR / "history" / f"estimation-priors-{self.priors.version}.json").exists())
         self.assertEqual(self.priors.get("flip")["trailer"]["repair_success_prob"]["used"], Decimal("0.95"))
 
     def test_tampered_payload_fails_verification(self):

@@ -1,11 +1,10 @@
 {
-  "priors_version": "2026.10.3",
-  "supersedes": "2026.10.2",
+  "priors_version": "2026.10.2",
+  "supersedes": "2026.10.1",
   "priors_format": 1,
   "_note": "Category priors for the RESEARCH/estimate producer (C-RESEARCH-01). These are ESTIMATES used to fill Item.economics before evidence exists. They are not scoring policy; scoring policy lives in scoring-config.json. Every value is REC or UNK until LEARN calibrates it from outcomes. Any change bumps priors_version. Research-bundle overrides, which need provenance, always win over priors. The estimator never invents a resale price: no comps means status=insufficient.",
 
   "_changelog": [
-    "2026.10.3 (C-11): coverage. comps_query vocabularies for tool, compressor type, commercial_equipment, mechanical_equipment, project_vehicle; generic other_asset / other_service priors usable ONLY with human scope overrides (requires_scope_override). Other values unchanged.",
     "2026.10.2 (C-07): learn parameters (min outcomes per group, prior weight, minimum relative change). Other values unchanged.",
     "2026.10.1 (C-04): comps_sources registry (ADR-02-0202 tiers, fail-closed) and comps_query vocabulary. Other values unchanged."
   ],
@@ -38,12 +37,8 @@
     "mower": { "type": ["zero turn", "zero-turn", "lawn tractor", "riding", "push"] },
     "generator": { "size": ["2000w", "3500w", "5500w", "7500w", "9500w", "12000w"], "type": ["inverter", "standby", "portable"] },
     "welder": { "process": ["mig", "tig", "stick", "plasma"], "brand": ["lincoln", "miller", "hobart"] },
-    "compressor": { "size": ["20 gallon", "30 gallon", "60 gallon", "80 gallon"], "type": ["pancake", "hot dog", "twin tank", "vertical"] },
-    "tool": { "type": ["impact wrench", "impact driver", "miter saw", "table saw", "circular saw", "chainsaw", "socket set", "tool box", "drill"], "brand": ["milwaukee", "dewalt", "makita", "snap-on", "ryobi"] },
-    "commercial_equipment": { "type": ["forklift", "pallet jack", "walk-in cooler", "ice machine", "fryer", "oven", "floor scrubber"] },
-    "mechanical_equipment": { "type": ["pressure washer", "log splitter", "tiller", "transfer pump", "water pump", "engine"] },
-    "project_vehicle": { "type": ["atv", "utv", "motorcycle", "dirt bike", "go kart", "go-kart", "pickup", "jeep"] },
-    "other_asset": { "_note": "deliberately empty: an uncategorized asset needs human-chosen comps (manual source)" }
+    "compressor": { "size": ["20 gallon", "30 gallon", "60 gallon", "80 gallon"] },
+    "tool": {}, "commercial_equipment": {}, "mechanical_equipment": {}, "project_vehicle": {}
   },
 
   "home_base": {
@@ -183,19 +178,6 @@
       "salvage_unsold_frac": 0.75, "salvage_fail_frac": 0.50, "ask_to_sold_ratio": 0.85,
       "required_skills": ["mechanical_diagnosis", "maintenance", "electrical_diagnosis"],
       "_note_buy_fees_pct": "UNK: Arkansas vehicle sales tax + title; confirm"
-    },
-    "other_asset": {
-      "_note": "Generic, conservative. USED ONLY when a human supplies the scope (requires_scope_override): parts_cost, labor_hours and required_skills must arrive as provenance-carrying overrides; without them the estimate is 'insufficient', never guessed.",
-      "requires_scope_override": ["rehab.parts_cost", "rehab.labor_hours", "rehab.required_skills"],
-      "negotiation_factor": 0.85, "buy_fees_flat": 0, "buy_fees_pct": 0,
-      "parts_cost": { "new": 0, "used": 0, "parts": 0, "unknown": 0 },
-      "materials_cost": 20,
-      "labor_hours": { "new": 0, "used": 0, "parts": 0, "unknown": 0 },
-      "admin_hours": 2,
-      "repair_success_prob": { "new": 1, "used": 0.75, "parts": 0.55, "unknown": 0.60 },
-      "sale_prob": 0.70, "expected_dom_days": 30, "storage_cost_per_day": 2, "sell_fees_rate": 0, "sell_fees_flat": 0,
-      "salvage_unsold_frac": 0.60, "salvage_fail_frac": 0.30, "ask_to_sold_ratio": 0.80,
-      "required_skills": []
     }
   },
 
@@ -219,9 +201,6 @@
     "handyman":           { "labor_hours": 3,   "materials_cost": 40,  "admin_hours": 1,   "completion_prob": 0.95, "deposit_rate": 0,    "disposal_cost": 0, "payment_terms_days": 0, "required_skills": ["repair", "carpentry"] },
     "smart_home_install": { "labor_hours": 3,   "materials_cost": 30,  "admin_hours": 1,   "completion_prob": 0.97, "deposit_rate": 0,    "disposal_cost": 0, "payment_terms_days": 0, "required_skills": ["smart_home_install", "low_voltage_wiring"] },
     "technical_service":  { "labor_hours": 2,   "materials_cost": 0,   "admin_hours": 0.5, "completion_prob": 0.95, "deposit_rate": 0,    "disposal_cost": 0, "payment_terms_days": 0, "required_skills": ["network_config", "troubleshooting"] },
-    "mechanical_service": { "labor_hours": 3,   "materials_cost": 120, "admin_hours": 1,   "completion_prob": 0.92, "deposit_rate": 0.30, "disposal_cost": 0, "payment_terms_days": 0, "required_skills": ["mechanical_diagnosis", "maintenance"] },
-    "other_service":      { "labor_hours": 0,   "materials_cost": 0,   "admin_hours": 1,   "completion_prob": 0.90, "deposit_rate": 0,    "disposal_cost": 0, "payment_terms_days": 0, "required_skills": [],
-                            "requires_scope_override": ["job.labor_hours", "job.materials_cost", "job.required_skills"],
-                            "_note": "Generic. USED ONLY with human scope overrides; otherwise 'insufficient', never guessed." }
+    "mechanical_service": { "labor_hours": 3,   "materials_cost": 120, "admin_hours": 1,   "completion_prob": 0.92, "deposit_rate": 0.30, "disposal_cost": 0, "payment_terms_days": 0, "required_skills": ["mechanical_diagnosis", "maintenance"] }
   }
 }

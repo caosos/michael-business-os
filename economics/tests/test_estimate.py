@@ -110,7 +110,7 @@ class TestNeverGuessed(unittest.TestCase):
     def test_other_category_refused(self):
         r, _ = run(item("other_asset"))
         self.assertEqual(r["status"], "insufficient")
-        self.assertIn("category_unestimable", [g["code"] for g in r["gaps"]])
+        self.assertIn("scope_override_required", [g["code"] for g in r["gaps"] if g["blocking"]])   # C-11
 
 
 class TestInjectionImmunity(unittest.TestCase):
