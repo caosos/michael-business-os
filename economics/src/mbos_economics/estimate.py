@@ -37,7 +37,7 @@ from pathlib import Path
 from typing import Any
 
 from . import __version__ as ESTIMATOR_VERSION
-from .canonical import content_hash, derived_ulid, parse_ts
+from .canonical import CanonicalError, content_hash, derived_ulid, parse_ts
 from .comps import aggregate_sold_comps
 from .config import CONFIG_DIR, ScoringConfig, load_config
 from .inputs import FLIP_CATEGORIES, SERVICE_CATEGORIES
@@ -407,6 +407,17 @@ def _estimate_service(item: dict, bundle: dict, pri: ScoringConfig, miles: Decim
 
 # --------------------------------------------------------------------------- entry point
 
+def _estimate_hash(item: dict, bundle: dict, pri: ScoringConfig, scfg: ScoringConfig, as_of: str) -> str:
+    return content_hash({
+        "spec": ESTIMATE_SPEC, "estimator_version": ESTIMATOR_VERSION, "priors_version": pri.version,
+        "priors_hash": pri.hash, "scoring_config_version": scfg.version, "as_of": as_of,
+        "item": {"type": item.get("type"), "category": item.get("category"), "normalized": item.get("normalized"),
+                 "sources": [{k: s.get(k) for k in ("source", "first_seen_at", "provenance_id")}
+                             for s in item.get("sources", [])]},
+        "bundle": bundle,
+    })
+
+
 def estimate_item(item: dict, bundle: dict | None, as_of: str, *, priors: ScoringConfig | None = None,
                   scoring_cfg: ScoringConfig | None = None) -> dict:
     """Return {status, item_patch, gaps, estimate_hash, provenance, receipt_draft}. Pure."""
@@ -418,13 +429,10 @@ def estimate_item(item: dict, bundle: dict | None, as_of: str, *, priors: Scorin
     lane, cat = item.get("type"), item.get("category")
     flags = set(((item.get("normalized") or {}).get("flags")) or [])
 
-    est_hash = content_hash({
-        "spec": ESTIMATE_SPEC, "estimator_version": ESTIMATOR_VERSION, "priors_version": pri.version,
-        "priors_hash": pri.hash, "scoring_config_version": scfg.version, "as_of": as_of,
-        "item": {"type": lane, "category": cat, "normalized": item.get("normalized"),
-                 "sources": [{k: s.get(k) for k in ("source", "first_seen_at", "provenance_id")} for s in item.get("sources", [])]},
-        "bundle": bundle,
-    })
+    try:
+        est_hash = _estimate_hash(item, bundle, pri, scfg, as_of)
+    except CanonicalError as e:
+        raise BundleError([f"item or bundle is not MBOS-CJSON-1 hashable: {e}"]) from e
     prov_id = derived_ulid("prov", as_of, "est|" + est_hash)
 
     for f in sorted(flags & {"injection_suspected", "needs_review"}):

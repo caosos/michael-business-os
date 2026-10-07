@@ -21,9 +21,9 @@ from decimal import Decimal
 from typing import Any
 
 from . import __version__ as ENGINE_VERSION
-from .canonical import canonical_json, content_hash, derived_ulid
+from .canonical import CanonicalError, canonical_json, content_hash, derived_ulid
 from .config import ScoringConfig
-from .inputs import build_engine_input, validate_engine_input
+from .inputs import InputError, build_engine_input, validate_engine_input
 from .lanes import LaneEconomics, flip_economics, scarcity_flip, service_economics
 from .numeric import D, HUNDRED, ONE, ZERO, clamp, fine, money, score2, to_json_number
 
@@ -451,7 +451,10 @@ def _jsonify(x: Any) -> Any:
 def score(inp: dict, cfg: ScoringConfig, scored_at: str) -> dict:
     """Score one engine input. Deterministic in (inp, cfg, scored_at)."""
     core = compute(inp, cfg)
-    ih = inputs_hash(inp, cfg.version)
+    try:
+        ih = inputs_hash(inp, cfg.version)
+    except CanonicalError as e:   # ADR-0010 I-JSON profile: e.g. a U+0000 or a non-BMP key in a skill name
+        raise InputError([f"input is not MBOS-CJSON-1 hashable: {e}"]) from e
     seed = f"{ih}|{ENGINE_VERSION}|{scored_at}"
     scorecard_id = derived_ulid("scr", scored_at, "scr|" + seed)
 
