@@ -1,9 +1,13 @@
 """IDs, canonical JSON, hashing and time helpers shared by the governance layer.
 
-Canonical JSON (used for payload_hash, row_hash, policy/panic checksums):
-UTF-8, keys sorted, no insignificant whitespace, non-ASCII kept as-is, no NaN/Infinity.
-This is the RFC 8785 (JCS) subset that matters for our payloads; floats are rejected
-in payloads that are hashed for approval so number formatting can never drift.
+Canonical JSON — normative per Agent 01 ruling R3 (ROUND_TWO_INTEGRATION.md, ADR-0009):
+  json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=False), UTF-8, sha256,
+  written "sha256:<hex>". Money values are JSON numbers (Python's deterministic float repr).
+Byte-identical to mbos.hashing.canonical_json (01) and operator_ui.util.canonical_json (06)
+for every valid JSON value. Two deliberate differences, both REFUSALS rather than divergent
+hashes: NaN/Infinity raise (not valid JSON), and non-JSON types raise (01 stringifies them
+with default=str). NOTE: 850 and 850.0 hash differently by design of R3 — the gateway always
+hashes the exact stored payload, so the proposer must not re-normalise numbers (07 F-14).
 """
 from __future__ import annotations
 
@@ -42,20 +46,9 @@ def sha256_tagged(data: str | bytes) -> str:
     return "sha256:" + hashlib.sha256(data).hexdigest()
 
 
-def _reject_floats(obj: Any, path: str = "$") -> None:
-    if isinstance(obj, float):
-        raise ValueError(f"float at {path}: approval payloads must use integers/strings (e.g. cents)")
-    if isinstance(obj, dict):
-        for k, v in obj.items():
-            _reject_floats(v, f"{path}.{k}")
-    elif isinstance(obj, list):
-        for i, v in enumerate(obj):
-            _reject_floats(v, f"{path}[{i}]")
-
-
 def payload_hash(payload: dict) -> str:
-    """The hash Michael approves. Floats are refused so the hash is unambiguous."""
-    _reject_floats(payload)
+    """The hash Michael approves (R3 canonical form). Raises ValueError/TypeError on
+    NaN/Infinity or non-JSON values, which callers treat as a refusal."""
     return sha256_tagged(canonical_json(payload))
 
 

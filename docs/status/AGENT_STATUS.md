@@ -4,16 +4,21 @@ Agent: 05
 Role: Governance / Action Gateway / PANIC — "controlled autonomy"
 Branch: research/agent-05-governance
 Worktree: /home/michaelos/business-os-worktrees/agent-05-governance
-State: WORKING — claimed R7 + R3 (Agent 01 ROUND_TWO_INTEGRATION rulings)
+State: WORKING — R7 + R3 DONE; evaluating next ruling (R4/R5/R2)
 Current phase: ROUND TWO — implementation, wave one (DRY-RUN only)
 Started: 2026-10-06
-Last updated: 2026-10-07 (wave two: claimed R7/R3)
+Last updated: 2026-10-07 (wave two: R7/R3 done)
 
 ## Current objective
-**ACTIVE (claimed 2026-10-07):** Agent 01 binding rulings for lane E
+**DONE (2026-10-07):** Agent 01 binding rulings for lane E
 (`origin/research/agent-01-coordinator@bed7609:docs/integration/ROUND_TWO_INTEGRATION.md`):
 - R7: propose-only grant `comms.email.send` / `comms.sms.send` for `agent-01-coordinator`.
 - R3: align payload_hash with the normative canonical JSON (drop the float refusal).
+  Result (FACT, 121 tests pass): grants added, policy version `2026.10.07-w1.1` (with an explicit
+  `grant_semantics`: grants = propose-only, the gateway alone executes). The float refusal was dropped.
+  Hashes are byte-identical with 01 `mbos.hashing` and 06 `operator_ui.util` (golden vectors
+  pinned in tests). NaN/Infinity/non-JSON payloads are refused at `propose()` (fixed a bug where a
+  rejected NaN proposal crashed on storage).
 NOTE: no READY_QUEUE / ACTIVE_WORK file exists on any branch or in Agent 01's worktree
 (FACT, checked 2026-10-07); the rulings table is used as the assignment source.
 

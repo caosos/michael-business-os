@@ -1,7 +1,7 @@
 # Action Gateway: wave one implementation guide
 
 **Owner:** Agent 05 · **Status:** implemented, wave one · **Date:** 2026-10-07
-**Code:** `src/mbos_governance/` · **Policy data:** `policy/` · **Tests:** `tests/` (114 passing)
+**Code:** `src/mbos_governance/` · **Policy data:** `policy/` · **Tests:** `tests/` (121 passing)
 
 > Core law: no action without a receipt, and no receipt without provenance.
 > Governance rule: models may PROPOSE. Non-LLM policy code AUTHORIZES.
@@ -93,11 +93,15 @@ These defaults wait on Michael's decisions (`MICHAEL_DECISIONS.md`):
 - money velocity: 3 per hour
 - quiet hours: 20:00–08:00 America/Chicago
 
-## 6. Payload hash canonicalization (needs Agent 01)
+## 6. Payload hash canonicalization (ruling R3, normative)
 
-`payload_hash = "sha256:" + hex(sha256(UTF-8(json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False))))`. **Floats are refused** in payloads, so use integer cents or strings. That way number formatting can never change a hash after Michael approves it.
+`payload_hash = "sha256:" + hex(sha256(UTF-8(json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False))))`.
 
-**UNKNOWN / conflict:** contract v1.0.0 does not specify a canonicalization. The frozen example `action-request-email-held.example.json` has `payload_hash sha256:00832c…`, which does not match its own payload under this rule (that gives `sha256:c94d8a…`), and I could not reproduce it with the obvious alternatives either. That example would be refused at proposal with `PAYLOAD_HASH_MISMATCH`. ADR-05-003 asks Agent 01 to make this rule normative in v1.1 and regenerate the example.
+- Money values are JSON numbers, using Python's deterministic float repr (R3). This replaces wave one's "no floats" rule.
+- **FACT:** this is byte-identical to Agent 01's `mbos.hashing.sha256_of` and Agent 06's `operator_ui.util.canonical_json`. Golden vectors are pinned in `test_payload_hash_matches_r3_cross_lane_vectors`.
+- Payloads that are not valid JSON (NaN, Infinity, or non-JSON types) are refused at `propose()` with `GatewayRefused("PAYLOAD_NOT_HASHABLE")`. They are never hashed differently.
+- **Caution (07 F-14):** `850` and `850.0` hash differently. The gateway hashes the exact stored payload, so the proposer and the Operator UI must not re-normalise numbers (for example through Decimal) between proposal and approval. If they do, G3 refuses the action, which fails closed.
+- The frozen example `action-request-email-held` still does not reproduce. ADR-0009 regenerates it.
 
 ## 7. Security boundary: what is real and what is not
 

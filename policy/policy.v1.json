@@ -1,7 +1,7 @@
 {
   "policy_schema": "mbos.governance.policy/1",
   "policy_id": "wave-one-default-deny",
-  "version": "2026.10.07-w1",
+  "version": "2026.10.07-w1.1",
   "description": "Round Two wave one. Everything tier 0, every externally consequential action needs Michael's YES, every effector DRY-RUN, no delegation, no real-world spend. Anything not listed here is DENIED.",
   "system_mode": "mvp",
   "delegation_enabled": false,
@@ -53,8 +53,9 @@
     "commit.external":             { "category": "external_commitment", "effector": "dryrun" }
   },
 
+  "grant_semantics": "agent_grants authorize PROPOSING an ActionRequest only. No agent ever executes: the Action Gateway alone calls effectors, after Michael's YES and the 8 guard checks (ruling R7). The proposer's grant is re-checked at execution (G6).",
   "agent_grants": {
-    "agent-01-coordinator":    ["offer.submit", "purchase.create", "money.payment.send", "price.change", "commit.external"],
+    "agent-01-coordinator":    ["offer.submit", "purchase.create", "money.payment.send", "price.change", "commit.external", "comms.email.send", "comms.sms.send"],
     "agent-02-opportunity":    [],
     "agent-03-economics":      [],
     "agent-04-state":          [],

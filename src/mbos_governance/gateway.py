@@ -147,7 +147,7 @@ class ActionGateway:
         try:
             if payload_hash(ar["payload"]) != ar["payload_hash"]:
                 p.append("PAYLOAD_HASH_MISMATCH")
-        except ValueError as exc:
+        except (ValueError, TypeError) as exc:
             p.append(f"PAYLOAD_NOT_HASHABLE:{exc}")
         if policy is None:
             return p
@@ -172,6 +172,11 @@ class ActionGateway:
     def propose(self, ar: dict, caller: str) -> Result:
         """An agent submits a proposed side-effect. Never executes anything."""
         contracts.require_valid("action-request", ar)
+        try:
+            payload_hash(ar["payload"])
+        except (ValueError, TypeError) as exc:
+            # Not canonical JSON (NaN/Infinity/non-JSON type): it cannot be stored or receipted faithfully.
+            raise GatewayRefused(f"PAYLOAD_NOT_HASHABLE:{exc}") from exc
         policy, policy_err = self._policy()
         panic_state = self.panic.read()
         with self.store.tx() as cur:
@@ -387,7 +392,7 @@ class ActionGateway:
         # G3 payload hash equality (recomputed, stored, and what Michael saw)
         try:
             recomputed = payload_hash(ar["payload"])
-        except ValueError as exc:
+        except (ValueError, TypeError) as exc:
             recomputed = f"unhashable:{exc}"
         if recomputed != ar["payload_hash"]:
             f["G3"].append("PAYLOAD_MUTATED_AFTER_PROPOSAL")
