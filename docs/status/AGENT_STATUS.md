@@ -4,17 +4,20 @@ Agent: 07
 Role: ROUND TWO — QA / End-to-End Integration / Manual-Assist Outputs (lane G)
 Branch: research/agent-07-marketing
 Worktree: /home/michaelos/business-os-worktrees/agent-07-marketing
-State: WORKING (assigned task R11 WAITING)
-Current phase: Round Two — queue check done; R11 blocked; doing unblocked lane-G verification
+State: WORKING
+Claimed: G-01
+Current phase: Round Two — foreman loop; G-01 (ADR-0010 interop) claimed, G-02 next
 Started: 2026-10-06 (round one) · 2026-10-07 (round two)
 Last updated: 2026-10-07
 
-## Work queue check (2026-10-07)
-- FACT: `READY_QUEUE` and `ACTIVE_WORK` do not exist on any remote branch (`git ls-tree` + `git grep` of all `origin/*`) or in `~/business-os-prompts`. There is nothing to claim. I have created no claim files on anyone else's behalf.
-- **Assigned task**, Agent 01 ruling **R11** (`docs/integration/ROUND_TWO_INTEGRATION.md` @ `bed7609`): run `qa/` against the real system through `MBOS_QA_IMPL=mbos.qa_adapter:build`. **WAITING**: 01 ships the adapter after R1, and R1 waits on 04 migration `0005`.
-- **Next compatible work**, lane G's own charter, with no dependency on any other lane:
-  - (a) Independent build verification of every lane's claimed test count.
-  - (b) A ruling-compliance re-run of interop against R2 and R3.
+## Work queue (foreman loop, docs/COORDINATION.md)
+- Source: `origin/research/agent-01-coordinator` @ `99e9ec0`, `docs/status/READY_QUEUE.md`. G-01 and G-02 are READY for 07, and both are unclaimed.
+- **Claimed: G-01** (P1). Steps:
+  - Move `core.canonical`/`receipt_row_hash` onto the ADR-0010 reference (MBOS-CJSON-1 / MBOS-RH-1).
+  - Add `vectors.json` to `mbos_qa interop`.
+  - Re-run interop across all lanes and publish the matrix.
+- Next: **G-02** (P1, READY): `mbos_qa.impl_spine:build` against 01's public API on pgserver. Then G-03 (READY after G-02).
+- Earlier note, superseded: at 11:5x no READY_QUEUE existed and R11 was WAITING. The amended R11 removes that wait.
 
 ## Current objective
 Independent QA/integration lane against the frozen contracts v1.0.0. DRY-RUN ONLY.
