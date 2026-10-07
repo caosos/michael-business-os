@@ -18,6 +18,7 @@ from pathlib import Path
 
 from . import AGENT_ID, CONTRACT_VERSION
 from .adapter import Normalized, SourceAdapter
+from .images import compare as compare_images
 from .dedup import RELIST_WINDOW, SERVICE_WINDOW, content_hash, dedup_key, is_cross_source_duplicate, is_relist
 from .ids import canonical_json, derived_ulid, iso, parse_ts
 
@@ -38,6 +39,7 @@ class ItemStore:
         self._by_listing: dict[str, str] = {}          # "source\x1flisting_id" → item_id
         self._sighting_hash: dict[str, str] = {}       # same key → content hash of last payload
         self._fingerprints: dict[str, str] = {}        # "category\x1ffp" → item_id (service)
+        self._phash: dict[str, list[str]] = {}         # item_id → image pHashes (B-11; recomputable from artifacts)
 
     # ---- queries -------------------------------------------------------------------
     def find_by_listing(self, source: str, listing_id: str) -> dict | None:
@@ -59,6 +61,7 @@ class ItemStore:
             sighting = next(s for s in item["sources"]
                             if s["source"] == adapter.source and s.get("source_listing_id") == n.source_listing_id)
             sighting["last_seen_at"] = ts
+            self._add_hashes(existing_id, list(n.match_hints.get("phash") or []))
             if self._sighting_hash[key] == chash:
                 return Observation(SEEN, existing_id)
             # Content changed: point the sighting at the payload that now backs it.
@@ -72,6 +75,7 @@ class ItemStore:
             self._event(UPDATED, item, adapter, n, raw_ref, prov, ts, effect="update")
             return Observation(UPDATED, existing_id)
 
+        new_hashes = list(n.match_hints.get("phash") or [])
         dup = self._find_duplicate(n, fetched_at, adapter.source)
         relist = False
         if dup is None and present_ids is not None:
@@ -90,6 +94,7 @@ class ItemStore:
         }
         self._sighting_hash[key] = chash
         if dup:
+            self._add_hashes(dup["item_id"], new_hashes)
             dup["sources"].append(sighting)
             dup["provenance_ids"].append(prov["provenance_id"])
             dup["updated_at"] = ts
@@ -116,6 +121,7 @@ class ItemStore:
         }
         self._apply_primary(item, n, chash)
         self.items[item_id] = item
+        self._add_hashes(item_id, new_hashes)
         self._by_listing[key] = item_id
         fp = n.match_hints.get("contact_fp")
         if fp:
@@ -152,7 +158,8 @@ class ItemStore:
             cand = self.items[iid]
             if any(s["source"] == source for s in cand["sources"]):
                 continue                                    # same source = a different listing
-            if is_cross_source_duplicate(cand, n.type, n.category, n.normalized):
+            if is_cross_source_duplicate(cand, n.type, n.category, n.normalized,
+                                         compare_images(self._phash.get(iid, []), n.match_hints.get("phash") or [])):
                 return cand
         return None
 
@@ -164,9 +171,15 @@ class ItemStore:
             for s in cand["sources"]:
                 if (s["source"] == source and s.get("source_listing_id") not in present
                         and fetched_at - parse_ts(s.get("last_seen_at") or s["first_seen_at"]) <= RELIST_WINDOW
-                        and is_relist(cand, s, n.type, n.category, n.normalized)):
-                    return cand
+                        and is_relist(cand, s, n.type, n.category, n.normalized)
+                        and compare_images(self._phash.get(iid, []), n.match_hints.get("phash") or []) != "DIFFERENT"):
+                    return cand                         # B-11: different photos = a different unit, never a relist
         return None
+
+    def _add_hashes(self, item_id: str, hashes: list[str]) -> None:
+        if hashes:
+            cur = self._phash.setdefault(item_id, [])
+            cur.extend(h for h in hashes if h not in cur)
 
     def _add_prov(self, prov: dict) -> str:
         self.provenance.setdefault(prov["provenance_id"], prov)   # append-only
@@ -217,6 +230,7 @@ class ItemStore:
                 "by_listing": dict(sorted(self._by_listing.items())),
                 "sighting_hash": dict(sorted(self._sighting_hash.items())),
                 "fingerprints": dict(sorted(self._fingerprints.items())),
+                "phash": dict(sorted(self._phash.items())),
             },
         }
 
@@ -230,6 +244,7 @@ class ItemStore:
         s._by_listing = idx.get("by_listing", {})
         s._sighting_hash = idx.get("sighting_hash", {})
         s._fingerprints = idx.get("fingerprints", {})
+        s._phash = idx.get("phash", {})
         return s
 
 

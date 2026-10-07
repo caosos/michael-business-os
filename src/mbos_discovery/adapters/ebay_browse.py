@@ -282,8 +282,11 @@ class EbayBrowseAdapter(SourceAdapter):
         first_cat = next((c.get("categoryName") for c in s.get("categories") or []
                           if isinstance(c, dict) and c.get("categoryName")), None)
         sub = clean_text(first_cat, 120) or None
+        imgs = [i.get("imageUrl") for i in [s.get("image") or {}] + list(s.get("additionalImages") or [])
+                if isinstance(i, dict) and str(i.get("imageUrl", "")).startswith("https://")]
         return Normalized(source_listing_id=str(s["itemId"]), url=url, type="flip", category=category,
-                          opportunity_kind=kind, normalized=normalized, subcategory=sub)
+                          opportunity_kind=kind, normalized=normalized, subcategory=sub,
+                          match_hints={"image_urls": imgs} if imgs else {})
 
 
 def _slug(q: str) -> str:

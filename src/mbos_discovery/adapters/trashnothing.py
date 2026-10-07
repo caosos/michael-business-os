@@ -155,4 +155,7 @@ class TrashNothingAdapter(SourceAdapter):
         normalized["flags"] = sorted(flags)
         url = clean_text(post.get("url")) or f"trashnothing://post/{clean_text(post['post_id'])}"   # no guessed web URL
         return Normalized(source_listing_id=clean_text(post["post_id"]), url=url, type="flip", category=category,
-                          opportunity_kind="free_item", normalized=normalized)
+                          opportunity_kind="free_item", normalized=normalized,
+                          match_hints={"image_urls": [p["url"] for p in post.get("photos") or []
+                                                      if isinstance(p, dict) and str(p.get("url", "")).startswith("https://")]}
+                          if post.get("photos") else {})

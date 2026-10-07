@@ -12,3 +12,6 @@ Scenarios (all ILLUSTRATIVE, hand-designed to stress dedup):
 * twins: a dealer lists two identical units at once (two physical objects → must stay TWO Items)
 * GSA lots re-polled daily with rising bids; GovDeals alert e-mails repeat lots across days
 * service: a customer uses both the web form and a referral; another submits the form twice
+* B-11 photos: every eBay unit has its own synthetic photo; relists re-upload a degraded copy of the SAME photo;
+  the known-ambiguous case — a dealer's SECOND identical unit listed after the first ended (same title, price,
+  seller) — has a different photo, because it is a different physical unit. Images need Pillow.

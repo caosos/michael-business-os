@@ -298,7 +298,7 @@ To run it: `mbos-discover acceptance [--corpus tests/fixtures/corpus7d] [--out r
 Twins can never merge, because both are present in the same fetch.
 
 **Stated limitations.**
-- **Known ambiguity**, pinned by a test: a dealer's *second identical unit*, listed after the first ended, looks like a relist and merges. No data is lost, but inventory is undercounted. Image pHash (wave two) is the planned fix.
+- **Known ambiguity**, pinned by a test: from listing data alone, a dealer's *second identical unit*, listed after the first ended, looks like a relist and merges. No data is lost, but inventory is undercounted. **B-11 resolves this when photos exist (§19).** It remains when there are no photos, or when the same stock photo is reused.
 - **The corpus is synthetic.** Agent 01's original F2 target is a 7-day **live** sample, which still needs live credentials.
 - **The spine path doesn't have the relist rule yet.** Its `Deduper` call carries no source or fetch context. That's queued as A-14 for Agent 01.
 
@@ -321,3 +321,29 @@ Also tested:
 - the CLI builds `PgPanicStore` from the DSN
 
 The B-04 tests that used the removed file-based `PanicStore` were retired in favour of these Postgres versions.
+
+## 19. Image perceptual hashing — READY_QUEUE B-11
+
+`src/mbos_discovery/images.py` uses Pillow, an optional `images` extra.
+- **Hash.** A 64-bit DCT pHash: grayscale, 32×32, the 8×8 low-frequency DCT block compared against its median.
+- **Verdicts.** `compare()` returns:
+  - MATCH: ≤ 10 bits apart
+  - DIFFERENT: ≥ 20 bits apart
+  - INCONCLUSIVE: anything in between
+  - NO_IMAGES: either side has no photos
+- **Retention.** Images are fetched read-only through an injectable `ImageFetcher`; only fixtures are used in this task. They're retained content-addressed and fill the contract's `normalized.images` with sha256 refs. pHashes live in the store index and can always be recomputed from the artifacts. An image problem never breaks discovery.
+- **Adapters.** eBay, GSA and Trash Nothing expose their image URLs as dedup-only hints.
+
+How dedup uses photos. Photos can only add certainty; INCONCLUSIVE or no photos falls back to the listing-data rules.
+- **Relist:** the listing-data rule plus photos that are **not DIFFERENT**. Different photos mean a different physical unit, never a relist.
+- **Cross-source:** price and place must always agree. Then either title ≥ 0.85 **or** a photo MATCH is enough, which catches re-uploads with different wording. DIFFERENT photos veto a title match.
+
+Acceptance (FACT). The corpus now includes the ambiguous case: a dealer's second identical unit listed after the first sold, with its own photo. It has 43 sightings of 38 objects.
+- **`mbos-discover acceptance` with photos:** F2 0.00% missed, **0 false merges**, 38 Items for 38 objects.
+- **Listing data alone:** **1 false merge**, the two dealer units. The harness reports this alongside.
+- **Measured distances:** relist re-uploads (rescaled, cropped, posterized) are 2–6 bits apart; the two dealer units are 34; JPEG q60 recompression stays ≤ 10.
+
+Limits (stated):
+- The photos are synthetic, not real seller photos.
+- A dealer reusing one stock photo for two units can't be told apart.
+- The distance thresholds need tuning on real photos once B-12 (live runs) is unblocked.

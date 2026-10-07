@@ -22,16 +22,22 @@ def test_harness_passes_and_reports_f2_rate():
     assert r["pass"], json.dumps({k: r[k]["pass"] for k in ("F1", "F2", "F3", "F4")})
     f2 = r["F2"]
     assert f2["missed_duplicate_rate"] < 0.02 and f2["false_merges"] == [] and f2["unlabeled"] == []
-    assert (f2["items"], f2["objects"], f2["sightings_labelled"]) == (36, 36, 41)
+    assert (f2["items"], f2["objects"], f2["sightings_labelled"]) == (38, 38, 43)
     assert r["F3"]["schema_checked"] and r["F4"]["fetched_despite_forbidden"] == []
 
 
 def test_corpus_is_reproducible(tmp_path):
     root = Path(__file__).resolve().parents[1]
     subprocess.run([sys.executable, "-I", str(root / "tools" / "make_corpus.py"), str(tmp_path / "c")], check=True)
+    from mbos_discovery.images import phash
     for p in sorted(CORPUS.rglob("*")):
-        if p.is_file():
-            assert (tmp_path / "c" / p.relative_to(CORPUS)).read_bytes() == p.read_bytes(), p
+        if not p.is_file():
+            continue
+        q = tmp_path / "c" / p.relative_to(CORPUS)
+        if p.suffix == ".png":       # PNG bytes may vary with the zlib/Pillow build; the photo must not
+            assert phash(q.read_bytes()) == phash(p.read_bytes()), p
+        else:
+            assert q.read_bytes() == p.read_bytes(), p
 
 
 def test_cli_exit_code_and_report(tmp_path):
@@ -85,9 +91,9 @@ def test_relist_window_is_14_days():
 
 
 def test_known_ambiguity_second_identical_unit_after_first_ended():
-    """STATED LIMITATION: from listing data alone, a dealer's SECOND identical unit listed after the first ended
-    is indistinguishable from a relist, so it merges. No data is lost (both listing ids remain sightings);
-    inventory can be undercounted. Image perceptual hashing (wave two) is the planned disambiguator."""
+    """From LISTING DATA ALONE a dealer's SECOND identical unit listed after the first ended is indistinguishable
+    from a relist, so it merges (no data lost; inventory undercounted). B-11 resolves it when photos exist — see
+    test_b11_images.py::test_photos_resolve_the_relist_ambiguity. Still true without photos (or same stock photo)."""
     s = ItemStore()
     _observe(s, _n("UNIT-1"), 0, {"UNIT-1"})
     obs = _observe(s, _n("UNIT-2"), 5, {"UNIT-2"})

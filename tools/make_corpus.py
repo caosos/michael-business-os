@@ -14,6 +14,9 @@ Scenarios (all ILLUSTRATIVE, hand-designed to stress dedup):
 * twins: a dealer lists two identical units at once (two physical objects → must stay TWO Items)
 * GSA lots re-polled daily with rising bids; GovDeals alert e-mails repeat lots across days
 * service: a customer uses both the web form and a referral; another submits the form twice
+* B-11 photos: every eBay unit has its own synthetic photo; relists re-upload a degraded copy of the SAME photo;
+  the known-ambiguous case — a dealer's SECOND identical unit listed after the first ended (same title, price,
+  seller) — has a different photo, because it is a different physical unit. Images need Pillow.
 """
 
 from __future__ import annotations
@@ -35,13 +38,35 @@ CITIES = [("Conway", "AR", "720"), ("Little Rock", "AR", "722"), ("Searcy", "AR"
 
 def ebay_summary(lst: dict, price: float) -> dict:
     city, st, z = lst["city"]
-    return {"itemId": lst["id"], "title": lst["title"], "price": {"value": f"{price:.2f}", "currency": "USD"},
+    return {"image": {"imageUrl": f"https://i.ebayimg.com/corpus/{lst['id'].split('|')[1]}.png"},"itemId": lst["id"], "title": lst["title"], "price": {"value": f"{price:.2f}", "currency": "USD"},
             "buyingOptions": ["FIXED_PRICE"], "condition": "Used", "conditionId": "3000",
             "itemWebUrl": f"https://www.ebay.com/itm/{lst['id'].split('|')[1]}",
             "itemLocation": {"city": city, "stateOrProvince": st, "postalCode": f"{z}**", "country": "US"},
             "distanceFromPickupLocation": {"value": str(lst["miles"]), "unitOfMeasure": "MILE"},
             "seller": {"username": lst["seller"], "sellerAccountType": "BUSINESS" if lst.get("dealer") else "INDIVIDUAL"},
             "categories": [{"categoryName": lst["cat"].title()}]}
+
+
+def unit_photo(seed: str, path: Path, degrade: bool = False) -> None:
+    """Deterministic synthetic 'seller photo' of one physical unit; degrade=True simulates a re-upload
+    (rescaled, cropped, posterized) of the same photo."""
+    from PIL import Image, ImageDraw, ImageOps
+    r = random.Random(seed)
+    img = Image.new("RGB", (320, 240), (r.randint(60, 200), r.randint(60, 200), r.randint(60, 200)))
+    d = ImageDraw.Draw(img)
+    for _ in range(14):                                   # background clutter unique to this unit's scene
+        x, y = r.randint(0, 300), r.randint(0, 220)
+        d.rectangle([x, y, x + r.randint(10, 90), y + r.randint(10, 70)],
+                    fill=(r.randint(0, 255), r.randint(0, 255), r.randint(0, 255)))
+    bx, by = r.randint(30, 90), r.randint(60, 110)        # the object itself, placed differently per photo shoot
+    d.rectangle([bx, by, bx + 170, by + 80], fill=(40, 40, 45))
+    d.ellipse([bx + 20, by + 70, bx + 50, by + 100], fill=(10, 10, 10))
+    d.ellipse([bx + 120, by + 70, bx + 150, by + 100], fill=(10, 10, 10))
+    if degrade:
+        img = img.crop((6, 4, 314, 236)).resize((256, 192), Image.Resampling.BILINEAR)
+        img = ImageOps.posterize(img, 5)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    img.save(path, format="PNG", optimize=False)
 
 
 def main(out: Path) -> None:
@@ -68,6 +93,12 @@ def main(out: Path) -> None:
     twin = ebay[8]                                                # dealer twins: two units, both active
     twin.update(dealer=True, title=f"{twin['title']} - NEW STOCK", seller="dealer_outdoor_power", days=list(range(7)))
     ebay.append({**twin, "obj": "obj-ebay-twin-b", "id": "v1|52000000001|0"})
+    # known-ambiguous case (B-10 limitation, B-11 target): first unit sells, an IDENTICAL second unit is listed later
+    amb = {"obj": "obj-ebay-amb-1", "id": "v1|53000000001|0", "title": "6x12 enclosed cargo trailer ramp door",
+           "cat": "trailer", "seller": "dealer_trailers", "dealer": True, "city": CITIES[0], "miles": 6,
+           "price": 2400.0, "days": [0, 1, 2], "query": "trailer"}
+    ebay.append(amb)
+    ebay.append({**amb, "obj": "obj-ebay-amb-2", "id": "v1|53000000002|0", "days": [4, 5, 6]})
     for lst in ebay[9:11]:                                        # appears in both queries
         lst["both_queries"] = True
 
@@ -153,6 +184,15 @@ def main(out: Path) -> None:
                        "zip": "72034"}
                 (out / f"day{d}" / "intake" / ch / f"{sid}.json").write_text(json.dumps(sub, sort_keys=True) + "\n")
                 labels[f"{'website_lead' if ch == 'website_form' else 'referral'}|{sid}"] = objs[who]
+
+    # ---- photos (B-11): one per listing id; relists re-upload a degraded copy of the original unit's photo -------
+    index = {}
+    for lst in ebay:
+        num = lst["id"].split("|")[1]
+        rel = f"images/{num}.png"
+        unit_photo(lst["obj"], out / rel, degrade="relist_of" in lst)
+        index[f"https://i.ebayimg.com/corpus/{num}.png"] = rel
+    (out / "images" / "index.json").write_text(json.dumps(dict(sorted(index.items())), indent=1) + "\n")
 
     (out / "labels.json").write_text(json.dumps(dict(sorted(labels.items())), indent=1) + "\n")
     (out / "README.md").write_text(__doc__.split("\n\n", 1)[1])

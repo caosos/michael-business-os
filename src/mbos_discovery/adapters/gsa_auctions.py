@@ -148,4 +148,6 @@ class GsaAuctionsAdapter(SourceAdapter):
             normalized["flags"] = flags
         url = clean_text(lot.get("ItemDescURL")) or f"gsa-auctions://{sale}/{lot_no}"   # no guessed web URL
         return Normalized(source_listing_id=f"{sale}-{lot_no}", url=url, type="flip", category=category,
-                          opportunity_kind="auction_lot", normalized=normalized)
+                          opportunity_kind="auction_lot", normalized=normalized,
+                          match_hints={"image_urls": [clean_text(lot["ImageURL"])]}
+                          if str(lot.get("ImageURL", "")).startswith("https://") else {})

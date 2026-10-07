@@ -14,6 +14,7 @@ its raw_ref kept). Nothing here can raise out of `run_discovery` for a source pr
 
 from __future__ import annotations
 
+import dataclasses
 import traceback
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
@@ -23,6 +24,7 @@ from .adapter import FetchResult, Normalized, SearchProfile, SourceAdapter, Sour
 from .contract import ContractViolation, check_item, check_provenance
 from .health import HealthBook, external_blocks
 from .ids import derived_ulid, iso
+from .images import collect as collect_images
 from .policy import SourceRefused, check_allowed
 from .rawstore import RawStore
 from .store import ItemStore
@@ -111,7 +113,8 @@ def _trial_item(adapter: SourceAdapter, n: Normalized, raw_ref: str, prov: dict)
 
 def run_discovery(jobs: list[tuple[SourceAdapter, SearchProfile]], store: ItemStore, raw: RawStore,
                   health: HealthBook, now: datetime,
-                  enabled_sources: frozenset[str] = frozenset(), panic=None, events=None) -> RunReport:
+                  enabled_sources: frozenset[str] = frozenset(), panic=None, events=None,
+                  images=None) -> RunReport:
     report = RunReport(run_id=derived_ulid("run", now, "run", iso(now)), started_at=iso(now))
     for adapter, profile in jobs:
         stats = SourceRunStats(source=adapter.source, profile_id=profile.profile_id)
@@ -151,6 +154,11 @@ def run_discovery(jobs: list[tuple[SourceAdapter, SearchProfile]], store: ItemSt
                 if rec.payload is None:
                     raise ValueError("payload unparseable")
                 n = adapter.normalize(rec.payload, rec.fetched_at)
+                if images is not None and n.match_hints.get("image_urls"):   # B-11: photos as evidence
+                    refs, hashes = collect_images(n.match_hints["image_urls"], images, raw.put)
+                    if refs:
+                        n = dataclasses.replace(n, normalized={**n.normalized, "images": refs},
+                                                match_hints={**n.match_hints, "phash": hashes})
                 prov = build_provenance(adapter, n, raw_ref, rec.fetched_at, rec.request_uri)
                 check_item(_trial_item(adapter, n, raw_ref, prov))
                 obs = store.observe(adapter, n, raw_ref, prov, rec.fetched_at, present_ids=present)

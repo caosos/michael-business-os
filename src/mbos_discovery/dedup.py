@@ -117,11 +117,16 @@ def is_relist(cand: dict, cand_sighting: dict, item_type: str, category: str, no
             and title_similarity(cand["normalized"].get("title", ""), normalized.get("title", "")) >= RELIST_TITLE_SIMILARITY)
 
 
-def is_cross_source_duplicate(cand: dict, item_type: str, category: str, normalized: dict) -> bool:
-    """`cand` is an existing Item. Flip/asset matching only; service uses fingerprints."""
-    if cand["type"] != item_type or cand["category"] != category:
+def is_cross_source_duplicate(cand: dict, item_type: str, category: str, normalized: dict,
+                              image_verdict: str = "NO_IMAGES") -> bool:
+    """`cand` is an existing Item. Flip/asset matching only; service uses fingerprints.
+    Price and place must always agree. Then the title (≥ 0.85) OR the photos (pHash MATCH, B-11) must agree.
+    Clearly DIFFERENT photos veto a title match: two units can share a title, but they can't share a photo."""
+    if cand["type"] != item_type or cand["category"] != category or image_verdict == "DIFFERENT":
         return False
     cn = cand["normalized"]
-    return (_prices_close(cn.get("price"), normalized.get("price"))
-            and _same_place(cn.get("location"), normalized.get("location"))
-            and title_similarity(cn.get("title", ""), normalized.get("title", "")) >= TITLE_SIMILARITY)
+    if not (_prices_close(cn.get("price"), normalized.get("price"))
+            and _same_place(cn.get("location"), normalized.get("location"))):
+        return False
+    return (image_verdict == "MATCH"
+            or title_similarity(cn.get("title", ""), normalized.get("title", "")) >= TITLE_SIMILARITY)

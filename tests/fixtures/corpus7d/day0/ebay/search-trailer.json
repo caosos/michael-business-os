@@ -15,6 +15,9 @@
     "unitOfMeasure": "MILE",
     "value": "89"
    },
+   "image": {
+    "imageUrl": "https://i.ebayimg.com/corpus/500000000001.png"
+   },
    "itemId": "v1|500000000001|0",
    "itemLocation": {
     "city": "Conway",
@@ -47,6 +50,9 @@
    "distanceFromPickupLocation": {
     "unitOfMeasure": "MILE",
     "value": "92"
+   },
+   "image": {
+    "imageUrl": "https://i.ebayimg.com/corpus/500000000006.png"
    },
    "itemId": "v1|500000000006|0",
    "itemLocation": {
@@ -81,6 +87,9 @@
     "unitOfMeasure": "MILE",
     "value": "5"
    },
+   "image": {
+    "imageUrl": "https://i.ebayimg.com/corpus/500000000007.png"
+   },
    "itemId": "v1|500000000007|0",
    "itemLocation": {
     "city": "Benton",
@@ -113,6 +122,9 @@
    "distanceFromPickupLocation": {
     "unitOfMeasure": "MILE",
     "value": "75"
+   },
+   "image": {
+    "imageUrl": "https://i.ebayimg.com/corpus/500000000009.png"
    },
    "itemId": "v1|500000000009|0",
    "itemLocation": {
@@ -147,6 +159,9 @@
     "unitOfMeasure": "MILE",
     "value": "86"
    },
+   "image": {
+    "imageUrl": "https://i.ebayimg.com/corpus/500000000010.png"
+   },
    "itemId": "v1|500000000010|0",
    "itemLocation": {
     "city": "Russellville",
@@ -180,6 +195,9 @@
     "unitOfMeasure": "MILE",
     "value": "49"
    },
+   "image": {
+    "imageUrl": "https://i.ebayimg.com/corpus/500000000012.png"
+   },
    "itemId": "v1|500000000012|0",
    "itemLocation": {
     "city": "Hot Springs",
@@ -197,7 +215,43 @@
     "username": "seller_12"
    },
    "title": "7x10 enclosed trailer"
+  },
+  {
+   "buyingOptions": [
+    "FIXED_PRICE"
+   ],
+   "categories": [
+    {
+     "categoryName": "Trailer"
+    }
+   ],
+   "condition": "Used",
+   "conditionId": "3000",
+   "distanceFromPickupLocation": {
+    "unitOfMeasure": "MILE",
+    "value": "6"
+   },
+   "image": {
+    "imageUrl": "https://i.ebayimg.com/corpus/53000000001.png"
+   },
+   "itemId": "v1|53000000001|0",
+   "itemLocation": {
+    "city": "Conway",
+    "country": "US",
+    "postalCode": "720**",
+    "stateOrProvince": "AR"
+   },
+   "itemWebUrl": "https://www.ebay.com/itm/53000000001",
+   "price": {
+    "currency": "USD",
+    "value": "2400.00"
+   },
+   "seller": {
+    "sellerAccountType": "BUSINESS",
+    "username": "dealer_trailers"
+   },
+   "title": "6x12 enclosed cargo trailer ramp door"
   }
  ],
- "total": 6
+ "total": 7
 }

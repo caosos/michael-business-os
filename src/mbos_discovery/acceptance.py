@@ -3,8 +3,9 @@
     mbos-discover acceptance --corpus tests/fixtures/corpus7d [--out report.json]
 
 F1  every Item has ≥ 1 `sources[]` entry and every entry has a `raw_ref` whose bytes are retained and hash-verified.
-F2  duplicate rate after dedup over a 7-day corpus (target < 2%): with ground-truth labels (`labels.json`, never seen
-    by the pipeline) mapping each sighting to its physical object,
+F2  duplicate rate after dedup over a 7-day corpus (target < 2%), photos used as evidence when present (B-11; the
+    listing-data-only result is reported alongside). With ground-truth labels (`labels.json`, never seen by the
+    pipeline) mapping each sighting to its physical object,
         missed_duplicate_rate = (Items − distinct objects covered) / Items          — target < 0.02
         false_merge_rate      = Items whose sightings span > 1 object / Items        — must be 0
 F3  a source answering 403/429 twice produces one schema-valid L2 freeze request (`discovery.source.<src>.read`), and
@@ -57,12 +58,26 @@ def _corpus_jobs(day: Path, clock) -> list[tuple[SourceAdapter, SearchProfile]]:
     ]
 
 
-def run_corpus(corpus: Path) -> tuple[ItemStore, MemoryRawStore, list]:
+def image_fetcher(corpus: Path):
+    """Fixture photos (B-11) if the corpus has them and Pillow is installed; else None (listing data only)."""
+    idx = corpus / "images" / "index.json"
+    try:
+        import PIL  # noqa: F401
+    except ImportError:
+        return None
+    if not idx.exists():
+        return None
+    from .images import FixtureImageFetcher
+    return FixtureImageFetcher({u: corpus / rel for u, rel in json.loads(idx.read_text()).items()})
+
+
+def run_corpus(corpus: Path, use_images: bool = True) -> tuple[ItemStore, MemoryRawStore, list]:
     store, raw, health, reports = ItemStore(), MemoryRawStore(), HealthBook(), []
+    fetcher = image_fetcher(corpus) if use_images else None
     days = sorted(p for p in corpus.iterdir() if p.is_dir() and p.name.startswith("day"))
     for i, day in enumerate(days):
         clock = _Clock(T0 + timedelta(days=i))
-        reports.append(run_discovery(_corpus_jobs(day, clock), store, raw, health, clock()))
+        reports.append(run_discovery(_corpus_jobs(day, clock), store, raw, health, clock(), images=fetcher))
     return store, raw, reports
 
 
@@ -164,9 +179,17 @@ def check_f4() -> dict:
 
 
 def run_acceptance(corpus: Path, schema_path: Path | None = None) -> dict:
-    store, raw, _ = run_corpus(corpus)
     labels = json.loads((corpus / "labels.json").read_text())
-    report = {"corpus": str(corpus), "F1": check_f1(store, raw), "F2": check_f2(store, labels),
+    images_used = image_fetcher(corpus) is not None
+    store, raw, _ = run_corpus(corpus, use_images=True)
+    f2 = check_f2(store, labels)
+    f2["image_evidence"] = images_used
+    if images_used:                                       # what listing data alone would do (B-11 comparison)
+        plain, _, _ = run_corpus(corpus, use_images=False)
+        base = check_f2(plain, labels)
+        f2["listing_data_only"] = {k: base[k] for k in ("items", "objects", "missed_duplicate_rate",
+                                                        "false_merge_rate", "false_merges")}
+    report = {"corpus": str(corpus), "F1": check_f1(store, raw), "F2": f2,
               "F3": check_f3(schema_path), "F4": check_f4()}
     report["pass"] = all(report[k]["pass"] for k in ("F1", "F2", "F3", "F4"))
     return report
@@ -177,7 +200,10 @@ def render(report: dict) -> str:
     rows = [
         ("F1", report["F1"]["pass"], f"{report['F1']['items']} Items, {len(report['F1']['violations'])} violations"),
         ("F2", f2["pass"], f"missed-duplicate rate {f2['missed_duplicate_rate']:.2%} (target < {f2['target']:.0%}); "
-                           f"false merges {len(f2['false_merges'])}; {f2['items']} Items / {f2['objects']} objects"),
+                           f"false merges {len(f2['false_merges'])}; {f2['items']} Items / {f2['objects']} objects; "
+                           + ("photos used" + (f" (listing data alone: {len(f2['listing_data_only']['false_merges'])} "
+                                               "false merge(s))" if "listing_data_only" in f2 else "")
+                              if f2.get("image_evidence") else "no photo evidence")),
         ("F3", report["F3"]["pass"], "; ".join(f"{k}: {v['freeze_requests']} request(s), {v['fetches']} fetches"
                                                for k, v in report["F3"]["by_status"].items())),
         ("F4", report["F4"]["pass"], f"{len(report['F4']['forbidden_sources'])} forbidden sources refused; "
