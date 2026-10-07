@@ -5,16 +5,17 @@ Role: Communications + Operator UI / Approval UX (build lane F)
 Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
 State: WORKING
-Claimed: F-05
-Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd
+Claimed: F-06
+Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52
 Blocked: F-04 on A-03
 Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
 Last updated: 2026-10-07
 
 ## Current objective
-**F-05** (READY_QUEUE @ `0d107df`): `CommsActionPlanner` implementing `mbos.interfaces.ActionPlanner` from `comms_spec`. Next: **F-06** (dry-run comms `Effector`). F-04 is still BLOCKED on A-03.
+**F-06** (READY_QUEUE @ `0d107df`): dry-run comms `Effector` (`mbos.interfaces.Effector`). It is exactly-once per idempotency key, always `dry_run=true`, and its comms checks are graded by `comms_spec.audit()` on a spine run. F-04 is still BLOCKED on A-03.
 
 ## Done
+- **F-05 @ `acb7c52`:** `comms_spec/planner.py` `CommsActionPlanner`. It drafts first contact only, carries a `comms` block (template_id, MBOS-CJSON-1 template_hash, rendered draft, constraints) and sanitizes listing text. Contract-valid flip and service proposals. **A-13 must merge `payload_extension(pa)` into the payload.** Receipt: `docs/receipts/2026-10-07-f05-comms-action-planner.md`.
 - **F-01 follow-through @ `e2e42f8`:** the UI now calls the spine's `mbos.workflows.notify_decision` (A-07, which closes P-06-1). The spine is re-pinned to `bf215b2`, and a new test covers R12: a YES on a HELD item re-presents it, then executes once. 42 tests pass.
 - **F-03 @ `cb787dd`:** comms dry-run spec as data in `comms_spec/`:
   - a template registry with ADR-0010 content hashes and binding flags; every template is a draft pending Michael;
