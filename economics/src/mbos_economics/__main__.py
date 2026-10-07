@@ -4,11 +4,13 @@
     python -m mbos_economics replay ITEM.json        # ITEM.json must carry a `scores` block
     python -m mbos_economics estimate ITEM.json --as-of 2026-10-07T18:00:00Z [--bundle BUNDLE.json]
     python -m mbos_economics digest ITEMS.json --as-of 2026-10-07T18:00:00Z [--text] [--limit N]
+    python -m mbos_economics audit EXPORT.json     # {items, receipts} (lane-D export) or a list of Items
 
 ITEM.json may be a bare Item v1 or an examples/*.scored.json wrapper ({item, provenance, ...}).
 
 ``score`` prints {scores, recommendation, provenance, receipt_drafts}. It writes nothing.
-Exit codes: 0 ok / replay match, 1 replay mismatch, 2 invalid input or bundle, 3 estimate insufficient.
+Exit codes: 0 ok / replay match / audit clean, 1 replay mismatch or audit drift, 2 invalid input or bundle,
+3 estimate insufficient.
 """
 
 from __future__ import annotations
@@ -33,6 +35,8 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--config-version")
     r = sub.add_parser("replay")
     r.add_argument("item", type=Path)
+    a = sub.add_parser("audit")
+    a.add_argument("item", type=Path, help="lane-D export {items, receipts} or a JSON list of scored Items")
     g = sub.add_parser("digest")
     g.add_argument("item", type=Path, help="JSON list of scored Items")
     g.add_argument("--as-of", required=True)
@@ -45,6 +49,15 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     item = json.loads(args.item.read_text(encoding="utf-8"))
+    if args.cmd == "audit":
+        from .replay_audit import audit
+        items, receipts = (item["items"], item.get("receipts")) if isinstance(item, dict) else (item, None)
+        rep = audit(items, receipts=receipts)
+        print(json.dumps({k: v for k, v in rep.items() if k != "rows"} |
+                         {"drift": [r for r in rep["rows"] if any(f["drift"] for f in r["findings"])],
+                          "engine_changes": [r for r in rep["rows"] if any(f["kind"] == "engine_change" for f in r["findings"])]},
+                         indent=2))
+        return 0 if rep["ok"] else 1
     if args.cmd == "digest":
         from .digest import build_digest, render_text
         d = build_digest(item, args.as_of, limit=args.limit)

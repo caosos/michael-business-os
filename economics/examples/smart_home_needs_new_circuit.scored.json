@@ -68,12 +68,12 @@
       }
     },
     "scores": {
-      "scorecard_id": "scr_01M4B3R6G0DJHWC1JW0ZRXQ1T1",
+      "scorecard_id": "scr_01M4B3R6G0SJFJFCE0GKJAEYER",
       "inputs_hash": "sha256:5e5c62e3cda46d570a1367f37074b0e39f456eb71c3338d1b14f6e7da07d9aec",
       "scorecard": {
         "scoring_config_version": "2026.10.1",
         "computed_at": "2026-10-07T12:00:00Z",
-        "engine_version": "0.7.0",
+        "engine_version": "0.8.0",
         "config_hash": "sha256:8b7b98c7d92457d9d0049a0a2d7dd0c4e3bafa735c99c989bf156289aff58b20",
         "lane": "service",
         "derived": {
@@ -255,7 +255,7 @@
       }
     },
     "recommendation": {
-      "recommendation_id": "rec_01M4B3R6G0FD0BT9PZWGESS0DD",
+      "recommendation_id": "rec_01M4B3R6G0PR50WF63EGN7JARJ",
       "verdict": "PASS",
       "rationale": [
         "GATE FAIL license_ok: requires a license Michael lacks (licensed_electrical)",
@@ -267,21 +267,21 @@
       ],
       "confidence": 0.85,
       "alert": false,
-      "provenance_id": "prov_01M4B3R6G0ZS17PBCTTWA1K0SD"
+      "provenance_id": "prov_01M4B3R6G07X88P15S3MR0N8EC"
     },
     "provenance_ids": [
       "prov_01JB0000000000000000000220",
-      "prov_01M4B3R6G0ZS17PBCTTWA1K0SD"
+      "prov_01M4B3R6G07X88P15S3MR0N8EC"
     ]
   },
   "provenance": {
-    "provenance_id": "prov_01M4B3R6G0ZS17PBCTTWA1K0SD",
+    "provenance_id": "prov_01M4B3R6G07X88P15S3MR0N8EC",
     "created_at": "2026-10-07T12:00:00Z",
     "actor_type": "system",
     "agent_name": "agent-03-economics",
     "basis": "INFERENCE",
     "tool_name": "mbos_economics.engine",
-    "tool_version": "0.7.0",
+    "tool_version": "0.8.0",
     "config_version": "2026.10.1",
     "inputs_used": [
       {
@@ -303,26 +303,26 @@
       "type": "SCORE_RECORDED",
       "item_id": "itm_01JB0000000000000000000023",
       "entity_type": "scorecard",
-      "entity_id": "scr_01M4B3R6G0DJHWC1JW0ZRXQ1T1",
+      "entity_id": "scr_01M4B3R6G0SJFJFCE0GKJAEYER",
       "tool_name": "mbos_economics.engine",
       "inputs_hash": "sha256:5e5c62e3cda46d570a1367f37074b0e39f456eb71c3338d1b14f6e7da07d9aec",
-      "payload_hash": "sha256:5a869082e2f83fcf802a5b9fa2cf90a84a2b18b0bf85a5248a41e415d3212bf6",
-      "idempotency_key": "score:scr_01M4B3R6G0DJHWC1JW0ZRXQ1T1",
+      "payload_hash": "sha256:6e74f56bc5e97386a3369b767e46279fabf066807c197715fc68296878eb301d",
+      "idempotency_key": "score:scr_01M4B3R6G0SJFJFCE0GKJAEYER",
       "provenance_ids": [
-        "prov_01M4B3R6G0ZS17PBCTTWA1K0SD"
+        "prov_01M4B3R6G07X88P15S3MR0N8EC"
       ]
     },
     {
       "type": "RECOMMENDATION_RECORDED",
       "item_id": "itm_01JB0000000000000000000023",
       "entity_type": "recommendation",
-      "entity_id": "rec_01M4B3R6G0FD0BT9PZWGESS0DD",
+      "entity_id": "rec_01M4B3R6G0PR50WF63EGN7JARJ",
       "tool_name": "mbos_economics.engine",
       "inputs_hash": "sha256:5e5c62e3cda46d570a1367f37074b0e39f456eb71c3338d1b14f6e7da07d9aec",
-      "payload_hash": "sha256:73c8afe85b092c5d4bfe38a3a0cbcab8da3176dff69bb5505a3ddf2a630a6d31",
-      "idempotency_key": "recommend:rec_01M4B3R6G0FD0BT9PZWGESS0DD",
+      "payload_hash": "sha256:b0ca814f7224d39f1e4009bf2176dea8f43788cdc03c9a4fe4d9084711a90ecd",
+      "idempotency_key": "recommend:rec_01M4B3R6G0PR50WF63EGN7JARJ",
       "provenance_ids": [
-        "prov_01M4B3R6G0ZS17PBCTTWA1K0SD"
+        "prov_01M4B3R6G07X88P15S3MR0N8EC"
       ]
     }
   ]
