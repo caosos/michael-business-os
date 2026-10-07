@@ -4,7 +4,8 @@ Agent: 05
 Role: Governance / Action Gateway / PANIC — "controlled autonomy"
 Branch: research/agent-05-governance
 Worktree: /home/michaelos/business-os-worktrees/agent-05-governance
-State: WAITING — every queued lane-E task is DONE (E-01..E-11). Nothing READY for lane E; A-03 done (01).
+State: WORKING
+Claimed: E-12 (P1: recommendation-action policy as data — offer.*/counter/purchase.* tier0+step-up+caps, binding never under comms.*; R20 freeze-refused approved => cancelled_by_freeze) — READY_QUEUE @ agent-01 d2ef52f
 Done: E-11 @ 1c12a24 (lane D re-vendored @ a08dd9f/0014; velocity count now in mbos.budget_reserve_caps; in-Python count deleted; 305 tests)
 Done: E-10 @ ebae275 (spine_adapter: Gateway/KillSwitch/PDP over 01's mbos.interfaces on lane D; reconcile(); R4 contract docs/integration/05-spine-adapter-R4-contract.md)
 Done: E-06 @ e957680 (policy publish -> mbos.policy, receipted; PgPolicyStore reads policy_current, pinned schema, row-drift/tamper => fail closed; same decisions as file)
@@ -19,7 +20,7 @@ Done: E-01 @ df826c3 (interop row 05 = 10/10; vectors receipt_chain verifies; 14
 Done: E-03 @ e12caa3 (L3 DBOS cancel verified on real dbos 3.2.0; deny-all egress + LiteLLM budget generators; 157 tests)
 Current phase: ROUND TWO — wave two (foreman loop, docs/COORDINATION.md)
 Started: 2026-10-06
-Last updated: 2026-10-07 (E-11 done; lane E queue empty)
+Last updated: 2026-10-07 (claimed E-12)
 
 ## Current objective
 **SUPERSEDED by ADR-0010 (E-01):** Agent 01 binding rulings for lane E
