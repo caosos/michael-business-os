@@ -312,7 +312,7 @@ def _recommend(item: dict, areqs: list[dict], stage: str, dry_run_sent: bool = F
         action, why = "PASS", "; ".join(clean_text(x) for x in (rec.get("rationale") or ["The numbers do not support pursuing this."])[:2])
         if card.get("pass_on_priors"):
             action, why = "HOLD", "A pass here would rest on assumptions, not evidence; gather the missing evidence before discarding it."
-    elif (not live) and any(a.get("status") == "rejected" and not a.get("derived_from") for a in areqs) and item["state"] == "RECOMMENDED":
+    elif (not live) and item["state"] == "RECOMMENDED" and (verdict == "YES" or any(a.get("status") == "rejected" and not a.get("derived_from") for a in areqs)):
         action, why = "HOLD", "The numbers support acting, but policy blocked the proposed action; it needs a policy change or a different action."
     elif stage == "CLOSED":
         action, why = "PASS", "Closed: an outcome has been recorded, so no further action is recommended."

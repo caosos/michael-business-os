@@ -34,8 +34,21 @@ class DecisionRefused(ValueError):
     """A decision that the request's current status, or its payload hash, does not allow."""
 
 
+def proposer_for(components: Any, pa: dict) -> Optional[str]:
+    """Who proposes this action (07 F-41): the drafting lane (`pa["lane"]`) if lane E says it holds the capability, else
+    the spine identity if it does, else None (nobody may propose it: fail closed). Without lane E (reference gateway)
+    the lane tag is trusted as given and defaults to the spine identity."""
+    gov = getattr(components, "governance", None)
+    lane = pa.get("lane") if isinstance(pa.get("lane"), str) else None
+    if gov is None:
+        return lane or SPINE_AGENT
+    from mbos_governance import spine_adapter
+
+    return spine_adapter.proposer_for(gov, pa["capability"], lane)
+
+
 STEP_UP_CATEGORIES = {"money", "purchase", "offer", "external_commitment"}
-PROPOSED_ACTION_CORE = {"capability", "summary", "reversibility", "estimated_cost"}
+PROPOSED_ACTION_CORE = {"capability", "summary", "reversibility", "estimated_cost", "lane"}
 PAYLOAD_RESERVED = {"item_id", "recommendation_id", "target", "dry_run"}
 
 
@@ -237,6 +250,10 @@ def route_recommendation(conn: sa.Connection, item_id: str, components: Any) -> 
         return {"verdict": "MAYBE", "action_request_id": None}
     # MVP: the item proceeds on its primary proposed action; further actions are proposed after it settles.
     areq = _propose(conn, item, proposed[0], prov, components)
+    if areq.get("no_proposer"):
+        components.notifier.notify(conn, kind="policy_denied", item_id=item_id, action_request_id=None,
+                                   summary=f"{item['normalized']['title']}: no agent may propose {areq['capability']}")
+        return {"verdict": "YES", "action_request_id": None, "policy_denied": True}
     if areq["status"] == "rejected":  # R21 (07 F-23): the PDP denied it, so there is nothing for Michael to approve
         components.notifier.notify(conn, kind="policy_denied", item_id=item_id, action_request_id=areq["action_request_id"],
                                    summary=f"{item['normalized']['title']}: policy blocked the proposed action ({areq['capability']})")
@@ -288,6 +305,9 @@ def _insert_and_classify(conn: sa.Connection, areq: dict, prov: str, components:
 
 
 def _propose(conn: sa.Connection, item: dict, pa: dict, prov: str, components: Any) -> dict:
+    proposer = proposer_for(components, pa)
+    if proposer is None:  # nobody may propose this capability (lane E fails closed): create no request
+        return {"status": "rejected", "action_request_id": None, "capability": pa["capability"], "no_proposer": True}
     areq_id = new_id("areq")
     category, _ = classify_capability(pa["capability"])
     counterparty = item["normalized"].get("counterparty") or {}
@@ -311,7 +331,7 @@ def _propose(conn: sa.Connection, item: dict, pa: dict, prov: str, components: A
     areq = {k: v for k, v in {
         "action_request_id": areq_id, "item_id": item["item_id"],
         "recommendation_id": item["recommendation"]["recommendation_id"], "created_at": iso(now),
-        "proposed_by": SPINE_AGENT, "on_behalf_of": "michael", "capability": pa["capability"], "category": category,
+        "proposed_by": proposer, "on_behalf_of": "michael", "capability": pa["capability"], "category": category,
         "payload": payload, "payload_hash": sha256_of(payload), "idempotency_key": f"act:{areq_id}",
         "estimated_cost": pa.get("estimated_cost") or {"amount": 0, "currency": "USD"},
         "reversibility": pa["reversibility"], "untrusted_inputs_present": True,  # listing-derived ⇒ tainted

@@ -26,7 +26,7 @@ from mbos.hashing import canonical_json, sha256_of
 from mbos.ids import new_id
 from mbos.reference.governance import GATEWAY_TOOL, classify_capability
 from mbos.spine import (  # shared, backend-independent pieces
-    MICHAEL, PAYLOAD_RESERVED, _draft_provenance, PROPOSED_ACTION_CORE, SPINE_AGENT, DecisionRefused, requires_step_up,
+    MICHAEL, PAYLOAD_RESERVED, _draft_provenance, PROPOSED_ACTION_CORE, SPINE_AGENT, DecisionRefused, proposer_for, requires_step_up,
 )
 
 L = Pg04Ledger()
@@ -213,6 +213,8 @@ def route_recommendation(conn: sa.Connection, item_id: str, components: Any) -> 
         _to(conn, item_id, "RESEARCHING", f"MAYBE: needs {rec.get('cheapest_decisive_evidence') or 'more evidence'}", [prov])
         return {"verdict": "MAYBE", "action_request_id": None}
     areq = _propose(conn, item, proposed[0], prov, components)
+    if areq.get("no_proposer"):
+        return {"verdict": "YES", "action_request_id": None, "policy_denied": True}
     if areq["status"] == "rejected":  # R21 (07 F-23): the PDP denied it, so there is nothing for Michael to approve
         return {"verdict": "YES", "action_request_id": areq["action_request_id"], "policy_denied": True}
     _to(conn, item_id, "AWAITING_APPROVAL", f"awaiting Michael: {areq['capability']}", [prov])
@@ -238,6 +240,9 @@ def _classify_and_present(conn: sa.Connection, areq: dict, prov: list[str], comp
 
 
 def _propose(conn: sa.Connection, item: dict, pa: dict, prov: str, components: Any) -> dict:
+    proposer = proposer_for(components, pa)
+    if proposer is None:  # nobody may propose this capability (lane E fails closed): create no request
+        return {"status": "rejected", "action_request_id": None, "capability": pa["capability"], "no_proposer": True}
     areq_id = new_id("areq")
     category, _ = classify_capability(pa["capability"])
     counterparty = item["normalized"].get("counterparty") or {}
@@ -253,7 +258,7 @@ def _propose(conn: sa.Connection, item: dict, pa: dict, prov: str, components: A
     areq = {k: v for k, v in {
         "action_request_id": areq_id, "item_id": item["item_id"],
         "recommendation_id": item["recommendation"]["recommendation_id"], "created_at": iso(now),
-        "proposed_by": SPINE_AGENT, "on_behalf_of": "michael", "capability": pa["capability"], "category": category,
+        "proposed_by": proposer, "on_behalf_of": "michael", "capability": pa["capability"], "category": category,
         "payload": payload, "payload_hash": sha256_of(payload), "idempotency_key": f"act:{areq_id}",
         "estimated_cost": pa.get("estimated_cost") or {"amount": 0, "currency": "USD"}, "reversibility": pa["reversibility"],
         "untrusted_inputs_present": True, "tier": 0, "score_ref": item["scores"]["scorecard_id"], "status": "drafted",

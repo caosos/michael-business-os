@@ -201,3 +201,48 @@ def test_a_poisonous_listing_does_not_abort_the_batch(ledger_db):
     with ledger_db.begin() as c:                                                # an unrecoverable listing is dropped, not fatal
         r = spine.ingest_safe(c, {"payload": {}, "source": None}, {"dedup_key": "k", "type": "flip", "category": "trailer"}, "fx", "0", comps)
     assert r["dropped"] is True and "error" in r
+
+
+class _Gov:  # stands in for lane E's Governance handle; proposer_for is patched below
+    pass
+
+
+@pytest.mark.parametrize("answer,expect_proposer", [("agent-06-communications", "agent-06-communications"),
+                                                    ("agent-01-coordinator", "agent-01-coordinator"), (None, None)])
+def test_proposer_comes_from_lane_e_and_none_means_no_request(ledger_db, monkeypatch, answer, expect_proposer):
+    """07 F-41 / 05 E-15: proposed_by = lane E's proposer_for(); None => nobody may propose => no request, card says why."""
+    import mbos_governance.spine_adapter as sa
+
+    from mbos import card as cardmod
+    from mbos.reference.placeholder_scorer import PlaceholderScorer
+
+    seen = {}
+
+    def fake(gov, capability, lane, spine_identity="agent-01-coordinator"):
+        seen.update(capability=capability, lane=lane)
+        return answer
+
+    monkeypatch.setattr(sa, "proposer_for", fake)
+
+    class Tagging:
+        def plan(self, item):
+            return [{"capability": "comms.email.send", "summary": "first contact", "reversibility": "irreversible",
+                     "estimated_cost": {"amount": 0, "currency": "USD"}, "lane": "agent-06-communications"}]
+
+    comps = Components(planner=Tagging(), governance=_Gov()).with_defaults()
+    raw = _raw("FIX-TRAILER-1")
+    with ledger_db.begin() as c:
+        item_id = spine.ingest(c, asdict(raw), asdict(FixtureNormalizer().normalize(raw)), "fx", "0", comps)["item_id"]
+    with ledger_db.begin() as c:
+        spine.record_score(c, item_id, asdict(PlaceholderScorer().score(spine.read_item(c, item_id))))
+    with ledger_db.begin() as c:
+        out = spine.route_recommendation(c, item_id, comps)
+    assert seen == {"capability": "comms.email.send", "lane": "agent-06-communications"}
+    with ledger_db.connect() as c:
+        item, rc, ar = cardmod.load_inputs(c, item_id)
+    if expect_proposer is None:
+        assert out["policy_denied"] is True and out["action_request_id"] is None and ar == []
+        card = cardmod.build_card(item, rc, ar)
+        assert card["recommendation"]["action"] == "HOLD" and "policy blocked" in card["recommendation"]["why"]
+    else:
+        assert ar[0]["proposed_by"] == expect_proposer and "lane" not in ar[0]["payload"]
