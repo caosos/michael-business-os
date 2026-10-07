@@ -5,13 +5,14 @@ Role: Discovery / Source Adapters (DISCOVER + NORMALIZE lane)
 Branch: research/agent-02-opportunity
 Worktree: /home/michaelos/business-os-worktrees/agent-02-opportunity
 State: WORKING
-Claimed: B-05
+Claimed: B-06
 Done: B-01 @ 7c9da45
 Done: B-02 @ cadfdae
 Done: B-03 @ 8ff5476
 Done: B-04 @ 029356c (lane-E half by Agent 05 @ d3b9948: fixture vendored, auto-apply of valid requests)
+Done: B-05 @ e439b9b (HOLD wake_on=price_change wakes from a 02 fixture re-sighting on the real DBOS workflow; never executes)
 Done: C-04 (support, source side) @ a1a7730 (lead Agent 03 C-04 @ 882c726)
-Current phase: Round Two — working B-05 (wake-event producer for A-08 notify_event @ agent-01 aa88e7a)
+Current phase: Round Two — working B-06 (IMAP saved-search alert ingestor, tier 2, fixture-first)
 Started: 2026-10-06 (Round One) · Round Two started 2026-10-07
 Last updated: 2026-10-07
 
