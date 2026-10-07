@@ -4,13 +4,13 @@ Agent: 04
 Role: CRM / State (durable business-state, memory, receipts, provenance)
 Branch: research/agent-04-state
 Worktree: /home/michaelos/business-os-worktrees/agent-04-state
-State: COMPLETE
-Current phase: Round One — research & design (complete); coordination layer wired to GitHub
+State: WORKING
+Current phase: ROUND TWO — implementation, Lane D (Postgres state spine / receipts)
 Started: 2026-10-06
-Last updated: 2026-10-07T04:01:49Z
+Last updated: 2026-10-07 (round two start)
 
 ## Current objective
-Round-One research/design of the durable state system is complete. Deliverable written, decision record and receipts filed, reporting through GitHub per the coordination addendum.
+ROUND TWO (implementation). Build the authoritative Postgres state spine per ADR-0001/ADR-0004 and frozen contracts v1.0.0: DDL for items, action_requests, approvals, receipts, provenance, outcomes, outbox, policy, budget_ledger, lessons; append-only + hash-chained ledger; verify_chain; state+receipt+outbox in one transaction; least-privilege roles; EliteDesk bootstrap; tests. Round-one material below is retained for history.
 
 ## Completed
 - Fanned out 3 parallel research streams: (1) open-source CRM/ERP backbones, (2) agent-native CRMs + agent-memory frameworks + NakatomiCRM, (3) durable-state architecture patterns.
