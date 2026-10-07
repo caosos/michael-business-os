@@ -1,0 +1,58 @@
+[
+ {
+  "RecallID": 99020,
+  "RecallNumber": "26-920",
+  "RecallDate": "2026-02-11T00:00:00",
+  "Description": "(fixture)",
+  "URL": "https://www.cpsc.gov/Recalls/FIXTURE/Ridgeline-Compressors",
+  "Title": "Ridgeline Recalls Air Compressors Due to Impact Hazard",
+  "ConsumerContact": "(fixture)",
+  "LastPublishDate": "2026-02-11T00:00:00",
+  "Products": [
+   {
+    "Name": "Ridgeline 60-gallon air compressors",
+    "Description": "",
+    "Model": "RC-60V, RC60H",
+    "Type": "",
+    "CategoryID": "",
+    "NumberOfUnits": "About 2,600"
+   }
+  ],
+  "Inconjunctions": [],
+  "Images": [],
+  "Injuries": [],
+  "Manufacturers": [
+   {
+    "Name": "Ridgeline Air Systems Corp.",
+    "CompanyID": ""
+   }
+  ],
+  "Retailers": [],
+  "Importers": [],
+  "Distributors": [],
+  "SoldAtLabel": null,
+  "ManufacturerCountries": [
+   {
+    "Country": "China"
+   }
+  ],
+  "ProductUPCs": [],
+  "Hazards": [
+   {
+    "Name": "The air tank can corrode and rupture, posing an impact hazard.",
+    "HazardType": "",
+    "HazardTypeID": ""
+   }
+  ],
+  "Remedies": [
+   {
+    "Name": "Contact Ridgeline for a refund."
+   }
+  ],
+  "RemedyOptions": [
+   {
+    "Option": "Refund"
+   }
+  ]
+ }
+]

@@ -400,3 +400,41 @@ Verified (FACT). `tests/test_b15_enrichment.py` has 13 tests. On the real `mbos.
 - The rendered card shows 24 days, the 98.6% / 412 rating, `confidence: low`, and UNKNOWN for `updated_at`, `account_age` and the rest, all listed in `card.unknowns`.
 - An Item whose payload exposes nothing gets no seller block, and the card says UNKNOWN.
 - Not run: `spine_d` against lane D's database. `record_enrichment` has the same signature there; it needs lane D's schema at Agent 01's current pin.
+
+## 22. CPSC recalls → knowledge-base entries — READY_QUEUE B-16 (with Agent 03)
+
+**The programmer's guide was read in full** (CPSC "Recalls Retrieval Web Services Programmers Guide" v1.3, 2017-10-31; the 767 KB PDF was fetched and read page by page).
+
+| | |
+|---|---|
+| Endpoint (FACT) | `GET https://www.saferproducts.gov/RestWebServices/Recall?format=json&…` |
+| Parameters (FACT) | Case-insensitive wildcard search on `RecallID`, `RecallNumber`, `RecallDateStart/End`, `LastPublishDateStart/End`, `RecallTitle`, `RecallDescription`, `ProductName`, `ProductModel`, `ProductType`, `Manufacturer`, `Importer`, `Hazard`, `Remedy` and more. `format` is XML (default) or JSON. |
+| JSON (FACT) | A list of recalls. Single fields: `RecallID`, `RecallNumber`, `RecallDate` ("YYYY-MM-DDT00:00:00"), `Description`, `URL`, `Title`, `ConsumerContact`, `LastPublishDate`. Collections: `Products[{Name, Description, Model, Type, CategoryID, NumberOfUnits}]`, `Manufacturers`, `Importers`, `Retailers`, `Distributors` (`{Name, CompanyID}`), `Hazards[{Name, HazardType, HazardTypeID}]`, `Remedies[{Name}]`, `RemedyOptions[{Option}]`, `Injuries`, `Images` and others. |
+| UNKNOWN | **Any rate limit and any API-key requirement.** The guide states neither. I used one request per product-name query, a cap of 12 queries per run, and the shared 429/403 freeze. |
+| Real data caveat (FACT, from the guide's own example) | `Model` and `Manufacturers` can be empty strings. |
+
+**Adapter.** `adapters/cpsc_recalls.py` is read-only GET to `www.saferproducts.gov`, runs only with `live=True`, and is a registered tier-1 source. There is no scraping, only this documented API. It returns raw records; `recalls.collect_recalls()` consumes them with the same gate as discovery (policy → lane → freeze → lane E PANIC).
+
+**Output (`recalls.py`).**
+1. **Recall records.** Each has one FACT provenance record: actor `external`, source URI = the recall's CPSC URL, `fetched_at`, tool, and the raw payload hash.
+2. **KB entries in Agent 03's format.** An entry is produced only when the admission standard can be met mechanically:
+   - a named make (from Manufacturers or Importers, cleaned; the company name plus its first word as the brand, generic words excluded)
+   - at least one discrete model number from `Product.Model` (conservative: at least 3 characters, at least one digit)
+   - a hazard statement and a titled `https://…cpsc.gov` URL with a date
+   - a category in scope
+   - no elementary advice
+   
+   The text is a template over CPSC's own fields. There is no free text and no language model. The remedy is always marked UNKNOWN for the unit.
+3. **A review list** with the reason. Empty `Model` or `Manufacturers`, a bare category, out-of-scope products and elementary text all go there. Nothing fills a gap with a guess.
+
+**Acceptance (FACT).**
+- `tests/test_b16_cpsc.py`, 10 tests. In the fixture run, 7 recalls (6 illustrative with fictional makes and URLs, plus the guide's own stroller example) produce 3 KB entries and 4 review items.
+- The entries are written to a KB file and loaded with **Agent 03's real `mbos_economics.valueadd.load_kb`** (engine 0.10.0), and `match_entries` matches a listing that names a covered model. A different model number, or a bare category, matches nothing.
+- Fixtures are illustrative (labelled; URLs are `…/Recalls/FIXTURE/…`). They are not real recalls.
+- Entries add an `evidence` key (provenance id, raw ref, recall id). 03's loader accepts extra keys, and I've told 03.
+
+**Limits (stated).**
+- Auto-generated entries should get a human glance before shipping, per Agent 03's plan. Policy on that is Agent 01's to rule.
+- Coverage depends on CPSC filling `Model` and `Manufacturers`.
+- A make's first word may be a broad brand; the model-number requirement is the real gate.
+- NHTSA (vehicles) is the next adapter in 03's plan.

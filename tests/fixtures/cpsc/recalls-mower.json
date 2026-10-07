@@ -1,0 +1,165 @@
+[
+ {
+  "RecallID": 99001,
+  "RecallNumber": "26-901",
+  "RecallDate": "2026-05-14T00:00:00",
+  "Description": "(fixture)",
+  "URL": "https://www.cpsc.gov/Recalls/FIXTURE/Acme-Mowers",
+  "Title": "Acme Outdoor Power Recalls Zero-Turn Riding Mowers Due to Fire Hazard",
+  "ConsumerContact": "(fixture)",
+  "LastPublishDate": "2026-05-14T00:00:00",
+  "Products": [
+   {
+    "Name": "Acme ZT zero-turn riding mowers",
+    "Description": "",
+    "Model": "ZT5000, ZT5200-E; ZT6000 and ZT6200",
+    "Type": "",
+    "CategoryID": "",
+    "NumberOfUnits": "About 3,100"
+   }
+  ],
+  "Inconjunctions": [],
+  "Images": [],
+  "Injuries": [],
+  "Manufacturers": [
+   {
+    "Name": "Acme Outdoor Power Inc.",
+    "CompanyID": ""
+   }
+  ],
+  "Retailers": [],
+  "Importers": [],
+  "Distributors": [],
+  "SoldAtLabel": null,
+  "ManufacturerCountries": [
+   {
+    "Country": "China"
+   }
+  ],
+  "ProductUPCs": [],
+  "Hazards": [
+   {
+    "Name": "The fuel line can rub the engine shroud and leak fuel, posing a fire hazard.",
+    "HazardType": "",
+    "HazardTypeID": ""
+   }
+  ],
+  "Remedies": [
+   {
+    "Name": "Consumers should stop using the recalled mowers and contact an Acme dealer for a free repair."
+   }
+  ],
+  "RemedyOptions": [
+   {
+    "Option": "Repair"
+   }
+  ]
+ },
+ {
+  "RecallID": 99002,
+  "RecallNumber": "26-902",
+  "RecallDate": "2026-06-02T00:00:00",
+  "Description": "(fixture)",
+  "URL": "https://www.cpsc.gov/Recalls/FIXTURE/Brightfield-Mowers",
+  "Title": "Brightfield Recalls Riding Mowers Due to Laceration Hazard",
+  "ConsumerContact": "(fixture)",
+  "LastPublishDate": "2026-06-02T00:00:00",
+  "Products": [
+   {
+    "Name": "Brightfield riding mowers",
+    "Description": "",
+    "Model": "",
+    "Type": "",
+    "CategoryID": "",
+    "NumberOfUnits": "About 900"
+   }
+  ],
+  "Inconjunctions": [],
+  "Images": [],
+  "Injuries": [],
+  "Manufacturers": [
+   {
+    "Name": "Brightfield Equipment, LLC",
+    "CompanyID": ""
+   }
+  ],
+  "Retailers": [],
+  "Importers": [],
+  "Distributors": [],
+  "SoldAtLabel": null,
+  "ManufacturerCountries": [
+   {
+    "Country": "China"
+   }
+  ],
+  "ProductUPCs": [],
+  "Hazards": [
+   {
+    "Name": "The blade can detach during use, posing a laceration hazard.",
+    "HazardType": "",
+    "HazardTypeID": ""
+   }
+  ],
+  "Remedies": [
+   {
+    "Name": "Contact Brightfield for a free repair kit."
+   }
+  ],
+  "RemedyOptions": [
+   {
+    "Option": "Repair"
+   }
+  ]
+ },
+ {
+  "RecallID": 99003,
+  "RecallNumber": "26-903",
+  "RecallDate": "2026-03-01T00:00:00",
+  "Description": "(fixture)",
+  "URL": "https://www.cpsc.gov/Recalls/FIXTURE/Zenith-Mowers",
+  "Title": "Zenith Mowing Recalls Lawn Mowers Due to Burn Hazard",
+  "ConsumerContact": "(fixture)",
+  "LastPublishDate": "2026-03-01T00:00:00",
+  "Products": [
+   {
+    "Name": "Zenith lawn mowers",
+    "Description": "",
+    "Model": "Z-ONE",
+    "Type": "",
+    "CategoryID": "",
+    "NumberOfUnits": "About 40"
+   }
+  ],
+  "Inconjunctions": [],
+  "Images": [],
+  "Injuries": [],
+  "Manufacturers": [],
+  "Retailers": [],
+  "Importers": [],
+  "Distributors": [],
+  "SoldAtLabel": null,
+  "ManufacturerCountries": [
+   {
+    "Country": "China"
+   }
+  ],
+  "ProductUPCs": [],
+  "Hazards": [
+   {
+    "Name": "The muffler can overheat, posing a burn hazard.",
+    "HazardType": "",
+    "HazardTypeID": ""
+   }
+  ],
+  "Remedies": [
+   {
+    "Name": "Replace."
+   }
+  ],
+  "RemedyOptions": [
+   {
+    "Option": "Repair"
+   }
+  ]
+ }
+]

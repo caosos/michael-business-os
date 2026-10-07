@@ -40,6 +40,7 @@ REGISTRY: dict[str, SourcePolicy] = {p.source: p for p in [
     _P("trashnothing", Disposition.ALLOWED, 1, "low", "Trash Nothing REST API — next adapter"),
     _P("website_lead", Disposition.ALLOWED, 1, "low", "our own website form submissions"),
     _P("referral", Disposition.ALLOWED, 1, "low", "referral intake recorded by Michael"),
+    _P("cpsc_recalls", Disposition.ALLOWED, 1, "low", "CPSC Recalls Retrieval Web Services (official API, read-only); knowledge, not Items"),
     _P("ebay_marketplace_insights", Disposition.ALLOWED, 1, "low",
        "eBay Marketplace Insights (sold comps) — Limited Release; needs eBay approval + live flag"),
     # Tier 2 — sanctioned email alerts in our own inbox

@@ -1,0 +1,67 @@
+[
+ {
+  "RecallID": 7938,
+  "RecallNumber": "17057",
+  "RecallDate": "2016-12-20T00:00:00",
+  "Description": "(official guide example, abridged)",
+  "URL": "https://www.cpsc.gov/Recalls/2017/Aria-Child-Recalls-Strollers",
+  "Title": "Aria Child Recalls Strollers Due to Laceration and Fall Hazards",
+  "ConsumerContact": "(abridged)",
+  "LastPublishDate": "2016-12-20T00:00:00",
+  "Products": [
+   {
+    "Name": "Qbit strollers",
+    "Description": "",
+    "Model": "",
+    "Type": "",
+    "CategoryID": "",
+    "NumberOfUnits": "About 29,400"
+   }
+  ],
+  "Inconjunctions": [],
+  "Images": [],
+  "Injuries": [
+   {
+    "Name": "(abridged)"
+   }
+  ],
+  "Manufacturers": [],
+  "Retailers": [
+   {
+    "Name": "Babies R US and other retail stores",
+    "CompanyID": ""
+   }
+  ],
+  "Importers": [
+   {
+    "Name": "Aria Child Inc. of Dedham, Mass.",
+    "CompanyID": ""
+   }
+  ],
+  "Distributors": [],
+  "SoldAtLabel": null,
+  "ManufacturerCountries": [
+   {
+    "Country": "China"
+   }
+  ],
+  "ProductUPCs": [],
+  "Hazards": [
+   {
+    "Name": "A gap in the stroller's folding side hinge can pinch a caregiver's hand during unfolding, posing a laceration hazard.",
+    "HazardType": "",
+    "HazardTypeID": ""
+   }
+  ],
+  "Remedies": [
+   {
+    "Name": "Consumers should immediately stop using the recalled strollers and contact Aria Child for a free replacement stroller."
+   }
+  ],
+  "RemedyOptions": [
+   {
+    "Option": "Replace"
+   }
+  ]
+ }
+]
