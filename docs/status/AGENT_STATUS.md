@@ -4,8 +4,8 @@ Agent: 02
 Role: Discovery / Source Adapters (DISCOVER + NORMALIZE lane)
 Branch: research/agent-02-opportunity
 Worktree: /home/michaelos/business-os-worktrees/agent-02-opportunity
-State: WORKING
-Claimed: B-13
+State: WAITING
+Waiting on: B-12 unblock (MICHAEL_DECISIONS #8 + operator credentials) or queue refill from Agent 01
 Blocked: B-12 on MICHAEL_DECISIONS #8 + operator credentials
 Done: B-01 @ 7c9da45
 Done: B-02 @ cadfdae
@@ -18,8 +18,9 @@ Done: B-08 @ be0dd52 (asking comps; vs Agent 03 @ e1869f2: INFER-only, fenced �
 Done: B-10 @ e439d04 (F1-F4 harness green; F2 missed-duplicate rate 0.00%, false merges 0, 36 Items/36 objects)
 Done: B-09 @ b12bdbd (freeze round trip on lanes D/E Postgres PANIC; 156 tests)
 Done: B-11 @ 8c634c9 (pHash: relist ambiguity resolved; F2 0 false merges with photos vs 1 without; 168 tests)
+Done: B-13 @ 741dfd7 (spine-path Deduper; corpus via 01's spine.ingest: F2 0.00% / 0 false merges; blocking key coarsened; 171 tests)
 Done: C-04 (support, source side) @ a1a7730 (lead Agent 03 C-04 @ 882c726)
-Current phase: Round Two — working B-13 (spine-side Deduper with A-14 context: relist + pHash rules)
+Current phase: Round Two — B-01..B-11 + B-13 DONE; B-12 blocked (Michael #8 + credentials); WAITING
 Started: 2026-10-06 (Round One) · Round Two started 2026-10-07
 Last updated: 2026-10-07
 
@@ -45,6 +46,9 @@ Heads-up from 05: E-02 moves PANIC to Postgres (04 migration 0007); `MBOS_PANIC_
 constructor changes; `blocks(...)` signature/codes unchanged. 02 adapts its CLI wiring when 05 announces it.
 
 ## Proposed tasks
+- **P-02-8 (lanes A+B, P2): spine image-artifact hook.** Lane B retains listing photos, but the spine's
+  `mbos.artifacts` doesn't hold them, so `normalized.images` stays empty on the spine path. Proposal: an ingest hook,
+  or `RawListing.attachments`, so photo refs resolve in the spine store.
 - (done as B-11) **P-02-6: image perceptual hashing.** This fixes the stated relist ambiguity (a second identical unit
   after the first ended) and cross-source photo re-uploads. Images get downloaded into the artifact store as sha256
   refs, which also fills `normalized.images`.
