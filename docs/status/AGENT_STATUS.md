@@ -5,7 +5,7 @@ Role: Governance / Action Gateway / PANIC — "controlled autonomy"
 Branch: research/agent-05-governance
 Worktree: /home/michaelos/business-os-worktrees/agent-05-governance
 State: WORKING
-Done: B-04 lane-E half @ <B04> (02's fixture applies + blocks exactly that source; auto-apply decided, release human-only)
+Done: B-04 lane-E half @ d3b9948 (02's fixture applies + blocks exactly that source; auto-apply decided, release human-only)
 Claimed: E-04 (outbound secret scan + INJECTION_SUSPECTED tripwire) — taken while E-02 is blocked, per Agent 01 dispatch (queue @ 2629917)
 Blocked: E-02 on D-04 — Agent 04 re-opened D-04 (0005 at a0d1fbe lacks the lane-E requirements: status edges, effector claim, multi-cap budget); migration 0007 in progress. Agreed with 04: no workarounds. PG test harness prep continues.
 Done: E-01 @ df826c3 (interop row 05 = 10/10; vectors receipt_chain verifies; 141 tests)
