@@ -59,11 +59,19 @@ def wait_state(engine: sa.Engine, item_id: str, states: str | Iterable[str], tim
     raise AssertionError(f"{item_id} stuck in {st}, wanted {sorted(want)}")
 
 
-def pending_request(engine: sa.Engine, item_id: str) -> dict:
+def is_lane_d(engine: sa.Engine) -> bool:
     with engine.connect() as c:
-        return c.execute(sa.text(
-            "SELECT body FROM mbos.action_requests WHERE item_id = :i AND status IN ('pending_approval', 'held') "
-            "ORDER BY body->>'created_at' DESC LIMIT 1"), {"i": item_id}).scalar_one()
+        return c.execute(sa.text("SELECT to_regclass('mbos.v_action_request_documents') IS NOT NULL")).scalar_one()
+
+
+def pending_request(engine: sa.Engine, item_id: str) -> dict:
+    """Works on both state backends: reference DDL (`body`) and lane D (document views)."""
+    sql = ("SELECT doc FROM mbos.v_action_request_documents WHERE doc->>'item_id' = :i AND doc->>'status' IN "
+           "('pending_approval', 'held') ORDER BY doc->>'created_at' DESC LIMIT 1") if is_lane_d(engine) else (
+           "SELECT body FROM mbos.action_requests WHERE item_id = :i AND status IN ('pending_approval', 'held') "
+           "ORDER BY body->>'created_at' DESC LIMIT 1")
+    with engine.connect() as c:
+        return c.execute(sa.text(sql), {"i": item_id}).scalar_one()
 
 
 def scalar(engine: sa.Engine, sql: str, **params):

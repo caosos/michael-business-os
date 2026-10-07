@@ -14,7 +14,8 @@ from tests.helpers.seed import seed_flow
 
 
 class NeverDuplicate:
-    def is_duplicate(self, existing_item, candidate):
+    def is_duplicate(self, existing_item, candidate, context=None):
+        assert context is None or {'source', 'match_hints'} <= set(context)
         return False
 
 
@@ -85,3 +86,46 @@ def test_notify_event_wakes_matching_hold_and_never_executes(rt, run_discovery):
         workflows.notify_event(item_id, "buy_now")
     workflows.record_decision(areq["action_request_id"], "NO", areq["payload_hash"], reason="cleanup")
     wait_state(rt.engine, item_id, "ARCHIVED")
+
+
+def test_planner_draft_is_frozen_into_the_payload(ledger_db):
+    """07 F-19: what Michael approves is the draft that goes out, hash-frozen (A-13 extension merge)."""
+    from mbos.hashing import sha256_of
+
+    class DraftPlanner:
+        def plan(self, item):
+            draft = {"content": "Hi — is the trailer still available? (DRY-RUN)", "template_version": "t1"}
+            return [{"capability": "comms.email.send", "summary": "first contact", "reversibility": "irreversible",
+                     "estimated_cost": {"amount": 0, "currency": "USD"}, "draft": {**draft, "content_hash": sha256_of(draft)}}]
+
+    comps = Components(planner=DraftPlanner()).with_defaults()
+    raw = _raw("FIX-TRAILER-1")
+    n = FixtureNormalizer()
+    with ledger_db.begin() as c:
+        item_id = spine.ingest(c, asdict(raw), asdict(n.normalize(raw)), "fx", "0", comps)["item_id"]
+    from mbos.reference.placeholder_scorer import PlaceholderScorer
+    with ledger_db.begin() as c:
+        spine.record_score(c, item_id, asdict(PlaceholderScorer().score(spine.read_item(c, item_id))))
+    with ledger_db.begin() as c:
+        areq_id = spine.route_recommendation(c, item_id, comps)["action_request_id"]
+        areq = c.execute(sa.text("SELECT body FROM mbos.action_requests WHERE action_request_id = :a"), {"a": areq_id}).scalar_one()
+    assert areq["payload"]["draft"]["content"].startswith("Hi")
+    assert areq["payload_hash"] == sha256_of(areq["payload"])
+
+
+def test_no_without_reason_is_decision_refused(ledger_db):
+    ids = seed_flow(ledger_db, act=False)
+    with ledger_db.begin() as c:
+        h = c.execute(sa.text("SELECT payload_hash FROM mbos.action_requests")).scalar_one()
+        with pytest.raises(spine.DecisionRefused, match="contract"):
+            spine.decide(c, ids["action_request_id"], "NO", h, ids["components"])
+
+
+def test_outcome_attribution_and_channel(ledger_db):
+    ids = seed_flow(ledger_db, outcome=False)
+    with ledger_db.begin() as c:
+        out = spine.record_outcome(c, ids["item_id"], "flip_acquired", channel="web",
+                                   attribution={"first_touch_source": "craigslist", "channel": "organic"})
+        tool = c.execute(sa.text("SELECT body->>'tool_name' FROM mbos.provenance WHERE provenance_id = :p"),
+                         {"p": out["provenance_ids"][0]}).scalar_one()
+    assert out["attribution"]["first_touch_source"] == "craigslist" and tool == "mbos.web.outcome"

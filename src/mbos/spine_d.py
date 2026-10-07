@@ -20,6 +20,7 @@ import sqlalchemy as sa
 from mbos.adapters.state04 import Pg04Ledger
 from mbos.clock import iso, now_iso, parse, utcnow
 from mbos.config import settings
+from mbos.contracts import ContractViolation
 from mbos.contracts.models import ActionRequest, Approval
 from mbos.hashing import canonical_json, sha256_of
 from mbos.ids import new_id
@@ -75,7 +76,12 @@ def _receipt(conn: sa.Connection, areq: dict, rtype: str, intent: str, prov: lis
                                    "provenance_ids": prov, "idempotency_key": key, **fields})
 
 
+
 # ---------------------------------------------------------------- DISCOVER + NORMALIZE
+def _dedup_context(raw: dict, norm: dict) -> dict:
+    """A-14: the candidate sighting's source/fetch context for lane B's Deduper (relist + pHash rules)."""
+    return {"source": raw["source"], "source_listing_id": raw["source_listing_id"], "url": raw["url"],
+            "fetched_at": raw["fetched_at"], "match_hints": norm.get("match_hints")}
 def ingest(conn: sa.Connection, raw: dict, norm: Optional[dict], adapter_name: str, adapter_version: str,
            components: Any) -> dict:
     from mbos.interfaces import NormalizedListing
@@ -92,7 +98,7 @@ def ingest(conn: sa.Connection, raw: dict, norm: Optional[dict], adapter_name: s
     for (item_id,) in conn.execute(sa.text("SELECT item_id FROM mbos.items WHERE dedup_key = :k ORDER BY created_at"),
                                    {"k": norm["dedup_key"]}).all():
         doc = L.load_item(conn, item_id)
-        if components.deduper.is_duplicate(doc, NormalizedListing(**norm)):
+        if components.deduper.is_duplicate(doc, NormalizedListing(**norm), context=_dedup_context(raw, norm)):
             existing = doc
             break
     raw_bytes = canonical_json(raw["payload"])
@@ -281,7 +287,10 @@ def decide(conn: sa.Connection, action_request_id: str, decision: str, payload_h
         _classify_and_present(conn, successor, [prov_m], components, MICHAEL)
         doc["modifications"] = {"diff": payload_changes, "new_action_request_id": new_areq_id,
                                 "new_payload_hash": successor["payload_hash"]}
-    Approval.from_doc(doc)
+    try:
+        Approval.from_doc(doc)  # frozen contract: MODIFY ⇒ modifications, HOLD ⇒ hold, NO ⇒ reason
+    except ContractViolation as e:  # one exception type for UIs/CLI (07 F-18)
+        raise DecisionRefused(f"decision not valid under the contract: {'; '.join(e.errors[:3])}") from None
     L.record_approval(conn, doc, {"type": "human", "id": decider}, f"Michael decided {decision}" + (f": {reason}" if reason else ""),
                       f"{approval_id}:decide")
     return {"approval": doc, "item_id": areq["item_id"], "new_action_request_id": new_areq_id}
@@ -404,15 +413,16 @@ def finish_act(conn: sa.Connection, item_id: str, action_request_id: str, approv
 # ---------------------------------------------------------------- OUTCOME / KILL SWITCH
 def record_outcome(conn: sa.Connection, item_id: str, kind: str, *, realized: Optional[dict] = None,
                    predicted_vs_actual: Optional[list] = None, notes: Optional[str] = None,
-                   recorded_by: str = "michael") -> dict:
+                   recorded_by: str = "michael", channel: str = "cli",
+                   attribution: Optional[dict] = None) -> dict:
     item = read_item(conn, item_id)
     prov = L.record_provenance(conn, actor_type="human", human_actor=recorded_by, basis="FACT",
-                               tool_name="mbos.cli.outcome", tool_version="0.1.0", inputs_used=[{"ref": item_id}])
+                               tool_name=f"mbos.{channel}.outcome", tool_version="0.1.0", inputs_used=[{"ref": item_id}])
     outcome_id = new_id("outc")
     doc = {k: v for k, v in {"outcome_id": outcome_id, "item_id": item_id, "observed_at": now_iso(), "kind": kind,
                              "action_request_id": (item.get("action_request_ids") or [None])[-1],
                              "scorecard_id": (item.get("scores") or {}).get("scorecard_id"), "realized": realized,
-                             "predicted_vs_actual": predicted_vs_actual, "notes": notes,
+                             "predicted_vs_actual": predicted_vs_actual, "notes": notes, "attribution": attribution,
                              "provenance_ids": [prov]}.items() if v is not None}
     L.record_outcome(conn, doc, {"type": "human", "id": recorded_by}, f"outcome {kind}", f"{outcome_id}:record")
     if item["state"] == "ACTED":

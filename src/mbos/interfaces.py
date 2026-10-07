@@ -63,6 +63,7 @@ class NormalizedListing:
     opportunity_kind: Optional[str] = None
     content_hash: Optional[str] = None
     economics: Optional[dict[str, Any]] = None  # 03 input estimates when the source supplies them
+    match_hints: Optional[dict[str, Any]] = None  # lane B dedup hints (e.g. {"phash": [...], "contact_fp": ...})
 
 
 @runtime_checkable
@@ -77,9 +78,13 @@ class SourceAdapter(Protocol):
 
 @runtime_checkable
 class Deduper(Protocol):
-    def is_duplicate(self, existing_item: dict[str, Any], candidate: NormalizedListing) -> bool:
+    def is_duplicate(self, existing_item: dict[str, Any], candidate: NormalizedListing,
+                     context: Optional[dict[str, Any]] = None) -> bool:
         """Called only for existing Items that share the candidate's `dedup_key`. The key is a BLOCKING
-        bucket (Agent 02: category|priceband|geocell), never an identity: equal keys alone must not merge."""
+        bucket (Agent 02: category|priceband|geocell), never an identity: equal keys alone must not merge.
+
+        `context` (A-14) = {"source", "source_listing_id", "url", "fetched_at", "match_hints"} of the candidate
+        sighting, so lane B can apply its relist and photo (pHash) rules on the spine path."""
 
 
 @runtime_checkable

@@ -62,5 +62,5 @@ class ExactKeyDeduper:
     """Fixture-only: the fixtures' dedup_key IS an identity. Lane B replaces this with its
     identity-then-fuzzy matcher (Agent 02 dedup.is_cross_source_duplicate)."""
 
-    def is_duplicate(self, existing_item: dict, candidate) -> bool:
+    def is_duplicate(self, existing_item: dict, candidate, context=None) -> bool:
         return existing_item["dedup_key"] == candidate.dedup_key

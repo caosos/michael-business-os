@@ -16,6 +16,7 @@ import sqlalchemy as sa
 
 from mbos.clock import iso, now_iso, parse, utcnow
 from mbos.config import settings
+from mbos.contracts import ContractViolation
 from mbos.contracts.models import ActionRequest, Approval
 from mbos.hashing import canonical_json, sha256_bytes, sha256_of
 from mbos.ids import new_id
@@ -43,7 +44,12 @@ def requires_step_up(areq: dict) -> bool:
     return areq["reversibility"] == "irreversible" or areq["category"] in STEP_UP_CATEGORIES
 
 
+
 # ---------------------------------------------------------------- DISCOVER + NORMALIZE
+def _dedup_context(raw: dict, norm: dict) -> dict:
+    """A-14: the candidate sighting's source/fetch context for lane B's Deduper (relist + pHash rules)."""
+    return {"source": raw["source"], "source_listing_id": raw["source_listing_id"], "url": raw["url"],
+            "fetched_at": raw["fetched_at"], "match_hints": norm.get("match_hints")}
 def ingest(conn: sa.Connection, raw: dict[str, Any], norm: Optional[dict[str, Any]], adapter_name: str,
            adapter_version: str, components: Any) -> dict[str, Any]:
     """Store the raw artifact, then create a new Item or merge a duplicate sighting.
@@ -64,7 +70,7 @@ def ingest(conn: sa.Connection, raw: dict[str, Any], norm: Optional[dict[str, An
     existing = None
     for row in conn.execute(sa.text("SELECT body FROM mbos.items WHERE dedup_key = :k ORDER BY body->>'created_at' FOR UPDATE"),
                             {"k": norm["dedup_key"]}).all():
-        if components.deduper.is_duplicate(row.body, NormalizedListing(**norm)):
+        if components.deduper.is_duplicate(row.body, NormalizedListing(**norm), context=_dedup_context(raw, norm)):
             existing = row
             break
 
@@ -337,7 +343,10 @@ def decide(conn: sa.Connection, action_request_id: str, decision: str, payload_h
                     "status": "drafted", "provenance_ids": [prov]}
         doc["modifications"] = {"diff": payload_changes, "new_action_request_id": new_id_,
                                 "new_payload_hash": new_areq["payload_hash"]}
-    Approval.from_doc(doc)  # frozen contract: MODIFY ⇒ modifications, HOLD ⇒ hold, NO ⇒ reason
+    try:
+        Approval.from_doc(doc)  # frozen contract: MODIFY ⇒ modifications, HOLD ⇒ hold, NO ⇒ reason
+    except ContractViolation as e:  # one exception type for UIs/CLI (07 F-18)
+        raise DecisionRefused(f"decision not valid under the contract: {'; '.join(e.errors[:3])}") from None  # frozen contract: MODIFY ⇒ modifications, HOLD ⇒ hold, NO ⇒ reason
     if new_areq is not None:
         # The successor must exist before anything references it.
         _insert_and_classify(conn, new_areq, prov, components, MICHAEL)
@@ -492,18 +501,19 @@ def finish_act(conn: sa.Connection, item_id: str, action_request_id: str, approv
 # ---------------------------------------------------------------- OUTCOME (feeds LEARN, lane C)
 def record_outcome(conn: sa.Connection, item_id: str, kind: str, *, realized: Optional[dict] = None,
                    predicted_vs_actual: Optional[list] = None, notes: Optional[str] = None,
-                   recorded_by: str = "michael") -> dict[str, Any]:
+                   recorded_by: str = "michael", channel: str = "cli",
+                   attribution: Optional[dict] = None) -> dict[str, Any]:
     from mbos.contracts.models import Outcome
 
     item = load_item(conn, item_id, for_update=True)
     outcome_id = new_id("outc")
     prov = record_provenance(conn, actor_type="human", human_actor=recorded_by, basis="FACT",
-                             tool_name="mbos.cli.outcome", tool_version="0.1.0", inputs_used=[{"ref": item_id}])
+                             tool_name=f"mbos.{channel}.outcome", tool_version="0.1.0", inputs_used=[{"ref": item_id}])
     doc = {k: v for k, v in {
         "outcome_id": outcome_id, "item_id": item_id, "observed_at": now_iso(), "kind": kind,
         "action_request_id": (item.get("action_request_ids") or [None])[-1],
         "scorecard_id": (item.get("scores") or {}).get("scorecard_id"),
-        "realized": realized, "predicted_vs_actual": predicted_vs_actual, "notes": notes, "provenance_ids": [prov],
+        "realized": realized, "predicted_vs_actual": predicted_vs_actual, "notes": notes, "attribution": attribution, "provenance_ids": [prov],
     }.items() if v is not None}
     Outcome.from_doc(doc)
     conn.execute(sa.text("INSERT INTO mbos.outcomes (body) VALUES (CAST(:b AS jsonb))"), {"b": _j(doc)})

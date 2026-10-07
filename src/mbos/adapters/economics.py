@@ -2,8 +2,8 @@
 
 Install the engine from Agent 03's branch (read-only, no merge), e.g.:
     uv pip install "mbos-economics @ git+file://<repo>@<agent-03 commit>#subdirectory=economics"
-and pass `config_dir` pointing at a checkout of `economics/config/` from the same commit
-(the engine resolves configs relative to its source tree, which an installed wheel lacks).
+Since lane C 1044ed5 the config ships inside the wheel, so `config_dir` is optional (pass it only to pin a
+config directory explicitly).
 
 Mapping (agent-01 integration review, 2026-10-07):
 - `score_item(item, cfg, scored_at)` → ScoreResult; 03's deterministic scr_/rec_ ids are kept (replay).
