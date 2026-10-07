@@ -1,10 +1,12 @@
 """Subprocess probe: run ONE lane's own hashing code on ADR-0010 vectors.json and print a JSON result.
 
 Usage: python _probe.py <lane-src-root> <vectors.json> <spec-json>
-spec = {"payload": "pkg.mod:fn" | "pkg.mod:fn|canon_then_ref:fn2", "row": "pkg.mod:fn" | null, "row_style": "doc"|"split"}
+spec = {"payload": "pkg.mod:fn" | "pkg.mod:canon|pkg.mod:sha", "row": "pkg.mod:fn" | null}; the row-hash call style is
+inferred from the function's arity
 Runs in its own process so each lane's modules load with their own package context and never clash.
 """
 import importlib
+import inspect
 import json
 import sys
 
@@ -47,7 +49,8 @@ def main():
         ok, why = True, f"{len(vec['receipt_chain'])} receipts verified"
         for r in vec["receipt_chain"]:
             try:
-                if spec.get("row_style") == "split":
+                # 1-arg (doc) = MBOS-RH-1 style; 2-arg (row_without_hash, prev_hash) = the pre-ADR-0010 style
+                if len(inspect.signature(row).parameters) >= 2:
                     got = row({k: v for k, v in r.items() if k != "row_hash"}, r.get("prev_hash"))
                 else:
                     got = row(r)

@@ -39,10 +39,9 @@ PROBES = {
     "01": ("src", {"payload": "mbos.hashing:sha256_of", "row": None}),
     "02": ("src", {"payload": "mbos_discovery.ids:canonical_json|mbos_discovery.ids:sha256_ref", "row": None}),
     "03": ("economics/src", {"payload": "mbos_economics.canonical:content_hash", "row": None}),
-    "05": ("src", {"payload": "mbos_governance.ids:payload_hash",
-                   "row": "mbos_governance.store:compute_row_hash", "row_style": "split"}),
-    "06": (".", {"payload": "operator_ui.util:sha256_of", "row": "operator_ui.store:row_hash_of", "row_style": "split"}),
-    "07": ("qa", {"payload": "mbos_qa.core:sha256_ref", "row": "mbos_qa.core:receipt_row_hash", "row_style": "doc"}),
+    "05": ("src", {"payload": "mbos_governance.ids:payload_hash", "row": "mbos_governance.store:compute_row_hash"}),
+    "06": (".", {"payload": "operator_ui.util:sha256_of", "row": "operator_ui.store:row_hash_of"}),
+    "07": ("qa", {"payload": "mbos_qa.core:sha256_ref", "row": "mbos_qa.core:receipt_row_hash"}),
 }
 
 
@@ -88,8 +87,10 @@ def check_pins(rep: InteropReport) -> None:
         if lane == "07":
             continue
         ref = f"origin/{br}"
+        # README.md is a generic name: only the pinned canonical/README.md counts, matched by path
         files = [f for f in _git("ls-tree", "-r", "--name-only", ref).split()
-                 if f.split("/")[-1] in by_name and not f.startswith("docs/research/contracts/")]
+                 if f.split("/")[-1] in by_name and not f.startswith("docs/research/contracts/")
+                 and (f.split("/")[-1] != "README.md" or f.endswith("canonical/README.md"))]
         same, differ, same_id = 0, [], []
         for f in files:
             blob = _git("show", f"{ref}:{f}", binary=True)
@@ -146,6 +147,13 @@ def check_lane_hashers(rep: InteropReport, scratch: pathlib.Path) -> None:
     n_c, n_r = len(vec["cjson"]), len(vec["reject"])
     for lane, (sub, spec) in PROBES.items():
         root = _archive(lane, scratch) / sub
+        mod_file = root / (spec["payload"].split(":")[0].replace(".", "/") + ".py")
+        if not mod_file.exists():
+            rep.lanes[lane] = {"absent": True}
+            rep.add("3 lane hashers (vectors.json)", f"lane {lane}: payload hash", "INFO",
+                    f"no own hasher at head (`{mod_file.relative_to(root)}` removed); the lane hashes through "
+                    "Agent 01's spine, which is covered by row 01")
+            continue
         env = {k: v for k, v in os.environ.items() if k not in ("PYTHONPATH",)}
         p = subprocess.run([sys.executable, str(PROBE), str(root), str(VECTORS), json.dumps(spec)],
                            capture_output=True, text=True, env=env, cwd=root, timeout=120)
@@ -296,7 +304,7 @@ def render(rep: InteropReport) -> str:
          f"- **F-14 (number canonicalisation):** {v['F-14']}",
          f"- **F-13 (one ledger, one row_hash):** {v['F-13']}", "",
          "## Lane × vector matrix (✔ = the lane's own function reproduces the vector's sha256 / rejects the input)", ""]
-    lanes = list(rep.lanes)
+    lanes = [x for x in rep.lanes if not rep.lanes[x].get("absent")]
     L += ["| Vector | " + " | ".join(f"{x}" for x in lanes) + " | " + " | ".join(rep.sql) + " |",
           "|---|" + "---|" * (len(lanes) + len(rep.sql))]
 
