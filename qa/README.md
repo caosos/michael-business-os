@@ -17,7 +17,11 @@ Core law under test: **no action without a receipt; no receipt without provenanc
 | `mbos_qa/drafts.py`, `mbos_qa/packet.py` | **Real** (this lane): deterministic outbound drafts with G4 provenance, and the dry-run manual-assist packet effector. |
 | `mbos_qa/e2e.py`, `fixtures/` | One synthetic flip (trailer, with a planted prompt injection) and one synthetic service lead (drywall, with attribution), run end to end. |
 | `mbos_qa/report.py` | Human-readable report per item: source → normalization → economics → recommendation → approval → dry-run action → receipt → provenance. |
-| `tests/` | A1–A10 + G acceptance suite (pytest). Includes a real hard-kill crash test (`os._exit(137)` in a child process). |
+| `tests/test_a*.py`, `tests/test_g_*.py` | A1–A10 + G against the **reference mocks** (they exercise mock internals such as SQLite fault hooks). |
+| `tests/spec/` | **A1–A10 spec suite against a REAL implementation** (G-02). It is written only against the QA facade, and `MBOS_QA_IMPL=mbos_qa.impl_spine:build` runs it on Agent 01's spine (PostgreSQL 16 + DBOS, pinned in `impl_spine_PIN`). It is not collected in mock mode. |
+| `mbos_qa/impl_spine.py`, `_spine_child.py` | The adapter to 01's public API, plus out-of-process crash/restart scenarios. |
+| `mbos_qa/interop.py`, `_probe.py` | ADR-0010 interop: each lane's own hasher on `vectors.json`, plus the SQL twins on PostgreSQL. |
+| `mbos_qa/buildverify.py` | Runs every lane's own suite from a clean `git archive`. |
 
 ## Run
 
@@ -29,12 +33,17 @@ python3.12 -m venv ../.venv && ../.venv/bin/pip install -r requirements.txt
 This writes `docs/qa/ACCEPTANCE_REPORT.md`, `docs/qa/e2e/E2E_REPORT.md` and `docs/qa/e2e/packets/`.
 The e2e output is reproducible byte for byte (fixed clock, seeded IDs).
 
-## Plugging in a real lane
+## Running against the real system
 
-Lane A exposes `build(workdir, *, mode, seed, clock, fresh) -> Harness`, with the same attributes as
-`mbos_qa.harness.Harness`, and wires in its real store, gateway and workflow. Then:
-`MBOS_QA_IMPL=mbos.qa_adapter:build python -m mbos_qa run`. Mock-only checks (A2 roles, A8 LiteLLM,
-A9 egress) are listed as findings F-7/F-8 and must be re-run against the real components before MVP sign-off.
+```bash
+../.venv/bin/python -m mbos_qa spine      # A1–A10 spec suite on Agent 01's spine → docs/qa/SPINE_ACCEPTANCE.md
+../.venv/bin/python -m mbos_qa interop    # ADR-0010 cross-lane matrix          → docs/qa/INTEROP_REPORT.md
+../.venv/bin/python -m mbos_qa builds --workdir /tmp/claude-1001/a07b   # every lane's own suite → docs/qa/BUILD_VERIFICATION.md
+```
+
+The spine is installed non-editable from `git archive` at the commit in `impl_spine_PIN`. To re-target, re-install
+at the new commit and update the pin. When A-01 phase 2 moves the spine onto Agent 04's store, only the marked
+raw-SQL read block in `impl_spine.py` changes; the spec tests do not.
 
 ## Rules for this suite
 
