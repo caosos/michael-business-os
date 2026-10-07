@@ -11,9 +11,10 @@ Done: G-03 @ 4c2e897
 Done: G-04 @ 6d43d2b — wave-two RC verdict NOT READY (F-24 blocking; F-25 needs a ruling; F-22/F-23 open)
 Done: G-05 @ 3c330e8 — 148 pass / 87 fail → F-26..F-39 (3 of the highs: F-26 crash, F-31 dry-run shown as sent, F-35 text-view forgery; F-36 poison listing)
 Done: G-06 @ e7434f4 — RC re-run NOT READY on ONE red case (F-40, fails safe); safety invariants HOLD; F-22/23/24/25 verified closed
+Done: G-07 @ 5e66a02 — RC READY (105/0, dry-run scope, stable x2); card 232 pass / 11 residual; F-40 and F-41 closed with direct tests
 Claimed: (none; no READY task for 07)
-Waiting on: 01+05 to close F-40, then `python -m mbos_qa spine --rc` (about 2.5 minutes); card findings F-26..F-39 for 01/06.
-Current phase: Round Two — G-06 delivered; waiting on F-40 and the card fixes
+Waiting on: owners of the open card items — F-36 (01+02), F-30 (01+03), F-28/F-31/F-27 (01). Re-run: `python -m mbos_qa card` (about 45 s) and `python -m mbos_qa spine --rc` (about 2.5 min); `python -m mbos_qa install-pins` first.
+Current phase: Round Two — G-07 delivered; waiting on the remaining card fixes
 Started: 2026-10-06 (round one) · 2026-10-07 (round two)
 Last updated: 2026-10-07
 
@@ -50,7 +51,14 @@ Last updated: 2026-10-07
 - **Red:** F-40 (01+05). A publishing YES without step-up is accepted, then refused by the gateway, and Michael's approval is lost. It fails safe.
 - Observation F-41 (05): the proposer identity holds propose-only grants for every money-moving capability.
 
+## G-07 result @ 5e66a02
+- **Release candidate READY (dry-run scope):** 105 passed, 0 failed, identical across 2 runs; reference config 104/0; mock suite 77/0/1. `docs/qa/RELEASE_CANDIDATE.md` states the scope: no live providers, LiteLLM, real egress cut, lane C engine or UI.
+- Pins (verified byte-identical by `mbos_qa.pincheck`): mbos `2d4e8dd`, lane D `c97ba6b`, lane E `87f0b53`.
+- **Card:** 232 passed, 11 failed. Open: F-36 (a NUL aborts discover in normalize_step; 01+02), F-30 (3/42 phrasings, no model-specific marker; 01+03), F-28 (dates; 01), F-31 (headline lacks a dry-run marker; 01), F-27 (a malformed risk source; 01). F-39 is accepted (R25).
+- Receipt: `docs/receipts/2026-10-07-G-07-final-rerun.md`.
+
 ## Proposed tasks
+- **P-07-18 (01) F-36:** isolate each record in `discover` (try/except around normalize_step, convert domain errors to picklable ones), so one bad listing cannot abort the batch regardless of the normalizer.
 - **P-07-16 (01 + 05) F-40:** `decide` consults the PDP's step_up requirement on the request and refuses a YES that lacks it; a guard-refused request settles failed, not `approved`.
 - **P-07-17 (05) F-41:** per-lane propose grants (06: comms; 07: publishing), the spine identity limited to what its default planner emits.
 - **P-07-13 (01) F-26/F-27/F-28/F-36:** harden the card builder against malformed enrichment (type-check, sanitise, validate values) and quarantine NUL/invalid-JSON listings at ingest; add the fuzz and poison-listing tests to 01's suite.
