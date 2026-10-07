@@ -3,8 +3,9 @@
 Pure data (no HTML) so the same model backs the web page and the JSON API.
 """
 
-from .approvals import HOLD_PRESETS, needs_step_up
-from .util import parse_iso
+from mbos.clock import parse as parse_iso
+
+from .ux import HOLD_PRESETS, requires_step_up
 
 
 def _prov_kind(p):
@@ -70,6 +71,7 @@ def economics_summary(item):
 
 
 def card(store, areq_id, now):
+    """`store` is an operator_ui.backend.SpineBackend (read side)."""
     areq = store.action_request(areq_id)
     if areq is None:
         return None
@@ -78,7 +80,9 @@ def card(store, areq_id, now):
     sc = ((item.get("scores") or {}).get("scorecard") or {})
     approvals = store.approvals_for(areq_id)
     receipts = store.receipts(areq_id=areq_id)
-    item_receipts = [r for r in store.receipts(item_id=item["item_id"]) if r["type"] == "ITEM_STATE_CHANGED"]
+    seen = {r["receipt_id"] for r in receipts}
+    item_receipts = [r for r in store.receipts(item_id=item["item_id"])
+                     if r["type"] == "ITEM_STATE_CHANGED" and r["receipt_id"] not in seen]
     prov_ids = list(dict.fromkeys(
         list(areq["provenance_ids"]) + list(item.get("provenance_ids", []))
         + [s["provenance_id"] for s in item.get("sources", [])]
@@ -88,9 +92,10 @@ def card(store, areq_id, now):
     ))
     provenance = [_prov_summary(store.provenance(p)) or {"id": p, "kind": "MISSING", "what": "not found in store"} for p in prov_ids]
     successors = [a for a in store.action_requests_for_item(item["item_id"]) if a.get("derived_from") == areq_id]
-    action_summary = next((pa["summary"] for pa in rec.get("proposed_actions", []) if pa["capability"] == areq["capability"]), None)
+    action_summary = areq["payload"].get("summary") or next(
+        (pa["summary"] for pa in rec.get("proposed_actions", []) if pa["capability"] == areq["capability"]), None)
     gates = sc.get("gates") or {}
-    hold = store.hold_timer(areq_id)
+    hold = store.active_hold(areq)
     expires = parse_iso(areq["expires_at"])
     return {
         "item": item,
@@ -121,7 +126,7 @@ def card(store, areq_id, now):
         "research": item.get("research", []),
         "provenance": provenance,
         "action_summary": action_summary,
-        "step_up": needs_step_up(areq),
+        "step_up": requires_step_up(areq),
         "decidable": areq["status"] in ("pending_approval", "held") and expires > now,
         "expires_in_hours": round((expires - now).total_seconds() / 3600, 1),
         "approvals": approvals,
@@ -145,11 +150,12 @@ def queue(store, now):
             "category": item["category"], "title": item["normalized"]["title"], "verdict": rec.get("verdict"),
             "confidence": rec.get("confidence", d.get("confidence")), "ev": d.get("ev_net_profit"),
             "pph": d.get("ev_profit_per_hour"), "capability": a["capability"],
-            "summary": next((pa["summary"] for pa in rec.get("proposed_actions", []) if pa["capability"] == a["capability"]), a["capability"]),
+            "summary": a["payload"].get("summary") or next(
+                (pa["summary"] for pa in rec.get("proposed_actions", []) if pa["capability"] == a["capability"]), a["capability"]),
             "reversibility": a["reversibility"], "expires_at": a["expires_at"],
             "expires_in_hours": round((parse_iso(a["expires_at"]) - now).total_seconds() / 3600, 1),
             "derived_from": a.get("derived_from"),
-            "hold_until": (store.hold_timer(a["action_request_id"]) or {}).get("hold_until"),
+            "hold_until": (store.active_hold(a) or {}).get("hold_until"),
         })
     return {
         "pending": [r for r in rows if r["status"] == "pending_approval"],

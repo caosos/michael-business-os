@@ -3,18 +3,23 @@
 Binds to 127.0.0.1 only and rejects non-local Host headers (DNS-rebinding guard).
 Every POST carries a per-process CSRF token. Remote access and real step-up
 (WebAuthn/TOTP) are lane E (Agent 05) work and are deliberately not attempted here.
+
+R10: every decision goes through `backend.decide` → `mbos.spine.decide`. This module has no
+gateway, no timers and no ledger of its own.
 """
 
 import html
 import json
 import secrets
-import threading
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, quote, urlparse
 
-from . import views
-from .approvals import DecisionError
+from mbos.clock import utcnow
+from mbos.spine import DecisionRefused
+
+from . import ux, views
+from .ux import InputError
 
 ALLOWED_HOSTS = {"127.0.0.1", "localhost", "[::1]"}
 
@@ -147,9 +152,13 @@ def render_card(c, csrf):
     hold = ""
     if c["hold"]:
         h = c["hold"]
-        hold = (f"<p><b>On HOLD.</b> Wakes: {e(', '.join(json.loads(h['wake_on'])))}"
-                f"{' · until ' + e(h['hold_until']) if h['hold_until'] else ''} · next reminder {e(h['next_renotify_at'])}"
-                f"{' · escalates ' + e(h['escalate_at']) if h['escalate_at'] else ''}. It will never execute on its own.</p>")
+        hold = (f"<p><b>On HOLD</b> until {e(h.get('hold_until'))} · wakes on {e(', '.join(h.get('wake_on') or []))}"
+                f" · reminder every {e(h.get('renotify_after'))}"
+                f"{' · escalates after ' + e(h['escalate_after']) if h.get('escalate_after') else ''}."
+                " The item workflow owns this timer; it re-presents the request and never executes it.</p>")
+        if "michael_ping" in (h.get("wake_on") or []):
+            hold += (f'<form method="post" action="/areq/{e(a["action_request_id"])}/wake"><input type="hidden" name="csrf" value="{e(csrf)}">'
+                     '<button class="b-HOLD" style="width:auto">Wake now (re-present for a decision)</button></form>')
 
     common = (f'<input type="hidden" name="csrf" value="{e(csrf)}">'
               f'<input type="hidden" name="payload_hash_seen" value="{e(a["payload_hash"])}">')
@@ -166,7 +175,7 @@ def render_card(c, csrf):
 <button class="b-YES">YES</button></form>
 <form method="post" action="/areq/{e(a['action_request_id'])}/decide">{common}<input type="hidden" name="decision" value="NO">
 <label>Reason (required)<input name="reason" required maxlength="500"></label>
-<label><input type="checkbox" name="archive" value="1" checked>Archive the opportunity</label>
+<p class="small mut">The opportunity is archived; the reason feeds LEARN.</p>
 <button class="b-NO">NO</button></form>
 <form method="post" action="/areq/{e(a['action_request_id'])}/decide">{common}<input type="hidden" name="decision" value="MODIFY">
 <label>Edited payload (creates a NEW request that needs its own YES)<textarea name="new_payload">{e(json.dumps(a['payload'], indent=2))}</textarea></label>
@@ -197,51 +206,72 @@ def render_card(c, csrf):
 
 
 def render_ledger(store):
-    ok, bad, n = store.verify_chain()
-    status = f"<span class='ok'>chain verified ({n} receipts)</span>" if ok else f"<span class='bad'>CHAIN BROKEN at seq {bad}</span>"
+    v = store.verify_chain()
+    status = (f"<span class='ok'>chain verified ({e(v['checked'])} receipts)</span>" if v["ok"]
+              else f"<span class='bad'>CHAIN BROKEN at seq {e(v['first_bad_seq'])}: {e(v['reason'])}</span>")
     rows = "".join(
         f"<tr><td class='num'>{r['seq']}</td><td>{e(r['ts'])}</td><td>{e(r['type'])}</td><td>{e(r['actor']['id'])}</td>"
         f"<td>{'<a href=/areq/' + e(r['action_request_id']) + '>' + e(r['action_request_id'][:13]) + '…</a>' if r.get('action_request_id') else ''}</td>"
         f"<td>{e(r['intent'])}</td><td><code>{e(', '.join(r['provenance_ids']))}</code></td><td><code>{e(r['row_hash'][7:19])}</code></td></tr>"
-        for r in reversed(store.receipts()))
+        for r in reversed(store.receipts(limit=300)))
     return (f"<div class='card'><h2>Receipt ledger</h2><p>{status}</p></div><div class='card'><table><tr><th>seq</th><th>ts</th><th>type</th><th>actor</th>"
             f"<th>request</th><th>intent</th><th>provenance</th><th>row_hash</th></tr>{rows}</table></div>")
 
 
 class App:
-    def __init__(self, store, approvals, clock):
-        self.store, self.approvals, self.clock = store, approvals, clock
+    """Turns form posts into `spine.decide` calls through the backend. No side effects of its own."""
+
+    def __init__(self, backend, operator_pin=None):
+        self.store = backend
+        self.operator_pin = operator_pin
         self.csrf = secrets.token_urlsafe(32)
+        self.session_id = "web-" + secrets.token_hex(4)
 
     def state(self):
-        try:
-            return self.store.system("system_state")
-        except Exception:  # noqa: BLE001
-            return "UNREADABLE (fail-closed)"
+        return self.store.system_state()
+
+    def _check_csrf(self, f):
+        if not secrets.compare_digest(f.get("csrf", ""), self.csrf):
+            raise InputError("invalid form token; reload the page")
 
     def decide(self, areq_id, f):
-        if not secrets.compare_digest(f.get("csrf", ""), self.csrf):
-            raise DecisionError("invalid form token; reload the page")
-        d, seen = f.get("decision"), f.get("payload_hash_seen")
-        if d == "YES":
-            r = self.approvals.yes(areq_id, seen, pin=f.get("pin"))
-            ex = r.get("execution") or {}
-            return f"YES recorded. Execution: {ex.get('status')}" + (f" ({ex.get('error')})" if ex.get("error") else " — dry-run receipt written.")
-        if d == "NO":
-            self.approvals.no(areq_id, seen, f.get("reason"), archive=f.get("archive") == "1")
-            return "NO recorded; request closed."
+        self._check_csrf(f)
+        d, seen = f.get("decision"), f.get("payload_hash_seen") or ""
+        areq = self.store.action_request(areq_id)
+        if areq is None:
+            raise InputError(f"unknown action request {areq_id}")
+        if d not in ("YES", "NO", "MODIFY", "HOLD"):
+            raise InputError(f"unknown decision {d!r}")
+        kw = {"auth_context": ux.auth_context(areq, f.get("pin"), self.operator_pin, self.session_id, d)}
+        reason = (f.get("reason") or f.get("note") or "").strip() or None
+        if reason:
+            kw["reason"] = reason
+        if d == "NO" and not reason:
+            raise InputError("NO requires a reason (it feeds LEARN)")
         if d == "MODIFY":
             try:
-                payload = json.loads(f.get("new_payload") or "")
+                kw["new_payload"] = json.loads(f.get("new_payload") or "")
             except json.JSONDecodeError as ex:
-                raise DecisionError(f"edited payload is not valid JSON: {ex}")
-            r = self.approvals.modify(areq_id, seen, payload, note=f.get("note"))
-            return f"MODIFY recorded. New request {r['new_action_request_id']} awaits its own YES."
+                raise InputError(f"edited payload is not valid JSON: {ex}")
+            if not isinstance(kw["new_payload"], dict):
+                raise InputError("edited payload must be a JSON object")
         if d == "HOLD":
-            self.approvals.hold(areq_id, seen, preset=f.get("hold_preset") or "24h",
-                                hold_until=f.get("hold_until") or None, reason=f.get("reason"))
-            return "HOLD recorded. It will re-notify and never execute on its own."
-        raise DecisionError(f"unknown decision {d!r}")
+            kw["hold"] = ux.hold_for(f.get("hold_preset") or "24h", utcnow(), f.get("hold_until") or None)
+        out = self.store.decide(areq_id, d, seen, **kw)
+        return {
+            "YES": "YES recorded. The item workflow now runs it through the gateway (dry-run); watch the receipts below.",
+            "NO": "NO recorded; the opportunity is archived.",
+            "MODIFY": f"MODIFY recorded. New request {out.get('new_action_request_id')} awaits its own YES.",
+            "HOLD": "HOLD recorded. The workflow re-notifies and re-presents it; it never executes on its own.",
+        }[d], out
+
+    def wake(self, areq_id, f):
+        self._check_csrf(f)
+        areq = self.store.action_request(areq_id)
+        if areq is None or areq["status"] != "held":
+            raise InputError("only a held request can be woken")
+        self.store.ping(areq["item_id"])
+        return "Wake sent. The workflow re-presents the request (it does not execute it)."
 
 
 def make_handler(app):
@@ -280,7 +310,7 @@ def make_handler(app):
                 return
             u = urlparse(self.path)
             qs = parse_qs(u.query)
-            now = app.clock.now()
+            now = utcnow()
             flash = (qs.get("msg") or [None])[0]
             err = (qs.get("err") or [None])[0]
             if u.path == "/":
@@ -306,19 +336,19 @@ def make_handler(app):
                 return
             u = urlparse(self.path)
             parts = u.path.strip("/").split("/")
-            if len(parts) != 3 or parts[0] != "areq" or parts[2] != "decide":
+            if len(parts) != 3 or parts[0] != "areq" or parts[2] not in ("decide", "wake"):
                 return self._send(404, "not found", "text/plain")
             n = min(int(self.headers.get("Content-Length") or 0), 65536)
             f = {k: v[0] for k, v in parse_qs(self.rfile.read(n).decode("utf-8"), keep_blank_values=True).items()}
             areq_id = parts[1]
             try:
-                msg = app.decide(areq_id, f)
-                target = areq_id
-                for a in app.store.action_requests_for_item(app.store.action_request(areq_id)["item_id"]):
-                    if a.get("derived_from") == areq_id and f.get("decision") == "MODIFY":
-                        target = a["action_request_id"]
+                if parts[2] == "wake":
+                    msg, target = app.wake(areq_id, f), areq_id
+                else:
+                    msg, out = app.decide(areq_id, f)
+                    target = out.get("new_action_request_id") or areq_id
                 loc, key = f"/areq/{target}", "msg"
-            except DecisionError as ex:
+            except (InputError, DecisionRefused) as ex:
                 loc, key, msg = f"/areq/{areq_id}", "err", str(ex)
             self.send_response(303)
             self.send_header("Location", f"{loc}?{key}={quote(msg)}")
@@ -328,25 +358,14 @@ def make_handler(app):
     return H
 
 
-def serve(app, host="127.0.0.1", port=8765, tick_seconds=60):
+def serve(app, host="127.0.0.1", port=8765):
     if host not in ("127.0.0.1", "localhost", "::1"):
         raise SystemExit("refusing to bind a non-loopback address: remote access needs lane E auth (WebAuthn/TOTP)")
-    stop = threading.Event()
-
-    def ticker():
-        while not stop.wait(tick_seconds):
-            try:
-                app.approvals.tick()
-            except Exception as ex:  # noqa: BLE001
-                print("tick error:", ex)
-
-    threading.Thread(target=ticker, daemon=True).start()
     httpd = ThreadingHTTPServer((host, port), make_handler(app))
-    print(f"Operator UI on http://{host}:{port}/  (dry-run; Ctrl-C to stop)")
+    print(f"Operator UI on http://{host}:{port}/  (dry-run; decisions go to spine.decide; Ctrl-C to stop)")
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
         pass
     finally:
-        stop.set()
         httpd.server_close()
