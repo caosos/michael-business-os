@@ -4,8 +4,8 @@ Agent: 02
 Role: Discovery / Source Adapters (DISCOVER + NORMALIZE lane)
 Branch: research/agent-02-opportunity
 Worktree: /home/michaelos/business-os-worktrees/agent-02-opportunity
-State: WORKING
-Claimed: B-17
+State: WAITING
+Waiting on: B-12 unblock (MICHAEL_DECISIONS #8 + credentials); Agent 03 model-year support (to admit NHTSA entries); queue refill
 Blocked: B-12 on MICHAEL_DECISIONS #8 + operator credentials
 Done: B-01 @ 7c9da45
 Done: B-02 @ cadfdae
@@ -22,8 +22,9 @@ Done: B-13 @ 741dfd7 (spine-path Deduper; corpus via 01's spine.ingest: F2 0.00%
 Done: B-14 @ 0dd506b (photos via put_artifact; normalized.images round-trips by sha256 on the spine path; full suite 175 passed)
 Done: B-15 @ 09a755c (P0; listing_activity + seller blocks, only what the source exposes; card validates; 188 tests)
 Done: B-16 @ ab61f02 (CPSC adapter; 3 KB entries pass Agent 03's load_kb; review list for the rest; 198 tests)
+Done: B-17 @ 43de283 (NHTSA adapter; endpoints confirmed live; entries held for review until KB has model years; 208 tests)
 Done: C-04 (support, source side) @ a1a7730 (lead Agent 03 C-04 @ 882c726)
-Current phase: Round Two — working B-17 (NHTSA adapter for project_vehicle; confirm endpoints on the live site first)
+Current phase: Round Two — B-01..B-11, B-13..B-17 DONE; B-12 blocked; WAITING
 Started: 2026-10-06 (Round One) · Round Two started 2026-10-07
 Last updated: 2026-10-07
 
@@ -49,6 +50,10 @@ Heads-up from 05: E-02 moves PANIC to Postgres (04 migration 0007); `MBOS_PANIC_
 constructor changes; `blocks(...)` signature/codes unchanged. 02 adapts its CLI wiring when 05 announces it.
 
 ## Proposed tasks
+- **P-03/02-13 (lane C, P2): model-year support in the KB matcher.** Add optional `years` to match groups. A listing
+  must name the year or a covered year range for the entry to match; no year in the listing means no match (or a
+  labelled weaker match). Agent 03 owns this. Then flip `vehicle_safety.KB_SUPPORTS_MODEL_YEARS`, and the NHTSA entries
+  that pass the standard are admitted under R23.
 - **P-02-11 (lane B, P2): NHTSA adapter** (recalls and complaints by make/model/year; bulletins from downloaded files)
   for `project_vehicle`, per Agent 03's source plan. First confirm the endpoints on the live site, as 03's plan says.
 - **P-02-12 (lanes A+C, policy): review gate for auto-generated recall entries.** The adapter emits entries plus a
