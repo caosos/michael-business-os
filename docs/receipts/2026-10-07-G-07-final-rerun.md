@@ -39,3 +39,17 @@
 
 ## Not covered
 Operator UI rendering of the card; Agent 03's engine and lane B's real normalizer (the stack uses 01's fixture ones); live providers; LiteLLM; real egress cut.
+
+## Addendum: final card re-run at Agent 01 `deec1d1` (`40170f6`)
+- **Pins:** mbos `deec1d1` (04 `c97ba6b` and 05 `87f0b53` unchanged), installed and verified byte-identical.
+- **Card: 245 passed, 2 failed** of 248, up from 232 / 11. **Release candidate: still READY** (105 passed, 0 failed); the reference config is 104/0.
+- **Verified fixed by test:**
+  - F-36: the good listings behind a NUL ingest, and the poison one is retried scrubbed and flagged `needs_review`, with no NUL (both backends).
+  - F-31: the headline carries the DRY-RUN marker.
+  - F-27: an uncheckable risk is dropped.
+  - F-30: all 42 phrasings are blocked and junk sources rejected.
+  - F-28: ISO strings only, an edit cannot precede the post, and out-of-window dates are UNKNOWN. A positive control shows that valid dates still display.
+- **Open, both low:**
+  - **F-28:** a bare number such as `20261005` is still shown as a FACT date.
+  - **F-30:** the ADR promises a model-specific exemption path that the contract lacks. Today no elementary-phrased content can pass, which is stricter than the ADR.
+- **A premise change on my side, not a loosening.** After F-27 the card drops elementary or unsourced risks instead of leaving them for `validate_card` to reject, and 23 of my lint cases failed on the premise "validation must return errors". I restated the requirement as "does not reach Michael" (validation rejects, or the text is absent from the card). Each test checks the content explicitly, so it cannot pass vacuously. One consequence: a dropped risk leaves no trace, so a lane never learns its content was rejected. I did not test that; it is an observation for 01 and 03.
