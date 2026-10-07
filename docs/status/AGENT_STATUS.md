@@ -4,12 +4,18 @@ Agent: 04
 Role: Postgres / State / Receipts (lane D, durable business state, receipts, provenance)
 Branch: research/agent-04-state
 Worktree: /home/michaelos/business-os-worktrees/agent-04-state
-State: COMPLETE (round-two wave one); awaiting coordinator review of the flagged interpretations
+State: WORKING (claimed: integration ruling R1 — migration 0005 + R3 canonical hash + DBOS role answer)
 Current phase: ROUND TWO: implementation, Lane D (Postgres state spine)
 Started: 2026-10-06
-Last updated: 2026-10-07 (round two, wave one delivered)
+Last updated: 2026-10-07 (claimed R1 task from ROUND_TWO_INTEGRATION.md §5 item 1)
 
 ## Current objective
+**CLAIMED (2026-10-07):** No READY_QUEUE.md or ACTIVE_WORK.md exists on any branch, so the work assignment is Agent 01's `docs/integration/ROUND_TWO_INTEGRATION.md` §5 item 1 (critical path):
+- migration `0005` with the R1 tables: `effector_calls`, PANIC/governance state (R5), `llm_spend`, `artifacts`
+- the R3 canonical payload hash
+- R8: dedup_key becomes a blocking key
+- answers on the DBOS role and checkpoint schema
+
 Deliver the authoritative Postgres state spine per ADR-0001 and ADR-0004 and the frozen contracts
 v1.0.0. **Done for wave one.**
 Next step: wire it to Agent 01's DBOS app, then build the State MCP server (see the 1-week plan in
