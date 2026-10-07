@@ -21,7 +21,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from .adapter import SearchProfile
-from .adapters import EbayBrowseAdapter, GsaAuctionsAdapter, ServiceIntakeAdapter, TrashNothingAdapter
+from .adapters import EbayBrowseAdapter, GsaAuctionsAdapter, SamGovAdapter, ServiceIntakeAdapter, TrashNothingAdapter
 from .health import HealthBook, UnavailablePanic
 from .pipeline import run_discovery
 from .rawstore import FileRawStore
@@ -63,6 +63,10 @@ def build_jobs(cfg: dict, base: Path, fixtures: Path | None):
             kw = {"states": states} if states else {}
             adapter = (GsaAuctionsAdapter.from_fixture(fixtures / "gsa", _now, **kw) if fixtures
                        else GsaAuctionsAdapter.from_env(os.environ, live=live, clock=_now, **kw))
+        elif src == "samgov":
+            states = tuple(p.get("states") or ["AR"])
+            adapter = (SamGovAdapter.from_fixture(fixtures / "samgov", _now, states=states) if fixtures
+                       else SamGovAdapter.from_env(os.environ, live=live, clock=_now, states=states))
         elif src == "trashnothing":
             adapter = (TrashNothingAdapter.from_fixture(fixtures / "trashnothing", _now) if fixtures
                        else TrashNothingAdapter.from_env(os.environ, live=live, clock=_now))

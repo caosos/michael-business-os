@@ -34,6 +34,13 @@ limit = 100
 max_pages = 2
 
 [[profile]]
+id = "service-gov-contracts"
+source = "samgov"
+lane = "service"
+live = false              # needs SAMGOV_API_KEY (free SAM.gov account key)
+states = ["AR"]
+
+[[profile]]
 id = "service-website-form"
 source = "website_lead"
 lane = "service"

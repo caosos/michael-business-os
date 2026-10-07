@@ -6,7 +6,7 @@ Branch: research/agent-02-opportunity
 Worktree: /home/michaelos/business-os-worktrees/agent-02-opportunity
 State: WAITING
 Waiting on: B-12 unblock (MICHAEL_DECISIONS #8 + credentials); Agent 03 model-year support (to admit NHTSA entries); queue refill
-Blocked: B-12 on MICHAEL_DECISIONS #8 + operator credentials
+Blocked: B-12 on MICHAEL_DECISIONS #8 + operator credentials (prep DONE: docs/runbooks/first-live-run-checklist.md; SAM.gov added to the CLI)
 Done: B-01 @ 7c9da45
 Done: B-02 @ cadfdae
 Done: B-03 @ 8ff5476
