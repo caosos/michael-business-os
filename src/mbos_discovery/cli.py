@@ -1,6 +1,7 @@
 """`mbos-discover` — run the DISCOVER + NORMALIZE lane from a TOML config.
 
     mbos-discover run    --config config/discovery.example.toml [--fixtures tests/fixtures]
+                         [--source NAME]... [--dry]       (NAME: any profile source, see runner.ALL_SOURCES)
     mbos-discover health [--data-dir var/discovery]
     mbos-discover clear-freeze ebay --by michael
     mbos-discover acceptance [--corpus tests/fixtures/corpus7d] [--out report.json]   (F1-F4, offline)
@@ -20,12 +21,9 @@ import tomllib
 from datetime import datetime, timezone
 from pathlib import Path
 
-from .adapter import SearchProfile
-from .adapters import EbayBrowseAdapter, GsaAuctionsAdapter, SamGovAdapter, ServiceIntakeAdapter, TrashNothingAdapter
 from .health import HealthBook, UnavailablePanic
-from .pipeline import run_discovery
-from .rawstore import FileRawStore
-from .store import ItemStore, load_json, save_json_atomic
+from .runner import ALL_SOURCES, ConfigError, build_plan, dry_run, run
+from .store import load_json, save_json_atomic
 
 
 def _now() -> datetime:
@@ -46,45 +44,17 @@ def _panic():
     return PgPanicStore(dsn)
 
 
-def build_jobs(cfg: dict, base: Path, fixtures: Path | None):
-    jobs = []
-    for p in cfg.get("profile", []):
-        src = p["source"]
-        profile = SearchProfile(
-            profile_id=p["id"], lane=p["lane"], keywords=tuple(p.get("keywords", [])),
-            postal_code=str(p.get("postal_code", "72034")), radius_miles=int(p.get("radius_miles", 100)),
-            max_price=p.get("max_price"), limit=int(p.get("limit", 50)), max_pages=int(p.get("max_pages", 2)))
-        live = bool(p.get("live", False))      # GSA / Trash Nothing: no live call unless the profile says so
-        if src == "ebay":
-            adapter = (EbayBrowseAdapter.from_fixture(fixtures / "ebay", _now) if fixtures
-                       else EbayBrowseAdapter.from_env(os.environ, clock=_now))
-        elif src == "gsa_auctions":
-            states = frozenset(p["states"]) if p.get("states") else None
-            kw = {"states": states} if states else {}
-            adapter = (GsaAuctionsAdapter.from_fixture(fixtures / "gsa", _now, **kw) if fixtures
-                       else GsaAuctionsAdapter.from_env(os.environ, live=live, clock=_now, **kw))
-        elif src == "samgov":
-            states = tuple(p.get("states") or ["AR"])
-            adapter = (SamGovAdapter.from_fixture(fixtures / "samgov", _now, states=states) if fixtures
-                       else SamGovAdapter.from_env(os.environ, live=live, clock=_now, states=states))
-        elif src == "trashnothing":
-            adapter = (TrashNothingAdapter.from_fixture(fixtures / "trashnothing", _now) if fixtures
-                       else TrashNothingAdapter.from_env(os.environ, live=live, clock=_now))
-        elif src in ("website_lead", "referral"):
-            adapter = ServiceIntakeAdapter(src, base / p["inbox"], _now)
-        else:
-            raise SystemExit(f"config: no adapter implemented for source {src!r} (profile {p['id']})")
-        jobs.append((adapter, profile))
-    return jobs
-
-
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="mbos-discover")
     ap.add_argument("--data-dir", default="var/discovery")
     sub = ap.add_subparsers(dest="cmd", required=True)
     r = sub.add_parser("run")
     r.add_argument("--config", required=True)
-    r.add_argument("--fixtures", help="fixture root (ebay/, gsa/, trashnothing/ subdirs); no network")
+    r.add_argument("--fixtures", help="fixture root (ebay/, gsa/, samgov/, trashnothing/, email/, comps/, cpsc/, nhtsa/); no network")
+    r.add_argument("--source", action="append", default=[], choices=ALL_SOURCES,
+                   help="only profiles of this source (repeatable)")
+    r.add_argument("--dry", action="store_true",
+                   help="print the exact requests a live run would make; touches no network, no state, no PANIC DB")
     sub.add_parser("health")
     acc = sub.add_parser("acceptance", help="run discovery acceptance F1-F4 on a fixture corpus (offline)")
     acc.add_argument("--corpus", default="tests/fixtures/corpus7d")
@@ -120,24 +90,17 @@ def main(argv: list[str] | None = None) -> int:
     except (OSError, tomllib.TOMLDecodeError) as e:
         print(f"config error: {e}", file=sys.stderr)
         return 2
-    jobs = build_jobs(cfg, Path.cwd(), Path(a.fixtures) if a.fixtures else None)
-    store = ItemStore.from_json(load_json(data / "items.json", {}))
-    report = run_discovery(jobs, store, FileRawStore(data / "raw"), hb, _now(),
-                           frozenset(cfg.get("enabled_sources", [])), panic=_panic())
-    save_json_atomic(data / "items.json", store.to_json())
-    save_json_atomic(data / "health.json", hb.to_json())
-    save_json_atomic(data / "runs" / f"{report.run_id}.json", report.to_json())
-
-    for s in report.sources:
-        line = (f"{s.source:<13} {s.profile_id:<22} {s.status:<7} fetched={s.fetched} new={s.created} "
-                f"merged={s.merged} updated={s.updated} seen={s.seen} quarantined={s.quarantined}")
-        detail = s.skipped_reason or (s.error or {}).get("message")
-        print(line + (f"  [{detail}]" if detail else ""))
-    for f in report.freeze_requests:
-        print(f"FREEZE REQUEST {f['capability']}: {f['reason']}  (apply: mbos-gov panic freeze --level L2 "
-              f"--target {f['capability']} --actor {f['requested_by']} --reason ...)")
-    print(f"items in store: {len(store.items)}  run: {report.run_id}")
-    return 0
+    only = set(a.source)
+    fixtures = Path(a.fixtures) if a.fixtures else None
+    try:
+        if a.dry:
+            plan = build_plan(cfg, Path.cwd(), fixtures, True, only)
+            print(dry_run(plan))
+            return 0
+        return run(cfg, Path.cwd(), data, fixtures, only, _panic())
+    except ConfigError as e:
+        print(f"config error: {e}", file=sys.stderr)
+        return 2
 
 
 if __name__ == "__main__":

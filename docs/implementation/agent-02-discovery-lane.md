@@ -479,3 +479,24 @@ Also held for review:
 - With the flag off, no entries ship and everything is on the review list.
 - With the flag on (monkeypatched), the entries that pass the standard load through Agent 03's `load_kb` once `years` is removed from the match groups.
 - A freeze on 429 works and the output is deterministic.
+
+## 24. One CLI for every source, with `--dry` — READY_QUEUE B-19
+
+`mbos-discover run --config <cfg> [--source NAME]... [--fixtures ROOT] [--dry]` (`runner.py`). Source groups:
+- **Items:** `ebay`, `gsa_auctions`, `samgov`, `trashnothing`, `website_lead`, `referral`, `govdeals_email`, `publicsurplus_email`, `estatesales_net_email`. Output: `items.json` and `raw/`.
+- **Comps:** `manual`, `ebay_marketplace_insights`, `ebay_browse_asking`. Output: `comps.json`. The asking comps are derived from stored listings and make no request.
+- **Knowledge:** `cpsc_recalls`, `nhtsa`. Output: `knowledge/<source>.json` with entries and the review list.
+
+**`--dry`** builds every adapter over a recording transport (it still enforces the host allow-list) and prints the exact requests a live run would make:
+- It prints method, redacted URL, header names and request body.
+- For e-mail it prints the IMAP command sequence: login, `EXAMINE` (read-only), `SEARCH SINCE`, `BODY.PEEK[]` fetch.
+- It says, per profile, whether a real run would make zero requests because the live flag is off.
+- It touches no network, writes no state, reads no PANIC database, and changes no health.
+
+**Network guarantee, tested.** `tests/test_b19_cli.py` (9 tests) patches every network path (`socket.connect`, `create_connection`, `imaplib.IMAP4_SSL`, `UrllibTransport.request`) to fail the test:
+- every source runs green from `--fixtures`
+- `--dry` runs for every source and prints the expected URLs
+- a real run with no live flags and no credentials completes with "config" errors and zero network
+- an unknown source exits 2 and is rejected by `--source`
+
+Example config: `config/discovery.example.toml` now has a profile for every source, all with live flags off.

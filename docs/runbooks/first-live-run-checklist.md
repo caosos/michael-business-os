@@ -3,6 +3,7 @@
 Everything below is **read-only**: no seller contact, no bids, no purchases. Each live call is behind an explicit `live = true` (or credentials), a read-only transport that allows only the listed host, and the shared 403/429 freeze. If any source answers 403, 429 or a CAPTCHA, **stop**: the system freezes it (2 blocks or 1 CAPTCHA), and you do not retry or work around it.
 
 **Ground rules for the run**
+0. Start with `--dry` (see below).
 1. Run from a clean data dir: `--data-dir var/live-smoke`. Nothing from the run touches the production store.
 2. Raw payloads land in `var/live-smoke/raw/` (content-addressed). To make a fixture, copy a payload out by its `raw_ref`; scrub anything personal first (names, e-mails, phone numbers, partial VINs).
 3. Record real fixtures *next to* the hand-built ones, then change the mapping and the tests together. Never edit a fixture to make a test pass.
@@ -52,8 +53,11 @@ Confirm the terms and rate limits (UNKNOWN), and that complaint `components` is 
 ### eBay Marketplace Insights (only if approved)
 Confirm the real `item_sales` response shape (`itemSales[]`, `lastSoldPrice`, `lastSoldDate`), the 90-day window and the category allow-list. Change `ebay_insights.normalize`. Until approved, sold comps come from manual entry.
 
-## Not wired into the CLI yet (needs a short script, a known gap)
-`mbos-discover run` handles eBay, GSA, Trash Nothing, SAM.gov and the intake inboxes. **Not yet in the CLI:** e-mail alerts, comps (`collect_comps`), CPSC (`recalls.collect_recalls`) and NHTSA (`vehicle_safety.collect`). For the first run call them from Python, using the same adapters with `live=True`.
+## One command for every source (B-19)
+`mbos-discover run --config <cfg> [--source NAME]... [--fixtures ROOT] [--dry]` covers every source: items (eBay, GSA, SAM.gov, Trash Nothing, intake inboxes, alert e-mails), comps (manual, eBay Marketplace Insights, eBay asking comps derived from stored listings) and knowledge (CPSC, NHTSA).
+- **Before the first live run, look at what it will do:** `mbos-discover run --config <cfg> --dry`. It prints the exact requests, with secrets redacted, makes no network call, and writes no state. For e-mail it prints the read-only IMAP command sequence.
+- **Live flags:** a profile does nothing on the network until its flag is on (`live = true`; `imap.live = true` for a mailbox; eBay Browse goes live only when its credentials are set). Without a flag you see a "config" error with zero requests.
+- Knowledge output lands in `<data-dir>/knowledge/<source>.json` (entries plus the review list); comps in `<data-dir>/comps.json`.
 
 ## After the run (the ten-minute wrap-up)
 1. `mbos-discover health` → no source FROZEN; record any `error` kinds.

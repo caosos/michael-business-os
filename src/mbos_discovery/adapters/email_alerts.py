@@ -81,14 +81,15 @@ class ImapReader:
     """Read-only IMAP. `connect` is injectable for tests (default: imaplib.IMAP4_SSL)."""
 
     def __init__(self, host: str, user: str, password_env: str, folder: str = "INBOX", *, live: bool = False,
-                 connect: Callable[[str], object] | None = None) -> None:
+                 connect: Callable[[str], object] | None = None, password: str | None = None) -> None:
         self.host, self.user, self.password_env, self.folder, self.live = host, user, password_env, folder, live
+        self._password = password                       # explicit override (dry-run placeholder); never from config files
         self.connect = connect or (lambda h: imaplib.IMAP4_SSL(h))
 
     def messages(self, since: datetime) -> Iterable[bytes]:
         if not self.live:
             raise PermissionError("live mailbox access not enabled (set live = true)")
-        password = os.environ.get(self.password_env)
+        password = self._password or os.environ.get(self.password_env)
         if not password:
             raise PermissionError(f"{self.password_env} not set")
         conn = self.connect(self.host)

@@ -51,3 +51,53 @@ id = "service-referrals"
 source = "referral"
 lane = "service"
 inbox = "var/intake/referral"
+
+# ---- alert e-mails (tier 2). Either a local folder of .eml files, or a read-only IMAP mailbox. -------------------------
+# The password comes from the named environment variable, never from this file. `live = false` → no connection is opened.
+[[profile]]
+id = "flip-govdeals-alerts"
+source = "govdeals_email"
+lane = "flip"
+mail_dir = "var/mail/govdeals"          # local .eml files; or replace with the imap table below
+# imap = { host = "imap.example.invalid", user = "alerts@example.invalid", password_env = "MBOS_IMAP_PASSWORD", folder = "INBOX", live = false }
+
+[[profile]]
+id = "flip-publicsurplus-alerts"
+source = "publicsurplus_email"
+lane = "flip"
+mail_dir = "var/mail/publicsurplus"
+
+[[profile]]
+id = "flip-estatesales-alerts"
+source = "estatesales_net_email"
+lane = "flip"
+mail_dir = "var/mail/estatesales"
+
+# ---- sold comps / asking comps (evidence for Agent 03; never Items) -------------------------------------------------
+[[profile]]
+id = "comps-manual"
+source = "manual"
+inbox = "var/comps/manual"              # JSON files Michael (or the Operator UI) drops in; read-only
+
+[[profile]]
+id = "comps-ebay-sold"
+source = "ebay_marketplace_insights"
+keywords = ["6x12 enclosed trailer"]
+live = false                            # needs eBay Marketplace Insights Limited Release approval (MICHAEL_DECISIONS #8)
+
+[[profile]]
+id = "comps-ebay-asking"
+source = "ebay_browse_asking"           # derived from eBay listings already stored: no request
+
+# ---- knowledge sources for Agent 03's value_add KB (entries + review list in var/…/knowledge/) -------------------------
+[[profile]]
+id = "kb-cpsc"
+source = "cpsc_recalls"
+keywords = ["mower", "generator", "compressor", "welder", "trailer"]
+live = false                            # no key documented; rate limit UNKNOWN
+
+[[profile]]
+id = "kb-nhtsa"
+source = "nhtsa"
+vehicles = [{ make = "ACURA", model = "RDX", year = 2012 }]   # explicit; never parsed from listing text
+live = false
