@@ -1,6 +1,6 @@
 """`mbos-discover` — run the DISCOVER + NORMALIZE lane from a TOML config.
 
-    mbos-discover run    --config config/discovery.example.toml [--fixtures tests/fixtures/ebay]
+    mbos-discover run    --config config/discovery.example.toml [--fixtures tests/fixtures]
     mbos-discover health [--data-dir var/discovery]
     mbos-discover clear-freeze ebay --by michael
 
@@ -20,7 +20,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from .adapter import SearchProfile
-from .adapters import EbayBrowseAdapter, ServiceIntakeAdapter
+from .adapters import EbayBrowseAdapter, GsaAuctionsAdapter, ServiceIntakeAdapter, TrashNothingAdapter
 from .health import HealthBook
 from .pipeline import run_discovery
 from .rawstore import FileRawStore
@@ -39,9 +39,18 @@ def build_jobs(cfg: dict, base: Path, fixtures: Path | None):
             profile_id=p["id"], lane=p["lane"], keywords=tuple(p.get("keywords", [])),
             postal_code=str(p.get("postal_code", "72034")), radius_miles=int(p.get("radius_miles", 100)),
             max_price=p.get("max_price"), limit=int(p.get("limit", 50)), max_pages=int(p.get("max_pages", 2)))
+        live = bool(p.get("live", False))      # GSA / Trash Nothing: no live call unless the profile says so
         if src == "ebay":
-            adapter = (EbayBrowseAdapter.from_fixture(fixtures, _now) if fixtures
+            adapter = (EbayBrowseAdapter.from_fixture(fixtures / "ebay", _now) if fixtures
                        else EbayBrowseAdapter.from_env(os.environ, clock=_now))
+        elif src == "gsa_auctions":
+            states = frozenset(p["states"]) if p.get("states") else None
+            kw = {"states": states} if states else {}
+            adapter = (GsaAuctionsAdapter.from_fixture(fixtures / "gsa", _now, **kw) if fixtures
+                       else GsaAuctionsAdapter.from_env(os.environ, live=live, clock=_now, **kw))
+        elif src == "trashnothing":
+            adapter = (TrashNothingAdapter.from_fixture(fixtures / "trashnothing", _now) if fixtures
+                       else TrashNothingAdapter.from_env(os.environ, live=live, clock=_now))
         elif src in ("website_lead", "referral"):
             adapter = ServiceIntakeAdapter(src, base / p["inbox"], _now)
         else:
@@ -56,7 +65,7 @@ def main(argv: list[str] | None = None) -> int:
     sub = ap.add_subparsers(dest="cmd", required=True)
     r = sub.add_parser("run")
     r.add_argument("--config", required=True)
-    r.add_argument("--fixtures", help="serve eBay from recorded responses in this directory")
+    r.add_argument("--fixtures", help="fixture root (ebay/, gsa/, trashnothing/ subdirs); no network")
     sub.add_parser("health")
     c = sub.add_parser("clear-freeze")
     c.add_argument("source")

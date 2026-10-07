@@ -6,4 +6,4 @@ Read-only DISCOVER + NORMALIZE implementation: `src/mbos_discovery`. See
 `docs/implementation/agent-02-discovery-lane.md`. Quick start:
 
     python3.12 -m venv .venv && .venv/bin/pip install -e '.[dev]' && .venv/bin/python -m pytest -q
-    .venv/bin/mbos-discover run --config config/discovery.example.toml --fixtures tests/fixtures/ebay
+    .venv/bin/mbos-discover run --config config/discovery.example.toml --fixtures tests/fixtures

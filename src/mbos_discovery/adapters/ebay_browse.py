@@ -24,7 +24,8 @@ from urllib.parse import parse_qs, urlencode, urlsplit
 
 from ..adapter import (FetchResult, NormalizationError, Normalized, RawRecord, SearchProfile,
                        SourceAdapter, SourceError)
-from ..http import CallbackTransport, HttpResponse, ReadOnlyTransport, Transport, TransportError, UrllibTransport
+from ..http import (CallbackTransport, HttpResponse, ReadOnlyTransport, Transport, TransportError,
+                    UrllibTransport, status_error)
 from ..canonical import CanonicalError, raw_json_bytes
 from ..normalize import (MAX_DESCRIPTION, base_flags, classify, clean_text, geo_tier, match_text,
                          money, norm_ts)
@@ -163,7 +164,7 @@ class EbayBrowseAdapter(SourceAdapter):
             res.requests_made += 1
             if r.status == 401 and attempt == 1:
                 continue                            # token expired early: refresh once
-            err = _status_error(r)
+            err = status_error(r, "eBay")
             if err:
                 return {}, err
             try:
@@ -190,7 +191,7 @@ class EbayBrowseAdapter(SourceAdapter):
         res.requests_made += 1
         if r.status in (400, 401):
             return "", SourceError("auth", f"token request rejected ({r.status}); check credentials", r.status)
-        err = _status_error(r)
+        err = status_error(r, "eBay")
         if err:
             return "", err
         try:
@@ -281,21 +282,6 @@ class EbayBrowseAdapter(SourceAdapter):
         sub = clean_text(first_cat, 120) or None
         return Normalized(source_listing_id=str(s["itemId"]), url=url, type="flip", category=category,
                           opportunity_kind=kind, normalized=normalized, subcategory=sub)
-
-
-def _status_error(r: HttpResponse) -> SourceError | None:
-    if r.status < 300:
-        if b"captcha" in r.body[:4096].lower() and not r.body.lstrip().startswith(b"{"):
-            return SourceError("captcha", "CAPTCHA/challenge page returned instead of JSON", r.status)
-        return None
-    snippet = r.body[:300].decode("utf-8", "replace")
-    if r.status == 429:
-        return SourceError("rate_limited", f"429 from eBay: {snippet}", 429)
-    if r.status == 403:
-        return SourceError("blocked", f"403 from eBay: {snippet}", 403)
-    if r.status in (401, 400):
-        return SourceError("auth", f"{r.status} from eBay: {snippet}", r.status)
-    return SourceError("http", f"HTTP {r.status}: {snippet}", r.status)
 
 
 def _slug(q: str) -> str:

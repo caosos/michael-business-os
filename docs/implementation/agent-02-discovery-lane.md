@@ -75,14 +75,14 @@ F2 (dup rate < 2% on a 7-day sample) — **UNKNOWN** until live data runs for a 
 3. No Receipt type for source freezes (`KILL_SWITCH_CHANGED` is the closest); 05 to decide.
 4. `normalized.images` requires sha256 refs — image download is deferred (wave two); URLs remain in raw.
 
-## 7. Not done in wave one (RECOMMENDATION order)
-GSA Auctions API adapter → Trash Nothing API → IMAP alert ingestor → SAM.gov. Craigslist stays PENDING_MICHAEL. No Facebook / Nextdoor.
+## 7. Not done yet (RECOMMENDATION order)
+GSA Auctions and Trash Nothing are done (§10). Remaining: IMAP alert ingestor → SAM.gov. Craigslist stays PENDING_MICHAEL. No Facebook / Nextdoor.
 
 ## 8. Run it
 ```bash
 python3.12 -m venv .venv && .venv/bin/pip install -e '.[dev]'
 .venv/bin/python -m pytest -q
-.venv/bin/mbos-discover run --config config/discovery.example.toml --fixtures tests/fixtures/ebay   # offline
+.venv/bin/mbos-discover run --config config/discovery.example.toml --fixtures tests/fixtures   # offline
 EBAY_CLIENT_ID=... EBAY_CLIENT_SECRET=... .venv/bin/mbos-discover run --config config/discovery.example.toml  # live
 .venv/bin/mbos-discover health
 .venv/bin/mbos-discover clear-freeze ebay --by michael
@@ -121,3 +121,20 @@ git archive 99e9ec0 | tar -x -C /tmp/mbos-99e9ec0 && .venv/bin/pip install "/tmp
 ```
 `tests/test_spine_seam.py` skips if `mbos` is not importable. It uses a pinned test copy of 01's contracts
 (`tests/fixtures/mbos_contracts_99e9ec0/`) as `MBOS_CONTRACTS_DIR`, and pgserver for PostgreSQL 16.
+
+## 10. Credential-free official sources — READY_QUEUE B-03
+
+| | GSA Auctions (`adapters/gsa_auctions.py`) | Trash Nothing (`adapters/trashnothing.py`) |
+|---|---|---|
+| Endpoint (FACT, from official OpenAPI, read 2026-10-07) | `GET https://api.gsa.gov/assets/gsaauctions/v2/auctions?format=JSON` | `GET https://trashnothing.com/api/v1.4/posts?types=offer&sources=groups,trashnothing&latitude&longitude&radius(m ≤ 80500)&per_page(≤100)&page` |
+| Key | `GSA_API_KEY` (free, api.data.gov), sent as header `X-API-KEY` | `TRASHNOTHING_API_KEY`, query `api_key` (per spec); **redacted** from every recorded URL |
+| Live switch | profile `live = true`; otherwise `config` error and zero requests | same |
+| Identity / URL | `SaleNo-LotNo` / `ItemDescURL` (else `gsa-auctions://sale/lot`, never a guessed web URL) | `post_id` / `url` (else `trashnothing://post/<id>`) |
+| Mapping | `auction_lot`; `HighBidAmount` > 0 → `auction_current`, else `starting_bid` (no amount); `buyer_premium_pct: 0`; `BiddersCount` → `bid_count`; LotInfo by `LotSequence` → description; zip+4 → 5-digit | `free_item`, price `{0, free}`; `OFFER:` prefix and `(place)` suffix stripped; lat/lng → `geo_tier`; `outcome` set → `gone`; `wanted` posts quarantined |
+| Geography | no API geo filter → client-side `states` (default AR + neighbours) | API radius around Conway |
+| Kept out of the Item (raw only) | contracting officer name/email/phone | `user_id`, `footer`, photos |
+
+- **INFERENCE (GSA):** `AucEndDt` is a date only, so `ends_at` is set to `T23:59:59Z` as an upper bound. The real close also depends on `InactivityTime`. RESEARCH must confirm the time before any bid recommendation.
+- **UNKNOWN until the first live call:** the exact JSON types of `LotNo`, `PropertyZip` and amounts. The adapters accept numbers or strings. The fixtures are hand-built from the documented schemas, not recorded.
+- **Policy note for Michael (RECOMMENDATION; not decided here):** Trash Nothing offers are gifts from community groups, and some groups' rules forbid taking items to resell. Trash Nothing's Terms restrict redistributing *content*, not reselling items. Discovery is read-only either way. Every Trash Nothing Item carries `needs_review`, and whether to pursue free-item flips is listed as a business-policy question.
+- The CLI's `--fixtures` now takes the fixture **root** (`tests/fixtures`, with `ebay/`, `gsa/` and `trashnothing/` subdirectories).

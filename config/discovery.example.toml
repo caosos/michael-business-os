@@ -15,6 +15,24 @@ max_price = 5000
 limit = 50
 max_pages = 2
 
+# Credential-free / free-key official APIs (B-03). `live = true` is the explicit per-profile switch for
+# real calls; without it the adapter refuses (fail safe). --fixtures always runs offline.
+[[profile]]
+id = "flip-gsa-surplus"
+source = "gsa_auctions"
+lane = "flip"
+live = false              # needs GSA_API_KEY (free, api.data.gov)
+states = ["AR", "MO", "TN", "MS", "LA", "TX", "OK"]
+
+[[profile]]
+id = "flip-free-items"
+source = "trashnothing"
+lane = "flip"
+live = false              # needs TRASHNOTHING_API_KEY; see adapter note on gift-group reselling norms
+radius_miles = 50
+limit = 100
+max_pages = 2
+
 [[profile]]
 id = "service-website-form"
 source = "website_lead"
