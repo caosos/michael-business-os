@@ -146,3 +146,25 @@ def test_doc_update_is_receipted_with_before_after(db):
     assert r[0]["doc"] == {"scores": None} and "scores" in r[1]["doc"]
     with pytest.raises(psycopg.Error):
         s.update_item_doc(item_id, {"state": "ACTED"}, "SCORE_RECORDED", AGENT, "sneak state", [pid], key())
+
+
+def test_d14_scorecard_and_recommendation_entities_on_doc_receipts(db):
+    s = db.store()
+    item_id, pid = make_item(s, "SCORED")
+    scr, rec = new_id("scr"), new_id("rec")
+    r1 = s.update_item_doc(item_id, {"scores": {"scorecard_id": scr}}, "SCORE_RECORDED", AGENT, "score", [pid], key(),
+                           extra={"entity_type": "scorecard", "entity_id": scr})
+    r2 = s.update_item_doc(item_id, {"recommendation": {"recommendation_id": rec}}, "RECOMMENDATION_RECORDED", AGENT,
+                           "rec", [pid], key(), extra={"entity_type": "recommendation", "entity_id": rec})
+    r3 = s.update_item_doc(item_id, {"research": []}, "ITEM_STATE_CHANGED", AGENT, "x", [pid], key(),
+                           extra={"entity_type": "outcome", "entity_id": "outc_x"})          # not allowed: stays item
+    got = {r: s.conn.execute("SELECT entity_type, entity_id, item_id FROM mbos.receipts WHERE receipt_id=%s", (r,)).fetchone()
+           for r in (r1, r2, r3)}
+    assert got[r1] == ("scorecard", scr, item_id) and got[r2] == ("recommendation", rec, item_id)
+    assert got[r3] == ("item", item_id, item_id)
+    assert s.conn.execute("SELECT count(*) FROM mbos.receipts WHERE entity_id = %s", (scr,)).fetchone()[0] == 1
+    with pytest.raises(psycopg.Error) as ei:
+        s.update_item_doc(item_id, {"scores": {}}, "SCORE_RECORDED", AGENT, "bad", [pid], key(),
+                          extra={"entity_type": "scorecard", "entity_id": "rec_" + "0" * 26})
+    assert ei.value.sqlstate == "MB004"
+    assert s.verify_chain().ok
