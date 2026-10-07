@@ -3,6 +3,8 @@
     python -m mbos_economics score  ITEM.json --scored-at 2026-10-07T12:00:00Z [--config-version V]
     python -m mbos_economics replay ITEM.json        # ITEM.json must carry a `scores` block
 
+ITEM.json may be a bare Item v1 or an examples/*.scored.json wrapper ({item, provenance, ...}).
+
 ``score`` prints {scores, recommendation, provenance, receipt_drafts}. It writes nothing.
 Exit codes: 0 ok / replay match, 1 replay mismatch, 2 invalid input.
 """
@@ -32,6 +34,8 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     item = json.loads(args.item.read_text(encoding="utf-8"))
+    if "item" in item and "type" not in item:   # examples/*.scored.json wrapper
+        item = item["item"]
     if args.cmd == "score":
         try:
             out = score_item(item, load_config(args.config_version), args.scored_at)

@@ -1,0 +1,319 @@
+{
+  "item": {
+    "item_id": "itm_01JB0000000000000000000024",
+    "schema_version": "1.0.0",
+    "type": "service",
+    "category": "equipment_repair",
+    "state": "RECOMMENDED",
+    "created_at": "2026-10-07T10:00:00Z",
+    "sources": [
+      {
+        "source": "referral",
+        "url": "https://example.invalid/equipment_repair/24",
+        "ingestion_method": "inbound_form",
+        "first_seen_at": "2026-10-07T10:00:00Z",
+        "provenance_id": "prov_01JB0000000000000000000240"
+      }
+    ],
+    "dedup_key": "equipment_repair|example|24",
+    "normalized": {
+      "title": "Zero-turn hydraulic pump replacement (on site)",
+      "condition": "n/a",
+      "location": {
+        "city": "Conway",
+        "state": "AR",
+        "road_miles_one_way": 15
+      }
+    },
+    "economics": {
+      "logistics": {
+        "trips": [
+          {
+            "purpose": "estimate_visit",
+            "round_trip_miles": 30
+          },
+          {
+            "purpose": "work_day",
+            "round_trip_miles": 30
+          },
+          {
+            "purpose": "material_run",
+            "round_trip_miles": 12
+          }
+        ]
+      },
+      "job": {
+        "quoted_revenue": 1070,
+        "labor_revenue": 650,
+        "materials_cost": 420,
+        "material_markup_rate": 0,
+        "labor_hours": 4,
+        "admin_hours": 1,
+        "estimate_hours": 0.75,
+        "required_skills": [
+          "equipment_repair",
+          "hydraulics"
+        ],
+        "win_prob": 0.8,
+        "completion_prob": 0.9,
+        "deposit_rate": 0.4,
+        "payment_fee_rate": 0.029,
+        "payment_fee_flat": 0.3,
+        "payment_terms_days": 7,
+        "lead_quality": 0.7
+      },
+      "estimates_meta": {
+        "scoring_config_version": "2026.10.1",
+        "evidence": {
+          "scope_verified": true,
+          "customer_screened": true,
+          "materials_priced": true,
+          "access_and_schedule_confirmed": true,
+          "repeat_or_referral": true
+        }
+      }
+    },
+    "scores": {
+      "scorecard_id": "scr_01M4B3R6G06PEHFC67TRDD7AAQ",
+      "inputs_hash": "sha256:ac2b9f9d9380d469ab44de7ea8336bd09b62cbe687a994def1e18aa95a4aefed",
+      "scorecard": {
+        "scoring_config_version": "2026.10.1",
+        "computed_at": "2026-10-07T12:00:00Z",
+        "engine_version": "0.1.0",
+        "config_hash": "sha256:8b7b98c7d92457d9d0049a0a2d7dd0c4e3bafa735c99c989bf156289aff58b20",
+        "lane": "service",
+        "derived": {
+          "vehicle_cost_per_mile": 0.4578,
+          "road_miles_one_way": 15,
+          "trips_cash": 32.95,
+          "travel_hours": 1.6001,
+          "labor_hours": 4,
+          "admin_hours": 1,
+          "total_hours": 7.3501,
+          "cost_out": 452.95,
+          "r_net": 1038.67,
+          "net_profit_deterministic": 585.72,
+          "profit_per_hour_deterministic": 79.69,
+          "cash_tied_up": 24.95,
+          "roi_deterministic": 23.4758,
+          "expected_revenue": 806.51,
+          "ev_net_profit": 441.4,
+          "ev_hours": 6.1634,
+          "ev_profit_per_hour": 71.62,
+          "ev_roi": 17.6914,
+          "p_waste": 0,
+          "evidence_quality": 0.7,
+          "wasted_trip_ev": 0,
+          "confidence_raw": 0.7,
+          "confidence_distance_penalty": 0,
+          "confidence": 0.7,
+          "confidence_haircut": 0.88,
+          "ev_decision": 388.43,
+          "max_loss": 13.73,
+          "p_loss": 0.2,
+          "coefficient_of_variation": 0.548,
+          "risk_raw": 0.1782,
+          "time_to_cash_days": 11,
+          "travel_burden": 96.95,
+          "travel_burden_limit": 154.49,
+          "distance_ratio_gate_applies": false,
+          "skill_fit": 0.75,
+          "skill_coverage": 1,
+          "skill_mean_proficiency": 0.75,
+          "scarcity": 0.7,
+          "lead_quality": 0.7,
+          "quoted_revenue": 1070,
+          "materials": 420,
+          "buy_fees": 0,
+          "payment_fees": 31.33,
+          "disposal": 0,
+          "deposit": 428,
+          "sunk_cash": 13.73,
+          "sunk_hours": 1.4167,
+          "estimate_hours": 0.75,
+          "job_days": 1,
+          "cost_to_quote": 70.4,
+          "branches": [
+            {
+              "name": "won_clean",
+              "prob": 0.72,
+              "value": 585.72,
+              "revenue": 1038.67
+            },
+            {
+              "name": "won_goes_bad",
+              "prob": 0.08,
+              "value": 280.39,
+              "revenue": 733.34
+            },
+            {
+              "name": "lost_bid",
+              "prob": 0.2,
+              "value": -13.73,
+              "revenue": 0
+            }
+          ],
+          "trips": [
+            {
+              "purpose": "estimate_visit",
+              "round_trip_miles": 30,
+              "cash": 13.73,
+              "hours": 0.6667
+            },
+            {
+              "purpose": "work_day",
+              "round_trip_miles": 30,
+              "cash": 13.73,
+              "hours": 0.6667
+            },
+            {
+              "purpose": "material_run",
+              "round_trip_miles": 12,
+              "cash": 5.49,
+              "hours": 0.2667
+            }
+          ]
+        },
+        "sub_scores": {
+          "ev_score": 25.9,
+          "pph_score": 59.68,
+          "roi_score": 100,
+          "ttc_score": 81.67,
+          "risk_score": 82.18,
+          "conf_score": 70,
+          "skill_score": 75,
+          "scarcity_score": 70
+        },
+        "weights_used": {
+          "ev": 0.2,
+          "pph": 0.35,
+          "roi": 0,
+          "ttc": 0.1,
+          "risk": 0.08,
+          "conf": 0.07,
+          "skill": 0.15,
+          "scarcity": 0.05
+        },
+        "composite": 60.46,
+        "decision": "MAYBE",
+        "alert": false,
+        "alert_checks": {
+          "is_yes": false,
+          "lead_quality_ok": true,
+          "perishable": false,
+          "ev_multiple_ok": true
+        },
+        "gates": {
+          "ev_positive": true,
+          "max_loss_ok": true,
+          "cash_ok": true,
+          "skill_ok": true,
+          "license_ok": true,
+          "pph_floor_ok": true,
+          "min_profit_ok": true,
+          "distance_ratio_ok": true
+        },
+        "yes_conditions": {
+          "composite_ok": true,
+          "confidence_ok": true,
+          "ev_pph_target_ok": false,
+          "ev_min_profit_ok": true,
+          "remote_verification_ok": true
+        },
+        "evidence": {
+          "scope_verified": true,
+          "customer_screened": true,
+          "price_agreed_in_writing": false,
+          "skill_fit_high": false,
+          "materials_priced": true,
+          "access_and_schedule_confirmed": true,
+          "repeat_or_referral": true,
+          "remote_verification": false
+        },
+        "evidence_search": {
+          "target": "YES",
+          "items": [],
+          "reaches": null
+        },
+        "min_quote_for_yes": 1098,
+        "reasons": [
+          "YES blocked: EV profit/hour $71.62 < service target $75.00",
+          "deterministic: net $585.72, $79.69/h over 7.3501 h, cash tied up $24.95, ROI 23.4758",
+          "expected: net $441.40, $71.62/h, max loss $13.73, P(loss) 0.2000, time-to-cash 11 d",
+          "evidence is not the blocker: no missing evidence item changes the verdict",
+          "minimum quote for YES: $1,098"
+        ]
+      }
+    },
+    "recommendation": {
+      "recommendation_id": "rec_01M4B3R6G0YZJ1RG6VVDMWKMFQ",
+      "verdict": "MAYBE",
+      "rationale": [
+        "YES blocked: EV profit/hour $71.62 < service target $75.00",
+        "deterministic: net $585.72, $79.69/h over 7.3501 h, cash tied up $24.95, ROI 23.4758",
+        "expected: net $441.40, $71.62/h, max loss $13.73, P(loss) 0.2000, time-to-cash 11 d",
+        "evidence is not the blocker: no missing evidence item changes the verdict",
+        "minimum quote for YES: $1,098"
+      ],
+      "confidence": 0.7,
+      "alert": false,
+      "provenance_id": "prov_01M4B3R6G0PPVS9FBDHDYK8ZC0"
+    },
+    "provenance_ids": [
+      "prov_01JB0000000000000000000240",
+      "prov_01M4B3R6G0PPVS9FBDHDYK8ZC0"
+    ]
+  },
+  "provenance": {
+    "provenance_id": "prov_01M4B3R6G0PPVS9FBDHDYK8ZC0",
+    "created_at": "2026-10-07T12:00:00Z",
+    "actor_type": "system",
+    "agent_name": "agent-03-economics",
+    "basis": "INFERENCE",
+    "tool_name": "mbos_economics.engine",
+    "tool_version": "0.1.0",
+    "config_version": "2026.10.1",
+    "inputs_used": [
+      {
+        "ref": "engine_input",
+        "hash": "sha256:ac2b9f9d9380d469ab44de7ea8336bd09b62cbe687a994def1e18aa95a4aefed"
+      },
+      {
+        "ref": "scoring-config@2026.10.1",
+        "hash": "sha256:8b7b98c7d92457d9d0049a0a2d7dd0c4e3bafa735c99c989bf156289aff58b20"
+      }
+    ],
+    "derived_from": [
+      "prov_01JB0000000000000000000240"
+    ],
+    "confidence": 0.7
+  },
+  "receipt_drafts": [
+    {
+      "type": "SCORE_RECORDED",
+      "item_id": "itm_01JB0000000000000000000024",
+      "entity_type": "scorecard",
+      "entity_id": "scr_01M4B3R6G06PEHFC67TRDD7AAQ",
+      "tool_name": "mbos_economics.engine",
+      "inputs_hash": "sha256:ac2b9f9d9380d469ab44de7ea8336bd09b62cbe687a994def1e18aa95a4aefed",
+      "payload_hash": "sha256:1012032afcf4d39e383ce74bb310143b6aa366ab21d0821a4f67c71762765290",
+      "idempotency_key": "score:scr_01M4B3R6G06PEHFC67TRDD7AAQ",
+      "provenance_ids": [
+        "prov_01M4B3R6G0PPVS9FBDHDYK8ZC0"
+      ]
+    },
+    {
+      "type": "RECOMMENDATION_RECORDED",
+      "item_id": "itm_01JB0000000000000000000024",
+      "entity_type": "recommendation",
+      "entity_id": "rec_01M4B3R6G0YZJ1RG6VVDMWKMFQ",
+      "tool_name": "mbos_economics.engine",
+      "inputs_hash": "sha256:ac2b9f9d9380d469ab44de7ea8336bd09b62cbe687a994def1e18aa95a4aefed",
+      "payload_hash": "sha256:2f114af27a976f7430e9d9906ada6ac448219e0edd88b432f8eac0ccdcb53fbd",
+      "idempotency_key": "recommend:rec_01M4B3R6G0YZJ1RG6VVDMWKMFQ",
+      "provenance_ids": [
+        "prov_01M4B3R6G0PPVS9FBDHDYK8ZC0"
+      ]
+    }
+  ]
+}

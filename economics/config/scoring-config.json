@@ -1,5 +1,6 @@
 {
   "scoring_config_version": "2026.10.1",
+  "config_format": 1,
   "supersedes": "2026.10.0",
   "effective_from": "2026-10-07",
   "_note": "Single source of truth for every constant the economics engine uses (ADR-03-001; C13: also the single source for per-mile cost). Any value change MUST bump scoring_config_version and move the previous file to config/history/ so historical scorecards replay under the config that produced them. Leaves are {value, basis, note?, source?}. basis uses Agent 03's short alias (FACT|INFER|REC|UNK), permitted inside 03 blocks by ADR-0004 ruling 7. Owner-policy values carry source=MICHAEL_DECISIONS and are coordinator defaults, NOT Michael-confirmed business truth.",

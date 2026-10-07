@@ -1,0 +1,307 @@
+{
+  "item": {
+    "item_id": "itm_01JB0000000000000000000023",
+    "schema_version": "1.0.0",
+    "type": "service",
+    "category": "smart_home_install",
+    "state": "RECOMMENDED",
+    "created_at": "2026-10-07T10:00:00Z",
+    "sources": [
+      {
+        "source": "referral",
+        "url": "https://example.invalid/smart_home_install/22",
+        "ingestion_method": "inbound_form",
+        "first_seen_at": "2026-10-07T10:00:00Z",
+        "provenance_id": "prov_01JB0000000000000000000220"
+      }
+    ],
+    "dedup_key": "smart_home_install|example|22",
+    "normalized": {
+      "title": "6 switches, doorbell, 3 cameras, hub",
+      "condition": "n/a",
+      "location": {
+        "city": "Conway",
+        "state": "AR",
+        "road_miles_one_way": 14
+      }
+    },
+    "economics": {
+      "logistics": {
+        "trips": [
+          {
+            "purpose": "work_day",
+            "round_trip_miles": 28
+          },
+          {
+            "purpose": "work_day",
+            "round_trip_miles": 28
+          }
+        ]
+      },
+      "job": {
+        "quoted_revenue": 900,
+        "labor_revenue": 900,
+        "materials_cost": 40,
+        "labor_hours": 6,
+        "admin_hours": 1,
+        "required_skills": [
+          "smart_home_install",
+          "licensed_electrical"
+        ],
+        "win_prob": 1.0,
+        "completion_prob": 0.97,
+        "payment_terms_days": 0,
+        "job_days": 2,
+        "lead_quality": 0.6,
+        "lead_age_hours": 3
+      },
+      "estimates_meta": {
+        "scoring_config_version": "2026.10.1",
+        "evidence": {
+          "scope_verified": true,
+          "customer_screened": true,
+          "price_agreed_in_writing": true,
+          "materials_priced": true,
+          "access_and_schedule_confirmed": true,
+          "repeat_or_referral": true
+        }
+      }
+    },
+    "scores": {
+      "scorecard_id": "scr_01M4B3R6G0AV39B8RBJNP83X9H",
+      "inputs_hash": "sha256:5e5c62e3cda46d570a1367f37074b0e39f456eb71c3338d1b14f6e7da07d9aec",
+      "scorecard": {
+        "scoring_config_version": "2026.10.1",
+        "computed_at": "2026-10-07T12:00:00Z",
+        "engine_version": "0.1.0",
+        "config_hash": "sha256:8b7b98c7d92457d9d0049a0a2d7dd0c4e3bafa735c99c989bf156289aff58b20",
+        "lane": "service",
+        "derived": {
+          "vehicle_cost_per_mile": 0.4578,
+          "road_miles_one_way": 14,
+          "trips_cash": 25.64,
+          "travel_hours": 1.2444,
+          "labor_hours": 6,
+          "admin_hours": 1,
+          "total_hours": 8.2444,
+          "cost_out": 65.64,
+          "r_net": 900,
+          "net_profit_deterministic": 834.36,
+          "profit_per_hour_deterministic": 101.2,
+          "cash_tied_up": 65.64,
+          "roi_deterministic": 12.7112,
+          "expected_revenue": 886.5,
+          "ev_net_profit": 820.86,
+          "ev_hours": 8.2444,
+          "ev_profit_per_hour": 99.57,
+          "ev_roi": 12.5055,
+          "p_waste": 0,
+          "evidence_quality": 0.85,
+          "wasted_trip_ev": 0,
+          "confidence_raw": 0.85,
+          "confidence_distance_penalty": 0,
+          "confidence": 0.85,
+          "confidence_haircut": 0.94,
+          "ev_decision": 771.61,
+          "max_loss": 0,
+          "p_loss": 0,
+          "coefficient_of_variation": 0.0935,
+          "risk_raw": 0.0187,
+          "time_to_cash_days": 5,
+          "travel_burden": 75.42,
+          "travel_burden_limit": 287.3,
+          "distance_ratio_gate_applies": false,
+          "skill_fit": 0.45,
+          "skill_coverage": 0.5,
+          "skill_mean_proficiency": 0.9,
+          "scarcity": 0.6,
+          "lead_quality": 0.6,
+          "quoted_revenue": 900,
+          "materials": 40,
+          "buy_fees": 0,
+          "payment_fees": 0,
+          "disposal": 0,
+          "deposit": 0,
+          "sunk_cash": 0,
+          "sunk_hours": 0,
+          "estimate_hours": 0,
+          "job_days": 2,
+          "cost_to_quote": 0,
+          "branches": [
+            {
+              "name": "won_clean",
+              "prob": 0.97,
+              "value": 834.36,
+              "revenue": 900
+            },
+            {
+              "name": "won_goes_bad",
+              "prob": 0.03,
+              "value": 384.36,
+              "revenue": 450
+            },
+            {
+              "name": "lost_bid",
+              "prob": 0,
+              "value": 0,
+              "revenue": 0
+            }
+          ],
+          "trips": [
+            {
+              "purpose": "work_day",
+              "round_trip_miles": 28,
+              "cash": 12.82,
+              "hours": 0.6222
+            },
+            {
+              "purpose": "work_day",
+              "round_trip_miles": 28,
+              "cash": 12.82,
+              "hours": 0.6222
+            }
+          ]
+        },
+        "sub_scores": {
+          "ev_score": 51.44,
+          "pph_score": 82.98,
+          "roi_score": 100,
+          "ttc_score": 91.67,
+          "risk_score": 98.13,
+          "conf_score": 85,
+          "skill_score": 45,
+          "scarcity_score": 60
+        },
+        "weights_used": {
+          "ev": 0.2,
+          "pph": 0.35,
+          "roi": 0,
+          "ttc": 0.1,
+          "risk": 0.08,
+          "conf": 0.07,
+          "skill": 0.15,
+          "scarcity": 0.05
+        },
+        "composite": 72.05,
+        "decision": "PASS",
+        "alert": false,
+        "alert_checks": {
+          "is_yes": false,
+          "lead_quality_ok": true,
+          "perishable": true,
+          "ev_multiple_ok": true
+        },
+        "gates": {
+          "ev_positive": true,
+          "max_loss_ok": true,
+          "cash_ok": true,
+          "skill_ok": true,
+          "license_ok": false,
+          "pph_floor_ok": true,
+          "min_profit_ok": true,
+          "distance_ratio_ok": true
+        },
+        "yes_conditions": {
+          "composite_ok": true,
+          "confidence_ok": true,
+          "ev_pph_target_ok": true,
+          "ev_min_profit_ok": true,
+          "remote_verification_ok": true
+        },
+        "evidence": {
+          "scope_verified": true,
+          "customer_screened": true,
+          "price_agreed_in_writing": true,
+          "skill_fit_high": false,
+          "materials_priced": true,
+          "access_and_schedule_confirmed": true,
+          "repeat_or_referral": true,
+          "remote_verification": false
+        },
+        "evidence_search": {
+          "target": "MAYBE",
+          "items": [],
+          "reaches": null
+        },
+        "min_quote_for_yes": null,
+        "reasons": [
+          "GATE FAIL license_ok: requires a license Michael lacks (licensed_electrical)",
+          "deterministic: net $834.36, $101.20/h over 8.2444 h, cash tied up $65.64, ROI 12.7112",
+          "expected: net $820.86, $99.57/h, max loss $0.00, P(loss) 0.0000, time-to-cash 5 d",
+          "skills not in profile: licensed_electrical",
+          "evidence is not the blocker: no missing evidence item changes the verdict"
+        ]
+      }
+    },
+    "recommendation": {
+      "recommendation_id": "rec_01M4B3R6G0EEJBKMGJ6VNCXZ10",
+      "verdict": "PASS",
+      "rationale": [
+        "GATE FAIL license_ok: requires a license Michael lacks (licensed_electrical)",
+        "deterministic: net $834.36, $101.20/h over 8.2444 h, cash tied up $65.64, ROI 12.7112",
+        "expected: net $820.86, $99.57/h, max loss $0.00, P(loss) 0.0000, time-to-cash 5 d",
+        "skills not in profile: licensed_electrical",
+        "evidence is not the blocker: no missing evidence item changes the verdict"
+      ],
+      "confidence": 0.85,
+      "alert": false,
+      "provenance_id": "prov_01M4B3R6G08XX68S3GQJJ1ZTH7"
+    },
+    "provenance_ids": [
+      "prov_01JB0000000000000000000220",
+      "prov_01M4B3R6G08XX68S3GQJJ1ZTH7"
+    ]
+  },
+  "provenance": {
+    "provenance_id": "prov_01M4B3R6G08XX68S3GQJJ1ZTH7",
+    "created_at": "2026-10-07T12:00:00Z",
+    "actor_type": "system",
+    "agent_name": "agent-03-economics",
+    "basis": "INFERENCE",
+    "tool_name": "mbos_economics.engine",
+    "tool_version": "0.1.0",
+    "config_version": "2026.10.1",
+    "inputs_used": [
+      {
+        "ref": "engine_input",
+        "hash": "sha256:5e5c62e3cda46d570a1367f37074b0e39f456eb71c3338d1b14f6e7da07d9aec"
+      },
+      {
+        "ref": "scoring-config@2026.10.1",
+        "hash": "sha256:8b7b98c7d92457d9d0049a0a2d7dd0c4e3bafa735c99c989bf156289aff58b20"
+      }
+    ],
+    "derived_from": [
+      "prov_01JB0000000000000000000220"
+    ],
+    "confidence": 0.85
+  },
+  "receipt_drafts": [
+    {
+      "type": "SCORE_RECORDED",
+      "item_id": "itm_01JB0000000000000000000023",
+      "entity_type": "scorecard",
+      "entity_id": "scr_01M4B3R6G0AV39B8RBJNP83X9H",
+      "tool_name": "mbos_economics.engine",
+      "inputs_hash": "sha256:5e5c62e3cda46d570a1367f37074b0e39f456eb71c3338d1b14f6e7da07d9aec",
+      "payload_hash": "sha256:570cfea367f6929f43d35fc923b0ca465648ea55e7c782250f484d1082f75c00",
+      "idempotency_key": "score:scr_01M4B3R6G0AV39B8RBJNP83X9H",
+      "provenance_ids": [
+        "prov_01M4B3R6G08XX68S3GQJJ1ZTH7"
+      ]
+    },
+    {
+      "type": "RECOMMENDATION_RECORDED",
+      "item_id": "itm_01JB0000000000000000000023",
+      "entity_type": "recommendation",
+      "entity_id": "rec_01M4B3R6G0EEJBKMGJ6VNCXZ10",
+      "tool_name": "mbos_economics.engine",
+      "inputs_hash": "sha256:5e5c62e3cda46d570a1367f37074b0e39f456eb71c3338d1b14f6e7da07d9aec",
+      "payload_hash": "sha256:7920f171ecd6c739582f37a327e86239bc80afc2abee35ad57270544129a6514",
+      "idempotency_key": "recommend:rec_01M4B3R6G0EEJBKMGJ6VNCXZ10",
+      "provenance_ids": [
+        "prov_01M4B3R6G08XX68S3GQJJ1ZTH7"
+      ]
+    }
+  ]
+}

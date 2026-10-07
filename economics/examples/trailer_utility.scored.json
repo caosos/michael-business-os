@@ -1,0 +1,344 @@
+{
+  "item": {
+    "item_id": "itm_01JB0000000000000000000001",
+    "schema_version": "1.0.0",
+    "type": "flip",
+    "category": "trailer",
+    "state": "RECOMMENDED",
+    "created_at": "2026-10-07T10:00:00Z",
+    "sources": [
+      {
+        "source": "craigslist",
+        "url": "https://example.invalid/trailer/1",
+        "ingestion_method": "rss",
+        "first_seen_at": "2026-10-07T10:00:00Z",
+        "provenance_id": "prov_01JB0000000000000000000010"
+      }
+    ],
+    "dedup_key": "trailer|example|1",
+    "normalized": {
+      "title": "5x8 utility trailer, needs deck + tire",
+      "condition": "used",
+      "location": {
+        "city": "Conway",
+        "state": "AR",
+        "road_miles_one_way": 20
+      }
+    },
+    "economics": {
+      "acquisition": {
+        "ask_price": 300,
+        "expected_buy_price": 250,
+        "buy_fees": 10,
+        "market_buy_median": 500,
+        "listing_age_hours": 2
+      },
+      "rehab": {
+        "parts_cost": 160,
+        "materials_cost": 30,
+        "labor_hours": 5,
+        "admin_hours": 1.25,
+        "required_skills": [
+          "carpentry",
+          "trailer_wiring",
+          "painting"
+        ],
+        "repair_success_prob": 0.95,
+        "repair_scope_known": true
+      },
+      "logistics": {
+        "trips": [
+          {
+            "purpose": "inspect_pickup",
+            "round_trip_miles": 40
+          },
+          {
+            "purpose": "buyer_meet",
+            "round_trip_miles": 16
+          }
+        ]
+      },
+      "holding": {
+        "storage_cost_per_day": 3,
+        "expected_hold_days": 9,
+        "sell_fees_rate": 0,
+        "sell_fees_flat": 0
+      },
+      "resale": {
+        "target_sell_price": 1050,
+        "comp_price_low": 950,
+        "comp_price_expected": 1050,
+        "comp_price_high": 1150,
+        "sale_prob": 0.85,
+        "expected_dom_days": 7,
+        "active_comparable_listings": 6
+      },
+      "downside": {
+        "salvage_if_repair_fails": 220,
+        "salvage_if_unsold": 700
+      },
+      "estimates_meta": {
+        "scoring_config_version": "2026.10.1",
+        "evidence": {
+          "sold_comps_count": 4,
+          "condition_verified": true,
+          "title_verified": true,
+          "demand_evidence": true,
+          "seller_screened": true
+        }
+      }
+    },
+    "research": [
+      {
+        "finding": "4 refurbished 5x8 utility trailers sold $950-$1,150 in 60 d (illustrative)",
+        "field": "resale.target_sell_price",
+        "basis": "FACT",
+        "source_uri": "https://example.invalid/comps/trailer",
+        "fetched_at": "2026-10-07T10:30:00Z",
+        "provenance_id": "prov_01JB0000000000000000000011"
+      }
+    ],
+    "scores": {
+      "scorecard_id": "scr_01M4B3R6G01H26DFNWPV7YN4AD",
+      "inputs_hash": "sha256:44c3bc4651e910cabfc0532cdb4044a8330be45badb14cf212e699922637aef9",
+      "scorecard": {
+        "scoring_config_version": "2026.10.1",
+        "computed_at": "2026-10-07T12:00:00Z",
+        "engine_version": "0.1.0",
+        "config_hash": "sha256:8b7b98c7d92457d9d0049a0a2d7dd0c4e3bafa735c99c989bf156289aff58b20",
+        "lane": "flip",
+        "derived": {
+          "vehicle_cost_per_mile": 0.4578,
+          "road_miles_one_way": 20,
+          "trips_cash": 25.63,
+          "travel_hours": 1.2445,
+          "labor_hours": 5,
+          "admin_hours": 1.25,
+          "total_hours": 7.4945,
+          "cost_out": 502.63,
+          "r_net": 1050,
+          "net_profit_deterministic": 547.37,
+          "profit_per_hour_deterministic": 73.04,
+          "cash_tied_up": 502.63,
+          "roi_deterministic": 1.089,
+          "expected_revenue": 958.63,
+          "ev_net_profit": 464.81,
+          "ev_hours": 7.4945,
+          "ev_profit_per_hour": 62.02,
+          "ev_roi": 0.9248,
+          "p_waste": 0,
+          "evidence_quality": 0.93,
+          "wasted_trip_ev": 0,
+          "confidence_raw": 0.93,
+          "confidence_distance_penalty": 0,
+          "confidence": 0.93,
+          "confidence_haircut": 0.972,
+          "ev_decision": 451.8,
+          "max_loss": 106.31,
+          "p_loss": 0.05,
+          "coefficient_of_variation": 0.3849,
+          "risk_raw": 0.1584,
+          "time_to_cash_days": 10,
+          "travel_burden": 75.41,
+          "travel_burden_limit": 162.68,
+          "distance_ratio_gate_applies": false,
+          "skill_fit": 0.7667,
+          "skill_coverage": 1,
+          "skill_mean_proficiency": 0.7667,
+          "scarcity": 0.6433,
+          "deal_discount": 0.5,
+          "demand_velocity": 0.8444,
+          "supply_tightness": 0.7,
+          "acquisition": 250,
+          "buy_fees": 10,
+          "parts": 160,
+          "materials": 30,
+          "storage_cost": 27,
+          "hold_days": 9,
+          "sell_fees": 0,
+          "trips_cash_acquisition": 18.31,
+          "cost_out_fail": 326.31,
+          "branches": [
+            {
+              "name": "repaired_and_sold",
+              "prob": 0.8075,
+              "value": 547.37,
+              "revenue": 1050
+            },
+            {
+              "name": "repaired_unsold",
+              "prob": 0.1425,
+              "value": 197.37,
+              "revenue": 700
+            },
+            {
+              "name": "repair_failed",
+              "prob": 0.05,
+              "value": -106.31,
+              "revenue": 220
+            }
+          ],
+          "trips": [
+            {
+              "purpose": "inspect_pickup",
+              "round_trip_miles": 40,
+              "cash": 18.31,
+              "hours": 0.8889
+            },
+            {
+              "purpose": "buyer_meet",
+              "round_trip_miles": 16,
+              "cash": 7.32,
+              "hours": 0.3556
+            }
+          ]
+        },
+        "sub_scores": {
+          "ev_score": 56.48,
+          "pph_score": 51.68,
+          "roi_score": 61.65,
+          "ttc_score": 83.33,
+          "risk_score": 84.16,
+          "conf_score": 93,
+          "skill_score": 76.67,
+          "scarcity_score": 64.33
+        },
+        "weights_used": {
+          "ev": 0.25,
+          "pph": 0.25,
+          "roi": 0.1,
+          "ttc": 0.1,
+          "risk": 0.1,
+          "conf": 0.05,
+          "skill": 0.1,
+          "scarcity": 0.05
+        },
+        "composite": 65.49,
+        "decision": "MAYBE",
+        "alert": false,
+        "alert_checks": {
+          "is_yes": false,
+          "scarcity_ok": true,
+          "perishable": true,
+          "ev_multiple_ok": true,
+          "deal_discount_ok": true
+        },
+        "gates": {
+          "ev_positive": true,
+          "max_loss_ok": true,
+          "cash_ok": true,
+          "skill_ok": true,
+          "license_ok": true,
+          "pph_floor_ok": true,
+          "min_profit_ok": true,
+          "distance_ratio_ok": true
+        },
+        "yes_conditions": {
+          "composite_ok": true,
+          "confidence_ok": true,
+          "ev_pph_target_ok": false,
+          "ev_min_profit_ok": true,
+          "remote_verification_ok": true,
+          "sold_comps_ok": true,
+          "fault_identified_ok": true,
+          "title_ok": true
+        },
+        "evidence": {
+          "three_sold_comps": true,
+          "condition_verified": true,
+          "fault_identified": true,
+          "title_verified": true,
+          "demand_evidence": true,
+          "seller_screened": true,
+          "skill_fit_high": false,
+          "price_distribution": true,
+          "remote_verification": false
+        },
+        "evidence_search": {
+          "target": "YES",
+          "items": [],
+          "reaches": null
+        },
+        "walk_away_price": 227,
+        "reasons": [
+          "YES blocked: EV profit/hour $62.02 < flip target $65.00",
+          "deterministic: net $547.37, $73.04/h over 7.4945 h, cash tied up $502.63, ROI 1.0890",
+          "expected: net $464.81, $62.02/h, max loss $106.31, P(loss) 0.0500, time-to-cash 10 d",
+          "evidence is not the blocker: no missing evidence item changes the verdict",
+          "walk-away price (max buy for YES): $227"
+        ]
+      }
+    },
+    "recommendation": {
+      "recommendation_id": "rec_01M4B3R6G02ENJ473HXFCRJ0YZ",
+      "verdict": "MAYBE",
+      "rationale": [
+        "YES blocked: EV profit/hour $62.02 < flip target $65.00",
+        "deterministic: net $547.37, $73.04/h over 7.4945 h, cash tied up $502.63, ROI 1.0890",
+        "expected: net $464.81, $62.02/h, max loss $106.31, P(loss) 0.0500, time-to-cash 10 d",
+        "evidence is not the blocker: no missing evidence item changes the verdict",
+        "walk-away price (max buy for YES): $227"
+      ],
+      "confidence": 0.93,
+      "alert": false,
+      "provenance_id": "prov_01M4B3R6G0WTH539H66V7XKSTX"
+    },
+    "provenance_ids": [
+      "prov_01JB0000000000000000000010",
+      "prov_01M4B3R6G0WTH539H66V7XKSTX"
+    ]
+  },
+  "provenance": {
+    "provenance_id": "prov_01M4B3R6G0WTH539H66V7XKSTX",
+    "created_at": "2026-10-07T12:00:00Z",
+    "actor_type": "system",
+    "agent_name": "agent-03-economics",
+    "basis": "INFERENCE",
+    "tool_name": "mbos_economics.engine",
+    "tool_version": "0.1.0",
+    "config_version": "2026.10.1",
+    "inputs_used": [
+      {
+        "ref": "engine_input",
+        "hash": "sha256:44c3bc4651e910cabfc0532cdb4044a8330be45badb14cf212e699922637aef9"
+      },
+      {
+        "ref": "scoring-config@2026.10.1",
+        "hash": "sha256:8b7b98c7d92457d9d0049a0a2d7dd0c4e3bafa735c99c989bf156289aff58b20"
+      }
+    ],
+    "derived_from": [
+      "prov_01JB0000000000000000000010",
+      "prov_01JB0000000000000000000011"
+    ],
+    "confidence": 0.93
+  },
+  "receipt_drafts": [
+    {
+      "type": "SCORE_RECORDED",
+      "item_id": "itm_01JB0000000000000000000001",
+      "entity_type": "scorecard",
+      "entity_id": "scr_01M4B3R6G01H26DFNWPV7YN4AD",
+      "tool_name": "mbos_economics.engine",
+      "inputs_hash": "sha256:44c3bc4651e910cabfc0532cdb4044a8330be45badb14cf212e699922637aef9",
+      "payload_hash": "sha256:185e9afca693d25e4dd70f3d1feb782793007981fbc1667db1bfdfd79935fe6b",
+      "idempotency_key": "score:scr_01M4B3R6G01H26DFNWPV7YN4AD",
+      "provenance_ids": [
+        "prov_01M4B3R6G0WTH539H66V7XKSTX"
+      ]
+    },
+    {
+      "type": "RECOMMENDATION_RECORDED",
+      "item_id": "itm_01JB0000000000000000000001",
+      "entity_type": "recommendation",
+      "entity_id": "rec_01M4B3R6G02ENJ473HXFCRJ0YZ",
+      "tool_name": "mbos_economics.engine",
+      "inputs_hash": "sha256:44c3bc4651e910cabfc0532cdb4044a8330be45badb14cf212e699922637aef9",
+      "payload_hash": "sha256:5701379d290e2c4db1e6a2e759516c17a63ae822c12c8b873fde9ba66a606551",
+      "idempotency_key": "recommend:rec_01M4B3R6G02ENJ473HXFCRJ0YZ",
+      "provenance_ids": [
+        "prov_01M4B3R6G0WTH539H66V7XKSTX"
+      ]
+    }
+  ]
+}

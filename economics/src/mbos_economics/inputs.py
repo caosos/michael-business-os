@@ -64,14 +64,10 @@ class _V:
                 self.problems.append(f"{where}.{key} is required")
             return
         v = block[key]
-        if isinstance(v, bool) or not isinstance(v, (int, float, str, Decimal)):
+        if isinstance(v, bool) or not isinstance(v, (int, float, Decimal)):
             self.problems.append(f"{where}.{key} must be a number")
             return
-        try:
-            d = D(v)
-        except Exception:
-            self.problems.append(f"{where}.{key} must be a number")
-            return
+        d = D(v)
         if not d.is_finite():
             self.problems.append(f"{where}.{key} must be finite")
         elif positive and d <= 0:

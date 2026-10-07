@@ -20,9 +20,9 @@ CONFIG_DIR = Path(__file__).resolve().parents[2] / "config"
 
 _META_KEYS = {"basis", "note", "source"}
 
-# Versions whose structure this engine can execute. 2026.10.0 stored formulas as
-# prose strings and has no executable form; it is archived for the record only.
-EXECUTABLE_VERSIONS = {"2026.10.1"}
+# Config document format this engine executes. 2026.10.0 predates the format (it
+# stored formulas as prose strings); it is archived for the record only.
+CONFIG_FORMAT = 1
 
 
 class ConfigError(ValueError):
@@ -65,8 +65,9 @@ def _parse(text: str) -> dict:
 
 
 def _validate(cfg: ScoringConfig) -> None:
-    if cfg.version not in EXECUTABLE_VERSIONS:
-        raise ConfigError(f"scoring_config_version {cfg.version} is not executable by this engine")
+    if cfg.raw.get("config_format") != CONFIG_FORMAT:
+        raise ConfigError(f"scoring_config_version {cfg.version} is not config_format {CONFIG_FORMAT}; "
+                          "this engine cannot execute it")
     for lane in ("flip", "service"):
         w = cfg.group(f"composite_weights.{lane}")
         if set(w) != {"ev", "pph", "roi", "ttc", "risk", "conf", "skill", "scarcity"}:
@@ -106,3 +107,19 @@ def load_config(version: str | None = None, config_dir: Path = CONFIG_DIR) -> Sc
             if raw_version == version:
                 return load_config_file(p)
     raise ConfigError(f"scoring_config_version {version} not found in {config_dir}")
+
+
+def dump_config(raw: dict) -> str:
+    """Serialize a config document (Decimal-valued) back to JSON text."""
+    from .numeric import to_json_number
+
+    def conv(x):
+        if isinstance(x, Decimal):
+            return to_json_number(x)
+        if isinstance(x, dict):
+            return {k: conv(v) for k, v in x.items()}
+        if isinstance(x, list):
+            return [conv(v) for v in x]
+        return x
+
+    return json.dumps(conv(raw), indent=2, ensure_ascii=False) + "\n"

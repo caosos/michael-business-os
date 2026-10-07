@@ -1,0 +1,340 @@
+{
+  "item": {
+    "item_id": "itm_01JB0000000000000000000008",
+    "schema_version": "1.0.0",
+    "type": "flip",
+    "category": "trailer",
+    "state": "RECOMMENDED",
+    "created_at": "2026-10-07T10:00:00Z",
+    "sources": [
+      {
+        "source": "craigslist",
+        "url": "https://example.invalid/trailer/8",
+        "ingestion_method": "rss",
+        "first_seen_at": "2026-10-07T10:00:00Z",
+        "provenance_id": "prov_01JB0000000000000000000080"
+      }
+    ],
+    "dedup_key": "trailer|example|8",
+    "normalized": {
+      "title": "6x12 enclosed trailer, needs lights + floor",
+      "condition": "used",
+      "location": {
+        "city": "Conway",
+        "state": "AR",
+        "road_miles_one_way": 32
+      }
+    },
+    "economics": {
+      "acquisition": {
+        "ask_price": 1200,
+        "expected_buy_price": 1050,
+        "buy_fees": 25
+      },
+      "rehab": {
+        "parts_cost": 120,
+        "materials_cost": 180,
+        "labor_hours": 6,
+        "admin_hours": 2,
+        "required_skills": [
+          "trailer_wiring",
+          "carpentry"
+        ],
+        "repair_success_prob": 0.95,
+        "repair_scope_known": true
+      },
+      "logistics": {
+        "trips": [
+          {
+            "purpose": "inspect_pickup",
+            "round_trip_miles": 64,
+            "can_combine": false
+          },
+          {
+            "purpose": "buyer_meet",
+            "round_trip_miles": 20
+          }
+        ],
+        "vehicle_mpg": 18,
+        "fuel_price_per_gal": 3.2,
+        "wear_per_mile": 0.28,
+        "avg_speed_mph": 45
+      },
+      "holding": {
+        "storage_cost_per_day": 3,
+        "expected_hold_days": 14,
+        "disposal_cost": 0,
+        "sell_fees_rate": 0,
+        "sell_fees_flat": 0
+      },
+      "resale": {
+        "target_sell_price": 2100,
+        "comp_price_low": 1800,
+        "comp_price_expected": 2100,
+        "comp_price_high": 2400,
+        "sale_prob": 0.85,
+        "expected_dom_days": 14
+      },
+      "downside": {
+        "salvage_if_repair_fails": 900,
+        "salvage_if_unsold": 1000
+      },
+      "estimates_meta": {
+        "scoring_config_version": "2026.10.0",
+        "assumptions": [
+          {
+            "field": "rehab.labor_hours",
+            "value": 6,
+            "basis": "INFER",
+            "note": "illustrative"
+          }
+        ]
+      }
+    },
+    "scores": {
+      "scorecard_id": "scr_01M4B3R6G0RHWF9VTNAR47BYX9",
+      "inputs_hash": "sha256:d0260cb37bd3a20b08e9291fc52effa69b8dd7ad37c21d7f23ea09f04106f00f",
+      "scorecard": {
+        "scoring_config_version": "2026.10.1",
+        "computed_at": "2026-10-07T12:00:00Z",
+        "engine_version": "0.1.0",
+        "config_hash": "sha256:8b7b98c7d92457d9d0049a0a2d7dd0c4e3bafa735c99c989bf156289aff58b20",
+        "lane": "flip",
+        "derived": {
+          "vehicle_cost_per_mile": 0.4578,
+          "road_miles_one_way": 32,
+          "trips_cash": 38.46,
+          "travel_hours": 1.8666,
+          "labor_hours": 6,
+          "admin_hours": 2,
+          "total_hours": 9.8666,
+          "cost_out": 1455.46,
+          "r_net": 2100,
+          "net_profit_deterministic": 644.54,
+          "profit_per_hour_deterministic": 65.33,
+          "cash_tied_up": 1455.46,
+          "roi_deterministic": 0.4428,
+          "expected_revenue": 1883.25,
+          "ev_net_profit": 443.55,
+          "ev_hours": 9.8666,
+          "ev_profit_per_hour": 44.95,
+          "ev_roi": 0.3047,
+          "p_waste": 0.002,
+          "evidence_quality": 0.2,
+          "wasted_trip_ev": 0.17,
+          "confidence_raw": 0.2,
+          "confidence_distance_penalty": 0,
+          "confidence": 0.2,
+          "confidence_haircut": 0.68,
+          "ev_decision": 301.5,
+          "max_loss": 455.46,
+          "p_loss": 0.1925,
+          "coefficient_of_variation": 0.9328,
+          "risk_raw": 0.529,
+          "time_to_cash_days": 15,
+          "travel_burden": 113.29,
+          "travel_burden_limit": 155.24,
+          "distance_ratio_gate_applies": false,
+          "skill_fit": 0.8,
+          "skill_coverage": 1,
+          "skill_mean_proficiency": 0.8,
+          "scarcity": 0.2067,
+          "deal_discount": 0,
+          "demand_velocity": 0.6889,
+          "supply_tightness": 0,
+          "acquisition": 1050,
+          "buy_fees": 25,
+          "parts": 120,
+          "materials": 180,
+          "storage_cost": 42,
+          "hold_days": 14,
+          "sell_fees": 0,
+          "trips_cash_acquisition": 29.3,
+          "cost_out_fail": 1140.3,
+          "branches": [
+            {
+              "name": "repaired_and_sold",
+              "prob": 0.8075,
+              "value": 644.54,
+              "revenue": 2100
+            },
+            {
+              "name": "repaired_unsold",
+              "prob": 0.1425,
+              "value": -455.46,
+              "revenue": 1000
+            },
+            {
+              "name": "repair_failed",
+              "prob": 0.05,
+              "value": -240.3,
+              "revenue": 900
+            }
+          ],
+          "trips": [
+            {
+              "purpose": "inspect_pickup",
+              "round_trip_miles": 64,
+              "cash": 29.3,
+              "hours": 1.4222
+            },
+            {
+              "purpose": "buyer_meet",
+              "round_trip_miles": 20,
+              "cash": 9.16,
+              "hours": 0.4444
+            }
+          ]
+        },
+        "sub_scores": {
+          "ev_score": 37.69,
+          "pph_score": 37.46,
+          "roi_score": 20.31,
+          "ttc_score": 75,
+          "risk_score": 47.1,
+          "conf_score": 20,
+          "skill_score": 80,
+          "scarcity_score": 20.67
+        },
+        "weights_used": {
+          "ev": 0.25,
+          "pph": 0.25,
+          "roi": 0.1,
+          "ttc": 0.1,
+          "risk": 0.1,
+          "conf": 0.05,
+          "skill": 0.1,
+          "scarcity": 0.05
+        },
+        "composite": 43.06,
+        "decision": "PASS",
+        "alert": false,
+        "alert_checks": {
+          "is_yes": false,
+          "scarcity_ok": false,
+          "perishable": false,
+          "ev_multiple_ok": true,
+          "deal_discount_ok": false
+        },
+        "gates": {
+          "ev_positive": true,
+          "max_loss_ok": true,
+          "cash_ok": true,
+          "skill_ok": true,
+          "license_ok": true,
+          "pph_floor_ok": true,
+          "min_profit_ok": true,
+          "distance_ratio_ok": true
+        },
+        "yes_conditions": {
+          "composite_ok": false,
+          "confidence_ok": false,
+          "ev_pph_target_ok": false,
+          "ev_min_profit_ok": true,
+          "remote_verification_ok": true,
+          "sold_comps_ok": false,
+          "fault_identified_ok": true,
+          "title_ok": false
+        },
+        "evidence": {
+          "three_sold_comps": false,
+          "condition_verified": false,
+          "fault_identified": true,
+          "title_verified": false,
+          "demand_evidence": false,
+          "seller_screened": false,
+          "skill_fit_high": false,
+          "price_distribution": true,
+          "remote_verification": false
+        },
+        "evidence_search": {
+          "target": "MAYBE",
+          "items": [
+            "condition_verified"
+          ],
+          "reaches": "MAYBE"
+        },
+        "walk_away_price": null,
+        "reasons": [
+          "composite 43.06 < pass floor 45",
+          "deterministic: net $644.54, $65.33/h over 9.8666 h, cash tied up $1,455.46, ROI 0.4428",
+          "expected: net $443.55, $44.95/h, max loss $455.46, P(loss) 0.1925, time-to-cash 15 d",
+          "note: estimates prepared under config 2026.10.0, scored under 2026.10.1",
+          "cheapest decisive evidence: condition_verified -> MAYBE"
+        ],
+        "cheapest_decisive_evidence": "condition_verified -> MAYBE"
+      }
+    },
+    "recommendation": {
+      "recommendation_id": "rec_01M4B3R6G0EN782QNX4RM8PNBX",
+      "verdict": "PASS",
+      "rationale": [
+        "composite 43.06 < pass floor 45",
+        "deterministic: net $644.54, $65.33/h over 9.8666 h, cash tied up $1,455.46, ROI 0.4428",
+        "expected: net $443.55, $44.95/h, max loss $455.46, P(loss) 0.1925, time-to-cash 15 d",
+        "note: estimates prepared under config 2026.10.0, scored under 2026.10.1",
+        "cheapest decisive evidence: condition_verified -> MAYBE"
+      ],
+      "confidence": 0.2,
+      "alert": false,
+      "provenance_id": "prov_01M4B3R6G0G1GMT9YV0QXCVBBK",
+      "cheapest_decisive_evidence": "condition_verified -> MAYBE"
+    },
+    "provenance_ids": [
+      "prov_01JB0000000000000000000080",
+      "prov_01M4B3R6G0G1GMT9YV0QXCVBBK"
+    ]
+  },
+  "provenance": {
+    "provenance_id": "prov_01M4B3R6G0G1GMT9YV0QXCVBBK",
+    "created_at": "2026-10-07T12:00:00Z",
+    "actor_type": "system",
+    "agent_name": "agent-03-economics",
+    "basis": "INFERENCE",
+    "tool_name": "mbos_economics.engine",
+    "tool_version": "0.1.0",
+    "config_version": "2026.10.1",
+    "inputs_used": [
+      {
+        "ref": "engine_input",
+        "hash": "sha256:d0260cb37bd3a20b08e9291fc52effa69b8dd7ad37c21d7f23ea09f04106f00f"
+      },
+      {
+        "ref": "scoring-config@2026.10.1",
+        "hash": "sha256:8b7b98c7d92457d9d0049a0a2d7dd0c4e3bafa735c99c989bf156289aff58b20"
+      }
+    ],
+    "derived_from": [
+      "prov_01JB0000000000000000000080"
+    ],
+    "confidence": 0.2
+  },
+  "receipt_drafts": [
+    {
+      "type": "SCORE_RECORDED",
+      "item_id": "itm_01JB0000000000000000000008",
+      "entity_type": "scorecard",
+      "entity_id": "scr_01M4B3R6G0RHWF9VTNAR47BYX9",
+      "tool_name": "mbos_economics.engine",
+      "inputs_hash": "sha256:d0260cb37bd3a20b08e9291fc52effa69b8dd7ad37c21d7f23ea09f04106f00f",
+      "payload_hash": "sha256:a48faec112c845aa87a2e9b84faca5695dc1d658c36514790d18f10900641665",
+      "idempotency_key": "score:scr_01M4B3R6G0RHWF9VTNAR47BYX9",
+      "provenance_ids": [
+        "prov_01M4B3R6G0G1GMT9YV0QXCVBBK"
+      ]
+    },
+    {
+      "type": "RECOMMENDATION_RECORDED",
+      "item_id": "itm_01JB0000000000000000000008",
+      "entity_type": "recommendation",
+      "entity_id": "rec_01M4B3R6G0EN782QNX4RM8PNBX",
+      "tool_name": "mbos_economics.engine",
+      "inputs_hash": "sha256:d0260cb37bd3a20b08e9291fc52effa69b8dd7ad37c21d7f23ea09f04106f00f",
+      "payload_hash": "sha256:069c92cfc3ce38f1a956de683c1da260fc4aef512a1f2737d8b1e40c2e0b04d4",
+      "idempotency_key": "recommend:rec_01M4B3R6G0EN782QNX4RM8PNBX",
+      "provenance_ids": [
+        "prov_01M4B3R6G0G1GMT9YV0QXCVBBK"
+      ]
+    }
+  ]
+}
