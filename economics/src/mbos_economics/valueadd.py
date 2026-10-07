@@ -38,6 +38,30 @@ KB_FORMAT = 1
 TOOL_NAME = "mbos_economics.valueadd"
 
 
+_NUMERIC_ONLY = re.compile(r"^[\d\s\-./]+$")
+
+
+def weak_match_problems(entry: dict) -> list[str]:
+    """Why an entry's match tokens could warn about the WRONG unit. A recall or weak-point warning on a unit that is
+    not affected is a false safety claim, so these fail closed:
+
+    * every group needs BOTH makes and models (a model alone is never enough);
+    * a model token must not be purely numeric: a wattage, year, gallon size or part count ("6500", "2018", "20")
+      appears in unrelated listings of the same make;
+    * a model token must be at least 3 characters.
+    """
+    out: list[str] = []
+    for g in entry.get("match") or []:
+        if not g.get("makes") or not g.get("models"):
+            out.append("a match group needs BOTH makes and models")
+        for m in g.get("models") or []:
+            if _NUMERIC_ONLY.match(str(m)):
+                out.append(f"model token {m!r} is purely numeric (a wattage, year or size, not a model)")
+            elif len(str(m).strip()) < 3:
+                out.append(f"model token {m!r} is shorter than 3 characters")
+    return out
+
+
 def load_kb(path: Path | None = None) -> dict:
     p = Path(path) if path else CONFIG_DIR / "value_add_kb.json"
     doc = json.loads(p.read_text(encoding="utf-8"))
@@ -49,6 +73,9 @@ def load_kb(path: Path | None = None) -> dict:
         src = e.get("source") or {}
         if not (e.get("risk") and e.get("kind") and src.get("url", "").startswith("https://") and src.get("title")):
             raise ValueError(f"KB entry {e.get('id')!r} needs risk, kind and a titled https source")
+        weak = weak_match_problems(e)
+        if weak:
+            raise ValueError(f"KB entry {e.get('id')!r} has match tokens that could fire on the wrong unit: {'; '.join(weak)}")
     doc["_hash"] = content_hash({k: v for k, v in doc.items() if k != "_hash"})
     return doc
 

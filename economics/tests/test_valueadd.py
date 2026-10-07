@@ -262,3 +262,50 @@ class TestCardIntegration(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestMatchTokensFailClosed(unittest.TestCase):
+    """Review of Agent 02's B-16 converter (2026-10-07): bare numbers pass its `model_tokens`, so a '6500 watt' listing of a
+    NON-recalled model matched a recall entry. The KB loader must refuse such entries whatever their source."""
+
+    def kb_file(self, entry):
+        import tempfile
+        from pathlib import Path
+        base = {k: v for k, v in copy.deepcopy(KB).items() if k != "_hash"}
+        base["entries"] = [entry]
+        d = tempfile.mkdtemp()
+        p = Path(d) / "kb.json"
+        p.write_text(json.dumps(base))
+        return p
+
+    def entry(self, makes=("northgate", "northgate power"), models=("NG3500i", "NG7500E")):
+        return {"id": "cpsc_fixture", "category": "generator", "match": [{"makes": list(makes), "models": list(models)}],
+                "kind": "failure_mode", "risk": "Fixture recall.", "plan_hint": "Ask a dealer.",
+                "source": {"title": "CPSC: fixture, recall date Jan 1, 2026", "url": "https://www.cpsc.gov/Recalls/FIXTURE/x",
+                           "retrieved": "2026-10-07"}}
+
+    def test_alphanumeric_models_load(self):
+        self.assertEqual(len(load_kb(self.kb_file(self.entry()))["entries"]), 1)
+
+    def test_numeric_only_and_short_tokens_are_refused(self):
+        for models in (("6500", "8000"), ("2018",), ("NG3500i", "20"), ("12",), ("1-2",)):
+            with self.assertRaises(ValueError, msg=models) as cm:
+                load_kb(self.kb_file(self.entry(models=models)))
+            self.assertIn("could fire on the wrong unit", str(cm.exception))
+
+    def test_a_group_without_makes_or_models_is_refused(self):
+        for e in (self.entry(makes=()), self.entry(models=())):
+            with self.assertRaises(ValueError):
+                load_kb(self.kb_file(e))
+
+    def test_the_false_positive_that_motivated_this(self):
+        weak = {"entries": [{"id": "w", "category": "generator", "match": [{"makes": ["northgate"], "models": ["6500"]}]}]}
+        listing = {"category": "generator", "normalized": {"title": "Northgate 6500 watt generator (NG6500, not the recalled unit)"}}
+        self.assertEqual([e["id"] for e in match_entries(listing, weak)], ["w"])          # the matcher alone cannot tell...
+        with self.assertRaises(ValueError):                                              # ...so the loader never lets it in
+            load_kb(self.kb_file(self.entry(models=("6500",))))
+
+    def test_shipped_kb_passes_the_rule(self):
+        from mbos_economics.valueadd import weak_match_problems
+        for e in KB["entries"]:
+            self.assertEqual(weak_match_problems(e), [], e["id"])

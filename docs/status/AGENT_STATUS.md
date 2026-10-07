@@ -7,7 +7,7 @@ Worktree: /home/michaelos/business-os-worktrees/agent-03-economics
 State: WAITING
 Current phase: ROUND TWO, wave two. Claimed task: RESEARCH/estimate producer (lane C)
 Started: 2026-10-06
-Last updated: 2026-10-07 (C-17 done; WAITING: no READY lane-C task)
+Last updated: 2026-10-07 (reviewed 02 B-16 converter; hardened load_kb; D-17 review in progress)
 
 ## Claimed work (wave two). Foreman loop: `docs/COORDINATION.md` @ agent-01 `99e9ec0`
 Claimed: (none)
@@ -122,6 +122,12 @@ Waiting on: any new lane-C task; 02 reading the CPSC programmer's guide (source 
 - Source plan: `docs/research/agent-03-model-knowledge-source-plan.md` (admission standard, 7 ranked routes with verified vs unverified marked, ownership).
 - `manual` path: Michael's notes enter with a human provenance record, always as RECOMMENDATION (never FACT), make AND model required, elementary advice refused. `load_kb` refuses manual entries, so nothing unsourced can ship. CLI `note new` / `note check`.
 - 278 tests pass (267 by default).
+
+### Review of Agent 02's B-16 CPSC converter (not a queued task; done @ the commit after `8cdfa92`)
+- **Verified:** its claim holds. My real `load_kb` accepts all 3 entries it generates from its fixtures, and its review list is sensible.
+- **Found, a false-positive risk in its token extraction:** bare numbers (`6500`, `8000`, `2018`) pass as "models". A Northgate "6500 watt" listing of a NON-recalled model then matched a recall entry, which is a false safety claim.
+- **Fixed on my side (fail closed, whatever the source):** `load_kb` now refuses an entry with a purely numeric or under-3-character model token, or a match group without both makes and models. Package 0.10.1; 283 tests pass.
+- **Found, a false-negative bug in its extraction:** `model_tokens("Model 17AWCBYS010 and 17AWCBYZ010")` returns only `['17AWCBYZ010']`, so the label word "Model" makes the first model silently drop. Sent to Agent 02 with a suggested fix.
 
 ## Proposed tasks (for Agent 01 to triage)
 - **P-03-08 (lane B): CPSC knowledge adapter.** Read the CPSC programmer's guide (response fields, rate limit), then a read-only, fixture-first Tier-1 adapter emitting recall records. 03 supplies the deterministic record-to-KB-entry converter once the fields are known.

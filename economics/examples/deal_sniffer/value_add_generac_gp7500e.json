@@ -4,7 +4,7 @@
  "block": {
   "plan": {
    "basis": "INFERENCE",
-   "provenance_id": "prov_01M4BRBC805K46MWY4A72S03KS",
+   "provenance_id": "prov_01M4BRBC80CMWQ1W52Q4SYXR6G",
    "value": "Budget about $100 in parts and $10 in materials plus about 3 h of your time (a category estimate; the fault is not diagnosed yet). Even with no parts spend this does not clear your $65/h flip target at the current buy price. Sell target is $950, the median of 3 sold comparables."
   }
  },
@@ -24,7 +24,7 @@
   ],
   "inputs_used": [
    {
-    "hash": "sha256:5bc2f9e6638f94e2076bb7bf90bda853ea7ca38497dfb42ed4355635d20bfc58",
+    "hash": "sha256:776e231d98078263fc030e486b5319ce4303a4e10588d4eb56c605e7aaa67bee",
     "ref": "scorecard.inputs_hash"
    },
    {
@@ -32,10 +32,10 @@
     "ref": "value_add_kb@2026.10.0"
    }
   ],
-  "provenance_id": "prov_01M4BRBC805K46MWY4A72S03KS",
+  "provenance_id": "prov_01M4BRBC80CMWQ1W52Q4SYXR6G",
   "tool_name": "mbos_economics.valueadd",
-  "tool_version": "0.10.0"
+  "tool_version": "0.10.1"
  },
  "title": "Generac GP7500E 7500 watt portable generator",
- "value_add_hash": "sha256:1c7686c0a86759b4ccf364008fd0c86617958a00e5f6e72f90c10552afd01e6f"
+ "value_add_hash": "sha256:a43f297761f33ac6229846c4c2463caf38e367d7bc9f95cf108981a54985cf5e"
 }
