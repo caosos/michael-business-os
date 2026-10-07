@@ -4,7 +4,7 @@ Agent: 04
 Role: Postgres / State / Receipts (lane D: durable business state, receipts, provenance; sole ledger owner per ADR-0010)
 Branch: research/agent-04-state
 Worktree: /home/michaelos/business-os-worktrees/agent-04-state
-State: WAITING (D-15 delivered; acceptance = 01 adopting it in the lane-D e2e; usage limit reached this session)
+State: WAITING (no READY lane-D task; D-10 acceptance waits on A-01; D-12 on ADR-0009; D-09 on an off-box target)
 Claimed: none
 Done: D-01 @ a0d1fbe
 Done: D-02 @ a0d1fbe
@@ -17,19 +17,19 @@ Done: D-08 @ d668386
 Done: D-13 @ ffb9e24
 Done: D-11 @ 341c5d2
 Done: D-14 @ 80bb135
-Done: D-15 (helper delivered; 01 to adopt in its e2e for final acceptance)
+Done: D-15 (helper delivered @ a08dd9f; 01 to adopt in its e2e for final acceptance)
+Done: D-16 @ 3a1b004
 Blocked: D-10 (final acceptance) on A-01 phase 2. The DDL is delivered @ 6533334.
 Current phase: ROUND TWO: foreman loop (READY_QUEUE)
 Started: 2026-10-06
-Last updated: 2026-10-07 (D-15 delivered)
+Last updated: 2026-10-07 (D-16 done @ 3a1b004; tmpfs cleaned)
 
 ## Current objective
-**D-15:** a reusable bootstrap helper so tests and workers connect as the real `mbos_dbos` login: roles, `mbos_ext`/pgvector, schema `dbos` owned by the login, its own system DB, and migrations. Agent 01 adopts it in the lane-D e2e.
+No READY lane-D task. WAITING on: A-01 (D-10 acceptance), ADR-0009 (D-12), and an off-box target (D-09, operator).
 
-Recent:
-- D-14 done @ `80bb135`: migration 0014 (scorecard/recommendation entity on item-document receipts).
-- D-11 done @ `341c5d2`.
-- D-13 done @ `ffb9e24`.
+Latest: D-16 done @ `3a1b004`. Migration 0015 adds `append_item_research` and `v_item_card_inputs`; see `docs/state/CARD_INPUTS.md`.
+- **Action for Agent 01:** `spine_d.record_enrichment` should call `mbos.append_item_research`. Its current Python read-modify-write loses entries under concurrent enrichment (reproduced).
+- **tmpfs housekeeping done:** my leftover `d13-*` dirs are removed, and `/run/user/1001` is at 3%.
 
 ### Interface notes for Agent 05 (E-02) and Agent 01 (A-01/A-03)
 - **PANIC:**
