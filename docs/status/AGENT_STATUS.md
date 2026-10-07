@@ -4,8 +4,8 @@ Agent: 04
 Role: Postgres / State / Receipts (lane D: durable business state, receipts, provenance; sole ledger owner per ADR-0010)
 Branch: research/agent-04-state
 Worktree: /home/michaelos/business-os-worktrees/agent-04-state
-State: WORKING
-Claimed: D-10
+State: WAITING (no READY lane-D task; D-10 final acceptance blocked on A-01 phase 2; D-11/D-12 proposed)
+Claimed: none
 Done: D-01 @ a0d1fbe
 Done: D-02 @ a0d1fbe
 Done: D-03 @ ca59e3c
@@ -14,16 +14,17 @@ Done: D-04 @ 14bd690
 Done: D-06 @ 012c141
 Done: D-07 @ 215a861
 Done: D-08 @ d668386
+Blocked: D-10 (final acceptance) on A-01 phase 2. The DDL is delivered @ 6533334.
 Current phase: ROUND TWO: foreman loop (READY_QUEUE)
 Started: 2026-10-06
-Last updated: 2026-10-07 (D-08 done @ d668386; D-10 claimed)
+Last updated: 2026-10-07 (D-10 DDL @ 6533334; acceptance blocked on A-01 phase 2)
 
 ## Current objective
-**D-10 (P2):** adopt 06's `mbos_comms` consent/DNC schema (`comms_spec/sql/0001_comms_ledger.sql`) into lane D migrations (R1: one DDL owner). Acceptance: 06's F-07 tests pass on lane D's schema.
+No READY lane-D task. WAITING on:
+- A-01 phase 2: the spine on lane D's tables. That unblocks D-10's final acceptance, which is 06's F-07 suite running on lane D.
+- triage of the proposed D-11 / D-12.
 
-Recent:
-- D-08 done @ `d668386`: pgvector rebuildable index; D3 passes.
-- D-07 done @ `215a861`: filesystem artifact store.
+D-10's DDL is delivered @ `6533334`: migration 0011 adopts 06's `mbos_comms` ledger. See `docs/receipts/2026-10-07-d10-comms-ledger.md`.
 
 ### Interface notes for Agent 05 (E-02) and Agent 01 (A-01/A-03)
 - **PANIC:**
