@@ -309,21 +309,30 @@ def test_a_hostile_title_through_the_real_pipeline_cannot_forge_the_card_view(qa
     assert sum(1 for ln in text.split("\n") if ln.startswith("RECOMMENDATION:")) == 1
 
 
-@pytest.mark.skipif(not LANE_E, reason="a PDP denial needs lane E's policy (publish.listing.create has no grant there)")
+class _UngrantedPlanner:
+    """Proposes comms.voice.call, which the spine's proposer does not hold in lane E's policy: the PDP must deny it."""
+    def plan(self, item):
+        return [{"capability": "comms.voice.call", "summary": "QA: phone the seller (ungranted; must be denied)",
+                 "reversibility": "irreversible", "estimated_cost": {"amount": 0, "currency": "USD"}}]
+
+
+@pytest.mark.skipif(not LANE_E, reason="a PDP denial needs lane E's policy")
 def test_a_policy_denied_proposal_is_shown_as_blocked_not_as_awaiting_michael(qa, mc):
+    """01's R21 (F-23 fix) as the card reports it. The premise changed with 05's E-13: publish.listing.create is now
+    granted, so the denial case uses a capability that is still ungranted for the proposer."""
+    import time
+
     from mbos.runtime import components
 
-    from mbos_qa.marketing_planner import MarketingPlanner
-
     comps = components()
-    saved, comps.planner = comps.planner, MarketingPlanner()
+    saved, comps.planner = comps.planner, _UngrantedPlanner()
     try:
-        item_id = qa.discover(FLIP)  # flips propose publish.listing.create
-        import time
-
+        item_id = qa.discover(FLIP)
         time.sleep(3.0)
     finally:
         comps.planner = saved
+    reqs = qa.areqs(item_id=item_id)
+    assert reqs and reqs[-1]["status"] == "rejected", f"no PDP denial happened: {[r['status'] for r in reqs]}"
     card, _, _ = card_for(qa, mc, item_id)
     stages = [s["stage"] for s in card["status"]["timeline"]]
     assert qa.item(item_id)["state"] != "AWAITING_APPROVAL", "F-23 regression"
