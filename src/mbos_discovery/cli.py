@@ -21,7 +21,7 @@ from pathlib import Path
 
 from .adapter import SearchProfile
 from .adapters import EbayBrowseAdapter, GsaAuctionsAdapter, ServiceIntakeAdapter, TrashNothingAdapter
-from .health import HealthBook
+from .health import HealthBook, UnavailablePanic
 from .pipeline import run_discovery
 from .rawstore import FileRawStore
 from .store import ItemStore, load_json, save_json_atomic
@@ -29,6 +29,18 @@ from .store import ItemStore, load_json, save_json_atomic
 
 def _now() -> datetime:
     return datetime.now(timezone.utc)
+
+
+def _panic():
+    """Lane E PANIC state (B-04). Set MBOS_PANIC_STATE to honour L1/L2/L3 freezes; fail closed if unusable."""
+    path = os.environ.get("MBOS_PANIC_STATE")
+    if not path:
+        return None
+    try:
+        from mbos_governance.panic import PanicStore
+    except ImportError as e:
+        return UnavailablePanic(f"MBOS_PANIC_STATE set but mbos_governance not importable: {e}")
+    return PanicStore(path)
 
 
 def build_jobs(cfg: dict, base: Path, fixtures: Path | None):
@@ -93,7 +105,7 @@ def main(argv: list[str] | None = None) -> int:
     jobs = build_jobs(cfg, Path.cwd(), Path(a.fixtures) if a.fixtures else None)
     store = ItemStore.from_json(load_json(data / "items.json", {}))
     report = run_discovery(jobs, store, FileRawStore(data / "raw"), hb, _now(),
-                           frozenset(cfg.get("enabled_sources", [])))
+                           frozenset(cfg.get("enabled_sources", [])), panic=_panic())
     save_json_atomic(data / "items.json", store.to_json())
     save_json_atomic(data / "health.json", hb.to_json())
     save_json_atomic(data / "runs" / f"{report.run_id}.json", report.to_json())
@@ -104,7 +116,8 @@ def main(argv: list[str] | None = None) -> int:
         detail = s.skipped_reason or (s.error or {}).get("message")
         print(line + (f"  [{detail}]" if detail else ""))
     for f in report.freeze_requests:
-        print(f"FREEZE {f['capability']}: {f['reason']}")
+        print(f"FREEZE REQUEST {f['capability']}: {f['reason']}  (apply: mbos-gov panic freeze --level L2 "
+              f"--target {f['capability']} --actor {f['requested_by']} --reason ...)")
     print(f"items in store: {len(store.items)}  run: {report.run_id}")
     return 0
 

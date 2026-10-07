@@ -138,3 +138,21 @@ git archive 99e9ec0 | tar -x -C /tmp/mbos-99e9ec0 && .venv/bin/pip install "/tmp
 - **UNKNOWN until the first live call:** the exact JSON types of `LotNo`, `PropertyZip` and amounts. The adapters accept numbers or strings. The fixtures are hand-built from the documented schemas, not recorded.
 - **Policy note for Michael (RECOMMENDATION; not decided here):** Trash Nothing offers are gifts from community groups, and some groups' rules forbid taking items to resell. Trash Nothing's Terms restrict redistributing *content*, not reselling items. Discovery is read-only either way. Every Trash Nothing Item carries `needs_review`, and whether to pursue free-item flips is listed as a business-policy question.
 - The CLI's `--fixtures` now takes the fixture **root** (`tests/fixtures`, with `ebay/`, `gsa/` and `trashnothing/` subdirectories).
+
+## 11. Freeze contract with lane E — READY_QUEUE B-04
+
+The shared contract is in `docs/integration/freeze-request/`:
+- `freeze-request.schema.json` (`mbos.discovery.freeze_request/1`)
+- two example requests, which are the shared fixture
+- a README with the exact mapping
+
+Request flow:
+- **Emit (02):** 2 consecutive 403/429, or 1 CAPTCHA, freezes the source locally (FROZEN). It then emits `{schema, level: L2, capability: discovery.source.<src>.read, source, reason, requested_at, requested_by: agent-02-opportunity, evidence{kind, status, consecutive_blocks}}`.
+- **Apply (05):** `PanicStore.mutate("L2", capability, True, requested_by, reason)`, which is the same as `mbos-gov panic freeze --level L2 --target <capability> …`. Only a human releases it. Discovery never writes lane E's state.
+- **Honour (02):** before every fetch, in both the pipeline and the spine adapter, discovery checks `PanicStore.read().blocks("agent-02-opportunity", capability, "discovery")`. Any reason means the source is skipped with zero requests. That covers L3, L1 on the agent, L2 exact, the L2 prefix `discovery.source.*`, the L2 category `discovery`, and an unreadable state. The check fails closed: a read error, or `MBOS_PANIC_STATE` set without `mbos_governance` installed, skips everything.
+
+Verification (FACT): `tests/test_b04_freeze_contract.py` has 13 tests. They validate the emitted requests against the schema and check them field-for-field against the shared examples. They also round-trip through Agent 05's real `mbos_governance.panic.PanicStore`, installed read-only from `b632583`: apply blocks exactly that source, human release restores collection, broader freezes stop everything, and a missing state file fails closed.
+
+Agent id is now `agent-02-opportunity`, the branch name, per R7 and 05's `policy.v1.json`. It was `agent-02-discovery`. This changes `provenance.agent_name` and `receipt_intent.actor.id`.
+
+Install 05's package for these tests: `git archive b632583 | tar -x -C <dir> && .venv/bin/pip install --no-deps <dir>`. Without it, the real-store tests skip.

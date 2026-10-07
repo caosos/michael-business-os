@@ -32,7 +32,7 @@ from mbos.interfaces import NormalizedListing, RawListing
 
 from .adapter import FetchResult, NormalizationError, SearchProfile, SourceAdapter, SourceError
 from .dedup import content_hash, dedup_key, is_cross_source_duplicate
-from .health import HealthBook
+from .health import HealthBook, external_blocks
 from .ids import iso, parse_ts
 from .policy import SourceRefused, check_allowed
 from .rawstore import FileRawStore, RawStore
@@ -71,8 +71,9 @@ class SpineSourceAdapter:
     def __init__(self, inner: SourceAdapter, profile: SearchProfile, *, raw_store: RawStore,
                  side: SideChannel, health: Optional[HealthBook] = None, health_path: Optional[Path] = None,
                  enabled_sources: frozenset[str] = frozenset(), name: Optional[str] = None,
-                 clock=_now) -> None:
+                 clock=_now, panic=None) -> None:
         self.inner, self.profile, self.raw, self.side = inner, profile, raw_store, side
+        self.panic = panic                              # lane E PanicStore (B-04); None = local health only
         self.health_path = Path(health_path) if health_path else None
         self.health = health or HealthBook.from_json(load_json(self.health_path, {}) if self.health_path else {})
         self.enabled = enabled_sources
@@ -95,6 +96,10 @@ class SpineSourceAdapter:
             return []
         if self.health.is_frozen(src):
             self.side.emit("skipped", source=src, profile_id=pid, at=iso(now), reason="source FROZEN; human must clear")
+            return []
+        blocked = external_blocks(self.panic, src)
+        if blocked:
+            self.side.emit("skipped", source=src, profile_id=pid, at=iso(now), reason="PANIC: " + "; ".join(blocked))
             return []
 
         try:
@@ -175,7 +180,7 @@ class SpineDeduper:
 def discovery_components(jobs: list[tuple[SourceAdapter, SearchProfile]], *, raw_dir: str | os.PathLike,
                          side_path: Optional[str | os.PathLike] = None,
                          health_path: Optional[str | os.PathLike] = None,
-                         enabled_sources: frozenset[str] = frozenset(), clock=_now):
+                         enabled_sources: frozenset[str] = frozenset(), clock=_now, panic=None):
     """Build (adapters, normalizer, deduper, side_channel) for `mbos.runtime.Components`.
     Adapter names are `<source>:<profile_id>` so several profiles of one source can coexist."""
     side = SideChannel(Path(side_path) if side_path else None)
@@ -185,7 +190,7 @@ def discovery_components(jobs: list[tuple[SourceAdapter, SearchProfile]], *, raw
     for inner, profile in jobs:
         a = SpineSourceAdapter(inner, profile, raw_store=raw, side=side, health=health, health_path=health_path,
                                enabled_sources=enabled_sources, name=f"{inner.source}:{profile.profile_id}",
-                               clock=clock)
+                               clock=clock, panic=panic)
         adapters[a.name] = a
         by_source.setdefault(inner.source, inner)
     return adapters, SpineNormalizer(by_source, side), SpineDeduper(), side

@@ -21,7 +21,7 @@ from datetime import datetime
 from . import AGENT_ID, CONTRACT_VERSION, NORMALIZER_VERSION
 from .adapter import FetchResult, Normalized, SearchProfile, SourceAdapter, SourceError
 from .contract import ContractViolation, check_item, check_provenance
-from .health import HealthBook
+from .health import HealthBook, external_blocks
 from .ids import derived_ulid, iso
 from .policy import SourceRefused, check_allowed
 from .rawstore import RawStore
@@ -94,7 +94,7 @@ def _trial_item(adapter: SourceAdapter, n: Normalized, raw_ref: str, prov: dict)
 
 def run_discovery(jobs: list[tuple[SourceAdapter, SearchProfile]], store: ItemStore, raw: RawStore,
                   health: HealthBook, now: datetime,
-                  enabled_sources: frozenset[str] = frozenset()) -> RunReport:
+                  enabled_sources: frozenset[str] = frozenset(), panic=None) -> RunReport:
     report = RunReport(run_id=derived_ulid("run", now, "run", iso(now)), started_at=iso(now))
     for adapter, profile in jobs:
         stats = SourceRunStats(source=adapter.source, profile_id=profile.profile_id)
@@ -110,6 +110,10 @@ def run_discovery(jobs: list[tuple[SourceAdapter, SearchProfile]], store: ItemSt
             continue
         if health.is_frozen(adapter.source):
             stats.status, stats.skipped_reason = "skipped", "source FROZEN (block freeze); human must clear"
+            continue
+        blocked = external_blocks(panic, adapter.source)
+        if blocked:
+            stats.status, stats.skipped_reason = "skipped", "PANIC: " + "; ".join(blocked)
             continue
 
         try:

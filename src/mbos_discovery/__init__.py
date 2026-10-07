@@ -8,6 +8,6 @@ sellers, bids, buys, posts or sends; the HTTP layer refuses anything but allow-l
 
 __version__ = "0.1.0"
 
-AGENT_ID = "agent-02-discovery"
+AGENT_ID = "agent-02-opportunity"        # agent id = branch name (ruling R7; 05 policy.v1.json)
 CONTRACT_VERSION = "1.0.0"
 NORMALIZER_VERSION = "2026.10.0"

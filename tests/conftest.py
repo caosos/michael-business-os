@@ -48,9 +48,9 @@ class World:
             (ServiceIntakeAdapter("referral", self.intake_root / "referral", self.clock), SERVICE),
         ]
 
-    def run(self, jobs=None, enabled=frozenset()):
+    def run(self, jobs=None, enabled=frozenset(), panic=None):
         return run_discovery(jobs if jobs is not None else self.jobs(), self.store, self.raw,
-                             self.health, self.clock(), enabled)
+                             self.health, self.clock(), enabled, panic=panic)
 
     def dump(self) -> str:
         return json.dumps(self.store.to_json(), sort_keys=True)

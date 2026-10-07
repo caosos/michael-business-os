@@ -12,8 +12,11 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
 
+from . import AGENT_ID
 from .adapter import SourceError
 from .ids import iso
+
+FREEZE_SCHEMA = "mbos.discovery.freeze_request/1"   # docs/integration/freeze-request (B-04)
 
 BLOCK_FREEZE_THRESHOLD = 2   # consecutive 403/429 responses
 HEALTHY, DEGRADED, FROZEN = "HEALTHY", "DEGRADED", "FROZEN"
@@ -69,12 +72,15 @@ class HealthBook:
             h.freeze_reason = (f"{err.kind} (status {err.status}) x{h.consecutive_blocks}"
                                " — stop; no evasion; human must clear")
             return {
+                "schema": FREEZE_SCHEMA,
                 "level": "L2",
-                "capability": f"discovery.source.{source}.read",
+                "capability": capability_for(source),
                 "source": source,
                 "reason": h.freeze_reason,
                 "requested_at": iso(at),
-                "requested_by": "agent-02-discovery",
+                "requested_by": AGENT_ID,
+                "evidence": {"kind": err.kind, "status": err.status,
+                             "consecutive_blocks": max(h.consecutive_blocks, 1)},
             }
         return None
 
@@ -93,3 +99,28 @@ class HealthBook:
     @classmethod
     def from_json(cls, data: dict) -> "HealthBook":
         return cls({name: SourceHealth(**h) for name, h in data.items()})
+
+
+def capability_for(source: str) -> str:
+    return f"discovery.source.{source}.read"
+
+
+def external_blocks(panic, source: str) -> list[str]:
+    """Lane E PANIC check (B-04), duck-typed to `mbos_governance.panic.PanicStore`: `panic.read().blocks(agent,
+    capability, category)`. Any error reading it is a block — fail closed, like lane E itself."""
+    if panic is None:
+        return []
+    try:
+        return list(panic.read().blocks(AGENT_ID, capability_for(source), "discovery"))
+    except Exception as e:  # noqa: BLE001
+        return [f"PANIC_STATE_ERROR:{type(e).__name__}: {e}"]
+
+
+class UnavailablePanic:
+    """Stand-in when MBOS_PANIC_STATE is configured but lane E's package is missing: blocks everything."""
+
+    def __init__(self, why: str) -> None:
+        self.why = why
+
+    def read(self):
+        raise RuntimeError(self.why)
