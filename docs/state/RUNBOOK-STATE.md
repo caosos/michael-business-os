@@ -108,6 +108,12 @@ systemctl --user enable --now mbos-postgres.service mbos-chain-check.timer
 
   **FACT (2026-10-07):** the drill passed on a 179-receipt seeded dry-run history (`bootstrap/seed_demo.py`): flip and service lanes, HOLD and YES, dry-run effector calls, outcomes, PANIC. The reference result was `(True, '179 receipts verified')`.
   - *Caveat:* the "fresh host" was a fresh cluster on the same machine. The procedure is identical on a second machine (copy the dump and the anchor log over first).
+- **Artifacts (D-07):**
+  - Files live under `$MBOS_ARTIFACT_ROOT` (default `~/.local/share/mbos/artifacts`), indexed in `mbos.artifacts`.
+  - `backup-dump.sh` copies them to `artifacts-<ts>/` and verifies the copy against the index.
+  - The fresh-cluster drill re-verifies them against the *restored* index (set `MBOS_DRILL_ARTIFACTS=<backup>/artifacts-<ts>`).
+  - Routine check: `python -m mbos_state verify-artifacts`. It re-hashes every file and reports missing, modified and unindexed files.
+  - **FACT (2026-10-07):** the drill passed with 5 fs + 1 inline artifacts and 183 receipts.
 - **PITR:** `wal_level=replica` is already set. pgBackRest (`archive_command`, a repo on off-box storage)
   lands once an off-box target exists. **UNKNOWN:** the target (NAS, USB or cloud).
 

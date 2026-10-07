@@ -26,6 +26,8 @@ if [[ $fresh == 1 ]]; then
   "$MBOS_PY" -m mbos_state verify-chain --anchor "$MBOS_ANCHOR_LOG"
   "$MBOS_PY" -m mbos_state export-chain --out "$work/chain.jsonl"
   "$MBOS_PY" -m mbos_state verify-export "$work/chain.jsonl" --anchor "$MBOS_ANCHOR_LOG"
+  # artifacts: the restored index must match the backed-up files (set MBOS_DRILL_ARTIFACTS=<backup artifacts-ts dir>)
+  if [[ -n "${MBOS_DRILL_ARTIFACTS:-}" ]]; then "$MBOS_PY" -m mbos_state verify-artifacts --root "$MBOS_DRILL_ARTIFACTS"; fi
   "$MBOS_PY" -c "import json,sys; sys.path.insert(0,'$STATE_DIR/mbos_state'); import mbos_canonical as m; \
 print('ADR-0010 reference verify_chain:', m.verify_chain([json.loads(l) for l in open('$work/chain.jsonl')]))"
   echo "fresh-cluster restore drill ok ($dump -> new cluster on port $port, torn down)"

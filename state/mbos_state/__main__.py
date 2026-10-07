@@ -6,6 +6,7 @@
   anchor --out F               append the current head to an anchor log
   export-chain --out F         export the chain as JSONL
   verify-export F [--anchor F] offline verification of an export (no database)
+  verify-artifacts [--root D]  re-hash every indexed artifact (default root $MBOS_ARTIFACT_ROOT)
 
 Exit code 0 = ok, 1 = verification failed, 2 = usage/config error.
 """
@@ -48,6 +49,7 @@ def main(argv: list[str] | None = None) -> int:
     a = sub.add_parser("anchor"); a.add_argument("--out", required=True)
     e = sub.add_parser("export-chain"); e.add_argument("--out", required=True)
     x = sub.add_parser("verify-export"); x.add_argument("path"); x.add_argument("--anchor")
+    va = sub.add_parser("verify-artifacts"); va.add_argument("--root")
     args = ap.parse_args(argv)
 
     if args.cmd == "migrate":
@@ -72,6 +74,14 @@ def main(argv: list[str] | None = None) -> int:
         if args.cmd == "anchor":
             print(json.dumps(chain.write_anchor(conn, Path(args.out))))
             return 0
+        if args.cmd == "verify-artifacts":
+            from .artifacts import ArtifactStore, default_root
+            problems = ArtifactStore(conn, Path(args.root) if args.root else default_root()).verify_all()
+            n = conn.execute("SELECT count(*) FROM mbos.artifacts").fetchone()[0]
+            print(f"{'OK' if not problems else 'FAILED'}: {n} artifacts checked")
+            for pr in problems:
+                print("  " + pr)
+            return 0 if not problems else 1
         if args.cmd == "export-chain":
             print(f"exported {chain.export_chain(conn, Path(args.out))} receipts")
             return 0

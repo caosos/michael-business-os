@@ -27,6 +27,8 @@ state/
   migrations/0008_mcp_calls.sql    D-06: append-only audit of every State MCP call; ok write rows must cite receipts
   mbos_state/mcp_tools.py          D-06: State MCP tool layer (identity/scope -> provenance, narrow intent tools)
   mbos_state/mcp_server.py         D-06: MCP server (mcp 2.x MCPServer, stdio): python -m mbos_state.mcp_server
+  migrations/0009_artifact_fs.sql  D-07: fs artifacts indexed in mbos.artifacts; location forced to its canonical path
+  mbos_state/artifacts.py          D-07: ArtifactStore (sha256/ab/cd/<hex>, atomic, read-only, re-hash on read)
   mbos_state/mbos_canonical.py     ADR-0010 Python reference (byte-identical vendored copy)
   tests/canonical/vectors.json     ADR-0010 golden vectors (byte-identical vendored copy)
   bootstrap/roles.sql              group + login roles (cluster level)
@@ -35,7 +37,7 @@ state/
   bootstrap/systemd/               user units: postgres, hourly chain verify + anchor
   bootstrap/podman/                Quadlet units for the target runtime (UNTESTED: no Podman on host yet)
   mbos_state/                      Python: migrate, StateStore facade, chain export/anchor/offline verify, CLI
-  tests/                           162 tests; vendored frozen contracts v1.0.0 in tests/contracts-v1.0.0/
+  tests/                           171 tests; vendored frozen contracts v1.0.0 in tests/contracts-v1.0.0/
 ```
 
 ## Tables
