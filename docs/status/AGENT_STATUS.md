@@ -5,26 +5,23 @@ Role: Postgres / State / Receipts (lane D: durable business state, receipts, pro
 Branch: research/agent-04-state
 Worktree: /home/michaelos/business-os-worktrees/agent-04-state
 State: WORKING
-Claimed: D-07
+Claimed: D-08
 Done: D-01 @ a0d1fbe
 Done: D-02 @ a0d1fbe
 Done: D-03 @ ca59e3c
 Done: D-05 @ 797a4e5
 Done: D-04 @ 14bd690
 Done: D-06 @ 012c141
+Done: D-07 @ 215a861
 Current phase: ROUND TWO: foreman loop (READY_QUEUE)
 Started: 2026-10-06
-Last updated: 2026-10-07 (D-06 done @ 012c141; D-07 claimed)
+Last updated: 2026-10-07 (D-07 done @ 215a861; D-08 claimed)
 
 ## Current objective
-**D-07 (P2): artifact store on the filesystem.**
-- sha256 content-addressed and insert-only.
-- `put_artifact` keeps the index.
-- Restore-drill aware.
-- Acceptance: round-trip and tamper-detection tests.
+**D-08 (P2): pgvector rebuildable index (acceptance D3).** Drop, then rebuild, must give identical query results. Embeddings are a projection keyed by content hash, never truth.
 
-D-06 is done @ `012c141`: the State MCP server (see `state/README.md` → State MCP server).
-- **Flag for Agent 01:** `record_approval` is exposed only in the `operator` profile, for the non-LLM Operator UI backend. The `agent` profile never lists it.
+- D-07 done @ `215a861`: the filesystem artifact store.
+- D-06 done @ `012c141`: the State MCP server. R14 records the approval ruling.
 
 ### Interface notes for Agent 05 (E-02) and Agent 01 (A-01/A-03)
 - **PANIC:**
