@@ -4,8 +4,8 @@ Agent: 04
 Role: Postgres / State / Receipts (lane D: durable business state, receipts, provenance; sole ledger owner per ADR-0010)
 Branch: research/agent-04-state
 Worktree: /home/michaelos/business-os-worktrees/agent-04-state
-State: WORKING
-Claimed: none (checking READY_QUEUE)
+State: WAITING (no READY lane-D task in READY_QUEUE @ 2629917; awaiting triage of the proposed tasks below)
+Claimed: none
 Done: D-01 @ a0d1fbe
 Done: D-02 @ a0d1fbe
 Done: D-03 @ ca59e3c
@@ -13,7 +13,7 @@ Done: D-05 @ 797a4e5
 Done: D-04 @ 14bd690
 Current phase: ROUND TWO: foreman loop (READY_QUEUE)
 Started: 2026-10-06
-Last updated: 2026-10-07 (D-04 done @ 14bd690)
+Last updated: 2026-10-07 (D-01..D-05 done; WAITING on queue triage)
 
 ## Current objective
 D-04 is done @ `14bd690` (migration 0007, the Lane E requirements and 05's refinements). Next: pick the next READY lane-D task from the queue.
@@ -31,6 +31,15 @@ D-04 is done @ `14bd690` (migration 0007, the Lane E requirements and 05's refin
   - caps = `{per_action, daily, global_daily, velocity_per_hour (null = none), tz, categories[]}`
   - Also: `mbos.budget_exposure_day(categories[], currency, mode, tz)`, `mbos.budget_velocity_hour(...)`.
 - **Refused YES:** record it via `append_receipt` as POLICY_DECIDED with `details.refused_approval`.
+
+## Proposed tasks (for Agent 01 to triage into READY_QUEUE)
+| Proposed ID | Pri | Task | Deps | Acceptance |
+|---|---|---|---|---|
+| D-06 | P1 | State MCP server: narrow intent tools over `mbos.*` (ingest, transition, propose, outcome, lesson), login `mbos_state_mcp`; the only agent write path; no raw SQL | none | Tool tests; an agent cannot approve, execute or spend through it |
+| D-07 | P2 | Artifact store to FS (sha256 paths) behind `put_artifact`, plus `storage='fs'` rows; integrity check job | none | Round-trip and hash-verify tests; restore drill includes artifacts |
+| D-08 | P2 | pgvector rebuildable index (acceptance D3): embeddings keyed by content hash, with a drop/rebuild drill | none | Identical query results after rebuild |
+| D-09 | P2 | pgBackRest PITR to an off-box target, plus a PITR drill | an off-box target (UNKNOWN; Michael) | Point-in-time restore, then verify_chain |
+| D-10 | P2 | Contract v1.1.0 (ADR-0009) DDL follow-up: ITEM_UPDATED, ACTION_EXPIRED, GUARD_REFUSED and `superseded` status, once ADR-0009 is accepted | A-06 | Migration plus tests; old receipts still verify |
 
 ## Answers requested by Agent 01 (ROUND_TWO_INTEGRATION §3 D, READY_QUEUE D-01)
 1. **DBOS login role: `mbos_dbos`.** It is created by `state/bootstrap/roles.sql`.
