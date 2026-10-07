@@ -19,6 +19,7 @@ from mbos.clock import utcnow
 from mbos.spine import DecisionRefused
 
 from . import ux, views
+from .sources import load_health
 from .ux import InputError
 
 ALLOWED_HOSTS = {"127.0.0.1", "localhost", "[::1]"}
@@ -81,7 +82,7 @@ def page(title, body, state, flash=None, error=False):
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>{e(title)}</title><style>{CSS}</style></head>
 <body><div class="banner">DRY-RUN · nothing leaves this machine · system {e(state)}</div>
-<header><b>Operator UI</b><nav><a href="/">Queue</a><a href="/ledger">Receipt ledger</a></nav></header>
+<header><b>Operator UI</b><nav><a href="/">Queue</a><a href="/holds">HOLD backlog</a><a href="/outcomes">Outcomes</a><a href="/sources">Source health</a><a href="/ledger">Receipt ledger</a></nav></header>
 <main>{f}{body}</main></body></html>"""
 
 
@@ -204,6 +205,7 @@ def render_card(c, csrf):
 <div class="card"><h2>Sources</h2><table><tr><th>Source</th><th>URL</th><th>Method</th><th>First seen</th><th>raw_ref</th></tr>{sources}</table>
 {'<h2 style="margin-top:12px">Research findings</h2><ul>' + research + '</ul>' if research else ''}</div>
 <div class="card"><h2>Provenance (every fact, score and decision)</h2><table><tr><th>ID</th><th>Kind</th><th>Basis</th><th>Who</th><th>What</th></tr>{prov}</table></div>
+{render_outcome_section(c, csrf)}
 <div class="card"><h2>Decisions</h2>{'<ul>' + apprs + '</ul>' if apprs else '<p class="mut">None yet.</p>'}</div>
 <div class="card"><h2>Receipts</h2><table><tr><th>seq</th><th>ts</th><th>type</th><th>actor</th><th>intent</th><th>row_hash</th></tr>{receipts}</table></div>"""
 
@@ -224,12 +226,105 @@ def render_ledger(store):
             f"<th>request</th><th>intent</th><th>provenance</th><th>row_hash</th></tr>{rows}</table></div>")
 
 
+def _num(v):
+    """Plain text (callers HTML-escape it)."""
+    return "—" if v is None else (f"{v:,.2f}".rstrip("0").rstrip(".") if isinstance(v, (int, float)) else str(v))
+
+
+def _pva(o):
+    return ", ".join(f"{p['field']}: {_num(p.get('predicted'))} → {_num(p.get('actual'))}" for p in o.get("predicted_vs_actual") or [])
+
+
+def render_outcome_section(c, csrf):
+    """F-09: outcomes already recorded for this item, and, once the item has settled, the entry form."""
+    item, a = c["item"], c["areq"]
+    rows = "".join(
+        f"<tr><td>{e(o['observed_at'])}</td><td>{e(o['kind'])}</td>"
+        f"<td>{e(', '.join(f'{k} {_num(v)}' for k, v in (o.get('realized') or {}).items()))}</td>"
+        f"<td>{e(_pva(o))}</td>"
+        f"<td>{e(o.get('notes'))}</td></tr>" for o in c.get("outcomes") or [])
+    table = (f"<table><tr><th>Observed</th><th>Kind</th><th>Realized</th><th>Predicted → actual</th><th>Notes</th></tr>{rows}</table>"
+             if rows else "<p class='mut'>No outcome recorded yet.</p>")
+    form = ""
+    if item["state"] in ux.OUTCOME_STATES:
+        kinds = "".join(f"<option value='{e(k)}'>{e(k)}</option>" for k in ux.outcome_kinds(item["type"]))
+        form = f"""<form method="post" action="/areq/{e(a['action_request_id'])}/outcome">
+<input type="hidden" name="csrf" value="{e(csrf)}">
+<div class="decide"><label>What happened<select name="kind">{kinds}</select></label>
+<label>Revenue $<input name="revenue" inputmode="decimal"></label><label>Total cost $<input name="total_cost" inputmode="decimal"></label>
+<label>Hours spent<input name="hours" inputmode="decimal"></label><label>Days to cash<input name="days_to_cash" inputmode="decimal"></label></div>
+<label>Notes<input name="notes" maxlength="1000"></label>
+<button class="b-HOLD" style="width:auto">Record outcome (receipted; feeds LEARN)</button></form>"""
+    else:
+        form = f"<p class='small mut'>Outcome entry opens once the item has settled (now {e(item['state'])}).</p>"
+    return f"<div class='card'><h2>Outcome</h2>{table}{form}</div>"
+
+
+def render_holds(rows, now):
+    if not rows:
+        return "<div class='card'><h2>HOLD backlog</h2><p class='mut'>Nothing is parked.</p></div>"
+    def until(r):
+        return r["hold"].get("hold_until") or "9999"
+    out = []
+    overdue = 0
+    for r in sorted(rows, key=until):
+        a, item, h = r["action_request"], r["item"], r["hold"]
+        late = bool(h.get("hold_until")) and h["hold_until"] < now.strftime("%Y-%m-%dT%H:%M:%S")
+        overdue += late
+        out.append(
+            f"<tr><td>{_lane(item['type'])}</td><td><a href='/areq/{e(a['action_request_id'])}'>{e(item['normalized']['title'])}</a></td>"
+            f"<td>{e(a['capability'])}</td><td>{e(r['held_at'])}</td>"
+            f"<td class='{'bad' if late else ''}'>{e(h.get('hold_until'))}{' — OVERDUE (workflow should have re-presented)' if late else ''}</td>"
+            f"<td>{e(', '.join(h.get('wake_on') or []))}</td><td>{e(r['reason'])}</td></tr>")
+    note = f"<p class='bad'>{overdue} hold(s) past their wake time: check the worker is running.</p>" if overdue else ""
+    return (f"<div class='card'><h2>HOLD backlog ({len(rows)})</h2>{note}<p class='small mut'>Read-only. Holds never execute; "
+            "they re-present for a new decision. Open a card to decide or wake.</p><table><tr><th>Lane</th><th>Opportunity</th>"
+            f"<th>Action</th><th>Held at</th><th>Wakes at</th><th>Wake on</th><th>Reason</th></tr>{''.join(out)}</table></div>")
+
+
+def render_sources(h, now):
+    head = f"<p class='small mut'>Read-only view of lane B's <code>health.json</code> ({e(h['path'] or 'not configured')}). "
+    if h["updated_at"]:
+        age_h = (now - h["updated_at"]).total_seconds() / 3600
+        head += f"Last written {e(h['updated_at'].strftime('%Y-%m-%d %H:%M UTC'))}{' — <b class=bad>STALE (&gt;24h)</b>' if age_h > 24 else ''}. "
+    head += "Clearing a freeze is a human CLI action on lane B (<code>--by</code> required), not done here.</p>"
+    if h["error"]:
+        return f"<div class='card'><h2>Source health</h2>{head}<p class='bad'>{e(h['error'])}</p></div>"
+    rows = "".join(
+        f"<tr><td>{e(r['source'])}</td><td class='{'bad' if r['status'] != 'HEALTHY' else 'ok'}'>{e(r['status'])}</td>"
+        f"<td class='num'>{e(r['consecutive_failures'])}</td><td class='num'>{e(r['consecutive_blocks'])}</td>"
+        f"<td class='num'>{e(r['total_failures'])}/{e(r['total_runs'])}</td><td>{e(r['last_success_at'])}</td>"
+        f"<td class='num'>{e(r['last_items_seen'])}</td>"
+        f"<td>{e((r['last_error'] or {}).get('kind') if isinstance(r['last_error'], dict) else r['last_error'])}"
+        f"{' ' + e((r['last_error'] or {}).get('message')) if isinstance(r['last_error'], dict) and r['last_error'].get('message') else ''}</td>"
+        f"<td>{e(r['freeze_reason'])}</td></tr>" for r in h["rows"])
+    frozen = sum(1 for r in h["rows"] if r["status"] == "FROZEN")
+    return (f"<div class='card'><h2>Source health ({len(h['rows'])} sources, {frozen} frozen)</h2>{head}"
+            "<table><tr><th>Source</th><th>Status</th><th>Fails in a row</th><th>Blocks in a row</th><th>Failures/runs</th>"
+            f"<th>Last success</th><th>Items last run</th><th>Last error</th><th>Freeze</th></tr>{rows}</table></div>")
+
+
+def render_outcomes(rows, store):
+    if not rows:
+        return "<div class='card'><h2>Outcomes</h2><p class='mut'>None recorded yet.</p></div>"
+    out = []
+    for o in rows:
+        item = store.item(o["item_id"]) or {"normalized": {"title": o["item_id"]}, "type": "?"}
+        link = f"/areq/{e(o['action_request_id'])}" if o.get("action_request_id") else "#"
+        out.append(f"<tr><td>{e(o['observed_at'])}</td><td><a href='{link}'>{e(item['normalized']['title'])}</a></td>"
+                   f"<td>{e(o['kind'])}</td><td class='num'>{e(_num((o.get('realized') or {}).get('net_profit')))}</td>"
+                   f"<td>{e(o.get('notes'))}</td></tr>")
+    return (f"<div class='card'><h2>Outcomes ({len(rows)})</h2><table><tr><th>Observed</th><th>Opportunity</th><th>Kind</th>"
+            f"<th>Net $</th><th>Notes</th></tr>{''.join(out)}</table></div>")
+
+
 class App:
     """Turns form posts into `spine.decide` calls through the backend. No side effects of its own."""
 
-    def __init__(self, backend, operator_pin=None):
+    def __init__(self, backend, operator_pin=None, health_file=None):
         self.store = backend
         self.operator_pin = operator_pin
+        self.health_file = health_file  # lane B health.json (else MBOS_SOURCE_HEALTH_FILE)
         self.csrf = secrets.token_urlsafe(32)
         self.session_id = "web-" + secrets.token_hex(4)
 
@@ -270,6 +365,19 @@ class App:
             "MODIFY": f"MODIFY recorded. New request {out.get('new_action_request_id')} awaits its own YES.",
             "HOLD": "HOLD recorded. The workflow re-notifies and re-presents it; it never executes on its own.",
         }[d], out
+
+    def outcome(self, areq_id, f):
+        """F-09: record an outcome for the card's item via spine.record_outcome (receipted). Human channel only."""
+        self._check_csrf(f)
+        areq = self.store.action_request(areq_id)
+        if areq is None:
+            raise InputError(f"unknown action request {areq_id}")
+        item = self.store.item(areq["item_id"])
+        if item["state"] not in ux.OUTCOME_STATES:
+            raise InputError(f"the item is {item['state']}; record outcomes once it has settled")
+        kind, kw = ux.parse_outcome(item, f)
+        o = self.store.record_outcome(item["item_id"], kind, **kw)
+        return f"Outcome {o['kind']} recorded ({o['outcome_id']})."
 
     def wake(self, areq_id, f):
         self._check_csrf(f)
@@ -321,6 +429,12 @@ def make_handler(app):
             err = (qs.get("err") or [None])[0]
             if u.path == "/":
                 return self._send(200, page("Operator queue", render_queue(views.queue(app.store, now)), app.state(), flash or err, bool(err)))
+            if u.path == "/holds":
+                return self._send(200, page("HOLD backlog", render_holds(app.store.held(), now), app.state()))
+            if u.path == "/sources":
+                return self._send(200, page("Source health", render_sources(load_health(app.health_file), now), app.state()))
+            if u.path == "/outcomes":
+                return self._send(200, page("Outcomes", render_outcomes(app.store.outcomes(), app.store), app.state()))
             if u.path == "/ledger":
                 return self._send(200, page("Receipt ledger", render_ledger(app.store), app.state()))
             if u.path.startswith("/areq/"):
@@ -342,7 +456,7 @@ def make_handler(app):
                 return
             u = urlparse(self.path)
             parts = u.path.strip("/").split("/")
-            if len(parts) != 3 or parts[0] != "areq" or parts[2] not in ("decide", "wake"):
+            if len(parts) != 3 or parts[0] != "areq" or parts[2] not in ("decide", "wake", "outcome"):
                 return self._send(404, "not found", "text/plain")
             n = min(int(self.headers.get("Content-Length") or 0), 65536)
             f = {k: v[0] for k, v in parse_qs(self.rfile.read(n).decode("utf-8"), keep_blank_values=True).items()}
@@ -350,6 +464,8 @@ def make_handler(app):
             try:
                 if parts[2] == "wake":
                     msg, target = app.wake(areq_id, f), areq_id
+                elif parts[2] == "outcome":
+                    msg, target = app.outcome(areq_id, f), areq_id
                 else:
                     msg, out = app.decide(areq_id, f)
                     target = out.get("new_action_request_id") or areq_id

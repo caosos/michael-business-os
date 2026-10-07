@@ -1,7 +1,7 @@
 """Operator UI → spine adapter (coordinator ruling R10).
 
-Reads come straight from the spine's Postgres tables (read-only). The one write path is
-`decide()`: `mbos.spine.decide` in ONE transaction (approval + provenance + receipt + status),
+Reads come straight from the spine's Postgres tables (read-only). The write paths are
+`decide()` and `record_outcome()`: `mbos.spine.decide` in ONE transaction (approval + provenance + receipt + status),
 then `mbos.workflows.notify_decision` to wake the item workflow, the same path as `mbos decide` (CLI).
 The UI owns no gateway, no timers and no ledger. Execution happens only in the item
 workflow → lane E gateway → dry-run effector.
@@ -101,6 +101,26 @@ class SpineBackend:
             return mbos_canonical.verify_chain(chain)
         except Exception as e:  # noqa: BLE001 — a value the reference rejects is a failed verification
             return False, f"reference rejected the chain: {type(e).__name__}: {e}"
+
+    def held(self) -> list[dict]:
+        """HOLD backlog: held requests with their item and the HOLD in force (approval row)."""
+        rows = []
+        for areq in self._bodies("SELECT body FROM mbos.action_requests WHERE status = 'held' ORDER BY body->>'created_at'"):
+            last = (self.approvals_for(areq["action_request_id"]) or [None])[-1]
+            rows.append({"action_request": areq, "item": self.item(areq["item_id"]),
+                         "hold": (last or {}).get("hold") or {}, "held_at": (last or {}).get("decided_at"),
+                         "reason": (last or {}).get("reason")})
+        return rows
+
+    def outcomes(self, item_id: Optional[str] = None, limit: int = 100) -> list[dict]:
+        if item_id:
+            return self._bodies("SELECT body FROM mbos.outcomes WHERE body->>'item_id' = :i ORDER BY body->>'observed_at'", i=item_id)
+        return self._bodies("SELECT body FROM mbos.outcomes ORDER BY body->>'observed_at' DESC LIMIT :n", n=limit)
+
+    def record_outcome(self, item_id: str, kind: str, **kw: Any) -> dict:
+        """Second (and last) write path: Michael records what actually happened (feeds LEARN, lane C)."""
+        with self.engine.begin() as c:
+            return spine.record_outcome(c, item_id, kind, recorded_by="michael", **kw)
 
     # ---- the one write path -----------------------------------------------------------------
     def decide(self, areq_id: str, decision: str, payload_hash_seen: str, **kw: Any) -> dict:

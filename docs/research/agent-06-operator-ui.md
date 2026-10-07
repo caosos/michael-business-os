@@ -83,3 +83,13 @@ FACT (`bed7609`): the workflow acts on `hold_until`, `escalate_after`, `renotify
   1. **Card:** it recomputes `sha256_of(payload)`, independent of the spine. The card shows "verified (MBOS-CJSON-1)", and **offers YES only when what Michael sees hashes to `payload_hash`.** Otherwise it shows "YES unavailable", and NO/MODIFY/HOLD remain.
   2. **Ledger page:** besides the DB's `verify_chain()`, it re-verifies the exported chain in Python with `mbos_canonical.verify_chain` (MBOS-RH-1).
 - FACT: the spine's real chain at `99e9ec0` passes the independent MBOS-RH-1 check in the tests.
+
+## 6. Operator pages (task F-09)
+| Page | What it shows | Writes |
+|---|---|---|
+| Card → **Outcome** | Outcomes recorded for the item; once settled, a form (lane-specific kinds, realized $/hours/days, notes) | `spine.record_outcome` (receipted; feeds LEARN with predicted-vs-actual pairs) |
+| `/outcomes` | Recent outcomes with net $ | none |
+| `/holds` | HOLD backlog by wake time; overdue holds flagged | none |
+| `/sources` | Lane B source health (`MBOS_SOURCE_HEALTH_FILE`), worst first, freeze reasons, staleness | none (clearing a freeze stays lane B's human CLI) |
+
+Every page keeps the loopback, Host-check, CSRF and CSP guards (R14: human channel only).

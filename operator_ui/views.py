@@ -141,6 +141,7 @@ def card(store, areq_id, now):
         "decidable": areq["status"] in ("pending_approval", "held") and expires > now,
         "expires_in_hours": round((expires - now).total_seconds() / 3600, 1),
         "approvals": approvals,
+        "outcomes": store.outcomes(item["item_id"]),
         "receipts": receipts,
         "item_receipts": item_receipts,
         "successors": [a["action_request_id"] for a in successors],

@@ -63,3 +63,59 @@ def auth_context(areq: dict, pin: str | None, configured_pin: str | None, sessio
             raise InputError("this action is irreversible or moves money: step-up PIN required")
         step_up = True
     return {"method": "local_pin" if step_up else "localhost_csrf_session", "session_id": session_id, "step_up": step_up}
+
+
+# ---------------------------------------------------------------- F-09 outcome entry
+OUTCOME_KINDS = {
+    "flip": ["flip_acquired", "flip_sold", "flip_unsold_salvaged", "flip_repair_failed", "flip_passed_missed"],
+    "service": ["service_won", "service_lost", "service_completed", "service_rework", "service_paid"],
+    "any": ["wasted_trip", "message_replied", "message_no_reply", "lead_attributed"],
+}
+OUTCOME_STATES = {"ACTED", "OUTCOME_RECORDED", "FAILED", "ARCHIVED", "REJECTED"}
+_NUMBERS = ("revenue", "total_cost", "hours", "days_to_cash")
+
+
+def outcome_kinds(lane: str) -> list[str]:
+    return OUTCOME_KINDS[lane] + OUTCOME_KINDS["any"]
+
+
+def parse_outcome(item: dict, form: dict) -> tuple[str, dict]:
+    """Form → (kind, kwargs for spine.record_outcome). Validates; builds LEARN predicted-vs-actual pairs
+    from the item's own economics so lane C can calibrate (sell price, labor hours)."""
+    kind = form.get("kind") or ""
+    if kind not in outcome_kinds(item["type"]):
+        raise InputError(f"outcome kind {kind!r} is not valid for a {item['type']}")
+    realized: dict = {}
+    for k in _NUMBERS:
+        raw = (form.get(k) or "").strip().replace("$", "").replace(",", "")
+        if not raw:
+            continue
+        try:
+            v = float(raw)
+        except ValueError:
+            raise InputError(f"{k} must be a number")
+        if not (0 <= v < 10_000_000):
+            raise InputError(f"{k} must be between 0 and 10,000,000")
+        realized[k] = int(v) if v.is_integer() else v
+    if "revenue" in realized and "total_cost" in realized:
+        realized["net_profit"] = realized["revenue"] - realized["total_cost"]
+    e = item.get("economics") or {}
+    pva = []
+    if item["type"] == "flip":
+        if "revenue" in realized and kind == "flip_sold":
+            pva.append({"field": "resale.target_sell_price",
+                        "predicted": (e.get("resale") or {}).get("target_sell_price"), "actual": realized["revenue"]})
+        if "hours" in realized:
+            pva.append({"field": "rehab.labor_hours", "predicted": (e.get("rehab") or {}).get("labor_hours"),
+                        "actual": realized["hours"]})
+    else:
+        if "hours" in realized:
+            pva.append({"field": "job.labor_hours", "predicted": (e.get("job") or {}).get("labor_hours"),
+                        "actual": realized["hours"]})
+        if kind in ("service_won", "service_lost"):
+            pva.append({"field": "job.win_prob", "predicted": (e.get("job") or {}).get("win_prob"),
+                        "actual": 1 if kind == "service_won" else 0})
+    notes = (form.get("notes") or "").strip()[:1000]
+    kw = {"realized": realized or None, "predicted_vs_actual": [p for p in pva if p["predicted"] is not None] or None,
+          "notes": notes or None}
+    return kind, {k: v for k, v in kw.items() if v is not None}
