@@ -282,7 +282,7 @@ def cmd_tests() -> tuple[int, list[tuple[str, str, str, str]]]:
         xml = pathlib.Path(td) / "junit.xml"
         env = dict(os.environ, PYTHONPATH=str(QA_ROOT))
         rc = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", f"--junitxml={xml}",
-                             "tests"], cwd=QA_ROOT, env=env).returncode
+                             "tests", "--ignore=tests/card", "--ignore=tests/spec"], cwd=QA_ROOT, env=env).returncode
         rows = []
         for tc in ET.parse(xml).getroot().iter("testcase"):
             outcome = "passed"

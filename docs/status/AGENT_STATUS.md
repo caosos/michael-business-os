@@ -10,8 +10,8 @@ Done: G-02 @ a1700d9
 Done: G-03 @ 4c2e897
 Done: G-04 @ 6d43d2b — wave-two RC verdict NOT READY (F-24 blocking; F-25 needs a ruling; F-22/F-23 open)
 Done: G-05 @ 3c330e8 — 148 pass / 87 fail → F-26..F-39 (3 of the highs: F-26 crash, F-31 dry-run shown as sent, F-35 text-view forgery; F-36 poison listing)
-Claimed: (none; G-06 waits for 05's E-13 ping)
-Current phase: Round Two — G-05 delivered; G-06 (RC re-run after E-13) waiting on 05
+Claimed: G-06
+Current phase: Round Two — G-06 (P0): release-candidate re-run after 05's E-13
 Started: 2026-10-06 (round one) · 2026-10-07 (round two)
 Last updated: 2026-10-07
 
