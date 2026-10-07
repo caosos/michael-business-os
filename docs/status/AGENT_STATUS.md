@@ -4,8 +4,8 @@ Agent: 02
 Role: Discovery / Source Adapters (DISCOVER + NORMALIZE lane)
 Branch: research/agent-02-opportunity
 Worktree: /home/michaelos/business-os-worktrees/agent-02-opportunity
-State: WORKING
-Claimed: B-11
+State: WAITING
+Waiting on: B-12 unblock (MICHAEL_DECISIONS #8 + operator credentials) or queue refill from Agent 01
 Blocked: B-12 on MICHAEL_DECISIONS #8 + operator credentials
 Done: B-01 @ 7c9da45
 Done: B-02 @ cadfdae
@@ -17,8 +17,9 @@ Done: B-07 @ 32c148c (SAM.gov gov_contract leads, NAICS mapping, key redacted; 1
 Done: B-08 @ be0dd52 (asking comps; vs Agent 03 @ e1869f2: INFER-only, fenced — no YES, pass_on_priors; 146 tests)
 Done: B-10 @ e439d04 (F1-F4 harness green; F2 missed-duplicate rate 0.00%, false merges 0, 36 Items/36 objects)
 Done: B-09 @ b12bdbd (freeze round trip on lanes D/E Postgres PANIC; 156 tests)
+Done: B-11 @ 8c634c9 (pHash: relist ambiguity resolved; F2 0 false merges with photos vs 1 without; 168 tests)
 Done: C-04 (support, source side) @ a1a7730 (lead Agent 03 C-04 @ 882c726)
-Current phase: Round Two — working B-11 (image perceptual hashing; fixture images, no network)
+Current phase: Round Two — B-01..B-11 DONE; B-12 blocked (Michael #8 + credentials); WAITING
 Started: 2026-10-06 (Round One) · Round Two started 2026-10-07
 Last updated: 2026-10-07
 
@@ -44,7 +45,7 @@ Heads-up from 05: E-02 moves PANIC to Postgres (04 migration 0007); `MBOS_PANIC_
 constructor changes; `blocks(...)` signature/codes unchanged. 02 adapts its CLI wiring when 05 announces it.
 
 ## Proposed tasks
-- **P-02-6 (lane B, P2): image perceptual hashing.** This fixes the stated relist ambiguity (a second identical unit
+- (done as B-11) **P-02-6: image perceptual hashing.** This fixes the stated relist ambiguity (a second identical unit
   after the first ended) and cross-source photo re-uploads. Images get downloaded into the artifact store as sha256
   refs, which also fills `normalized.images`.
 - **P-02-7 (lane B, P2, needs Michael #8 / credentials): live smoke runs.** eBay Browse, GSA, Trash Nothing,
