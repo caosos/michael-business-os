@@ -24,6 +24,7 @@ except ImportError:  # pragma: no cover
     NOTE_CATEGORIES, NOTE_KINDS = frozenset(), frozenset()
 
 from . import card_view, ux, views
+from .card_view import ec
 from .backend import ItemNotFound, NoteRefused, ProfileUnavailable
 from .sources import load_health
 from .ux import InputError
@@ -88,7 +89,7 @@ def _verdict(v):
 def page(title, body, state, flash=None, error=False):
     f = f'<div class="flash{" err" if error else ""}">{e(flash)}</div>' if flash else ""
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>{e(title)}</title><style>{CSS}</style></head>
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>{ec(title)}</title><style>{CSS}</style></head>
 <body><div class="banner">DRY-RUN · nothing leaves this machine · system {e(state)}</div>
 <header><b>Operator UI</b><nav><a href="/">Queue</a><a href="/digest">Morning digest</a><a href="/summary">Daily summary</a><a href="/notes">My notes</a><a href="/holds">HOLD backlog</a><a href="/outcomes">Outcomes</a><a href="/sources">Source health</a><a href="/ledger">Receipt ledger</a></nav></header>
 <main>{f}{body}</main></body></html>"""
@@ -105,7 +106,7 @@ def render_queue(q):
             out.append(f"""<div class="card q"><a class="rowlink" href="/item/{e(r['item_id'])}">
 <div class="row">{_lane(r['lane'])}<span class="mut small">{e(r['category'])}</span>{_verdict(r['verdict'])}
 <span class="grow"></span><span class="small mut">{e(r['status'])} · expires in {e(r['expires_in_hours'])}h{extra}</span></div>
-<h1>{e(r['title'])}</h1>
+<h1>{ec(r['title'])}</h1>
 <div class="row small"><span>EV {_money(r['ev'])}</span><span>{_money(r['pph'])}/h</span>
 <span>confidence {e(r['confidence'])}</span><span class="mut">{e(r['reversibility'])}</span></div>
 <div>Proposed: <b>{e(r['summary'])}</b> <code>{e(r['capability'])}</code></div></a></div>""")
@@ -215,7 +216,7 @@ def render_card(c, csrf):
 
     return f"""<div class="card"><div class="row">{_lane(c['lane'])}<span class="mut">{e(c['category'])} · {e(c['subcategory'])}</span>
 {_verdict(c['verdict'])}<span class="grow"></span><span class="small mut">item {e(item['state'])} · request {e(a['status'])} · expires in {e(c['expires_in_hours'])}h</span></div>
-<h1>{e(c['title'])}</h1><div class="mut small">{e(loc.get('city'))}, {e(loc.get('state'))} · {e(loc.get('road_miles_one_way'))} road miles one way</div>{hold}{lineage}</div>
+<h1>{ec(c['title'])}</h1><div class="mut small">{e(loc.get('city'))}, {e(loc.get('state'))} · {e(loc.get('road_miles_one_way'))} road miles one way</div>{hold}{lineage}</div>
 <div class="grid">
 <div class="card"><h2>Why the system recommends this</h2><p>Composite <b>{e(c['composite'])}</b> · confidence <b>{e(c['confidence'])}</b></p><ul>{why}</ul>{cde}</div>
 <div class="card"><h2>Economics</h2><table>{econ}</table></div>
@@ -266,7 +267,7 @@ def render_notes(notes, lane):
     rows = "".join(
         f"<tr><td>{e(n.get('entered_at'))}</td><td>{e(n.get('category'))}</td>"
         f"<td>{e(', '.join(g.get('makes', [])))} / {e(', '.join(g.get('models', [])))}</td><td>{e(n.get('kind'))}</td>"
-        f"<td>{'<b class=bad>RETRACTED</b> ' if n.get('retracted') else ''}{e(n.get('statement'))}</td>"
+        f"<td>{'<b class=bad>RETRACTED</b> ' if n.get('retracted') else ''}{ec(n.get('statement'), 700)}</td>"
         f"<td>{e(n.get('basis_of_knowledge'))}</td><td>{e(n.get('entered_by'))}</td>"
         f"<td><a href='/provenance/{e(n.get('provenance_id'))}'><code>{e(n.get('provenance_id'))}</code></a></td></tr>"
         for n in (g_ for g_ in notes) for g in [((n.get('match') or [{}])[0])])
@@ -321,7 +322,7 @@ def render_holds(rows, now):
         late = bool(h.get("hold_until")) and h["hold_until"] < now.strftime("%Y-%m-%dT%H:%M:%S")
         overdue += late
         out.append(
-            f"<tr><td>{_lane(item['type'])}</td><td><a href='/areq/{e(a['action_request_id'])}'>{e(item['normalized']['title'])}</a></td>"
+            f"<tr><td>{_lane(item['type'])}</td><td><a href='/areq/{e(a['action_request_id'])}'>{ec(item['normalized']['title'])}</a></td>"
             f"<td>{e(a['capability'])}</td><td>{e(r['held_at'])}</td>"
             f"<td class='{'bad' if late else ''}'>{e(h.get('hold_until'))}{' — OVERDUE (workflow should have re-presented)' if late else ''}</td>"
             f"<td>{e(', '.join(h.get('wake_on') or []))}</td><td>{e(r['reason'])}</td></tr>")
@@ -360,7 +361,7 @@ def render_outcomes(rows, store):
     for o in rows:
         item = store.item(o["item_id"]) or {"normalized": {"title": o["item_id"]}, "type": "?"}
         link = f"/areq/{e(o['action_request_id'])}" if o.get("action_request_id") else "#"
-        out.append(f"<tr><td>{e(o['observed_at'])}</td><td><a href='{link}'>{e(item['normalized']['title'])}</a></td>"
+        out.append(f"<tr><td>{e(o['observed_at'])}</td><td><a href='{link}'>{ec(item['normalized']['title'])}</a></td>"
                    f"<td>{e(o['kind'])}</td><td class='num'>{e(_num((o.get('realized') or {}).get('net_profit')))}</td>"
                    f"<td>{e(o.get('notes'))}</td></tr>")
     return (f"<div class='card'><h2>Outcomes ({len(rows)})</h2><table><tr><th>Observed</th><th>Opportunity</th><th>Kind</th>"
@@ -379,7 +380,7 @@ def render_digest(view):
     rows = []
     for r in d["rows"]:
         card = view["cards"].get(r["item_id"])
-        title = e(r["title"])  # listing text: untrusted
+        title = ec(r["title"])  # listing text: untrusted (clean_text + escape)
         title = f"<a href='/areq/{e(card)}'>{title}</a>" if card else title
         rf = r["refs"]
         rows.append(

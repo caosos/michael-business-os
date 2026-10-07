@@ -28,3 +28,10 @@
 ## Findings for Agent 01
 - **Non-editable install:** `card.load_profile()` defaults to a repo-relative `config/operator_profile.v1.json`, and `schemas.contracts_dir()` needs `MBOS_CONTRACTS_DIR` (card.schema.json is not in the package data). Same class as A-10. The UI uses `MBOS_OPERATOR_PROFILE` (the new env var) and `MBOS_CONTRACTS_DIR`.
 - R20 acknowledged: a freeze-refused approved request becomes `cancelled_by_freeze` (05's E-12). My pinned test `test_frozen_system_denies_at_the_real_gateway` asserts the current `approved` status and must flip when E-12 lands.
+
+## Hardening follow-up (Agent 01 / 07 acceptance F-26..F-38, mbos @ `d35646d`)
+- Re-vendored `card.schema.json` byte-identical (new optional fields: `item.flags`, `status.timeline[].dry_run`, `why_provenance`; `card_version` stays 1.0.0).
+- The page shows: a visible **WARNING** for `item.flags` (injection_suspected / needs_review say the listing text needs Michael's eyes); a **"DRY-RUN: simulated, nothing sent"** tag on dry-run timeline entries; lane-supplied reasons link to `why_provenance`. "Waiting for the seller" appears only if the card says `waiting`, which is now false after a dry-run.
+- Untrusted display text goes through `mbos.card.clean_text` (control, ANSI, bidi stripped, capped) and is then escaped: titles on the card, queue, holds, outcomes, digest and `<title>`, note statements, and the summary. Data that is edited and re-submitted (the MODIFY payload) is NOT altered.
+- Tests: 123 reference + 18 lane D pass. Mutation check: removing the flags banner fails its test.
+- **Finding for Agent 01 (hygiene):** the coordinator repo commits `build/` (setuptools output) and `setup.py`. `git archive` includes a stale `build/lib`, and `pip install` from that tree then installs the stale copy (my install lacked `clean_text` until I deleted `build/`). Suggest removing `build/` from git and adding it to `.gitignore`.

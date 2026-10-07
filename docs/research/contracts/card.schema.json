@@ -1,99 +1,291 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://michael-business-os/contracts/card.schema.json",
-  "title": "OpportunityCard v1 — the decision-ready view of one Item (derived, never stored as truth)",
-  "description": "ADDITIVE contract (ADR-0011). A card is a pure projection of an Item, its receipts and lane-supplied enrichment blocks. It is NOT a new source of truth and never carries authority: Michael's decision is still Approval.decision (YES|NO|MODIFY|HOLD) on an ActionRequest. Honesty rule: every datum is either a value with a basis (FACT|INFERENCE|RECOMMENDATION) and optional provenance_id, or the literal UNKNOWN. Nothing unavailable is ever filled in. The score is for the machine; `why` and `recommendation.why` are for Michael.",
+  "title": "OpportunityCard v1 \u2014 the decision-ready view of one Item (derived, never stored as truth)",
+  "description": "ADDITIVE contract (ADR-0011). A card is a pure projection of an Item, its receipts and lane-supplied enrichment blocks. It is NOT a new source of truth and never carries authority: Michael's decision is still Approval.decision (YES|NO|MODIFY|HOLD) on an ActionRequest. Honesty rule: every datum is either a value with a basis (FACT|INFERENCE|RECOMMENDATION) and optional provenance_id, or the literal UNKNOWN. Nothing unavailable is ever filled in. The score is for the machine; `why` and `recommendation.why` are for Michael. Additive optional fields (2026-10-07, 07 findings F-31/F-29/F-37): item.flags, status.timeline[].dry_run, why_provenance. card_version stays 1.0.0 (optional additions only; consumers re-vendor to validate cards that use them).",
   "type": "object",
-  "required": ["card_version", "item_id", "generated_at", "item", "listing_activity", "seller", "why", "economics", "value_add_plan", "seasonality", "logistics", "recommendation", "status", "activity_trail", "unknowns"],
+  "required": [
+    "card_version",
+    "item_id",
+    "generated_at",
+    "item",
+    "listing_activity",
+    "seller",
+    "why",
+    "economics",
+    "value_add_plan",
+    "seasonality",
+    "logistics",
+    "recommendation",
+    "status",
+    "activity_trail",
+    "unknowns"
+  ],
   "additionalProperties": false,
   "properties": {
-    "card_version": { "const": "1.0.0" },
-    "item_id": { "type": "string", "pattern": "^itm_[0-9A-HJKMNP-TV-Z]{26}$" },
-    "generated_at": { "type": "string", "format": "date-time" },
-    "card_hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$", "description": "MBOS-CJSON-1 of the card without this field and without generated_at: same inputs, same hash." },
+    "card_version": {
+      "const": "1.0.0"
+    },
+    "item_id": {
+      "type": "string",
+      "pattern": "^itm_[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "card_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "description": "MBOS-CJSON-1 of the card without this field and without generated_at: same inputs, same hash."
+    },
     "item": {
       "type": "object",
-      "required": ["title", "category", "type", "asking_price", "location", "source"],
+      "required": [
+        "title",
+        "category",
+        "type",
+        "asking_price",
+        "location",
+        "source"
+      ],
       "additionalProperties": false,
       "properties": {
-        "title": { "type": "string" },
-        "make_model": { "$ref": "#/$defs/datum" },
-        "category": { "type": "string" },
-        "type": { "enum": ["flip", "service"] },
-        "asking_price": { "$ref": "#/$defs/datum" },
-        "location": { "$ref": "#/$defs/datum" },
-        "distance_miles": { "$ref": "#/$defs/datum" },
-        "source": { "type": "string" },
-        "url": { "type": "string" }
+        "title": {
+          "type": "string"
+        },
+        "make_model": {
+          "$ref": "#/$defs/datum"
+        },
+        "category": {
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "flip",
+            "service"
+          ]
+        },
+        "asking_price": {
+          "$ref": "#/$defs/datum"
+        },
+        "location": {
+          "$ref": "#/$defs/datum"
+        },
+        "distance_miles": {
+          "$ref": "#/$defs/datum"
+        },
+        "source": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "flags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Listing-level warnings from lane B (e.g. injection_suspected, needs_review), shown to Michael."
+        }
       }
     },
     "listing_activity": {
       "type": "object",
-      "required": ["posted_at", "updated_at", "age_days", "recent_activity", "suspected_relist", "stale_risk"],
+      "required": [
+        "posted_at",
+        "updated_at",
+        "age_days",
+        "recent_activity",
+        "suspected_relist",
+        "stale_risk"
+      ],
       "additionalProperties": false,
       "properties": {
-        "posted_at": { "$ref": "#/$defs/datum" },
-        "updated_at": { "$ref": "#/$defs/datum" },
-        "age_days": { "$ref": "#/$defs/datum" },
-        "recent_activity": { "type": "array", "items": { "type": "string" } },
-        "suspected_relist": { "$ref": "#/$defs/datum" },
-        "stale_risk": { "$ref": "#/$defs/datum", "description": "value: low | medium | high | UNKNOWN" }
+        "posted_at": {
+          "$ref": "#/$defs/datum"
+        },
+        "updated_at": {
+          "$ref": "#/$defs/datum"
+        },
+        "age_days": {
+          "$ref": "#/$defs/datum"
+        },
+        "recent_activity": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "suspected_relist": {
+          "$ref": "#/$defs/datum"
+        },
+        "stale_risk": {
+          "$ref": "#/$defs/datum",
+          "description": "value: low | medium | high | UNKNOWN"
+        }
       }
     },
     "seller": {
       "type": "object",
-      "required": ["account_age", "rating", "prior_listings", "complaint_signals", "response_history", "inconsistencies", "confidence"],
+      "required": [
+        "account_age",
+        "rating",
+        "prior_listings",
+        "complaint_signals",
+        "response_history",
+        "inconsistencies",
+        "confidence"
+      ],
       "additionalProperties": false,
       "properties": {
-        "account_age": { "$ref": "#/$defs/datum" },
-        "rating": { "$ref": "#/$defs/datum" },
-        "prior_listings": { "$ref": "#/$defs/datum" },
-        "complaint_signals": { "$ref": "#/$defs/datum" },
-        "response_history": { "$ref": "#/$defs/datum" },
-        "inconsistencies": { "$ref": "#/$defs/datum" },
-        "confidence": { "enum": ["high", "medium", "low", "UNKNOWN"] }
+        "account_age": {
+          "$ref": "#/$defs/datum"
+        },
+        "rating": {
+          "$ref": "#/$defs/datum"
+        },
+        "prior_listings": {
+          "$ref": "#/$defs/datum"
+        },
+        "complaint_signals": {
+          "$ref": "#/$defs/datum"
+        },
+        "response_history": {
+          "$ref": "#/$defs/datum"
+        },
+        "inconsistencies": {
+          "$ref": "#/$defs/datum"
+        },
+        "confidence": {
+          "enum": [
+            "high",
+            "medium",
+            "low",
+            "UNKNOWN"
+          ]
+        }
       }
     },
-    "why": { "type": "array", "minItems": 1, "items": { "type": "string" }, "description": "Plain-English reasoning for Michael." },
+    "why": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      },
+      "description": "Plain-English reasoning for Michael."
+    },
     "economics": {
       "type": "object",
-      "required": ["asking_price", "recommended_opening_offer", "maximum_acquisition_price", "expected_repair_material_cost", "transport_cost", "total_cash_at_risk", "resale_conservative", "resale_likely", "resale_optimistic", "expected_gross_profit", "expected_net_profit", "expected_profit_per_hour", "expected_days_to_cash"],
+      "required": [
+        "asking_price",
+        "recommended_opening_offer",
+        "maximum_acquisition_price",
+        "expected_repair_material_cost",
+        "transport_cost",
+        "total_cash_at_risk",
+        "resale_conservative",
+        "resale_likely",
+        "resale_optimistic",
+        "expected_gross_profit",
+        "expected_net_profit",
+        "expected_profit_per_hour",
+        "expected_days_to_cash"
+      ],
       "additionalProperties": false,
       "properties": {
-        "asking_price": { "$ref": "#/$defs/datum" },
-        "recommended_opening_offer": { "$ref": "#/$defs/datum" },
-        "maximum_acquisition_price": { "$ref": "#/$defs/datum" },
-        "expected_repair_material_cost": { "$ref": "#/$defs/datum" },
-        "transport_cost": { "$ref": "#/$defs/datum" },
-        "total_cash_at_risk": { "$ref": "#/$defs/datum" },
-        "resale_conservative": { "$ref": "#/$defs/datum" },
-        "resale_likely": { "$ref": "#/$defs/datum" },
-        "resale_optimistic": { "$ref": "#/$defs/datum" },
-        "expected_gross_profit": { "$ref": "#/$defs/datum" },
-        "expected_net_profit": { "$ref": "#/$defs/datum" },
-        "expected_profit_per_hour": { "$ref": "#/$defs/datum" },
-        "expected_days_to_cash": { "$ref": "#/$defs/datum" },
-        "scoring_config_version": { "type": "string" }
+        "asking_price": {
+          "$ref": "#/$defs/datum"
+        },
+        "recommended_opening_offer": {
+          "$ref": "#/$defs/datum"
+        },
+        "maximum_acquisition_price": {
+          "$ref": "#/$defs/datum"
+        },
+        "expected_repair_material_cost": {
+          "$ref": "#/$defs/datum"
+        },
+        "transport_cost": {
+          "$ref": "#/$defs/datum"
+        },
+        "total_cash_at_risk": {
+          "$ref": "#/$defs/datum"
+        },
+        "resale_conservative": {
+          "$ref": "#/$defs/datum"
+        },
+        "resale_likely": {
+          "$ref": "#/$defs/datum"
+        },
+        "resale_optimistic": {
+          "$ref": "#/$defs/datum"
+        },
+        "expected_gross_profit": {
+          "$ref": "#/$defs/datum"
+        },
+        "expected_net_profit": {
+          "$ref": "#/$defs/datum"
+        },
+        "expected_profit_per_hour": {
+          "$ref": "#/$defs/datum"
+        },
+        "expected_days_to_cash": {
+          "$ref": "#/$defs/datum"
+        },
+        "scoring_config_version": {
+          "type": "string"
+        }
       }
     },
     "value_add_plan": {
       "type": "object",
-      "required": ["plan", "model_specific_risks"],
+      "required": [
+        "plan",
+        "model_specific_risks"
+      ],
       "additionalProperties": false,
       "properties": {
-        "plan": { "$ref": "#/$defs/datum" },
+        "plan": {
+          "$ref": "#/$defs/datum"
+        },
         "model_specific_risks": {
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["risk", "basis"],
+            "required": [
+              "risk",
+              "basis"
+            ],
             "additionalProperties": false,
             "properties": {
-              "risk": { "type": "string" },
-              "kind": { "enum": ["failure_mode", "expensive_part", "parts_availability", "known_weakness", "resale_demand", "economic"] },
-              "basis": { "enum": ["FACT", "INFERENCE", "RECOMMENDATION"] },
-              "source": { "type": "string" },
-              "provenance_id": { "type": "string", "pattern": "^prov_[0-9A-HJKMNP-TV-Z]{26}$" }
+              "risk": {
+                "type": "string"
+              },
+              "kind": {
+                "enum": [
+                  "failure_mode",
+                  "expensive_part",
+                  "parts_availability",
+                  "known_weakness",
+                  "resale_demand",
+                  "economic"
+                ]
+              },
+              "basis": {
+                "enum": [
+                  "FACT",
+                  "INFERENCE",
+                  "RECOMMENDATION"
+                ]
+              },
+              "source": {
+                "type": "string"
+              },
+              "provenance_id": {
+                "type": "string",
+                "pattern": "^prov_[0-9A-HJKMNP-TV-Z]{26}$"
+              }
             }
           }
         }
@@ -101,60 +293,154 @@
     },
     "seasonality": {
       "type": "object",
-      "required": ["demand_now", "hold_likely", "note"],
+      "required": [
+        "demand_now",
+        "hold_likely",
+        "note"
+      ],
       "additionalProperties": false,
       "properties": {
-        "demand_now": { "$ref": "#/$defs/datum", "description": "value: strong | normal | weak | UNKNOWN" },
-        "hold_likely": { "$ref": "#/$defs/datum" },
-        "peak_months": { "type": "array", "items": { "type": "integer", "minimum": 1, "maximum": 12 } },
-        "note": { "$ref": "#/$defs/datum" }
+        "demand_now": {
+          "$ref": "#/$defs/datum",
+          "description": "value: strong | normal | weak | UNKNOWN"
+        },
+        "hold_likely": {
+          "$ref": "#/$defs/datum"
+        },
+        "peak_months": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12
+          }
+        },
+        "note": {
+          "$ref": "#/$defs/datum"
+        }
       }
     },
     "logistics": {
       "type": "object",
-      "required": ["transport_mode", "trailer_needed", "trailer_owned", "borrowed_trailer_possible", "borrowed_trailer_confirmed", "trip_miles_round_trip", "trip_hours", "fuel_cost", "difficulty"],
+      "required": [
+        "transport_mode",
+        "trailer_needed",
+        "trailer_owned",
+        "borrowed_trailer_possible",
+        "borrowed_trailer_confirmed",
+        "trip_miles_round_trip",
+        "trip_hours",
+        "fuel_cost",
+        "difficulty"
+      ],
       "additionalProperties": false,
       "properties": {
-        "transport_mode": { "$ref": "#/$defs/datum", "description": "value: fits_truck | requires_trailer | UNKNOWN" },
-        "trailer_needed": { "$ref": "#/$defs/datum" },
-        "trailer_owned": { "$ref": "#/$defs/datum" },
-        "borrowed_trailer_possible": { "$ref": "#/$defs/datum" },
-        "borrowed_trailer_confirmed": { "$ref": "#/$defs/datum", "description": "Must be confirmed with a person before pickup; never assumed." },
-        "trip_miles_round_trip": { "$ref": "#/$defs/datum" },
-        "trip_hours": { "$ref": "#/$defs/datum" },
-        "fuel_cost": { "$ref": "#/$defs/datum" },
-        "difficulty": { "$ref": "#/$defs/datum", "description": "value: easy | moderate | hard | UNKNOWN. Difficulty is an economic penalty, never an automatic rejection." }
+        "transport_mode": {
+          "$ref": "#/$defs/datum",
+          "description": "value: fits_truck | requires_trailer | UNKNOWN"
+        },
+        "trailer_needed": {
+          "$ref": "#/$defs/datum"
+        },
+        "trailer_owned": {
+          "$ref": "#/$defs/datum"
+        },
+        "borrowed_trailer_possible": {
+          "$ref": "#/$defs/datum"
+        },
+        "borrowed_trailer_confirmed": {
+          "$ref": "#/$defs/datum",
+          "description": "Must be confirmed with a person before pickup; never assumed."
+        },
+        "trip_miles_round_trip": {
+          "$ref": "#/$defs/datum"
+        },
+        "trip_hours": {
+          "$ref": "#/$defs/datum"
+        },
+        "fuel_cost": {
+          "$ref": "#/$defs/datum"
+        },
+        "difficulty": {
+          "$ref": "#/$defs/datum",
+          "description": "value: easy | moderate | hard | UNKNOWN. Difficulty is an economic penalty, never an automatic rejection."
+        }
       }
     },
     "recommendation": {
       "type": "object",
-      "required": ["action", "waiting", "why"],
+      "required": [
+        "action",
+        "waiting",
+        "why"
+      ],
       "additionalProperties": false,
       "properties": {
-        "action": { "enum": ["CONTACT", "OFFER", "BUY", "COUNTER", "HOLD", "PASS"] },
-        "waiting": { "type": "boolean", "description": "True when the action is already in flight and the system is waiting (e.g. contacted, awaiting reply)." },
-        "why": { "type": "string", "minLength": 1 },
-        "requires_step_up": { "type": "boolean" },
-        "action_request_id": { "type": "string", "pattern": "^areq_[0-9A-HJKMNP-TV-Z]{26}$" }
+        "action": {
+          "enum": [
+            "CONTACT",
+            "OFFER",
+            "BUY",
+            "COUNTER",
+            "HOLD",
+            "PASS"
+          ]
+        },
+        "waiting": {
+          "type": "boolean",
+          "description": "True when the action is already in flight and the system is waiting (e.g. contacted, awaiting reply)."
+        },
+        "why": {
+          "type": "string",
+          "minLength": 1
+        },
+        "requires_step_up": {
+          "type": "boolean"
+        },
+        "action_request_id": {
+          "type": "string",
+          "pattern": "^areq_[0-9A-HJKMNP-TV-Z]{26}$"
+        }
       }
     },
     "status": {
       "type": "object",
-      "required": ["current", "timeline"],
+      "required": [
+        "current",
+        "timeline"
+      ],
       "additionalProperties": false,
       "properties": {
-        "current": { "$ref": "#/$defs/stage" },
+        "current": {
+          "$ref": "#/$defs/stage"
+        },
         "timeline": {
           "type": "array",
           "description": "One entry per stage reached, with its timestamp and the receipt that proves it. Stages with no event source yet are simply absent.",
           "items": {
             "type": "object",
-            "required": ["stage", "at", "receipt_id"],
+            "required": [
+              "stage",
+              "at",
+              "receipt_id"
+            ],
             "additionalProperties": false,
             "properties": {
-              "stage": { "$ref": "#/$defs/stage" },
-              "at": { "type": "string", "format": "date-time" },
-              "receipt_id": { "type": "string", "pattern": "^rcpt_[0-9A-HJKMNP-TV-Z]{26}$" }
+              "stage": {
+                "$ref": "#/$defs/stage"
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "receipt_id": {
+                "type": "string",
+                "pattern": "^rcpt_[0-9A-HJKMNP-TV-Z]{26}$"
+              },
+              "dry_run": {
+                "type": "boolean",
+                "description": "True when the proving receipt is a DRY-RUN: the step was simulated and nothing was actually sent."
+              }
             }
           }
         }
@@ -165,37 +451,143 @@
       "description": "Every receipt about this Item, newest last: no invisible autonomous actions.",
       "items": {
         "type": "object",
-        "required": ["at", "agent", "what", "why", "inputs", "result", "receipt_id", "next_action"],
+        "required": [
+          "at",
+          "agent",
+          "what",
+          "why",
+          "inputs",
+          "result",
+          "receipt_id",
+          "next_action"
+        ],
         "additionalProperties": false,
         "properties": {
-          "at": { "type": "string" },
-          "agent": { "type": "string" },
-          "what": { "type": "string" },
-          "why": { "type": "string" },
-          "inputs": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "^prov_[0-9A-HJKMNP-TV-Z]{26}$" } },
-          "result": { "type": "string" },
-          "receipt_id": { "type": "string", "pattern": "^rcpt_[0-9A-HJKMNP-TV-Z]{26}$" },
-          "next_action": { "type": "string" }
+          "at": {
+            "type": "string"
+          },
+          "agent": {
+            "type": "string"
+          },
+          "what": {
+            "type": "string"
+          },
+          "why": {
+            "type": "string"
+          },
+          "inputs": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "pattern": "^prov_[0-9A-HJKMNP-TV-Z]{26}$"
+            }
+          },
+          "result": {
+            "type": "string"
+          },
+          "receipt_id": {
+            "type": "string",
+            "pattern": "^rcpt_[0-9A-HJKMNP-TV-Z]{26}$"
+          },
+          "next_action": {
+            "type": "string"
+          }
         }
       }
     },
-    "unknowns": { "type": "array", "items": { "type": "string" }, "description": "Dotted paths of every datum that is UNKNOWN, so Michael sees at a glance what the system could not establish." }
+    "unknowns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Dotted paths of every datum that is UNKNOWN, so Michael sees at a glance what the system could not establish."
+    },
+    "why_provenance": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^prov_[0-9A-HJKMNP-TV-Z]{26}$"
+      },
+      "description": "Provenance of reasons supplied by a lane (a lane's reasons are shown only if they carry provenance)."
+    }
   },
   "$defs": {
-    "stage": { "enum": ["DISCOVERED", "RESEARCHED", "SCORED", "CONTACT APPROVED", "CONTACT SENT", "SELLER RESPONDED", "NEGOTIATING", "QUALIFIED", "AWAITING MICHAEL", "CLOSED", "PASSED"] },
+    "stage": {
+      "enum": [
+        "DISCOVERED",
+        "RESEARCHED",
+        "SCORED",
+        "CONTACT APPROVED",
+        "CONTACT SENT",
+        "SELLER RESPONDED",
+        "NEGOTIATING",
+        "QUALIFIED",
+        "AWAITING MICHAEL",
+        "CLOSED",
+        "PASSED"
+      ]
+    },
     "datum": {
       "oneOf": [
-        { "type": "object", "required": ["value", "basis"], "additionalProperties": false,
+        {
+          "type": "object",
+          "required": [
+            "value",
+            "basis"
+          ],
+          "additionalProperties": false,
           "properties": {
-            "value": { "type": ["number", "string", "boolean", "array", "object"], "description": "Never the string UNKNOWN: use the UNKNOWN form." },
-            "unit": { "type": "string" },
-            "low": { "type": "number" },
-            "high": { "type": "number" },
-            "basis": { "enum": ["FACT", "INFERENCE", "RECOMMENDATION"] },
-            "provenance_id": { "type": "string", "pattern": "^prov_[0-9A-HJKMNP-TV-Z]{26}$" },
-            "note": { "type": "string" } } },
-        { "type": "object", "required": ["value"], "additionalProperties": false,
-          "properties": { "value": { "const": "UNKNOWN" }, "reason": { "type": "string" } } }
+            "value": {
+              "type": [
+                "number",
+                "string",
+                "boolean",
+                "array",
+                "object"
+              ],
+              "description": "Never the string UNKNOWN: use the UNKNOWN form."
+            },
+            "unit": {
+              "type": "string"
+            },
+            "low": {
+              "type": "number"
+            },
+            "high": {
+              "type": "number"
+            },
+            "basis": {
+              "enum": [
+                "FACT",
+                "INFERENCE",
+                "RECOMMENDATION"
+              ]
+            },
+            "provenance_id": {
+              "type": "string",
+              "pattern": "^prov_[0-9A-HJKMNP-TV-Z]{26}$"
+            },
+            "note": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "value"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "const": "UNKNOWN"
+            },
+            "reason": {
+              "type": "string"
+            }
+          }
+        }
       ]
     }
   }

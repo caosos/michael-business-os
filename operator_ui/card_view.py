@@ -15,6 +15,14 @@ from typing import Any
 
 e = lambda v: html.escape("" if v is None else str(v))  # noqa: E731
 
+
+def ec(v, limit: int = 300) -> str:
+    """Escape UNTRUSTED display text after `mbos.card.clean_text` (strips control, ANSI and bidi characters, caps length).
+    Only for text that is displayed, never for data that is edited and re-submitted."""
+    from mbos.card import clean_text
+
+    return html.escape(clean_text("" if v is None else v, limit))
+
 _BASIS_CLASS = {"FACT": "fact", "INFERENCE": "inf", "RECOMMENDATION": "rec"}
 
 
@@ -59,7 +67,7 @@ def render_header(card: dict) -> str:
     return (f"<div class='card'><div class='row'><span class='badge {e(i['type'])}'>{'FLIP' if i['type'] == 'flip' else 'SERVICE'}</span>"
             f"<span class='mut'>{e(i['category'])}</span><span class='grow'></span>"
             f"<span class='small mut'>{e(i['source'])} · {link} · card <code>{e(card['card_hash'][:19])}</code></span></div>"
-            f"<h1>{e(i['title'])}</h1>"
+            f"<h1>{ec(i['title'])}</h1>"
             f"<div>{datum(i['location'])} · {datum(i['distance_miles'])} · asking {datum(i['asking_price'], True)}</div>"
             f"<div class='small'>make/model: {datum(i['make_model'])}</div></div>")
 
@@ -85,7 +93,20 @@ def render_seller(card: dict) -> str:
 
 
 def render_why(card: dict) -> str:
-    return f"<div class='card'><h2>Why it is interesting</h2><ul>{''.join(f'<li>{e(w)}</li>' for w in card['why'])}</ul></div>"
+    wp = card.get("why_provenance") or []
+    src = (" <span class='small'>Lane-supplied reasons come from: " + " ".join(_link_prov(p) for p in wp) + "</span>") if wp else ""
+    return f"<div class='card'><h2>Why it is interesting</h2><ul>{''.join(f'<li>{e(w)}</li>' for w in card['why'])}</ul>{src}</div>"
+
+
+def render_flags(card: dict) -> str:
+    """item.flags are listing-level warnings from lane B (injection_suspected, needs_review, ...): never hidden."""
+    flags = card["item"].get("flags") or []
+    if not flags:
+        return ""
+    strong = [f for f in flags if f in ("injection_suspected", "needs_review")]
+    return ("<div class='flash err'><b>WARNING: this listing was flagged.</b> "
+            + ("Its text needs your eyes before you act: do not trust it." if strong else "Read the listing yourself.")
+            + "<ul>" + "".join(f"<li><code>{ec(f, 80)}</code></li>" for f in flags) + "</ul></div>")
 
 
 def render_economics(card: dict) -> str:
@@ -134,8 +155,10 @@ def render_transport(card: dict) -> str:
 
 def render_status(card: dict) -> str:
     st = card["status"]
-    rows = "".join(f"<tr><td>{e(t['at'])}</td><td><b>{e(t['stage'])}</b></td><td><code>{e(t['receipt_id'])}</code></td></tr>"
-                   for t in st["timeline"])
+    rows = "".join(
+        f"<tr><td>{e(t['at'])}</td><td><b>{e(t['stage'])}</b>"
+        f"{' <span class=\"tag rec\">DRY-RUN: simulated, nothing sent</span>' if t.get('dry_run') else ''}</td>"
+        f"<td><code>{e(t['receipt_id'])}</code></td></tr>" for t in st["timeline"])
     note = "<p class='small mut'>Stages without an event source (NEGOTIATING, QUALIFIED) are shown only when they happen. They are never invented.</p>"
     return (f"<div class='card'><h2>System status</h2><p>Now: <b>{e(st['current'])}</b></p>"
             f"<table><tr><th>When</th><th>Stage</th><th>Proved by receipt</th></tr>{rows}</table>{note}</div>")
@@ -220,7 +243,7 @@ def render_item_card(card: dict, errors: list[str], controls_html: str, hold_htm
                   + "".join(f"<li>{e(x)}</li>" for x in errors[:8]) + "</ul></div>")
     decide = (f"<div class='card'><h2>Your decision</h2>{hold_html}{controls_html}</div>" if controls_html else
               "<div class='card'><h2>Your decision</h2><p class='mut'>No open request is waiting for a decision on this item.</p></div>")
-    return (banner + render_header(card)
+    return (banner + render_flags(card) + render_header(card)
             + "<div class='grid'>" + render_listing_activity(card) + render_seller(card) + "</div>"
             + render_why(card) + render_economics(card)
             + "<div class='grid'>" + render_value_add(card) + render_seasonality(card) + render_transport(card) + "</div>"

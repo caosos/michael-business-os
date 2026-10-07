@@ -26,6 +26,7 @@ from mbos.clock import iso
 
 from . import digest as digest_view
 from . import mbos_canonical
+from .card_view import ec
 from .sources import load_health
 
 LOCAL_TZ = ZoneInfo("America/Chicago")
@@ -101,7 +102,9 @@ _MD_SPECIAL = re.compile(r"([\\`*_\[\]{}()#+!|>~-])")
 
 def md(text: Any) -> str:
     """Markdown-safe inline text: no newlines, markdown syntax escaped, HTML neutralised."""
-    s = "" if text is None else str(text)
+    from mbos.card import clean_text
+
+    s = clean_text("" if text is None else text, 400)  # control / ANSI / bidi stripped, length capped
     s = re.sub(r"\s+", " ", s).strip()
     s = html.escape(s, quote=False)
     return _MD_SPECIAL.sub(r"\\\1", s)
@@ -163,20 +166,20 @@ def render_html_body(s: dict) -> str:
     if d["error"]:
         parts.append(f"<p class='bad'>Digest unavailable: {e(d['error'])}</p>")
     else:
-        rows = "".join(f"<tr><td>{e(r['rank'])}</td><td>{e(r['bucket'])}</td><td>{e(r['lane'])}</td><td>{e(r['title'])}</td>"
+        rows = "".join(f"<tr><td>{e(r['rank'])}</td><td>{e(r['bucket'])}</td><td>{e(r['lane'])}</td><td>{ec(r['title'])}</td>"
                        f"<td>{e(r['action'])}</td><td>{e(r['window'])}</td><td>{e(_money(r['value_per_hour']))}</td></tr>"
                        for r in d["rows"])
         parts.append("<table><tr><th>#</th><th>Bucket</th><th>Lane</th><th>Opportunity</th><th>Next step</th><th>Window</th>"
                      f"<th>Value $/h</th></tr>{rows or '<tr><td colspan=7>Nothing open to rank.</td></tr>'}</table>")
     over = sum(h["overdue"] for h in s["holds"])
-    rows = "".join(f"<tr><td>{e(h['title'])}</td><td>{e(h['capability'])}</td><td>{e(h['hold_until'])}</td>"
+    rows = "".join(f"<tr><td>{ec(h['title'])}</td><td>{e(h['capability'])}</td><td>{e(h['hold_until'])}</td>"
                    f"<td class='{'bad' if h['overdue'] else ''}'>{'OVERDUE' if h['overdue'] else 'waiting'}</td><td>{e(h['reason'])}</td></tr>"
                    for h in s["holds"])
     parts.append(f"<h2>HOLD backlog ({len(s['holds'])}, {over} overdue)</h2>" + (
         f"<table><tr><th>Opportunity</th><th>Action</th><th>Wakes at</th><th>Status</th><th>Reason</th></tr>{rows}</table>"
         if rows else "<p>Nothing is parked.</p>"))
     o = s["outcomes"]
-    rows = "".join(f"<tr><td>{e(r['title'])}</td><td>{e(r['lane'])}</td><td>{e(r['kind'])}</td><td>{e(_money(r['net_profit']))}</td>"
+    rows = "".join(f"<tr><td>{ec(r['title'])}</td><td>{e(r['lane'])}</td><td>{e(r['kind'])}</td><td>{e(_money(r['net_profit']))}</td>"
                    f"<td>{e(r['notes'])}</td></tr>" for r in o["rows"])
     parts.append(f"<h2>Yesterday's outcomes ({len(o['rows'])}, net {e(_money(o['net_profit']))})</h2>" + (
         f"<table><tr><th>Opportunity</th><th>Lane</th><th>Outcome</th><th>Net</th><th>Notes</th></tr>{rows}</table>"

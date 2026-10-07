@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 import re
 
 import pytest
@@ -103,7 +104,7 @@ def test_enrichment_blocks_render_with_basis_and_hostile_text_escaped(rt, discov
             "stale_risk": {"value": "low", "basis": "INFERENCE"},
             "recent_activity": [HOSTILE]}, prov, agent="agent-02-opportunity")
         spine.record_enrichment(c, item_id, "seller", {
-            "rating": {"value": "4.8 of 5 " + HOSTILE, "basis": "FACT"}, "confidence": "medium"}, prov, agent="agent-02-opportunity")
+            "rating": {"value": 4.8, "basis": "FACT"}, "confidence": "medium"}, prov, agent="agent-02-opportunity")
         spine.record_enrichment(c, item_id, "value_add", {
             "plan": {"value": "Replace the front axle bearings and re-wire the marker lights " + HOSTILE, "basis": "INFERENCE"},
             "model_specific_risks": [{"risk": "Torsion axle lower-seat corrosion on this model year", "basis": "FACT",
@@ -116,7 +117,7 @@ def test_enrichment_blocks_render_with_basis_and_hostile_text_escaped(rt, discov
     assert "Torsion axle lower-seat corrosion" in body and "example.invalid/forum/thread" in body
     assert "<script>" not in body and "&lt;script&gt;" in body
     assert "Seller style: UNKNOWN" not in body                   # real seller data replaces the UNKNOWN banner...
-    assert "4.8 of 5 &lt;script&gt;" in body                      # seller rating shown, its hostile text escaped
+    assert "4.8 <span class='tag fact'>FACT</span>" in body        # a valid seller rating is shown (the hardened card drops invalid ones to UNKNOWN)
     assert "Confidence: medium" in body
     ids = [r["receipt_id"] for r in ui.store.receipts(item_id=item_id)]
     assert len(ids) == len(res["card"]["activity_trail"]) and all(i in body for i in ids)  # enrichment shows in the trail
@@ -172,3 +173,63 @@ def test_notes_are_unavailable_on_the_reference_backend_and_nothing_is_stored(rt
     s, _, out = req(ui, "POST", f"/item/{item_id}/note", form)
     assert s == 200 and "Note not saved." in out and "operator notes need the lane D store" in out
     assert "Notes need the lane D store" in req(ui, "GET", "/notes")[2]
+
+
+# ---------------------------------------------------------------- card hardening (07 acceptance F-26..F-38, d35646d)
+def test_dry_run_send_is_tagged_and_the_card_never_says_waiting(rt, discover, ui):
+    item_id, areq = ready(rt, discover)
+    post(ui, areq, "YES", pin=PIN)
+    wait_state(rt.engine, item_id, "ACTED")
+    res = ui.store.opportunity_card(item_id)
+    assert res["errors"] == []
+    card = res["card"]
+    sent = [t for t in card["status"]["timeline"] if t["stage"] == "CONTACT SENT"]
+    assert sent and sent[0].get("dry_run") is True and card["recommendation"]["waiting"] is False
+    body = item_page(ui, item_id)[2]
+    assert "DRY-RUN: simulated, nothing sent" in body
+    assert "WAIT FOR RESPONSE" not in body and "waiting on the seller" not in body.lower()
+
+
+def _flagged_card(flags, why_prov=None):
+    from mbos.card import build_card, load_profile
+
+    item = json.loads((Path(__file__).resolve().parent.parent / "docs/research/contracts/examples/item-flip-trailer.example.json").read_text())
+    item["normalized"]["flags"] = flags
+    card = build_card(item, [], [], {}, profile=load_profile())
+    if why_prov:
+        from mbos.hashing import sha256_of
+
+        card["why_provenance"] = why_prov
+        card["card_hash"] = sha256_of({k: v for k, v in card.items() if k not in ("generated_at", "card_hash")})  # still a valid card
+    return card
+
+
+def test_flags_warning_is_visible_and_never_hidden():
+    from operator_ui import card_view
+
+    card = _flagged_card(["injection_suspected", "needs_review", "underpriced"])
+    assert "injection_suspected" in card["item"]["flags"]
+    html = card_view.render_item_card(card, [], "")
+    assert "WARNING: this listing was flagged" in html and "needs your eyes" in html
+    assert "<code>injection_suspected</code>" in html and "<code>needs_review</code>" in html
+    assert "WARNING" not in card_view.render_item_card(_flagged_card([]), [], "")
+
+
+def test_why_provenance_links_and_schema_accepts_the_new_fields():
+    from operator_ui import card_view
+
+    pid = "prov_01JA0000000000000000000007"
+    card = _flagged_card(["needs_review"], why_prov=[pid])
+    assert mc.validate_card(card) == []                       # the re-vendored schema accepts flags + why_provenance
+    html = card_view.render_item_card(card, [], "")
+    assert f"href='/provenance/{pid}'" in html and "Lane-supplied reasons come from" in html
+
+
+def test_control_ansi_and_bidi_characters_are_stripped_from_displayed_titles(rt, discover, ui):
+    nasty = "Trailer \x1b[31mRED\x1b[0m ‮evil‬\x07 end"
+    tid = discover("FIX-TRAILER-1", titles={"FIX-TRAILER-1": nasty})["FIX-TRAILER-1"]
+    wait_state(rt.engine, tid, "AWAITING_APPROVAL")
+    for path in (f"/item/{tid}", "/", f"/areq/{[a for a in ui.store.action_requests_for_item(tid)][0]['action_request_id']}"):
+        body = req(ui, "GET", path)[2]
+        assert "\x1b" not in body and "‮" not in body and "‬" not in body and "\x07" not in body, path
+    assert "Trailer" in req(ui, "GET", f"/item/{tid}")[2]
