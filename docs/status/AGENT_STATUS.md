@@ -4,8 +4,8 @@ Agent: 04
 Role: Postgres / State / Receipts (lane D: durable business state, receipts, provenance; sole ledger owner per ADR-0010)
 Branch: research/agent-04-state
 Worktree: /home/michaelos/business-os-worktrees/agent-04-state
-State: WAITING (no READY lane-D task in READY_QUEUE @ 2629917; awaiting triage of the proposed tasks below)
-Claimed: none
+State: WORKING
+Claimed: D-06
 Done: D-01 @ a0d1fbe
 Done: D-02 @ a0d1fbe
 Done: D-03 @ ca59e3c
@@ -13,10 +13,14 @@ Done: D-05 @ 797a4e5
 Done: D-04 @ 14bd690
 Current phase: ROUND TWO: foreman loop (READY_QUEUE)
 Started: 2026-10-06
-Last updated: 2026-10-07 (D-01..D-05 done; WAITING on queue triage)
+Last updated: 2026-10-07 (claimed D-06 State MCP server, queue @ aa88e7a)
 
 ## Current objective
-D-04 is done @ `14bd690` (migration 0007, the Lane E requirements and 05's refinements). Next: pick the next READY lane-D task from the queue.
+**D-06 (P1): the State MCP server.**
+- Narrow intent tools over the `mbos.*` SQL API; it is the ONLY agent write path (ADR-0003).
+- Caller identity and scope go into provenance.
+- No raw SQL.
+- Acceptance: an agent role without the MCP cannot write, and every tool call is receipted.
 
 ### Interface notes for Agent 05 (E-02) and Agent 01 (A-01/A-03)
 - **PANIC:**
