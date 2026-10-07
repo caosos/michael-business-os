@@ -8,28 +8,28 @@
     "high": 22,
     "low": 10,
     "note": "lead + repair + expected days on market (range from the comps' days on market)",
-    "provenance_id": "prov_01M4BRBC802H6TVJW517RZSNMF",
+    "provenance_id": "prov_01M4BRBC80ESBSF9KP5WDV4WYY",
     "unit": "days",
     "value": 16
    },
    "max_acquisition": {
     "basis": "INFERENCE",
     "note": "highest buy price that clears your $65/h flip target and every hard limit, provided the evidence still outstanding checks out (not a YES yet)",
-    "provenance_id": "prov_01M4BRBC802H6TVJW517RZSNMF",
+    "provenance_id": "prov_01M4BRBC80ESBSF9KP5WDV4WYY",
     "unit": "USD",
     "value": 964
    },
    "opening_offer": {
     "basis": "RECOMMENDATION",
     "note": "70% of the ask, never above the price ceiling",
-    "provenance_id": "prov_01M4BRBC802H6TVJW517RZSNMF",
+    "provenance_id": "prov_01M4BRBC80ESBSF9KP5WDV4WYY",
     "unit": "USD",
     "value": 490
    },
    "resale_conservative": {
     "basis": "INFERENCE",
     "note": "5 FACT sold comps (the highest and lowest dropped as outliers; middle 3 used): 25th percentile / median / 75th percentile",
-    "provenance_id": "prov_01M4BRBC802H6TVJW517RZSNMF",
+    "provenance_id": "prov_01M4BRBC80ESBSF9KP5WDV4WYY",
     "unit": "USD",
     "value": 1900
    },
@@ -38,21 +38,21 @@
     "high": 2000,
     "low": 1900,
     "note": "5 FACT sold comps (the highest and lowest dropped as outliers; middle 3 used): 25th percentile / median / 75th percentile",
-    "provenance_id": "prov_01M4BRBC802H6TVJW517RZSNMF",
+    "provenance_id": "prov_01M4BRBC80ESBSF9KP5WDV4WYY",
     "unit": "USD",
     "value": 1950
    },
    "resale_optimistic": {
     "basis": "INFERENCE",
     "note": "5 FACT sold comps (the highest and lowest dropped as outliers; middle 3 used): 25th percentile / median / 75th percentile",
-    "provenance_id": "prov_01M4BRBC802H6TVJW517RZSNMF",
+    "provenance_id": "prov_01M4BRBC80ESBSF9KP5WDV4WYY",
     "unit": "USD",
     "value": 2000
    },
    "transport_cost": {
     "basis": "INFERENCE",
     "note": "fuel and wear for the trips, plus $27 for towing a trailer",
-    "provenance_id": "prov_01M4BRBC802H6TVJW517RZSNMF",
+    "provenance_id": "prov_01M4BRBC80ESBSF9KP5WDV4WYY",
     "unit": "USD",
     "value": 57.21
    }
@@ -61,33 +61,33 @@
    "difficulty": {
     "basis": "INFERENCE",
     "note": "needs a trailer, within normal range. An economic input (already in the score), never a rejection",
-    "provenance_id": "prov_01M4BRBC802H6TVJW517RZSNMF",
+    "provenance_id": "prov_01M4BRBC80ESBSF9KP5WDV4WYY",
     "value": "moderate"
    },
    "fuel_cost": {
     "basis": "INFERENCE",
     "note": "fuel at the truck's normal mileage; the towing premium is inside transport_cost",
-    "provenance_id": "prov_01M4BRBC802H6TVJW517RZSNMF",
+    "provenance_id": "prov_01M4BRBC80ESBSF9KP5WDV4WYY",
     "unit": "USD",
     "value": 8.89
    },
    "transport_mode": {
     "basis": "INFERENCE",
     "note": "classified when the economics were estimated; borrowed trailer: the score already includes $27 and 1 h for it. Cost, not a rejection",
-    "provenance_id": "prov_01M4BRBC802H6TVJW517RZSNMF",
+    "provenance_id": "prov_01M4BRBC80ESBSF9KP5WDV4WYY",
     "value": "requires_trailer"
    },
    "trip_hours": {
     "basis": "INFERENCE",
     "note": "driving time plus fetching, hooking up and loading the trailer",
-    "provenance_id": "prov_01M4BRBC802H6TVJW517RZSNMF",
+    "provenance_id": "prov_01M4BRBC80ESBSF9KP5WDV4WYY",
     "unit": "hours",
     "value": 2.11
    },
    "trip_miles_round_trip": {
     "basis": "INFERENCE",
     "note": "pickup trip only (inspect and collect); the buyer meeting is a separate local trip",
-    "provenance_id": "prov_01M4BRBC802H6TVJW517RZSNMF",
+    "provenance_id": "prov_01M4BRBC80ESBSF9KP5WDV4WYY",
     "unit": "miles",
     "value": 50
    }
@@ -96,17 +96,17 @@
    "demand_now": {
     "basis": "INFERENCE",
     "note": "October: in the slow months",
-    "provenance_id": "prov_01M4BRBC802H6TVJW517RZSNMF",
+    "provenance_id": "prov_01M4BRBC80ESBSF9KP5WDV4WYY",
     "value": "weak"
    },
    "hold_likely": {
     "basis": "INFERENCE",
-    "provenance_id": "prov_01M4BRBC802H6TVJW517RZSNMF",
+    "provenance_id": "prov_01M4BRBC80ESBSF9KP5WDV4WYY",
     "value": "long: likely to hold until March when demand picks up"
    },
    "note": {
     "basis": "INFERENCE",
-    "provenance_id": "prov_01M4BRBC802H6TVJW517RZSNMF",
+    "provenance_id": "prov_01M4BRBC80ESBSF9KP5WDV4WYY",
     "value": "Strong spring demand; dealers clear riding mowers in early fall (first week of October) and rarely discount May-September, so October resale is weaker. Dealer new-mower pricing is used as evidence for used-mower demand by inference. [source: Consumer Reports: How to Find the Best Deals on a Riding Lawn Mower; Bob Vila: Best Time to Buy a Lawn Mower]"
    },
    "peak_months": [
@@ -125,7 +125,7 @@
    "October is a weak-demand month for this category; expect a longer hold."
   ]
  },
- "enrichment_hash": "sha256:54562e25cf6f8f238788787b7ac39501906f5ae9828299576ca1e611c9d5911a",
+ "enrichment_hash": "sha256:3185951a3eb6ccf7701d809351ab4a5e331120134d925b57c8222d16ee64287b",
  "item_id": "itm_01JK0000000000000000000001",
  "omitted": {},
  "provenance": {
@@ -141,12 +141,12 @@
    "prov_01JK0000000000000000000013",
    "prov_01JK0000000000000000000014",
    "prov_01JK0000000000000000000100",
-   "prov_01M4BRBC80HQYEYC6KM8H5SSBC",
-   "prov_01M4BRBC80MMRTR8SQMNFC8D0A"
+   "prov_01M4BRBC80P12EA50D39BPAR4Q",
+   "prov_01M4BRBC80YGZ2YC1C575ZJBM2"
   ],
   "inputs_used": [
    {
-    "hash": "sha256:d98ecab74ae260f85b9654398b4d59abf6c761e5b9ae37ab1b17e7124d05e4f1",
+    "hash": "sha256:22450c1ff1de2e09b1bd68e76d13658d8c22943880998b087f2ca2c033db6acc",
     "ref": "scorecard.inputs_hash"
    },
    {
@@ -158,9 +158,9 @@
     "ref": "seasonality@2026.10.0"
    }
   ],
-  "provenance_id": "prov_01M4BRBC802H6TVJW517RZSNMF",
+  "provenance_id": "prov_01M4BRBC80ESBSF9KP5WDV4WYY",
   "tool_name": "mbos_economics.enrich",
-  "tool_version": "0.10.2"
+  "tool_version": "0.11.0"
  },
  "title": "Cub Cadet 54 in zero turn mower, deck needs rebuild",
  "verdict": "MAYBE"

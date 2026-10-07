@@ -90,3 +90,27 @@ Written ahead of D-17 so 04's table lines up the first time. Reviewing it is a o
 - **Option B (cleaner ledger):** add `OPERATOR_NOTE_RECORDED` under ADR-0009. Cost: a contract change.
 - **Reusing `mbos.lessons` outright** is not recommended: it has no constrained make, model, category or kind, so the "name a model" rule could not be enforced in the database.
 - My recommendation is A now and B when ADR-0009 is next opened.
+
+## 8. Model years (C-18): year-specific entries
+NHTSA recalls and complaint counts are per make, model **and model year**. A make-and-model entry would flag a 2018 vehicle with a 2012 recall, a false safety claim, so entries can now carry the years they cover.
+
+**Entry format.** `match[].years` is optional on each match group, in any of three forms: a list `[2012, 2013]`, a range `{"from": 2010, "to": 2014}`, or a string `"2010-2014"`. Years must lie in 1950 to 2035, and a range may span at most 40 years. The loader refuses a malformed value, and the matcher fails closed on one. An entry with no `years` behaves exactly as before; every entry shipped today is yearless.
+
+**The rule (agent-01 ruling for C-18).**
+| The listing says | Result |
+|---|---|
+| a year inside the covered years | **matches**; the risk text shows the evidence: "Model year read from the listing title (2018); that reading is an inference and is not verified against the unit" |
+| a year outside the covered years | no match; recorded as UNKNOWN |
+| no year | **no match**; recorded as UNKNOWN. A yearless listing never matches a year-specific entry |
+| several years (or a range) | matches only if **every** stated year is covered. A unit has one model year; if the title names years outside the covered set, the unit might not be covered |
+
+**What counts as a year.** A four-digit year from 1950 to 2039 in the title, read as the model year (this is an **inference**). Ranges (`2010-2014`, `2010-14`, `2010 to 2014`) expand to every year. Not years: two-digit years (`'05`), prices (`$2000`), quantities (`2000 watt`, `2000 lb`, `2000 psi`, `1999 miles`) and numbers outside the range.
+
+**Blocked is visible, never silent.** When make and model match but the year condition is not met, `build_value_add` returns the entry in `year_blocked` with the reason and adds a line to `omitted` saying the entry was not applied and why.
+
+**Obligations on converters (02).**
+- Emit `years` on every entry whose source is per model year. A per-year source with no years in the entry is a bug.
+- One match group per (make, model); put all the covered years for that pair in one list or range.
+- Numeric-only model names (for example a Mazda "3") still go to the review list; the shipped-KB guard is unchanged. A human's own note may use one.
+
+**Human notes** can be year-specific too: `new_manual_note(..., years=[2012])`, the same rule.

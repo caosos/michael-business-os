@@ -54,6 +54,10 @@ def weak_match_problems(entry: dict) -> list[str]:
     for g in entry.get("match") or []:
         if not g.get("makes") or not g.get("models"):
             out.append("a match group needs BOTH makes and models")
+        try:
+            group_years(g)
+        except ValueError as exc:
+            out.append(f"years: {exc}")
         for m in g.get("models") or []:
             if _NUMERIC_ONLY.match(str(m)):
                 out.append(f"model token {m!r} is purely numeric (a wattage, year or size, not a model)")
@@ -122,6 +126,12 @@ def _note_problems(n: dict) -> list[str]:
     m = n.get("match")
     if m is not None and (not isinstance(m, list) or not m or not all(isinstance(g, dict) and g.get("makes") and g.get("models") for g in m)):
         p.append("every match group needs BOTH makes and models (a note must be about a named model)")
+    for g in (m if isinstance(m, list) else []):
+        if isinstance(g, dict):
+            try:
+                group_years(g)
+            except ValueError as exc:
+                p.append(f"years: {exc}")
     if n.get("basis") not in (None, "RECOMMENDATION"):
         p.append("a manual note is owner-stated: basis is always RECOMMENDATION, never FACT")
     if n.get("reference_url") and not str(n["reference_url"]).startswith("https://"):
@@ -143,14 +153,15 @@ def _note_problems(n: dict) -> list[str]:
 def new_manual_note(*, category: str, makes: list[str], models: list[str], kind: str, statement: str, entered_by: str,
                     entered_at: str, basis_of_knowledge: str, plan_hint: str | None = None,
                     reference_url: str | None = None, review_after: str | None = None,
-                    supersedes: str | None = None) -> dict:
+                    supersedes: str | None = None, years=None) -> dict:
     """Build one validated note plus the HUMAN provenance record the entry step must persist FIRST.
     Pure: writes nothing and reads no clock (``entered_at`` is supplied by the entry channel)."""
     try:                                    # validate the timestamp BEFORE deriving ids from it
         parse_ts(entered_at)
     except (TypeError, ValueError):
         raise NoteError(["entered_at must be an RFC 3339 timestamp with a timezone"]) from None
-    body = {"category": category, "match": [{"makes": list(makes), "models": list(models)}], "kind": kind,
+    group = {"makes": list(makes), "models": list(models), **({"years": years} if years is not None else {})}
+    body = {"category": category, "match": [group], "kind": kind,
             "statement": statement.strip(), "entered_by": entered_by, "entered_at": entered_at,
             "basis_of_knowledge": basis_of_knowledge,
             **({"plan_hint": plan_hint.strip()} if plan_hint else {}),
@@ -241,18 +252,115 @@ def _token_re(token: str) -> re.Pattern:
     return re.compile(r"(?<![a-z0-9])" + "".join(parts) + r"(?![a-z0-9])")
 
 
-def match_entries(item: dict, kb: dict, make_model: str | None = None) -> list[dict]:
+# --------------------------------------------------------------------------- model years (C-18)
+MIN_YEAR, MAX_YEAR, MAX_SPAN = 1950, 2035, 40
+_YEAR = r"(?:19[5-9]\d|20[0-3]\d)"
+_UNIT_AFTER = r"(?!\s*(?:w\b|watts?\b|lbs?\b|psi\b|rpm\b|hp\b|gal(?:lons?)?\b|cc\b|miles?\b|mi\b|hrs?\b|hours?\b|v\b|volts?\b|amps?\b|k\b))"
+_RANGE = re.compile(rf"(?<![\d$])({_YEAR})\s*(?:-|\u2013|\u2014|to|thru|through)\s*({_YEAR}|\d{{2}})(?!\d)")
+_SINGLE = re.compile(rf"(?<![\d$.,])({_YEAR})(?![\d]){_UNIT_AFTER}")
+
+
+def group_years(g: dict) -> set[int] | None:
+    """The model years a match group covers: None when the group is not year-specific; a set of years otherwise.
+    Accepts a list ``[2012, 2013]``, a range ``{"from": 2010, "to": 2014}`` or a string ``"2010-2014"``.
+    Raises ValueError when present but malformed (the loader refuses such an entry; the matcher fails closed)."""
+    if "years" not in g or g["years"] is None:
+        return None
+    y = g["years"]
+    if isinstance(y, str):
+        m = re.fullmatch(r"\s*(\d{4})\s*[-\u2013]\s*(\d{4})\s*", y)
+        if not m:
+            raise ValueError(f"years string {y!r} must look like '2010-2014'")
+        y = {"from": int(m.group(1)), "to": int(m.group(2))}
+    if isinstance(y, dict):
+        lo, hi = y.get("from"), y.get("to")
+        if not (isinstance(lo, int) and isinstance(hi, int) and not isinstance(lo, bool) and not isinstance(hi, bool)) or lo > hi:
+            raise ValueError("a years range needs integer from <= to")
+        if hi - lo > MAX_SPAN:
+            raise ValueError(f"a years range may span at most {MAX_SPAN} years")
+        years = set(range(lo, hi + 1))
+    elif isinstance(y, list) and y and all(isinstance(v, int) and not isinstance(v, bool) for v in y):
+        years = set(y)
+    else:
+        raise ValueError("years must be a non-empty list of integers, a {from, to} range, or '2010-2014'")
+    if min(years) < MIN_YEAR or max(years) > MAX_YEAR:
+        raise ValueError(f"years must lie within {MIN_YEAR}-{MAX_YEAR}")
+    return years
+
+
+def listing_years(text: str) -> tuple[set[int], list[str]]:
+    """Model years a listing STATES, with the evidence text (INFERENCE: a four-digit year in the title is read as the model
+    year). Ranges ('2010-2014', '2010-14', '2010 to 2014') expand to every year. Two-digit years, prices ($2000) and
+    quantities (2000 watt, 2000 lb) are NOT years. Not a year: nothing is guessed."""
+    years: set[int] = set()
+    evidence: list[str] = []
+    spans: list[tuple[int, int]] = []
+    for m in _RANGE.finditer(text):
+        lo = int(m.group(1))
+        hi_txt = m.group(2)
+        hi = int(hi_txt) if len(hi_txt) == 4 else (lo // 100) * 100 + int(hi_txt)
+        if lo <= hi <= lo + 30:
+            years.update(range(lo, hi + 1))
+            evidence.append(m.group(0).strip())
+            spans.append(m.span())
+    for m in _SINGLE.finditer(text):
+        if any(a <= m.start() < b for a, b in spans):
+            continue
+        years.add(int(m.group(1)))
+        evidence.append(m.group(1))
+    return years, evidence
+
+
+def _year_verdict(g: dict, text: str) -> tuple[str, str | None, str | None]:
+    """('ok'|'blocked', evidence, reason) for a match group that already matched make+model."""
+    try:
+        want = group_years(g)
+    except ValueError:
+        return "blocked", None, "the entry's years are malformed (fail closed)"
+    if want is None:
+        return "ok", None, None
+    named, evidence = listing_years(text)
+    if not named:
+        return "blocked", None, f"the listing states no model year, so whether this unit is in the covered years {_fmt_years(want)} is UNKNOWN"
+    if named <= want:
+        return "ok", ", ".join(evidence), None
+    return "blocked", None, (f"the listing's year ({', '.join(evidence)}) is not entirely within the covered years {_fmt_years(want)}")
+
+
+def _fmt_years(ys: set[int]) -> str:
+    ys = sorted(ys)
+    return str(ys[0]) if len(ys) == 1 else (f"{ys[0]}-{ys[-1]}" if ys[-1] - ys[0] + 1 == len(ys) else ", ".join(map(str, ys)))
+
+
+def match_hits(item: dict, kb: dict, make_model: str | None = None) -> tuple[list[dict], list[dict]]:
+    """``(hits, blocked)``. A hit is ``{"entry", "year_evidence"}`` (evidence is None for entries that are not year-specific).
+    ``blocked`` lists entries whose make AND model matched but whose model-year condition was not met, with the reason:
+    the card shows UNKNOWN for them, never a safety claim about a year the listing does not state."""
     text = " ".join([(item.get("normalized") or {}).get("title") or "", make_model or ""]).lower()
-    hits = []
+    hits, blocked = [], []
     for e in kb["entries"]:
         if e["category"] != item.get("category"):
             continue
+        outcome = None
         for g in e["match"]:
             make_ok = not g.get("makes") or any(_token_re(m).search(text) for m in g["makes"])
-            if make_ok and any(_token_re(m).search(text) for m in g["models"]):
-                hits.append(e)
+            if not (make_ok and any(_token_re(m).search(text) for m in g["models"])):
+                continue
+            status, evidence, why = _year_verdict(g, text)
+            if status == "ok":
+                outcome = ("hit", {"entry": e, "year_evidence": evidence})
                 break
-    return hits
+            outcome = outcome or ("blocked", {"entry_id": e["id"], "reason": why})
+        if outcome and outcome[0] == "hit":
+            hits.append(outcome[1])
+        elif outcome:
+            blocked.append(outcome[1])
+    return hits, blocked
+
+
+def match_entries(item: dict, kb: dict, make_model: str | None = None) -> list[dict]:
+    """Entries that apply (see ``match_hits`` for the model-year rule and the blocked list)."""
+    return [h["entry"] for h in match_hits(item, kb, make_model)[0]]
 
 
 def _parts_ceiling(item: dict, cfg: ScoringConfig) -> int | None:
@@ -327,10 +435,13 @@ def build_value_add(item: dict, as_of: str, *, cfg: ScoringConfig, kb: dict | No
     nothing can be supported."""
     kb = kb or load_kb()
     sc = item.get("scores") or {}
-    hits = match_entries(item, kb, make_model)
+    hit_rows, blocked = match_hits(item, kb, make_model)
+    hits = [h["entry"] for h in hit_rows]
+    evidence_by_id = {h["entry"]["id"]: h["year_evidence"] for h in hit_rows}
     key = content_hash({"spec": "mbos.economics.valueadd/v1", "v": VERSION, "as_of": as_of, "item_id": item.get("item_id"),
                         "inputs_hash": sc.get("inputs_hash"), "kb": kb["_hash"], "config": cfg.hash,
-                        "make_model": make_model, "matched": [e["id"] for e in hits]})
+                        "make_model": make_model, "matched": [e["id"] for e in hits],
+                        "year_evidence": evidence_by_id, "blocked": blocked})
     pid = derived_ulid("prov", as_of, "valueadd|" + key)
     omitted: list[str] = []
     block: dict = {}
@@ -344,20 +455,24 @@ def build_value_add(item: dict, as_of: str, *, cfg: ScoringConfig, kb: dict | No
     risks, manual_pids = [], []
     for e in hits:
         s = e["source"]
+        yr = evidence_by_id.get(e["id"])
+        yr_note = f" Model year read from the listing title ({yr}); that reading is an inference and is not verified against the unit." if yr else ""
         if e.get("origin") == "manual":       # Michael's own note: owner-stated, human provenance, never FACT
             ref = f" <{s['url']}>" if s.get("url") else ""
-            risks.append({"risk": e["risk"] + " (Michael's note; the model is taken from the listing text and not verified against the unit.)",
+            risks.append({"risk": e["risk"] + yr_note + " (Michael's note; the model is taken from the listing text and not verified against the unit.)",
                           "kind": e["kind"], "basis": "RECOMMENDATION", "source": f"{s['title']}{ref}",
                           "provenance_id": e["provenance_id"]})
             manual_pids.append(e["provenance_id"])
             continue
-        risks.append({"risk": e["risk"] + " (Model taken from the listing text; not verified against the unit.)",
+        risks.append({"risk": e["risk"] + yr_note + " (Model taken from the listing text; not verified against the unit.)",
                       "kind": e["kind"], "basis": "FACT", "source": f"{s['title']} <{s['url']}> (retrieved {s['retrieved']})",
                       "provenance_id": pid})
     if risks:
         block["model_specific_risks"] = risks
-    elif item.get("type") == "flip":
+    elif item.get("type") == "flip" and not blocked:
         omitted.append(f"model_specific_risks: no sourced knowledge for this model (KB {kb['kb_version']}); UNKNOWN, not guessed")
+    for b in blocked:
+        omitted.append(f"model_specific_risks: entry {b['entry_id']} not applied: {b['reason']}; UNKNOWN, never a guess")
 
     provenance = {
         "provenance_id": pid, "created_at": as_of, "actor_type": "system", "agent_name": "agent-03-economics",
@@ -368,4 +483,5 @@ def build_value_add(item: dict, as_of: str, *, cfg: ScoringConfig, kb: dict | No
            if (item.get("sources") or manual_pids) else {}),
     }
     return {"block": block, "provenance": provenance, "omitted": omitted, "matched": [e["id"] for e in hits],
+            "year_blocked": blocked, "year_evidence": evidence_by_id,
             "value_add_hash": key}

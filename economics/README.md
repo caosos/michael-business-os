@@ -125,3 +125,6 @@ kb = merge_manual(load_kb(), load_manual_notes("mechanic_notes.json"))     # in 
 build_value_add(item, as_of, cfg=cfg, kb=kb)
 ```
 Notes need an author, a timestamp, a human provenance record and a make AND model. They show on the card as RECOMMENDATION (owner-stated), never FACT, and `load_kb` refuses any manual entry in a KB file. Source plan: `docs/research/agent-03-model-knowledge-source-plan.md`.
+
+### Model years (C-18)
+`match[].years` (a list, a `{from, to}` range, or `"2010-2014"`) makes an entry year-specific. It applies only when the **listing states a covered year** (read from the title: an inference, with the evidence shown in the risk text); a yearless listing never matches, and a blocked match is recorded in `year_blocked` and `omitted` as UNKNOWN. Rule and converter obligations: `docs/research/agent-03-model-knowledge-source-plan.md` §8.

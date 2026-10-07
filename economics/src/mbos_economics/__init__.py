@@ -1,3 +1,3 @@
 """Michael Business OS — deterministic economics and scoring engine (Agent 03, lane C)."""
 
-__version__ = "0.10.2"
+__version__ = "0.11.0"
