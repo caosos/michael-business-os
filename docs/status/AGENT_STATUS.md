@@ -4,14 +4,16 @@ Agent: 07
 Role: ROUND TWO — QA / End-to-End Integration / Manual-Assist Outputs (lane G)
 Branch: research/agent-07-marketing
 Worktree: /home/michaelos/business-os-worktrees/agent-07-marketing
-State: WORKING
+State: WAITING
 Done: G-01 @ 9cbce70
 Done: G-02 @ a1700d9
 Done: G-03 @ 4c2e897
 Done: G-04 @ 6d43d2b — wave-two RC verdict NOT READY (F-24 blocking; F-25 needs a ruling; F-22/F-23 open)
 Done: G-05 @ 3c330e8 — 148 pass / 87 fail → F-26..F-39 (3 of the highs: F-26 crash, F-31 dry-run shown as sent, F-35 text-view forgery; F-36 poison listing)
-Claimed: G-06
-Current phase: Round Two — G-06 (P0): release-candidate re-run after 05's E-13
+Done: G-06 @ e7434f4 — RC re-run NOT READY on ONE red case (F-40, fails safe); safety invariants HOLD; F-22/23/24/25 verified closed
+Claimed: (none; no READY task for 07)
+Waiting on: 01+05 to close F-40, then `python -m mbos_qa spine --rc` (about 2.5 minutes); card findings F-26..F-39 for 01/06.
+Current phase: Round Two — G-06 delivered; waiting on F-40 and the card fixes
 Started: 2026-10-06 (round one) · 2026-10-07 (round two)
 Last updated: 2026-10-07
 
@@ -41,11 +43,16 @@ Last updated: 2026-10-07
 - Held: no invented NEGOTIATING/QUALIFIED; trail = ledger 1:1; read-only; process-stable hash; no authority fields.
 - Re-run: `python -m mbos_qa card` (about 45 s).
 
-## G-06 plan (RC re-run once 05's E-13 lands; 01 will ping)
-- Re-pin `qa/impl_lane_pins.json` (`lane_e_05` to the E-13 head, `mbos_01` already `f8407c9`, `lane_d_04` `92d52b1`) and run `python -m mbos_qa spine --rc`.
-- Remove the F-23 strict xfail (01's R21 fixed it; the xfail will XPASS-fail otherwise). Amend A5 per R22 (a: one effector call, settled executed; b: failed + RECONCILED with zero duplicates; never two sends). The F-24 and F-22 markers go when 05 lands E-13.
+## G-06 result @ e7434f4: release candidate = NOT READY on one case
+- 103 passed, 1 failed (F-40), 3 n/a; stable over two runs; reference config 104/104. `docs/qa/RELEASE_CANDIDATE.md`; receipt `docs/receipts/2026-10-07-G-06-release-candidate-rerun.md`.
+- Pins: mbos `f8407c9`, lane D `92d52b1`, lane E `e6afc28` (all by `git archive`).
+- **Closed and verified:** F-24 (A9 8/8), F-25/R22 (A5 5/5), F-22, F-23.
+- **Red:** F-40 (01+05). A publishing YES without step-up is accepted, then refused by the gateway, and Michael's approval is lost. It fails safe.
+- Observation F-41 (05): the proposer identity holds propose-only grants for every money-moving capability.
 
 ## Proposed tasks
+- **P-07-16 (01 + 05) F-40:** `decide` consults the PDP's step_up requirement on the request and refuses a YES that lacks it; a guard-refused request settles failed, not `approved`.
+- **P-07-17 (05) F-41:** per-lane propose grants (06: comms; 07: publishing), the spine identity limited to what its default planner emits.
 - **P-07-13 (01) F-26/F-27/F-28/F-36:** harden the card builder against malformed enrichment (type-check, sanitise, validate values) and quarantine NUL/invalid-JSON listings at ingest; add the fuzz and poison-listing tests to 01's suite.
 - **P-07-14 (01 card + 06) F-31/F-32/F-35:** a dry-run is not 'sent'; derive timeline stages from typed documents; escape/truncate untrusted fields in `render_text`.
 - **P-07-15 (01 + 03) F-29/F-30:** `why` as sourced datums; real source requirement, a model-specific marker, a wider/normalised lint driven by data.
