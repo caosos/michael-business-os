@@ -4,14 +4,13 @@ Agent: 05
 Role: Governance / Action Gateway / PANIC — "controlled autonomy"
 Branch: research/agent-05-governance
 Worktree: /home/michaelos/business-os-worktrees/agent-05-governance
-State: WAITING
+State: WORKING
+Claimed: E-02 (P0: Postgres-backed GovernanceStore + PanicStore on 04's 0005 API; R2/R4/R5) — READY_QUEUE @ agent-01 0d107df, deps D-01/D-02/D-04 DONE @ agent-04 a0d1fbe
 Done: E-01 @ df826c3 (interop row 05 = 10/10; vectors receipt_chain verifies; 141 tests)
 Done: E-03 @ e12caa3 (L3 DBOS cancel verified on real dbos 3.2.0; deny-all egress + LiteLLM budget generators; 157 tests)
-Waiting on: E-02 (BLOCKED on D-01, D-02 — Agent 04 migration 0005 + ADR-0010 ledger). No other READY task is assigned to lane E.
-Blocked: E-02 on D-01, D-02 (Agent 04 migration 0005 + ADR-0010 ledger)
 Current phase: ROUND TWO — wave two (foreman loop, docs/COORDINATION.md)
 Started: 2026-10-06
-Last updated: 2026-10-07 (E-01 + E-03 done; WAITING on D-01/D-02 for E-02)
+Last updated: 2026-10-07 (claimed E-02; then E-04, E-05 queued)
 
 ## Current objective
 **SUPERSEDED by ADR-0010 (E-01):** Agent 01 binding rulings for lane E
