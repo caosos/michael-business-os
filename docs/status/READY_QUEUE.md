@@ -1,14 +1,14 @@
 # READY QUEUE: Michael Business OS, Round Two
 
 - **Owner:** Agent 01 (coordinator / dispatcher). **Protocol:** `docs/COORDINATION.md`. Read it before claiming.
-- **Last synced:** 2026-10-07 13:00 -0500, against branch heads 02 `41d45a6` · 03 `73a4d32` · 04 `7f0649a` · 05 `16fb86c` · 06 `c125618` · 07 `397101c`.
+- **Last synced:** 2026-10-07 13:20 -0500, against branch heads 02 `41d45a6` · 03 `73a4d32` · 04 `7f0649a` · 05 `16fb86c` · 06 `c125618` · 07 `397101c`.
 - **Read it from any worktree:** `git fetch -q origin && git show origin/research/agent-01-coordinator:docs/status/READY_QUEUE.md`
 - **Status values:** READY · CLAIMED · BLOCKED · DONE.
 - **Priority:** P0 = critical path · P1 = next-up · P2 = useful parallel work.
 - **Every task is DRY-RUN ONLY.** No action without a receipt, and no receipt without provenance.
 
 ## Critical path
-`D-01` (04: migration 0005) and `D-02` (04: ADR-0010 ledger) → `A-01` phase 2 (01: spine on 04's store) → `E-02` (05: gateway on Postgres) → `A-03` (01: real gateway wired) → `G-02` (07: release run on real components).
+`D-04` (04: migration 0007, PANIC/claims/edges/budget modes per 05's requirements) → `A-01` phase 2 (01: spine on 04's store) → `E-02` (05: gateway on Postgres) → `A-03` (01: real gateway wired) → `G-02` (07: release run on real components).
 
 ## Tasks
 
@@ -35,9 +35,9 @@
 |---|---|---|---|---|---|---|
 | D-01 | **P0** | Migration `0005`: `effector_calls` (UNIQUE idempotency_key, CHECK dry_run), PANIC/governance state table (R5), `llm_spend`, `artifacts` (sha256 content-addressed), all insert-only where they are ledgers. Answer: DBOS login role (`mbos_dbos`), and whether datasource checkpoints may live in schema `dbos` of the app DB | none | **DONE** @ `a0d1fbe` | 04 | Tables exist with the same invariants as 01's `0001_spine.sql`; answers in AGENT_STATUS |
 | D-02 | **P0** | **ADR-0010 conformance (supersedes the R3 wording in your claim).** Install `contracts/canonical/mbos_canonical.sql`. Set `NEW.canonical := mbos.cjson(mbos.receipt_canonical(NEW))` and `NEW.row_hash := 'sha256:'∥sha256(canonical)`; `verify_chain` uses the same formula. `mbos.payload_hash` → `mbos.cjson_sha256`. Keep `utc_iso` (it already conforms) | none | **DONE** @ `a0d1fbe` (verified by 01's gate test) | 04 | All `vectors.json` pass in PostgreSQL; a chain exported from 04's DB verifies with `mbos_canonical.verify_chain` |
-| D-04 | **P0** | Fold Lane E's requirements into 0005 (binding input; ruling R5): `origin/research/agent-05-governance:docs/integration/05-requirements-for-04-migration-0005.md`. Covers: `panic_events` (append-only) + `panic_current` view + `panic_set()`, release by approver only, bootstrap FROZEN; `effector_calls` as the execution-claim table; action-status edges `approved→expired`, `approved→failed` and `executing→cancelled_by_freeze`; budget caps per action, daily, global and velocity | D-01 (same migration) | **DONE** @ `a0d1fbe` (panic_state, effector_calls, llm_spend_authorize, put_artifact) | 04 | 05's E-02 port runs on 0005 without workarounds |
-| D-05 | **P0** | R12 re-affirmed: remove `NORMALIZED→SCORED`, `HELD→APPROVED` and `LEARNED→ARCHIVED/FAILED` (added in a0d1fbe to accommodate pre-R12 spine). Keep `ACTED→AWAITING_APPROVAL` | none | READY | 04 | 01's `test_r12_item_edges_match_lane_d` XPASSes (then flipped to a hard gate) |
-| D-03 | P1 | Reporting views (pipeline by lane, HOLD backlog, approval latency) over the ADR-0010 chain; restore drill D1 then `verify_chain` | D-01 | **CLAIMED** | 04 | D1 passes; views documented |
+| D-04 | **P0** | Fold Lane E's requirements into 0005 (binding input; ruling R5): `origin/research/agent-05-governance:docs/integration/05-requirements-for-04-migration-0005.md`. Covers: `panic_events` (append-only) + `panic_current` view + `panic_set()`, release by approver only, bootstrap FROZEN; `effector_calls` as the execution-claim table; action-status edges `approved→expired`, `approved→failed` and `executing→cancelled_by_freeze`; budget caps per action, daily, global and velocity | D-01 (same migration) | **CLAIMED** (04, re-opened @ `bd64f72`; migration 0007). *Correction: 01 marked this DONE at a0d1fbe too early; 0005 did not yet meet all of 05's requirements* | 04 | 05's E-02 port runs on 0005 without workarounds |
+| D-05 | **P0** | R12 re-affirmed: remove `NORMALIZED→SCORED`, `HELD→APPROVED` and `LEARNED→ARCHIVED/FAILED` (added in a0d1fbe to accommodate pre-R12 spine). Keep `ACTED→AWAITING_APPROVAL` | none | **DONE** @ `797a4e5` (parity gate verified by 01; now a hard pass) | 04 | 01's `test_r12_item_edges_match_lane_d` XPASSes (then flipped to a hard gate) |
+| D-03 | P1 | Reporting views (pipeline by lane, HOLD backlog, approval latency) over the ADR-0010 chain; restore drill D1 then `verify_chain` | D-01 | **DONE** @ `ca59e3c` (views + D1 restore drill on a 179-receipt chain) | 04 | D1 passes; views documented |
 
 ### Lane B: Agent 02 (discovery)
 | ID | Pri | Task | Deps | Status | Agent | Acceptance |
@@ -61,7 +61,7 @@
 | ID | Pri | Task | Deps | Status | Agent | Acceptance |
 |---|---|---|---|---|---|---|
 | E-01 | P1 | R7 propose-only grant for `agent-01-coordinator` + ADR-0010 `payload_hash` (drop the float refusal) + stand-in store `row_hash` → MBOS-RH-1 | none | **DONE** @ `df826c3` | 05 | interop row 05 = 10/10; `vectors.json` `receipt_chain` verifies with 05's code |
-| E-02 | P0 (after D-01) | Postgres-backed `GovernanceStore` + `PanicStore` on 04's tables (R2/R4/R5). Fail-closed is kept | D-01, D-02 | **READY, P0: switch to it now** (unblocked by D-01/D-02) | 05 | 05's suite passes on Postgres; no SQLite in the production path |
+| E-02 | P0 (after D-01) | Postgres-backed `GovernanceStore` + `PanicStore` on 04's tables (R2/R4/R5). Fail-closed is kept | D-01, D-02 | **CLAIMED** (05). Can build on 0005 now; full acceptance needs D-04 (0007) | 05 | 05's suite passes on Postgres; no SQLite in the production path |
 | E-03 | P2 | A8/A9 hardening, dry: per-agent LiteLLM budget config generator (no external calls); L3 hook that cancels unstarted DBOS workflows (`DBOS.cancel_workflows`) and writes the egress deny-all policy file | none | **DONE** @ `e12caa3` | 05 | Tests prove L3 cancels pending workflows and emits deny-all config; nothing reaches the network |
 
 | E-04 | P1 | Outbound secret scan + `INJECTION_SUSPECTED` tripwire (05 §17 #24–26): scan proposed payloads and effector requests; listing/inbound text matching injection patterns emits an `INJECTION_SUSPECTED` receipt and forces tier 0 + `needs_review` | none | READY after E-02 | 05 | Tests: a secret in a payload is refused; an injected listing yields at most a tier-0 proposal with the tripwire receipt |
