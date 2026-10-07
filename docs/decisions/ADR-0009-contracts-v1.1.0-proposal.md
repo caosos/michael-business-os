@@ -20,3 +20,5 @@
 - A10 conformance passes on the converged store.
 - Agent 01 bumps `schema_version` and updates `ContractModel` alignment tests.
 - Owner impact: none. This is technical, not a MICHAEL_DECISIONS item.
+10. (ADR-0011) First-class card enrichment on the Item (typed `enrichment` object or fields for listing activity, seller intelligence, logistics, seasonality, value-add) replacing the interim artifact-citation convention. Receipt type `ITEM_UPDATED` for enrichment.
+11. (ADR-0011) Events for the NEGOTIATING and QUALIFIED stages (new outcome kinds or an Item sub-state), once inbound communications exist.

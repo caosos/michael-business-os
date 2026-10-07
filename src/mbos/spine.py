@@ -370,7 +370,8 @@ def decide(conn: sa.Connection, action_request_id: str, decision: str, payload_h
         _insert_and_classify(conn, new_areq, prov, components, MICHAEL)
     conn.execute(sa.text("INSERT INTO mbos.approvals (body) VALUES (CAST(:b AS jsonb))"), {"b": _j(doc)})
     _areq_receipt(conn, areq, "APPROVAL_DECIDED", f"Michael decided {decision}" + (f": {reason}" if reason else ""),
-                  [prov], actor={"type": "human", "id": decider}, approval_id=approval_id)
+                  [prov], actor={"type": "human", "id": decider}, approval_id=approval_id,
+                  after_state={"decision": decision, "scope": "once"})
     to_status = {"YES": "approved", "NO": "rejected", "HOLD": "held", "MODIFY": "rejected"}[decision]
     _set_status(conn, action_request_id, to_status)
     return {"approval": doc, "item_id": areq["item_id"],
@@ -537,7 +538,8 @@ def record_outcome(conn: sa.Connection, item_id: str, kind: str, *, realized: Op
     conn.execute(sa.text("INSERT INTO mbos.outcomes (body) VALUES (CAST(:b AS jsonb))"), {"b": _j(doc)})
     append_receipt(conn, type="OUTCOME_RECORDED", intent=f"outcome {kind}", provenance_ids=[prov],
                    actor={"type": "human", "id": recorded_by}, item_id=item_id, outcome_id=outcome_id,
-                   entity_type="outcome", entity_id=outcome_id, effect="create")
+                   entity_type="outcome", entity_id=outcome_id, effect="create",
+                   after_state={"kind": kind, "realized": realized})
     to_state = "OUTCOME_RECORDED" if item["state"] == "ACTED" else None
     update_item(conn, item_id, to_state=to_state, patch={"outcome_ids": (item.get("outcome_ids") or []) + [outcome_id]},
                 intent=f"outcome {kind} recorded", provenance_ids=[prov], actor={"type": "human", "id": recorded_by})
@@ -562,3 +564,27 @@ def set_kill_switch(conn: sa.Connection, key: str, frozen: bool, *, reason: str,
                    entity_type="governance_flag", entity_id=key, effect="update",
                    before_state=before if isinstance(before, dict) else None, after_state=value)
     return value
+
+
+# ---------------------------------------------------------------- card enrichment (ADR-0011 interim convention)
+ENRICHMENT_BLOCKS = ("listing_activity", "seller", "economics", "value_add", "seasonality", "logistics", "make_model",
+                     "distance_miles", "why")
+
+
+def record_enrichment(conn: sa.Connection, item_id: str, block: str, data: Any, provenance_id: str, *,
+                      summary: str = "", basis: str = "INFERENCE", agent: str = "lane-enrichment") -> dict:
+    """A lane attaches a card-enrichment block to an Item WITHOUT a contract change: the block is stored as a
+    content-addressed artifact and cited from Item.research[] (field "card.<block>", source_uri "artifact:<sha256>")
+    with the lane's own provenance. Receipted like any other Item change. The card loader reads these back."""
+    if block not in ENRICHMENT_BLOCKS:
+        raise ValueError(f"unknown enrichment block {block!r}; expected one of {ENRICHMENT_BLOCKS}")
+    raw = canonical_json(data)
+    ref = conn.execute(sa.text("INSERT INTO mbos.artifacts (sha256, media_type, content) VALUES (:h, 'application/json', :c) "
+                         "ON CONFLICT (sha256) DO NOTHING RETURNING sha256"), {"h": sha256_bytes(raw), "c": raw}) and sha256_bytes(raw)
+    item = load_item(conn, item_id)
+    entry = {"finding": summary or f"card enrichment: {block}", "field": f"card.{block}", "basis": basis,
+             "source_uri": f"artifact:{ref}", "provenance_id": provenance_id}
+    update_item(conn, item_id, patch={"research": (item.get("research") or []) + [entry]},
+                intent=f"card enrichment {block} attached by {agent}", provenance_ids=[provenance_id],
+                actor={"type": "agent", "id": agent})
+    return entry

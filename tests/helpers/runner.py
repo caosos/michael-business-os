@@ -169,9 +169,27 @@ def lane_d_e2e(fixture: str, gateway_mode: str = "reference") -> None:
         at1 = {k: rep.get(k) for k in ("ok", "drift_count", "weak_receipt_count")} | {"items": len(items_)}
     errors = [e for d in docs for e in schemas.errors("item", d)] + [e for d in areqs for e in schemas.errors("action-request", d)] \
         + [e for r in exported for e in schemas.errors("receipt", r)]
+    from mbos import card as cardmod
+
+    card_errors, card_stats = [], {}
+    with engine.begin() as c:  # a lane attaches enrichment through the ledger (ADR-0011 interim convention)
+        pv = L.record_provenance(c, actor_type="agent", agent_name="agent-02-opportunity", basis="FACT",
+                                 tool_name="listing-activity", tool_version="0.1.0")
+        spine_d.record_enrichment(c, trailer, "listing_activity", {"stale_risk": {"value": "medium", "basis": "INFERENCE"},
+                                  "recent_activity": ["Seller edited the listing 8 days ago"]}, pv, agent="agent-02-opportunity")
+    with engine.connect() as c:
+        it_, _, _ = cardmod.load_inputs(c, trailer)
+        enriched = cardmod.enrichment_from_item(c, it_)
+        card_stats["enrichment_roundtrip"] = enriched.get("listing_activity", {}).get("stale_risk", {}).get("value")
+    with engine.connect() as c:
+        for cat, i in by_cat.items():
+            it, rc, ar = cardmod.load_inputs(c, i)
+            cd = cardmod.build_card(it, rc, ar, cardmod.enrichment_from_item(c, it))
+            card_errors += [f"{cat}: {e}" for e in cardmod.validate_card(cd)]
+            card_stats[cat] = [cd["status"]["current"], cd["recommendation"]["action"], len(cd["unknowns"]), len(cd["activity_trail"])]
     with engine.connect() as c:
         by_type = dict(c.execute(sa.text("SELECT type, count(*) FROM mbos.receipts GROUP BY type")).all())
-    say("RESULT", json.dumps({"at1": at1, "receipt_types": by_type, "gateway_mode": gateway_mode, "final": final, "chain": chain, "reference_chain": [ref_ok, ref_msg],
+    say("RESULT", json.dumps({"cards": card_stats, "card_errors": card_errors[:5], "at1": at1, "receipt_types": by_type, "gateway_mode": gateway_mode, "final": final, "chain": chain, "reference_chain": [ref_ok, ref_msg],
                               "effector_calls": calls, "live_effector_calls": live, "receipts": len(exported),
                               "contract_errors": errors[:5], "executed": sum(r["type"] == "ACTION_EXECUTED" for r in exported)}))
     os._exit(0)

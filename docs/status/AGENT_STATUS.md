@@ -134,6 +134,20 @@ None new. MICHAEL_DECISIONS #1–#5 are unchanged; none blocks the dry-run MVP.
   - A-18 (PANIC + reconcile via 05)
   - A-04, A-15, A-12, A-10, A-06
 
+## Deal Sniffer opportunity card (A-19, DONE 2026-10-07 18:10)
+- Michael's spec is implemented as ADR-0011 plus `card.schema.json` (a new additive contract; frozen v1.0.0 untouched). `mbos.card` builds it, `mbos card ITEM` prints it.
+- It is a derived view of the Item, its receipts and lane enrichment, never a source of truth. Honesty rule: every datum has a basis or is UNKNOWN, and the card lists its UNKNOWN paths.
+- Includes:
+  - recommendation CONTACT/OFFER/BUY/COUNTER/HOLD/PASS with the reason and a waiting flag
+  - the status timeline from real receipts, with no invented stages
+  - the full activity trail (who, what, why, inputs, result, receipt, next action)
+  - logistics from the operator profile data (trailer not owned, borrowed possible, never auto-rejected; borrowed trailer must be confirmed)
+- A lint rejects elementary mechanic advice unless sourced and model-specific.
+- Lanes attach enrichment through `spine.record_enrichment`, with no contract change.
+- Tests: 177 passed. Cards validate on the lane D/E end-to-end run.
+- Open, by design, for the lanes: B-15 (listing and seller blocks), C-15/C-16 (economics ranges, logistics, seasonality, value-add), F-13 (rendering), G-05 (acceptance), E-12, D-16.
+- NEGOTIATING and QUALIFIED are not shown until inbound communication events exist (ADR-0009 item 11).
+
 ## Next action (superseded by READY_QUEUE.md)
 1. On 04's `0005`: port `ledger.py`/`spine.py` onto `mbos_state.StateStore` (R1/R2), with A1–A10 passing unchanged.
 2. Wire 05's ActionGateway, PanicState and PDP adapters (R4–R7), with A5/A9 passing on the real gateway.

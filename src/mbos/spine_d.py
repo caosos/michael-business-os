@@ -458,3 +458,25 @@ def set_kill_switch(conn: sa.Connection, key: str, frozen: bool, *, reason: str,
                        {"l": level, "t": target, "e": frozen, "a": canonical_json({"type": "human", "id": actor_id}).decode(),
                         "r": reason, "p": [prov], "k": _panic_key(conn, level, target, frozen, reason)}).scalar_one()
     return {"frozen": frozen, "reason": reason, "receipt_id": rid}
+
+
+# ---------------------------------------------------------------- card enrichment (ADR-0011 interim convention)
+ENRICHMENT_BLOCKS = ("listing_activity", "seller", "economics", "value_add", "seasonality", "logistics", "make_model",
+                     "distance_miles", "why")
+
+
+def record_enrichment(conn: sa.Connection, item_id: str, block: str, data: Any, provenance_id: str, *,
+                      summary: str = "", basis: str = "INFERENCE", agent: str = "lane-enrichment") -> dict:
+    """A lane attaches a card-enrichment block to an Item WITHOUT a contract change: the block is stored as a
+    content-addressed artifact and cited from Item.research[] (field "card.<block>", source_uri "artifact:<sha256>")
+    with the lane's own provenance. Receipted like any other Item change. The card loader reads these back."""
+    if block not in ENRICHMENT_BLOCKS:
+        raise ValueError(f"unknown enrichment block {block!r}; expected one of {ENRICHMENT_BLOCKS}")
+    raw = canonical_json(data)
+    ref = conn.execute(sa.text("SELECT mbos.put_artifact(:c, 'application/json')"), {"c": raw}).scalar_one()
+    item = read_item(conn, item_id)
+    entry = {"finding": summary or f"card enrichment: {block}", "field": f"card.{block}", "basis": basis,
+             "source_uri": f"artifact:{ref}", "provenance_id": provenance_id}
+    _patch(conn, item_id, {"research": (item.get("research") or []) + [entry]},
+           f"card enrichment {block} attached by {agent}", [provenance_id], {"type": "agent", "id": agent})
+    return entry

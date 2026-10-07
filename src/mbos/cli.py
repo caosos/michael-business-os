@@ -6,6 +6,7 @@ everything here goes through the same spine functions, so receipts are identical
     mbos worker [--fixture PATH]    run DBOS: recover workflows, optionally discover a fixture, keep serving
     mbos queue                      what needs Michael's decision
     mbos show ITEM_ID
+    mbos card ITEM_ID [--json]      the decision-ready opportunity card (ADR-0011)
     mbos decide AREQ_ID YES|NO|MODIFY|HOLD --seen HASHPREFIX [--reason ..] [--change k=v ..] [--hold-until ISO]
     mbos ping ITEM_ID               wake a HOLD that has wake_on=michael_ping
     mbos outcome ITEM_ID KIND [--revenue N --cost N --hours N --notes ..]
@@ -185,6 +186,19 @@ def cmd_decide(a: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_card(a: argparse.Namespace) -> int:
+    from mbos import card as cardmod
+
+    with _engine().connect() as c:
+        item, receipts, areqs = cardmod.load_inputs(c, a.item_id)
+        card = cardmod.build_card(item, receipts, areqs, cardmod.enrichment_from_item(c, item))
+    errors = cardmod.validate_card(card)
+    print(json.dumps(card, indent=2) if a.json else cardmod.render_text(card))
+    if errors:
+        print("CARD INVALID:", *errors, sep="\n  ", file=sys.stderr)
+    return 1 if errors else 0
+
+
 def cmd_ping(a: argparse.Namespace) -> int:
     _wake(a.item_id, {"kind": "ping"})
     print("pinged", a.item_id)
@@ -236,6 +250,7 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--step-up", action="store_true",
                    help="explicit confirmation required for YES on irreversible / money-like requests")
     s.set_defaults(fn=cmd_decide)
+    s = sub.add_parser("card"); s.add_argument("item_id"); s.add_argument("--json", action="store_true"); s.set_defaults(fn=cmd_card)
     s = sub.add_parser("ping"); s.add_argument("item_id"); s.set_defaults(fn=cmd_ping)
     s = sub.add_parser("outcome"); s.add_argument("item_id"); s.add_argument("kind")
     s.add_argument("--revenue", type=float); s.add_argument("--cost", type=float); s.add_argument("--hours", type=float)

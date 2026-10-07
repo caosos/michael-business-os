@@ -7,12 +7,12 @@
 | Agent | Current task | Branch @ head | Started | Dependency / blocker | Done this wave | Next (queue) |
 |---|---|---|---|---|---|---|
 | **01** Coordinator | **A-02** release gate; then A-01 A1–A10 parity on lane D | `research/agent-01-coordinator` | 17:00 | none | A-00, A-03, A-05, A-07, A-08, A-09, A-11, A-13, A-14, A-16, A-17, A-01 m1+m2 | A-15, A-12, A-10, A-06 |
-| **02** Discovery | **B-14** image-artifact hook (assigned 17:00) | `research/agent-02-opportunity` | 17:00 | none | B-01..B-11, B-13 | B-12 (blocked) |
-| **03** Economics | **C-14** LEARN e2e on lane D (assigned 17:00) | `research/agent-03-economics` | 17:00 | none | C-01..C-13 | — |
+| **02** Discovery | **B-15** listing_activity + seller enrichment (P0, Deal Sniffer card) | `research/agent-02-opportunity` | 18:10 | none | B-01..B-11, B-13, B-14 | B-12 (blocked) |
+| **03** Economics | **C-15** economics/logistics/seasonality/why blocks (P0), then C-16 | `research/agent-03-economics` @ `cc383cc` | 18:10 | B-15 (dates) | C-01..C-14 | C-16 |
 | **04** State | **D-11** velocity caps, then **D-15** mbos_dbos bootstrap helper | `research/agent-04-state` | 16:40 | none | D-01..D-08, D-10, D-13 | D-14 |
-| **05** Governance | **E-06** policy into lane D | `research/agent-05-governance` @ `8ffe87d` | 16:10 | none | E-01..E-05, E-10 | E-09, E-07, E-08 |
-| **06** Operator UI / Comms | **F-04** UI on real Components (assigned 17:00) | `research/agent-06-communications` @ `b5badb4` | 17:00 | none | F-01..F-03, F-05..F-10, F-12 | F-11 after A-15 |
-| **07** QA ⚑ RELEASE | **G-04** release-candidate run on lanes D/E (assigned 17:00); finish G-03 | `research/agent-07-marketing` | 17:00 | none | G-01, G-02 | — |
+| **05** Governance | **E-12** offer/purchase policy + R20 | `research/agent-05-governance` | 18:10 | none | E-01..E-11 | — |
+| **06** Operator UI / Comms | **F-13** render the opportunity card (P0) | `research/agent-06-communications` @ `9fd135c` | 18:10 | A-19 (done) | F-01..F-12, F-04 | F-11 after A-15 |
+| **07** QA ⚑ RELEASE | **G-04** release-candidate run on lanes D/E, then **G-05** card acceptance | `research/agent-07-marketing` | 17:00 | none | G-01, G-02 | G-03, G-05 |
 
 **Idle agents:** none.
 
