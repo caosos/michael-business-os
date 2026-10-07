@@ -1,7 +1,7 @@
 {
   "policy_schema": "mbos.governance.policy/1",
   "policy_id": "wave-one-default-deny",
-  "version": "2026.10.07-w1.7",
+  "version": "2026.10.07-w1.8",
   "description": "Round Two wave one. Everything tier 0, every externally consequential action needs Michael's YES, every effector DRY-RUN, no delegation, no real-world spend. Anything not listed here is DENIED.",
   "system_mode": "mvp",
   "delegation_enabled": false,
@@ -65,9 +65,10 @@
     "commit.external":             { "category": "external_commitment", "effector": "dryrun" }
   },
 
+  "grant_notes": "F-41 least privilege (E-15): agent-01-coordinator, the spine's proposer, holds ONLY what its planners can emit: comms.email/sms, offer.*, purchase.create, publish.*. money.payment.send, price.change and commit.external are granted to NOBODY until a lane needs them; comms.voice.call, comms.message.send and schedule.appointment.create stay ungranted for the spine. Drafting lanes propose as THEMSELVES: a proposed action carries `lane` (an agent id); proposed_by = lane when that agent holds the capability (spine_adapter.proposer_for).",
   "grant_semantics": "agent_grants authorize PROPOSING an ActionRequest only. No agent ever executes: the Action Gateway alone calls effectors, after Michael's YES and the 8 guard checks (ruling R7). The proposer's grant is re-checked at execution (G6).",
   "agent_grants": {
-    "agent-01-coordinator":    ["offer.submit", "offer.email.send", "offer.sms.send", "offer.message.send", "offer.email.counter", "offer.sms.counter", "offer.message.counter", "purchase.create", "publish.listing.create", "publish.content.post", "money.payment.send", "price.change", "commit.external", "comms.email.send", "comms.sms.send"],
+    "agent-01-coordinator":    ["comms.email.send", "comms.sms.send", "offer.submit", "offer.email.send", "offer.sms.send", "offer.message.send", "offer.email.counter", "offer.sms.counter", "offer.message.counter", "purchase.create", "publish.listing.create", "publish.content.post"],
     "agent-02-opportunity":    [],
     "agent-03-economics":      [],
     "agent-04-state":          [],

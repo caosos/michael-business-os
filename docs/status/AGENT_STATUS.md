@@ -4,8 +4,8 @@ Agent: 05
 Role: Governance / Action Gateway / PANIC — "controlled autonomy"
 Branch: research/agent-05-governance
 Worktree: /home/michaelos/business-os-worktrees/agent-05-governance
-State: WORKING
-Claimed: E-15 (P0: F-40 backstop — approved request refused for a NON-freeze reason settles failed with ACTION_FAILED in the same txn; F-41 narrow agent-01 grants; per-lane proposer tag) — from 07 G-06
+State: WAITING — every queued lane-E task is DONE (E-01..E-15).
+Done: E-15 @ <E15> (F-40 backstop: approved + non-freeze, non-transient refusal => failed with ACTION_FAILED same txn, transient (quiet hours/budget/unreadable policy) keeps approval; F-41: agent-01 grants narrowed, money.payment.send/price.change/commit.external granted to nobody, proposer_for(lane); 408 tests)
 Done: E-14 @ cc0128c (spine_adapter: build wires hooks; engage_panic/release_panic/panic_state; schedule_reconcile + .activate() on real DBOS 3.2; L3 never cancels the reconcile workflow; call-sequence doc)
 Done: E-13 @ ecf1600 (F-24: freeze/unreadable/corrupt PANIC denial settles approved->cancelled_by_freeze, 6-mode regression; F-25/R22: durable dry-run provider in mbos.effector_calls, after-send->executed, before/unproven->failed RECONCILED; F-22: publish.* propose-only grants for 07+01; 362 tests)
 Done: E-12 @ c507ac0 (offer.*/counter/purchase.* tier0+step-up, binding never under comms.*, cash-at-risk defaults as data, R20 cancelled_by_freeze; 338 tests)
@@ -23,7 +23,7 @@ Done: E-01 @ df826c3 (interop row 05 = 10/10; vectors receipt_chain verifies; 14
 Done: E-03 @ e12caa3 (L3 DBOS cancel verified on real dbos 3.2.0; deny-all egress + LiteLLM budget generators; 157 tests)
 Current phase: ROUND TWO — wave two (foreman loop, docs/COORDINATION.md)
 Started: 2026-10-06
-Last updated: 2026-10-07 (claimed E-15)
+Last updated: 2026-10-07 (E-15 done)
 
 ## Current objective
 **SUPERSEDED by ADR-0010 (E-01):** Agent 01 binding rulings for lane E

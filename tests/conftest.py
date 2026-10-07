@@ -113,6 +113,12 @@ class Env:
         self.policy_path.parent.mkdir()
         for f in ("policy.v1.json", "policy.schema.json", "content_rules.v1.json"):
             shutil.copy(REPO / "policy" / f, self.policy_path.parent / f)
+        # F-41: the SHIPPED policy grants nobody money.payment.send / price.change / commit.external. The mechanics
+        # tests (all 11 categories) need a proposer for them, so the TEST COPY of the policy adds those grants to
+        # agent-01. Least-privilege itself is asserted against the shipped file (tests/test_e15_*).
+        data = json.loads(self.policy_path.read_text())
+        data["agent_grants"]["agent-01-coordinator"] += ["money.payment.send", "price.change", "commit.external"]
+        self.policy_path.write_text(json.dumps(data))
         self.clock = Clock(NOON)
         self.dsns = {r: self.dsn(r) for r in ("agent_write", "gateway", "approver", "policy_admin")}
         self.store = PgGovernanceStore(self.dsns)

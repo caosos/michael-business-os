@@ -1,7 +1,7 @@
 # Action Gateway: wave one implementation guide
 
 **Owner:** Agent 05 · **Status:** implemented, wave one · **Date:** 2026-10-07
-**Code:** `src/mbos_governance/` · **Policy data:** `policy/` · **Tests:** `tests/` (371 passing, on PostgreSQL 16)
+**Code:** `src/mbos_governance/` · **Policy data:** `policy/` · **Tests:** `tests/` (408 passing, on PostgreSQL 16)
 
 > Core law: no action without a receipt, and no receipt without provenance.
 > Governance rule: models may PROPOSE. Non-LLM policy code AUTHORIZES.
@@ -143,6 +143,20 @@ These defaults wait on Michael's decisions (`MICHAEL_DECISIONS.md`):
   - Its reservation is released and it gets an `ACTION_FAILED` receipt.
   - Releasing the freeze later does **not** revive the approval, so Michael re-approves a new proposal.
   - Pending requests are untouched, and so are approvals refused for non-freeze reasons.
+
+### 5b. F-40 backstop and least-privilege grants (E-15)
+
+- **An approved request that the gateway refuses never stays `approved` unless the refusal is transient.**
+  - **Freeze** (R20): the request becomes `cancelled_by_freeze`.
+  - **A refusal retrying cannot fix** becomes `failed`, with `ACTION_FAILED` in the same transaction. This covers a missing step-up, an unauthenticated or wrong decider, channel or scope, a payload or hash mismatch, expiry, a revoked grant, or a secret.
+  - **Transient conditions keep the approval:** quiet hours, a budget or cash cap, an unreadable policy or rules file, and G8 system state.
+  - Michael's decision on a failed request is never lost silently: the receipt says why, and he re-decides on a new request.
+- **Grants (F-41):**
+  - `agent-01-coordinator` (the spine's proposer) holds only `comms.email/sms.send`, `offer.*`, `purchase.create` and `publish.*`.
+  - `money.payment.send`, `price.change` and `commit.external` are granted to **nobody**.
+  - `comms.voice.call`, `comms.message.send` and `schedule.appointment.create` belong to agent 06 only.
+  - A test asserts the exact grant matrix against the shipped policy file.
+- **Per-lane proposer identity:** a proposed action carries `lane` (an agent id). `spine_adapter.proposer_for(gov, capability, lane)` returns the lane if it holds the capability, otherwise the spine identity if that holds it, otherwise None.
 
 ## 6. Hashing: ADR-0010 (normative), supersedes R3
 

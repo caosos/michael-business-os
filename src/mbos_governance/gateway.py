@@ -504,6 +504,20 @@ class ActionGateway:
                 f["G5"] += reasons
         return f, approval, dry_run
 
+    TRANSIENT_PREFIXES = ("QUIET_HOURS", "BUDGET_", "CASH_AT_RISK", "RESERVATION_", "ESTIMATE_", "POLICY_UNREADABLE",
+                          "CONTENT_RULES_UNREADABLE", "LIVE_MODE_NOT_AVAILABLE", "NO_EFFECTOR", "EFFECTOR_CANNOT_DRY_RUN")
+
+    @classmethod
+    def _terminal_refusal(cls, failures: dict[str, list[str]]) -> bool:
+        """True if any refusal reason is one retrying will never fix (see the F-40 backstop)."""
+        for gate, reasons in failures.items():
+            if gate == "G7":
+                continue      # kill-switch reasons are handled by R20; G7 non-PANIC is the unreadable-policy marker
+            for r in reasons:
+                if not r.startswith(cls.TRANSIENT_PREFIXES):
+                    return True
+        return False
+
     def execute(self, action_request_id: str) -> Result:
         """Run the guard; on success call the effector (DRY-RUN) and receipt the outcome."""
         policy, policy_err = self._policy()
@@ -548,6 +562,13 @@ class ActionGateway:
                     # PANIC release. The request is cancelled_by_freeze (reservation released); Michael re-approves
                     # via a new proposal.
                     new_status = "cancelled_by_freeze"
+                elif before == "approved" and self._terminal_refusal(failures):
+                    # F-40 backstop (E-15): an approval refused for a NON-freeze reason that retrying cannot fix
+                    # (no step-up, bad approver/channel/scope/auth, payload or grant problem, ...) must not stay
+                    # `approved`: it settles `failed` (approved -> failed) with ACTION_FAILED in the same transaction,
+                    # so Michael's approval is never silently lost and never half-alive. Transient conditions
+                    # (quiet hours, budget caps, unreadable policy/rules, G8 system state) keep the approval.
+                    new_status = "failed"
                 details = {"kind": "generic", "guard": "refused", "failed_checks": failures}
                 if approval is not None:
                     rtype, extra = "ACTION_FAILED", {"approval_id": approval["approval_id"], "effect": "none",

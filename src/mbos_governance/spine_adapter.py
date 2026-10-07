@@ -162,6 +162,24 @@ def build(dsns: str | dict[str, str], policy_path: str | None = None, *, dbos: A
     return Governance(gw, SpineGateway(gw), SpineKillSwitch(policies), SpinePDP(policies))
 
 
+def proposer_for(gov: Governance, capability: str, lane: str | None, spine_identity: str = "agent-01-coordinator") -> str | None:
+    """F-41: drafting lanes propose as THEMSELVES. A proposed action carries `lane` (an agent id such as
+    "agent-06-communications" / "agent-07-marketing"). Returns the `proposed_by` to stamp:
+      * `lane`, if that agent holds `capability` in policy;
+      * else the spine's own identity, if IT holds the capability (least-privilege grants make this narrow);
+      * else None: nobody may propose it (the PDP would deny anyway) — the spine should not create the request.
+    Pure policy lookup; the grants are data (policy `agent_grants`). Fails closed (None) if policy is unreadable."""
+    try:
+        policy = gov.action_gateway.policies.current()
+    except PolicyUnavailable:
+        return None
+    if lane and capability in policy.grants(lane):
+        return lane
+    if capability in policy.grants(spine_identity):
+        return spine_identity
+    return None
+
+
 # ---------------------------------------------------------------- A-18 helpers (plain functions, JSON-serialisable)
 def engage_panic(gov: Governance, level: str, target: str | None, actor: str, reason: str) -> dict[str, Any]:
     """Freeze (any actor may engage). Runs the wired hooks. Returns {"state", "cancelled", "hooks", ["error"]}.
