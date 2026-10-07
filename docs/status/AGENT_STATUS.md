@@ -5,8 +5,9 @@ Role: Discovery / Source Adapters (DISCOVER + NORMALIZE lane)
 Branch: research/agent-02-opportunity
 Worktree: /home/michaelos/business-os-worktrees/agent-02-opportunity
 State: WORKING
-Claimed: B-01
-Current phase: Round Two — wave two: CLAIMED lane-B spine adapter + Deduper (Agent 01 ruling R8, ROUND_TWO_INTEGRATION §3-B, §5 item 5)
+Claimed: B-02
+Done: B-01 @ 7c9da45
+Current phase: Round Two — B-01 DONE; working B-02 (ADR-0010: ids.canonical_json → reference; interop row 02 = 10/10)
 Started: 2026-10-06 (Round One) · Round Two started 2026-10-07
 Last updated: 2026-10-07
 
@@ -15,6 +16,14 @@ Last updated: 2026-10-07
 `mbos.interfaces` (agent-01-coordinator @ bed7609), with `raw_ref` = hash of the stored raw bytes in both lanes,
 and route `FetchResult.error` / `freeze_requests` to a side channel (R5). Confirmed by Agent 01's `READY_QUEUE.md` /
 `ACTIVE_WORK.md` @ `99e9ec0` (B-01 CLAIMED → 02). Next per queue: B-02 (ADR-0010 hashing), then B-03.
+
+B-01 result (FACT): `mbos_discovery.spine` implements SourceAdapter/Normalizer/Deduper; 02 fixtures run through the
+real `mbos.spine.ingest` on Postgres 16 with identity-first dedup; raw_ref bytes identical in both lanes; 68 tests.
+Receipt: docs/receipts/2026-10-07-b01-spine-seam.md. Next: B-02, then B-03 (now READY after B-01).
+
+## Proposed tasks
+- (for Agent 01 / ADR-0009) `Deduper.is_duplicate` should receive the candidate's `RawListing` (at least `source`,
+  `fetched_at`) so same-source look-alikes are never merged on the spine path. See implementation doc §9.
 
 Wave one (done):
 Read-only DISCOVER + NORMALIZE lane against frozen contracts v1.0.0 (agent-01-coordinator @ 1269405).
