@@ -17,7 +17,7 @@ from mbos.config import Settings, configure, settings
 from mbos.db.engine import app_engine, sqlalchemy_url
 from mbos.db.migrate import migrate
 from mbos.interfaces import (
-    ActionPlanner, Deduper, Researcher, Gateway, KillSwitch, LLMBudget, Normalizer, Notifier, PolicyDecisionPoint, Scorer,
+    ActionPlanner, Deduper, Enricher, Researcher, Gateway, KillSwitch, LLMBudget, Normalizer, Notifier, PolicyDecisionPoint, Scorer,
     SourceAdapter,
 )
 
@@ -33,6 +33,7 @@ class Components:
     deduper: Optional[Deduper] = None
     planner: Optional[ActionPlanner] = None
     scorer: Optional[Scorer] = None
+    enrichers: list = field(default_factory=list)  # card enrichment (ADR-0011); run after ingest and after scoring
     researcher: Optional[Researcher] = None  # when set, RESEARCH runs before SCORE (A-05)
     pdp: Optional[PolicyDecisionPoint] = None
     kill_switch: Optional[KillSwitch] = None

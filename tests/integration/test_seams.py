@@ -133,3 +133,35 @@ def test_outcome_attribution_and_channel(ledger_db):
         tool = c.execute(sa.text("SELECT body->>'tool_name' FROM mbos.provenance WHERE provenance_id = :p"),
                          {"p": out["provenance_ids"][0]}).scalar_one()
     assert out["attribution"]["first_touch_source"] == "craigslist" and tool == "mbos.web.outcome"
+
+
+def test_policy_denied_proposal_never_awaits_approval(ledger_db):
+    """07 F-23 / R21: a PDP-denied proposal leaves the item RECOMMENDED with nothing to approve, and Michael is told."""
+    from mbos import card as cardmod
+    from mbos.interfaces import PolicyDecision
+
+    class DenyAll:
+        def decide(self, areq):
+            return PolicyDecision(decision="deny", tier=0, category="email", reason="DENY_TEST", policy_version="t")
+
+    ids = seed_flow(ledger_db, act=False)  # prime comps for a clean second item
+    comps = Components(pdp=DenyAll()).with_defaults()
+    raw = _raw("FIX-LEAD-SMARTHOME-1")
+    n = FixtureNormalizer()
+    from mbos.reference.placeholder_scorer import PlaceholderScorer
+    with ledger_db.begin() as c:
+        item_id = spine.ingest(c, asdict(raw), asdict(n.normalize(raw)), "fx", "0", comps)["item_id"]
+    with ledger_db.begin() as c:
+        spine.record_score(c, item_id, asdict(PlaceholderScorer().score(spine.read_item(c, item_id))))
+    with ledger_db.begin() as c:
+        out = spine.route_recommendation(c, item_id, comps)
+    assert out["policy_denied"] is True
+    with ledger_db.begin() as c:
+        item, receipts, areqs = cardmod.load_inputs(c, item_id)
+        st = c.execute(sa.text("SELECT status FROM mbos.action_requests WHERE action_request_id = :a"), {"a": out["action_request_id"]}).scalar_one()
+        queued = c.execute(sa.text("SELECT count(*) FROM mbos.outbox WHERE topic = 'operator.notify' AND payload->>'kind' = 'policy_denied'")).scalar_one()
+        pend = spine.pending_decisions(c)
+    assert item["state"] == "RECOMMENDED" and st == "rejected" and queued == 1
+    assert all(p["item"]["item_id"] != item_id for p in pend), "nothing for Michael to approve"
+    card = cardmod.build_card(item, receipts, areqs)
+    assert card["recommendation"]["action"] == "HOLD" and "policy blocked" in card["recommendation"]["why"]

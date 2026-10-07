@@ -148,6 +148,21 @@ None new. MICHAEL_DECISIONS #1–#5 are unchanged; none blocks the dry-run MVP.
 - Open, by design, for the lanes: B-15 (listing and seller blocks), C-15/C-16 (economics ranges, logistics, seasonality, value-add), F-13 (rendering), G-05 (acceptance), E-12, D-16.
 - NEGOTIATING and QUALIFIED are not shown until inbound communication events exist (ADR-0009 item 11).
 
+## 19:00 checkpoint (card wiring + release candidate)
+- A-20 DONE: an `Enricher` protocol; lane C's `EconomicsEnricher` (economics/logistics/seasonality/why/value_add) and lane B's `LaneBEnricher` run in the workflow after ingest and after scoring.
+  - Enrichment is atomic and idempotent (lost-update bug found by 04 fixed).
+  - Lane C skips placeholder-scored items rather than crash.
+- A-10 DONE: contracts and operator profile ship in the wheel.
+- R21 (F-23): a policy-denied proposal leaves the item RECOMMENDED, notifies Michael, and the card recommends HOLD.
+- R22 (F-25): A5 means never duplicate and settle truthfully; E-13 queued to 05.
+- G-04 verdict from 07 is **NOT READY**. Open items and owners:
+  - F-24 (05): confirm the guard denial leaves no stale approval, including unreadable and corrupt PANIC states.
+  - F-25 (05): durable provider lookup.
+  - F-22 (05): propose-only publish grant.
+  - F-23 (01): fixed.
+  - 07 re-runs as G-06 after E-13.
+- Tests: 183 passed.
+
 ## Next action (superseded by READY_QUEUE.md)
 1. On 04's `0005`: port `ledger.py`/`spine.py` onto `mbos_state.StateStore` (R1/R2), with A1–A10 passing unchanged.
 2. Wire 05's ActionGateway, PanicState and PDP adapters (R4–R7), with A5/A9 passing on the real gateway.

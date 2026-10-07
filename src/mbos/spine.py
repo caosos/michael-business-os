@@ -205,6 +205,10 @@ def route_recommendation(conn: sa.Connection, item_id: str, components: Any) -> 
         return {"verdict": "MAYBE", "action_request_id": None}
     # MVP: the item proceeds on its primary proposed action; further actions are proposed after it settles.
     areq = _propose(conn, item, proposed[0], prov, components)
+    if areq["status"] == "rejected":  # R21 (07 F-23): the PDP denied it, so there is nothing for Michael to approve
+        components.notifier.notify(conn, kind="policy_denied", item_id=item_id, action_request_id=areq["action_request_id"],
+                                   summary=f"{item['normalized']['title']}: policy blocked the proposed action ({areq['capability']})")
+        return {"verdict": "YES", "action_request_id": areq["action_request_id"], "policy_denied": True}
     update_item(conn, item_id, to_state="AWAITING_APPROVAL",
                 patch={"action_request_ids": (item.get("action_request_ids") or []) + [areq["action_request_id"]]},
                 intent=f"awaiting Michael: {areq['capability']}", provenance_ids=[prov])
@@ -573,18 +577,41 @@ ENRICHMENT_BLOCKS = ("listing_activity", "seller", "economics", "value_add", "se
 
 def record_enrichment(conn: sa.Connection, item_id: str, block: str, data: Any, provenance_id: str, *,
                       summary: str = "", basis: str = "INFERENCE", agent: str = "lane-enrichment") -> dict:
-    """A lane attaches a card-enrichment block to an Item WITHOUT a contract change: the block is stored as a
-    content-addressed artifact and cited from Item.research[] (field "card.<block>", source_uri "artifact:<sha256>")
-    with the lane's own provenance. Receipted like any other Item change. The card loader reads these back."""
+    """A lane attaches a card-enrichment block (ADR-0011 interim convention): the block is a content-addressed
+    artifact cited from Item.research[] ("card.<block>", "artifact:<sha256>") with the lane's provenance.
+
+    The item row is locked BEFORE research[] is read, so concurrent lanes cannot lose each other's entries; the same
+    block content is a no-op (idempotent)."""
     if block not in ENRICHMENT_BLOCKS:
         raise ValueError(f"unknown enrichment block {block!r}; expected one of {ENRICHMENT_BLOCKS}")
     raw = canonical_json(data)
-    ref = conn.execute(sa.text("INSERT INTO mbos.artifacts (sha256, media_type, content) VALUES (:h, 'application/json', :c) "
-                         "ON CONFLICT (sha256) DO NOTHING RETURNING sha256"), {"h": sha256_bytes(raw), "c": raw}) and sha256_bytes(raw)
-    item = load_item(conn, item_id)
+    ref = sha256_bytes(raw)
+    conn.execute(sa.text("INSERT INTO mbos.artifacts (sha256, media_type, content) VALUES (:h, 'application/json', :c) "
+                         "ON CONFLICT (sha256) DO NOTHING"), {"h": ref, "c": raw})
+    item = load_item(conn, item_id, for_update=True)
     entry = {"finding": summary or f"card enrichment: {block}", "field": f"card.{block}", "basis": basis,
              "source_uri": f"artifact:{ref}", "provenance_id": provenance_id}
+    if any(r.get("field") == entry["field"] and r.get("source_uri") == entry["source_uri"] for r in item.get("research") or []):
+        return entry
     update_item(conn, item_id, patch={"research": (item.get("research") or []) + [entry]},
                 intent=f"card enrichment {block} attached by {agent}", provenance_ids=[provenance_id],
                 actor={"type": "agent", "id": agent})
     return entry
+
+
+def record_lane_provenance(conn: sa.Connection, doc: dict) -> str:
+    """Persist a lane-supplied Provenance v1 record (e.g. lane C's `build_enrichment()["provenance"]`)."""
+    from mbos.contracts.models import Provenance
+
+    existing = conn.execute(sa.text("SELECT 1 FROM mbos.provenance WHERE provenance_id = :p"), {"p": doc["provenance_id"]}).first()
+    if existing is None:
+        Provenance.from_doc(doc)
+        conn.execute(sa.text("INSERT INTO mbos.provenance (body) VALUES (CAST(:b AS jsonb))"), {"b": _j(doc)})
+    return doc["provenance_id"]
+
+
+def run_enrichers(conn: sa.Connection, item_id: str, components: Any) -> int:
+    """Run every registered lane enricher for this Item (each is idempotent). Returns blocks attached."""
+    import sys
+
+    return sum(int(e.enrich(conn, sys.modules[__name__], item_id) or 0) for e in components.enrichers)

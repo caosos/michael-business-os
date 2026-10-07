@@ -100,3 +100,65 @@ def _gap_text(g: Any) -> str:
     if isinstance(g, dict):
         return f"{'BLOCKING ' if g.get('blocking') else ''}{g.get('code', 'gap')}: {g.get('detail', '')}".strip(": ")
     return str(g)
+
+
+class EconomicsEnricher:
+    """Lane C's card enrichment (`mbos_economics.enrich.build_enrichment`, C-15) behind `Enricher` (A-20).
+
+    Persists lane C's provenance FIRST, then each block through `spine.record_enrichment` (atomic append). Blocks:
+    economics, logistics, seasonality, why. Idempotent (same content = no-op). Whatever the evidence cannot support is
+    omitted by lane C, so the card prints UNKNOWN. `as_of` is the Item's own timestamp, never wall-clock.
+    """
+
+    AGENT = "agent-03-economics"
+
+    def __init__(self, profile: dict | None = None):
+        from mbos import card
+
+        self.profile = profile if profile is not None else card.load_profile()
+
+    def enrich(self, conn, spine, item_id: str) -> int:
+        from mbos_economics.config import load_config
+        from mbos_economics.enrich import build_enrichment, load_seasonality
+        from mbos_economics.estimate import load_priors
+
+        item = spine.read_item(conn, item_id)
+        if item["state"] in ("ARCHIVED", "FAILED"):
+            return 0
+        card_ = (item.get("scores") or {}).get("scorecard")
+        if not card_ or "engine_version" not in card_:  # lane C enriches only what lane C's own engine scored
+            return 0
+        la = self._listing_activity(conn, item)
+        as_of = card_.get("computed_at") or item["created_at"]  # stable once scored (updated_at moves on every change)
+        e = build_enrichment(item, as_of, cfg=load_config(), priors=load_priors(),
+                             seasonality=load_seasonality(), profile=self.profile, listing_activity=la)
+        n = 0
+        if e.get("blocks"):
+            pid = spine.record_lane_provenance(conn, e["provenance"])
+            for block, data in e["blocks"].items():
+                spine.record_enrichment(conn, item_id, block, data, pid, summary=f"lane C {block}", agent=self.AGENT)
+            n += len(e["blocks"])
+        n += self._value_add(conn, spine, item, as_of, la)
+        return n
+
+    def _value_add(self, conn, spine, item: dict, as_of: str, la) -> int:
+        """C-16: plan from the deal's own numbers + SOURCED model-specific risks (CPSC recalls etc.). Whatever matches
+        no sourced knowledge is omitted, so the card prints UNKNOWN."""
+        from mbos_economics.config import load_config
+        from mbos_economics.valueadd import build_value_add, load_kb
+
+        from mbos.card import enrichment_from_item
+
+        mm = (enrichment_from_item(conn, item).get("make_model") or {}).get("value")
+        v = build_value_add(item, as_of, cfg=load_config(), kb=load_kb(), make_model=mm if isinstance(mm, str) else None)
+        if not v.get("block"):
+            return 0
+        pid = spine.record_lane_provenance(conn, v["provenance"])
+        spine.record_enrichment(conn, item["item_id"], "value_add", v["block"], pid, summary="lane C value-add", agent=self.AGENT)
+        return 1
+
+    @staticmethod
+    def _listing_activity(conn, item: dict):
+        from mbos.card import enrichment_from_item
+
+        return enrichment_from_item(conn, item).get("listing_activity")

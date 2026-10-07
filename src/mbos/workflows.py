@@ -91,6 +91,8 @@ def item_lifecycle(item_id: str) -> dict[str, Any]:
     item = tx(S().read_item, item_id)
     if item["state"] not in ("NORMALIZED", "RESEARCHING"):
         return {"status": "skipped", "state": item["state"]}
+    if components().enrichers:
+        tx(S().run_enrichers, item_id, components())  # listing activity / seller facts exist before scoring
     if components().researcher is not None:  # A-05: RESEARCH (lane C, comps via lane B) before SCORE
         rr = research_step(item)
         out = tx(S().record_research, item_id, rr, components())
@@ -100,9 +102,13 @@ def item_lifecycle(item_id: str) -> dict[str, Any]:
     else:
         sr = score_step(item)
     tx(S().record_score, item_id, sr)
+    if components().enrichers:
+        tx(S().run_enrichers, item_id, components())  # economics / logistics / seasonality / why need the score
     routed = tx(S().route_recommendation, item_id, components())
     if routed["verdict"] != "YES":
         return {"status": routed["verdict"].lower()}
+    if routed.get("policy_denied"):  # nothing to approve: the item stays RECOMMENDED and the card says why
+        return {"status": "policy_denied", "action_request_id": routed["action_request_id"]}
     return _approval_gate(item_id, routed["action_request_id"])
 
 

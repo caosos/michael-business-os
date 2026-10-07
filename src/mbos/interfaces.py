@@ -11,6 +11,7 @@ labelled with the lane that replaces it.
 | Normalizer         | B Discovery (Agent 02)     | reference.fixture_adapter.FixtureNormalizer    |
 | Deduper            | B Discovery (Agent 02)     | reference.fixture_adapter.ExactKeyDeduper      |
 | Researcher         | C Economics (Agent 03) + B comps | adapters.economics.EconomicsResearcher (real) |
+| Enricher           | B (02 listing/seller), C (03 economics/logistics/seasonality/why/value-add) | adapters.economics.EconomicsEnricher |
 | Scorer             | C Economics (Agent 03)     | adapters.economics.EconomicsEngineScorer (real) / reference.placeholder_scorer |
 | ActionPlanner      | 06 Comms / 07 Marketing    | reference.action_planner.DefaultActionPlanner  |
 | PolicyDecisionPoint| E Governance (Agent 05)    | reference.governance.DenyByDefaultPDP          |
@@ -130,6 +131,14 @@ class ResearchResult:
 class Researcher(Protocol):
     def research(self, item: dict[str, Any]) -> ResearchResult:
         """Gather evidence (comps via lane B), estimate economics, and score if sufficient. Deterministic."""
+
+
+@runtime_checkable
+class Enricher(Protocol):
+    def enrich(self, conn: sa.Connection, spine: Any, item_id: str) -> int:
+        """Attach this lane's card-enrichment blocks (ADR-0011) to the Item inside the caller's transaction, using
+        `spine.record_lane_provenance` and `spine.record_enrichment`. MUST be idempotent and MUST omit anything the
+        evidence cannot support (the card prints UNKNOWN). Returns the number of blocks attached."""
 
 
 @runtime_checkable

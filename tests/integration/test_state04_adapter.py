@@ -141,3 +141,35 @@ def test_r12_item_edges_match_lane_d(db04):
     with db04.connect() as c:
         lane_d = {tuple(r) for r in c.execute(sa.text("SELECT from_state, to_state FROM mbos.item_state_transitions"))}
     assert set(ITEM_TRANSITIONS) == lane_d, {"spine_only": set(ITEM_TRANSITIONS) - lane_d, "lane_d_only": lane_d - set(ITEM_TRANSITIONS)}
+
+
+def test_concurrent_enrichment_on_lane_d_loses_nothing(db04, lifecycle):
+    """04 D-16: update_item_doc REPLACES research[]; record_enrichment must use the atomic append."""
+    import threading
+
+    from mbos import spine_d
+
+    blocks = ["listing_activity", "seller", "economics", "logistics", "seasonality", "why", "value_add", "make_model"]
+    errors = []
+
+    def lane(block):
+        try:
+            with db04.begin() as c:
+                pid = L.record_provenance(c, actor_type="agent", agent_name=f"lane-{block}", basis="FACT", tool_name=block, tool_version="0")
+                spine_d.record_enrichment(c, lifecycle["item_id"], block, {"why": [block]} if block == "why" else
+                                          {"note": {"value": block, "basis": "INFERENCE"}}, pid, agent=f"agent-{block}")
+        except Exception as e:  # pragma: no cover
+            errors.append(repr(e))
+
+    L = lifecycle["L"]
+    ts = [threading.Thread(target=lane, args=(b,)) for b in blocks]
+    [t.start() for t in ts]
+    [t.join() for t in ts]
+    assert not errors, errors
+    with db04.connect() as c:
+        item = L.load_item(c, lifecycle["item_id"])
+        fields = sorted(r["field"] for r in item.get("research", []) if r["field"].startswith("card."))
+        assert L.verify_chain(c)["ok"]
+    assert fields == sorted(f"card.{b}" for b in blocks), fields
+    errs = schemas.errors("item", item)
+    assert not errs, errs[:3]
