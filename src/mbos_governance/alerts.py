@@ -52,7 +52,8 @@ def collect(dsn: str, since: datetime | None = None, claim_ttl_seconds: int = 30
                 out.append(_a(sev, "freeze", f"{what}: {r['reason']}", level=r["level"], target=r["target"],
                               revision=r["revision"]))
         for r in q("SELECT c.action_request_id, c.capability, c.claimed_at FROM mbos.effector_calls c "
-                   "WHERE c.state = 'executing' AND c.claimed_at < now() - make_interval(secs => %s) ORDER BY c.claimed_at",
+                   "JOIN mbos.action_requests a USING (action_request_id) "
+                   "WHERE a.status = 'executing' AND c.claimed_at < now() - make_interval(secs => %s) ORDER BY c.claimed_at",
                    (claim_ttl_seconds,)):
             out.append(_a("high", "stuck_claim", f"{r['capability']} stuck executing since {r['claimed_at'].isoformat()}; "
                           "run `mbos-gov reconcile` (NEEDS_HUMAN if the provider cannot answer)",
@@ -83,10 +84,14 @@ def collect(dsn: str, since: datetime | None = None, claim_ttl_seconds: int = 30
                    "AND details->'effector_reported'->'dry_run' IS DISTINCT FROM 'true'::jsonb ORDER BY seq", (since,)):
             out.append(_a("critical", "dry_run_violation", "an effector reported a LIVE effect (L3 PANIC engaged)",
                           action_request_id=r["action_request_id"], receipt_id=r["receipt_id"]))
-        for r in q("SELECT receipt_id, action_request_id, type FROM mbos.receipts WHERE ts >= %s "
+        for r in q("SELECT receipt_id, action_request_id, type, details->>'proof' AS proof FROM mbos.receipts WHERE ts >= %s "
                    "AND (details->>'reconciled')::boolean IS TRUE ORDER BY seq", (since,)):
-            out.append(_a("low", "reconciled", f"crashed execution reconciled -> {r['type']}",
-                          action_request_id=r["action_request_id"], receipt_id=r["receipt_id"]))
+            if r["proof"] == "unproven":
+                out.append(_a("medium", "reconcile_unproven", "a provider could not prove a send; settled failed (not retried) — "
+                              "verify before re-approving", action_request_id=r["action_request_id"], receipt_id=r["receipt_id"]))
+            else:
+                out.append(_a("low", "reconciled", f"crashed execution reconciled -> {r['type']}",
+                              action_request_id=r["action_request_id"], receipt_id=r["receipt_id"]))
     return sorted(out, key=lambda a: SEVERITY_ORDER[a["severity"]])
 
 

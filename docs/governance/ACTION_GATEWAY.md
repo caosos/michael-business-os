@@ -1,7 +1,7 @@
 # Action Gateway: wave one implementation guide
 
 **Owner:** Agent 05 · **Status:** implemented, wave one · **Date:** 2026-10-07
-**Code:** `src/mbos_governance/` · **Policy data:** `policy/` · **Tests:** `tests/` (338 passing, on PostgreSQL 16)
+**Code:** `src/mbos_governance/` · **Policy data:** `policy/` · **Tests:** `tests/` (362 passing, on PostgreSQL 16)
 
 > Core law: no action without a receipt, and no receipt without provenance.
 > Governance rule: models may PROPOSE. Non-LLM policy code AUTHORIZES.
@@ -183,3 +183,7 @@ These defaults wait on Michael's decisions (`MICHAEL_DECISIONS.md`):
 4. Governance alerts on FREEZE, budget breach, INJECTION_SUSPECTED and stuck `executing` claims.
 5. ~~A reconciliation job for stuck claims~~ **DONE (E-05):** `gw.reconcile()` / `mbos-gov reconcile` — provider lookup by idempotency key, never re-send. Agent 01 schedules it (A-03).
 6. Output-side secret scan for outbound content (§17 #25–26), and the `INJECTION_SUSPECTED` tripwire (#24) wired to L2 auto-demotion.
+
+- **R22 / F-25 (durable provider).** The simulated dry-run provider records each delivery in lane D's `mbos.effector_calls` at send time (`DurableProviderLedger`) and answers lookups from that row.
+  - Crash after the send: the request settles `executed`, via the DBOS re-run of `gateway_step` or `reconcile()`, and the effector is not called again.
+  - Crash before the send, or a provider that cannot prove a send: the request settles `failed` with a RECONCILED receipt. It is never re-sent, and Michael re-approves.

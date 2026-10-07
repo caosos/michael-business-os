@@ -1,7 +1,7 @@
 {
   "policy_schema": "mbos.governance.policy/1",
   "policy_id": "wave-one-default-deny",
-  "version": "2026.10.07-w1.6",
+  "version": "2026.10.07-w1.7",
   "description": "Round Two wave one. Everything tier 0, every externally consequential action needs Michael's YES, every effector DRY-RUN, no delegation, no real-world spend. Anything not listed here is DENIED.",
   "system_mode": "mvp",
   "delegation_enabled": false,
@@ -67,7 +67,7 @@
 
   "grant_semantics": "agent_grants authorize PROPOSING an ActionRequest only. No agent ever executes: the Action Gateway alone calls effectors, after Michael's YES and the 8 guard checks (ruling R7). The proposer's grant is re-checked at execution (G6).",
   "agent_grants": {
-    "agent-01-coordinator":    ["offer.submit", "offer.email.send", "offer.sms.send", "offer.message.send", "offer.email.counter", "offer.sms.counter", "offer.message.counter", "purchase.create", "money.payment.send", "price.change", "commit.external", "comms.email.send", "comms.sms.send"],
+    "agent-01-coordinator":    ["offer.submit", "offer.email.send", "offer.sms.send", "offer.message.send", "offer.email.counter", "offer.sms.counter", "offer.message.counter", "purchase.create", "publish.listing.create", "publish.content.post", "money.payment.send", "price.change", "commit.external", "comms.email.send", "comms.sms.send"],
     "agent-02-opportunity":    [],
     "agent-03-economics":      [],
     "agent-04-state":          [],
@@ -110,9 +110,10 @@
   },
 
   "recommendation_actions": {
-    "note": "E-12 (Deal Sniffer card: CONTACT / OFFER / COUNTER / BUY). CONTACT is plain comms.* (no commitment). OFFER and COUNTER are binding => offer.* (category offer). BUY is purchase.* (category purchase). All tier 0 with step-up. A binding offer can NEVER be created under comms.*: comms.* may only map to comms categories, and a comms.* request whose payload carries a binding key is denied.",
+    "note": "E-12 (Deal Sniffer card: CONTACT / OFFER / COUNTER / BUY). CONTACT is plain comms.* (no commitment). OFFER and COUNTER are binding => offer.* (category offer). BUY is purchase.* (category purchase). All tier 0 with step-up. A binding offer can NEVER be created under comms.* or publish.*: comms.* may only map to comms categories, publish.* only to publishing, and a comms.*/publish.* request whose payload carries a binding key is denied. F-22: publish.listing.create / publish.content.post are propose-only grants for the drafting agents (07 and the spine's proposer 01): tier 0, category publishing, default deny otherwise.",
     "binding_namespaces": { "offer.": "offer", "purchase.": "purchase" },
     "comms_namespace": "comms.",
+    "publish_namespace": "publish.",
     "comms_categories": ["message", "sms", "phone_call", "email"],
     "binding_payload_keys": ["offer", "offer_amount", "offer_usd", "counter", "counter_offer", "bid_amount", "binding"],
     "cash_at_risk": {

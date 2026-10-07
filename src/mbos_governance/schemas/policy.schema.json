@@ -486,7 +486,8 @@
         "comms_namespace",
         "comms_categories",
         "binding_payload_keys",
-        "cash_at_risk"
+        "cash_at_risk",
+        "publish_namespace"
       ],
       "properties": {
         "note": {
@@ -540,6 +541,9 @@
               "minLength": 1
             }
           }
+        },
+        "publish_namespace": {
+          "const": "publish."
         }
       }
     }

@@ -81,30 +81,41 @@ class Effector:
 
 
 class DryRunEffector(Effector):
-    """Simulates any capability. No network, no files, no spend."""
+    """Simulates any capability. No network, no files, no spend.
+
+    R22 (F-25): the simulated provider keeps its delivery record DURABLY, like a real provider would. The
+    gateway binds a `ledger` (store_pg.DurableProviderLedger, i.e. lane D's mbos.effector_calls); `_execute`
+    records the delivery there at send time and `_lookup` reads it back. A crash after the send therefore
+    leaves proof of the send; a crash before it leaves none. Without a ledger (unit use) it falls back to an
+    in-process dict, which is NOT durable."""
 
     name = "dryrun"
     supports_dry_run = True
 
-    def __init__(self, minter: TokenMinter):
+    def __init__(self, minter: TokenMinter, ledger=None):
         super().__init__(minter)
-        # The simulated provider's own record, keyed by idempotency key (in-process; a real provider
-        # keeps this server-side and answers lookups by its Idempotency-Key / message id).
-        self.deliveries: dict[str, dict] = {}
+        self.ledger = ledger
+        self._local_log: dict[str, dict] = {}
 
     def _execute(self, token: GuardToken, action_request: dict) -> dict:
         if not token.dry_run:
             raise EffectorRefused("DryRunEffector refuses live execution")
-        if token.idempotency_key in self.deliveries:   # provider-level idempotency: never twice
-            return self.deliveries[token.idempotency_key]
+        areq = action_request["action_request_id"]
+        prior = self.ledger.lookup(areq) if self.ledger else self._local_log.get(areq)
+        if prior is not None:                        # provider-level idempotency: never twice
+            return prior
         resp = {
             "provider": "dryrun",
             "provider_msg_id": f"dryrun_{new_ulid()}",
             "status": "simulated",
             "dry_run": True,
         }
-        self.deliveries[token.idempotency_key] = resp
+        if self.ledger:
+            self.ledger.record_sent(areq, resp)      # durable BEFORE we report success
+        else:
+            self._local_log[areq] = resp
         return resp
 
     def _lookup(self, token: GuardToken, action_request: dict) -> dict | None:
-        return self.deliveries.get(token.idempotency_key)
+        areq = action_request["action_request_id"]
+        return self.ledger.lookup(areq) if self.ledger else self._local_log.get(areq)

@@ -98,6 +98,8 @@ def _cross_check(data: dict) -> list[str]:
                 problems.append(f"capability {cap} is in the binding namespace {prefix} but maps to {spec['category']}, not {cat}")
         if cap.startswith(ra["comms_namespace"]) and spec["category"] not in comms_cats:
             problems.append(f"capability {cap}: a binding/money category {spec['category']} can never be created under comms.*")
+        if cap.startswith(ra["publish_namespace"]) and spec["category"] != "publishing":
+            problems.append(f"capability {cap}: publish.* may only map to publishing, not {spec['category']} (no binding offers via publish.*)")
     for cat, spec in data["categories"].items():
         if cat in ra["binding_namespaces"].values() and not (spec["tier"] == 0 and spec["decision"] == "require_approval"):
             problems.append(f"category {cat} must be tier 0 + require_approval")
@@ -205,11 +207,12 @@ def decide(action_request: dict, policy: Policy) -> PolicyDecision:
     if cap_name not in policy.grants(action_request["proposed_by"]):
         return deny(f"CAPABILITY_NOT_HELD:{action_request['proposed_by']} lacks {cap_name}")
     ra = policy.data["recommendation_actions"]
-    if cap_name.startswith(ra["comms_namespace"]):   # a binding offer must never ride a comms.* capability
+    if cap_name.startswith((ra["comms_namespace"], ra["publish_namespace"])):   # a binding offer never rides comms.*/publish.*
         keys = {str(k).lower() for k in _payload_keys(action_request.get("payload"))}
         hit = sorted(keys & {k.lower() for k in ra["binding_payload_keys"]})
         if hit:
-            return deny(f"BINDING_UNDER_COMMS:{','.join(hit)} (use offer.<channel>.send / .counter)")
+            return deny(f"BINDING_UNDER_{'COMMS' if cap_name.startswith(ra['comms_namespace']) else 'PUBLISH'}:{','.join(hit)} "
+                        "(use offer.<channel>.send / .counter)")
     cat = policy.category(category)
     if cat is None:
         return deny(f"UNKNOWN_CATEGORY:{category}")

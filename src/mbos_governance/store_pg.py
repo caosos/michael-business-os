@@ -147,9 +147,12 @@ class PgGovernanceStore:
     @staticmethod
     def stuck_claims(cur, older_than_seconds: int) -> list[str]:
         """Execution claims still `executing` longer than the TTL (DB clock: claimed_at is DB time)."""
+        # A request still `executing` whose claim is `executing` (crash before/at the send) OR `executed`
+        # (crash after the send, before the outcome receipts) is stuck.
         return [r["action_request_id"] for r in cur.execute(
-            "SELECT action_request_id FROM mbos.effector_calls WHERE state = 'executing' "
-            "AND claimed_at < now() - make_interval(secs => %s) ORDER BY claimed_at", (older_than_seconds,))]
+            "SELECT c.action_request_id FROM mbos.effector_calls c JOIN mbos.action_requests a USING (action_request_id) "
+            "WHERE a.status = 'executing' AND c.claimed_at < now() - make_interval(secs => %s) ORDER BY c.claimed_at",
+            (older_than_seconds,))]
 
     @staticmethod
     def effector_finish(cur, action_request_id: str, state: str, provider: str | None, msg_id: str | None,
@@ -197,6 +200,25 @@ class PgGovernanceStore:
                   key: str) -> str:
         return cur.execute("SELECT mbos.panic_set(%s,%s,%s,%s,%s,%s,%s) AS id",
                            (level, target, engage, J(actor), reason, prov, key)).fetchone()["id"]
+
+
+class DurableProviderLedger:
+    """The simulated provider's delivery log = lane D's mbos.effector_calls (R22). `record_sent` is the
+    provider's own durable write (its own committed transaction, before success is reported); `lookup`
+    answers "did the call land?" from that row. Only a row in state `executed` is proof of a send."""
+
+    def __init__(self, store: "PgGovernanceStore"):
+        self.store = store
+
+    def record_sent(self, action_request_id: str, response: dict) -> None:
+        with self.store.tx("gateway") as cur:
+            self.store.effector_finish(cur, action_request_id, "executed", response.get("provider"),
+                                       response.get("provider_msg_id"), response)
+
+    def lookup(self, action_request_id: str) -> dict | None:
+        with self.store.tx("gateway") as cur:
+            row = self.store.claim_state(cur, action_request_id)
+        return row["response"] if row and row["state"] == "executed" and row["response"] else None
 
 
 class PgPanicStore:

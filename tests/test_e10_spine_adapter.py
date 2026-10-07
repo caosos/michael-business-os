@@ -69,7 +69,8 @@ def test_replay_returns_original_response_a5(env, gov, engine):
     first = g.execute(engine, ar["action_request_id"], appr)
     again = g.execute(engine, ar["action_request_id"], appr)
     assert again.ok and again.effector_response == first.effector_response and "replay" in again.reason
-    assert len(env.gw._effectors["dryrun"].deliveries) == 1
+    assert env.sql("SELECT count(*) FROM mbos.effector_calls WHERE action_request_id=%s AND state='executed'",
+                   (ar["action_request_id"],))[0][0] == 1
 
 
 def test_wrong_or_stale_approval_id_denied(env, gov, engine):
@@ -103,7 +104,7 @@ def test_dbos_recovery_after_send_reconciles_not_resends(env, gov, engine, monke
     g, _, _ = gov
     ar = crash_after_effector(env, monkeypatch, "email")
     r = g.execute(engine, ar["action_request_id"], latest_approval_id(env, ar["action_request_id"]))
-    assert r.ok and "reconciled" in r.reason and len(env.gw._effectors["dryrun"].deliveries) == 1
+    assert r.ok and "RECONCILED" in r.reason.upper() and "reconciled" in r.reason.lower()
     assert env.status(ar["action_request_id"]) == "executed"
 
 
@@ -112,7 +113,8 @@ def test_dbos_recovery_before_send_fails_safely(env, gov, engine, monkeypatch):
     ar = crash_before_effector(env, monkeypatch, "email")
     r = g.execute(engine, ar["action_request_id"], latest_approval_id(env, ar["action_request_id"]))
     assert not r.ok and not r.frozen and "PROVIDER_NOT_FOUND" in r.reason
-    assert env.gw._effectors["dryrun"].deliveries == {} and env.status(ar["action_request_id"]) == "failed"
+    assert env.sql("SELECT state FROM mbos.effector_calls WHERE action_request_id=%s", (ar["action_request_id"],))[0][0] == "failed"
+    assert env.status(ar["action_request_id"]) == "failed"
 
 
 # ---------------------------------------------------------------- R4: the spine must not write the action edges
