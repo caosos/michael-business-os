@@ -17,14 +17,14 @@ src/mbos_economics/
   comps.py       sold-comps aggregation (trimmed median, p25/p75)
   learn.py       Brier, MAPE, prior shrink, config-bump *proposal* (never self-activates)
   estimate.py    C-01 RESEARCH/estimate producer: Item (as discovered) + research bundle -> Item.economics
-tests/                             75 tests: worked flips/services, AT-1..21, C22/C23, contracts, determinism
+tests/                             94 tests: worked flips/services, AT-1..21, C22/C23, contracts, determinism, C-01 estimator
 examples/*.scored.json             13 golden scored Items (regenerate with scripts/regen_examples.py)
 ```
 
 ## Use
 ```bash
 cd economics
-python3 -m unittest discover -s tests          # stdlib only; the 3 contract tests skip without jsonschema
+python3 -m unittest discover -s tests          # stdlib only; the 4 contract tests skip without jsonschema
 pip install -e '.[test]' && pytest -q          # full run, including Item v1 / Provenance conformance
 
 PYTHONPATH=src python3 -m mbos_economics score  examples/smart_home_install.scored.json --scored-at 2026-10-07T12:00:00Z

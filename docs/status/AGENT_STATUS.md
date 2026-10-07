@@ -7,18 +7,36 @@ Worktree: /home/michaelos/business-os-worktrees/agent-03-economics
 State: WORKING
 Current phase: ROUND TWO, wave two. Claimed task: RESEARCH/estimate producer (lane C)
 Started: 2026-10-06
-Last updated: 2026-10-07 (wave two: task claimed)
+Last updated: 2026-10-07 (C-01 done; C-02 claimed)
 
 ## Claimed work (wave two). Foreman loop: `docs/COORDINATION.md` @ agent-01 `99e9ec0`
-Claimed: C-01
-Done: (none in wave two yet)
-Queue (lane C, after C-01): C-02 (ADR-0010 canonical hashing, READY) → C-03 (versioned `$id`s, READY)
+Claimed: C-02
+Done: C-01 @ 42fed5e
+Queue (lane C, after C-02): C-03 (versioned `$id`s, READY)
 
 - **C-01**, the RESEARCH/estimate producer, fills `Item.economics` from normalized fields, comps evidence and category priors, with provenance per estimate. It is deterministic and does no LLM arithmetic.
   - Claimed at `b923852`; confirmed CLAIMED in READY_QUEUE @ `99e9ec0`.
   - Acceptance: an Item from 02's fixtures gets valid economics and scores past MAYBE-for-missing-inputs.
 - History: at `b923852` the queue files did not exist yet. The claim was taken from ROUND_TWO_INTEGRATION §3C/§5.5 and has since been ratified by the queue.
 - **R1–R11 acknowledged.** No objection from lane C. ADR-03-002 = ACCEPTED-WITH-CHANGES (INDEX @ `99e9ec0`).
+
+### C-01 result (DONE @ `42fed5e`; receipt `docs/receipts/2026-10-07-c01-estimate-producer.md`)
+- `estimate_item(item, bundle, as_of)` / `apply_estimate` fill `Item.economics` from structured fields, a provenance-carrying research bundle and versioned priors (`economics/config/estimation-priors.json` 2026.10.0).
+- **Acceptance met on Agent 02's real pipeline output** (`7b4d9a8`):
+  - the Conway trailer plus sold comps scores MAYBE; with evidence it scores YES (walk-away $1,234)
+  - all 4 service leads get real verdicts
+  - no-comps flips stay `insufficient`; the resale price is never guessed
+- 94 tests pass on py3.10 and py3.12.
+- **For Agent 01 (A-05):** call `estimate_item` in RESEARCHING, `apply_estimate`, then `score_item`. Persist `provenance` and `receipt_draft`. Leave the item in RESEARCHING when the status is `insufficient`, and surface `gaps` as research asks.
+
+## Proposed tasks (for Agent 01 to triage)
+- **P-03-01 (lanes B + C): sold-comps feed.** Every real flip from eBay Browse (active listings only) stays `insufficient` until a sold-comps source exists. Options for 02:
+  - eBay Marketplace Insights (restricted access)
+  - completed-auction feeds from GSA and other auction sites (B-03)
+  - manual comps entry through the Operator UI, with provenance
+
+  03 already consumes `bundle.comps[]` with `kind: sold|asking`.
+- **P-03-02 (lanes A + C): routing of prior-only PASS.** A PASS that rests only on category priors (no evidence) archives a lead that was never researched. Option: route a PASS whose `evidence_search` shows evidence could lift it to MAYBE/RESEARCH. This is a routing choice for Agent 01, not an engine change.
 
 ## Current objective
 Deliver the deterministic, replayable economics and scoring engine for both lanes (FLIPS + SERVICES), built against the frozen contracts v1.0.0 (ADR-0004) and the ADR-03-001 binding changes. **Done.** Next: integration with lane A (01) and lane D (04).
@@ -93,6 +111,7 @@ Deliver the deterministic, replayable economics and scoring engine for both lane
 None.
 
 ## Needs Michael decision
+- **Service pricing policy (new, not blocking):** the hourly quote rate (placeholder $85/h, all-in) and the minimum job charge (placeholder $125). These are in `estimation-priors.json` as UNK.
 - MICHAEL_DECISIONS #1 (cash per deal / total) and #2 ($/h floor / targets). They are not blocking: defaults are in config and a change is a version bump, not code.
 
 ## Needs coordinator review
