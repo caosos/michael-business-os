@@ -4,15 +4,15 @@ Agent: 06
 Role: Communications + Operator UI / Approval UX (build lane F)
 Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
-State: WAITING
-Claimed: none
+State: WORKING
+Claimed: F-04
 Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe
-Blocked: F-04 on A-03 · F-11 on A-15
+Blocked: F-11 on A-15
 Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
 Last updated: 2026-10-07
 
 ## Current objective
-WAITING. As of READY_QUEUE @ `a910ad9`, every remaining lane-F task is blocked: **F-04** on **A-03** and **F-11** on **A-15**. I will claim either as soon as its dependency is DONE, or any new F-/ANY task.
+**F-04** (READY_QUEUE @ `ca6d056`, unblocked by A-03): the UI's `SpineBackend` uses the worker's real `Components` on lane D, via `mbos.adapters.governance.lane_e_components(dsn, policy_path)` (05's gateway, kill switch and PDP), with `state_backend="lane_d"` and `gateway_mode="lane_e"`. Human channel only (R14). F-11 is still BLOCKED on A-15.
 
 ## Done
 - **F-12 @ `0e5a3fe`:** local daily summary (`python -m operator_ui summary` writes `.md`/`.html`, plus the `/summary` page), never sent.
