@@ -5,7 +5,7 @@ Role: Postgres / State / Receipts (lane D: durable business state, receipts, pro
 Branch: research/agent-04-state
 Worktree: /home/michaelos/business-os-worktrees/agent-04-state
 State: WORKING
-Claimed: D-13
+Claimed: D-11
 Done: D-01 @ a0d1fbe
 Done: D-02 @ a0d1fbe
 Done: D-03 @ ca59e3c
@@ -14,13 +14,21 @@ Done: D-04 @ 14bd690
 Done: D-06 @ 012c141
 Done: D-07 @ 215a861
 Done: D-08 @ d668386
+Done: D-13 @ ffb9e24
 Blocked: D-10 (final acceptance) on A-01 phase 2. The DDL is delivered @ 6533334.
 Current phase: ROUND TWO: foreman loop (READY_QUEUE)
 Started: 2026-10-06
-Last updated: 2026-10-07 (claimed D-13: review of 01's lane-D backend @ 8c3e4fd)
+Last updated: 2026-10-07 (D-13 done @ ffb9e24; D-11 claimed)
 
 ## Current objective
-**D-13 (P1, critical-path support):** review Agent 01's lane-D backend at `research/agent-01-coordinator @ 8c3e4fd` (read-only) for misuse of the lane-D API. Files: `src/mbos/spine_d.py`, `src/mbos/reference/governance_lane_d.py`, `tests/helpers/lane_d.py`. Also look into why the lane-D e2e times out. Findings go here and to Agent 01; their branch is not edited.
+**D-11 (P2):** `caps.velocity_actions_per_hour` in `budget_reserve_caps`, requested by Agent 05.
+
+D-13 is done @ `ffb9e24`. The full report is in `docs/receipts/2026-10-07-d13-review-01-lane-d-backend.md`.
+- **Why 01's lane-D e2e times out:**
+  - `tests/helpers/common.py::pending_request` (and the receipts helper) select the reference-DDL `body` column.
+  - The runner then hangs because DBOS threads outlive the exception.
+- **Proof:** with both fixed in a scratch copy, the e2e passes in 2.2 s with every asserted value met, also as the real `mbos_dbos` login.
+- **MODIFY FK bug** is fixed lane-side by migration 0012.
 
 ### Interface notes for Agent 05 (E-02) and Agent 01 (A-01/A-03)
 - **PANIC:**
@@ -39,7 +47,7 @@ Last updated: 2026-10-07 (claimed D-13: review of 01's lane-D backend @ 8c3e4fd)
 ## Proposed tasks (for Agent 01 to triage into READY_QUEUE)
 | Proposed ID | Pri | Task | Deps | Acceptance |
 |---|---|---|---|---|
-| D-11 | P2 | `caps.velocity_actions_per_hour` in `budget_reserve_caps`: a count of unreleased bucket reservations in the last hour, zero-amount rows included. Requested by 05 after E-02, so lane E's 3-money-actions/h rule lives in one place | none | 05 switches from its own count; a parallel test never exceeds N actions/h |
+| (queued as D-11) | P2 | `caps.velocity_actions_per_hour` in `budget_reserve_caps`: a count of unreleased bucket reservations in the last hour, zero-amount rows included. Requested by 05 after E-02, so lane E's 3-money-actions/h rule lives in one place | none | 05 switches from its own count; a parallel test never exceeds N actions/h |
 | D-12 | P2 | Contract v1.1.0 (ADR-0009) DDL follow-up: ITEM_UPDATED, ACTION_EXPIRED, GUARD_REFUSED, `superseded` | ADR-0009 accepted | Migration + tests; old receipts still verify |
 
 ## Answers requested by Agent 01 (ROUND_TWO_INTEGRATION §3 D, READY_QUEUE D-01)
