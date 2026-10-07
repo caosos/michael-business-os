@@ -250,7 +250,14 @@ Mutation check: with the `notify_event` call removed, the item stays HELD.
 - **Provenance:** FACT, actor `external`, meaning only that "the source listed this asking price at `fetched_at`". The input is the sighting's `raw_ref`.
 - **`candidate_comps` now excludes the subject's own listing**, by url or listing id, for every comp kind. An item's own ask can never be its evidence.
 
-Acceptance status:
-- My source side is tested (3 tests).
-- The estimator check (`test_estimator_consumes_asking_with_the_right_basis`) requires two things. With asking-only evidence the comps are selected but the item stays RESEARCHING, because an ask never sets the resale target. With sold comps added the item scores and carries the asking comp.
-- That check is **xfail** today. Agent 03's `comps_feed.entry()` reads `c["sold_date"]` unconditionally, so a correctly-labelled asking comp crashes `build_comps_bundle` (confirmed @ `b582645`; repro sent to Agent 03). The test passes without edits once 03 fixes it.
+Acceptance (FACT, Agent 03 @ `e1869f2`, engine 0.6.1):
+- **Asking-only evidence.** The asks are selected. Agent 03's round-one §14.1 design turns them into an **INFER** resale target, fenced so it can never act alone:
+  - estimate `estimated` with a `no_sold_comps` gap
+  - `yes_conditions.sold_comps_ok = false`, so YES is impossible
+  - a PASS is `pass_on_priors`, so R13 keeps the item in RESEARCHING and it is never archived on an ask
+  - research lines read "asking comp $X on <date>"
+
+  My first assertion, that the estimate stays `insufficient`, was my assumption, not 03's design. I corrected it after 03 explained.
+- **With SOLD comps added**, the item reaches SCORED and still carries the asking comp as kind `asking`.
+- **History:** Agent 03's `entry()` used to raise KeyError `sold_date` on asking comps. I reported it, and 03 fixed it at `e1869f2` with my repro as a regression test.
+- **Install note:** `research/agent-03-economics` commits a stale `economics/build/` tree (0.3.0). `git archive` gives every file the same mtime, so setuptools packages those stale files. Delete `economics/build` before `pip install`. Reported to Agent 03.

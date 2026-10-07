@@ -93,10 +93,18 @@ def test_estimator_consumes_asking_with_the_right_basis(world):
     asking, asking_prov = asking_comps_from_items(items)
     cands = candidate_comps(subject, asking, T0)
 
-    # 1. asking-only evidence: selected as ASKING, but never becomes a resale target → stays RESEARCHING
+    # 1. asking-only evidence (Agent 03 round-one §14.1, confirmed @ e1869f2): asks give only an INFER resale
+    #    target, fenced so it can never act on its own — no YES without >= 3 SOLD comps, and a PASS is
+    #    `pass_on_priors` (R13 keeps it in RESEARCHING; never archived on an ask).
     out = _research(feed, subject, cands, asking_prov)
     assert out["comps"]["selected"] == [c["provenance_id"] for c in cands]
-    assert out["proposed_next_state"] == "RESEARCHING" and out["estimate"]["status"] != "estimated"
+    assert out["estimate"]["status"] == "estimated"
+    assert "no_sold_comps" in [g["code"] for g in out["estimate"]["gaps"]]
+    sc = out["item"]["scores"]["scorecard"]
+    assert sc["decision"] != "YES" and sc["yes_conditions"]["sold_comps_ok"] is False
+    if sc["decision"] == "PASS":
+        assert sc["pass_on_priors"] is True
+    assert any("asking comp" in r["finding"] for r in out["item"].get("research", []))   # labelled as an ask
 
     # 2. with SOLD comps as well, the item scores; the asking comp is carried as kind "asking"
     store = CompsStore()
