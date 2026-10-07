@@ -92,16 +92,20 @@ def _compile(entries: Any, kind: str) -> tuple[Rule, ...]:
     return tuple(out)
 
 
-def load_rules(path: str | os.PathLike) -> ContentRules:
-    try:
-        data = json.loads(Path(path).read_text("utf-8"))
-    except Exception as exc:  # noqa: BLE001
-        raise ContentRulesUnavailable(f"cannot read content rules: {exc}") from exc
+def rules_from_data(data: Any) -> ContentRules:
     if not isinstance(data, dict) or data.get("rules_schema") != RULES_SCHEMA or not data.get("version"):
         raise ContentRulesUnavailable("content rules: wrong schema or missing version")
     digest = sha256_tagged(canonical_json(data)).split(":", 1)[1][:16]
     return ContentRules(f"{data['version']}+{digest}", _compile(data.get("secret_rules"), "secret_rules"),
                         _compile(data.get("injection_rules"), "injection_rules"))
+
+
+def load_rules(path: str | os.PathLike) -> ContentRules:
+    try:
+        data = json.loads(Path(path).read_text("utf-8"))
+    except Exception as exc:  # noqa: BLE001
+        raise ContentRulesUnavailable(f"cannot read content rules: {exc}") from exc
+    return rules_from_data(data)
 
 
 class ContentRulesStore:

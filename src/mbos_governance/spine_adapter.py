@@ -131,9 +131,15 @@ class Governance:
     pdp: SpinePDP
 
 
-def build(dsns: str | dict[str, str], policy_path: str, *, panic_hooks: list | None = None, **gateway_kw: Any) -> Governance:
-    policies = PolicyStore(policy_path)
+def build(dsns: str | dict[str, str], policy_path: str | None = None, *, panic_hooks: list | None = None,
+          **gateway_kw: Any) -> Governance:
+    """policy_path=None (production, E-06): the PDP reads lane D's mbos.policy_current; a file path is for dev/tests."""
     store = PgGovernanceStore(dsns)
     gateway_dsn = dsns if isinstance(dsns, str) else dsns["gateway"]
+    if policy_path is None:
+        from .policy_pg import PgPolicyStore
+        policies: Any = PgPolicyStore(gateway_dsn)
+    else:
+        policies = PolicyStore(policy_path)
     gw = ActionGateway(store, policies, PgPanicStore(gateway_dsn), panic_hooks=panic_hooks, **gateway_kw)
     return Governance(gw, SpineGateway(gw), SpineKillSwitch(policies), SpinePDP(policies))

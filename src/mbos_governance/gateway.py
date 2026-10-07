@@ -96,7 +96,10 @@ class ActionGateway:
         self._journal = Path(journal_path) if journal_path else Path("var/panic.journal.jsonl")
         self.panic_hooks = list(panic_hooks or [])  # hooks.py: DBOS cancel, egress, LiteLLM (E-03)
         # E-04: secret scan + injection tripwire rules (data). Default: next to the policy file.
-        self.content_rules = content_rules or ContentRulesStore(Path(policy_store.path).with_name("content_rules.v1.json"))
+        if content_rules is None:  # rules travel with the policy: DB store (E-06) or the file next to policy.v1.json
+            content_rules = (policy_store.content_rules_store() if hasattr(policy_store, "content_rules_store")
+                             else ContentRulesStore(Path(policy_store.path).with_name("content_rules.v1.json")))
+        self.content_rules = content_rules
 
     # ------------------------------------------------------------------ helpers
     def _policy(self) -> tuple[Policy | None, str | None]:

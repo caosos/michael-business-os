@@ -3,7 +3,8 @@
   mbos-gov panic status
   mbos-gov panic freeze  --level L3|L2|L1 [--target X] --actor A --reason "..."     (role gateway)
   mbos-gov panic release --level L3|L2|L1 [--target X] --actor michael --reason "..." (role approver)
-  mbos-gov policy check
+  mbos-gov policy check                          (file, or the running DB policy with MBOS_POLICY_SOURCE=db)
+  mbos-gov policy publish --actor michael        (E-06: file -> lane D mbos.policy, receipted; role policy_admin)
   mbos-gov ledger verify
   mbos-gov render egress|litellm [--out FILE]   (generators; stdout if no --out; no network)
   mbos-gov freeze-requests apply FILE.jsonl     (B-04: apply lane B's side-channel freeze requests)
@@ -48,7 +49,9 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--target")
     p.add_argument("--actor", default=os.environ.get("USER", "unknown"))
     p.add_argument("--reason", default="")
-    sub.add_parser("policy").add_argument("action", choices=["check"])
+    pp = sub.add_parser("policy")
+    pp.add_argument("action", choices=["check", "publish"])
+    pp.add_argument("--actor", default=os.environ.get("USER", "unknown"))
     sub.add_parser("ledger").add_argument("action", choices=["verify"])
     r = sub.add_parser("render")
     r.add_argument("what", choices=["egress", "litellm"])
@@ -61,9 +64,23 @@ def main(argv: list[str] | None = None) -> int:
     a = ap.parse_args(argv)
     policy_path = a.policy or os.environ.get("MBOS_POLICY", "policy/policy.v1.json")
 
+    db_policy = os.environ.get("MBOS_POLICY_SOURCE", "file") == "db"
+    if a.cmd == "policy" and a.action == "publish":
+        from .policy_pg import publish
+        try:
+            out = publish(dsns(a.dsn)["policy_admin"], policy_path, Path(policy_path).with_name("content_rules.v1.json"), a.actor)
+        except Exception as exc:  # noqa: BLE001
+            print(f"refused: {exc}", file=sys.stderr)
+            return 1
+        print(json.dumps(out, indent=2))
+        return 0
     if a.cmd == "policy":
         try:
-            pol = PolicyStore(policy_path).current()
+            if db_policy:
+                from .policy_pg import PgPolicyStore
+                pol = PgPolicyStore(dsns(a.dsn)["gateway"]).current()
+            else:
+                pol = PolicyStore(policy_path).current()
         except PolicyUnavailable as exc:
             print(f"POLICY UNREADABLE — gateway will deny everything: {exc}", file=sys.stderr)
             return 1
@@ -80,7 +97,11 @@ def main(argv: list[str] | None = None) -> int:
         return 2 if st.globally_frozen else 0
     if a.cmd == "render":
         try:
-            data = PolicyStore(policy_path).current().data
+            if db_policy:
+                from .policy_pg import PgPolicyStore
+                data = PgPolicyStore(roles["gateway"]).current().data
+            else:
+                data = PolicyStore(policy_path).current().data
         except PolicyUnavailable:
             data = None  # renders the frozen form
         doc = (render_egress if a.what == "egress" else render_litellm_keys)(data, panic.read())
@@ -95,7 +116,11 @@ def main(argv: list[str] | None = None) -> int:
         ok, msg = store.verify_chain()
         print(msg)
         return 0 if ok else 1
-    ps = PolicyStore(policy_path)
+    if db_policy:
+        from .policy_pg import PgPolicyStore
+        ps = PgPolicyStore(roles["gateway"])
+    else:
+        ps = PolicyStore(policy_path)
     hooks = [EgressPolicyHook(os.environ.get("MBOS_EGRESS_FILE", "var/egress_policy.json"), ps),
              LiteLLMBudgetHook(os.environ.get("MBOS_LITELLM_FILE", "var/litellm_keys.json"), ps)]
     gw = ActionGateway(store, ps, panic, panic_hooks=hooks)

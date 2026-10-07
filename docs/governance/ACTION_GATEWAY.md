@@ -1,7 +1,7 @@
 # Action Gateway: wave one implementation guide
 
 **Owner:** Agent 05 · **Status:** implemented, wave one · **Date:** 2026-10-07
-**Code:** `src/mbos_governance/` · **Policy data:** `policy/` · **Tests:** `tests/` (233 passing, on PostgreSQL 16)
+**Code:** `src/mbos_governance/` · **Policy data:** `policy/` · **Tests:** `tests/` (247 passing, on PostgreSQL 16)
 
 > Core law: no action without a receipt, and no receipt without provenance.
 > Governance rule: models may PROPOSE. Non-LLM policy code AUTHORIZES.
@@ -100,6 +100,19 @@ mbos-gov policy check
 - **Still not done:** OpenBao lease revocation (no OpenBao yet), the actual proxy and LiteLLM processes, and B29 against a live proxy.
 
 ## 5. Policy as data
+
+**Production source (E-06): lane D's `mbos.policy` / `policy_current`.**
+- `mbos-gov policy publish --actor michael` (role `policy_admin`) validates `policy/policy.v1.json` and `content_rules.v1.json`, then publishes the changed keys in **one** transaction through `mbos.publish_policy`. Each published key gets a `CONFIG_VERSION_BUMPED` receipt.
+  - `governance:policy/1` holds the full document. `governance:content_rules/1` holds the content rules.
+  - Each category and capability gets its own row, so lane D's own constraints apply. For example, money can never be `allow`.
+- **Reads fail closed.** `PgPolicyStore` reads the document and validates it against the schema **pinned in the installed code**, and the per-key rows must agree with the document. The policy is unavailable, and the gateway denies everything, if:
+  - no policy has been published
+  - the database errors
+  - the document is tampered with or loosened
+  - a per-key row has drifted from the document
+- **`spine_adapter.build(dsns)`** defaults to the database policy.
+- **The file below** stays the reviewed source in git, and dev/test runs can use it directly.
+
 
 `policy/policy.v1.json` (`version 2026.10.07-w1`) holds the 11-category × tier × threshold matrix, the capability → category → effector map, the agent grants, quiet hours, live and shadow budgets, the money velocity cap, and the LLM-spend caps (which LiteLLM will enforce). `policy/policy.schema.json` validates the file and pins the wave-one invariants. The PDP re-reads the file whenever it changes, and every decision records `policy_version = <version>+<content hash>`. If a reload fails, the PDP refuses. It never falls back to a stale policy.
 

@@ -92,14 +92,17 @@ def _cross_check(data: dict) -> list[str]:
     return problems
 
 
-def load_policy(path: str | os.PathLike, schema_path: str | os.PathLike | None = None) -> Policy:
-    path = Path(path)
-    schema_path = Path(schema_path) if schema_path else path.with_name("policy.schema.json")
-    try:
-        data = json.loads(path.read_text("utf-8"))
-        schema = json.loads(schema_path.read_text("utf-8"))
-    except Exception as exc:  # noqa: BLE001
-        raise PolicyUnavailable(f"cannot read policy: {exc}") from exc
+def packaged_schema() -> dict:
+    """The wave-one policy schema pinned IN CODE (schemas/policy.schema.json == policy/policy.schema.json,
+    test-enforced). Used for policy read from the database, so a DB edit can never ship a looser schema."""
+    from importlib import resources
+    return json.loads(resources.files("mbos_governance.schemas").joinpath("policy.schema.json").read_text("utf-8"))
+
+
+def policy_from_data(data: Any, schema: dict, source: str) -> Policy:
+    """Validate a policy document (schema + cross-checks). Raises PolicyUnavailable on any problem."""
+    if not isinstance(data, dict):
+        raise PolicyUnavailable("policy document is not an object")
     errs = [f"{'/'.join(map(str, e.absolute_path)) or '$'}: {e.message[:160]}"
             for e in Draft202012Validator(schema).iter_errors(data)]
     if errs:
@@ -108,7 +111,18 @@ def load_policy(path: str | os.PathLike, schema_path: str | os.PathLike | None =
     if problems:
         raise PolicyUnavailable("policy cross-check failed: " + "; ".join(problems))
     digest = sha256_tagged(canonical_json(data)).split(":", 1)[1][:16]
-    return Policy(data=data, version=f"{data['version']}+{digest}", source=str(path))
+    return Policy(data=data, version=f"{data['version']}+{digest}", source=source)
+
+
+def load_policy(path: str | os.PathLike, schema_path: str | os.PathLike | None = None) -> Policy:
+    path = Path(path)
+    schema_path = Path(schema_path) if schema_path else path.with_name("policy.schema.json")
+    try:
+        data = json.loads(path.read_text("utf-8"))
+        schema = json.loads(schema_path.read_text("utf-8"))
+    except Exception as exc:  # noqa: BLE001
+        raise PolicyUnavailable(f"cannot read policy: {exc}") from exc
+    return policy_from_data(data, schema, str(path))
 
 
 class PolicyStore:
