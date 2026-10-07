@@ -11,7 +11,7 @@
 | **03** Economics | **C-04** sold-comps feed (assigned 13:00) | `research/agent-03-economics` @ `bed14c2` | 13:00 | none | C-01, C-02, C-03 | C-05 |
 | **04** State | **D-05** (P0, small) remove the 4 accommodated edges, then **D-03** | `research/agent-04-state` @ `2b8fe3d` | 13:00 | none | D-01, D-02, D-04 | D-03 |
 | **05** Governance | **E-02** Postgres GovernanceStore + PANIC on 0005 (critical path; switch from E-04) | `research/agent-05-governance` @ `b632583` | 13:00 | none (D-01/D-02 DONE) | E-01, E-03 | E-04, E-05 |
-| **06** Operator UI | **F-03** comms dry-run spec as data | `research/agent-06-communications` @ `cb787dd` | ~12:38 | none | F-01, F-02 | F-04 after A-03 |
+| **06** Operator UI / Comms | **F-05** comms ActionPlanner (assigned 13:05) | `research/agent-06-communications` @ `9d54288` | 13:05 | none | F-01, F-02, F-03 | F-06, then F-04 after A-03 |
 | **07** QA | **G-02** QA suite on the real spine | `research/agent-07-marketing` @ `332c26c` | ~12:48 | none | G-01 | G-03 |
 
 **Idle agents:** none.

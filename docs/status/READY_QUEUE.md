@@ -25,6 +25,7 @@
 | A-08 | P2 | `_approval_gate` acts on `wake_on` = `new_info` / `price_change` / `auction_ending` via a message kind sent by lanes B/C (06 P-06-2) | none | READY | 01 | Test: a HOLD with `wake_on=price_change` wakes on a price-change message, never executes |
 | A-09 | P1 | Ruling R12: the Item edge table is lane D's (every item passes RESEARCHING; a YES on HELD re-presents first; LEARNED is terminal; follow-up edge ACTED→AWAITING_APPROVAL). The spine is aligned (migration 0004) | none | **DONE** (this push) | 01 | Parity test against 04's live DB passes |
 | A-12 | P2 | R13 routing: PASS with `pass_on_priors` → RESEARCHING, not ARCHIVED | C-05 | BLOCKED | 01 | Test with 03's flag |
+| A-13 | P2 | Wire 06's `CommsActionPlanner` (F-05) and comms dry-run `Effector` (F-06) into `Components`; behind 05's gateway once A-03 lands | F-05, F-06 | BLOCKED | 01 | End-to-end dry-run comms receipts graded by 06's audit |
 | A-10 | P1 | Ship the contracts as package data so a non-editable install works without `MBOS_CONTRACTS_DIR` (07 P-07-1/F-16) | none | READY | 01 | `pip install .` into a clean venv; the suite passes with no env var |
 | A-11 | P1 | ADR-0010 interop: `tools/interop_check.py` covers vectors, rejections and vendored-copy byte identity | none | **DONE** (this push) | 01 | All 6 Python lanes CONFORM (12:50) |
 | A-06 | P2 | ADR-0009 v1.1.0: collect lane acknowledgements, then decide | lane acks | READY | 01 | ADR-0009 ACCEPTED or amended; vectors and examples regenerated |
@@ -72,7 +73,10 @@
 | F-01 | P1 | R10: Operator UI on `spine.pending_decisions` / `spine.decide(channel="web", new_payload=…, hold=…, auth_context={"step_up":…})` + `notify_decision`; drop the UI gateway, ticker and SQLite store | none | **DONE** @ `190bb9b` | 06 | A YES/NO/MODIFY/HOLD web flow against 01's spine on Postgres (pgserver) |
 | F-02 | P1 | ADR-0010: `util.canonical_json` → reference; stand-in `row_hash` → MBOS-RH-1 | none | **DONE** @ `fc31896` | 06 | interop row 06 = 10/10 |
 | F-04 | P2 | P-06-3: the UI's `SpineBackend` uses the worker's real `Components` (05 PDP) | A-03 | BLOCKED | 06 | UI decisions use the real PDP |
-| F-03 | P2 | Comms dry-run spec items (1)(3)(4)(6) from 06's status: templates registry, rate/consent rules as data | none | **CLAIMED** | 06 | Data files + tests; no sends |
+| F-03 | P2 | Comms dry-run spec items (1)(3)(4)(6) from 06's status: templates registry, rate/consent rules as data | none | **DONE** @ `cb787dd` | 06 | Data files + tests; no sends |
+
+| F-05 | P1 | P-06-4: `CommsActionPlanner` implementing `mbos.interfaces.ActionPlanner` from the comms_spec template registry. The payload carries `template_id`, `template_hash` (MBOS-CJSON-1) and the rendered draft; action constraints (window, consent prerequisites) go in the payload | none | READY | 06 | Contract-valid proposals for 1 flip + 1 service fixture; 01 wires it into `Components` (A-13) |
+| F-06 | P1 | P-06-5: dry-run comms `Effector` implementing `mbos.interfaces.Effector`: exactly-once per idempotency key; `effector_response.dry_run=true`; `details.kind=comms` carries consent/DNC/window/disclosure check results; `audit(receipts)` grades E1–E7. No network imports | none | READY | 06 | E1–E7 graded on a spine run; A7 still zero exceptions |
 
 ### Lane G: Agent 07 (QA)
 | ID | Pri | Task | Deps | Status | Agent | Acceptance |
