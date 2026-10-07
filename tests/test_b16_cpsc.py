@@ -39,7 +39,9 @@ def test_fixture_run_entries_review_and_provenance(world):
     reasons = {r["recall_id"]: r["reason"] for r in rep.review}
     assert "no discrete model" in reasons["99002"]                          # empty Model → review, not an entry
     assert "no named make" in reasons["99003"]                              # no manufacturer/importer
-    assert "elementary advice" in reasons["99011"]                          # injected / elementary text refused
+    assert "elementary-advice wording; needs a human glance" in reasons["99011"]   # surfaced, not silently dropped
+    cand = next(r for r in rep.review if r["recall_id"] == "99011")["candidate_entry"]
+    assert cand["match"][0]["models"] == ["HG9000"]                          # the withheld entry is attached for review
     assert "out of scope" in reasons["7938"]                                # the guide's stroller example
     for rec in rep.records.values():
         assert raw.exists(rec["raw_ref"]) and rec["url"].startswith("https://www.cpsc.gov/")
@@ -73,6 +75,9 @@ def test_model_token_extraction_is_conservative():
     assert model_tokens("ZT5000, ZT5200-E; ZT6000 and ZT6200") == ["ZT5000", "ZT5200-E", "ZT6000", "ZT6200"]
     assert model_tokens("") == [] and model_tokens("various models sold nationwide") == []
     assert model_tokens("model 12") == []                                   # too short, no named model
+    assert model_tokens("Model 17AWCBYS010 and 17AWCBYZ010") == ["17AWCBYS010", "17AWCBYZ010"]   # label word stripped
+    assert model_tokens("Models: GP3600, Model No. GP4000DF; #GP6500E") == ["GP3600", "GP4000DF", "GP6500E"]
+    assert model_tokens("6500, 8000") == [] and model_tokens("2018") == []   # wattage/year-like: not a model
     assert model_tokens("GP6500 GP6500") == ["GP6500"] or model_tokens("GP6500, GP6500") == ["GP6500"]
 
 
@@ -136,3 +141,35 @@ def test_entries_pass_agent_03_loader_and_match_listings(world, tmp_path):
     import mbos.card as card
     for e in rep.entries:
         assert card.elementary_advice(e["risk"]) == [] if hasattr(card, "elementary_advice") else True
+
+
+def _rec(model, units="About 100"):
+    return {"recall_id": "1", "recall_number": "26-1", "recall_date": "2026-01-01", "title": "Northgate Recalls Generators",
+            "url": "https://www.cpsc.gov/Recalls/FIXTURE/x", "last_publish_date": None,
+            "products": [{"name": "Northgate generators", "model": model, "units": units}], "manufacturers": ["Northgate Power Inc."],
+            "importers": [], "hazards": ["The unit can leak fuel."], "remedies": ["Contact Northgate."], "remedy_options": []}
+
+
+REF = {"fetched_at": "2026-10-07T12:00:00Z", "raw_ref": "sha256:" + "a" * 64, "provenance_id": "prov_" + "0" * 26}
+
+
+def test_numeric_only_models_go_to_review_with_the_reason():
+    for text in ("6500, 8000", "2018", "6500 watt"):
+        entries, reason, cand = to_kb_entries(_rec(text), REF)
+        assert entries == [] and cand is None and "purely numeric" in reason, text
+    entries, reason, _ = to_kb_entries(_rec("NG6500, 8000"), REF)            # numeric token dropped, model kept
+    assert entries and entries[0]["match"][0]["models"] == ["NG6500"] and reason is None
+
+
+def test_label_word_does_not_drop_the_first_model():
+    entries, _, _ = to_kb_entries(_rec("Model 17AWCBYS010 and 17AWCBYZ010"), REF)
+    assert entries[0]["match"][0]["models"] == ["17AWCBYS010", "17AWCBYZ010"]
+
+
+def test_long_text_is_cut_at_a_word_boundary():
+    rec = _rec("NG3500i")
+    rec["hazards"] = ["The generator can emit carbon monoxide. " * 20]
+    (e,), _, _ = to_kb_entries(rec, REF)
+    hazard = e["risk"].split("Hazard as stated by CPSC: ")[1].split(" Listed models")[0]
+    assert hazard.endswith("…") and not hazard[:-1].endswith(" ") and len(hazard) <= 301
+    assert hazard[:-1].split(" ")[-1] in {"monoxide.", "carbon", "emit", "can", "generator", "The"}   # whole words only

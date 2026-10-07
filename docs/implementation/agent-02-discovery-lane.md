@@ -438,3 +438,10 @@ Verified (FACT). `tests/test_b15_enrichment.py` has 13 tests. On the real `mbos.
 - Coverage depends on CPSC filling `Model` and `Manufacturers`.
 - A make's first word may be a broad brand; the model-number requirement is the real gate.
 - NHTSA (vehicles) is the next adapter in 03's plan.
+
+**B-16 review fixes (Agent 03's review).**
+- **False negative fixed.** A leading label such as "Model", "Model No." or "#" is now stripped before the model test. `"Model 17AWCBYS010 and 17AWCBYZ010"` yields both models; before the fix it silently kept only the second.
+- **False positive fixed.** Purely numeric tokens ("6500", "2018") are wattage- or year-like, not models, and are dropped. A recall whose Model text has only such tokens goes to the review list with the reason. Agent 03's `load_kb` (0.10.1) now refuses such tokens, so one weak recall can't stop a whole KB file from loading.
+- **Elementary-advice lint.** A recall whose own CPSC wording trips the lint is no longer silently dropped. It goes to the review list as "needs a human glance" with the withheld `candidate_entry` attached.
+- **Truncation.** Quoted hazard and remedy text is cut at a word boundary and ends with "…".
+- **R23 (Agent 01).** Complete entries are admitted automatically; review-list entries stay out of the KB until a human reviews them with provenance. The converter already behaves this way.

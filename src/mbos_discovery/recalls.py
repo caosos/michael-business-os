@@ -130,45 +130,76 @@ def make_tokens(company: str) -> list[str]:
     return out
 
 
+_LABEL = re.compile(r"^\s*(?:model\s*(?:number|no|num|#)?s?|models|item\s*(?:number|no)s?|no|#)\b[\s.:#-]*", re.I)
+
+
+def _model_like(t: str) -> bool:
+    """A discrete model identifier: ≥ 3 chars, has a digit AND a letter or hyphen (a purely numeric token such as
+    "6500" or "2018" is a wattage/year, not a model: matching it would flag units that are not recalled)."""
+    return bool(_MODEL.match(t)) and any(c.isdigit() for c in t) and not t.isdigit()
+
+
 def model_tokens(text: str) -> list[str]:
-    """Conservative: only discrete model-number-like tokens (≥ 3 chars, at least one digit); everything else is dropped."""
+    """Conservative: only discrete model-number-like tokens. A leading label ("Model", "Model No.", "#") is stripped
+    from each part first, so "Model 17AWCBYS010 and 17AWCBYZ010" yields both. Purely numeric tokens are dropped."""
     out: list[str] = []
     for part in _SPLIT.split(text or ""):
-        t = part.strip().strip(".")
-        if _MODEL.match(t) and any(c.isdigit() for c in t) and t.upper() not in {x.upper() for x in out}:
-            out.append(t)
+        part = _LABEL.sub("", part.strip()).strip().strip(".")
+        words = [part] if " " not in part else part.split()
+        for t in words:
+            t = t.strip(".,")
+            if _model_like(t) and t.upper() not in {x.upper() for x in out}:
+                out.append(t)
     return out[:25]
+
+
+def numeric_only_model_text(text: str) -> bool:
+    """True if the Model text has candidate identifiers but every one is purely numeric / too short."""
+    parts = [_LABEL.sub("", p.strip()).strip().strip(".") for p in _SPLIT.split(text or "")]
+    parts = [w.strip(".,") for p in parts for w in (p.split() or [""]) if w.strip(".,")]
+    return bool(parts) and any(any(c.isdigit() for c in w) for w in parts) and not model_tokens(text)
+
+
+def _cut(s: str, n: int) -> str:
+    """Truncate at a word boundary (never mid-sentence fragments like 'caregiver and chi')."""
+    if len(s) <= n:
+        return s
+    cut = s[:n].rsplit(" ", 1)[0].rstrip(",;: ")
+    return cut + "…"
 
 
 def _slug(s: str) -> str:
     return re.sub(r"[^a-z0-9]+", "_", s.lower()).strip("_")[:40]
 
 
-def to_kb_entries(rec: dict, record_ref: dict) -> tuple[list[dict], Optional[str]]:
-    """(entries, review_reason). Entries only if the admission standard is met mechanically; else ([], reason)."""
+def to_kb_entries(rec: dict, record_ref: dict) -> tuple[list[dict], Optional[str], Optional[dict]]:
+    """(entries, review_reason, candidate). Entries only if the admission standard is met mechanically; else
+    ([], reason, None). `candidate` is set only for the "needs a human glance" case: the complete entry that was
+    withheld because CPSC's own wording tripped the elementary-advice lint."""
     text = " ".join([rec["title"]] + [p["name"] for p in rec["products"]])
     category, matched = classify("flip", text.lower())
     if not matched or category not in IN_SCOPE:
-        return [], "category out of scope or unrecognised from title/product names"
+        return [], "category out of scope or unrecognised from title/product names", None
     makes = sorted({t for n in rec["manufacturers"] + rec["importers"] for t in make_tokens(n)})
     if not makes:
-        return [], "no manufacturer/importer name in the record: no named make"
+        return [], "no manufacturer/importer name in the record: no named make", None
     models: list[str] = []
     for p in rec["products"]:
         models += [m for m in model_tokens(p["model"]) if m.upper() not in {x.upper() for x in models}]
     if not models:
-        return [], "no discrete model number in Product.Model (empty or free text): no named model"
+        if any(numeric_only_model_text(p["model"]) for p in rec["products"]):
+            return [], "Product.Model has only purely numeric identifiers (wattage/year-like): not a named model", None
+        return [], "no discrete model number in Product.Model (empty or free text): no named model", None
     if not rec["hazards"]:
-        return [], "no hazard statement in the record"
+        return [], "no hazard statement in the record", None
     units = next((p["units"] for p in rec["products"] if p["units"]), "")
     remedy = rec["remedies"][0] if rec["remedies"] else ""
     risk = (f"{rec['title']} (CPSC recall {rec['recall_number'] or rec['recall_id']}, {rec['recall_date']}). "
-            f"Hazard as stated by CPSC: {rec['hazards'][0][:300]} "
+            f"Hazard as stated by CPSC: {_cut(rec['hazards'][0], 300)} "
             f"Listed models: {', '.join(models)}." + (f" Units: {units}." if units else "")
-            + (f" Remedy as stated by CPSC: {remedy[:240]}" if remedy else "")
+            + (f" Remedy as stated by CPSC: {_cut(remedy, 240)}" if remedy else "")
             + " Whether the remedy was completed on this unit is UNKNOWN.")
-    if any(rx.search(risk) for rx in _ELEMENTARY):
-        return [], "text contains elementary advice"
+    glance = any(rx.search(risk) for rx in _ELEMENTARY)
     entry = {
         "id": f"cpsc_{rec['recall_number'] or rec['recall_id']}_{_slug(max(makes, key=len))}".replace("-", "_"),
         "category": category,
@@ -182,7 +213,9 @@ def to_kb_entries(rec: dict, record_ref: dict) -> tuple[list[dict], Optional[str
         "evidence": {"provenance_id": record_ref["provenance_id"], "raw_ref": record_ref["raw_ref"],
                      "recall_id": rec["recall_id"], "tool": "mbos_discovery.recalls"},
     }
-    return [entry], None
+    if glance:       # CPSC's own wording trips the lint: not shipped, but surfaced with the candidate for a human glance
+        return [], "CPSC text contains elementary-advice wording; needs a human glance (candidate entry attached)", entry
+    return [entry], None, None
 
 
 def _provenance(adapter: SourceAdapter, rec: dict, raw_ref: str, fetched_at: datetime, request_uri: str) -> dict:
@@ -231,12 +264,15 @@ def collect_recalls(adapter: SourceAdapter, profile: SearchProfile, raw: RawStor
         rep.provenance.setdefault(prov["provenance_id"], prov)
         ref = {"fetched_at": iso(r.fetched_at), "raw_ref": raw_ref, "provenance_id": prov["provenance_id"]}
         rep.records[rec["recall_id"]] = {**rec, **ref}
-        entries, reason = to_kb_entries(rec, ref)
+        entries, reason, candidate = to_kb_entries(rec, ref)
         if entries:
             rep.entries += entries
         else:
-            rep.review.append({"recall_id": rec["recall_id"], "recall_number": rec["recall_number"],
-                               "title": rec["title"], "reason": reason, "provenance_id": prov["provenance_id"]})
+            item = {"recall_id": rec["recall_id"], "recall_number": rec["recall_number"], "title": rec["title"],
+                    "reason": reason, "provenance_id": prov["provenance_id"]}
+            if candidate:
+                item["candidate_entry"] = candidate
+            rep.review.append(item)
     row.update(recalls=len(rep.records), entries=len(rep.entries), review=len(rep.review))
     health.record_success(adapter.source, now, len(res.records))
     rep.entries.sort(key=lambda e: e["id"])

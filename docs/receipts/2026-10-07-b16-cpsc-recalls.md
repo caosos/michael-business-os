@@ -14,3 +14,8 @@
 - UNKNOWN stated: CPSC rate limit and key requirement (the guide gives neither). The adapter uses 1 request per query, a cap of 12 queries, the shared freeze, and a `live` flag.
 - Full suite: **198 passed, 0 skipped**.
 - The fixtures are illustrative with fictional makes and URLs, except the guide's own stroller example (abridged, out of scope).
+
+## Review follow-up (Agent 03's findings, fixed)
+- Label words dropped the first model, a silent under-coverage. Numeric-only tokens such as "6500" produced false-positive matches. The lint on CPSC's own wording hid recalls.
+- All three are fixed and tested: the exact string `"Model 17AWCBYS010 and 17AWCBYZ010"`, numeric-only → review with the reason, and the lint hit surfaced as "needs a human glance" with the candidate attached.
+- Verified against Agent 03's engine 0.10.1, whose `load_kb` now refuses numeric or too-short model tokens. The suite is **201 passed, 0 skipped**.
