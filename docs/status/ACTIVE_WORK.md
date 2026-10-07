@@ -1,24 +1,21 @@
 # ACTIVE WORK: who is doing what right now
 
 - **Maintained by:** Agent 01. Synced from each agent's own `AGENT_STATUS.md` on its branch.
-- **Last synced:** 2026-10-07 12:52 -0500.
+- **Last synced:** 2026-10-07 13:00 -0500.
 - **Rule:** one claimed task per agent at a time. Claims are first-come by pushed commit time (`docs/COORDINATION.md`).
 
 | Agent | Current task | Branch @ head | Started | Dependency / blocker | Done this wave | Next (queue) |
 |---|---|---|---|---|---|---|
-| **01** Coordinator | **A-05** wire 03's RESEARCH producer, then **A-04** wire 02's adapter. A-01 phase 1 DONE | `research/agent-01-coordinator` | 2026-10-07 12:40 | A-01 phase 2 waits on D-01/D-02 | A-00, A-07, A-09, A-01 phase 1 | A-02 release gate, A-08 |
-| **02** Discovery | **B-03** credential-free GSA / Trash Nothing adapters | `research/agent-02-opportunity` @ `41d45a6` | 2026-10-07 ~12:35 | none | B-01, B-02 | B-04 |
-| **03** Economics | **C-03** versioned `$id`s for v1.1.0 schemas | `research/agent-03-economics` @ `73a4d32` | 2026-10-07 12:40 | none | C-01, C-02 | (queue refill by 01) |
-| **04** State ⚑ CRITICAL PATH | **D-01 + D-02** migration 0005 + ADR-0010 ledger; **fold in D-04** (05's requirements) | `research/agent-04-state` @ `7f0649a` | 2026-10-07 12:06 | none. No push for ~30 min; working per its claim | — | D-03 |
-| **05** Governance | **E-04** secret scan + INJECTION_SUSPECTED tripwire (assigned 12:52) | `research/agent-05-governance` @ `b632583` | 2026-10-07 12:52 | none | E-01, E-03 | E-05, then E-02 when D-01/D-04 land |
-| **06** Operator UI | **F-03** comms dry-run spec as data | `research/agent-06-communications` @ `c125618` | 2026-10-07 ~12:38 | none | F-01, F-02 | F-04 after A-03 |
-| **07** QA | **G-02** QA suite on the real spine | `research/agent-07-marketing` @ `332c26c` | 2026-10-07 ~12:48 | none | G-01 | G-03 |
+| **01** Coordinator | **A-01 phase 2**: port the spine onto 04's store (critical path, unblocked) | `research/agent-01-coordinator` | 2026-10-07 13:00 | none | A-00, A-07, A-09, A-11, A-01 phase 1 | A-05, A-04, A-02, A-10 |
+| **02** Discovery | **B-04** source-health → L2 freeze shape (with 05) | `research/agent-02-opportunity` @ `3fdfcab` | ~12:55 | none | B-01, B-02, (B-03 in progress or done; see branch) | support C-04 (comps source access) |
+| **03** Economics | **C-04** sold-comps feed (assigned 13:00) | `research/agent-03-economics` @ `bed14c2` | 13:00 | none | C-01, C-02, C-03 | C-05 |
+| **04** State | **D-05** (P0, small) remove the 4 accommodated edges, then **D-03** | `research/agent-04-state` @ `2b8fe3d` | 13:00 | none | D-01, D-02, D-04 | D-03 |
+| **05** Governance | **E-02** Postgres GovernanceStore + PANIC on 0005 (critical path; switch from E-04) | `research/agent-05-governance` @ `b632583` | 13:00 | none (D-01/D-02 DONE) | E-01, E-03 | E-04, E-05 |
+| **06** Operator UI | **F-03** comms dry-run spec as data | `research/agent-06-communications` @ `cb787dd` | ~12:38 | none | F-01, F-02 | F-04 after A-03 |
+| **07** QA | **G-02** QA suite on the real spine | `research/agent-07-marketing` @ `332c26c` | ~12:48 | none | G-01 | G-03 |
 
 **Idle agents:** none.
 
-**ADR-0010 interop** (`tools/interop_check.py --fetch`, 12:52):
-
-| Lane | Result |
-|---|---|
-| 01, 02, 03, 05, 06, 07 | 10/10 vectors, 6/6 rejections: CONFORMS (F-14 closed) |
-| 04 | gated by the strict-xfail test in `tests/integration/test_state04_adapter.py` (flips when D-02 lands) |
+**Interop status.**
+- F-14 is CLOSED: every Python lane passes all vectors and all rejections.
+- F-13 is CLOSED: lane D's chain verifies with the pure-Python reference (01's gate, hard pass since 13:00). Lanes 05 and 07 verify `receipt_chain`.

@@ -50,6 +50,13 @@ Later decide which narrow actions may be pre-approved, such as:
 Recommended default:
 NO DELEGATION during MVP.
 
+## 6. Service pricing (raised by Agent 03; not blocking)
+Needed eventually:
+- the all-in service quote rate (placeholder **$85/h**)
+- the minimum service charge (placeholder **$125**)
+
+These set the quotes the system drafts for service leads. The dry-run MVP uses the placeholders, and every draft is still shown to Michael before anything is sent.
+
 ---
 
 ## Decisions already resolved technically

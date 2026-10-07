@@ -4,8 +4,8 @@
 build a fresh database on an isolated pgserver PostgreSQL 16. Then `mbos.adapters.state04.Pg04Ledger` writes
 provenance, item, scores, action request, approval, dry-run execution and outcome — and we check:
   * 04's own verify_chain passes, every exported document conforms to the frozen v1.0.0 contracts;
-  * ADR-0010 (D-02): the exported chain verifies with the pure-Python reference. strict xfail until 04
-    lands D-02 — it then XPASSes, which FAILS this suite on purpose so the coordinator flips it to a hard gate.
+  * ADR-0010 (D-02, DONE @ a0d1fbe): the exported chain verifies with the pure-Python reference (hard gate).
+  * R12 edge parity: strict xfail until 04 lands D-05 (it then XPASSes and is flipped to a hard gate).
 """
 
 from __future__ import annotations
@@ -152,7 +152,6 @@ def test_exported_documents_conform_to_frozen_contracts(db04, lifecycle):
     assert all(r["effector_response"]["dry_run"] for r in receipts if r["type"] == "ACTION_EXECUTED")
 
 
-@pytest.mark.xfail(strict=True, reason="D-02 pending: Agent 04 ledger not yet on ADR-0010 MBOS-RH-1")
 def test_adr0010_lane_d_chain_verifies_with_reference(db04, lifecycle):
     with db04.connect() as c:
         receipts = lifecycle["L"].export_receipts(c)
@@ -160,6 +159,7 @@ def test_adr0010_lane_d_chain_verifies_with_reference(db04, lifecycle):
     assert ok, f"lane D @ {db04.lane_d_commit}: {msg}"
 
 
+@pytest.mark.xfail(strict=True, reason="D-05 pending: 04 re-added NORMALIZED->SCORED, HELD->APPROVED, LEARNED exits")
 def test_r12_item_edges_match_lane_d(db04):
     from mbos.state_machine import ITEM_TRANSITIONS
     with db04.connect() as c:
