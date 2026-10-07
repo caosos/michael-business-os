@@ -347,3 +347,24 @@ Limits (stated):
 - The photos are synthetic, not real seller photos.
 - A dealer reusing one stock photo for two units can't be told apart.
 - The distance thresholds need tuning on real photos once B-12 (live runs) is unblocked.
+
+## 20. Lane-B dedup on the spine path — READY_QUEUE B-13 (A-14 context @ agent-01 `a910ad9`)
+
+`mbos_discovery.spine` now applies the same rules as the standalone store, through Agent 01's A-14 `Deduper.is_duplicate(existing_item, candidate, context)`:
+
+| Piece | Why |
+|---|---|
+| `FetchLedger` | Records each fetch run's listing ids. The relist rule needs "the original is **absent** from the current fetch", but the spine ingests one record at a time. The normalizer copies the run's set into `match_hints["present_ids"]`, which DBOS checkpoints. If that set is unknown, no relist merge happens (a possible miss, never a false merge). |
+| `PhashIndex` (persisted JSON) | Holds pHashes and last-seen time per `(source, listing id)`. The spine's Item body doesn't keep lane-B hints, so the Deduper looks *existing* Items up here. |
+| `SpineNormalizer` | Fills `NormalizedListing.match_hints` with `present_ids`, `phash` and `contact_fp`. |
+| `SpineDeduper` | Service: contact-fingerprint bucket, existing Item not terminal. Flip with an existing same-source sighting: relist only (original absent, ≤ 14 d, same seller, title ≥ 0.90, price ±15%, photos not DIFFERENT). Flip from another source: cross-source rule (price + place, then title ≥ 0.85 or photo MATCH; DIFFERENT vetoes). |
+
+**Blocking key changed (FACT, found by this task).** The spine only consults the Deduper for Items with an equal `dedup_key`. The old key contained a price band, so a relist that dropped from $1,627 to $1,497 crossed the 1500 band and was never compared. The measured result was a 2.56% miss on the spine path. The standalone store never blocks, so B-10/B-11 couldn't see this. The flip key is now `category|state` (falling back to zip prefix, then a 1° cell), with price and exact place judged inside the Deduper.
+
+**F2 metric fixed.** Missed duplicates are now Σ over objects of (Items showing that object − 1), divided by Items. The old formula, (Items − objects) / Items, let a false merge offset a miss and could go negative (−2.7% was observed). Earlier reported values stand, because their false-merge count was 0.
+
+**Acceptance (FACT).** `tests/test_b13_spine_dedup.py` drives the 7-day corpus through Agent 01's real `mbos.spine.ingest` on PostgreSQL 16:
+- with photos: **F2 0.00% missed, 0 false merges, 38 Items / 38 objects**
+- without photos: 0.00% missed and exactly the one known-ambiguous false merge
+- `spine_d.ingest` (the lane-D backend) calls the Deduper identically. I verified that by reading the code @ `a910ad9` but did **not** run it here, since it needs lane D's schema at Agent 01's current pin.
+- Not filled on the spine path: `normalized.images`. The photos are retained in lane B's raw store, but the spine's `mbos.artifacts` doesn't hold them. That would need a spine image-artifact hook (proposed).

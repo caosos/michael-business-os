@@ -31,7 +31,8 @@ from typing import Any, Optional
 from mbos.interfaces import NormalizedListing, RawListing
 
 from .adapter import FetchResult, NormalizationError, SearchProfile, SourceAdapter, SourceError
-from .dedup import content_hash, dedup_key, is_cross_source_duplicate
+from .dedup import RELIST_WINDOW, content_hash, dedup_key, is_cross_source_duplicate, is_relist
+from .images import collect as collect_images, compare as compare_images
 from .health import HealthBook, external_blocks
 from .ids import iso, parse_ts
 from .policy import SourceRefused, check_allowed
@@ -65,16 +66,69 @@ def _now() -> datetime:
     return datetime.now(timezone.utc)
 
 
+@dataclass
+class FetchLedger:
+    """Which listing ids each fetch run of a source contained (B-13). The relist rule needs "the original listing
+    is ABSENT from the current fetch"; the spine ingests one record at a time, so the normalizer copies the run's
+    id set into `match_hints["present_ids"]` (then DBOS-checkpointed). In-memory: if it is lost (e.g. a recovery
+    replays fetch from a checkpoint), present_ids is omitted and the relist rule simply does not fire."""
+    runs: dict[str, frozenset[str]] = field(default_factory=dict)
+    run_of: dict[str, str] = field(default_factory=dict)          # "source\x1flid\x1ffetched_at" -> run id
+
+    def record(self, source: str, fetched_ats: dict[str, str]) -> None:
+        run = f"{source}\x1f{len(self.runs)}"
+        self.runs[run] = frozenset(fetched_ats)
+        for lid, at in fetched_ats.items():
+            self.run_of[f"{source}\x1f{lid}\x1f{at}"] = run
+
+    def present(self, source: str, lid: str, fetched_at: str) -> Optional[list[str]]:
+        run = self.run_of.get(f"{source}\x1f{lid}\x1f{fetched_at}")
+        return sorted(self.runs[run]) if run else None
+
+
+@dataclass
+class PhashIndex:
+    """Per sighting (source, listing id): image pHashes and last time lane B saw it. The spine's Item body does not
+    keep lane-B hints, so the Deduper looks EXISTING Items up here. Persisted (JSON) when `path` is given."""
+    path: Optional[Path] = None
+    rows: dict[str, dict] = field(default_factory=dict)
+
+    @classmethod
+    def load(cls, path: str | os.PathLike) -> "PhashIndex":
+        return cls(Path(path), load_json(Path(path), {}))
+
+    def note(self, source: str, lid: str, seen_at: str, hashes: list[str]) -> None:
+        r = self.rows.setdefault(f"{source}\x1f{lid}", {"phash": [], "last_seen": seen_at})
+        r["last_seen"] = max(r["last_seen"], seen_at)
+        r["phash"] += [h for h in hashes if h not in r["phash"]]
+
+    def hashes(self, sightings: list[dict]) -> list[str]:
+        out: list[str] = []
+        for s in sightings:
+            out += [h for h in self.rows.get(f"{s.get('source')}\x1f{s.get('source_listing_id')}", {}).get("phash", [])
+                    if h not in out]
+        return out
+
+    def last_seen(self, source: str, lid: str) -> Optional[str]:
+        return self.rows.get(f"{source}\x1f{lid}", {}).get("last_seen")
+
+    def save(self) -> None:
+        if self.path:
+            save_json_atomic(self.path, dict(sorted(self.rows.items())))
+
+
 class SpineSourceAdapter:
     """`mbos.interfaces.SourceAdapter` over one mbos_discovery adapter + search profile."""
 
     def __init__(self, inner: SourceAdapter, profile: SearchProfile, *, raw_store: RawStore,
                  side: SideChannel, health: Optional[HealthBook] = None, health_path: Optional[Path] = None,
                  enabled_sources: frozenset[str] = frozenset(), name: Optional[str] = None,
-                 clock=_now, panic=None, events=None) -> None:
+                 clock=_now, panic=None, events=None, ledger: Optional[FetchLedger] = None,
+                 index: Optional[PhashIndex] = None, images=None) -> None:
         self.inner, self.profile, self.raw, self.side = inner, profile, raw_store, side
         self.panic = panic                              # lane E PanicStore (B-04); None = local health only
         self.events = events                            # WakeEventDetector (B-05); None = no wake events
+        self.ledger, self.index, self.images = ledger, index, images   # B-13 dedup context; B-11 photo fetcher
         self.health_path = Path(health_path) if health_path else None
         self.health = health or HealthBook.from_json(load_json(self.health_path, {}) if self.health_path else {})
         self.enabled = enabled_sources
@@ -128,12 +182,21 @@ class SpineSourceAdapter:
                 self.side.emit("quarantine", source=src, profile_id=pid, at=iso(now), raw_ref=raw_ref,
                                error=f"{type(e).__name__}: {str(e)[:300]}")
                 continue
+            if self.index is not None:
+                hashes = []
+                if self.images is not None and n.match_hints.get("image_urls"):
+                    _, hashes = collect_images(n.match_hints["image_urls"], self.images, self.raw.put)
+                self.index.note(src, n.source_listing_id, iso(rec.fetched_at), hashes)
             if self.events is not None:
                 self.events.observe(source=src, source_listing_id=n.source_listing_id, url=n.url,
                                     normalized=n.normalized, fetched_at=rec.fetched_at, raw_ref=raw_ref)
             out.setdefault(n.source_listing_id, RawListing(
                 source=src, source_listing_id=n.source_listing_id, url=n.url, fetched_at=iso(rec.fetched_at),
                 ingestion_method=self.inner.ingestion_method, tos_risk=self.inner.tos_risk, payload=rec.payload))
+        if self.ledger is not None:
+            self.ledger.record(src, {lid: r.fetched_at for lid, r in out.items()})
+        if self.index is not None:
+            self.index.save()
         self.health.record_success(src, now, len(result.records))
         self._save_health()
         if self.events is not None:
@@ -148,9 +211,11 @@ class SpineSourceAdapter:
 class SpineNormalizer:
     """`mbos.interfaces.Normalizer`: dispatches on `raw.source` to the adapter's pure `normalize`."""
 
-    def __init__(self, adapters: dict[str, SourceAdapter], side: Optional[SideChannel] = None) -> None:
+    def __init__(self, adapters: dict[str, SourceAdapter], side: Optional[SideChannel] = None,
+                 ledger: Optional[FetchLedger] = None, index: Optional[PhashIndex] = None) -> None:
         self.adapters = adapters                        # keyed by source name, e.g. {"ebay": EbayBrowseAdapter}
         self.side = side or SideChannel()
+        self.ledger, self.index = ledger, index
 
     def normalize(self, raw: RawListing) -> Optional[NormalizedListing]:
         inner = self.adapters.get(raw.source)
@@ -162,41 +227,83 @@ class SpineNormalizer:
         except Exception as e:
             self.side.emit("quarantine", source=raw.source, url=raw.url, error=f"{type(e).__name__}: {str(e)[:300]}")
             return None
+        hints: dict[str, Any] = {}                       # A-14 / B-13: JSON-only, DBOS-checkpointed with the listing
+        if n.match_hints.get("contact_fp"):
+            hints["contact_fp"] = n.match_hints["contact_fp"]
+        if self.ledger is not None:
+            present = self.ledger.present(raw.source, n.source_listing_id, raw.fetched_at)
+            if present is not None:
+                hints["present_ids"] = present
+        if self.index is not None:
+            ph = self.index.hashes([{"source": raw.source, "source_listing_id": n.source_listing_id}])
+            if ph:
+                hints["phash"] = ph
         return NormalizedListing(
             type=n.type, category=n.category,
             dedup_key=dedup_key(n.type, n.category, n.normalized, n.match_hints.get("contact_fp")),
             normalized=n.normalized, subcategory=n.subcategory, opportunity_kind=n.opportunity_kind,
-            content_hash=content_hash(n.normalized), economics=None)
+            content_hash=content_hash(n.normalized), economics=None, match_hints=hints or None)
 
 
 class SpineDeduper:
-    """`mbos.interfaces.Deduper`. Called only for Items sharing the candidate's blocking key."""
+    """`mbos.interfaces.Deduper` (A-14 signature). Called only for Items sharing the candidate's blocking key.
 
-    def is_duplicate(self, existing_item: dict[str, Any], candidate: NormalizedListing) -> bool:
+    The rules match lane B's standalone store (`ItemStore`):
+    * service: same contact-fingerprint bucket, and the existing Item not in a terminal state;
+    * flip, existing Item already has a sighting from the candidate's SOURCE → only a **relist** can merge:
+      original absent from the current fetch (`present_ids`), last seen ≤ 14 days ago, same seller, title ≥ 0.90,
+      price ±15%, and photos not DIFFERENT (B-11). Unknown `present_ids` → never a relist (no false merge);
+    * flip, other source → cross-source rule: price + place agree, and title ≥ 0.85 or photo MATCH; DIFFERENT
+      photos veto.
+    Without `context` (pre-A-14 spine) only the cross-source rule runs, as before."""
+
+    def __init__(self, index: Optional[PhashIndex] = None) -> None:
+        self.index = index or PhashIndex()
+
+    def is_duplicate(self, existing_item: dict[str, Any], candidate: NormalizedListing,
+                     context: Optional[dict[str, Any]] = None) -> bool:
         if existing_item.get("type") != candidate.type or existing_item.get("category") != candidate.category:
             return False
         if candidate.type == "service":
-            # Same blocking key here means same category + same contact fingerprint (dedup_key).
             fp_bucket = candidate.dedup_key.split("|")[-1].startswith("fp-")
             return (fp_bucket and existing_item.get("dedup_key") == candidate.dedup_key
                     and existing_item.get("state") not in TERMINAL_STATES)
-        return is_cross_source_duplicate(existing_item, candidate.type, candidate.category, candidate.normalized)
+        hints = candidate.match_hints or (context or {}).get("match_hints") or {}
+        img = compare_images(self.index.hashes(existing_item.get("sources", [])), hints.get("phash") or [])
+        src = (context or {}).get("source")
+        same = [s for s in existing_item.get("sources", []) if src and s.get("source") == src]
+        if not same:
+            return is_cross_source_duplicate(existing_item, candidate.type, candidate.category, candidate.normalized,
+                                             image_verdict=img)
+        present = hints.get("present_ids")
+        if present is None or img == "DIFFERENT":
+            return False
+        if any(s.get("source_listing_id") in present for s in same):
+            return False                                 # the earlier listing is still up: a second unit, not a relist
+        at = parse_ts(context["fetched_at"])
+        last = max(parse_ts(self.index.last_seen(src, s.get("source_listing_id")) or s["first_seen_at"]) for s in same)
+        return at - last <= RELIST_WINDOW and is_relist(existing_item, same[0], candidate.type, candidate.category,
+                                                        candidate.normalized)
 
 
 def discovery_components(jobs: list[tuple[SourceAdapter, SearchProfile]], *, raw_dir: str | os.PathLike,
                          side_path: Optional[str | os.PathLike] = None,
                          health_path: Optional[str | os.PathLike] = None,
-                         enabled_sources: frozenset[str] = frozenset(), clock=_now, panic=None, events=None):
+                         enabled_sources: frozenset[str] = frozenset(), clock=_now, panic=None, events=None,
+                         images=None, index_path: Optional[str | os.PathLike] = None):
     """Build (adapters, normalizer, deduper, side_channel) for `mbos.runtime.Components`.
     Adapter names are `<source>:<profile_id>` so several profiles of one source can coexist."""
     side = SideChannel(Path(side_path) if side_path else None)
     raw = FileRawStore(raw_dir)
     health = HealthBook.from_json(load_json(Path(health_path), {}) if health_path else {})
     adapters, by_source = {}, {}
+    ledger = FetchLedger()
+    index = PhashIndex.load(index_path) if index_path else PhashIndex()
     for inner, profile in jobs:
         a = SpineSourceAdapter(inner, profile, raw_store=raw, side=side, health=health, health_path=health_path,
                                enabled_sources=enabled_sources, name=f"{inner.source}:{profile.profile_id}",
-                               clock=clock, panic=panic, events=events)
+                               clock=clock, panic=panic, events=events, ledger=ledger, index=index,
+                               images=images)
         adapters[a.name] = a
         by_source.setdefault(inner.source, inner)
-    return adapters, SpineNormalizer(by_source, side), SpineDeduper(), side
+    return adapters, SpineNormalizer(by_source, side, ledger, index), SpineDeduper(index), side

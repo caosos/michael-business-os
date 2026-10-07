@@ -56,14 +56,28 @@ def geo_cell(location: dict | None) -> str:
     return "nogeo"
 
 
+def geo_block(location: dict | None) -> str:
+    """Coarse place bucket for BLOCKING: state, else zip prefix, else a 1° cell. Deliberately wider than the
+    Deduper's own place test, so near-boundary duplicates still meet."""
+    loc = location or {}
+    if loc.get("state"):
+        return str(loc["state"]).upper()
+    if loc.get("zip"):
+        return f"zip-{str(loc['zip'])[:3]}"
+    if loc.get("lat") is not None and loc.get("lng") is not None:
+        return f"cell-{round(loc['lat'])}{round(loc['lng']):+d}"
+    return "nogeo"
+
+
 def dedup_key(item_type: str, category: str, normalized: dict, contact_fp: str | None = None) -> str:
-    """Blocking key (never an identity — ruling R8) in the contract example's format, e.g.
-    `trailer|1000-1500|cell-35.1-92.4`. Service leads with a contact block on a 64-bit prefix of the
-    contact fingerprint (`drywall_repair|lead|fp-<16 hex>`) so the same customer's leads meet in one
-    bucket; without one they fall back to the geo cell."""
+    """BLOCKING key (never an identity — ruling R8), e.g. `trailer|AR`. The spine only asks the Deduper about
+    Items with an equal key, so the key must be coarse. Price and exact place are judged inside the Deduper
+    (±15 %, same place). A price band in the key would split a relist that drops from $1,627 to $1,497 (B-13
+    finding). Service leads with a contact block on a 64-bit prefix of the contact fingerprint
+    (`drywall_repair|lead|fp-<16 hex>`); without one they fall back to the place bucket."""
     if item_type == "service":
-        return f"{category}|lead|" + (f"fp-{contact_fp[:16]}" if contact_fp else geo_cell(normalized.get("location")))
-    return f"{category}|{price_band(normalized.get('price'))}|{geo_cell(normalized.get('location'))}"
+        return f"{category}|lead|" + (f"fp-{contact_fp[:16]}" if contact_fp else geo_block(normalized.get("location")))
+    return f"{category}|{geo_block(normalized.get('location'))}"
 
 
 def content_hash(normalized: dict) -> str:

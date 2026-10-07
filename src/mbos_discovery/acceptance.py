@@ -6,7 +6,7 @@ F1  every Item has ≥ 1 `sources[]` entry and every entry has a `raw_ref` whose
 F2  duplicate rate after dedup over a 7-day corpus (target < 2%), photos used as evidence when present (B-11; the
     listing-data-only result is reported alongside). With ground-truth labels (`labels.json`, never seen by the
     pipeline) mapping each sighting to its physical object,
-        missed_duplicate_rate = (Items − distinct objects covered) / Items          — target < 0.02
+        missed_duplicate_rate = Σ_objects (Items showing that object − 1) / Items  — target < 0.02
         false_merge_rate      = Items whose sightings span > 1 object / Items        — must be 0
 F3  a source answering 403/429 twice produces one schema-valid L2 freeze request (`discovery.source.<src>.read`), and
     the next run makes zero requests to it.
@@ -112,7 +112,9 @@ def check_f2(store: ItemStore, labels: dict[str, str]) -> dict:
         for o in {labels.get(f"{s['source']}|{s['source_listing_id']}") for s in item["sources"]} - {None}:
             by_obj.setdefault(o, []).append(item["item_id"])
     missed = {o: sorted(ids) for o, ids in sorted(by_obj.items()) if len(ids) > 1}
-    rate = (n - len(covered)) / n if n else 0.0
+    # extra Items per physical object (an object split over k Items contributes k-1). Not (Items - objects):
+    # a false merge would offset a miss and could even make that negative.
+    rate = sum(len(ids) - 1 for ids in missed.values()) / n if n else 0.0
     return {"pass": rate < F2_TARGET and not false_merges and not unlabeled,
             "items": n, "objects": len(covered), "sightings_labelled": len(labels),
             "missed_duplicate_rate": round(rate, 4), "target": F2_TARGET,
