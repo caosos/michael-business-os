@@ -33,15 +33,17 @@ def _now() -> datetime:
 
 
 def _panic():
-    """Lane E PANIC state (B-04). Set MBOS_PANIC_STATE to honour L1/L2/L3 freezes; fail closed if unusable."""
-    path = os.environ.get("MBOS_PANIC_STATE")
-    if not path:
+    """Lane E PANIC state (B-04/B-09). Since E-02 it lives in Postgres (lane D `mbos.panic_state`, ruling R5):
+    set MBOS_PANIC_STATE to a libpq DSN for a read-capable login (e.g. the reader role). Unset = local health
+    only. Set but unusable (governance package missing, DB down, no rights) = every source blocked (fail closed)."""
+    dsn = os.environ.get("MBOS_PANIC_STATE")
+    if not dsn:
         return None
     try:
-        from mbos_governance.panic import PanicStore
+        from mbos_governance import PgPanicStore
     except ImportError as e:
-        return UnavailablePanic(f"MBOS_PANIC_STATE set but mbos_governance not importable: {e}")
-    return PanicStore(path)
+        return UnavailablePanic(f"MBOS_PANIC_STATE set but mbos_governance (>= E-02) not importable: {e}")
+    return PgPanicStore(dsn)
 
 
 def build_jobs(cfg: dict, base: Path, fixtures: Path | None):

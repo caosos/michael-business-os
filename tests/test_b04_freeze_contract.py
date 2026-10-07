@@ -1,5 +1,5 @@
-"""B-04: source-health → L2 freeze request, agreed shape with lane E, tested against a shared fixture and
-(when installed) Agent 05's real PanicStore. Discovery requests freezes; lane E holds them; discovery honours
+"""B-04: source-health → L2 freeze request, agreed shape with lane E, tested against a shared fixture (real-store
+round trips now on Postgres: test_b09_pg_panic.py). Discovery requests freezes; lane E holds them; discovery honours
 every L1/L2/L3 freeze and fails closed when the PANIC state is unusable."""
 
 from __future__ import annotations
@@ -114,47 +114,8 @@ def test_spine_adapter_honours_panic(tmp_path):
     assert side.events[-1]["kind"] == "skipped" and side.events[-1]["reason"].startswith("PANIC:")
 
 
-# ---------------------------------------------------------------- round trip with Agent 05's real PanicStore
-@pytest.fixture
-def panic_store(tmp_path):
-    panic = pytest.importorskip("mbos_governance.panic")
-    store = panic.PanicStore(tmp_path / "panic_state.json")
-    store.init("michael", "test bootstrap", state=panic.RUNNING)
-    return store
-
-
-@pytest.mark.parametrize("name", sorted(EXAMPLES))
-def test_shared_fixture_applied_by_lane_e_blocks_exactly_that_source(name, panic_store, world, intake_copy):
-    req = EXAMPLES[name]
-    assert panic_store.read().blocks(AGENT_ID, req["capability"], "discovery") == []
-    panic_store.mutate(req["level"], req["capability"], True, req["requested_by"], req["reason"])   # lane E applies
-    st = panic_store.read()
-    assert st.blocks(AGENT_ID, req["capability"], "discovery") == [f"PANIC_L2_CAPABILITY:{req['capability']}"]
-    assert st.blocks(AGENT_ID, capability_for("website_lead"), "discovery") == []
-    from mbos_discovery.adapters import ServiceIntakeAdapter
-    frozen_src = StaticAdapter(req["source"], [[]], world.clock)
-    frozen_src.lanes = frozenset({"flip"})
-    lead = ServiceIntakeAdapter("website_lead", intake_copy / "website_form", world.clock)
-    r = world.run([(frozen_src, FLIP), (lead, SERVICE)], enabled=frozenset({req["source"]}), panic=panic_store)
-    assert r.sources[0].status == "skipped" and frozen_src.fetch_calls == 0
-    assert r.sources[1].status == "ok" and r.sources[1].created == 3
-    # human release through lane E restores collection
-    panic_store.mutate("L2", req["capability"], False, "michael", "investigated; source OK")
-    r = world.run([(frozen_src, FLIP)], enabled=frozenset({req["source"]}), panic=panic_store)
-    assert r.sources[0].status == "ok" and frozen_src.fetch_calls == 1
-
-
-@pytest.mark.parametrize("level,target", [("L2", "discovery.source.*"), ("L1", AGENT_ID), ("L3", None)])
-def test_broader_freezes_stop_all_discovery(level, target, panic_store, world):
-    panic_store.mutate(level, target, True, "michael", "test")
-    ads = [StaticAdapter(s, [[]], world.clock) for s in ("craigslist", "govdeals")]
-    r = world.run([(a, FLIP) for a in ads], enabled=frozenset({"craigslist", "govdeals"}), panic=panic_store)
-    assert all(s.status == "skipped" and "PANIC" in s.skipped_reason for s in r.sources)
-    assert all(a.fetch_calls == 0 for a in ads)
-
-
-def test_missing_panic_file_fails_closed_with_real_store(tmp_path, world):
-    panic = pytest.importorskip("mbos_governance.panic")
-    ad = StaticAdapter("craigslist", [[]], world.clock)
-    r = world.run([(ad, FLIP)], enabled=frozenset({"craigslist"}), panic=panic.PanicStore(tmp_path / "absent.json"))
-    assert "PANIC_STATE_UNREADABLE" in r.sources[0].skipped_reason and ad.fetch_calls == 0
+# ---------------------------------------------------------------- round trip with lane E's real store
+# Moved to tests/test_b09_pg_panic.py: since E-02 (agent-05 1c554cb) PANIC lives in Postgres (lane D
+# mbos.panic_state) and the file-based PanicStore these tests used (b632583) no longer exists. The Postgres
+# versions cover the same cases: shared examples applied by lane E's gateway, human-only release, broader
+# L2-prefix / L1 / L3 freezes, and fail-closed on an unreadable state.

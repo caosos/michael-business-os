@@ -1,0 +1,1 @@
+Test-only copy of origin/research/agent-04-state@14bd690:state/{bootstrap/roles.sql,mbos_state/migrate.py,migrations/0000-0007} (same pin Agent 05 E-02 tests use). Read-only; do not edit.

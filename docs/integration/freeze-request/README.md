@@ -28,7 +28,11 @@ reasons = panic_store.read().blocks("agent-02-opportunity", "discovery.source.<s
   - `PANIC_L2_CATEGORY:discovery`
   - `PANIC_STATE_UNREADABLE:…`
 - An exception while reading also skips the source. The check fails closed.
-- CLI: set `MBOS_PANIC_STATE=<path>`. If it is set but `mbos_governance` cannot be imported, every source is skipped.
+- **Since E-02** (Agent 05 @ `1c554cb`, ruling R5), PANIC state lives in Postgres (lane D `mbos.panic_state`):
+  - Discovery reads it with `mbos_governance.PgPanicStore(dsn).read().blocks(...)` through a **read-only** login, such as the reader role.
+  - CLI: `MBOS_PANIC_STATE=<libpq DSN>`.
+  - If the DSN is set but the governance package is missing, the DB is down, or the login lacks rights, every source is skipped.
+- Lane E applies side-channel requests with `mbos-gov freeze-requests apply <side.jsonl>` or `freeze_requests.apply_side_channel(gw, path)`. Agents have no PANIC write rights in the database.
 
 ## 4. Shared fixture
 `examples/*.json` are the fixture both lanes test against:

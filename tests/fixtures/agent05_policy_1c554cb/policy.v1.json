@@ -1,0 +1,113 @@
+{
+  "policy_schema": "mbos.governance.policy/1",
+  "policy_id": "wave-one-default-deny",
+  "version": "2026.10.07-w1.3",
+  "description": "Round Two wave one. Everything tier 0, every externally consequential action needs Michael's YES, every effector DRY-RUN, no delegation, no real-world spend. Anything not listed here is DENIED.",
+  "system_mode": "mvp",
+  "delegation_enabled": false,
+  "clock_skew_seconds": 300,
+
+  "approval": {
+    "approvers": ["michael"],
+    "allowed_channels": ["web", "cli", "telegram"],
+    "allowed_scopes": ["once"],
+    "max_approval_ttl_seconds": 86400,
+    "step_up_required": {
+      "categories": ["money", "purchase", "offer", "external_commitment"],
+      "reversibility": ["irreversible"],
+      "untrusted_inputs": true
+    }
+  },
+
+  "action_request": {
+    "max_lifetime_seconds": 604800,
+    "allowed_initial_status": ["drafted"],
+    "on_behalf_of_required": "michael"
+  },
+
+  "categories": {
+    "message":             { "decision": "require_approval", "tier": 0, "max_tier": 0, "budget_bucket": "comms",      "require_cost_estimate": false, "quiet_hours": false },
+    "sms":                 { "decision": "require_approval", "tier": 0, "max_tier": 0, "budget_bucket": "comms",      "require_cost_estimate": false, "quiet_hours": true },
+    "phone_call":          { "decision": "require_approval", "tier": 0, "max_tier": 0, "budget_bucket": "comms",      "require_cost_estimate": false, "quiet_hours": true },
+    "email":               { "decision": "require_approval", "tier": 0, "max_tier": 0, "budget_bucket": "comms",      "require_cost_estimate": false, "quiet_hours": false },
+    "offer":               { "decision": "require_approval", "tier": 0, "max_tier": 0, "budget_bucket": "money",      "require_cost_estimate": true,  "quiet_hours": false },
+    "money":               { "decision": "require_approval", "tier": 0, "max_tier": 0, "budget_bucket": "money",      "require_cost_estimate": true,  "quiet_hours": false },
+    "purchase":            { "decision": "require_approval", "tier": 0, "max_tier": 0, "budget_bucket": "money",      "require_cost_estimate": true,  "quiet_hours": false },
+    "publishing":          { "decision": "require_approval", "tier": 0, "max_tier": 0, "budget_bucket": "publishing", "require_cost_estimate": false, "quiet_hours": false },
+    "scheduling":          { "decision": "require_approval", "tier": 0, "max_tier": 0, "budget_bucket": "scheduling", "require_cost_estimate": false, "quiet_hours": false },
+    "price_change":        { "decision": "require_approval", "tier": 0, "max_tier": 0, "budget_bucket": "publishing", "require_cost_estimate": false, "quiet_hours": false },
+    "external_commitment": { "decision": "require_approval", "tier": 0, "max_tier": 0, "budget_bucket": "money",      "require_cost_estimate": true,  "quiet_hours": false }
+  },
+
+  "capabilities": {
+    "comms.sms.send":              { "category": "sms",                 "effector": "dryrun" },
+    "comms.email.send":            { "category": "email",               "effector": "dryrun" },
+    "comms.voice.call":            { "category": "phone_call",          "effector": "dryrun" },
+    "comms.message.send":          { "category": "message",             "effector": "dryrun" },
+    "offer.submit":                { "category": "offer",               "effector": "dryrun" },
+    "money.payment.send":          { "category": "money",               "effector": "dryrun" },
+    "purchase.create":             { "category": "purchase",            "effector": "dryrun" },
+    "publish.listing.create":      { "category": "publishing",          "effector": "dryrun" },
+    "publish.content.post":        { "category": "publishing",          "effector": "dryrun" },
+    "schedule.appointment.create": { "category": "scheduling",          "effector": "dryrun" },
+    "price.change":                { "category": "price_change",        "effector": "dryrun" },
+    "commit.external":             { "category": "external_commitment", "effector": "dryrun" }
+  },
+
+  "grant_semantics": "agent_grants authorize PROPOSING an ActionRequest only. No agent ever executes: the Action Gateway alone calls effectors, after Michael's YES and the 8 guard checks (ruling R7). The proposer's grant is re-checked at execution (G6).",
+  "agent_grants": {
+    "agent-01-coordinator":    ["offer.submit", "purchase.create", "money.payment.send", "price.change", "commit.external", "comms.email.send", "comms.sms.send"],
+    "agent-02-opportunity":    [],
+    "agent-03-economics":      [],
+    "agent-04-state":          [],
+    "agent-05-governance":     [],
+    "agent-06-communications": ["comms.sms.send", "comms.email.send", "comms.voice.call", "comms.message.send", "schedule.appointment.create"],
+    "agent-07-marketing":      ["publish.listing.create", "publish.content.post"]
+  },
+
+  "quiet_hours": {
+    "start": "20:00",
+    "end": "08:00",
+    "timezone": "America/Chicago",
+    "note": "Stricter than TCPA 8am-9pm. Policy timezone is used until Agent 06's consent ledger supplies recipient-local time (UNKNOWN)."
+  },
+
+  "budgets": {
+    "currency": "USD",
+    "live": {
+      "global_daily_hard_cap": 0,
+      "buckets": {
+        "comms":      { "per_action_hard_cap": 0, "daily_hard_cap": 0 },
+        "money":      { "per_action_hard_cap": 0, "daily_hard_cap": 0 },
+        "publishing": { "per_action_hard_cap": 0, "daily_hard_cap": 0 },
+        "scheduling": { "per_action_hard_cap": 0, "daily_hard_cap": 0 }
+      }
+    },
+    "dry_run": {
+      "note": "Shadow caps: simulated spend is reserved/committed against these so the budget guard is exercised without spending. Money defaults follow Agent 03 REC ($1,500 per deal) pending MICHAEL_DECISIONS #1.",
+      "global_daily_hard_cap": 2000,
+      "buckets": {
+        "comms":      { "per_action_hard_cap": 1,    "daily_hard_cap": 5 },
+        "money":      { "per_action_hard_cap": 1500, "daily_hard_cap": 1500 },
+        "publishing": { "per_action_hard_cap": 50,   "daily_hard_cap": 50 },
+        "scheduling": { "per_action_hard_cap": 0,    "daily_hard_cap": 0 }
+      }
+    },
+    "velocity": {
+      "money_bucket_actions_per_hour": 3
+    }
+  },
+
+  "egress": {
+    "default": "deny",
+    "note": "Per-agent outbound host allow-lists for the default-deny egress proxy. Wave one: every list is empty (fixture/dry-run only). Opening a host is a policy.schema.json change (Agent 05 + 01 review), e.g. Agent 02 read-only discovery sources.",
+    "allow": {}
+  },
+
+  "llm_spend": {
+    "enforced_by": "LiteLLM virtual keys (ADR-0005 §6) — NOT by this gateway",
+    "default_agent_daily_usd": 2,
+    "per_agent_daily_usd": {},
+    "max_tokens_per_call": 4096
+  }
+}

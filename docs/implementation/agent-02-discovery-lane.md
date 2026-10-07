@@ -301,3 +301,23 @@ Twins can never merge, because both are present in the same fetch.
 - **Known ambiguity**, pinned by a test: a dealer's *second identical unit*, listed after the first ended, looks like a relist and merges. No data is lost, but inventory is undercounted. Image pHash (wave two) is the planned fix.
 - **The corpus is synthetic.** Agent 01's original F2 target is a 7-day **live** sample, which still needs live credentials.
 - **The spine path doesn't have the relist rule yet.** Its `Deduper` call carries no source or fetch context. That's queued as A-14 for Agent 01.
+
+## 18. Freeze round trip on Postgres PANIC — READY_QUEUE B-09 (after E-02)
+
+Since Agent 05's E-02 (`1c554cb`, ruling R5), PANIC state lives in lane D's `mbos.panic_state`.
+- **Reading.** Discovery now reads it through `mbos_governance.PgPanicStore(dsn)` using a **read-only** login. `mbos-discover` takes `MBOS_PANIC_STATE=<DSN>`. The `blocks(...)` call and its reason codes are unchanged, and the check still fails closed.
+- **Writing.** Agents have no PANIC write rights. Lane E's gateway applies discovery's side-channel freeze requests and records a `KILL_SWITCH_CHANGED` receipt in lane D's ledger.
+
+Verified (FACT) by `tests/test_b09_pg_panic.py`, 8 tests on a throwaway PostgreSQL 16 cluster. The cluster uses Agent 04's canonical migrations 0000–0007 @ `14bd690` and real per-role logins, and calls Agent 05's real `ActionGateway`, `PgPanicStore` and `apply_side_channel` @ `1c554cb`. All of these are pinned test-only copies.
+1. Two 429s produce a local freeze and one side-channel request.
+2. `apply_side_channel` applies it, with a `KILL_SWITCH_CHANGED` receipt whose actor is `agent-02-opportunity`.
+3. Discovery, reading through the reader login, skips exactly that source with zero requests, even after the *local* freeze is cleared. Other sources still run.
+4. Agent self-release is refused. Michael's release restores collection.
+
+Also tested:
+- both shared examples
+- an L2 `discovery.source.*` prefix, L1 on the agent and L3 global each stop all discovery
+- an unreachable database fails closed (`PANIC_STATE_UNREADABLE`)
+- the CLI builds `PgPanicStore` from the DSN
+
+The B-04 tests that used the removed file-based `PanicStore` were retired in favour of these Postgres versions.
