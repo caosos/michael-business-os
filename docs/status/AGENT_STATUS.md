@@ -6,8 +6,9 @@ Branch: research/agent-07-marketing
 Worktree: /home/michaelos/business-os-worktrees/agent-07-marketing
 State: WORKING
 Done: G-01 @ 9cbce70
-Claimed: G-02
-Current phase: Round Two — foreman loop; G-01 DONE, G-02 (QA suite on the real spine) claimed
+Done: G-02 @ a1700d9
+Claimed: (none — claiming G-03 next)
+Current phase: Round Two — foreman loop; G-01 + G-02 DONE, claiming G-03
 Started: 2026-10-06 (round one) · 2026-10-07 (round two)
 Last updated: 2026-10-07
 
@@ -15,11 +16,14 @@ Last updated: 2026-10-07
 - **Done: G-01 @ 9cbce70.**
   - ADR-0010 interop matrix: `docs/qa/INTEROP_REPORT.md`. Receipt: `docs/receipts/2026-10-07-G-01-adr0010-interop.md`.
   - F-14 and F-13 are RULED. Conformance is open only for lane 03 (C-02), lane 04 (D-02) and the second `mbos.receipts` (A-01 phase 2). Every other lane and SQL twin passes `vectors.json`.
-- **Claimed: G-02** (P1). Write `mbos_qa.impl_spine:build` (MBOS_QA_IMPL) against 01's public API on pgserver. Report A1–A10 results against the real spine as real, not mocked. Then G-03.
+- **Done: G-02 @ a1700d9.** `qa/` A1–A10 run against Agent 01's REAL spine (`mbos` @ `c5c7c1c`, PostgreSQL 16 + DBOS): **90/90 pass**, stable across 3 runs. Report: `docs/qa/SPINE_ACCEPTANCE.md`. Receipt: `docs/receipts/2026-10-07-G-02-spine-acceptance.md`.
+- Next: **G-03** (READY after G-02): G1–G4 marketing tests on the real ActionRequest/approval path.
 
 ## Proposed tasks (for Agent 01 to triage)
 - **P-07-1 (01), F-16:** ship the contracts as package data, or fail clearly. A non-editable install of `mbos` fails 94 of 109 tests without `MBOS_CONTRACTS_DIR` (`docs/qa/BUILD_VERIFICATION.md`).
 - **P-07-2 (launcher owner / Agent 01), F-17, provenance:** the git identity is stored in the shared `.git/config`, so the last-launched agent signs everyone's commits. 01's commits `acb6f3b`, `c6c5ad4`, `7ed5705` and `bed7609` are authored "Agent 07 Marketing". Fix: `extensions.worktreeConfig=true` plus `git config --worktree user.*` in `~/bin/mbos-agent`. I have not changed any shared config.
+- **P-07-4 (01), F-18:** `spine.decide` refuses NO-without-reason through `ContractViolation` rather than `DecisionRefused`. Validate the approval before any write and raise one exception type.
+- **P-07-5 (07, after A-03/E-02 and A-01 phase 2):** re-run `python -m mbos_qa spine` once lane E's real gateway, PANIC and budget, and Agent 04's store, are wired. A5/A8/A9 currently exercise 01's reference stand-ins.
 - **P-07-3 (01):** refresh the test-count claims in ALL_AGENTS from `docs/qa/BUILD_VERIFICATION.md`. Collected counts: 01 has 109 vs 111 claimed, 03 has 114 vs 75, 05 has 121 vs 114.
 
 ## Current objective
