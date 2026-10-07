@@ -82,7 +82,7 @@ def page(title, body, state, flash=None, error=False):
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>{e(title)}</title><style>{CSS}</style></head>
 <body><div class="banner">DRY-RUN · nothing leaves this machine · system {e(state)}</div>
-<header><b>Operator UI</b><nav><a href="/">Queue</a><a href="/digest">Morning digest</a><a href="/holds">HOLD backlog</a><a href="/outcomes">Outcomes</a><a href="/sources">Source health</a><a href="/ledger">Receipt ledger</a></nav></header>
+<header><b>Operator UI</b><nav><a href="/">Queue</a><a href="/digest">Morning digest</a><a href="/summary">Daily summary</a><a href="/holds">HOLD backlog</a><a href="/outcomes">Outcomes</a><a href="/sources">Source health</a><a href="/ledger">Receipt ledger</a></nav></header>
 <main>{f}{body}</main></body></html>"""
 
 
@@ -476,6 +476,13 @@ def make_handler(app):
                 from . import digest as digest_view
 
                 return self._send(200, page("Morning digest", render_digest(digest_view.build(app.store, iso(now))), app.state()))
+            if u.path == "/summary":
+                from . import summary as summary_view
+
+                s_ = summary_view.build_summary(app.store, now, health_file=app.health_file)
+                return self._send(200, page("Daily summary", "<div class='card'>" + summary_view.render_html_body(s_) +
+                                            "<p class='small mut'>Files on disk: <code>python -m operator_ui summary --out-dir DIR</code>"
+                                            " (local only; never sent).</p></div>", app.state()))
             if u.path.startswith("/provenance/"):
                 pid = u.path.split("/")[2]
                 return self._send(200, page("Provenance", render_provenance(app.store.provenance(pid), pid), app.state()))

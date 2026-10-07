@@ -96,3 +96,6 @@ Every page keeps the loopback, Host-check, CSRF and CSP guards (R14: human chann
 
 ## 7. Morning digest (task F-10)
 `/digest` renders lane C's C-08 ranking (`mbos_economics.digest.build_digest`) **unchanged**: rank, bucket, escaped title linked to the open card, lane C's action and reason, deadline window, value $/h, and refs with `/provenance/<id>` links. Items without a lane-C engine scorecard are listed under "Not ranked" with the reason, never dropped silently. The page is read-only.
+
+## 8. Daily summary (task F-12)
+`python -m operator_ui summary --out-dir DIR [--as-of ISO]` writes `daily-summary-<date>.md` and `.html` **locally**, and the same content is on `/summary`. It is never sent. Sections: digest top-N, HOLD backlog (overdue first), yesterday's outcomes (America/Chicago calendar day) with net $, and source health. It is deterministic for a given store state and `as_of` (`summary_hash` in the header), and all untrusted text is escaped.
