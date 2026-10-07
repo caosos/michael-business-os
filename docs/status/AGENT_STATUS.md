@@ -7,12 +7,12 @@ Worktree: /home/michaelos/business-os-worktrees/agent-03-economics
 State: WORKING
 Current phase: ROUND TWO, wave two. Claimed task: RESEARCH/estimate producer (lane C)
 Started: 2026-10-06
-Last updated: 2026-10-07 (C-06 claimed)
+Last updated: 2026-10-07 (C-06 done; C-07 claimed)
 
 ## Claimed work (wave two). Foreman loop: `docs/COORDINATION.md` @ agent-01 `99e9ec0`
-Claimed: C-06
-Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6; C-04 @ 882c726; C-05 @ 6e938d2
-Queue (lane C, after C-06): C-07 (LEARN on 04 outcome store; READY @ agent-01 `aa88e7a`)
+Claimed: C-07
+Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6; C-04 @ 882c726; C-05 @ 6e938d2; C-06 @ 9e36ec9
+Queue (lane C, after C-07): none READY @ agent-01 `aa88e7a`
 
 - **C-01**, the RESEARCH/estimate producer, fills `Item.economics` from normalized fields, comps evidence and category priors, with provenance per estimate. It is deterministic and does no LLM arithmetic.
   - Claimed at `b923852`; confirmed CLAIMED in READY_QUEUE @ `99e9ec0`.
@@ -54,6 +54,11 @@ Queue (lane C, after C-06): C-07 (LEARN on 04 outcome store; READY @ agent-01 `a
 - 127 tests pass.
 - **Concern for Agent 01:** literal "at least one" is weak for flips, because the FACT ask almost always qualifies. A stricter variant is proposed in the receipt.
 
+### C-06 result (DONE @ `9e36ec9`; receipt `docs/receipts/2026-10-07-c06-r13-amended.md`)
+- **R13 amended:** a flip economic PASS needs the revenue side AND at least one cost-side input evidence-backed. Decisive inputs are arithmetic inputs only (corrects C-05, which counted the ask). Engine 0.4.0.
+- **New golden:** the welder (02 listing + FACT sold comps) floor PASS on prior repair costs is flagged.
+- **Interpretation note:** the revenue requirement is applied to economic gates only; see the receipt. Agent 01 can widen it in one line.
+
 ## Proposed tasks (for Agent 01 to triage)
 - **P-03-03 (lane C, internal): ship config as package data. DONE** (see the commit after `7390416`).
   - `economics/config/` moved to `economics/src/mbos_economics/config/` and is declared as package-data.
@@ -61,7 +66,7 @@ Queue (lane C, after C-06): C-07 (LEARN on 04 outcome store; READY @ agent-01 `a
   - Original report:
   - Agent 02 reported that the installed `mbos_economics` wheel has no `config/`, so callers like A-05 need a pinned copy.
   - Fix: config moves inside the package. Agent 02's adapter-side workaround becomes unnecessary.
-- **P-03-04 (lanes A + C): tighten R13 for flips.** Require the revenue side and at least one cost-side input to be evidence-backed (see the C-05 receipt).
+- **P-03-04 → accepted as amended R13, implemented as C-06 (DONE).** Original text: Require the revenue side and at least one cost-side input to be evidence-backed (see the C-05 receipt).
 - **P-03-01 → queued as C-04, DONE.** (Original text kept below for the record.) Sold-comps feed. Every real flip from eBay Browse (active listings only) stays `insufficient` until a sold-comps source exists. Options for 02:
   - eBay Marketplace Insights (restricted access)
   - completed-auction feeds from GSA and other auction sites (B-03)
