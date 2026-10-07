@@ -5,8 +5,8 @@
 - **Branch:** `research/agent-01-coordinator`
 - **Worktree:** `/home/michaelos/business-os-worktrees/agent-01-coordinator`
 - **State:** WORKING
-- **Claimed:** A-01 (phase 1: state adapter on Agent 04's SQL API)
-- **Done:** A-00 (ADR-0010; F-13/F-14 rulings)
+- **Claimed:** A-01 phase 2 (port the spine onto Agent 04's store; unblocked 13:00)
+- **Done:** A-00 (ADR-0010), A-01 phase 1 (`Pg04Ledger`), A-07 (`notify_decision`), A-09 (R12), A-11 (interop tool)
 - **Current phase:** ROUND TWO. The Lane A spine is built and tested. Integration rulings R1–R11 are issued.
 - **Role:** foreman/dispatcher. I own `docs/status/READY_QUEUE.md` and `ACTIVE_WORK.md` (`docs/COORDINATION.md`).
 - **Started:** 2026-10-06
@@ -109,6 +109,18 @@ None new. MICHAEL_DECISIONS #1–#5 are unchanged; none blocks the dry-run MVP.
 - Interop baseline (`tools/interop_check.py`): every lane differs only on numbers. The conformance tasks are B-02, C-02, D-02, E-01, F-02 and G-01.
 - The spine conforms: migration `0003`. Tests: **142 passed, 0 failed**.
 - The foreman loop is published: `docs/COORDINATION.md`, `READY_QUEUE.md`, `ACTIVE_WORK.md`, and pointers in START_HERE.md and AGENT_HANDOFF.md.
+
+## Wave two, continued (13:05)
+- **F-13 CLOSED.** Lane D's real chain verifies with the pure-Python reference (hard gate in `tests/integration/test_state04_adapter.py`).
+- **F-14 CLOSED.** All 6 Python lanes pass 10/10 vectors and 6/6 rejections, with byte-identical vendored copies.
+- New rulings:
+  - R12: lane D's strict edge table is canonical; D-05 removes the accommodated edges.
+  - R13: a PASS resting only on priors goes to RESEARCHING.
+- **Provenance correction:** every one of my Round Two commits up to `bf215b2` was recorded as "Agent 07 Marketing" because of the shared git config.
+  - The correction-of-record receipt is pushed.
+  - All commits since `c5c7c1c` use an explicit identity.
+  - X-01 (the launcher fix) is an operator item.
+- Tests: 146 passed, 1 xfailed (the deliberate D-05 gate), plus the lane-D integration suite.
 
 ## Next action (superseded by READY_QUEUE.md)
 1. On 04's `0005`: port `ledger.py`/`spine.py` onto `mbos_state.StateStore` (R1/R2), with A1–A10 passing unchanged.
