@@ -4,15 +4,19 @@ Agent: 03
 Role: Economics / Scoring (Round-Two build lane C)
 Branch: research/agent-03-economics
 Worktree: /home/michaelos/business-os-worktrees/agent-03-economics
-State: WORKING
+State: WAITING
 Current phase: ROUND TWO, wave two. Claimed task: RESEARCH/estimate producer (lane C)
 Started: 2026-10-06
-Last updated: 2026-10-07 (C-02 done; C-03 claimed)
+Last updated: 2026-10-07 (C-01, C-02, C-03 done; WAITING: no READY lane-C task)
 
 ## Claimed work (wave two). Foreman loop: `docs/COORDINATION.md` @ agent-01 `99e9ec0`
-Claimed: C-03
-Done: C-01 @ 42fed5e; C-02 @ 247c036
-Queue (lane C, after C-03): none READY. Next: Proposed tasks P-03-01/P-03-02, pending triage
+Claimed: (none)
+Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6
+Waiting on:
+- Agent 01 triage of proposed tasks P-03-01 (sold-comps feed, lanes B + C) and P-03-02 (prior-only PASS routing, lanes A + C)
+- A-05 (Agent 01 wires C-01 into the workflow). Lane C will answer any interface questions.
+
+The READY_QUEUE @ `bf215b2` has no READY task for lane C or ANY.
 
 - **C-01**, the RESEARCH/estimate producer, fills `Item.economics` from normalized fields, comps evidence and category priors, with provenance per estimate. It is deterministic and does no LLM arithmetic.
   - Claimed at `b923852`; confirmed CLAIMED in READY_QUEUE @ `99e9ec0`.
@@ -34,6 +38,13 @@ Queue (lane C, after C-03): none READY. Next: Proposed tasks P-03-01/P-03-02, pe
 - **Interop row 03 = 10/10 CONFORMS** (Agent 01's own tool, fresh clone, @ `247c036`).
 - **Golden re-baseline.** All 13 `inputs_hash` values and the `config_hash` are unchanged under MBOS-CJSON-1. Only the version string and the ids seeded by it changed: no number, no verdict. The 13 goldens replay.
 - **FYI Agent 01 (not lane C):** in the same interop run, row 06 reported "not found on branch" and row 07 reported 8/10.
+
+### C-03 result (DONE @ `22b49e6`; receipt `docs/receipts/2026-10-07-c03-versioned-ids.md`)
+- The v1.1.0 schemas now have versioned `$id`s: `https://michael-business-os/schemas/agent-03/v1.1.0/{opportunity,service-job,scorecard}.schema.json`.
+- They coexist with the v1.0.0 copies Agent 01 vendored.
+- Goldens and estimated Items validate against both frozen Item v1.0.0 and v1.1.0.
+- 104 tests pass.
+- **Agent 01:** re-vendor @ `22b49e6` under ADR-0009 item 6.
 
 ## Proposed tasks (for Agent 01 to triage)
 - **P-03-01 (lanes B + C): sold-comps feed.** Every real flip from eBay Browse (active listings only) stays `insufficient` until a sold-comps source exists. Options for 02:
