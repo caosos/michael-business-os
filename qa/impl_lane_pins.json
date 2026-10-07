@@ -1,6 +1,7 @@
 {
- "note": "Commits of the lane components installed/extracted for the release-candidate run (git archive, never merged). G-06: 05 = E-13 head e6afc28; 01 = f8407c9; 04 = 92d52b1 (D-16).",
- "mbos_01": "f8407c9e9f264bd04d597b3c8fde292743e160c7",
- "lane_d_04": "92d52b18c4034f669d89794c053e5260a0eaa605",
- "lane_e_05": "e6afc28b2355cc81e746ddf1706c528c4dfff5bb"
+ "note": "G-07 release-candidate + card runs (git archive, never merged): 01 mbos 2d4e8dd, 04 c97ba6b (through 0016), 05 87f0b53 (E-15, policy w1.8). 03's engine is NOT in this stack (the RC uses 01's placeholder scorer); its head is recorded for reference only.",
+ "mbos_01": "2d4e8dd9914c87f1b0836652990557da962baa44",
+ "lane_d_04": "c97ba6bb78bb20c3fdbcbebbc1f78d044c5d3ee8",
+ "lane_e_05": "87f0b53eecfc92a918ac72fb0da84a5270f8032b",
+ "lane_c_03_not_installed": "3d6212c3b1b5441ee4de4e63486f5e28a8e02a7e"
 }

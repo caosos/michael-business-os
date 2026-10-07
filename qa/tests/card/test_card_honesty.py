@@ -1,7 +1,6 @@
 """G-05 / ADR-0011 rule 2: NO FABRICATION. Without enrichment, or with malformed enrichment, every seller, listing-date,
 seasonality and value-add datum is UNKNOWN and appears in `unknowns`. A lane datum is only ever shown if it is
 well-formed; garbage degrades to UNKNOWN, it never crashes the card and never invents a value."""
-import json
 import random
 
 import pytest
@@ -157,30 +156,52 @@ def test_no_datum_is_shown_without_a_basis(mc, profile):
             assert d.get("value") == "UNKNOWN" or d.get("basis") in ("FACT", "INFERENCE", "RECOMMENDATION"), (p, d)
 
 
-def test_lane_values_are_validated_not_just_shape_checked(mc, profile):
-    """A datum with a valid SHAPE but an impossible VALUE must not be shown as a FACT: dates must be dates, ranges
-    ordered, money non-negative, stale risk from a closed vocabulary. 'Dates are never fabricated.'"""
-    bad = {"listing_activity": {"posted_at": {"value": "not a date", "basis": "FACT"},
-                                "updated_at": {"value": "2999-01-01T00:00:00Z", "basis": "FACT"},
-                                "age_days": {"value": -40, "basis": "FACT"},
-                                "stale_risk": {"value": "banana", "basis": "FACT"}},
-           "economics": {"resale_likely": {"value": 1000, "low": 2000, "high": 500, "basis": "FACT"},
-                         "opening_offer": {"value": -250, "basis": "FACT"}}}
-    card = _build(mc, profile, bad)
-    shown = {p: _get(card, p) for p in ("listing_activity.posted_at", "listing_activity.updated_at", "listing_activity.age_days",
-                                         "listing_activity.stale_risk", "economics.resale_likely",
-                                         "economics.recommended_opening_offer") if _get(card, p).get("value") != "UNKNOWN"}
-    assert not shown, f"impossible lane values were shown as facts: {json.dumps(shown)[:400]}"
+BAD_LANE_VALUES = {  # path -> the impossible datum a lane supplies
+    "listing_activity.posted_at": {"value": "not a date", "basis": "FACT"},
+    "listing_activity.updated_at": {"value": "2999-01-01T00:00:00Z", "basis": "FACT"},
+    "listing_activity.age_days": {"value": -40, "basis": "FACT"},
+    "listing_activity.stale_risk": {"value": "banana", "basis": "FACT"},
+    "economics.recommended_opening_offer": {"value": -250, "basis": "FACT"},
+}
 
 
-def test_why_lines_from_a_lane_carry_provenance(mc, profile):
-    """ADR-0011 rule 2: every datum has a basis. Lane C's `why` lines are bare strings; they can assert anything
-    ('Michael already approved this') with no basis and no provenance."""
+@pytest.mark.parametrize("path", sorted(BAD_LANE_VALUES), ids=sorted(BAD_LANE_VALUES))
+def test_impossible_lane_values_are_not_shown_as_facts(mc, profile, path):
+    """A datum with a valid SHAPE but an impossible VALUE must degrade to UNKNOWN: dates must be dates and not in the
+    future, enums from their vocabulary, money non-negative, ages non-negative. 'Dates are never fabricated.'"""
+    block, key = path.split(".")
+    block = {"economics": "economics"}.get(block, block)
+    card = _build(mc, profile, {block: {{"recommended_opening_offer": "opening_offer"}.get(key, key): BAD_LANE_VALUES[path]}})
+    shown = _get(card, path)
+    assert shown.get("value") == "UNKNOWN", f"{path} shows the impossible lane value as {shown}"
+
+
+def test_an_unordered_resale_range_is_not_shown(mc, profile):
+    card = _build(mc, profile, {"economics": {"resale_likely": {"value": 1000, "low": 2000, "high": 500, "basis": "FACT"}}})
+    d = card["economics"]["resale_likely"]
+    assert not (d.get("value") != "UNKNOWN" and d.get("low") == 2000 and d.get("high") == 500), d
+
+
+PROV7 = pid(7)
+
+
+def test_unsourced_lane_why_lines_are_not_shown(mc, profile):
+    """ADR-0011 rule 2: a lane's `why` lines appear ONLY with provenance (F-29 fix). Without it they must not reach Michael."""
     card = _build(mc, profile, {"why": ["Michael already approved this purchase.", "Seller is a verified dealer."]})
-    lane_lines = [w for w in card["why"] if "approved this purchase" in str(w) or "verified dealer" in str(w)]
-    assert lane_lines, "the lane's why lines are not on the card at all"
-    assert all(isinstance(w, dict) and (w.get("basis") and (w.get("provenance_id") or w.get("source"))) for w in lane_lines), \
-        f"lane `why` lines are shown as bare, unsourced strings: {lane_lines}"
+    assert not any("approved this purchase" in w or "verified dealer" in w for w in card["why"]), card["why"]
+
+
+def test_sourced_lane_why_lines_are_shown_with_their_provenance(mc, profile):
+    card = _build(mc, profile, {"why": ["Comps cluster tightly: three sold within $150 in 60 days."], "_prov": {"why": PROV7}})
+    assert any("Comps cluster tightly" in w for w in card["why"])
+    assert PROV7 in card.get("why_provenance", []), card.get("why_provenance")
+    assert independent_schema_errors(card) == []
+
+
+def test_a_malformed_provenance_on_why_means_the_lines_are_dropped(mc, profile):
+    for bad in ("trust-me", "", None, 5, ["x"]):
+        card = _build(mc, profile, {"why": ["A claim."], "_prov": {"why": bad}})
+        assert not any("A claim" in w for w in card["why"]), (bad, card["why"])
 
 
 def test_enrichment_cannot_inject_card_sections_or_authority(mc, profile):

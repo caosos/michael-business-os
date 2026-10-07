@@ -1,0 +1,88 @@
+{
+  "apply_via": "operator: LiteLLM proxy key API (/key/generate, /key/update). Not called by this code.",
+  "checksum": "sha256:aae85b09fe8943b2910223764cd6419869d69f9b59120f60bd300ae743466bf7",
+  "frozen": false,
+  "generated_at": "2026-10-07T22:50:18.727583Z",
+  "keys": [
+    {
+      "budget_duration": "1d",
+      "key_alias": "mbos-agent-01-coordinator",
+      "max_budget": 2.0,
+      "metadata": {
+        "agent_id": "agent-01-coordinator",
+        "max_tokens_per_call": 4096,
+        "policy_daily_usd": 2.0,
+        "zeroed_by": []
+      }
+    },
+    {
+      "budget_duration": "1d",
+      "key_alias": "mbos-agent-02-opportunity",
+      "max_budget": 2.0,
+      "metadata": {
+        "agent_id": "agent-02-opportunity",
+        "max_tokens_per_call": 4096,
+        "policy_daily_usd": 2.0,
+        "zeroed_by": []
+      }
+    },
+    {
+      "budget_duration": "1d",
+      "key_alias": "mbos-agent-03-economics",
+      "max_budget": 2.0,
+      "metadata": {
+        "agent_id": "agent-03-economics",
+        "max_tokens_per_call": 4096,
+        "policy_daily_usd": 2.0,
+        "zeroed_by": []
+      }
+    },
+    {
+      "budget_duration": "1d",
+      "key_alias": "mbos-agent-04-state",
+      "max_budget": 2.0,
+      "metadata": {
+        "agent_id": "agent-04-state",
+        "max_tokens_per_call": 4096,
+        "policy_daily_usd": 2.0,
+        "zeroed_by": []
+      }
+    },
+    {
+      "budget_duration": "1d",
+      "key_alias": "mbos-agent-05-governance",
+      "max_budget": 2.0,
+      "metadata": {
+        "agent_id": "agent-05-governance",
+        "max_tokens_per_call": 4096,
+        "policy_daily_usd": 2.0,
+        "zeroed_by": []
+      }
+    },
+    {
+      "budget_duration": "1d",
+      "key_alias": "mbos-agent-06-communications",
+      "max_budget": 2.0,
+      "metadata": {
+        "agent_id": "agent-06-communications",
+        "max_tokens_per_call": 4096,
+        "policy_daily_usd": 2.0,
+        "zeroed_by": []
+      }
+    },
+    {
+      "budget_duration": "1d",
+      "key_alias": "mbos-agent-07-marketing",
+      "max_budget": 2.0,
+      "metadata": {
+        "agent_id": "agent-07-marketing",
+        "max_tokens_per_call": 4096,
+        "policy_daily_usd": 2.0,
+        "zeroed_by": []
+      }
+    }
+  ],
+  "panic_revision": 2,
+  "policy_version": "2026.10.07-w1.8",
+  "schema": "mbos.litellm.keys/1"
+}

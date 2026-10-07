@@ -5,6 +5,7 @@
   python -m mbos_qa interop                        cross-lane checks against peers' actual code
   python -m mbos_qa builds --workdir DIR            run every lane's own suite from a clean archive
   python -m mbos_qa spine                          A1–A10 spec suite against Agent 01's REAL spine (G-02)
+  python -m mbos_qa install-pins                   (re)install mbos + mbos_governance from the pins and verify byte identity
   python -m mbos_qa card                           G-05: Deal Sniffer card acceptance (pure + reference + RC) → CARD_ACCEPTANCE.md
   python -m mbos_qa run [--drift-ref REF]          everything; writes docs/qa/ACCEPTANCE_REPORT.md
   python -m mbos_qa pin --ref COMMIT               re-pin contracts after an Agent 01 semver bump
@@ -331,7 +332,8 @@ def _card_finding(module: str, name: str) -> str:
         return "F-26" if pid in CARD_CRASH_IDS else "F-27"
     if "one_malformed_enrichment_block" in n:
         return "F-27" if "bad-provenance" in n else "F-26"
-    table = [("fuzzed_enrichment", "F-26"), ("lane_values_are_validated", "F-28"), ("why_lines_from_a_lane", "F-29"),
+    table = [("fuzzed_enrichment", "F-26"), ("lane_values_are_validated", "F-28"), ("impossible_lane_values", "F-28"),
+             ("unordered_resale", "F-28"), ("headline_status", "F-31"), ("lane_why_lines", "F-30"), ("why_lines_from_a_lane", "F-29"),
              ("lint", "F-30"), ("elementary", "F-30"), ("junk_source", "F-30"), ("model_specific", "F-30"), ("basis_fact", "F-30"),
              ("generic_advice", "F-30"), ("contact_sent", "F-31"), ("dry_run", "F-31"), ("contact_approved", "F-32"),
              ("seller_reply", "F-32"), ("recorded_seller_reply", "F-32"), ("attribution", "F-32"), ("closed", "F-32"),
@@ -477,6 +479,12 @@ def cmd_spine(release: bool = False) -> int:
         L += [f"## Verdict: **{verdict}**", "",
               f"{passed} passed, {failed} failed, {xfailed} strict-xfail known gaps, {na} not applicable; "
               f"{len(rows)} cases, {secs}s.", ""]
+        L += ["**Scope of this verdict.** READY means: for the DRY-RUN MVP stack above, every acceptance test in this suite passes, "
+              "stably, and the safety invariants hold. It is not evidence about anything that does not exist in the stack: live "
+              "sending or publishing (there is no live effector; the provider is a dry-run simulator), the LiteLLM-enforced LLM cap "
+              "(A8 is tested against `LedgerLLMBudget`), real egress cut / credential revocation on PANIC, lane C's real scoring "
+              "engine (the stack uses 01's placeholder scorer), real discovery sources, or the Operator UI. Card quality is judged "
+              "separately in [CARD_ACCEPTANCE.md](CARD_ACCEPTANCE.md), which still has open items (it is a read-only view, not a safety invariant).", ""]
         if failed:
             L += ["Blocking findings: " + ", ".join(blockers) + (f"; **unmapped failures: {unmapped}**" if unmapped else "")
                   + ". Details in [ACCEPTANCE_REPORT.md](ACCEPTANCE_REPORT.md) (findings table).", ""]
@@ -509,9 +517,12 @@ def cmd_spine(release: bool = False) -> int:
               "| F-24 stale approval executes after a freeze | 05 E-13 | A9 8/8 incl. the replay regression |",
               "| F-25 crash mid-ACT | R22 + 05 E-13 | A5 5/5: no duplicate; truthful settlement (executed after a send, failed+RECONCILED before) |",
               "| F-22 no publish grant | 05 E-13 | G1/G4 publish cases pass (with step-up) |",
-              "| F-23 PDP denial leaves the item awaiting Michael | 01 R21 | regression test: ungranted capability → rejected, item not awaiting |",
+              "| F-23 PDP denial leaves the item awaiting Michael | 01 R21 | an ungranted capability leaves no live request and the item not awaiting |",
+              "| F-40 a YES the policy will refuse is accepted, then lost | 01 R24 + 05 E-15 | `test_a_yes_the_policy_will_refuse_is_refused_when_it_is_given` passes: a YES without step-up is refused at decision time |",
+              "| F-41 broad propose grants on one shared identity | 05 w1.8 + 01 lane tags | policy data: nobody holds money.payment.send / price.change / commit.external; a publishing proposal is stamped `proposed_by: agent-07-marketing`, email falls back to the spine identity |",
               "| F-16 packaging, F-18/19/20/21 | 01 A-10, A-13, … | verified at earlier pins |",
-              "", "New this round (open): F-40 above; F-41 (least privilege, 05) is an observation. Card defects are in [CARD_ACCEPTANCE.md](CARD_ACCEPTANCE.md).", ""]
+              "", ("Open in this suite: " + ", ".join(reds) + "." if reds else "Nothing is open in this acceptance suite.")
+              + " Card defects are tracked separately in [CARD_ACCEPTANCE.md](CARD_ACCEPTANCE.md).", ""]
     L += ["| Acceptance test | Result | Cases |", "|---|---|---:|"]
     for prefix, title_ in SPEC_GROUPS.items():
         g = [r for r in rows if r[0] == prefix or r[0].startswith(prefix + "_")]
@@ -553,6 +564,20 @@ def cmd_spine(release: bool = False) -> int:
     out.write_text("\n".join(L) + "\n")
     print(f"wrote {out}: {passed} passed, {failed} failed, {xfailed} xfail")
     return 0 if pytest_rc == 0 and not failed else 1
+
+
+FINDING_STATUS = {  # verified by the suites at the pins in qa/impl_lane_pins.json (G-07)
+    "F-22": "FIXED", "F-23": "FIXED", "F-24": "FIXED", "F-25": "FIXED (R22)", "F-40": "FIXED", "F-41": "FIXED",
+    "F-16": "FIXED", "F-18": "FIXED", "F-19": "FIXED", "F-20": "FIXED", "F-21": "FIXED",
+    "F-26": "FIXED", "F-27": "PARTIAL: a risk with a malformed `source` leaves a FACT risk that validate_card rejects",
+    "F-28": "PARTIAL: enums, ranges and negatives fixed; `posted_at`/`updated_at` still accept 'not a date' and a 2999 date as FACT",
+    "F-29": "FIXED", "F-30": "PARTIAL: 3 of 42 phrasings still pass; no model-specific marker in the contract; a sourced `why` is not linted",
+    "F-31": "PARTIAL: the row and the recommendation say dry-run; the headline 'Contact Sent / [now: CONTACT SENT]' does not",
+    "F-32": "FIXED", "F-33": "FIXED", "F-34": "FIXED", "F-35": "FIXED",
+    "F-36": "OPEN: `discover` has no per-record isolation around `normalize_step`; one NUL makes the reference normalizer raise (unpicklable CanonicalError) and aborts the whole batch. `ingest`'s scrub and savepoint never run",
+    "F-37": "FIXED", "F-38": "FIXED", "F-39": "ACCEPTED (R25)",
+    "F-13": "FIXED", "F-14": "FIXED",
+}
 
 
 def write_acceptance_report(contract_rep, gaps, test_rc, rows, e2e_ok, drift_ref):
@@ -598,8 +623,10 @@ def write_acceptance_report(contract_rep, gaps, test_rc, rows, e2e_ok, drift_ref
     lines += ["", "## Contract gap probes (the schema ACCEPTS these; ADR prose forbids them)", "",
               "| Probe | Status |", "|---|---|"]
     lines += [f"| {g.name} | {g.detail} |" for g in gaps]
-    lines += ["", "## Findings for other lanes", "", "| ID | Tag | For | Finding | Recommendation |", "|---|---|---|---|---|"]
-    lines += [f"| {i} | {tag} | {who} | {f} | {rec} |" for i, tag, who, f, rec in FINDINGS]
+    lines += ["", "## Findings for other lanes", "",
+              "Status is as verified at the latest pins (`qa/impl_lane_pins.json`); FIXED means a test that failed now passes.", "",
+              "| ID | Status | Tag | For | Finding | Recommendation |", "|---|---|---|---|---|---|"]
+    lines += [f"| {i} | **{FINDING_STATUS.get(i, 'see text')}** | {tag} | {who} | {f} | {rec} |" for i, tag, who, f, rec in FINDINGS]
     lines += ["", "## Every test case", "", "| Module | Test | Outcome |", "|---|---|---|"]
     lines += [f"| {m} | `{n}` | {o} |" for m, n, o, _ in rows]
     lines += ["", "## How to reproduce", "", "```bash",
@@ -640,6 +667,7 @@ def main(argv=None):
     sub.add_parser("e2e")
     sub.add_parser("interop")
     sub.add_parser("card")
+    sub.add_parser("install-pins")
     sp = sub.add_parser("spine")
     sp.add_argument("--rc", action="store_true",
                     help="release-candidate stack: state_backend=lane_d + gateway_mode=lane_e → docs/qa/RELEASE_CANDIDATE.md")
@@ -661,6 +689,13 @@ def main(argv=None):
         for c in rep.checks:
             print(f"{c.status:7} {c.group} · {c.name} — {c.detail[:140]}")
         return 0
+    if a.cmd == "install-pins":
+        from . import pincheck
+
+        print("installed:", ", ".join(pincheck.install_pins()))
+        bad = pincheck.check()
+        print("byte-identical to the pins" if not bad else "MISMATCH: " + "; ".join(bad[:5]))
+        return 1 if bad else 0
     if a.cmd == "card":
         return cmd_card()
     if a.cmd == "spine":

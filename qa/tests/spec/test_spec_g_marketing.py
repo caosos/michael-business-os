@@ -131,10 +131,11 @@ def test_a_pdp_denied_proposal_never_leaves_the_item_awaiting_michael(qa):
         time.sleep(3.0)
     finally:
         comps.planner = saved
-    reqs = qa.areqs(item_id=item_id)
-    assert reqs and reqs[-1]["status"] == "rejected", f"the PDP did not deny the ungranted capability: {reqs}"
+    live = ("pending_approval", "held", "approved", "executing", "executed")
+    assert not qa.areqs(item_id=item_id, status=live), f"an ungranted capability produced a live request: {qa.areqs(item_id=item_id)}"
+    # F-41 model: if nobody may propose it, NO request is created; older heads created a `rejected` one. Either is a denial.
+    assert all(r["status"] == "rejected" for r in qa.areqs(item_id=item_id))
     assert qa.item(item_id)["state"] != "AWAITING_APPROVAL", "AWAITING_APPROVAL with no request to approve"
-    assert not qa.areqs(item_id=item_id, status=("pending_approval", "held"))
 
 
 @pytest.mark.skipif(not LANE_E, reason="step-up policy comes from lane E")
@@ -147,6 +148,24 @@ def test_a_yes_the_policy_will_refuse_is_refused_when_it_is_given(qa, planner07)
         qa.decide(areq["action_request_id"], "YES", step_up=False)
     assert qa.item(item_id)["state"] == "AWAITING_APPROVAL"
     assert qa.areq(areq["action_request_id"])["status"] == "pending_approval"
+
+
+@pytest.mark.skipif(not LANE_E, reason="grants and proposer identities come from lane E's policy")
+def test_f41_no_agent_holds_the_unneeded_money_grants_and_drafting_lanes_propose_as_themselves(qa, planner07):
+    """F-41 (05's w1.8 policy + 01's lane-tagged proposals), verified from the policy data AND the live request."""
+    import json
+    import pathlib
+
+    from mbos_qa.impl_spine import policy_path
+
+    policy = json.loads(pathlib.Path(policy_path()).read_text())
+    holders = {cap: [a for a, g in policy["agent_grants"].items() if cap in g]
+               for cap in ("money.payment.send", "price.change", "commit.external")}
+    assert holders == {"money.payment.send": [], "price.change": [], "commit.external": []}, holders
+    item_id, areq = _request(qa, "publish")  # a flip → publish.listing.create drafted by lane 07
+    assert areq["proposed_by"] == "agent-07-marketing", f"publishing was proposed by {areq['proposed_by']!r}, not its drafting lane"
+    item2, areq2 = _request(qa, "email")  # lane 07 holds no comms grant → falls back to the spine identity
+    assert areq2["proposed_by"] == "agent-01-coordinator", areq2["proposed_by"]
 
 
 @pytest.mark.skip(reason="G3: wave one has no review-request path in the spine or in lane 06/07 code.")

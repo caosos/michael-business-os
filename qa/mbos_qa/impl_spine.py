@@ -43,6 +43,10 @@ LANE_PINS = json.loads((QA_ROOT / "impl_lane_pins.json").read_text())
 
 import sqlalchemy as sa  # noqa: E402
 
+from . import pincheck  # noqa: E402
+
+pincheck.require()  # never test stale code (pip keeps an old copy when the version string is unchanged)
+
 STEP_UP = {"method": "qa_step_up", "step_up": True}
 STATE_BACKEND = os.environ.get("MBOS_QA_STATE_BACKEND", "reference")
 GATEWAY_MODE = os.environ.get("MBOS_QA_GATEWAY_MODE", "reference")
@@ -458,11 +462,7 @@ class LedgerDB:
                 self.comps = self.comps.with_defaults("lane_d")
             else:
                 self.comps = Components().with_defaults("lane_d")
-            from mbos import spine_d
-
-            with self.engine.begin() as c:
-                spine_d.set_kill_switch(c, "global_freeze", False,
-                                        reason="QA bootstrap: Michael releases the initial FROZEN state")
+            self.panic("L3", None, engage=False, reason="QA bootstrap: Michael releases the initial FROZEN state")
         else:
             self.url = new_database("qa_ledger")
             self.settings = Settings(database_url=self.url, system_database_url=self.url)
@@ -471,6 +471,23 @@ class LedgerDB:
             migrate(self.engine)
             self.comps = Components().with_defaults()
         configure(qa.rt.settings)  # never leave global settings pointing away from the runtime
+
+    def panic(self, level: str, target: str | None, *, engage: bool, reason: str = "QA drill") -> None:
+        """Engage/release PANIC on THIS ledger database. On the lane E stack `spine_d.set_kill_switch` goes through the
+        SHARED runtime's governance object (A-18), so a fresh ledger DB must use its own `self.gov`."""
+        if LANE_E:
+            from mbos_governance import spine_adapter as gov_sa
+
+            fn = gov_sa.engage_panic if engage else gov_sa.release_panic
+            out = fn(self.gov, level, target, "michael", reason)
+            if isinstance(out, dict) and out.get("error"):
+                raise RuntimeError(f"PANIC {'engage' if engage else 'release'} {level} failed: {out['error']}")
+            return
+        from mbos import spine_d
+
+        key = "global_freeze" if level == "L3" else (f"capability_freeze:{target}" if level == "L2" else f"agent_freeze:{target}")
+        with self.engine.begin() as c:
+            spine_d.set_kill_switch(c, key, engage, reason=reason)
 
     def _use(self):
         from mbos.config import configure
@@ -586,8 +603,7 @@ class LedgerDB:
         """QA HOOK (owner): damage the PANIC state the gateway reads, to prove it fails closed."""
         if LANE_E:  # lane E reads `mbos.panic_read()` over lane D's sealed `mbos.panic_state`
             if how == "L3 frozen":
-                with self.engine.begin() as c:
-                    _spine_for_runtime().set_kill_switch(c, "global_freeze", True, reason="QA drill")
+                self.panic("L3", None, engage=True)
             elif how == "state emptied":
                 self.superuser_sql("ALTER TABLE mbos.panic_state DISABLE TRIGGER USER")
                 self.superuser_sql("DELETE FROM mbos.panic_state")
@@ -617,19 +633,12 @@ class LedgerDB:
     def freeze_scoped(self, level: str, target: str) -> None:
         key = f"capability_freeze:{target}" if level == "L2" else f"agent_freeze:{target}"
         if LANE_D:
-            with self.engine.begin() as c:
-                _spine_for_runtime().set_kill_switch(c, key, True, reason="QA drill")
+            self.panic(level, target, engage=True)
         else:
             self.superuser_sql("INSERT INTO mbos.governance_flags (key, value) VALUES (:k, '{\"frozen\": true}')", k=key)
 
     def dispose(self) -> None:
         self.engine.dispose()
-
-
-def _spine_for_runtime():
-    from mbos import spine_d
-
-    return spine_d
 
 
 # ------------------------------------------------------------------ out-of-process crash / restart (A5, A6)

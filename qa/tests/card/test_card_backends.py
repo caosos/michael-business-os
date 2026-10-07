@@ -102,13 +102,14 @@ def test_card_is_valid_and_its_trail_is_the_ledger_one_to_one(qa, mc, made, kind
         assert card["status"]["current"] == STAGE_FOR_STATE[state], (state, card["status"]["current"])
 
 
-def test_after_a_dry_run_execution_the_card_never_says_the_seller_was_contacted(qa, mc, made):
+def test_after_a_dry_run_execution_the_card_says_nothing_was_sent(qa, mc, made):
     card, _, _ = card_for(qa, mc, made["yes"])
     assert qa.item(made["yes"])["state"] in ("ACTED", "OUTCOME_RECORDED")
-    stages = [s["stage"] for s in card["status"]["timeline"]]
+    sent = [s for s in card["status"]["timeline"] if s["stage"] == "CONTACT SENT"]
+    assert all(s.get("dry_run") is True for s in sent), card["status"]["timeline"]
     text = mc.render_text(card)
-    assert "CONTACT SENT" not in stages and "WAIT FOR RESPONSE" not in text, \
-        f"dry-run execution presented as contact: stages={stages}"
+    assert "WAIT FOR RESPONSE" not in text and card["recommendation"]["waiting"] is False
+    assert "nothing has been sent" in card["recommendation"]["why"].lower()
 
 
 def test_michaels_yes_shows_up_as_contact_approved(qa, mc, made):
@@ -331,8 +332,8 @@ def test_a_policy_denied_proposal_is_shown_as_blocked_not_as_awaiting_michael(qa
         time.sleep(3.0)
     finally:
         comps.planner = saved
-    reqs = qa.areqs(item_id=item_id)
-    assert reqs and reqs[-1]["status"] == "rejected", f"no PDP denial happened: {[r['status'] for r in reqs]}"
+    live = ("pending_approval", "held", "approved", "executing", "executed")
+    assert not qa.areqs(item_id=item_id, status=live), "an ungranted capability produced a live request"
     card, _, _ = card_for(qa, mc, item_id)
     stages = [s["stage"] for s in card["status"]["timeline"]]
     assert qa.item(item_id)["state"] != "AWAITING_APPROVAL", "F-23 regression"

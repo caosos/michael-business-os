@@ -74,6 +74,9 @@ def areq_doc(item_id: str, cap="comms.email.send", status="pending_approval", n=
 
 @pytest.fixture(scope="session")
 def mc():
+    from mbos_qa import pincheck
+
+    pincheck.require()
     return importlib.import_module("mbos.card")
 
 

@@ -29,10 +29,18 @@ def test_card_has_no_decision_or_authority_fields(mc, profile):
 
 
 def test_recommendation_uses_its_own_vocabulary_not_michaels(mc, profile):
+    """ADR-0004 rule 3 (never conflate the vocabularies) as amended by Agent 01's ruling R25: on a card, HOLD means
+    'wait', Michael's decision is still on the ActionRequest. So HOLD is the one allowed overlap, and then the text
+    must say why it waits and must not claim it was parked by Michael unless the item really is HELD."""
     for state in ("DISCOVERED", "RECOMMENDED", "AWAITING_APPROVAL", "HELD", "APPROVED", "ACTED", "ARCHIVED"):
         item, rs, ar = world(state=state)
         r = mc.build_card(item, rs, ar, None, profile=profile)["recommendation"]
-        assert r["action"] in RECS and r["action"] not in DECISIONS, (state, r["action"])
+        assert r["action"] in RECS, (state, r["action"])
+        assert r["action"] not in DECISIONS - {"HOLD"}, (state, r["action"])
+        if r["action"] == "HOLD" and state != "HELD":
+            assert "parked at michael" not in r["why"].lower(), (state, r["why"])
+        if r["action"] == "HOLD":
+            assert len(r["why"]) > 20
 
 
 def test_recommendation_is_derived_from_the_machine_verdict_and_the_live_request(mc, profile):

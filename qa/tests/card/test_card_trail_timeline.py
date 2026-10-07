@@ -111,21 +111,38 @@ def test_an_attribution_outcome_does_not_close_a_live_lead(mc, profile):
     assert card["recommendation"]["action"] != "PASS" or card["status"]["current"] != "CLOSED"
 
 
-def test_a_dry_run_execution_is_not_reported_as_contact_sent(mc, profile):
-    """Wave one is DRY-RUN: nothing leaves the system. A timeline stage 'CONTACT SENT' (and a recommendation that says
-    'Already contacted; waiting on the seller's reply') tells Michael a seller was contacted when no one was."""
+def _dry_run_card(mc, profile):
     a = areq_doc(base_item()["item_id"], status="executed")
     item, rs, _ = world(state="ACTED", flow=("DISCOVERED", "NORMALIZED", "RESEARCHING", "SCORED", "RECOMMENDED",
                                              "AWAITING_APPROVAL", "APPROVED", "ACTING", "ACTED"))
     rs.append(receipt(70, "ACTION_EXECUTED", item["item_id"], areq=a["action_request_id"], capability="comms.email.send",
                       intent="DRY-RUN comms.email.send executed", effector_response={"status": "simulated", "dry_run": True,
                                                                                      "provider": "dry-run"}))
-    card = mc.build_card(item, rs, [a], None, profile=profile)
-    stages = [s["stage"] for s in card["status"]["timeline"]]
+    return mc.build_card(item, rs, [a], None, profile=profile)
+
+
+def test_a_dry_run_execution_is_labelled_and_never_waits_for_a_seller(mc, profile):
+    """Wave one is DRY-RUN: nothing leaves the system. The timeline row must say so, the recommendation must not wait
+    for a reply, and must say nothing was sent (F-31 fix)."""
+    card = _dry_run_card(mc, profile)
+    sent = [s for s in card["status"]["timeline"] if s["stage"] == "CONTACT SENT"]
+    assert sent and all(s.get("dry_run") is True for s in sent), card["status"]["timeline"]
+    assert card["recommendation"]["waiting"] is False
+    why = card["recommendation"]["why"].lower()
+    assert "nothing has been sent" in why or "not sent" in why, why
     text = mc.render_text(card)
-    assert "CONTACT SENT" not in stages, f"dry-run shown as CONTACT SENT: {stages}"
-    assert "Already contacted" not in card["recommendation"]["why"] and "WAIT FOR RESPONSE" not in text, \
-        "the card tells Michael the seller was contacted (and to wait) after a dry-run"
+    assert any("CONTACT SENT" in ln and "DRY-RUN" in ln for ln in text.split("\n")), "the stage row does not say DRY-RUN"
+    assert "WAIT FOR RESPONSE" not in text and "Already contacted" not in text
+
+
+def test_the_headline_status_never_says_contact_sent_without_saying_dry_run(mc, profile):
+    """Michael reads the 'SYSTEM STATUS' headline and '[now: ...]' first. The DRY-RUN label is on the detail row only;
+    the headline chain and `status.current` still read 'Contact Sent'."""
+    card = _dry_run_card(mc, profile)
+    text = mc.render_text(card)
+    head = next(ln for ln in text.split("\n") if ln.startswith("SYSTEM STATUS"))
+    assert "Contact Sent" not in head or "dry" in head.lower(), f"headline reads as a real send: {head!r}"
+    assert card["status"]["current"] != "CONTACT SENT" or "dry" in head.lower()
 
 
 def test_michaels_yes_on_a_contact_request_appears_as_contact_approved(mc, profile):

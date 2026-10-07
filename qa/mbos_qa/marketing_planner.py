@@ -16,6 +16,7 @@ from typing import Any
 from . import drafts
 
 ZERO = {"amount": 0, "currency": "USD"}
+LANE = "agent-07-marketing"  # F-41: drafting lanes propose as themselves; lane E's proposer_for() stamps proposed_by
 
 
 def _shape(item: dict[str, Any]) -> dict[str, Any]:
@@ -39,9 +40,9 @@ class MarketingPlanner:
                                             work_done="to be completed before posting", unknowns="listed as found")
             return [{"capability": "publish.listing.create", "reversibility": "partially_reversible",
                      "summary": f"Resale listing draft (manual-assist, DRY-RUN): {payload['content']['title']}",
-                     "estimated_cost": ZERO, "draft": payload}]
+                     "estimated_cost": ZERO, "draft": payload, "lane": LANE}]
         quote = (e.get("job") or {}).get("quoted_revenue") or 0
         payload = drafts.service_quote(shaped, price=round(float(quote)), scope="as described in your request")
         return [{"capability": "comms.email.send", "reversibility": "irreversible",
                  "summary": f"Quote reply draft (DRY-RUN): {payload['content']['subject']}",
-                 "estimated_cost": ZERO, "draft": payload}]
+                 "estimated_cost": ZERO, "draft": payload, "lane": LANE}]

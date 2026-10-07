@@ -88,5 +88,8 @@ def test_no_false_positives_on_legitimate_mechanic_language(mc, profile):
 
 def test_the_lint_also_covers_the_lane_why_lines(mc, profile):
     """Lane C's `why` is rendered to Michael verbatim; elementary advice there is the same defect."""
-    card = mc.build_card(*world(), {"why": ["Check compression first, then decide."]}, profile=profile)
-    assert mc.validate_card(card), "elementary advice in `why` is not linted"
+    from .conftest import pid
+
+    card = mc.build_card(*world(), {"why": ["Check compression first, then decide."], "_prov": {"why": pid(7)}}, profile=profile)
+    assert any("Check compression" in w for w in card["why"]), "the sourced why line is not on the card"
+    assert mc.validate_card(card), "elementary advice in a SOURCED `why` line passes validation"
