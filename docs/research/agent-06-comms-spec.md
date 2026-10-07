@@ -39,3 +39,8 @@ This document closes the open spec items from integration doc §10, row 06: (1) 
 - A future comms effector should write each check's result into `details.kind=comms`: `consent_check`, `dnc_check`, `send_window_check`, `first_message`, `disclosure_present`, `binding` and `template_hash`. `audit()` reads exactly those fields.
 - The planner (R9, `ActionPlanner`) can use `questions()` + `render()` to draft the payload, and `action_constraints()` to set tier, reversibility and category.
 - Pre-approving a template version is Michael's decision: a standing-rule Approval with step-up (MICHAEL_DECISIONS #5). Until then every template is `draft`, and a test forbids any template claiming approval.
+
+## Planner and effector (F-05, F-06)
+- `comms_spec/planner.py` `CommsActionPlanner` (an `ActionPlanner`) drafts **first contact only**, from the registry, with a `comms` block in each proposed action. Listing text is sanitized.
+- `comms_spec/effector.py` `CommsDryRunEffector` (an `Effector`) is exactly-once and fail-closed, sends only the frozen draft, and writes its checks to `effector_response.comms`.
+- On a spine run, `audit()` grades E1/E3/E6/E7 PASS, E2 DRY_RUN_EXEMPT and E5 not testable. The integration requests to A-13 are in `docs/receipts/2026-10-07-f06-comms-dry-run-effector.md`.

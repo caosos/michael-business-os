@@ -169,20 +169,33 @@ def audit(receipts: list[dict], stop_events: Iterable[dict] = ()) -> dict:
     {contact, stop_at, suppressed_at, sends_after}. Dry-run 'not_evaluated' checks are reported as
     DRY_RUN_EXEMPT, never as PASS."""
     thr = load("acceptance_thresholds")["tests"]
-    sends = [r for r in receipts if r.get("type") == "ACTION_EXECUTED" and (r.get("details") or {}).get("kind") == "comms"]
-    out: dict[str, Any] = {}
+    # A comms receipt's check block sits in `details` (once A-13 merges it) or in `effector_response.comms`
+    # (F-06 effector, today). Blocked attempts are recorded but are NOT sends.
+    sends, blocked = [], []
+    for r in receipts:
+        if r.get("type") != "ACTION_EXECUTED":
+            continue
+        d = r.get("details") or {}
+        block = d if "channel" in d else (r.get("effector_response") or {}).get("comms")
+        if not block or block.get("kind", d.get("kind")) != "comms":
+            continue
+        rr = {**r, "details": {**d, **block, "kind": "comms"}}
+        (blocked if (r.get("effector_response") or {}).get("status") == "blocked" else sends).append(rr)
+    out: dict[str, Any] = {"sends": len(sends), "blocked": len(blocked)}
 
     first = [r for r in sends if r["details"].get("first_message") or r["details"].get("channel") == "voice"]
     disclosed = [r for r in first if r["details"].get("disclosure_present") is True]
     out["E1"] = _ratio(len(disclosed), len(first), thr["E1"]["pass"]["min_ratio"])
 
     checks = [(r["details"].get("consent_check") or {}, r["details"].get("dnc_check") or {}) for r in sends]
-    if checks and all(c.get("result") == "not_evaluated" and d.get("result") == "not_evaluated" for c, d in checks) \
-            and all(r["effector_response"].get("dry_run") is True for r in sends):
-        out["E2"] = {"status": "DRY_RUN_EXEMPT", "n": len(sends)}
+    recorded = [c.get("result") not in (None, "not_evaluated") and d.get("result") not in (None, "not_evaluated")
+                for c, d in checks]
+    exempt = [c.get("result") == "not_evaluated" and r["effector_response"].get("dry_run") is True
+              for (c, _), r in zip(checks, sends)]
+    if checks and not all(recorded) and all(rec or ex for rec, ex in zip(recorded, exempt)):
+        out["E2"] = {"status": "DRY_RUN_EXEMPT", "n": len(sends), "exempt": sum(exempt)}
     else:
-        ok = sum(1 for c, d in checks if c.get("result") not in (None, "not_evaluated") and d.get("result") not in (None, "not_evaluated"))
-        out["E2"] = _ratio(ok, len(sends), thr["E2"]["pass"]["min_ratio"])
+        out["E2"] = _ratio(sum(recorded), len(sends), thr["E2"]["pass"]["min_ratio"])
 
     bad = [r["receipt_id"] for r in sends if (r["details"].get("send_window_check") or {}).get("ok") is False]
     out["E3"] = {"status": "PASS" if not bad else "FAIL", "violations": bad}
