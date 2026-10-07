@@ -372,7 +372,8 @@
       "type": "object",
       "required": [
         "default",
-        "allow"
+        "allow",
+        "catalog"
       ],
       "properties": {
         "default": {
@@ -388,6 +389,79 @@
             }
           },
           "description": "Wave one: no agent may reach any host (maxItems 0)."
+        },
+        "catalog": {
+          "type": "array",
+          "description": "E-07: per adapter/effector egress entries. Wave one: every entry disabled (enabled const false), so the effective allow-list is empty; enabling one is a reviewed schema+data change.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "owner",
+              "kind",
+              "hosts",
+              "scheme",
+              "port",
+              "methods",
+              "enabled",
+              "purpose",
+              "basis"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^(adapter|effector):[a-z0-9_.-]+$"
+              },
+              "owner": {
+                "type": "string"
+              },
+              "kind": {
+                "enum": [
+                  "source_adapter",
+                  "effector"
+                ]
+              },
+              "hosts": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string"
+                }
+              },
+              "scheme": {
+                "const": "https"
+              },
+              "port": {
+                "const": 443
+              },
+              "methods": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "enum": [
+                    "GET",
+                    "HEAD",
+                    "POST",
+                    "PUT",
+                    "PATCH",
+                    "DELETE"
+                  ]
+                }
+              },
+              "enabled": {
+                "const": false
+              },
+              "purpose": {
+                "type": "string",
+                "minLength": 1
+              },
+              "basis": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
         }
       }
     },

@@ -73,18 +73,17 @@ def render_egress(policy_data: dict | None, panic: PanicState) -> dict:
         reasons.append(f"PANIC_STATE_UNREADABLE:{panic.error}")
     elif panic.global_state != "RUNNING":
         reasons.append("PANIC_L3_FROZEN")
-    allow: dict[str, list[str]] = {}
-    if not reasons:
-        for agent, hosts in policy_data.get("egress", {}).get("allow", {}).items():
-            if agent in panic.frozen_agents:
-                continue  # L1: agent loses egress
-            allow[agent] = sorted(hosts)
+    from .egress import effective_allow  # E-07: enabled catalog entries (+ legacy allow), minus L1-frozen agents
+    allow: dict[str, list[str]] = effective_allow(policy_data, panic) if not reasons else {}
+    catalog = [{k: e[k] for k in ("id", "owner", "kind", "hosts", "enabled")}
+               for e in (policy_data or {}).get("egress", {}).get("catalog", [])]
     return _seal({
         "schema": EGRESS_SCHEMA,
         "default": "deny",
         "deny_all": bool(reasons),
         "reasons": reasons,
         "allow": allow,
+        "catalog": catalog,
         "policy_version": (policy_data or {}).get("version", "UNAVAILABLE"),
         "panic_revision": panic.revision,
         "generated_at": fmt_ts_us(utcnow()),

@@ -1,7 +1,7 @@
 {
   "policy_schema": "mbos.governance.policy/1",
   "policy_id": "wave-one-default-deny",
-  "version": "2026.10.07-w1.4",
+  "version": "2026.10.07-w1.5",
   "description": "Round Two wave one. Everything tier 0, every externally consequential action needs Michael's YES, every effector DRY-RUN, no delegation, no real-world spend. Anything not listed here is DENIED.",
   "system_mode": "mvp",
   "delegation_enabled": false,
@@ -106,7 +106,18 @@
   "egress": {
     "default": "deny",
     "note": "Per-agent outbound host allow-lists for the default-deny egress proxy. Wave one: every list is empty (fixture/dry-run only). Opening a host is a policy.schema.json change (Agent 05 + 01 review), e.g. Agent 02 read-only discovery sources.",
-    "allow": {}
+    "allow": {},
+    "catalog": [
+      { "id": "adapter:ebay_browse",    "owner": "agent-02-opportunity", "kind": "source_adapter", "hosts": ["api.ebay.com"],
+        "scheme": "https", "port": 443, "methods": ["GET"], "enabled": false,
+        "purpose": "eBay Browse API, read-only listings/comps (02 runbook; needs Michael's keyset)", "basis": "INFERENCE: host per eBay developer docs; 02 to confirm" },
+      { "id": "adapter:gsa_auctions",   "owner": "agent-02-opportunity", "kind": "source_adapter", "hosts": ["api.gsa.gov"],
+        "scheme": "https", "port": 443, "methods": ["GET"], "enabled": false,
+        "purpose": "GSA Auctions API, read-only (B-03)", "basis": "INFERENCE: api.gsa.gov hosts GSA public APIs; 02 to confirm path/host" },
+      { "id": "adapter:trash_nothing",  "owner": "agent-02-opportunity", "kind": "source_adapter", "hosts": ["trashnothing.com"],
+        "scheme": "https", "port": 443, "methods": ["GET"], "enabled": false,
+        "purpose": "Trash Nothing API, read-only (B-03)", "basis": "INFERENCE: API served from trashnothing.com; 02 to confirm" }
+    ]
   },
 
   "llm_spend": {

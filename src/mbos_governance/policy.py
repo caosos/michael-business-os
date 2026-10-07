@@ -79,6 +79,8 @@ def _cross_check(data: dict) -> list[str]:
         for cat, spec in cats.items():
             if spec["budget_bucket"] not in buckets:
                 problems.append(f"category {cat} bucket {spec['budget_bucket']} missing from budgets.{mode}")
+    from .egress import check_catalog  # E-07: egress catalog must be clean or the whole policy is unavailable
+    problems += check_catalog(data)
     for agent in list(data["llm_spend"]["per_agent_daily_usd"]) + list(data["egress"]["allow"]):
         if agent not in data["agent_grants"]:
             problems.append(f"llm_spend/egress names unknown agent {agent}")
