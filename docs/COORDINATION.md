@@ -50,6 +50,23 @@ for b in 02-opportunity 03-economics 04-state 05-governance 06-communications 07
   git show origin/research/agent-$b:docs/status/AGENT_STATUS.md | grep -E '^(State|Claimed|Done|Blocked)' ; done
 ```
 
+## Continuous execution / owner-interrupt rule (Michael directive)
+
+The goal is not to keep agents cosmetically busy. The goal is to keep useful project work advancing until the current scope is complete or Michael is genuinely required.
+
+- **Agent 01 must continuously dispatch useful work.** If an agent finishes a task, Agent 01 immediately assigns the next highest-value compatible READY task.
+- **An empty lane is not a reason to idle while useful work remains.** Agent 01 must derive bounded, testable tasks from open acceptance gaps, release findings, integration gaps, QA failures, documentation/runbook gaps, source-adapter work, or blocked dependents, then add them to READY_QUEUE before assignment.
+- **Do not create make-work.** Every generated task must have a concrete acceptance condition and advance release readiness, live-readiness, operator usability, reliability, evidence quality, or a documented future dependency.
+- **Agents continue automatically after every completion.** Finish → push receipt/status → claim next assigned/compatible task → work. Michael is not the dispatcher.
+- **WAITING is allowed only when no useful compatible work can proceed without one of these:**
+  1. a specific Michael business/policy decision,
+  2. an unavailable external credential/account/provider,
+  3. a hard dependency owned by another active task,
+  4. a safety/governance boundary that forbids proceeding.
+- **If Michael is required, stop at the smallest decision boundary.** Write one consolidated owner question with: exact decision, why it matters, recommended default, options, what is blocked, and what can continue in parallel. Push it to repo truth and notify Agent 01.
+- **Do not stop merely because the originally assigned prompt is complete.** The work loop ends only when the current project scope/release objective is complete, or all remaining work is legitimately blocked under the rule above.
+- **Agent 01 must keep READY_QUEUE deep enough for parallel execution.** When fewer agents have actionable work than available lanes, replenish the queue from verified gaps before allowing idle time.
+
 ## Commit identity (provenance; P-07-2)
 The shared `.git/config` identity is overwritten by whichever agent launched last, so **always set your identity per commit**:
 `git -c user.name='Agent NN <Role>' -c user.email='michaelos+agent-NN-<role>@users.noreply.github.com' commit …`
