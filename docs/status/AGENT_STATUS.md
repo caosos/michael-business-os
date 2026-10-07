@@ -4,10 +4,17 @@ Agent: 07
 Role: ROUND TWO — QA / End-to-End Integration / Manual-Assist Outputs (lane G)
 Branch: research/agent-07-marketing
 Worktree: /home/michaelos/business-os-worktrees/agent-07-marketing
-State: WORKING
-Current phase: Round Two, wave one — harness delivered; cross-lane interop run against real peer code
+State: WORKING (assigned task R11 WAITING)
+Current phase: Round Two — queue check done; R11 blocked; doing unblocked lane-G verification
 Started: 2026-10-06 (round one) · 2026-10-07 (round two)
 Last updated: 2026-10-07
+
+## Work queue check (2026-10-07)
+- FACT: `READY_QUEUE` and `ACTIVE_WORK` do not exist on any remote branch (`git ls-tree` + `git grep` of all `origin/*`) or in `~/business-os-prompts`. There is nothing to claim. I have created no claim files on anyone else's behalf.
+- **Assigned task**, Agent 01 ruling **R11** (`docs/integration/ROUND_TWO_INTEGRATION.md` @ `bed7609`): run `qa/` against the real system through `MBOS_QA_IMPL=mbos.qa_adapter:build`. **WAITING**: 01 ships the adapter after R1, and R1 waits on 04 migration `0005`.
+- **Next compatible work**, lane G's own charter, with no dependency on any other lane:
+  - (a) Independent build verification of every lane's claimed test count.
+  - (b) A ruling-compliance re-run of interop against R2 and R3.
 
 ## Current objective
 Independent QA/integration lane against the frozen contracts v1.0.0. DRY-RUN ONLY.
