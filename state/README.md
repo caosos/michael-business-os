@@ -20,6 +20,10 @@ state/
   migrations/0004_views_grants.sql contract-document views, reporting views, least-privilege grants
   migrations/0005_r1_integration.sql  R1 tables (effector_calls, panic_state, llm_spend, artifacts), R3/ADR-0010
                                    payload-hash check, R5 PANIC (05 semantics, fail-closed), R8 blocking dedup_key
+  migrations/0006_r12_strict_item_edges.sql  R12: strict ADR-0004 item edges (== Agent 01 ITEM_TRANSITIONS)
+  migrations/0007_lane_e_requirements.sql   D-04 / Lane E: panic_set + panic_events/panic_current (bootstrap
+                                   FROZEN, release = approver, L3 cancels approved), effector_calls as execution
+                                   claim, gateway edges, budget modes + bucket multi-cap reserve
   mbos_state/mbos_canonical.py     ADR-0010 Python reference (byte-identical vendored copy)
   tests/canonical/vectors.json     ADR-0010 golden vectors (byte-identical vendored copy)
   bootstrap/roles.sql              group + login roles (cluster level)
@@ -28,7 +32,7 @@ state/
   bootstrap/systemd/               user units: postgres, hourly chain verify + anchor
   bootstrap/podman/                Quadlet units for the target runtime (UNTESTED: no Podman on host yet)
   mbos_state/                      Python: migrate, StateStore facade, chain export/anchor/offline verify, CLI
-  tests/                           137 tests; vendored frozen contracts v1.0.0 in tests/contracts-v1.0.0/
+  tests/                           149 tests; vendored frozen contracts v1.0.0 in tests/contracts-v1.0.0/
 ```
 
 ## Tables

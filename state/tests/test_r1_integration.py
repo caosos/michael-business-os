@@ -183,67 +183,23 @@ def _read(c):
     return c.execute("SELECT global_state, readable, error FROM mbos.panic_read()").fetchone()
 
 
-def test_panic_fails_closed_until_initialised_and_released(db):
-    c = db.connect("reader")
-    assert _read(c)[:2] == ("FROZEN", False)
-    assert c.execute("SELECT mbos.panic_blocks('a','comms.sms.send','sms')").fetchone()[0][0].startswith(
-        "PANIC_STATE_UNREADABLE")
-    pol = db.store("policy_admin")
-    pid = tool_prov(pol)
-    pol.conn.execute("SELECT mbos.panic_init(%s,'first boot',%s,%s)", (MICHAEL.as_json(), [pid], key()))
-    assert _read(c) == ("FROZEN", True, None)                      # init defaults to FROZEN (05)
-    gw = db.store("gateway")
-    with pytest.raises(errors.InsufficientPrivilege):              # only policy_admin releases
-        gw.conn.execute("SELECT mbos.panic_mutate('L3',NULL,false,%s,'go',%s,%s)", (GATEWAY.as_json(), [pid], key()))
-    pol.conn.execute("SELECT mbos.panic_mutate('L3',NULL,false,%s,'Michael releases',%s,%s)",
-                     (MICHAEL.as_json(), [pid], key()))
-    assert _read(c) == ("RUNNING", True, None)
-    assert c.execute("SELECT mbos.panic_blocks('a','comms.sms.send','sms')").fetchone()[0] == []
-
-
-def test_panic_levels_and_receipts(db):
-    pol = db.store("policy_admin")
-    pid = tool_prov(pol)
-    pol.conn.execute("SELECT mbos.panic_init(%s,'boot',%s,%s,'RUNNING')", (MICHAEL.as_json(), [pid], key()))
-    gw = db.store("gateway")   # engaging is allowed for the gateway
-    gw.conn.execute("SELECT mbos.panic_mutate('L2','money.*',true,%s,'403 storm',%s,%s)", (GATEWAY.as_json(), [pid], key()))
-    gw.conn.execute("SELECT mbos.panic_mutate('L2','category:sms',true,%s,'carrier block',%s,%s)",
-                    (GATEWAY.as_json(), [pid], key()))
-    gw.conn.execute("SELECT mbos.panic_mutate('L1','agent-07-marketing',true,%s,'loop',%s,%s)",
-                    (GATEWAY.as_json(), [pid], key()))
-    blocks = lambda a, cap, cat: gw.conn.execute("SELECT mbos.panic_blocks(%s,%s,%s)", (a, cap, cat)).fetchone()[0]
-    assert blocks("agent-06", "money.payment.send", "money") == ["PANIC_L2_CAPABILITY:money.*"]
-    assert blocks("agent-06", "comms.sms.send", "sms") == ["PANIC_L2_CATEGORY:sms"]
-    assert blocks("agent-07-marketing", "publish.post", "publishing") == ["PANIC_L1_AGENT:agent-07-marketing"]
-    assert blocks("agent-06", "comms.email.send", "email") == []
-    gw.conn.execute("SELECT mbos.panic_mutate('L3',NULL,true,%s,'PANIC',%s,%s)", (GATEWAY.as_json(), [pid], key()))
-    assert "PANIC_L3_FROZEN" in blocks("agent-06", "comms.email.send", "email")
-    revs = gw.conn.execute("SELECT array_agg(revision ORDER BY revision) FROM mbos.panic_state").fetchone()[0]
-    assert revs == [1, 2, 3, 4, 5]
-    n = gw.conn.execute("SELECT count(*) FROM mbos.receipts WHERE type='KILL_SWITCH_CHANGED'").fetchone()[0]
-    assert n == 5 and gw.verify_chain().ok
-    # direct insert without a receipt cannot commit
-    with pytest.raises(psycopg.Error) as ei:
-        gw.conn.execute("""INSERT INTO mbos.panic_state (revision, global_state, body)
-                           VALUES (6, 'RUNNING', '{}')""")
-    assert ei.value.sqlstate == "MB003"
-
-
 def test_panic_checksum_matches_agent05_seal_and_tamper_reads_frozen(db):
-    pol = db.store("policy_admin")
-    pid = tool_prov(pol)
-    pol.conn.execute("SELECT mbos.panic_init(%s,'boot',%s,%s,'RUNNING')", (MICHAEL.as_json(), [pid], key()))
-    body = pol.conn.execute("SELECT body FROM mbos.panic_state").fetchone()[0]
+    ui = db.store("approver")
+    pid = tool_prov(ui)
+    ui.conn.execute("SELECT mbos.panic_set('L3',NULL,false,%s,'Michael releases',%s,%s)", (MICHAEL.as_json(), [pid], key()))
+    body = ui.conn.execute("SELECT body FROM mbos.panic_state ORDER BY revision DESC LIMIT 1").fetchone()[0]
     unsealed = {k: v for k, v in body.items() if k != "checksum"}
-    assert body["checksum"] == py_hash(unsealed)    # = 05 _seal(): sha256_tagged(canonical_json(body))
+    assert body["checksum"] == py_hash(unsealed)    # = 05 _seal(): sha256 of MBOS-CJSON-1(body)
+    assert _read(ui.conn) == ("RUNNING", True, None)
     su = db.connect("superuser")
     with su.transaction():
         su.execute("SET LOCAL session_replication_role = replica")
-        su.execute("""UPDATE mbos.panic_state SET body = jsonb_set(body, '{agents}', '{"x":{}}')""")
-    assert _read(pol.conn) == ("FROZEN", False, "checksum mismatch")
+        su.execute("""UPDATE mbos.panic_state SET body = jsonb_set(body, '{agents}', '{"x":{}}')
+                      WHERE revision = (SELECT max(revision) FROM mbos.panic_state)""")
+    assert _read(ui.conn) == ("FROZEN", False, "checksum mismatch")
     # a mutation never repairs an unreadable state into RUNNING
-    pol.conn.execute("SELECT mbos.panic_mutate('L1','agent-x',false,%s,'cleanup',%s,%s)", (MICHAEL.as_json(), [pid], key()))
-    assert _read(pol.conn)[:2] == ("FROZEN", True)
+    ui.conn.execute("SELECT mbos.panic_set('L1','agent-x',false,%s,'cleanup',%s,%s)", (MICHAEL.as_json(), [pid], key()))
+    assert _read(ui.conn)[:2] == ("FROZEN", True)
 
 
 # ---------------------------------------------------------------------------
