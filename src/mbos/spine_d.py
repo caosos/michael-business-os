@@ -517,3 +517,20 @@ def run_enrichers(conn: sa.Connection, item_id: str, components: Any) -> int:
     import sys
 
     return sum(int(e.enrich(conn, sys.modules[__name__], item_id) or 0) for e in components.enrichers)
+
+
+# ---------------------------------------------------------------- Michael's own model knowledge (operator notes)
+def record_operator_note(conn: sa.Connection, bundle: dict) -> str:
+    """Enter Michael's own mechanic knowledge about a make+model (ADR-0011, A-21). HUMAN CHANNEL ONLY (R14).
+
+    `bundle` is exactly what `mbos_economics.new_manual_note(...)` returns: {"note", "provenance"}. Lane D inserts the
+    human provenance FIRST and the receipt in the same transaction; the note is append-only (edits and retractions are
+    new rows). Never call this from a workflow or an LLM-reachable tool: `mbos_dbos` holds the approver role, so the
+    database cannot stop it, the code path must. `tests/unit/test_card.py::test_operator_note_entry_is_not_reachable_from_workflows`
+    pins that."""
+    return conn.execute(sa.text("SELECT mbos.record_operator_note(CAST(:b AS jsonb))"), {"b": canonical_json(bundle).decode()}).scalar_one()
+
+
+def operator_notes_document(conn: sa.Connection) -> dict:
+    """The flat {"notes_format": 1, "notes": [...]} document `mbos_economics.valueadd.load_manual_notes` reads."""
+    return conn.execute(sa.text("SELECT mbos.operator_notes_document(false)")).scalar_one()

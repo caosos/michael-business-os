@@ -145,12 +145,16 @@ class EconomicsEnricher:
         """C-16: plan from the deal's own numbers + SOURCED model-specific risks (CPSC recalls etc.). Whatever matches
         no sourced knowledge is omitted, so the card prints UNKNOWN."""
         from mbos_economics.config import load_config
-        from mbos_economics.valueadd import build_value_add, load_kb
+        from mbos_economics.valueadd import build_value_add, load_kb, load_manual_notes, merge_manual
 
         from mbos.card import enrichment_from_item
 
         mm = (enrichment_from_item(conn, item).get("make_model") or {}).get("value")
-        v = build_value_add(item, as_of, cfg=load_config(), kb=load_kb(), make_model=mm if isinstance(mm, str) else None)
+        kb = load_kb()
+        doc = spine.operator_notes_document(conn)  # Michael's own notes (RECOMMENDATION); a sourced recall stays first
+        if doc.get("notes"):
+            kb = merge_manual(kb, load_manual_notes(doc))
+        v = build_value_add(item, as_of, cfg=load_config(), kb=kb, make_model=mm if isinstance(mm, str) else None)
         if not v.get("block"):
             return 0
         pid = spine.record_lane_provenance(conn, v["provenance"])

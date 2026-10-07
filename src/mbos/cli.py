@@ -6,6 +6,7 @@ everything here goes through the same spine functions, so receipts are identical
     mbos worker [--fixture PATH]    run DBOS: recover workflows, optionally discover a fixture, keep serving
     mbos queue                      what needs Michael's decision
     mbos show ITEM_ID
+    mbos note add|list              Michael's own model knowledge (lane D; human channel only)
     mbos card ITEM_ID [--json]      the decision-ready opportunity card (ADR-0011)
     mbos decide AREQ_ID YES|NO|MODIFY|HOLD --seen HASHPREFIX [--reason ..] [--change k=v ..] [--hold-until ISO]
     mbos ping ITEM_ID               wake a HOLD that has wake_on=michael_ping
@@ -199,6 +200,26 @@ def cmd_card(a: argparse.Namespace) -> int:
     return 1 if errors else 0
 
 
+def cmd_note(a: argparse.Namespace) -> int:
+    """Enter / list Michael's own model knowledge. Human channel; never an agent tool (R14)."""
+    from mbos import spine_d
+    from mbos.clock import now_iso
+
+    engine = _engine()
+    if a.action == "list":
+        with engine.connect() as c:
+            _print(spine_d.operator_notes_document(c))
+        return 0
+    from mbos_economics.valueadd import new_manual_note
+
+    bundle = new_manual_note(category=a.category, makes=a.make, models=a.model, kind=a.kind, statement=a.statement,
+                             entered_by=a.author, entered_at=now_iso(), basis_of_knowledge=a.basis_of_knowledge,
+                             plan_hint=a.plan_hint, reference_url=a.reference_url)
+    with engine.begin() as c:
+        print("recorded", spine_d.record_operator_note(c, bundle))
+    return 0
+
+
 def cmd_ping(a: argparse.Namespace) -> int:
     _wake(a.item_id, {"kind": "ping"})
     print("pinged", a.item_id)
@@ -251,6 +272,10 @@ def main(argv: list[str] | None = None) -> int:
                    help="explicit confirmation required for YES on irreversible / money-like requests")
     s.set_defaults(fn=cmd_decide)
     s = sub.add_parser("card"); s.add_argument("item_id"); s.add_argument("--json", action="store_true"); s.set_defaults(fn=cmd_card)
+    s = sub.add_parser("note"); s.add_argument("action", choices=["add", "list"]); s.add_argument("--category")
+    s.add_argument("--make", action="append"); s.add_argument("--model", action="append"); s.add_argument("--kind")
+    s.add_argument("--statement"); s.add_argument("--author", default="michael"); s.add_argument("--basis-of-knowledge", dest="basis_of_knowledge")
+    s.add_argument("--plan-hint"); s.add_argument("--reference-url"); s.set_defaults(fn=cmd_note)
     s = sub.add_parser("ping"); s.add_argument("item_id"); s.set_defaults(fn=cmd_ping)
     s = sub.add_parser("outcome"); s.add_argument("item_id"); s.add_argument("kind")
     s.add_argument("--revenue", type=float); s.add_argument("--cost", type=float); s.add_argument("--hours", type=float)

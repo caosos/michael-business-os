@@ -173,3 +173,38 @@ def test_concurrent_enrichment_on_lane_d_loses_nothing(db04, lifecycle):
     assert fields == sorted(f"card.{b}" for b in blocks), fields
     errs = schemas.errors("item", item)
     assert not errs, errs[:3]
+
+
+def test_michaels_note_reaches_the_card_as_a_recommendation(db04, lifecycle):
+    """A-21: new_manual_note -> lane D store (human provenance first) -> document -> lane C value_add -> card."""
+    pytest.importorskip("mbos_economics.valueadd")
+    from mbos import card as cardmod
+    from mbos import spine_d
+    from mbos.clock import now_iso
+    from mbos_economics.config import load_config
+    from mbos_economics.valueadd import build_value_add, load_kb, load_manual_notes, merge_manual, new_manual_note
+
+    bundle = new_manual_note(category="mower", makes=["Zzz Mowers"], models=["ZT-9000"], kind="failure_mode",
+                             statement="The ZT-9000 hydro pump coupler shears under load; the OEM coupler is a known weak part.",
+                             entered_by="michael", entered_at=now_iso(), basis_of_knowledge="own experience",
+                             plan_hint="Budget a replacement coupler before bidding.")
+    with db04.begin() as c:
+        note_id = spine_d.record_operator_note(c, bundle)
+    with db04.connect() as c:
+        doc = spine_d.operator_notes_document(c)
+    notes = load_manual_notes(doc)
+    assert any(n.get("note_id", note_id) == note_id or n["statement"].startswith("The ZT-9000") for n in notes)
+    item = {"item_id": lifecycle["item_id"], "type": "flip", "category": "mower", "state": "SCORED",
+            "created_at": "2026-10-07T12:00:00Z", "normalized": {"title": "Zzz Mowers ZT-9000 zero turn, hydro whine"},
+            "economics": {}, "sources": [], "scores": {"scorecard": {"scoring_config_version": "2026.10.2"}}}
+    v = build_value_add(item, "2026-10-07T13:00:00Z", cfg=load_config(), kb=merge_manual(load_kb(), notes))
+    risks = v["block"]["model_specific_risks"]
+    assert any(r["basis"] == "RECOMMENDATION" and "michael" in (r.get("source", "") + r["risk"]).lower() for r in risks), risks
+    with db04.begin() as c:  # the lane persists provenance, then attaches the block
+        pid = spine_d.record_lane_provenance(c, v["provenance"])
+        spine_d.record_enrichment(c, lifecycle["item_id"], "value_add", v["block"], pid, agent="agent-03-economics")
+    with db04.connect() as c:
+        it, rc, ar = cardmod.load_inputs(c, lifecycle["item_id"])
+        card = cardmod.build_card(it, rc, ar, cardmod.enrichment_from_item(c, it))
+    assert cardmod.validate_card(card) == [], cardmod.validate_card(card)
+    assert any(r["basis"] == "RECOMMENDATION" for r in card["value_add_plan"]["model_specific_risks"])

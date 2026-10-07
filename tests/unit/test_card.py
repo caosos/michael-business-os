@@ -194,3 +194,14 @@ def test_machine_noise_never_reaches_michaels_reasons(ledger_db):
     why = " ".join(cardmod.build_card(item, receipts, areqs)["why"])
     assert "PLACEHOLDER" not in why and "MICHAEL_DECISIONS" not in why and "provisional" not in why
     assert why.startswith("Asking $950 against a likely resale")  # facts first, in plain English
+
+
+def test_operator_note_entry_is_not_reachable_from_workflows():
+    """R14: Michael's note entry is a HUMAN channel. mbos_dbos holds the approver role, so the database cannot stop a
+    workflow from calling it; this static guard does. Only the CLI (human) and the spine modules that define it may name it."""
+    from pathlib import Path
+
+    src = Path(__file__).resolve().parents[2] / "src" / "mbos"
+    offenders = [str(p.relative_to(src)) for p in src.rglob("*.py")
+                 if "record_operator_note" in p.read_text() and p.name not in ("spine.py", "spine_d.py", "cli.py")]
+    assert offenders == [], offenders

@@ -615,3 +615,11 @@ def run_enrichers(conn: sa.Connection, item_id: str, components: Any) -> int:
     import sys
 
     return sum(int(e.enrich(conn, sys.modules[__name__], item_id) or 0) for e in components.enrichers)
+
+
+def record_operator_note(conn: sa.Connection, bundle: dict) -> str:
+    raise NotImplementedError("operator notes need the lane D store (state_backend='lane_d')")
+
+
+def operator_notes_document(conn: sa.Connection) -> dict:
+    return {"notes_format": 1, "notes": []}  # the reference DDL has no note store; the card simply has no manual notes
