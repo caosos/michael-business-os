@@ -71,7 +71,11 @@ def load_kb(path: Path | None = None) -> dict:
     doc = json.loads(p.read_text(encoding="utf-8"))
     if doc.get("kb_format") != KB_FORMAT:
         raise ValueError(f"value-add KB must be kb_format {KB_FORMAT}")
+    seen_ids: set[str] = set()
     for e in doc["entries"]:                        # a risk without a primary source cannot exist
+        if e.get("id") in seen_ids or not e.get("id"):
+            raise ValueError(f"KB entry id {e.get('id')!r} is missing or duplicated (ids key the matched list and the year evidence)")
+        seen_ids.add(e["id"])
         if e.get("origin") == "manual":
             raise ValueError(f"KB entry {e.get('id')!r}: manual notes never ship in the KB file; use merge_manual()")
         src = e.get("source") or {}

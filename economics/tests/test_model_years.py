@@ -114,6 +114,33 @@ class TestYearForms(unittest.TestCase):
         self.assertEqual(ids("2018 Ford F-150", kb_with(entry(years=["2018"]))), [])
 
 
+class TestEntryIdsAreUnique(unittest.TestCase):
+    """Found verifying Agent 02's NHTSA entries: two entries with one id would collide in the matched list and in the
+    year evidence (keyed by id), attaching the wrong year to a safety claim. The loader refuses them."""
+
+    def write(self, entries):
+        d = tempfile.mkdtemp()
+        base = {k: v for k, v in copy.deepcopy(KB).items() if k != "_hash"}
+        base["entries"] = entries
+        p = Path(d) / "kb.json"
+        p.write_text(json.dumps(base))
+        return p
+
+    def test_duplicate_ids_are_refused(self):
+        with self.assertRaises(ValueError) as cm:
+            load_kb(self.write([entry(years=[2012]), entry(years=[2013])]))
+        self.assertIn("missing or duplicated", str(cm.exception))
+
+    def test_distinct_ids_load(self):
+        self.assertEqual(len(load_kb(self.write([entry(years=[2012]), entry(years=[2013], eid="nhtsa_fixture_2013")]))["entries"]), 2)
+
+    def test_missing_id_is_refused(self):
+        e = entry()
+        del e["id"]
+        with self.assertRaises(ValueError):
+            load_kb(self.write([e]))
+
+
 class TestListingYears(unittest.TestCase):
     def test_extraction(self):
         yrs = lambda t: listing_years(t.lower())[0]

@@ -7,7 +7,7 @@ Worktree: /home/michaelos/business-os-worktrees/agent-03-economics
 State: WAITING
 Current phase: ROUND TWO, wave two. Claimed task: RESEARCH/estimate producer (lane C)
 Started: 2026-10-06
-Last updated: 2026-10-07 (C-18 done; WAITING: no READY lane-C task)
+Last updated: 2026-10-07 (verified 02 B-18; load_kb refuses duplicate ids; WAITING)
 
 ## Claimed work (wave two). Foreman loop: `docs/COORDINATION.md` @ agent-01 `99e9ec0`
 Claimed: (none)
@@ -138,6 +138,10 @@ Queue (lane C): none READY @ agent-01 `37abd48`\nWaiting on: 02 B-18 (flip KB_SU
 - `match[].years` (list, range or `"2010-2014"`): a year-specific entry applies only when the LISTING states a covered year (read from the title: inference, evidence shown). A yearless listing never matches; every blocked match is recorded as UNKNOWN in `year_blocked` and `omitted`.
 - Preserved: the numeric-token asymmetry. Yearless entries behave exactly as before.
 - 318 tests pass with all environments.
+
+### Verified: Agent 02's B-18 NHTSA entries (not a queued task)
+- Ran its recall and complaint entry builders over its fixtures through my real `load_kb` and `match_hits`. Its report holds: a 2012 listing hits its 2012 entries; 2013 hits only the 2013 recall; 2018, yearless and "2012 and 2018" listings hit nothing and show as blocked; the Mazda "3" stays held.
+- **Gap found on my side:** `load_kb` accepted two entries with one id, which would collide in the matched list and in the year evidence (keyed by id), attaching the wrong year to a safety claim. It now refuses duplicate or missing ids (package 0.11.1; 321 tests pass with all environments).
 
 ## Proposed tasks (for Agent 01 to triage)
 - **P-03-08 (lane B): CPSC knowledge adapter.** Read the CPSC programmer's guide (response fields, rate limit), then a read-only, fixture-first Tier-1 adapter emitting recall records. 03 supplies the deterministic record-to-KB-entry converter once the fields are known.
