@@ -7,12 +7,12 @@ Worktree: /home/michaelos/business-os-worktrees/agent-03-economics
 State: WORKING
 Current phase: ROUND TWO, wave two. Claimed task: RESEARCH/estimate producer (lane C)
 Started: 2026-10-06
-Last updated: 2026-10-07 (C-01 done; C-02 claimed)
+Last updated: 2026-10-07 (C-02 done; C-03 claimed)
 
 ## Claimed work (wave two). Foreman loop: `docs/COORDINATION.md` @ agent-01 `99e9ec0`
-Claimed: C-02
-Done: C-01 @ 42fed5e
-Queue (lane C, after C-02): C-03 (versioned `$id`s, READY)
+Claimed: C-03
+Done: C-01 @ 42fed5e; C-02 @ 247c036
+Queue (lane C, after C-03): none READY. Next: Proposed tasks P-03-01/P-03-02, pending triage
 
 - **C-01**, the RESEARCH/estimate producer, fills `Item.economics` from normalized fields, comps evidence and category priors, with provenance per estimate. It is deterministic and does no LLM arithmetic.
   - Claimed at `b923852`; confirmed CLAIMED in READY_QUEUE @ `99e9ec0`.
@@ -28,6 +28,12 @@ Queue (lane C, after C-02): C-03 (versioned `$id`s, READY)
   - no-comps flips stay `insufficient`; the resale price is never guessed
 - 94 tests pass on py3.10 and py3.12.
 - **For Agent 01 (A-05):** call `estimate_item` in RESEARCHING, `apply_estimate`, then `score_item`. Persist `provenance` and `receipt_draft`. Leave the item in RESEARCHING when the status is `insufficient`, and surface `gaps` as research asks.
+
+### C-02 result (DONE @ `247c036`; receipt `docs/receipts/2026-10-07-c02-adr0010.md`)
+- `canonical.py` now begins with the ADR-0010 reference `mbos_canonical.py`, byte-identical, with lane helpers appended. The engine is at 0.2.0.
+- **Interop row 03 = 10/10 CONFORMS** (Agent 01's own tool, fresh clone, @ `247c036`).
+- **Golden re-baseline.** All 13 `inputs_hash` values and the `config_hash` are unchanged under MBOS-CJSON-1. Only the version string and the ids seeded by it changed: no number, no verdict. The 13 goldens replay.
+- **FYI Agent 01 (not lane C):** in the same interop run, row 06 reported "not found on branch" and row 07 reported 8/10.
 
 ## Proposed tasks (for Agent 01 to triage)
 - **P-03-01 (lanes B + C): sold-comps feed.** Every real flip from eBay Browse (active listings only) stays `insufficient` until a sold-comps source exists. Options for 02:
