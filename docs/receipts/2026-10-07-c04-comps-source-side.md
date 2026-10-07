@@ -23,3 +23,8 @@
   - shared gate (PANIC, 429 freeze)
   - pre-filter is deterministic and order-independent
   - comps never become Items
+
+## Pin bump (2026-10-07)
+- Agent 03 @ `1044ed5` (engine 0.3.0, config 2026.10.1 shipped as package data; C-05 `pass_on_priors` added).
+- Removed `tests/fixtures/econ_config_882c726` and the `cfg=`/`priors=` workaround.
+- The acceptance test still passes and the suite is 122 green.

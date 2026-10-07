@@ -142,17 +142,13 @@ def test_comps_never_become_items(env):
 
 # ---------------------------------------------------------------- end to end with Agent 03 (C-04 acceptance)
 def test_flip_with_comps_advances_to_scored_with_fact_comp_provenance(env):
-    feed = pytest.importorskip("mbos_economics.comps_feed")
-    from mbos_economics.config import load_config
-    from mbos_economics.estimate import load_priors
-    cfg_dir = FIX / "econ_config_882c726"                       # pinned copy of 03's config (wheel ships none)
+    feed = pytest.importorskip("mbos_economics.comps_feed")    # Agent 03 @ 1044ed5 (config ships as package data)
     world, store, _, _, run = env
     run([(_manual(world), COMPS), (EbayInsightsAdapter.from_fixture(FIX / "comps" / "ebay_insights", world.clock), COMPS)])
     item = _trailer_item(world)
     item = {**item, "state": "RESEARCHING"}
     recs = candidate_comps(item, store.records(), T0)
-    out = feed.research_step(item, recs, store.provenance_records(recs), "2026-10-07T12:00:00Z",
-                             cfg=load_config(config_dir=cfg_dir), priors=load_priors(config_dir=cfg_dir))
+    out = feed.research_step(item, recs, store.provenance_records(recs), "2026-10-07T12:00:00Z")
     assert out["proposed_next_state"] == "SCORED", (out["comps"]["rejected"], out["estimate"])
     assert out["comps"]["selected"] and set(out["comps"]["selected"]) <= {c["provenance_id"] for c in recs}
     used = [p for p in out["provenance_records"] if p["provenance_id"] in set(out["comps"]["selected"])]

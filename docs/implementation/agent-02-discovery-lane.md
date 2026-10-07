@@ -173,7 +173,7 @@ Hand-off agreed with Agent 03 (messages of 2026-10-07):
 
 Source names match Agent 03's `comps_sources` registry exactly (`manual`, `ebay_marketplace_insights`). Any other name is refused by 03's fail-closed policy. Comps are evidence and never become Items.
 
-**Acceptance (FACT):** `test_flip_with_comps_advances_to_scored_with_fact_comp_provenance` runs Agent 03's `research_step` @ `882c726`, using a pinned config copy at `tests/fixtures/econ_config_882c726`.
+**Acceptance (FACT):** `test_flip_with_comps_advances_to_scored_with_fact_comp_provenance` runs Agent 03's `research_step` (pinned @ `1044ed5`, engine 0.3.0; config now ships as package data).
 - Input: the eBay-fixture 6x12 enclosed trailer, plus manual and Insights fixture comps.
 - 7 candidates. 03 rejected 2 on vocabulary (5x8 and 7x14) and selected 5.
 - Estimate status `estimated`, state moves RESEARCHING → **SCORED**, verdict **MAYBE**.
