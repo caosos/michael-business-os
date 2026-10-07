@@ -7,7 +7,7 @@ Worktree: /home/michaelos/business-os-worktrees/agent-05-governance
 State: WORKING
 Done: E-10 @ ebae275 (spine_adapter: Gateway/KillSwitch/PDP over 01's mbos.interfaces on lane D; reconcile(); R4 contract docs/integration/05-spine-adapter-R4-contract.md)
 Done: E-06 @ e957680 (policy publish -> mbos.policy, receipted; PgPolicyStore reads policy_current, pinned schema, row-drift/tamper => fail closed; same decisions as file)
-Done: E-09 @ <E09> (alerts.collect read-only over lane D: freeze/unreadable/stuck/chain/A7/budget/injection/dry-run/reconciled; ntfy-ready JSON, never sent; CLI exit 2 on critical)
+Done: E-09 @ c68f3b2 (alerts.collect read-only over lane D: freeze/unreadable/stuck/chain/A7/budget/injection/dry-run/reconciled; ntfy-ready JSON, never sent; CLI exit 2 on critical)
 Claimed: E-07 (egress allow-list per adapter/effector as policy data + checker)
 Done: B-04 lane-E half @ d3b9948 (02's fixture applies + blocks exactly that source; auto-apply decided, release human-only)
 Done: E-04 @ 4fadbe7 (secret scan refuses + never stores; injection tripwire => tier 0, needs_review, step-up; 205 tests)
