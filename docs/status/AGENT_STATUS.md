@@ -4,17 +4,23 @@ Agent: 06
 Role: Communications + Operator UI / Approval UX (build lane F)
 Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
-State: WORKING
-Claimed: F-10
-Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db
-Blocked: F-04 on A-03
+State: WAITING
+Claimed: none
+Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219
+Blocked: F-04 on A-03 · F-11 on A-15
 Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
 Last updated: 2026-10-07
 
 ## Current objective
-**F-10** (READY per Agent 01 after C-08): a morning digest page rendering 03's `mbos_economics.digest.build_digest` (C-08 @ `a81a989`). It is a ranked list with reasons and provenance links, and listing titles are untrusted, so they are escaped. F-11 is BLOCKED on A-15, and F-04 on A-03.
+WAITING. As of READY_QUEUE @ `8c3e4fd`, every remaining lane-F task is blocked: **F-04** on **A-03** (05's real gateway/PDP) and **F-11** on **A-15** (`spine.propose_followup`). I will claim either as soon as its dependency is DONE, or any new F-/ANY task.
 
 ## Done
+- **F-10 @ `f955219`:** `/digest` renders lane C's C-08 ranking **unchanged**.
+  - Escaped titles linked to open cards; action and reason; deadline window; value $/h; refs with `/provenance/<id>` links.
+  - Non-engine scorecards are listed as "Not ranked". A missing engine or an engine failure is reported.
+  - Tests run with the real lane-C engine; the page order equals a direct `build_digest` call (same digest hash). 101 tests pass.
+  - Receipt: `docs/receipts/2026-10-07-f10-morning-digest.md`.
+- **Lane D compat @ `0299a31`:** `comms_spec.ledger.ensure_schema()` skips when `mbos_comms.contacts` exists. Agent 04 adopted the F-07 schema as migration 0011 (D-10), and it is owner-managed there.
 - **F-09 @ `317a2db`:** Operator UI pages.
   - Outcome entry on settled cards via `spine.record_outcome` (receipted, with LEARN predicted-vs-actual pairs) and `/outcomes`.
   - `/holds` HOLD backlog with an overdue flag.
@@ -85,7 +91,8 @@ None. Live comms stay disabled (MICHAEL_DECISIONS #4).
   2. `finish_act` maps `effector_response.status=="blocked"` to ACTION_FAILED.
   3. Optionally, merge `effector_response.comms` into `details`. F-06's acceptance text says the checks belong in `details`; the gateway at `0d107df` builds `details` itself, so they ride in `effector_response.comms` today, and `audit()` reads either location.
 - RESOLVED in `c23bee8` (A-16): **FINDING (spine @ `aa88e7a`, lane A):** receipt `seq` comes from `nextval()` in `mbos.receipts_chain()`. A rolled-back receipt transaction (including A1 fault injection) therefore leaves a seq gap. `mbos.verify_chain()` checks links only and stays ok; the ADR-0010 reference `verify_chain` reports `gap before seq N`. Pinned by `tests/test_operator_ui.py::test_finding_spine_seq_gap_after_rollback_is_flagged_only_by_the_reference`. R1 (lane D's gapless chain) should close it. Until then the two verifiers disagree.
-- **F-07 DDL:** `comms_spec/sql/0001_comms_ledger.sql` (schema `mbos_comms`) is PROPOSED for lane D to adopt or port (R1: 04 owns DDL).
+- **F-07 DDL:** ADOPTED by lane D as migration 0011 (D-10, agent-04 @ `6533334`), with identical names. On lane D, only the gateway role may record consent GRANTED or DNC CLEAR, and only it can read `contacts.value`. When A-01 phase 2 lands, the consent-recording path must run as the gateway role (`mbos_dbos`).
+- **Lane C adapter note:** at `a81a989`, `mbos_economics` ships its config inside the package, so `EconomicsEngineScorer()` needs no `config_dir`. The adapter docstring is outdated.
 - **ADR-0009 request:** add receipt types CONSENT_RECORDED / CONSENT_REVOKED / DNC_SCRUB_RECORDED. Under v1.0.0 these events use GRANT_CREATED/GRANT_REVOKED with `entity_type` `consent` or `dnc_scrub`.
 - The comms policy values in `comms_spec/data/comms_policy.v1.json` are PROPOSED (conservative). Loosening any of them is a version bump.
 
@@ -98,6 +105,6 @@ None. Live comms stay disabled (MICHAEL_DECISIONS #4).
 - P-06-9 is DONE in `c23bee8`. Original note: `finish_act` reads `response.get("blocked")` for the reason text, but the F-06 effector reports `comms.blocked_reasons`. The reason falls back to "see details", so a one-line read of `response["comms"]["blocked_reasons"]` would make ACTION_FAILED intents self-explanatory.
 
 ## Files (Round Two, current)
-- `operator_ui/` (`backend`, `ux`, `views`, `server`, `__main__`, `mbos_canonical`), `comms_spec/` (+ `planner.py`, `effector.py`, `data/*.v1.json`), `tests/` (conftest, test_operator_ui, test_comms_spec, fixtures/illustrative.json)
+- `operator_ui/` (`backend`, `ux`, `views`, `server`, `sources`, `digest`, `__main__`, `mbos_canonical`), `comms_spec/` (+ `planner.py`, `effector.py`, `data/*.v1.json`), `tests/` (conftest, test_operator_ui, test_comms_spec, fixtures/illustrative.json)
 - `docs/research/agent-06-operator-ui.md`, `docs/decisions/ADR-06-003-operator-ui-stdlib.md`, `docs/receipts/2026-10-07-*.md`
 - `docs/research/contracts/` (byte-identical frozen v1.0.0)
