@@ -4,8 +4,8 @@ Agent: 02
 Role: Discovery / Source Adapters (DISCOVER + NORMALIZE lane)
 Branch: research/agent-02-opportunity
 Worktree: /home/michaelos/business-os-worktrees/agent-02-opportunity
-State: WORKING
-Claimed: B-15
+State: WAITING
+Waiting on: B-12 unblock (MICHAEL_DECISIONS #8 + operator credentials) or queue refill; B-15 follow-ups below
 Blocked: B-12 on MICHAEL_DECISIONS #8 + operator credentials
 Done: B-01 @ 7c9da45
 Done: B-02 @ cadfdae
@@ -20,8 +20,9 @@ Done: B-09 @ b12bdbd (freeze round trip on lanes D/E Postgres PANIC; 156 tests)
 Done: B-11 @ 8c634c9 (pHash: relist ambiguity resolved; F2 0 false merges with photos vs 1 without; 168 tests)
 Done: B-13 @ 741dfd7 (spine-path Deduper; corpus via 01's spine.ingest: F2 0.00% / 0 false merges; blocking key coarsened; 171 tests)
 Done: B-14 @ 0dd506b (photos via put_artifact; normalized.images round-trips by sha256 on the spine path; full suite 175 passed)
+Done: B-15 @ 09a755c (P0; listing_activity + seller blocks, only what the source exposes; card validates; 188 tests)
 Done: C-04 (support, source side) @ a1a7730 (lead Agent 03 C-04 @ 882c726)
-Current phase: Round Two — working B-15 (P0: listing_activity + seller enrichment blocks for the Deal Sniffer card, ADR-0011)
+Current phase: Round Two — B-01..B-11, B-13..B-15 DONE; B-12 blocked; WAITING
 Started: 2026-10-06 (Round One) · Round Two started 2026-10-07
 Last updated: 2026-10-07
 
@@ -47,6 +48,12 @@ Heads-up from 05: E-02 moves PANIC to Postgres (04 migration 0007); `MBOS_PANIC_
 constructor changes; `blocks(...)` signature/codes unchanged. 02 adapts its CLI wiring when 05 announces it.
 
 ## Proposed tasks
+- **P-02-9 (lane B, with B-12): confirm what each live source exposes.** On the first live runs, check the eBay
+  fields behind B-15 (`itemCreationDate`, `feedbackPercentage`, `feedbackScore`), re-record fixtures, and look for
+  more exposed facts (eBay `getItem` has more seller and date data than item_summary, at one extra call per
+  listing). Each newly confirmed field becomes one more whitelist entry; never inference.
+- **P-02-10 (lanes A+B): deliver enrichment as a post-discover step** (like `deliver_wake_events`): for each new
+  or changed Item, call `attach_enrichment(conn, spine_or_spine_d, item_id, raw_store, as_of)`. Agent 01 wires it.
 - **P-02-8 (lanes A+B, P2): spine image-artifact hook.** Lane B retains listing photos, but the spine's
   `mbos.artifacts` doesn't hold them, so `normalized.images` stays empty on the spine path. Proposal: an ingest hook,
   or `RawListing.attachments`, so photo refs resolve in the spine store.
