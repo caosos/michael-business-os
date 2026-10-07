@@ -4,16 +4,26 @@ Agent: 06
 Role: Communications + Operator UI / Approval UX (build lane F)
 Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
-State: WORKING
-Claimed: F-03
-Done: F-01 @ 190bb9b · F-02 @ fc31896
+State: WAITING
+Claimed: none
+Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd
+Blocked: F-04 on A-03
 Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
 Last updated: 2026-10-07
 
 ## Current objective
-**F-03** (READY_QUEUE @ `99e9ec0`): comms dry-run spec items (1)(3)(4)(6) as data files and tests (template registry, seller Q&A and service intake, rate and consent rules, E1–E7 thresholds). No sends.
+WAITING. As of READY_QUEUE @ `bf215b2`, no READY task is assigned to 06 or ANY. **F-04** (the UI's `SpineBackend` using the worker's real `Components`, i.e. 05's PDP) is BLOCKED on **A-03**. I will claim F-04 as soon as A-03 is DONE, or any new F-/ANY task Agent 01 queues.
 
 ## Done
+- **F-01 follow-through @ `e2e42f8`:** the UI now calls the spine's `mbos.workflows.notify_decision` (A-07, which closes P-06-1). The spine is re-pinned to `bf215b2`, and a new test covers R12: a YES on a HELD item re-presents it, then executes once. 42 tests pass.
+- **F-03 @ `cb787dd`:** comms dry-run spec as data in `comms_spec/`:
+  - a template registry with ADR-0010 content hashes and binding flags; every template is a draft pending Michael;
+  - Q&A for all 10 flip and all 9 service categories;
+  - send-window, rate, consent, DNC and opt-out policy;
+  - E1–E7 thresholds;
+  - pure checks and a receipt auditor.
+
+  There is no send path, and a test enforces that. Spec: `docs/research/agent-06-comms-spec.md`. Receipt: `docs/receipts/2026-10-07-f03-comms-spec-data.md`.
 - **F-02 @ `fc31896`** (ADR-0010):
   - `operator_ui/mbos_canonical.py` is a byte-identical copy of the reference.
   - The card verifies `payload_hash` independently, and offers YES only on a match.
@@ -43,14 +53,14 @@ None.
 None. Live comms stay disabled (MICHAEL_DECISIONS #4).
 
 ## Needs coordinator review
-- `tools/interop_check.py` row 06 points at `operator_ui/util.py`, which F-01 removed under R10. F-02 vendors the reference byte-identical at `operator_ui/mbos_canonical.py`. Please repoint row 06 there (adapter `lambda m: m.sha256_of`); with that one-line change the tool reports row 06 = 10/10 at `fc31896`.
+- Resolved in `bf215b2`: interop row 06 now points at the vendored reference. P-06-1 became A-07 (DONE), P-06-2 became A-08 (READY, lane A), and P-06-3 became F-04 (BLOCKED on A-03).
+- The comms policy values in `comms_spec/data/comms_policy.v1.json` are PROPOSED (conservative). Loosening any of them is a version bump.
 
 ## Proposed tasks
-- **P-06-1 (lane A):** a `spine.notify_decision(item_id, approval_id)` helper (named in R10), so the UI and CLI share one wake path.
-- **P-06-2 (lane A, with B/C):** have `_approval_gate` act on `wake_on` = `new_info` / `price_change` / `auction_ending`, using a message kind that lanes B/C send. Today these presets only fire at `hold_until`.
-- **P-06-3 (lane F, after A-03):** build the UI's `SpineBackend` with the worker's real `Components` (05 PDP).
+- **P-06-4 (lanes F + A):** wire `comms_spec` into the planner (R9 `ActionPlanner`): `questions()` + `render()` draft the payload, `action_constraints()` sets tier/category, and the payload carries `template_id`/`template_hash`. This needs 01's planner interface, so it must be queued, not self-started.
+- **P-06-5 (lane F, after live gate):** a comms effector that writes `consent_check` / `dnc_check` / `send_window_check` / `disclosure_present` into `details.kind=comms`, so `comms_spec.audit()` can grade E1–E7. Blocked on MICHAEL_DECISIONS #4 for anything live; a dry-run version could come earlier.
 
 ## Files (Round Two, current)
-- `operator_ui/` (`backend`, `ux`, `views`, `server`, `__main__`), `tests/` (conftest, test_operator_ui, fixtures/illustrative.json)
+- `operator_ui/` (`backend`, `ux`, `views`, `server`, `__main__`, `mbos_canonical`), `comms_spec/` (+ `data/*.v1.json`), `tests/` (conftest, test_operator_ui, test_comms_spec, fixtures/illustrative.json)
 - `docs/research/agent-06-operator-ui.md`, `docs/decisions/ADR-06-003-operator-ui-stdlib.md`, `docs/receipts/2026-10-07-*.md`
 - `docs/research/contracts/` (byte-identical frozen v1.0.0)
