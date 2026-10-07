@@ -173,6 +173,9 @@ Update and push status:
 
 Never invent another agent's progress. Read its branch.
 
+## What only Michael can do
+See `docs/status/OWNER_ACTIONS.md` (decisions, credentials, his own model knowledge, host tasks).
+
 ## Michael's role
 Michael should not be the messenger between agents.
 
