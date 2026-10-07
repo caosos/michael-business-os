@@ -566,6 +566,12 @@ def record_operator_note(conn: sa.Connection, bundle: dict) -> str:
     return conn.execute(sa.text("SELECT mbos.record_operator_note(CAST(:b AS jsonb))"), {"b": canonical_json(bundle).decode()}).scalar_one()
 
 
+def retract_operator_note(conn: sa.Connection, note_id: str, entered_by: str, entered_at: str, reason: str) -> str:
+    """Retract one of Michael's notes (a new row; history is never edited). HUMAN CHANNEL ONLY (R14)."""
+    return conn.execute(sa.text("SELECT mbos.retract_operator_note(:n, :by, CAST(:at AS timestamptz), :r)"),
+                        {"n": note_id, "by": entered_by, "at": entered_at, "r": reason}).scalar_one()
+
+
 def operator_notes_document(conn: sa.Connection) -> dict:
     """The flat {"notes_format": 1, "notes": [...]} document `mbos_economics.valueadd.load_manual_notes` reads."""
     return conn.execute(sa.text("SELECT mbos.operator_notes_document(false)")).scalar_one()

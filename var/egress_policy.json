@@ -1,0 +1,42 @@
+{
+  "allow": {},
+  "catalog": [
+    {
+      "enabled": false,
+      "hosts": [
+        "api.ebay.com"
+      ],
+      "id": "adapter:ebay_browse",
+      "kind": "source_adapter",
+      "owner": "agent-02-opportunity"
+    },
+    {
+      "enabled": false,
+      "hosts": [
+        "api.gsa.gov"
+      ],
+      "id": "adapter:gsa_auctions",
+      "kind": "source_adapter",
+      "owner": "agent-02-opportunity"
+    },
+    {
+      "enabled": false,
+      "hosts": [
+        "trashnothing.com"
+      ],
+      "id": "adapter:trash_nothing",
+      "kind": "source_adapter",
+      "owner": "agent-02-opportunity"
+    }
+  ],
+  "checksum": "sha256:2352f768c3d3f9d46272a3b49846850db04dd9b8aaf6f4415169e7038be900f1",
+  "default": "deny",
+  "deny_all": true,
+  "generated_at": "2026-10-07T22:56:51.978514Z",
+  "panic_revision": 3,
+  "policy_version": "2026.10.07-w1.8",
+  "reasons": [
+    "PANIC_L3_FROZEN"
+  ],
+  "schema": "mbos.egress/1"
+}

@@ -16,7 +16,11 @@ def test_wheel_install_finds_contracts_and_profile(tmp_path):
     wheel_dir, venv = tmp_path / "wheel", tmp_path / "venv"
     subprocess.run([str(ROOT / ".venv/bin/python"), "-m", "pip", "--version"], capture_output=True)
     env = {"UV_CACHE_DIR": str(ROOT / ".tools/uv-cache"), "PATH": "/usr/bin:/bin", "HOME": str(tmp_path)}
-    r = subprocess.run([str(uv), "build", "--wheel", "--out-dir", str(wheel_dir), str(ROOT)], capture_output=True, text=True, env=env)
+    import shutil
+
+    src = tmp_path / "src"  # build from a COPY: building in the repo leaves build/ behind, which poisons later git-archive installs
+    shutil.copytree(ROOT, src, ignore=shutil.ignore_patterns(".venv", ".tools", ".git", "build", "dist", "*.egg-info", "__pycache__", ".pgdata", ".pytest_cache"))
+    r = subprocess.run([str(uv), "build", "--wheel", "--out-dir", str(wheel_dir), str(src)], capture_output=True, text=True, env=env)
     assert r.returncode == 0, r.stderr[-1500:]
     whl = next(wheel_dir.glob("mbos-*.whl"))
     subprocess.run([str(uv), "venv", "-q", "--python", "3.12", str(venv)], check=True, env={**env, "UV_PYTHON_INSTALL_DIR": str(ROOT / ".tools/python")})

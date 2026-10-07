@@ -140,7 +140,8 @@ def test_model_specific_risk_needs_a_source(ledger_db):
     item, receipts, areqs = _inputs(ledger_db, ids["item_id"])
     c = cardmod.build_card(item, receipts, areqs, {"value_add": {"model_specific_risks": [
         {"risk": "Known head-gasket weakness on this engine", "basis": "INFERENCE"}]}})
-    assert any("checkable source" in e for e in cardmod.validate_card(c))
+    assert c["value_add_plan"]["model_specific_risks"] == []        # not shown at all: UNKNOWN beats an unsourced claim
+    assert cardmod.validate_card(c) == []
 
 
 def test_contract_is_additive_and_frozen_files_untouched():
@@ -208,7 +209,7 @@ def test_operator_note_entry_is_not_reachable_from_workflows():
 
     src = Path(__file__).resolve().parents[2] / "src" / "mbos"
     offenders = [str(p.relative_to(src)) for p in src.rglob("*.py")
-                 if "record_operator_note" in p.read_text() and p.name not in ("spine.py", "spine_d.py", "cli.py")]
+                 if ("record_operator_note" in p.read_text() or "retract_operator_note" in p.read_text()) and p.name not in ("spine.py", "spine_d.py", "cli.py")]
     assert offenders == [], offenders
 
 
@@ -309,7 +310,8 @@ def test_junk_sources_do_not_launder_a_risk(ledger_db, src):
     item, receipts, areqs = _inputs(ledger_db, ids["item_id"])
     c = cardmod.build_card(item, receipts, areqs, {"value_add": {"model_specific_risks": [
         {"risk": "Known head-gasket weakness on this engine", "basis": "INFERENCE", "source": src}]}})
-    assert any("source" in e for e in cardmod.validate_card(c)), src
+    assert c["value_add_plan"]["model_specific_risks"] == [], src    # a junk source cannot launder a claim
+    assert cardmod.validate_card(c) == []
 
 
 def test_listing_flags_are_visible_on_the_card(ledger_db):
@@ -319,3 +321,31 @@ def test_listing_flags_are_visible_on_the_card(ledger_db):
     c = cardmod.build_card(item, receipts, areqs)
     assert "injection_suspected" in c["item"]["flags"] and "injection_suspected" in cardmod.render_text(c)
     assert cardmod.validate_card(c) == []
+
+
+@pytest.mark.parametrize("text", ["Look for any damage", "Check the carburetor", "Check the fluids", "Check carburetors for varnish"])
+def test_lint_catches_the_remaining_phrasings(text):
+    assert cardmod.elementary_advice(text), text
+
+
+@pytest.mark.parametrize("bad", ["not a date", "2999-01-01T00:00:00Z", "", 12345, None])
+def test_listing_dates_must_be_real_and_not_from_the_future(ledger_db, bad):
+    ids = seed_flow(ledger_db, act=False)
+    item, receipts, areqs = _inputs(ledger_db, ids["item_id"])
+    c = cardmod.build_card(item, receipts, areqs, {"listing_activity": {"posted_at": {"value": bad, "basis": "FACT"}}})
+    assert c["listing_activity"]["posted_at"]["value"] == "UNKNOWN" and cardmod.validate_card(c) == []
+
+
+def test_an_edit_cannot_precede_the_post(ledger_db):
+    ids = seed_flow(ledger_db, act=False)
+    item, receipts, areqs = _inputs(ledger_db, ids["item_id"])
+    la = {"posted_at": {"value": "2026-09-01T00:00:00Z", "basis": "FACT"}, "updated_at": {"value": "2026-08-01T00:00:00Z", "basis": "FACT"}}
+    c = cardmod.build_card(item, receipts, areqs, {"listing_activity": la})
+    assert c["listing_activity"]["posted_at"]["value"] != "UNKNOWN" and c["listing_activity"]["updated_at"]["value"] == "UNKNOWN"
+
+
+def test_dry_run_headline_is_marked(ledger_db):
+    ids = seed_flow(ledger_db, outcome=False)  # YES -> dry-run send
+    item, receipts, areqs = _inputs(ledger_db, ids["item_id"])
+    text = cardmod.render_text(cardmod.build_card(item, receipts, areqs))
+    assert "DRY-RUN: simulated, nothing sent" in text and "Contact Sent (dry-run)" in text

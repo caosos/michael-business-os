@@ -674,5 +674,9 @@ def record_operator_note(conn: sa.Connection, bundle: dict) -> str:
     raise NotImplementedError("operator notes need the lane D store (state_backend='lane_d')")
 
 
+def retract_operator_note(conn: sa.Connection, note_id: str, entered_by: str, entered_at: str, reason: str) -> str:
+    raise NotImplementedError("operator notes need the lane D store (state_backend='lane_d')")
+
+
 def operator_notes_document(conn: sa.Connection) -> dict:
     return {"notes_format": 1, "notes": []}  # the reference DDL has no note store; the card simply has no manual notes

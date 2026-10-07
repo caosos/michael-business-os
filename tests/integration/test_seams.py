@@ -246,3 +246,31 @@ def test_proposer_comes_from_lane_e_and_none_means_no_request(ledger_db, monkeyp
         assert card["recommendation"]["action"] == "HOLD" and "policy blocked" in card["recommendation"]["why"]
     else:
         assert ar[0]["proposed_by"] == expect_proposer and "lane" not in ar[0]["payload"]
+
+
+def test_nul_in_a_listing_does_not_abort_discover_batch(rt, tmp_path):
+    """07 F-36: the whole workflow path (normalize_step -> ingest_safe), not just ingest."""
+    import json, uuid
+
+    from dbos import DBOS, SetWorkflowID
+
+    from mbos import workflows
+    from mbos.reference.fixture_adapter import FixtureSourceAdapter
+    from mbos.runtime import components
+
+    tag = uuid.uuid4().hex[:8]
+    data = json.loads(FIXTURE.read_text())
+    ok = next(r for r in data["listings"] if r["source_listing_id"] == "FIX-TRAILER-1")
+    poison = json.loads(json.dumps(ok))
+    poison["source_listing_id"], poison["url"] = f"POISON-{tag}", poison["url"] + f"?p={tag}"
+    poison["record"]["dedup_key"], poison["record"]["normalized"]["title"] = f"poison|{tag}", "Trailer\x00 with NUL"
+    good = json.loads(json.dumps(ok))
+    good["source_listing_id"], good["url"] = f"GOOD-{tag}", good["url"] + f"?g={tag}"
+    good["record"]["dedup_key"] = f"good|{tag}"
+    f = tmp_path / "p.json"
+    f.write_text(json.dumps({"listings": [poison, good]}))
+    comps = components()
+    comps.adapters[f"p-{tag}"] = FixtureSourceAdapter(f, name=f"p-{tag}")
+    with SetWorkflowID(f"discover:p-{tag}"):
+        results = DBOS.start_workflow(workflows.discover, f"p-{tag}").get_result()
+    assert len(results) == 2 and sum(1 for r in results if r["created"]) == 2, results   # scrubbed + ingested, batch continues

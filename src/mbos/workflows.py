@@ -45,9 +45,19 @@ def fetch_step(adapter_name: str, since: Optional[str]) -> list[dict[str, Any]]:
 
 @DBOS.step()
 def normalize_step(raw: dict[str, Any]) -> Optional[dict[str, Any]]:
+    """Per-record isolation (07 F-36): a poisonous listing makes THIS record fail with a picklable, readable error;
+    it never aborts the batch (a CanonicalError on a NUL would otherwise be unpicklable and kill discover)."""
+    from mbos.card import scrub
     from mbos.interfaces import RawListing
 
-    norm = components().normalizer.normalize(RawListing(**raw))
+    try:
+        norm = components().normalizer.normalize(RawListing(**raw))
+    except Exception as e:  # noqa: BLE001
+        try:  # retry once on scrubbed text so a stray control character does not cost us the listing
+            clean, _ = scrub(raw)
+            norm = components().normalizer.normalize(RawListing(**clean))
+        except Exception as e2:  # noqa: BLE001
+            return {"__error__": f"{type(e2).__name__}: {str(e2)[:200]}", "listing": raw.get("source_listing_id")}
     return asdict(norm) if norm is not None else None
 
 
@@ -78,6 +88,10 @@ def discover(adapter_name: str, since: Optional[str] = None) -> list[dict[str, A
     results = []
     for raw in fetch_step(adapter_name, since):
         norm = normalize_step(raw)
+        if isinstance(norm, dict) and "__error__" in norm:
+            results.append({"item_id": None, "created": False, "merged": False, "dropped": True, "error": norm["__error__"],
+                            "listing": norm.get("listing")})
+            continue
         r = tx(S().ingest_safe, raw, norm, adapter_name, version, components())
         if r["created"]:
             with SetWorkflowID(item_workflow_id(r["item_id"])):

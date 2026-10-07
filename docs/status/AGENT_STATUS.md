@@ -179,6 +179,14 @@ None new. MICHAEL_DECISIONS #1–#5 are unchanged; none blocks the dry-run MVP.
 - Open, with owners: E-15 (05: other guard refusals settle failed; narrow agent-01 grants), G-07 (07 re-run), F-14 (06 operator-note form), B-18 (02 flip years flag).
 - Tests: 215 passed.
 
+## 00:15 checkpoint: RELEASE CANDIDATE READY (dry-run scope)
+- 07's G-07: 105 passed, 0 failed on the lane D + lane E stack at `2d4e8dd`. Card acceptance 232/11, and I fixed the remaining five (F-36 per-record isolation, F-30, F-28, F-31, F-27).
+- My release gate passes 6/6 (docs/status/RELEASE_GATE.md), now including a byte-level check that installed lane packages match their pushed heads.
+- Removed 54 committed `build/` files (06 P-06-15; 07's stale-install finding). The packaging test builds in a temp copy.
+- `retract_operator_note` added (human channel).
+- READY covers the dry-run scope only. It does NOT cover live providers, the LiteLLM cap at the proxy, a real egress cut, real sources, or live sends. Those need Michael's items in `docs/status/OWNER_ACTIONS.md`.
+- Open: E-16 (05), X-03 (all lanes), F-11/A-15 (follow-up API), A-04 (post-discover wiring of 02), A-12, A-06 (ADR-0009 decision).
+
 ## Next action (superseded by READY_QUEUE.md)
 1. On 04's `0005`: port `ledger.py`/`spine.py` onto `mbos_state.StateStore` (R1/R2), with A1–A10 passing unchanged.
 2. Wire 05's ActionGateway, PanicState and PDP adapters (R4–R7), with A5/A9 passing on the real gateway.

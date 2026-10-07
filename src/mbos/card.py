@@ -24,7 +24,7 @@ from __future__ import annotations
 
 import json
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Optional
 
@@ -42,7 +42,7 @@ STAGES = ("DISCOVERED", "RESEARCHED", "SCORED", "CONTACT APPROVED", "CONTACT SEN
 # entry model-specific with a source.
 _VERB = r"(?:check|test|inspect|verify|confirm|see if|make sure|try|look (?:for|at)|pull|do an?|run an?)"
 _BASIC = (r"compression|spark|fuel|oil|starts?|starting|runs?|running|turns? over|battery|belts?|hoses?|leaks?|filters?|"
-          r"plugs?|carb(?:urator)?|idle|choke|coolant|tires?|brakes?")
+          r"plugs?|carb(?:uretor|urator)?s?|idle|choke|coolant|fluids?|tires?|brakes?|(?:any )?damage|wear|cracks?")
 ELEMENTARY_ADVICE = [re.compile(p, re.I) for p in (
     rf"\b{_VERB}\b[^.;\n]{{0,30}}\b(?:{_BASIC})\b(?!\s+(?:pump|housing|module|coupler|gasket|regulator|solenoid)\b)",
     r"\bcompression (?:test|check)\b", r"\bsee if it (?:starts|runs)\b", r"\bpull the (?:spark )?plug\b",
@@ -452,6 +452,23 @@ def _fact_reasons(item: dict, econ: dict, la: dict, lg: dict) -> list[str]:
 
 
 # ---------------------------------------------------------------- build
+def _date_checked(d: dict, item: dict, not_before: Optional[dict]) -> dict:
+    """A listing date must parse, cannot be later than a day after we discovered the item, and an edit cannot precede the
+    post (07 F-28). Anything else is UNKNOWN, not FACT."""
+    if _is_unknown(d):
+        return d
+    try:
+        t = parse(str(d["value"]))
+        if t.tzinfo is None:
+            t = t.replace(tzinfo=parse("1970-01-01T00:00:00Z").tzinfo)
+        limit = parse(item["created_at"]) + timedelta(days=1)
+        if t > limit or (not_before is not None and t < parse(str(not_before["value"])).replace(tzinfo=t.tzinfo)):
+            return _unknown("lane date is in the future or out of order")
+    except (ValueError, TypeError, KeyError):
+        return _unknown("lane date is not a valid date-time")
+    return d
+
+
 def _lane_why(enr: dict) -> tuple[list[str], list[str]]:
     """Lane-supplied reasons are shown ONLY with provenance (F-29): (lines, provenance ids)."""
     prov = (enr.get("_prov") or {}).get("why") if isinstance(enr.get("_prov"), dict) else None
@@ -474,6 +491,10 @@ def _risks(va_in: dict) -> list[dict]:
             e["source"] = clean_text(r["source"], 300)
         if isinstance(r.get("provenance_id"), str) and _PROV_RX.match(r["provenance_id"]):
             e["provenance_id"] = r["provenance_id"]
+        if not (e.get("provenance_id") or _source_ok(e.get("source"))):
+            continue  # an uncheckable model-specific claim is not shown at all (07 F-27): UNKNOWN beats an unsourced claim
+        if elementary_advice(e["risk"]):
+            continue
         out.append(e)
     return out
 
@@ -494,9 +515,12 @@ def build_card(item: dict, receipts: list[dict], areqs: list[dict], enrichment: 
     loc = n.get("location") or {}
     loc_s = ", ".join(clean_text(x, 80) for x in (loc.get("city"), loc.get("state")) if isinstance(x, str) and x)
     miles = loc.get("road_miles_one_way")
+    posted = _date_checked(_from_block(la_in, "posted_at", "this source does not expose the original post date"), item, None)
+    updated = _date_checked(_from_block(la_in, "updated_at", "this source does not expose the last edit date"), item,
+                            posted if not _is_unknown(posted) else None)
     la = {
-        "posted_at": _from_block(la_in, "posted_at", "this source does not expose the original post date"),
-        "updated_at": _from_block(la_in, "updated_at", "this source does not expose the last edit date"),
+        "posted_at": posted,
+        "updated_at": updated,
         "age_days": _from_block(la_in, "age_days", "needs the original post date"),
         "recent_activity": [clean_text(x) for x in _strs(la_in.get("recent_activity"))],
         "suspected_relist": _from_block(la_in, "suspected_relist", "relist detection needs prior sightings or dates"),
@@ -575,6 +599,9 @@ def validate_card(card: dict) -> list[str]:
     for t in texts:
         for hit in elementary_advice(t):
             errs.append(f"value_add_plan: elementary advice not allowed: {hit!r}")
+    for w in card["why"]:
+        for hit in elementary_advice(w):
+            errs.append(f"why: elementary advice not allowed: {hit!r}")
     for r in card["value_add_plan"]["model_specific_risks"]:
         if r["basis"] != "FACT" and not r.get("provenance_id") and not _source_ok(r.get("source")):
             errs.append(f"model-specific risk without a checkable source/provenance: {r['risk']!r}")
@@ -678,7 +705,9 @@ def render_text(card: dict) -> str:
     lines += ["", "TRANSPORT: " + {"fits_truck": "Fits truck. No trailer required.", "requires_trailer": "Requires a trailer (not owned; borrowing is possible but MUST be confirmed with the lender before pickup)."}.get(mode, "UNKNOWN (not yet classified)")
               + f" Trip: {_fmt(lg['trip_miles_round_trip'])} mi round trip, {_fmt(lg['trip_hours'])} h, fuel {_fmt(lg['fuel_cost'], True)}, difficulty {_fmt(lg['difficulty'])}."]
     st = card["status"]
-    lines += ["", "SYSTEM STATUS: " + " → ".join(t["stage"].title() for t in st["timeline"]) + f"   [now: {st['current']}]"]
+    _dry = any(t["stage"] == "CONTACT SENT" and t.get("dry_run") for t in st["timeline"])
+    lines += ["", "SYSTEM STATUS: " + " → ".join(t["stage"].title() + (" (dry-run)" if t.get("dry_run") else "") for t in st["timeline"])
+              + f"   [now: {st['current']}{' (DRY-RUN: simulated, nothing sent)' if _dry and st['current'] == 'CONTACT SENT' else ''}]"]
     lines += [f"  {t['at'][:16]}  {t['stage']}" + ("  (DRY-RUN: simulated, nothing sent)" if t.get("dry_run") else "") for t in st["timeline"]]
     lines += ["", f"RECOMMENDATION: {r['action']}" + (" / WAIT FOR RESPONSE" if r["waiting"] else "") + (" (needs step-up approval)" if r.get("requires_step_up") else ""), f"  {T(r['why'], 600)}"]
     if card["unknowns"]:

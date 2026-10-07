@@ -32,6 +32,36 @@ def run(name: str, cmd: list[str], timeout: int = 1800, env: dict | None = None)
             "summary": tail[-1] if tail else "", "stdout": cp.stdout}
 
 
+def pins_check() -> dict:
+    """07's lesson: after a re-pin pip can silently keep OLD code (same version string, stale build/ dir). Compare every
+    installed lane package, byte for byte, with the pushed head the gate reports."""
+    import importlib.util
+
+    pairs = [("mbos_economics", "research/agent-03-economics", "economics/src/mbos_economics"),
+             ("mbos_governance", "research/agent-05-governance", "src/mbos_governance")]
+    bad, notes = [], []
+    for pkg, branch, path in pairs:
+        spec = importlib.util.find_spec(pkg)
+        if spec is None or not spec.submodule_search_locations:
+            bad.append(f"{pkg}: not installed")
+            continue
+        root = Path(list(spec.submodule_search_locations)[0])
+        tar = subprocess.run(["git", "archive", f"origin/{branch}", path], cwd=ROOT, capture_output=True)
+        if tar.returncode:
+            bad.append(f"{pkg}: cannot read {branch}")
+            continue
+        with tarfile.open(fileobj=io.BytesIO(tar.stdout)) as t:
+            files = {Path(m.name).relative_to(path).as_posix(): t.extractfile(m).read()
+                     for m in t.getmembers() if m.isfile() and m.name.endswith((".py", ".json"))}
+        diff = [f for f, data in files.items() if f.endswith(".py") and (root / f).exists() and (root / f).read_bytes() != data]
+        missing = [f for f in files if f.endswith(".py") and not (root / f).exists()]
+        notes.append(f"{pkg} {len(files)} files vs {branch}")
+        if diff or missing:
+            bad.append(f"{pkg}: {len(diff)} differ ({', '.join(diff[:3])}), {len(missing)} missing")
+    return {"name": "installed lane packages == pushed heads (no stale installs)", "ok": not bad, "rc": 0 if not bad else 1,
+            "secs": 0.0, "summary": "; ".join(bad) if bad else "identical: " + "; ".join(notes)}
+
+
 def at1_lane_de() -> dict:
     """Fresh lane-D DB (04's head) + 05's whole policy dir; lane C engine; strict AT-1 audit of the export."""
     sys.path.insert(0, str(ROOT))
@@ -54,13 +84,14 @@ def at1_lane_de() -> dict:
         fx = fixture_variant(tmp, "gate", ["FIX-TRAILER-1", "FIX-LEAD-SMARTHOME-1", "FIX-MOWER-1", "FIX-LEAD-DRYWALL-1"])
         r = run("lane D/E e2e + AT-1", [PY, "-m", "tests.helpers.runner", "lane_d_e2e", str(fx), "lane_e"], timeout=300,
                 env={"MBOS_DATABASE_URL": app, "MBOS_SYSTEM_DATABASE_URL": server.get_uri().replace("/postgres?", "/mbos_gate_sys?"),
-                     "MBOS_POLICY_PATH": str(tmp / "policy" / "policy.v1.json"), "MBOS_SCORER": "engine"})
+                     "MBOS_POLICY_PATH": str(tmp / "policy" / "policy.v1.json"), "MBOS_SCORER": "engine",
+                     "MBOS_EGRESS_FILE": str(tmp / "egress.json"), "MBOS_LITELLM_FILE": str(tmp / "litellm.json")})
     finally:
         server.cleanup()
     res = next((json.loads(line[len("RESULT"):]) for line in r["stdout"].splitlines() if line.startswith("RESULT")), None)
     ok = bool(r["ok"] and res and res["chain"]["ok"] and res["reference_chain"][0] and res["live_effector_calls"] == 0
               and not res["contract_errors"] and res["at1"] and res["at1"]["ok"] and res["at1"]["drift_count"] == 0)
-    summary = "no RESULT" if not res else (
+    summary = ("no RESULT: " + " ".join((r["stdout"] + r.get("stderr", "")).strip().splitlines()[-2:])[:300]) if not res else (
         f"chain {res['chain']['checked']} ok={res['chain']['ok']} · reference {res['reference_chain'][1]} · "
         f"effector {res['effector_calls']} (live {res['live_effector_calls']}) · contract errors {len(res['contract_errors'])} · "
         f"AT-1 {res['at1']} · final {res['final']}")
@@ -81,6 +112,7 @@ def main() -> int:
                                                       "docs/research/contracts/canonical/vectors.json"]),
         run("full test suite (pytest)", [PY, "-m", "pytest", "-q"]),
         run("cross-lane interop (tools/interop_check.py)", [PY, "-I", "tools/interop_check.py"]),
+        pins_check(),
         at1_lane_de(),
     ]
     ic = checks[3]
