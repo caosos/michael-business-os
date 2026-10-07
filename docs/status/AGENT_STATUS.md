@@ -4,17 +4,23 @@ Agent: 06
 Role: Communications + Operator UI / Approval UX (build lane F)
 Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
-State: WORKING
-Claimed: F-12
-Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219
+State: WAITING
+Claimed: none
+Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe
 Blocked: F-04 on A-03 · F-11 on A-15
 Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
 Last updated: 2026-10-07
 
 ## Current objective
-**F-12** (READY_QUEUE @ `a910ad9`): a daily summary, generated locally and never sent. Contents: digest top-N, HOLD backlog with overdue items, yesterday's outcomes and source health, as a markdown/HTML file on disk and a UI page. Deterministic from fixtures, with no network imports. F-04 is BLOCKED on A-03 and F-11 on A-15.
+WAITING. As of READY_QUEUE @ `a910ad9`, every remaining lane-F task is blocked: **F-04** on **A-03** and **F-11** on **A-15**. I will claim either as soon as its dependency is DONE, or any new F-/ANY task.
 
 ## Done
+- **F-12 @ `0e5a3fe`:** local daily summary (`python -m operator_ui summary` writes `.md`/`.html`, plus the `/summary` page), never sent.
+  - Contents: digest top-N, HOLD backlog (overdue first), yesterday's outcomes (America/Chicago) with net $, and source health.
+  - Deterministic from `as_of`: byte-identical output across runs and shuffled input, with a `summary_hash`.
+  - Untrusted text is escaped in markdown and HTML. Files are written atomically and locally. No network imports.
+  - 108 tests pass on spine `a910ad9`, which also adopts `record_outcome(channel="web")`.
+  - Receipt: `docs/receipts/2026-10-07-f12-daily-summary.md`.
 - **F-10 @ `f955219`:** `/digest` renders lane C's C-08 ranking **unchanged**.
   - Escaped titles linked to open cards; action and reason; deadline window; value $/h; refs with `/provenance/<id>` links.
   - Non-engine scorecards are listed as "Not ranked". A missing engine or an engine failure is reported.
@@ -101,10 +107,10 @@ None. Live comms stay disabled (MICHAEL_DECISIONS #4).
 - P-06-6 became F-07 (DONE).
 - P-06-7 became F-08 (DONE).
 - **P-06-8 (lane A, then F):** a public `spine.propose_followup(conn, item_id, proposed_action)` plus an approval-gate workflow for follow-up requests on an existing item (the R12 edge ACTED → AWAITING_APPROVAL exists, but there is no API). F-08's tests use the internal `_propose`. Lane F would then add "Draft follow-up / offer / quote" on the UI card.
-- **P-06-10 (lane A, small):** `spine.record_outcome` hard-codes provenance `tool_name="mbos.cli.outcome"`, so web-entered outcomes are labelled CLI. Proposal: add a `channel` parameter.
+- P-06-10 is DONE in `a910ad9`, and the UI now records `channel="web"` (`mbos.web.outcome`, asserted in tests).
 - P-06-9 is DONE in `c23bee8`. Original note: `finish_act` reads `response.get("blocked")` for the reason text, but the F-06 effector reports `comms.blocked_reasons`. The reason falls back to "see details", so a one-line read of `response["comms"]["blocked_reasons"]` would make ACTION_FAILED intents self-explanatory.
 
 ## Files (Round Two, current)
-- `operator_ui/` (`backend`, `ux`, `views`, `server`, `sources`, `digest`, `__main__`, `mbos_canonical`), `comms_spec/` (+ `planner.py`, `effector.py`, `data/*.v1.json`), `tests/` (conftest, test_operator_ui, test_comms_spec, fixtures/illustrative.json)
+- `operator_ui/` (`backend`, `ux`, `views`, `server`, `sources`, `digest`, `summary`, `__main__`, `mbos_canonical`), `comms_spec/` (+ `planner.py`, `effector.py`, `data/*.v1.json`), `tests/` (conftest, test_operator_ui, test_comms_spec, fixtures/illustrative.json)
 - `docs/research/agent-06-operator-ui.md`, `docs/decisions/ADR-06-003-operator-ui-stdlib.md`, `docs/receipts/2026-10-07-*.md`
 - `docs/research/contracts/` (byte-identical frozen v1.0.0)
