@@ -44,7 +44,7 @@ def test_offer_is_binding_offer_category_step_up():
     (pa,) = P.plan_offer(flip(), 1000, "Saturday morning", "Sunday 6pm")
     c = pa["comms"]
     assert pa["capability"] == "offer.email.send" and pa["reversibility"] == "irreversible"
-    assert c["binding"] is True and c["template_id"] == "seller_offer" and "$1,000 cash" in c["body"]
+    assert c["is_binding"] is True and c["template_id"] == "seller_offer" and "$1,000 cash" in c["body"]
     assert c["constraints"] == {**c["constraints"], "tier": 0, "step_up": True, "category": "offer"}
     assert pa["summary"].startswith("BINDING OFFER") and c["template_approval"] == "draft"
 
@@ -66,14 +66,14 @@ def test_offer_and_quote_lanes():
 
 def test_quote_is_binding():
     (pa,) = P.plan_quote(service(), 450, "two 12in patches + texture match", 25, "Friday")
-    assert pa["capability"] == "offer.email.send" and pa["comms"]["binding"] is True
+    assert pa["capability"] == "offer.email.send" and pa["comms"]["is_binding"] is True
     assert "$450" in pa["comms"]["body"] and "25% deposit" in pa["comms"]["body"]
 
 
 def test_followups_walk_the_question_set():
     qs = [q_["id"] for q_ in cs.questions("flip", "trailer")]
     (f1,) = P.plan_followup(flip(), asked=qs[:2])
-    assert f1["comms"]["question_ids"] == qs[2:4] and f1["comms"]["binding"] is False
+    assert f1["comms"]["question_ids"] == qs[2:4] and f1["comms"]["is_binding"] is False
     assert f1["capability"] == "comms.email.send" and f1["comms"]["first_message"] is False
     assert P.plan_followup(flip(), asked=qs) == []
     sms = flip()
@@ -111,7 +111,7 @@ def test_binding_offer_becomes_its_own_tier0_step_up_request_and_never_auto_send
         prov = tool_provenance(c, "tests.f08.offer")
         areq = spine._propose(c, item, pa, prov, components())
     assert areq["category"] == "offer" and areq["tier"] == 0 and areq["reversibility"] == "irreversible"
-    assert areq["payload"]["comms"]["binding"] is True and spine.requires_step_up(areq)
+    assert areq["payload"]["comms"]["is_binding"] is True and spine.requires_step_up(areq)
     status = q(rt.engine, "SELECT status FROM mbos.action_requests WHERE action_request_id = :a",
                a=areq["action_request_id"])[0][0]
     assert status == "pending_approval"

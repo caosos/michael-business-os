@@ -233,3 +233,56 @@ def test_decide_from_the_card_on_lane_d_returns_to_the_card_and_executes_once(rt
     for r in ui_d.store.receipts(item_id=item_id):
         assert r["receipt_id"] in body
     assert req(ui_d, "GET", "/item/itm_01JA0000000000000000009999")[0] == 404
+
+
+# ---------------------------------------------------------------- F-15: lane E stamps proposed_by from the drafting lane
+def test_proposed_by_is_the_drafting_lane_in_the_ledger(rtd, discover_d, ui_d, monkeypatch):
+    from comms_spec.planner import CommsActionPlanner
+    from mbos.runtime import components
+
+    monkeypatch.setattr(components(), "planner", CommsActionPlanner())
+    item_id, areq = ready(ui_d, discover_d)
+    assert areq["proposed_by"] == "agent-06-communications", areq["proposed_by"]
+    assert "lane" not in areq["payload"] and areq["payload"]["comms"]["template_id"] == "seller_first_inquiry"
+    ((pb,),) = q(rtd, "SELECT proposed_by FROM mbos.action_requests WHERE action_request_id = :a", a=areq["action_request_id"])
+    assert pb == "agent-06-communications"                                          # the ledger row names the drafting lane
+    assert any(r["type"] == "ACTION_PROPOSED" for r in ui_d.store.receipts(areq_id=areq["action_request_id"]))
+
+
+def test_capability_nobody_holds_creates_no_request(rtd, discover_d, ui_d, monkeypatch):
+    from mbos.runtime import components
+
+    class Rogue:  # an action tagged with our lane for a capability lane E gives to nobody
+        def plan(self, item):
+            return [{"capability": "comms.fax.send", "summary": "fax the seller", "reversibility": "irreversible",
+                     "estimated_cost": {"amount": 0, "currency": "USD"}, "lane": "agent-06-communications"}]
+
+    monkeypatch.setattr(components(), "planner", Rogue())
+    item_id = discover_d("FIX-TRAILER-1")["FIX-TRAILER-1"]
+    wait(lambda: any(r["type"] == "RECOMMENDATION_RECORDED" for r in ui_d.store.receipts(item_id=item_id)))
+    time.sleep(3)                                                                  # give the workflow every chance to propose
+    assert ui_d.store.action_requests_for_item(item_id) == []                      # no request, so nothing to approve
+    assert state(ui_d, item_id) != "AWAITING_APPROVAL"
+    card = ui_d.store.opportunity_card(item_id)
+    assert card["errors"] == [] and "policy blocked" in card["card"]["recommendation"]["why"]
+    body = req(ui_d, "GET", f"/item/{item_id}")[2]
+    assert "No open request is waiting for a decision" in body and ">YES<" not in body     # nothing to decide on
+    assert "policy blocked" in body                                                # the card says why
+
+
+def test_planner_payloads_never_carry_a_key_lane_e_reserves_for_binding_offers(policy_path):
+    """Found with F-15: 05's PDP denies any comms.*/publish.* payload that has a key named `binding` (even `binding: false`)
+    at ANY depth, so a flag named `binding` made every first contact 'policy blocked'. Pin ours against the real policy."""
+    from comms_spec.planner import CommsActionPlanner
+    from mbos_governance.policy import _payload_keys
+    import json as _json
+
+    reserved = {k.lower() for k in _json.load(open(policy_path))["recommendation_actions"]["binding_payload_keys"]}
+    item = _json.loads((__import__("pathlib").Path(__file__).resolve().parents[2] / "docs/research/contracts/examples/item-flip-trailer.example.json").read_text())
+    p = CommsActionPlanner()
+    acts = p.plan(item) + p.plan_followup(item) + p.plan_offer(item, 900, "Saturday", "Sunday")
+    assert acts
+    for a in acts:
+        if a["capability"].startswith(("comms.", "publish.")):
+            keys = {str(k).lower() for k in _payload_keys({"comms": a["comms"]})}
+            assert not (keys & reserved), (a["capability"], keys & reserved)

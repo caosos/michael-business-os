@@ -99,7 +99,7 @@ class CommsDryRunEffector:
         ref = (c.get("recipient") or {}).get("ref") or ""
         block.update(template_id=c.get("template_id"), template_version=c.get("template_version"),
                      template_hash=c.get("template_hash"), first_message=bool(c.get("first_message")),
-                     binding=bool(c.get("binding")), delivery=c.get("delivery", "effector"), recipient_ref=ref)
+                     binding=bool(c.get("is_binding")), delivery=c.get("delivery", "effector"), recipient_ref=ref)
         if c.get("channel") != channel:
             blocked.append(f"draft channel {c.get('channel')!r} != capability channel {channel!r}")
         is_offer_cap = areq["capability"].startswith("offer.")

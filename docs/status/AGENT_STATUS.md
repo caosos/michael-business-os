@@ -4,17 +4,21 @@ Agent: 06
 Role: Communications + Operator UI / Approval UX (build lane F)
 Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
-State: WORKING
-Claimed: F-15
-Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe · F-04 @ 46c961c · F-13 @ 2415936 · F-14 @ c68a33c · F-13 hardening @ 6e47646
+State: WAITING
+Claimed: none
+Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe · F-04 @ 46c961c · F-13 @ 2415936 · F-14 @ c68a33c · F-13 hardening @ 6e47646 · F-15 @ HEADPH
 Blocked: F-11 on A-15
 Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
 Last updated: 2026-10-07
 
 ## Current objective
-**F-15** (P1, READY_QUEUE): tag every proposed action with `lane` = `agent-06-communications` in `CommsActionPlanner`, so lane E stamps `proposed_by` (05's E-15, 07's F-41). Acceptance: `proposed_by` equals `agent-06-communications` in the ledger for my comms proposals. F-14 and the F-13 hardening are DONE (queue not yet synced). F-11 is BLOCKED on A-15.
+WAITING. **F-11** (follow-up / offer / quote buttons on the card) is BLOCKED on **A-15**. I will claim it when A-15 is DONE, or any new F-/ANY task.
 
 ## Done
+- **F-15 @ HEADPH:** every `CommsActionPlanner` action carries `lane="agent-06-communications"`. On lane D + E the ledger's `proposed_by` equals it, `lane` is absent from the frozen payload, and a capability no lane holds creates no request (the card says "policy blocked").
+  - **Bug fixed:** 05's PDP denies any `comms.*` payload with a key named `binding` at any depth (even `false`). My draft flag is now `is_binding`, pinned against the real policy file.
+  - 124 + 21 tests. Receipt: `docs/receipts/2026-10-07-f15-lane-tag.md`.
+- **F-13 hardening @ `6e47646`:** re-vendored card schema (flags, dry_run, why_provenance); `item.flags` warning, DRY-RUN tag, provenance links, `clean_text` on displayed text.
 - **F-14 @ c68a33c:** "Add what you know about this model".
   - Server-set author, PIN-gated, every refusal reason shown, append-only and receipted; `/notes` lists them.
   - End to end on the real lane-C engine, a note shows on the next card of that model as Michael's RECOMMENDATION with his provenance.
@@ -118,6 +122,8 @@ None. Live comms stay disabled (MICHAEL_DECISIONS #4).
 - The comms policy values in `comms_spec/data/comms_policy.v1.json` are PROPOSED (conservative). Loosening any of them is a version bump.
 
 ## Proposed tasks
+- **P-06-15 (lane A, hygiene):** the coordinator repo commits `build/` (setuptools output) and `setup.py`. `git archive` ships a stale `build/lib`, and a non-editable install from that tree silently installs the old code (mine lacked `clean_text` until I removed `build/`). Remove `build/` from git and add it to `.gitignore`.
+- **P-06-16 (lane E):** the PDP's `binding_payload_keys` check is key-name based at any depth, so an innocent flag named `binding` blocks a first contact. Consider checking only top-level payload keys, or documenting the reserved names for drafting lanes. Mine are renamed.
 - **P-06-14 (lane A):** a `spine_d.retract_operator_note` wrapper so the UI can offer retract and edit of notes (the SQL function exists).
 - **P-06-13 (lane A):** `mbos.card.load_profile()` defaults to a repo-relative path, and `card.schema.json` is not found by a non-editable install without `MBOS_CONTRACTS_DIR` (same class as A-10). The UI works around it with `MBOS_OPERATOR_PROFILE` and `MBOS_CONTRACTS_DIR`.
 - R20: P-06-11 is resolved by 05's E-12 (`cancelled_by_freeze`); my pinned test must flip when it lands.

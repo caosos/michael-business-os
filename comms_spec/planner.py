@@ -38,6 +38,7 @@ SERVICE_NAMES = {
     "technical_service": "tech help", "mechanical_service": "mechanical repair", "other_service": "your project",
 }
 ZERO = {"amount": 0, "currency": "USD"}
+LANE = "agent-06-communications"  # the drafting lane: lane E stamps `proposed_by` from it (F-15 / E-15 / 07 F-41)
 
 
 def sanitize(text: Any, limit: int = 80) -> str:
@@ -77,12 +78,15 @@ def _build(planner: str, item: dict[str, Any], route: tuple[str, str, str], temp
     policy = cs.load("comms_policy")
     loc = item["normalized"].get("location") or {}
     cp = item["normalized"].get("counterparty") or {}
+    # NB: the payload block must not contain the keys lane E's PDP reserves for binding offers under comms.* / publish.*
+    # (policy `recommendation_actions.binding_payload_keys`: offer, offer_amount, counter, binding, ...), at any depth.
+    # Hence `is_binding`, not `binding`. A test pins this against the real policy file.
     comms = {
         "template_id": draft["template_id"], "template_version": draft["template_version"],
         "template_hash": draft["template_hash"], "template_approval": draft["template_approval"],
         "channel": channel, "delivery": delivery, "subject": draft["subject"], "body": draft["body"],
         "variables": variables, "question_ids": question_ids,
-        "first_message": first_message, "binding": draft["binding"], "commercial": draft["commercial"],
+        "first_message": first_message, "is_binding": draft["binding"], "commercial": draft["commercial"],
         "recipient": {"ref": (item.get("sources") or [{}])[0].get("url"), "contact_method": method,
                       "role": cp.get("role"), "tz": STATE_TZ.get((loc.get("state") or "").upper())},
         "constraints": {
@@ -105,6 +109,7 @@ def _build(planner: str, item: dict[str, Any], route: tuple[str, str, str], temp
         "summary": summary + (" — MANUAL ASSIST: Michael pastes it into the platform" if delivery == "manual_assist" else ""),
         "reversibility": constraints["reversibility"],
         "estimated_cost": ZERO,
+        "lane": LANE,
         "comms": comms,
     }
 

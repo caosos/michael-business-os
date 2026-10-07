@@ -77,7 +77,7 @@ def test_contract_valid_proposals(make):
     t = cs.get_template(c["template_id"], c["channel"], c["template_version"])
     assert c["template_hash"] == t["content_hash"] == cs.template_hash(t)  # MBOS-CJSON-1
     assert cs.load("templates")["disclosure"] in c["body"]               # E1: first contact discloses
-    assert c["binding"] is False and c["first_message"] is True           # first contact is never an offer
+    assert c["is_binding"] is False and c["first_message"] is True           # first contact is never an offer
     assert c["template_approval"] == "draft"
     assert c["constraints"]["send_window"]["start"] == "08:00" and c["constraints"]["disclosure_required"] is True
 
@@ -125,3 +125,20 @@ def test_unknown_or_multi_zone_state_has_no_tz():
 def test_planner_is_deterministic():
     a, b = CommsActionPlanner().plan(flip_item()), CommsActionPlanner().plan(copy.deepcopy(flip_item()))
     assert mbos_canonical.sha256_of(a) == mbos_canonical.sha256_of(b)
+
+
+# ---------------------------------------------------------------- F-15: every action carries its drafting lane
+def test_every_planner_action_carries_the_lane_tag():
+    from comms_spec.planner import LANE
+
+    assert LANE == "agent-06-communications"
+    p = CommsActionPlanner()
+    flip, svc = flip_item(), service_item()
+    acts = (p.plan(flip) + p.plan(svc) + p.plan_followup(flip) + p.plan_followup(svc)
+            + p.plan_offer(flip, 900, "Saturday", "Sunday") + p.plan_quote(svc, 450, "two patches", 25, "Friday"))
+    assert len(acts) >= 6 and all(a["lane"] == LANE for a in acts)
+    sms = flip_item()
+    sms["normalized"]["counterparty"]["contact_method"] = "phone"
+    assert all(a["lane"] == LANE for a in p.plan(sms) + p.plan_followup(sms))
+    for a in acts:  # the tag is routing metadata only: the frozen payload built from `comms` never carries it
+        assert "lane" not in a["comms"]
