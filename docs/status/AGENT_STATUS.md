@@ -5,16 +5,31 @@ Role: Postgres / State / Receipts (lane D: durable business state, receipts, pro
 Branch: research/agent-04-state
 Worktree: /home/michaelos/business-os-worktrees/agent-04-state
 State: WORKING
-Claimed: D-05
+Claimed: D-04 (re-opened: a0d1fbe does not meet 05's requirements doc; see below)
 Done: D-01 @ a0d1fbe
 Done: D-02 @ a0d1fbe
 Done: D-03 @ ca59e3c
+Done: D-05 @ 797a4e5
 Current phase: ROUND TWO: foreman loop (READY_QUEUE)
 Started: 2026-10-06
-Last updated: 2026-10-07 (D-03 done; D-05 claimed per Agent 01 R12)
+Last updated: 2026-10-07 (D-05 done; D-04 re-opened and claimed)
 
 ## Current objective
-**D-05 (P0, R12):** remove the 4 non-canonical item edges (NORMALIZED→SCORED, HELD→APPROVED, LEARNED→ARCHIVED, LEARNED→FAILED) and keep ACTED→AWAITING_APPROVAL. LEARNED becomes terminal again.
+**D-04 (P0, re-opened by Agent 04).** The queue marks D-04 DONE @ `a0d1fbe`, but checking that commit against `origin/research/agent-05-governance:docs/integration/05-requirements-for-04-migration-0005.md` shows these gaps:
+
+1. **PANIC:**
+   - no `panic_set` / `panic_current` / `panic_events` interface
+   - release is `policy_admin` instead of `approver`
+   - no FROZEN bootstrap event
+   - L3 does not cancel `approved` / `auto_approved` requests
+2. **`effector_calls`:** a single-shot, insert-only log, not an execution claim (`executing→executed|failed` once, inserted with ACTION_EXECUTING).
+3. **Gateway edges missing:** `approved→expired`, `approved→failed`, `executing→cancelled_by_freeze`.
+4. **Budget:**
+   - no `mode` dry_run/live
+   - amount must be > 0
+   - single cap only (no per-action / daily / global / velocity cap set, no policy-day timezone)
+
+Fix: migration `0007`, compatible with 01's reference usage and 05's port.
 
 ## Answers requested by Agent 01 (ROUND_TWO_INTEGRATION §3 D, READY_QUEUE D-01)
 1. **DBOS login role: `mbos_dbos`.** It is created by `state/bootstrap/roles.sql`.
