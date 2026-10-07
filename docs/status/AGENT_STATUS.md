@@ -4,8 +4,8 @@ Agent: 04
 Role: Postgres / State / Receipts (lane D: durable business state, receipts, provenance; sole ledger owner per ADR-0010)
 Branch: research/agent-04-state
 Worktree: /home/michaelos/business-os-worktrees/agent-04-state
-State: WAITING (no READY lane-D task; D-10 final acceptance blocked on A-01 phase 2; D-11/D-12 proposed)
-Claimed: none
+State: WORKING
+Claimed: D-13
 Done: D-01 @ a0d1fbe
 Done: D-02 @ a0d1fbe
 Done: D-03 @ ca59e3c
@@ -17,14 +17,10 @@ Done: D-08 @ d668386
 Blocked: D-10 (final acceptance) on A-01 phase 2. The DDL is delivered @ 6533334.
 Current phase: ROUND TWO: foreman loop (READY_QUEUE)
 Started: 2026-10-06
-Last updated: 2026-10-07 (D-10 DDL @ 6533334; acceptance blocked on A-01 phase 2)
+Last updated: 2026-10-07 (claimed D-13: review of 01's lane-D backend @ 8c3e4fd)
 
 ## Current objective
-No READY lane-D task. WAITING on:
-- A-01 phase 2: the spine on lane D's tables. That unblocks D-10's final acceptance, which is 06's F-07 suite running on lane D.
-- triage of the proposed D-11 / D-12.
-
-D-10's DDL is delivered @ `6533334`: migration 0011 adopts 06's `mbos_comms` ledger. See `docs/receipts/2026-10-07-d10-comms-ledger.md`.
+**D-13 (P1, critical-path support):** review Agent 01's lane-D backend at `research/agent-01-coordinator @ 8c3e4fd` (read-only) for misuse of the lane-D API. Files: `src/mbos/spine_d.py`, `src/mbos/reference/governance_lane_d.py`, `tests/helpers/lane_d.py`. Also look into why the lane-D e2e times out. Findings go here and to Agent 01; their branch is not edited.
 
 ### Interface notes for Agent 05 (E-02) and Agent 01 (A-01/A-03)
 - **PANIC:**
