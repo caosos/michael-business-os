@@ -25,6 +25,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
+sys.path.insert(0, str(ROOT / "tests"))
 
 import psycopg  # noqa: E402
 from psycopg.types.json import Jsonb  # noqa: E402
@@ -61,65 +62,18 @@ def corpus() -> list[tuple[dict, dict, list]]:
     return out
 
 
-def pg_bin() -> Path:
-    import pgserver
-    return Path(pgserver.__file__).parent / "pginstall" / "bin"
-
-
-def write_through_state_api(dsn: str, rows) -> None:
-    from mbos_state.store import Actor, StateStore
-    actor = Actor("agent", "agent-03-economics")
-    with psycopg.connect(dsn, autocommit=False) as conn:
-        st = StateStore(conn)
-        for item, prov, drafts in rows:
-            iid = item["item_id"]
-            with st.transaction():
-                p = {k: v for k, v in prov.items() if k != "derived_from"}   # upstream ids are not all in this DB
-                pid = st.record_provenance(**p)
-                base = {k: v for k, v in item.items() if k not in ("scores", "recommendation", "state")}
-                base["state"] = "NORMALIZED"
-                st.create_item(base, actor, "C-12 export: create", [pid], f"c12:create:{iid}")
-                st.transition_item(iid, "RESEARCHING", actor, "C-12 export", [pid], f"c12:researching:{iid}")
-                sd = next(d for d in drafts if d["type"] == "SCORE_RECORDED")
-                st.update_item_doc(iid, {"scores": item["scores"]}, "SCORE_RECORDED", actor, "C-12 export: score",
-                                   [pid], sd["idempotency_key"],
-                                   extra={"inputs_hash": sd["inputs_hash"], "payload_hash": sd["payload_hash"],
-                                          "tool_name": sd["tool_name"]})
-                rd = next(d for d in drafts if d["type"] == "RECOMMENDATION_RECORDED")
-                st.update_item_doc(iid, {"recommendation": item["recommendation"]}, "RECOMMENDATION_RECORDED", actor,
-                                   "C-12 export: recommend", [pid], rd["idempotency_key"])
-                st.transition_item(iid, "SCORED", actor, "C-12 export", [pid], f"c12:scored:{iid}")
-                st.transition_item(iid, "RECOMMENDED", actor, "C-12 export", [pid], f"c12:recommended:{iid}")
-
-
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--state-dir", type=Path, required=True)
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--state-commit", default="unknown")
     args = ap.parse_args()
-    from mbos_state import migrate
+    import lane_d
 
-    root = Path(tempfile.mkdtemp(prefix="c12-"))
-    sock = Path(tempfile.mkdtemp(prefix="c12-", dir=os.environ.get("XDG_RUNTIME_DIR") or "/tmp"))
-    data, port, b = root / "data", int(os.environ.get("C12_PORT", "55471")), pg_bin()
-    subprocess.run([b / "initdb", "-D", data, "--auth=trust", "--encoding=UTF8", "--locale=C.UTF-8", "-U", "postgres"],
-                   check=True, capture_output=True)
-    subprocess.run([b / "pg_ctl", "-D", data, "-l", root / "pg.log", "-w", "start", "-o",
-                    f"-p {port} -k {sock} -c listen_addresses='' -c timezone=UTC"], check=True, capture_output=True)
-    base = f"host={sock} port={port}"
-    try:
-        with psycopg.connect(f"{base} dbname=postgres user=postgres", autocommit=True) as c:
-            c.execute((args.state_dir / "bootstrap" / "roles.sql").read_text())
-            c.execute("CREATE DATABASE mbos OWNER mbos_owner")
-        with psycopg.connect(f"{base} dbname=mbos user=postgres", autocommit=True) as c:
-            c.execute("CREATE SCHEMA dbos AUTHORIZATION mbos_dbos")
-            c.execute("CREATE SCHEMA mbos_ext; CREATE EXTENSION vector WITH SCHEMA mbos_ext; "
-                      "GRANT USAGE ON SCHEMA mbos_ext TO agent_read, agent_write, gateway, approver, policy_admin, mbos_owner")
-        migrate.migrate(f"{base} dbname=mbos user=postgres", args.state_dir / "migrations", log=lambda *_: None)
+    with lane_d.cluster(args.state_dir) as dsn:
         rows = corpus()
-        write_through_state_api(f"{base} dbname=mbos user=postgres", rows)
-        with psycopg.connect(f"{base} dbname=mbos user=postgres") as conn:
+        lane_d.write_scored(dsn, rows)
+        with psycopg.connect(dsn) as conn:
             items, receipts = load_scored_items(conn)
             server = conn.execute("SHOW server_version").fetchone()[0]
             chain = conn.execute("SELECT ok, receipts_checked FROM mbos.verify_chain(1, NULL, NULL)").fetchone()
@@ -131,10 +85,6 @@ def main() -> None:
                               "verify_chain": {"ok": chain[0], "receipts_checked": chain[1]}, "as_of": AS_OF},
             "items": items, "receipts": receipts}, indent=1, sort_keys=True) + "\n")
         print(f"exported {len(items)} scored items, {len(receipts)} SCORE_RECORDED receipts; chain ok={chain[0]}")
-    finally:
-        subprocess.run([b / "pg_ctl", "-D", data, "-m", "immediate", "-w", "stop"], capture_output=True)
-        shutil.rmtree(root, ignore_errors=True)
-        shutil.rmtree(sock, ignore_errors=True)
 
 
 if __name__ == "__main__":

@@ -7,7 +7,7 @@ Worktree: /home/michaelos/business-os-worktrees/agent-03-economics
 State: WORKING
 Current phase: ROUND TWO, wave two. Claimed task: RESEARCH/estimate producer (lane C)
 Started: 2026-10-06
-Last updated: 2026-10-07 (C-14 claimed)
+Last updated: 2026-10-07 (C-14 IN PROGRESS; paused at usage limit)
 
 ## Claimed work (wave two). Foreman loop: `docs/COORDINATION.md` @ agent-01 `99e9ec0`
 Claimed: C-14
@@ -97,6 +97,20 @@ Queue (lane C, after C-14): none READY @ agent-01 `ca6d056`
 ### C-13 result (DONE @ `0d417fb`; receipt `docs/receipts/2026-10-07-c13-release-gate-hook.md`)
 - The gate command is `python -m mbos_economics audit --dsn "$MBOS_DSN"` (exit 0/1/2). It is documented with expected output in `docs/research/agent-03-release-gate-at1.md`.
 - 01's spine receipts lack `payload_hash`, so they are reported as `receipt_weak` (not drift). `--strict` fails them.
+
+### C-14 progress (IN PROGRESS, not done; paused at the session usage limit)
+**Done:**
+- Shared throwaway lane-D harness: `economics/tests/lane_d.py` (`cluster()`, `write_scored()`). `scripts/lane_d_export.py` now uses it; verified that the export runs and `verify_chain` is ok.
+- Verified that Agent 01's real `mbos.spine_d.record_outcome` (@ `ca6d056`) can be imported in the scratch venv (01's package installed `--no-deps` from a read-only archive, plus sqlalchemy, pydantic, dbos and python-ulid).
+
+**Remaining:** `tests/test_learn_lane_d.py`, which skips unless `MBOS_LANE_D_STATE_DIR` is set. It must:
+1. Write 2 scored trailers via `lane_d.write_scored`.
+2. Record outcomes through `spine_d.record_outcome` (SQLAlchemy psycopg engine on the same DSN).
+3. Run `learn.load_outcomes(conn)`, then `calibrate`, then `propose_learn_bump`, and get a proposal.
+4. Call `StateStore.propose_action(draft)`. It must be refused (ADR-0009 item 9 is pending), with no `config.scoring.bump` row written.
+5. Show `verify_chain` ok, the priors file byte-identical, and `audit --strict` clean.
+
+After that: the receipt, then `Done: C-14`.
 
 ## Proposed tasks (for Agent 01 to triage)
 - **P-03-06 → DONE by Agent 01 @ `ca6d056`** (the spine writes `payload_hash`; the gate can use `--strict`). Original text:
