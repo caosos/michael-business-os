@@ -1,5 +1,7 @@
 """Canonical state machines (ADR-0004, conflict C8: Item flow ⊃ ActionRequest status).
 
+Ruling R12: Agent 04's edge table (lane D, `state/migrations/0002_domain.sql`) is authoritative.
+
 The Item transition table is mirrored in the DB (`mbos.item_state_transitions`, enforced by
 the `items_guard` trigger). `tests/unit/test_state_machine.py` asserts the two are identical.
 """
@@ -8,20 +10,21 @@ from __future__ import annotations
 
 NON_TERMINAL_ITEM_STATES = (
     "DISCOVERED", "NORMALIZED", "RESEARCHING", "SCORED", "RECOMMENDED", "AWAITING_APPROVAL", "HELD",
-    "APPROVED", "REJECTED", "ACTING", "ACTED", "OUTCOME_RECORDED", "LEARNED",
+    "APPROVED", "REJECTED", "ACTING", "ACTED", "OUTCOME_RECORDED",
 )
-TERMINAL_ITEM_STATES = ("ARCHIVED", "FAILED")
+TERMINAL_ITEM_STATES = ("ARCHIVED", "FAILED")  # LEARNED is also terminal (lane D, R12): no exits
 
 _ITEM_EDGES = {
     ("DISCOVERED", "NORMALIZED"),
-    ("NORMALIZED", "RESEARCHING"), ("NORMALIZED", "SCORED"),
+    ("NORMALIZED", "RESEARCHING"),
     ("RESEARCHING", "SCORED"), ("SCORED", "RESEARCHING"),
     ("SCORED", "RECOMMENDED"),
     ("RECOMMENDED", "AWAITING_APPROVAL"), ("RECOMMENDED", "RESEARCHING"),
     ("AWAITING_APPROVAL", "APPROVED"), ("AWAITING_APPROVAL", "HELD"), ("AWAITING_APPROVAL", "REJECTED"),
-    ("HELD", "AWAITING_APPROVAL"), ("HELD", "APPROVED"), ("HELD", "REJECTED"),
+    ("HELD", "AWAITING_APPROVAL"), ("HELD", "REJECTED"),
     ("APPROVED", "ACTING"), ("ACTING", "ACTED"),
     ("ACTED", "OUTCOME_RECORDED"), ("OUTCOME_RECORDED", "LEARNED"),
+    ("ACTED", "AWAITING_APPROVAL"),  # follow-up action on the same item (lane D edge, ruling R12)
 }
 ITEM_TRANSITIONS: frozenset[tuple[str, str]] = frozenset(
     _ITEM_EDGES | {(s, t) for s in NON_TERMINAL_ITEM_STATES for t in TERMINAL_ITEM_STATES}

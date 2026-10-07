@@ -25,7 +25,7 @@ LANES = [
     ("02", "research/agent-02-opportunity", "src/mbos_discovery/ids.py", lambda m: lambda o: m.sha256_ref(m.canonical_json(o))),
     ("03", "research/agent-03-economics", "economics/src/mbos_economics/canonical.py", lambda m: m.content_hash),
     ("05", "research/agent-05-governance", "src/mbos_governance/ids.py", lambda m: m.payload_hash),
-    ("06", "research/agent-06-communications", "operator_ui/util.py", lambda m: m.sha256_of),
+    ("06", "research/agent-06-communications", "operator_ui/mbos_canonical.py", lambda m: m.sha256_of),  # vendored reference (F-02)
     ("07", "research/agent-07-marketing", "qa/mbos_qa/core.py", lambda m: lambda o: m.sha256_ref(o)),
 ]
 

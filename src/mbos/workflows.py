@@ -168,3 +168,20 @@ def record_decision(action_request_id: str, decision: str, payload_hash_seen: st
 
 def ping(item_id: str) -> None:
     DBOS.send(item_workflow_id(item_id), {"kind": "ping"}, topic=DECISION_TOPIC)
+
+
+def notify_decision(item_id: str, approval_id: str) -> None:
+    """Wake an item workflow after a decision was recorded with `spine.decide` in the caller's own transaction
+    (Operator UI, CLI). Works from any process: uses DBOS inside a launched runtime, else a DBOSClient.
+    The approval row is the truth; this message is only a wake-up (the workflow re-polls on its own)."""
+    message = {"kind": "decision", "approval_id": approval_id}
+    try:
+        DBOS.send(item_workflow_id(item_id), message, topic=DECISION_TOPIC)
+    except Exception:
+        from mbos.runtime import client
+
+        c = client()
+        try:
+            c.send(item_workflow_id(item_id), message, topic=DECISION_TOPIC)
+        finally:
+            c.destroy()

@@ -120,6 +120,9 @@ def record_score(conn: sa.Connection, item_id: str, sr: dict[str, Any]) -> dict[
         inputs_used=[{"ref": item_id, "hash": sr["inputs_hash"]}],
         derived_from=[s["provenance_id"] for s in item["sources"]], confidence=sr["confidence"],
     )
+    if item["state"] == "NORMALIZED":  # R12: every item passes RESEARCH (lane C's producer plugs in here, A-05)
+        update_item(conn, item_id, to_state="RESEARCHING", intent="RESEARCH: scoring on the inputs supplied so far",
+                    provenance_ids=[prov], actor=actor)
     scores = {"scorecard_id": sr.get("scorecard_id") or new_id("scr"), "inputs_hash": sr["inputs_hash"], "scorecard": sr["scorecard"]}
     update_item(conn, item_id, to_state="SCORED", patch={"scores": scores}, intent="scored", provenance_ids=[prov], actor=actor)
     append_receipt(conn, type="SCORE_RECORDED", intent=f"scorecard {scores['scorecard_id']}: {sr['verdict']}",
@@ -400,6 +403,9 @@ def expire(conn: sa.Connection, item_id: str, action_request_id: str) -> None:
 def begin_act(conn: sa.Connection, item_id: str, action_request_id: str, approval: dict) -> None:
     prov = _approval_prov(conn, approval)
     item = load_item(conn, item_id)
+    if item["state"] == "HELD":  # R12: re-present before approving; HOLD itself never executes
+        update_item(conn, item_id, to_state="AWAITING_APPROVAL", intent="re-presented: Michael decided YES on a held request",
+                    provenance_ids=[prov])
     update_item(conn, item_id, to_state="APPROVED",
                 patch={"approval_ids": (item.get("approval_ids") or []) + [approval["approval_id"]]},
                 intent="Michael said YES", provenance_ids=[prov])
