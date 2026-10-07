@@ -4,8 +4,8 @@ Agent: 02
 Role: Discovery / Source Adapters (DISCOVER + NORMALIZE lane)
 Branch: research/agent-02-opportunity
 Worktree: /home/michaelos/business-os-worktrees/agent-02-opportunity
-State: WAITING
-Waiting on: B-12 unblock (MICHAEL_DECISIONS #8 + operator credentials) or queue refill; B-15 follow-ups below
+State: WORKING
+Claimed: B-16
 Blocked: B-12 on MICHAEL_DECISIONS #8 + operator credentials
 Done: B-01 @ 7c9da45
 Done: B-02 @ cadfdae
@@ -22,7 +22,7 @@ Done: B-13 @ 741dfd7 (spine-path Deduper; corpus via 01's spine.ingest: F2 0.00%
 Done: B-14 @ 0dd506b (photos via put_artifact; normalized.images round-trips by sha256 on the spine path; full suite 175 passed)
 Done: B-15 @ 09a755c (P0; listing_activity + seller blocks, only what the source exposes; card validates; 188 tests)
 Done: C-04 (support, source side) @ a1a7730 (lead Agent 03 C-04 @ 882c726)
-Current phase: Round Two — B-01..B-11, B-13..B-15 DONE; B-12 blocked; WAITING
+Current phase: Round Two — working B-16 (CPSC recalls adapter for Agent 03's knowledge base)
 Started: 2026-10-06 (Round One) · Round Two started 2026-10-07
 Last updated: 2026-10-07
 
