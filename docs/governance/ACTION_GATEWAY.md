@@ -1,7 +1,7 @@
 # Action Gateway: wave one implementation guide
 
 **Owner:** Agent 05 · **Status:** implemented, wave one · **Date:** 2026-10-07
-**Code:** `src/mbos_governance/` · **Policy data:** `policy/` · **Tests:** `tests/` (121 passing)
+**Code:** `src/mbos_governance/` · **Policy data:** `policy/` · **Tests:** `tests/` (141 passing)
 
 > Core law: no action without a receipt, and no receipt without provenance.
 > Governance rule: models may PROPOSE. Non-LLM policy code AUTHORIZES.
@@ -93,15 +93,20 @@ These defaults wait on Michael's decisions (`MICHAEL_DECISIONS.md`):
 - money velocity: 3 per hour
 - quiet hours: 20:00–08:00 America/Chicago
 
-## 6. Payload hash canonicalization (ruling R3, normative)
+## 6. Hashing: ADR-0010 (normative), supersedes R3
 
-`payload_hash = "sha256:" + hex(sha256(UTF-8(json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False))))`.
-
-- Money values are JSON numbers, using Python's deterministic float repr (R3). This replaces wave one's "no floats" rule.
-- **FACT:** this is byte-identical to Agent 01's `mbos.hashing.sha256_of` and Agent 06's `operator_ui.util.canonical_json`. Golden vectors are pinned in `test_payload_hash_matches_r3_cross_lane_vectors`.
-- Payloads that are not valid JSON (NaN, Infinity, or non-JSON types) are refused at `propose()` with `GatewayRefused("PAYLOAD_NOT_HASHABLE")`. They are never hashed differently.
-- **Caution (07 F-14):** `850` and `850.0` hash differently. The gateway hashes the exact stored payload, so the proposer and the Operator UI must not re-normalise numbers (for example through Decimal) between proposal and approval. If they do, G3 refuses the action, which fails closed.
-- The frozen example `action-request-email-held` still does not reproduce. ADR-0009 regenerates it.
+- **`payload_hash`** is MBOS-CJSON-1: RFC 8785 JCS with an I-JSON profile.
+  - Floats are allowed, and `850.0` and `850` hash the same.
+  - Rejected: NaN/±Inf, integral values beyond ±(2^53−1), non-BMP member names, U+0000 and lone surrogates.
+  - A rejected payload is refused at `propose()` with `GatewayRefused("PAYLOAD_NOT_HASHABLE")`.
+- **Stand-in receipt `row_hash`** is MBOS-RH-1: `sha256(CJSON(D))`.
+  - D is the receipt minus `row_hash`, including `seq` and `prev_hash`.
+  - Top-level nulls are dropped, except `prev_hash`.
+  - There is no `|| prev_hash` concatenation.
+  - The receipt `ts` is `YYYY-MM-DDTHH:MM:SS.ffffffZ`.
+- **Where the algorithm lives:** `src/mbos_governance/ids.py` contains Agent 01's reference `mbos_canonical` block **verbatim** (@`99e9ec0`). It is inlined because `tools/interop_check.py` loads `ids.py` standalone.
+- **FACT:** interop row 05 = 10/10 CONFORMS @ `df826c3`. All 10 vectors, all 6 rejections and the `receipt_chain` pass, from `tests/data/vectors.json` (pinned sha256).
+- **Side effect:** the PANIC-file checksum and the policy digest also use CJSON now. A state file sealed before this change reads as FROZEN, which fails closed. `mutate()` rebuilds it as FROZEN, and Michael then releases it.
 
 ## 7. Security boundary: what is real and what is not
 

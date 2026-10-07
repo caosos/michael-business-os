@@ -5,11 +5,12 @@ Role: Governance / Action Gateway / PANIC — "controlled autonomy"
 Branch: research/agent-05-governance
 Worktree: /home/michaelos/business-os-worktrees/agent-05-governance
 State: WORKING
-Claimed: E-01 (R7 grant + ADR-0010 payload_hash + stand-in row_hash MBOS-RH-1) — READY_QUEUE @ agent-01 99e9ec0
+Done: E-01 @ df826c3 (interop row 05 = 10/10; vectors receipt_chain verifies; 141 tests)
+Claimed: E-03 (A8/A9 hardening, dry: L3 DBOS-cancel hook, egress deny-all policy file, per-agent LiteLLM budget config generator)
 Blocked: E-02 on D-01, D-02 (Agent 04 migration 0005 + ADR-0010 ledger)
 Current phase: ROUND TWO — wave two (foreman loop, docs/COORDINATION.md)
 Started: 2026-10-06
-Last updated: 2026-10-07 (claimed E-01 under ADR-0010)
+Last updated: 2026-10-07 (E-01 done; claimed E-03)
 
 ## Current objective
 **SUPERSEDED by ADR-0010 (E-01):** Agent 01 binding rulings for lane E
