@@ -1,10 +1,12 @@
 """Governance store — wave-one SQLite reference implementation.
 
-Agent 04 owns the production ledger (Postgres, ADR-0001/0004). This module gives the
+TEST STAND-IN ONLY (ruling R2): Agent 04 owns the production ledger (Postgres, ADR-0001/0004),
+written only through its append_receipt. This module gives the
 gateway the properties it depends on, so the guard logic is real and testable now:
 
   * receipts, approvals, provenance are INSERT-ONLY (triggers reject UPDATE/DELETE);
-  * receipts are hash-chained: row_hash = sha256(canonical(row - row_hash) || prev_hash);
+  * receipts are hash-chained with MBOS-RH-1 (ADR-0010): row_hash = sha256(CJSON(D)), D = receipt
+    minus row_hash, incl. seq + prev_hash, top-level nulls dropped except prev_hash; ts has 6 digits;
   * every state change and its receipt commit in ONE transaction (BEGIN IMMEDIATE);
   * every receipt is validated against receipt.schema.json v1.0.0 and every
     provenance_id it cites must already exist ("no receipt without provenance");
@@ -23,7 +25,7 @@ from pathlib import Path
 from typing import Iterator
 
 from . import contracts
-from .ids import canonical_json, fmt_ts, new_id, sha256_tagged, utcnow
+from .ids import canonical_json, fmt_ts, fmt_ts_us, new_id, receipt_row_hash, utcnow
 
 DDL = """
 PRAGMA journal_mode=WAL;
@@ -89,8 +91,9 @@ def _immutability_triggers() -> str:
     return "\n".join(out)
 
 
-def compute_row_hash(row_without_hash: dict, prev_hash: str | None) -> str:
-    return sha256_tagged(canonical_json(row_without_hash) + (prev_hash or ""))
+def compute_row_hash(receipt: dict) -> str:
+    """MBOS-RH-1. prev_hash is inside the hashed document; there is no concatenation."""
+    return receipt_row_hash(receipt)
 
 
 class ProvenanceMissing(ValueError):
@@ -150,13 +153,13 @@ class GovernanceStore:
         row = {
             "receipt_id": new_id("rcpt"),
             "seq": seq,
-            "ts": fmt_ts(utcnow()),
+            "ts": fmt_ts_us(utcnow()),
             "schema_version": "1.0.0",
             **partial,
             "prev_hash": prev_hash,
         }
         row.setdefault("idempotency_key", f"{row['receipt_id']}")
-        row["row_hash"] = compute_row_hash(row, prev_hash)
+        row["row_hash"] = compute_row_hash(row)
         contracts.require_valid("receipt", row)
         self.require_provenance(cur, row["provenance_ids"])
         cur.execute(
@@ -181,8 +184,8 @@ class GovernanceStore:
                 return False, f"seq gap/mismatch at {r['seq']}"
             if body.get("prev_hash") != prev or r["prev_hash"] != prev:
                 return False, f"prev_hash break at seq {r['seq']}"
-            claimed = body.pop("row_hash", None)
-            if claimed != r["row_hash"] or compute_row_hash(body, prev) != claimed:
+            claimed = body.get("row_hash")
+            if claimed != r["row_hash"] or compute_row_hash(body) != claimed:
                 return False, f"row_hash mismatch at seq {r['seq']}"
             prev = claimed
             expected_seq += 1
@@ -193,14 +196,14 @@ class GovernanceStore:
         cur.execute(
             "INSERT INTO action_requests VALUES (?,?,?,?,?,?,?)",
             (ar["action_request_id"], ar["idempotency_key"], ar["proposed_by"], ar["status"],
-             ar.get("policy_decision_ref"), canonical_json(ar), fmt_ts(utcnow())),
+             ar.get("policy_decision_ref"), canonical_json(ar), fmt_ts_us(utcnow())),
         )
 
     def set_status(self, cur: sqlite3.Cursor, ar: dict, status: str) -> dict:
         new = {**ar, "status": status}
         cur.execute(
             "UPDATE action_requests SET status=?, policy_decision_ref=?, body=?, updated_at=? WHERE action_request_id=?",
-            (status, new.get("policy_decision_ref"), canonical_json(new), fmt_ts(utcnow()), ar["action_request_id"]),
+            (status, new.get("policy_decision_ref"), canonical_json(new), fmt_ts_us(utcnow()), ar["action_request_id"]),
         )
         return new
 
@@ -233,11 +236,11 @@ class GovernanceStore:
 
     def claim(self, cur: sqlite3.Cursor, key: str, action_request_id: str) -> None:
         cur.execute("INSERT INTO execution_claims VALUES (?,?,?,?,?,?)",
-                    (key, action_request_id, "executing", None, fmt_ts(utcnow()), None))
+                    (key, action_request_id, "executing", None, fmt_ts_us(utcnow()), None))
 
     def finish_claim(self, cur: sqlite3.Cursor, key: str, state: str, result: dict) -> None:
         cur.execute("UPDATE execution_claims SET state=?, result=?, finished_at=? WHERE idempotency_key=? AND state='executing'",
-                    (state, canonical_json(result), fmt_ts(utcnow()), key))
+                    (state, canonical_json(result), fmt_ts_us(utcnow()), key))
         if cur.rowcount != 1:
             raise RuntimeError(f"claim {key} not in executing state")
 
@@ -258,9 +261,11 @@ class GovernanceStore:
             "SELECT COUNT(*) c FROM budget_reservations WHERE mode=? AND bucket=? AND created_at>=? AND state IN ('reserved','committed')",
             (mode, bucket, since_iso)).fetchone()["c"])
 
-    def reserve(self, cur: sqlite3.Cursor, action_request_id: str, mode: str, bucket: str, micros: int, day: str) -> None:
+    def reserve(self, cur: sqlite3.Cursor, action_request_id: str, mode: str, bucket: str, micros: int, day: str,
+                created_at: str) -> None:
+        """created_at comes from the gateway clock (same clock as the velocity window)."""
         cur.execute("INSERT INTO budget_reservations VALUES (?,?,?,?,?,?,?)",
-                    (action_request_id, mode, bucket, micros, "reserved", day, fmt_ts(utcnow())))
+                    (action_request_id, mode, bucket, micros, "reserved", day, created_at))
 
     def settle(self, cur: sqlite3.Cursor, action_request_id: str, state: str, micros: int | None = None) -> None:
         if micros is None:

@@ -187,35 +187,17 @@ def test_payload_hash_mismatch_rejected_at_proposal(env):
     assert env.gw.propose(ar, ar["proposed_by"]).reasons[0] == "PAYLOAD_HASH_MISMATCH"
 
 
-# Golden vectors produced by Agent 01's mbos.hashing.sha256_of (agent-01-coordinator@bed7609)
-# and confirmed identical with Agent 06's operator_ui.util.canonical_json (agent-06@3e51ba4).
-R3_VECTORS = [
-    ({"offer": 850.0}, "sha256:74a32f5ce8dbf6acfb239519e6f1f628b41128af54ecc80773199f99fda89492"),
-    ({"offer": 850}, "sha256:8a3d480d3aabd209ab8e7241995c63ae272dbe3c5d5289e6478822a54f06994e"),
-    ({"to_ref": "relay:EXAMPLE-0001", "template_id": "seller_condition_q_v1", "offer": 1050},
-     "sha256:c94d8a80ad5387b3118c9db7379a2790a100c2d61466c6fde3a68219e64a7364"),
-    ({"note": "caf\u00e9 \u2713", "n": [1, 2.5, {"b": None, "a": True}]},
-     "sha256:a7e3d4627629234cd1a58e46f728e5de16e83314f18af7dffb400ffb4fa3ec18"),
-]
-
-
-@pytest.mark.parametrize("payload,expected", R3_VECTORS)
-def test_payload_hash_matches_r3_cross_lane_vectors(payload, expected):
-    """Ruling R3: byte-identical canonical JSON with lanes 01 and 06."""
-    assert payload_hash(payload) == expected
-
-
 def test_float_money_payload_executes(env):
-    """R3: money values are JSON numbers; a float payload round-trips and executes."""
+    """ADR-0010: money is a JSON number; float payloads hash and execute (850.0 == 850)."""
     ar = env.approved("offer", payload={"listing_ref": "x", "offer": 850.0})
     res = env.gw.execute(ar["action_request_id"])
     assert res.outcome == "executed"
     stored = env.store.get_action_request(None, ar["action_request_id"])
-    assert stored["payload"]["offer"] == 850.0 and isinstance(stored["payload"]["offer"], float)
-    assert payload_hash(stored["payload"]) == ar["payload_hash"]
+    assert stored["payload"]["offer"] == 850
+    assert payload_hash(stored["payload"]) == ar["payload_hash"] == payload_hash({"listing_ref": "x", "offer": 850})
 
 
-@pytest.mark.parametrize("bad", [float("nan"), float("inf")])
+@pytest.mark.parametrize("bad", [float("nan"), float("inf"), 2**53, "nul\x00"])
 def test_non_json_numbers_refused(env, bad):
     ar = env.ar("email")
     ar["payload"] = {"offer": bad}

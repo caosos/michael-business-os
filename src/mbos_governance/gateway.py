@@ -35,7 +35,7 @@ from zoneinfo import ZoneInfo
 
 from . import __version__, contracts
 from .effectors import DryRunEffector, Effector, TokenMinter
-from .ids import fmt_ts, new_id, new_ulid, parse_ts, payload_hash, utcnow
+from .ids import fmt_ts, fmt_ts_us, new_id, new_ulid, parse_ts, payload_hash, utcnow
 from .panic import PanicStore
 from .policy import DENY, REQUIRE_APPROVAL, Policy, PolicyStore, PolicyUnavailable, decide
 
@@ -333,7 +333,7 @@ class ActionGateway:
         if self.store.spent_micros(cur, mode, day) - exclude_own + need > to_micros(caps["global_daily_hard_cap"]):
             p.append(f"BUDGET_GLOBAL_DAILY_CAP:{mode}")
         if bucket == "money" and not exclude_own:
-            since = fmt_ts(self.clock() - timedelta(hours=1))
+            since = fmt_ts_us(self.clock() - timedelta(hours=1))
             limit = policy.data["budgets"]["velocity"]["money_bucket_actions_per_hour"]
             if self.store.bucket_actions_since(cur, mode, bucket, since) + 1 > limit:
                 p.append("BUDGET_VELOCITY_CAP:money")
@@ -346,7 +346,8 @@ class ActionGateway:
             return problems, None
         need = self._required_micros(ar)
         day = self._now_local(policy).date().isoformat()
-        self.store.reserve(cur, ar["action_request_id"], mode, policy.bucket_for(ar["category"]), need, day)
+        self.store.reserve(cur, ar["action_request_id"], mode, policy.bucket_for(ar["category"]), need, day,
+                           fmt_ts_us(self.clock()))
         gw = self._tool_provenance(cur, policy.version)
         extra = {"approval_id": approval_id} if approval_id else {}
         r = self._action_receipt(cur, "BUDGET_RESERVED", ar, f"reserved {need / 1e6:.6f} USD ({mode})",
