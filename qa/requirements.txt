@@ -2,3 +2,6 @@ jsonschema>=4.18
 referencing
 rfc3339-validator
 pytest>=8
+# optional: Postgres-side formulas in `python -m mbos_qa interop` (otherwise reported UNKNOWN)
+pgserver
+psycopg[binary]

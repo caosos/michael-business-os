@@ -5,7 +5,7 @@ Role: ROUND TWO — QA / End-to-End Integration / Manual-Assist Outputs (lane G)
 Branch: research/agent-07-marketing
 Worktree: /home/michaelos/business-os-worktrees/agent-07-marketing
 State: WORKING
-Current phase: Round Two, wave one — harness delivered against mocks; starting runs against real peer lanes
+Current phase: Round Two, wave one — harness delivered; cross-lane interop run against real peer code
 Started: 2026-10-06 (round one) · 2026-10-07 (round two)
 Last updated: 2026-10-07
 
@@ -24,15 +24,25 @@ Independent QA/integration lane against the frozen contracts v1.0.0. DRY-RUN ONL
 - **Dry-run manual-assist packets** (real, owned by this lane): `docs/qa/e2e/packets/`. Each packet is content-addressed, and its hash is on the `ACTION_EXECUTED` receipt.
 - **Mocks** for lanes A, B, C, D and E are clearly labelled `MOCK` in code and in every report, and sit behind the `MBOS_QA_IMPL` seam.
 
-## Findings (details and recommendations in docs/qa/ACCEPTANCE_REPORT.md)
-- F-1 UNKNOWN: the canonical JSON form behind the example hashes is unspecified. The examples do not reproduce. (01/04)
-- F-2 FACT: 5 schema gaps, covering MODIFY/HOLD required fields, step-up, the MVP `dry_run` value and the `prev_hash` pattern. (01)
-- F-3 FACT: there is no `superseded` ActionRequest status for requests closed by MODIFY. (01/05)
-- F-4 FACT: `INSERT OR REPLACE` bypassed the DELETE triggers in SQLite. The Postgres analogue is `TRUNCATE`. (04)
-- F-5 FACT: the hash chain cannot detect tail truncation and needs an external anchor. (04)
-- F-6 FACT: budget reservations must be durable and committed in the same transaction as `ACTION_EXECUTING`. (05/04)
-- F-7 / F-8 INFERENCE: A2 roles, A8 against LiteLLM and A9 egress are proven on mocks only. Re-run against the real lanes before MVP sign-off.
-- F-9..F-12: item state with multiple actions, the guard-denial receipt type, step-up fatigue on irreversible emails, and the coordinator validator skipping `format` checks.
+## Cross-lane interop against the peers' real code (docs/qa/INTEROP_REPORT.md)
+Peer refs checked: 01 c6c5ad4 · 02 5b62625 · 03 dcd6883 · 04 3af8e92 · 05 03db146 · 06 3e51ba4.
+- PASS (FACT): the vendored contract copies in 02, 04 and 05 are byte-identical to the frozen pin. 01 and 06 read the coordinator path.
+- PASS (FACT): all 13 Agent 03 scored examples (26 documents) validate against frozen Item/Provenance v1.
+- PASS (FACT): every lane computes the same payload_hash for int, string, unicode and nested payloads.
+- **FAIL (FACT) F-13, blocking for integration:** two lanes (01 and 04) each define `mbos.receipts`. Their row_hash formulas differ from each other and from the contract text used by 05, 06 and 07. On real PostgreSQL 16, one identical receipt produced 3 different row_hashes, so no lane can verify another lane's chain.
+- **FAIL (FACT) F-14:** `{"offer": 850.0}` hashes differently in 03 (Decimal normalisation) than in 01, 02, 06 and 07. 05 refuses floats entirely.
+- **FAIL (FACT) F-15:** 03 changed its schemas but kept the pinned `$id`. Nothing breaks today.
+
+## Findings (all in docs/qa/ACCEPTANCE_REPORT.md)
+- F-1: the example hashes are not reproducible, and the contract does not pin the exact bytes. (01)
+- F-2: 5 schema gaps. The runtime enforces each one. (01)
+- F-3: no `superseded` status for requests closed by MODIFY. (01/05)
+- F-4: `INSERT OR REPLACE` bypassed the DELETE trigger in SQLite. The Postgres analogue is `TRUNCATE`. (04)
+- F-5: tail truncation needs an anchor. 04's code has one; QA has not exercised it yet. (04)
+- F-6: budget reservations must be durable. (05/04)
+- F-7 / F-8: A2 roles, A8 against LiteLLM and A9 egress are proven on mocks only. (05/04)
+- F-9..F-12: item state with multiple actions, the guard-denial receipt type, step-up fatigue, and the coordinator validator skipping `format` checks.
+- F-13..F-15: see the interop section above.
 
 ## Blockers
 None.
@@ -41,7 +51,11 @@ None.
 None new. (Round-one marketing questions remain parked until marketing go-live.)
 
 ## Needs coordinator review
-- Findings F-1, F-2, F-3, F-9 and F-10 touch the frozen contracts. A v1.1.0 bump is proposed and is for Agent 01 to decide.
+- **F-13 (blocking for integration):** rule on one receipts ledger and one byte-exact row_hash formula. 01 and 04 currently both define `mbos.receipts`.
+- **F-14:** rule on number canonicalisation for hashed payloads: no floats (05) or RFC 8785 JCS everywhere.
+- F-1, F-2, F-3, F-9 and F-10 touch the frozen contracts. A v1.1.0 bump is proposed and is for Agent 01 to decide.
 
 ## Next action
-Peer lanes pushed code during this session (01 c6c5ad4, 02 5b62625, 03 dcd6883, 04 3af8e92, 05 03db146, 06 3e51ba4). Next: run the contract and conformance checks against their real outputs, then wire `MBOS_QA_IMPL` to Agent 01's spine.
+1. Wire `MBOS_QA_IMPL` to Agent 01's spine (`mbos.runtime` / `mbos.interfaces`) and re-run A1–A10 on real Postgres and DBOS.
+2. Re-run A2 (roles), A3 (anchors) and A5 against Agent 04's store, and A8/A9 against Agent 05's gateway and PANIC.
+3. Re-run `python -m mbos_qa interop` once F-13 and F-14 are ruled on.

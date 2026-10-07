@@ -6,6 +6,7 @@
 - Contract validation: **PASS** (31/31 checks)
 - Acceptance tests: **PASS** (76 passed, 0 failed, 1 strict-xfail known gaps)
 - End-to-end dry-run (flip + service): **PASS** → [E2E_REPORT.md](e2e/E2E_REPORT.md)
+- Cross-lane interop against the peers' real code: [INTEROP_REPORT.md](INTEROP_REPORT.md) (`python -m mbos_qa interop`). Its FAILs are findings F-13, F-14 and F-15.
 
 ## Summary by acceptance test
 
@@ -73,11 +74,11 @@
 
 | ID | Tag | For | Finding | Recommendation |
 |---|---|---|---|---|
-| F-1 | UNKNOWN | 01/04 | Hashes in `contracts/examples/` (`payload_hash`, `row_hash`) do not reproduce under sorted-key compact JSON or default JSON. The canonical form is unspecified. QA uses sorted keys, `(',',':')`, UTF-8, `prev_hash` appended as UTF-8 text. | RECOMMENDATION: Agent 04 pins one canonical form (RFC 8785 JCS). Agent 01 regenerates the example hashes. |
+| F-1 | FACT | 01/04 | Hashes in `contracts/examples/` (`payload_hash`, `row_hash`) do not reproduce under any tried canonical form. The contract never pins the exact bytes. See F-13/F-14 for the effect on the real lanes. | RECOMMENDATION: Agent 01 pins one canonical form in the contract text and regenerates the example hashes. |
 | F-2 | FACT | 01 | 5 rules stated in ADR/integration prose are NOT enforced by the frozen schemas (see 'Contract gap probes'). The QA runtime enforces each one. | RECOMMENDATION: tighten in v1.1.0: MODIFY `modifications.required=[new_action_request_id,new_payload_hash]`; HOLD `hold.required=[hold_until,wake_on]`; `prev_hash` pattern; dry_run const for MVP via policy, not schema. |
 | F-3 | FACT | 01/05 | ActionRequest `status` has no `superseded` value, so a request closed by MODIFY must reuse `rejected` (QA records `after_state.superseded_by`). | RECOMMENDATION: add `superseded` (minor bump) so NO-rejections and MODIFY-closures are distinguishable in LEARN. |
 | F-4 | FACT | 04 | SQLite `INSERT OR REPLACE` silently bypassed the append-only DELETE trigger until `recursive_triggers=ON` (caught by A2, fixed in the mock). Postgres analogue: `TRUNCATE` does not fire row-level DELETE triggers. | RECOMMENDATION: Agent 04 adds a `BEFORE TRUNCATE` statement trigger and `REVOKE TRUNCATE`; A2 must test it. |
-| F-5 | FACT | 04 | A hash chain alone cannot detect deletion of the newest rows (strict xfail `test_tail_truncation_detected`). | RECOMMENDATION: periodically anchor (seq, row_hash) outside the DB (off-box backup manifest or signed checkpoint), and have verify_chain compare against the anchor. |
+| F-5 | FACT | 04 | A hash chain alone cannot detect deletion of the newest rows (strict xfail `test_tail_truncation_detected` against the QA mock). From reading the code, Agent 04's lane already has external head anchors (`state/mbos_state/chain.py` write_anchor / verify_lines). QA has not exercised them yet. | RECOMMENDATION: keep the 04 anchors. Wire them into A3 when the suite runs on lane D. |
 | F-6 | FACT | 05/04 | Budget reservations must be durable. The mock ledger is in memory and lost its reservation on a hard kill (caught by A5). Recovery now re-reserves under the cap. | RECOMMENDATION: write `budget_ledger` rows in the same transaction as `ACTION_EXECUTING`. |
 | F-7 | INFERENCE | 05 | A8 and A9 are proven only against in-process mocks. No LiteLLM proxy, OpenBao lease or egress proxy exists yet. | RECOMMENDATION: re-run A8 and A9 (plus B29) through `MBOS_QA_IMPL` once lane E ships. Do not sign off the MVP on mocks. |
 | F-8 | INFERENCE | 04 | A2 cannot prove the `agent_write` *role* is denied, because SQLite has no roles. | RECOMMENDATION: the Postgres A2 run must connect as `agent_write` and as `gateway`. |
@@ -85,6 +86,9 @@
 | F-10 | FACT | 01/05 | The receipt vocabulary has no event for 'in-flight at freeze' or for guard denials. QA uses `POLICY_DECIDED` with `after_state.guard=deny`. | RECOMMENDATION: add `ACTION_DENIED` and `ACTION_INFLIGHT_AT_FREEZE` (minor bump) or bless the QA convention. |
 | F-11 | INFERENCE | 06/Michael | approval.schema says step-up is required for *irreversible* actions. Every seller or customer email is irreversible, so every email approval needs WebAuthn/TOTP. That risks approval fatigue. | RECOMMENDATION: Agent 06 UX considers a session-scoped step-up. This is an owner decision only if it would relax the rule. |
 | F-12 | FACT | 01 | Agent 01's `validate_contracts.py` does not check `format` (date-time). The QA runner does. | RECOMMENDATION: adopt `FORMAT_CHECKER` in the coordinator validator. |
+| F-13 | FACT | 01/04 (BLOCKING for integration) | Two lanes define the receipts ledger `mbos.receipts`: 01 `src/mbos/db/migrations/0001_spine.sql` and 04 `state/migrations/0001_foundation.sql`. They use different row_hash formulas, and both differ from the contract text that 05, 06 and 07 implement. On one identical receipt, PostgreSQL 16 produced 3 different hashes, so no lane can verify another lane's chain ([INTEROP_REPORT](INTEROP_REPORT.md)). | RECOMMENDATION: Agent 01 rules on ONE ledger (04 per the ownership map) and ONE byte-exact formula, then bumps the contract. Until then, cross-lane A3 cannot pass. |
+| F-14 | FACT | 01/03/05 | Integral floats hash differently: `{"offer": 850.0}` gives one hash in 01/02/06/07 and another in 03, whose Decimal normalisation emits `850`. 05 refuses floats in approval payloads outright. | RECOMMENDATION: adopt 05's rule (no floats in hashed payloads; money as integer cents) or RFC 8785 JCS in every lane. This is a contract decision for Agent 01. |
+| F-15 | FACT | 03 | Agent 03 changed `opportunity`, `scorecard` and `service-job` schemas without changing their `$id`, contrary to the ADR-0004 mitigation. Its 13 scored examples (26 documents) still validate against frozen v1.0.0, so nothing breaks today. | RECOMMENDATION: 03 bumps the `$id` / version on its next schema change. 01 re-pins through a semver bump. |
 
 ## Every test case
 

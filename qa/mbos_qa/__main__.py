@@ -2,6 +2,7 @@
 
   python -m mbos_qa contracts [--drift-ref REF]   contract validation runner only
   python -m mbos_qa e2e                            run flip + service fixtures, write reports + packets
+  python -m mbos_qa interop                        cross-lane checks against peers' actual code
   python -m mbos_qa run [--drift-ref REF]          everything; writes docs/qa/ACCEPTANCE_REPORT.md
   python -m mbos_qa pin --ref COMMIT               re-pin contracts after an Agent 01 semver bump
 
@@ -45,10 +46,9 @@ GROUPS = OrderedDict([
 ])
 
 FINDINGS = [
-    ("F-1", "UNKNOWN", "01/04", "Hashes in `contracts/examples/` (`payload_hash`, `row_hash`) do not reproduce under "
-     "sorted-key compact JSON or default JSON. The canonical form is unspecified. QA uses sorted keys, `(',',':')`, "
-     "UTF-8, `prev_hash` appended as UTF-8 text.",
-     "RECOMMENDATION: Agent 04 pins one canonical form (RFC 8785 JCS). Agent 01 regenerates the example hashes."),
+    ("F-1", "FACT", "01/04", "Hashes in `contracts/examples/` (`payload_hash`, `row_hash`) do not reproduce under any "
+     "tried canonical form. The contract never pins the exact bytes. See F-13/F-14 for the effect on the real lanes.",
+     "RECOMMENDATION: Agent 01 pins one canonical form in the contract text and regenerates the example hashes."),
     ("F-2", "FACT", "01", "5 rules stated in ADR/integration prose are NOT enforced by the frozen schemas (see "
      "'Contract gap probes'). The QA runtime enforces each one.",
      "RECOMMENDATION: tighten in v1.1.0: MODIFY `modifications.required=[new_action_request_id,new_payload_hash]`; "
@@ -61,9 +61,9 @@ FINDINGS = [
      "row-level DELETE triggers.",
      "RECOMMENDATION: Agent 04 adds a `BEFORE TRUNCATE` statement trigger and `REVOKE TRUNCATE`; A2 must test it."),
     ("F-5", "FACT", "04", "A hash chain alone cannot detect deletion of the newest rows (strict xfail "
-     "`test_tail_truncation_detected`).",
-     "RECOMMENDATION: periodically anchor (seq, row_hash) outside the DB (off-box backup manifest or signed "
-     "checkpoint), and have verify_chain compare against the anchor."),
+     "`test_tail_truncation_detected` against the QA mock). From reading the code, Agent 04's lane already has "
+     "external head anchors (`state/mbos_state/chain.py` write_anchor / verify_lines). QA has not exercised them yet.",
+     "RECOMMENDATION: keep the 04 anchors. Wire them into A3 when the suite runs on lane D."),
     ("F-6", "FACT", "05/04", "Budget reservations must be durable. The mock ledger is in memory and lost its "
      "reservation on a hard kill (caught by A5). Recovery now re-reserves under the cap.",
      "RECOMMENDATION: write `budget_ledger` rows in the same transaction as `ACTION_EXECUTING`."),
@@ -86,6 +86,21 @@ FINDINGS = [
      "relax the rule."),
     ("F-12", "FACT", "01", "Agent 01's `validate_contracts.py` does not check `format` (date-time). The QA runner does.",
      "RECOMMENDATION: adopt `FORMAT_CHECKER` in the coordinator validator."),
+    ("F-13", "FACT", "01/04 (BLOCKING for integration)", "Two lanes define the receipts ledger `mbos.receipts`: "
+     "01 `src/mbos/db/migrations/0001_spine.sql` and 04 `state/migrations/0001_foundation.sql`. They use different "
+     "row_hash formulas, and both differ from the contract text that 05, 06 and 07 implement. On one identical "
+     "receipt, PostgreSQL 16 produced 3 different hashes, so no lane can verify another lane's chain "
+     "([INTEROP_REPORT](INTEROP_REPORT.md)).",
+     "RECOMMENDATION: Agent 01 rules on ONE ledger (04 per the ownership map) and ONE byte-exact formula, then "
+     "bumps the contract. Until then, cross-lane A3 cannot pass."),
+    ("F-14", "FACT", "01/03/05", "Integral floats hash differently: `{\"offer\": 850.0}` gives one hash in 01/02/06/07 "
+     "and another in 03, whose Decimal normalisation emits `850`. 05 refuses floats in approval payloads outright.",
+     "RECOMMENDATION: adopt 05's rule (no floats in hashed payloads; money as integer cents) or RFC 8785 JCS in "
+     "every lane. This is a contract decision for Agent 01."),
+    ("F-15", "FACT", "03", "Agent 03 changed `opportunity`, `scorecard` and `service-job` schemas without changing "
+     "their `$id`, contrary to the ADR-0004 mitigation. Its 13 scored examples (26 documents) still validate "
+     "against frozen v1.0.0, so nothing breaks today.",
+     "RECOMMENDATION: 03 bumps the `$id` / version on its next schema change. 01 re-pins through a semver bump."),
 ]
 
 
@@ -171,6 +186,8 @@ def write_acceptance_report(contract_rep, gaps, test_rc, rows, e2e_ok, drift_ref
         f"({sum(r[2] == 'passed' for r in rows)} passed, {sum(r[2] == 'FAILED' for r in rows)} failed, "
         f"{sum(r[2].startswith('xfail') for r in rows)} strict-xfail known gaps)",
         f"- End-to-end dry-run (flip + service): **{'PASS' if e2e_ok else 'FAIL'}** → [E2E_REPORT.md](e2e/E2E_REPORT.md)",
+        "- Cross-lane interop against the peers' real code: [INTEROP_REPORT.md](INTEROP_REPORT.md) "
+        "(`python -m mbos_qa interop`). Its FAILs are findings F-13, F-14 and F-15.",
         "",
         "## Summary by acceptance test",
         "",
@@ -231,6 +248,7 @@ def main(argv=None):
         p = sub.add_parser(name)
         p.add_argument("--drift-ref")
     sub.add_parser("e2e")
+    sub.add_parser("interop")
     p = sub.add_parser("pin")
     p.add_argument("--ref", required=True)
     a = ap.parse_args(argv)
@@ -239,6 +257,13 @@ def main(argv=None):
     if a.cmd == "e2e":
         _, ok = cmd_e2e(OUT / "e2e")
         return 0 if ok else 1
+    if a.cmd == "interop":
+        from . import interop
+        rep = interop.run()
+        (OUT / "INTEROP_REPORT.md").write_text(interop.render(rep))
+        for c in rep.checks:
+            print(f"{c.status:7} {c.group} · {c.name} — {c.detail[:140]}")
+        return 0
     if a.cmd == "pin":
         cmd_pin(a.ref)
         return 0

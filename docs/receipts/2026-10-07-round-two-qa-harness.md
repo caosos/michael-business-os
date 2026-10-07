@@ -33,3 +33,17 @@
 ## Not verified
 - A2 role-level denial, A8 against LiteLLM, and A9 egress/lease revocation. These are mocks only (findings F-7, F-8).
 - Peer lanes pushed implementations during this session (01 `c6c5ad4`, 02 `5b62625`, 03 `dcd6883`, 04 `3af8e92`, 05 `03db146`, 06 `3e51ba4`). They were not yet exercised by this suite at the time of this receipt.
+
+## Addendum: cross-lane interop run (same day)
+- **Inputs (read-only, `git show` / `git archive`, nothing modified on other branches):**
+  - 01 `c6c5ad4`: `src/mbos/hashing.py`, `src/mbos/db/migrations/0001_spine.sql`
+  - 02 `5b62625`: `src/mbos_discovery/ids.py`
+  - 03 `dcd6883`: `economics/src/mbos_economics/canonical.py`, `economics/examples/*.scored.json`, `docs/research/schemas/*`
+  - 04 `3af8e92`: `state/migrations/0001_foundation.sql`, `state/mbos_state/chain.py`
+  - 05 `03db146`: `src/mbos_governance/ids.py`, `src/mbos_governance/store.py`
+  - 06 `3e51ba4`: `operator_ui/util.py`, `operator_ui/store.py`
+- **Method:**
+  - The stdlib-only hashing modules were imported from a temporary directory and run on shared vectors.
+  - The Postgres-side formulas were evaluated on a throwaway local PostgreSQL 16.2 (pgserver wheel, socket under `$XDG_RUNTIME_DIR`, stopped afterwards).
+- **Result:** `docs/qa/INTEROP_REPORT.md`, findings F-13, F-14 and F-15.
+- **Correction made during the run:** the checker first mis-read Agent 03's `provenance` field, which is an object, not a list, and reported a false FAIL. This was fixed before any report was committed, and the correct result is a PASS.
