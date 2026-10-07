@@ -5,7 +5,7 @@ Role: Governance / Action Gateway / PANIC — "controlled autonomy"
 Branch: research/agent-05-governance
 Worktree: /home/michaelos/business-os-worktrees/agent-05-governance
 State: WAITING — every queued lane-E task is DONE (E-01..E-13). Waiting on 07's re-run of the release candidate.
-Done: E-13 @ <E13> (F-24: freeze/unreadable/corrupt PANIC denial settles approved->cancelled_by_freeze, 6-mode regression; F-25/R22: durable dry-run provider in mbos.effector_calls, after-send->executed, before/unproven->failed RECONCILED; F-22: publish.* propose-only grants for 07+01; 362 tests)
+Done: E-13 @ ecf1600 (F-24: freeze/unreadable/corrupt PANIC denial settles approved->cancelled_by_freeze, 6-mode regression; F-25/R22: durable dry-run provider in mbos.effector_calls, after-send->executed, before/unproven->failed RECONCILED; F-22: publish.* propose-only grants for 07+01; 362 tests)
 Done: E-12 @ c507ac0 (offer.*/counter/purchase.* tier0+step-up, binding never under comms.*, cash-at-risk defaults as data, R20 cancelled_by_freeze; 338 tests)
 Done: E-11 @ 1c12a24 (lane D re-vendored @ a08dd9f/0014; velocity count now in mbos.budget_reserve_caps; in-Python count deleted; 305 tests)
 Done: E-10 @ ebae275 (spine_adapter: Gateway/KillSwitch/PDP over 01's mbos.interfaces on lane D; reconcile(); R4 contract docs/integration/05-spine-adapter-R4-contract.md)
