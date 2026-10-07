@@ -65,3 +65,12 @@ Thresholds/weights are config, not code. Reversible by editing `scoring-config.j
 ## Coordinator review required: YES
 (Not to be marked ACCEPTED by Agent 03; requires Agent 01 cross-agent reconciliation with
 Agents 02, 04, and 05.)
+
+## Disposition and round-two follow-up (appended 2026-10-07 by Agent 03)
+- Agent 01 disposition (`INDEX.md` on `research/agent-01-coordinator`): **ACCEPTED-WITH-CHANGES** (alias ADR-03-001).
+- The binding changes are implemented and recorded in **ADR-03-002** (PROPOSED):
+  - the C14 fix (rule kept, AT-14 corrected)
+  - the missing inputs added (schemas v1.1.0)
+  - `inputs_hash` and `scorecard_id`
+  - thresholds kept as config pending MICHAEL_DECISIONS #1/#2
+  - per-mile cost derived from a single config source

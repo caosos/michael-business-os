@@ -5,6 +5,14 @@
 **Author:** Agent 03 (Economics)
 **Date:** 2026-10-06
 
+> **Round-two errata (2026-10-07).** This is the round-one design record. The implemented engine is `economics/` (v0.1.0, config 2026.10.1). Where the two differ, the engine and **ADR-03-002** govern.
+> - **§17.1 / AT-14 (C14):** the trailer is **MAYBE**, not YES. EV is $62.02/h against the $65 target. The rule was kept and the test corrected. Walk-away is $227.
+> - **§17.2:** the mower is **PASS** on the $40 floor (deterministic $39.84/h), with or without evidence.
+> - **§5.2:** v is derived as 0.4578, not stored as 0.46.
+> - **§6.3:** service EV is an explicit 3-branch tree; quote hours count as hours, not dollars.
+>
+> Formula changes F1–F11 are listed in ADR-03-002 §3. The engine-computed numbers are in `agent-03-worked-examples.md`.
+
 ---
 
 ## 0. How to read this document
@@ -236,7 +244,7 @@ Every opportunity is reduced to a ledger of cash out, cash in, and Michael-hours
 | `S_fail`, `S_unsold` | salvage floors | ✓ | — |
 | `w` | Michael's time value (opportunity-cost floor) | ✓ | ✓ |
 
-### 5.2 Default constants **[REC]** — all live in [`config/scoring-config.json`](config/scoring-config.json)
+### 5.2 Default constants **[REC]** — all live in [`economics/config/scoring-config.json`](../../economics/config/scoring-config.json) (round-one 2026.10.0 archived in `economics/config/history/`)
 
 | Constant | Default | Basis |
 |----------|---------|-------|
@@ -735,7 +743,7 @@ These are executable-style assertions for whoever implements the engine. Each mu
 ### 18.4 Gates & decisions
 - **AT-12** Any deal with `EV_decision ≤ 0`, `MaxLoss > max_loss_cap`, `skill_fit < 0.4`, or `requires_license_he_lacks` returns **PASS** regardless of composite.
 - **AT-13** A deal cannot return **YES** with `confidence < 0.60` (→ MAYBE "gather evidence", naming the cheapest decisive missing item).
-- **AT-14** The five worked examples (§17) reproduce exactly: Trailer=YES+ALERT, Mower=PASS(→MAYBE w/ evidence), Generator=PASS, Drywall=YES, Smart-home=YES.
+- **AT-14** *(corrected in round two, C14)* The worked examples reproduce: Trailer=**MAYBE** (YES+ALERT at a buy ≤ $227), Mower=**PASS** (det. $/h below the $40 floor, with or without evidence), Generator=PASS, Drywall=YES, Smart-home=YES(+ALERT). ~~Trailer=YES+ALERT, Mower=PASS(→MAYBE w/ evidence)~~ contradicted §12.4.
 - **AT-15** A YES with low scarcity or a stale listing does **not** raise an immediate alert (alert requires strong **and** perishable — §12.5).
 - **AT-16** The generator case fails the long-distance ratio gate (§13-1) even though its deterministic profit/hour > target — proves distance is economic, not cosmetic.
 
