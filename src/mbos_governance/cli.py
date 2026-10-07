@@ -9,6 +9,7 @@
   mbos-gov render egress|litellm [--out FILE]   (generators; stdout if no --out; no network)
   mbos-gov freeze-requests apply FILE.jsonl     (B-04: apply lane B's side-channel freeze requests)
   mbos-gov reconcile [--older-than SECONDS]      (E-05: stuck claims; provider lookup, never re-send)
+  mbos-gov alerts [--since-hours 24] [--ntfy]    (E-09: read-only alert queries; exit 2 on any CRITICAL; sends nothing)
 
 Connection: --dsn, or env MBOS_GOV_DSN (one login for every role), or per role
 MBOS_GOV_DSN_GATEWAY / _APPROVER / _AGENT_WRITE / _POLICY_ADMIN. --policy / MBOS_POLICY for the policy file.
@@ -59,6 +60,9 @@ def main(argv: list[str] | None = None) -> int:
     fr = sub.add_parser("freeze-requests")
     fr.add_argument("action", choices=["apply"])
     fr.add_argument("file")
+    al = sub.add_parser("alerts")
+    al.add_argument("--since-hours", type=float, default=24.0)
+    al.add_argument("--ntfy", action="store_true")
     rc = sub.add_parser("reconcile")
     rc.add_argument("--older-than", type=int)
     a = ap.parse_args(argv)
@@ -87,6 +91,18 @@ def main(argv: list[str] | None = None) -> int:
         print(f"policy ok: {pol.version} mode={pol.data['system_mode']} delegation={pol.data['delegation_enabled']}")
         return 0
 
+    if a.cmd == "alerts":
+        from datetime import datetime, timedelta, timezone
+        from .alerts import collect, to_ntfy
+        dsn = os.environ.get("MBOS_GOV_DSN_READER") or dsns(a.dsn)["gateway"]
+        ttl = 300
+        try:
+            ttl = PolicyStore(policy_path).current().data["execution"]["claim_ttl_seconds"]
+        except PolicyUnavailable:
+            pass
+        found = collect(dsn, datetime.now(timezone.utc) - timedelta(hours=a.since_hours), ttl)
+        print(json.dumps(to_ntfy(found) if a.ntfy else found, indent=2, default=str))
+        return 2 if any(x["severity"] == "critical" for x in found) else 0
     roles = dsns(a.dsn)
     panic = PgPanicStore(roles["gateway"])
     if a.cmd == "panic" and a.action == "status":

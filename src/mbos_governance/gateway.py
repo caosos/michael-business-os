@@ -364,6 +364,12 @@ class ActionGateway:
             with self.store.tx("gateway") as cur:
                 ar = self.store.get_action_request(cur, areq, lock=True)
                 reasons, _ = self._reserve(cur, ar, policy, approval["approval_id"])
+                if reasons:  # a refused reservation is receipted too (E-09 alerts read it); G5 re-tries at execute
+                    gw = self._tool_provenance(cur, policy.version)
+                    self._receipt(cur, self.store, "POLICY_DECIDED", ar, "budget reservation refused at approval",
+                                  [gw] + ar["provenance_ids"], effect="none",
+                                  before_state={"status": ar["status"]}, after_state={"status": ar["status"]},
+                                  details={"kind": "money", "budget_refused": reasons, "stage": "approval"})
         return Result("recorded", areq, status, reasons)
 
     # ------------------------------------------------------------------ budget (G5)
