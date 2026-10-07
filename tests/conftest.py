@@ -60,7 +60,10 @@ def _pg_bin() -> Path:
 def cluster():
     pg_bin = _pg_bin()
     root = Path(tempfile.mkdtemp(prefix="mbos05-test-"))
-    sock = Path(tempfile.mkdtemp(prefix="m05-", dir=os.environ.get("XDG_RUNTIME_DIR") or "/tmp"))  # <107-byte socket path
+    sockdir = os.environ.get("XDG_RUNTIME_DIR") or "/tmp"
+    if shutil.disk_usage(sockdir).free < 8 * 1024 * 1024:   # shared tmpfs can fill up (other lanes' clusters)
+        sockdir = "/tmp"
+    sock = Path(tempfile.mkdtemp(prefix="m05-", dir=sockdir))  # <107-byte socket path
     data, port = root / "data", int(os.environ.get("MBOS05_TEST_PORT", "55505"))
     subprocess.run([pg_bin / "initdb", "-D", data, "--auth=trust", "--encoding=UTF8", "--locale=C.UTF-8",
                     "-U", "postgres"], check=True, capture_output=True)

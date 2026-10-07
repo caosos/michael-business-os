@@ -1,7 +1,7 @@
 {
   "policy_schema": "mbos.governance.policy/1",
   "policy_id": "wave-one-default-deny",
-  "version": "2026.10.07-w1.5",
+  "version": "2026.10.07-w1.6",
   "description": "Round Two wave one. Everything tier 0, every externally consequential action needs Michael's YES, every effector DRY-RUN, no delegation, no real-world spend. Anything not listed here is DENIED.",
   "system_mode": "mvp",
   "delegation_enabled": false,
@@ -50,6 +50,12 @@
     "comms.voice.call":            { "category": "phone_call",          "effector": "dryrun" },
     "comms.message.send":          { "category": "message",             "effector": "dryrun" },
     "offer.submit":                { "category": "offer",               "effector": "dryrun" },
+    "offer.email.send":            { "category": "offer",               "effector": "dryrun" },
+    "offer.sms.send":              { "category": "offer",               "effector": "dryrun" },
+    "offer.message.send":          { "category": "offer",               "effector": "dryrun" },
+    "offer.email.counter":         { "category": "offer",               "effector": "dryrun" },
+    "offer.sms.counter":           { "category": "offer",               "effector": "dryrun" },
+    "offer.message.counter":       { "category": "offer",               "effector": "dryrun" },
     "money.payment.send":          { "category": "money",               "effector": "dryrun" },
     "purchase.create":             { "category": "purchase",            "effector": "dryrun" },
     "publish.listing.create":      { "category": "publishing",          "effector": "dryrun" },
@@ -61,12 +67,12 @@
 
   "grant_semantics": "agent_grants authorize PROPOSING an ActionRequest only. No agent ever executes: the Action Gateway alone calls effectors, after Michael's YES and the 8 guard checks (ruling R7). The proposer's grant is re-checked at execution (G6).",
   "agent_grants": {
-    "agent-01-coordinator":    ["offer.submit", "purchase.create", "money.payment.send", "price.change", "commit.external", "comms.email.send", "comms.sms.send"],
+    "agent-01-coordinator":    ["offer.submit", "offer.email.send", "offer.sms.send", "offer.message.send", "offer.email.counter", "offer.sms.counter", "offer.message.counter", "purchase.create", "money.payment.send", "price.change", "commit.external", "comms.email.send", "comms.sms.send"],
     "agent-02-opportunity":    [],
     "agent-03-economics":      [],
     "agent-04-state":          [],
     "agent-05-governance":     [],
-    "agent-06-communications": ["comms.sms.send", "comms.email.send", "comms.voice.call", "comms.message.send", "schedule.appointment.create"],
+    "agent-06-communications": ["comms.sms.send", "comms.email.send", "comms.voice.call", "comms.message.send", "schedule.appointment.create", "offer.email.send", "offer.sms.send", "offer.message.send", "offer.email.counter", "offer.sms.counter", "offer.message.counter"],
     "agent-07-marketing":      ["publish.listing.create", "publish.content.post"]
   },
 
@@ -100,6 +106,19 @@
     },
     "velocity": {
       "money_bucket_actions_per_hour": 3
+    }
+  },
+
+  "recommendation_actions": {
+    "note": "E-12 (Deal Sniffer card: CONTACT / OFFER / COUNTER / BUY). CONTACT is plain comms.* (no commitment). OFFER and COUNTER are binding => offer.* (category offer). BUY is purchase.* (category purchase). All tier 0 with step-up. A binding offer can NEVER be created under comms.*: comms.* may only map to comms categories, and a comms.* request whose payload carries a binding key is denied.",
+    "binding_namespaces": { "offer.": "offer", "purchase.": "purchase" },
+    "comms_namespace": "comms.",
+    "comms_categories": ["message", "sms", "phone_call", "email"],
+    "binding_payload_keys": ["offer", "offer_amount", "offer_usd", "counter", "counter_offer", "bid_amount", "binding"],
+    "cash_at_risk": {
+      "max_per_flip_usd": 1500,
+      "max_total_active_usd": 3000,
+      "basis": "MICHAEL_DECISIONS #1 is UNDECIDED: conservative defaults. Per-flip follows Agent 03 REC ($1,500 per deal); total is 2x. Applies to dry-run (shadow) reservations of offer/purchase requests; live spend stays pinned at 0."
     }
   },
 

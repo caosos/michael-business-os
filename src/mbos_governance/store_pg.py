@@ -170,6 +170,17 @@ class PgGovernanceStore:
         cur.execute("SELECT mbos.budget_lock(%s)", (currency,))
 
     @staticmethod
+    def cash_at_risk(cur, item_id: str, categories: list[str], currency: str, mode: str):
+        """(this item's, all items') outstanding binding cash: reserved minus released over offer/purchase."""
+        r = cur.execute(
+            "SELECT coalesce(sum(CASE b.kind WHEN 'reserve' THEN b.amount WHEN 'release' THEN -b.amount ELSE 0 END) "
+            "FILTER (WHERE a.item_id = %s), 0) AS item_amt, "
+            "coalesce(sum(CASE b.kind WHEN 'reserve' THEN b.amount WHEN 'release' THEN -b.amount ELSE 0 END), 0) AS total_amt "
+            "FROM mbos.budget_ledger b JOIN mbos.action_requests a USING (action_request_id) "
+            "WHERE b.category = ANY(%s) AND b.currency = %s AND b.mode = %s", (item_id, categories, currency, mode)).fetchone()
+        return r["item_amt"], r["total_amt"]
+
+    @staticmethod
     def reserve_caps(cur, areq: str, amount, currency: str, caps: dict, mode: str, actor: dict, intent: str,
                      prov: list[str], key: str) -> str:
         return cur.execute("SELECT mbos.budget_reserve_caps(%s,%s,%s,%s,%s,%s,%s,%s,%s) AS id",

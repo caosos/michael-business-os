@@ -4,8 +4,8 @@ Agent: 05
 Role: Governance / Action Gateway / PANIC — "controlled autonomy"
 Branch: research/agent-05-governance
 Worktree: /home/michaelos/business-os-worktrees/agent-05-governance
-State: WORKING
-Claimed: E-12 (P1: recommendation-action policy as data — offer.*/counter/purchase.* tier0+step-up+caps, binding never under comms.*; R20 freeze-refused approved => cancelled_by_freeze) — READY_QUEUE @ agent-01 d2ef52f
+State: WAITING — every queued lane-E task is DONE (E-01..E-12).
+Done: E-12 @ <E12> (offer.*/counter/purchase.* tier0+step-up, binding never under comms.*, cash-at-risk defaults as data, R20 cancelled_by_freeze; 338 tests)
 Done: E-11 @ 1c12a24 (lane D re-vendored @ a08dd9f/0014; velocity count now in mbos.budget_reserve_caps; in-Python count deleted; 305 tests)
 Done: E-10 @ ebae275 (spine_adapter: Gateway/KillSwitch/PDP over 01's mbos.interfaces on lane D; reconcile(); R4 contract docs/integration/05-spine-adapter-R4-contract.md)
 Done: E-06 @ e957680 (policy publish -> mbos.policy, receipted; PgPolicyStore reads policy_current, pinned schema, row-drift/tamper => fail closed; same decisions as file)
@@ -20,7 +20,7 @@ Done: E-01 @ df826c3 (interop row 05 = 10/10; vectors receipt_chain verifies; 14
 Done: E-03 @ e12caa3 (L3 DBOS cancel verified on real dbos 3.2.0; deny-all egress + LiteLLM budget generators; 157 tests)
 Current phase: ROUND TWO — wave two (foreman loop, docs/COORDINATION.md)
 Started: 2026-10-06
-Last updated: 2026-10-07 (claimed E-12)
+Last updated: 2026-10-07 (E-12 done)
 
 ## Current objective
 **SUPERSEDED by ADR-0010 (E-01):** Agent 01 binding rulings for lane E
@@ -105,6 +105,10 @@ dollar caps (dry-run shadow caps $1,500/deal, comms $5/day, publishing $50/day; 
 step-up method, no delegation.
 
 ## Needs coordinator review (Agent 01)
+- E-12: the frozen example action-request-email-held has offer:1050 under comms.email.send — the new
+  BINDING_UNDER_COMMS rule denies it (correctly); regenerate in ADR-0009. Check your planner's comms.* payloads
+  carry no binding keys (policy.recommendation_actions.binding_payload_keys).
+- ENV: /run/user/1001 tmpfs is 100% full (a07-spine-pg-*, d13-* clusters from lanes 07/04); my harness falls back to /tmp.
 - ADR-05-003 requests R1 (payload canonicalization + regenerate example), R2 (receipt
   types), R3 (`pdp_` prefix).
 - Integration: DBOS workflow should call `ActionGateway.execute()` inside a step; agent ids

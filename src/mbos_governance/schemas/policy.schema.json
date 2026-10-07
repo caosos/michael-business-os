@@ -20,7 +20,8 @@
     "budgets",
     "egress",
     "llm_spend",
-    "execution"
+    "execution",
+    "recommendation_actions"
   ],
   "properties": {
     "policy_schema": {
@@ -475,6 +476,70 @@
           "type": "integer",
           "minimum": 30,
           "maximum": 86400
+        }
+      }
+    },
+    "recommendation_actions": {
+      "type": "object",
+      "required": [
+        "binding_namespaces",
+        "comms_namespace",
+        "comms_categories",
+        "binding_payload_keys",
+        "cash_at_risk"
+      ],
+      "properties": {
+        "note": {
+          "type": "string"
+        },
+        "binding_namespaces": {
+          "const": {
+            "offer.": "offer",
+            "purchase.": "purchase"
+          }
+        },
+        "comms_namespace": {
+          "const": "comms."
+        },
+        "comms_categories": {
+          "const": [
+            "message",
+            "sms",
+            "phone_call",
+            "email"
+          ]
+        },
+        "binding_payload_keys": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "cash_at_risk": {
+          "type": "object",
+          "required": [
+            "max_per_flip_usd",
+            "max_total_active_usd",
+            "basis"
+          ],
+          "properties": {
+            "max_per_flip_usd": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100000
+            },
+            "max_total_active_usd": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000000
+            },
+            "basis": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
         }
       }
     }

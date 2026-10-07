@@ -114,7 +114,8 @@ class SpinePDP:
             d = decide(action_request, policy)
         except (KeyError, TypeError) as exc:  # incomplete draft: never allow
             return PolicyDecision("deny", 0, category, f"MALFORMED_REQUEST: {exc}", policy.version)
-        return PolicyDecision(d.decision, d.tier, category, "; ".join(d.reasons), policy.version)
+        reason = "; ".join(d.reasons) + ("; step_up=required" if d.step_up else "")
+        return PolicyDecision(d.decision, d.tier, category, reason, policy.version)
 
 
 def reconcile(gw: ActionGateway, older_than_seconds: int | None = None) -> list[dict[str, Any]]:

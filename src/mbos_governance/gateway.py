@@ -42,7 +42,7 @@ from .content_guard import ContentRulesStore, ContentRulesUnavailable, injection
 from .effectors import DryRunEffector, Effector, TokenMinter
 from .hooks import run_hooks
 from .ids import fmt_ts, new_ulid, parse_ts, payload_hash, utcnow
-from .policy import DENY, REQUIRE_APPROVAL, Policy, PolicyStore, PolicyUnavailable, decide
+from .policy import DENY, REQUIRE_APPROVAL, Policy, PolicyStore, PolicyUnavailable, decide, step_up_required
 from .store_pg import PgGovernanceStore, PgPanicStore
 
 GATEWAY_ACTOR = {"type": "system", "id": "action-gateway"}
@@ -295,10 +295,7 @@ class ActionGateway:
             p.append(f"SCOPE_NOT_ALLOWED:{approval['scope']} (no delegation in wave one)")
         if approval["payload_hash_seen"] != ar["payload_hash"]:
             p.append("APPROVAL_PAYLOAD_HASH_MISMATCH")
-        need_step_up = (ar["category"] in rules["step_up_required"]["categories"]
-                        or ar["reversibility"] in rules["step_up_required"]["reversibility"]
-                        or (rules["step_up_required"].get("untrusted_inputs") and ar.get("untrusted_inputs_present")))
-        if need_step_up and not (approval.get("auth_context") or {}).get("step_up"):
+        if step_up_required(ar, policy) and not (approval.get("auth_context") or {}).get("step_up"):
             p.append("STEP_UP_REQUIRED")
         if not (approval.get("auth_context") or {}).get("method"):
             p.append("AUTH_CONTEXT_REQUIRED")
@@ -393,6 +390,16 @@ class ActionGateway:
         caps = policy.data["budgets"][mode]
         bcaps = caps["buckets"][bucket]
         need = self._required(ar)
+        if (ar["category"] in policy.data["recommendation_actions"]["binding_namespaces"].values()
+                and need <= to_amount(bcaps["per_action_hard_cap"])):   # an over-per-action request is refused by lane D first
+            self.store.budget_lock(cur, CURRENCY)   # re-entrant: serialises cash-at-risk with the reservation
+            car = policy.data["recommendation_actions"]["cash_at_risk"]
+            binding_cats = list(policy.data["recommendation_actions"]["binding_namespaces"].values())
+            item_now, total_now = self.store.cash_at_risk(cur, ar["item_id"], binding_cats, CURRENCY, mode)
+            if item_now + need > to_amount(car["max_per_flip_usd"]):
+                return [f"CASH_AT_RISK_PER_FLIP:{ar['item_id']}"], None
+            if total_now + need > to_amount(car["max_total_active_usd"]):
+                return ["CASH_AT_RISK_TOTAL"], None
         # Lane D 0013 (D-11): the money ACTION-count cap is enforced inside budget_reserve_caps under the
         # per-currency lock (count of unreleased bucket reservations in the last hour, zero-amount included).
         velocity = policy.data["budgets"]["velocity"]["money_bucket_actions_per_hour"] if bucket == "money" else None
@@ -521,10 +528,18 @@ class ActionGateway:
             if flat:
                 before = ar["status"]
                 new_status = before
-                if failures["G2"] and before in ("approved", "held", "pending_approval"):
+                # Only the SPECIFIC reasons change status: an unreadable policy fails every check generically
+                # (POLICY_UNREADABLE) and must leave the approval intact, not expire or fail it.
+                if (any(r.startswith(("APPROVAL_EXPIRED", "ACTION_REQUEST_EXPIRED")) for r in failures["G2"])
+                        and before in ("approved", "held", "pending_approval")):
                     new_status = "expired"
-                elif failures["G3"] and before == "approved":
+                elif any(r.startswith(("PAYLOAD_MUTATED", "APPROVAL_PAYLOAD_HASH")) for r in failures["G3"]) and before == "approved":
                     new_status = "failed"
+                elif before == "approved" and any(r.startswith("PANIC_") for r in failures["G7"]):
+                    # R20 (06 P-06-11): an approval refused by a freeze must not stay reusable after an unrelated
+                    # PANIC release. The request is cancelled_by_freeze (reservation released); Michael re-approves
+                    # via a new proposal.
+                    new_status = "cancelled_by_freeze"
                 details = {"kind": "generic", "guard": "refused", "failed_checks": failures}
                 if approval is not None:
                     rtype, extra = "ACTION_FAILED", {"approval_id": approval["approval_id"], "effect": "none",

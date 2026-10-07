@@ -46,6 +46,15 @@ class Policy:
         return self.data["categories"][category]["budget_bucket"]
 
 
+def step_up_required(action_request: dict, policy: "Policy") -> bool:
+    """Single rule for 'needs step-up on the YES' (money/purchase/offer/commitment categories, irreversible,
+    or tainted by untrusted input). The Deal Sniffer card shows this as `requires_step_up`."""
+    rules = policy.data["approval"]["step_up_required"]
+    return bool(action_request.get("category") in rules["categories"]
+                or action_request.get("reversibility") in rules["reversibility"]
+                or (rules.get("untrusted_inputs") and action_request.get("untrusted_inputs_present")))
+
+
 @dataclass(frozen=True)
 class PolicyDecision:
     decision: str
@@ -53,6 +62,7 @@ class PolicyDecision:
     policy_decision_ref: str
     policy_version: str
     reasons: list[str] = field(default_factory=list)
+    step_up: bool = False
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -61,6 +71,7 @@ class PolicyDecision:
             "policy_decision_ref": self.policy_decision_ref,
             "policy_version": self.policy_version,
             "reasons": list(self.reasons),
+            "step_up": self.step_up,
         }
 
 
@@ -79,6 +90,19 @@ def _cross_check(data: dict) -> list[str]:
         for cat, spec in cats.items():
             if spec["budget_bucket"] not in buckets:
                 problems.append(f"category {cat} bucket {spec['budget_bucket']} missing from budgets.{mode}")
+    ra = data["recommendation_actions"]
+    comms_cats = set(ra["comms_categories"])
+    for cap, spec in data["capabilities"].items():
+        for prefix, cat in ra["binding_namespaces"].items():
+            if cap.startswith(prefix) and spec["category"] != cat:
+                problems.append(f"capability {cap} is in the binding namespace {prefix} but maps to {spec['category']}, not {cat}")
+        if cap.startswith(ra["comms_namespace"]) and spec["category"] not in comms_cats:
+            problems.append(f"capability {cap}: a binding/money category {spec['category']} can never be created under comms.*")
+    for cat, spec in data["categories"].items():
+        if cat in ra["binding_namespaces"].values() and not (spec["tier"] == 0 and spec["decision"] == "require_approval"):
+            problems.append(f"category {cat} must be tier 0 + require_approval")
+        if cat in ra["binding_namespaces"].values() and cat not in data["approval"]["step_up_required"]["categories"]:
+            problems.append(f"category {cat} must require step-up")
     from .egress import check_catalog  # E-07: egress catalog must be clean or the whole policy is unavailable
     problems += check_catalog(data)
     for agent in list(data["llm_spend"]["per_agent_daily_usd"]) + list(data["egress"]["allow"]):
@@ -153,6 +177,16 @@ class PolicyStore:
             return self._policy
 
 
+def _payload_keys(obj, depth: int = 0):
+    if isinstance(obj, dict) and depth < 6:
+        for k, v in obj.items():
+            yield k
+            yield from _payload_keys(v, depth + 1)
+    elif isinstance(obj, list) and depth < 6:
+        for v in obj:
+            yield from _payload_keys(v, depth + 1)
+
+
 def decide(action_request: dict, policy: Policy) -> PolicyDecision:
     """Pure, deterministic policy classification of a (schema-valid) ActionRequest."""
     ref = new_id("pdp")
@@ -170,6 +204,12 @@ def decide(action_request: dict, policy: Policy) -> PolicyDecision:
         return deny(f"CATEGORY_MISMATCH:{cap_name} is {cap['category']}, request says {category}")
     if cap_name not in policy.grants(action_request["proposed_by"]):
         return deny(f"CAPABILITY_NOT_HELD:{action_request['proposed_by']} lacks {cap_name}")
+    ra = policy.data["recommendation_actions"]
+    if cap_name.startswith(ra["comms_namespace"]):   # a binding offer must never ride a comms.* capability
+        keys = {str(k).lower() for k in _payload_keys(action_request.get("payload"))}
+        hit = sorted(keys & {k.lower() for k in ra["binding_payload_keys"]})
+        if hit:
+            return deny(f"BINDING_UNDER_COMMS:{','.join(hit)} (use offer.<channel>.send / .counter)")
     cat = policy.category(category)
     if cat is None:
         return deny(f"UNKNOWN_CATEGORY:{category}")
@@ -191,6 +231,7 @@ def decide(action_request: dict, policy: Policy) -> PolicyDecision:
     if action_request["tier"] != tier:
         reasons.append(f"TIER_FORCED:{action_request['tier']}->{tier}")
     if tier == 0 or not policy.data["delegation_enabled"]:
-        return PolicyDecision(REQUIRE_APPROVAL, 0, ref, policy.version, reasons + [f"GATED:{category}:tier0"])
+        return PolicyDecision(REQUIRE_APPROVAL, 0, ref, policy.version, reasons + [f"GATED:{category}:tier0"],
+                              step_up=step_up_required(action_request, policy))
     # Unreachable in wave one (schema pins delegation_enabled=false and tier=0).
     return deny("DELEGATION_NOT_IMPLEMENTED")

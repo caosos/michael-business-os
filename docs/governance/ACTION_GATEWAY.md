@@ -1,7 +1,7 @@
 # Action Gateway: wave one implementation guide
 
 **Owner:** Agent 05 · **Status:** implemented, wave one · **Date:** 2026-10-07
-**Code:** `src/mbos_governance/` · **Policy data:** `policy/` · **Tests:** `tests/` (305 passing, on PostgreSQL 16)
+**Code:** `src/mbos_governance/` · **Policy data:** `policy/` · **Tests:** `tests/` (338 passing, on PostgreSQL 16)
 
 > Core law: no action without a receipt, and no receipt without provenance.
 > Governance rule: models may PROPOSE. Non-LLM policy code AUTHORIZES.
@@ -120,6 +120,29 @@ These defaults wait on Michael's decisions (`MICHAEL_DECISIONS.md`):
 - dry-run shadow caps: money $1,500 per action and per day (Agent 03 REC), comms $5/day, publishing $50/day
 - money velocity: 3 per hour
 - quiet hours: 20:00–08:00 America/Chicago
+
+### 5a. Recommendation actions (E-12: Deal Sniffer CONTACT / OFFER / COUNTER / BUY)
+
+| Card action | Capability | Category | Tier | Step-up |
+|---|---|---|---|---|
+| CONTACT | `comms.email.send`, `comms.sms.send`, … | email / sms / … | 0 | no (unless irreversible or tainted) |
+| OFFER | `offer.<email\|sms\|message>.send`, `offer.submit` | offer | 0 | **yes** |
+| COUNTER | `offer.<email\|sms\|message>.counter` | offer | 0 | **yes** |
+| BUY | `purchase.create` | purchase | 0 | **yes** |
+
+- **Default deny:** an unknown capability, an ungranted agent or a category mismatch is denied. The grants are data, and agent 06 and agent 01 propose offers.
+- **A binding offer can never be created under `comms.*`:**
+  - Policy cross-checks make the whole policy unavailable if any `offer.*` or `purchase.*` capability maps to the wrong category, or any `comms.*` capability maps to a binding or money category.
+  - The PDP also denies a `comms.*` request whose payload carries a binding key (`offer`, `counter_offer`, `offer_amount`, …; a data list) with `BINDING_UNDER_COMMS`.
+- **`step_up_required(ar, policy)`** is the one rule behind the card's `requires_step_up`. The PDP result carries it (`PolicyDecision.step_up`), and the spine adapter appends `step_up=required` to the reason.
+- **Cash at risk (MICHAEL_DECISIONS #1, UNDECIDED, conservative defaults as data):** `max_per_flip_usd 1500` and `max_total_active_usd 3000`.
+  - Outstanding offer and purchase reservations (reserved minus released) are summed under the budget lock.
+  - The refusals are `CASH_AT_RISK_PER_FLIP:<item>` and `CASH_AT_RISK_TOTAL`.
+  - The limits apply to dry-run reservations. Live spend stays pinned at 0.
+- **R20:** an approved request that the gateway refuses because of a freeze (L1, L2 or L3) becomes `cancelled_by_freeze`.
+  - Its reservation is released and it gets an `ACTION_FAILED` receipt.
+  - Releasing the freeze later does **not** revive the approval, so Michael re-approves a new proposal.
+  - Pending requests are untouched, and so are approvals refused for non-freeze reasons.
 
 ## 6. Hashing: ADR-0010 (normative), supersedes R3
 

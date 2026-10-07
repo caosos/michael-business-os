@@ -32,9 +32,10 @@ def test_packaged_schema_matches_repo_schema():
 
 def test_publish_is_receipted_and_db_policy_equals_file(env):
     out = _publish(env)
-    assert len(out["published"]) == 2 + 11 + 12 and out["unchanged"] == []
+    n_caps = len(PolicyStore(env.policy_path).current().data["capabilities"])
+    assert len(out["published"]) == 2 + 11 + n_caps and out["unchanged"] == []
     bumps = [r for r in env.store.receipts() if r["type"] == "CONFIG_VERSION_BUMPED" and r.get("entity_type") == "policy"]
-    assert len(bumps) == 25 and all(r["actor"] == {"type": "human", "id": "michael"} for r in bumps)
+    assert len(bumps) == 2 + 11 + n_caps and all(r["actor"] == {"type": "human", "id": "michael"} for r in bumps)
     db, file = PgPolicyStore(env.dsn("gateway")).current(), PolicyStore(env.policy_path).current()
     assert db.version == file.version == out["policy_version"] and db.data == file.data
 
