@@ -2,7 +2,7 @@
 
 **Round One: research and design only.** Nothing has been deployed, contacted, purchased or published.
 
-This document merges the seven round-one research efforts into one system. It supersedes the *provisional* sections of `agent-01-coordinator.md`. That file remains the technology survey, and this file is the integration decision.
+This document merges the seven round-one research efforts into one system. **Relationship to `ROUND_ONE_SYNTHESIS.md`:** the synthesis (Aria / Agent 01 lane) is the authoritative executive summary. This document is the detailed engineering record behind it: the conflict register with rubric scores, the frozen machine-readable contracts, ADRs, the acceptance suite and the per-specialist gap lists. Where they differ, the synthesis wins and this document was aligned on 2026-10-07 (approval surface = Operator UI; Python is not an owner decision; owner decisions = `docs/status/MICHAEL_DECISIONS.md`). `agent-01-coordinator.md` remains the technology survey.
 
 **Date:** 2026-10-06 · **Author:** Agent 01 (chief coordinator / systems architect)
 
@@ -39,7 +39,7 @@ Tags: **FACT** (verified in a peer report or on the web), **INFERENCE**, **RECOM
 4. **Contracts are frozen** as validated JSON Schema in `docs/research/contracts/` (ADR-0004), with worked examples for a flip (trailer) and a service (drywall).
 5. **One build plan:** a unified 24-hour MVP (one flip vertical, dry-run only), a 1-week path that adds the service lane and full governance, and a single acceptance suite of about 70 tests with owners (§8).
 6. **What's next:**
-   - Michael has 4 P1 decisions to make (§11).
+   - Michael's owner decisions are the five in `docs/status/MICHAEL_DECISIONS.md` (§11). None blocks the dry-run MVP.
    - Every specialist has an exact round-two gap list (§10).
 
 ---
@@ -68,10 +68,10 @@ Tags: **FACT** (verified in a peer report or on the web), **INFERENCE**, **RECOM
 | Comms effectors | Telnyx (voice/SMS, official MCP), Postmark (email), Vapi/Retell hosted voice → LiveKit/Pipecat later | proprietary SaaS / Apache-2.0 / BSD-2 | 06 |
 | Marketing | Drafts only → 06 effectors; Cal.diy (MIT) booking; Umami (MIT) analytics; static site; manual-assist lane | MIT etc. | 07 |
 | CRM UI | Twenty as **optional one-way projection** | AGPL-3.0 | 04 + 07 → ADR-0006 |
-| Approvals UX | Telegram bot (YES/NO/MODIFY/HOLD buttons) → + web step-up page | — | ADR-0006 (Michael to confirm) |
+| Approvals UX | **Operator UI** (dashboard, opportunity cards, YES/NO/MODIFY/HOLD queue, step-up); Telegram optional later | — | ADR-0006 + synthesis Agent F |
 | Alerts (one-way) | ntfy | Apache-2.0 / GPL-2.0 (UNKNOWN exact; verify) | 02 |
 | Connector (optional) | n8n **connector only** (or Activepieces MIT) | Sustainable Use (fair-code) | 02/07 → ADR-0006 |
-| Language | Python 3.12+ / Pydantic v2 (PENDING MICHAEL) | — | ADR-0008 |
+| Language | Python 3.12+ / Pydantic v2 | — | ADR-0008 (technical; per synthesis) |
 
 ---
 
@@ -79,8 +79,8 @@ Tags: **FACT** (verified in a peer report or on the web), **INFERENCE**, **RECOM
 
 ```
                      ┌───────────────────────────────────────────────────────────┐
-                     │ MICHAEL   Telegram bot: YES · NO · MODIFY · HOLD           │
-                     │           web step-up page (money / irreversible / rules)  │
+                     │ MICHAEL   Operator UI queue: YES · NO · MODIFY · HOLD      │
+                     │           (+ step-up for money / irreversible / rules)     │
                      │           ntfy = one-way alerts only                       │
                      └──────────────▲──────────────────────────┬─────────────────┘
                      approval request│ (payload_hash shown)     │ Approval row (append-only)
@@ -146,7 +146,7 @@ Tags: **FACT** (verified in a peer report or on the web), **INFERENCE**, **RECOM
 | C8 | State machines | 01 Item flow vs 05 ActionRequest status | — | Nested: Item flow ⊃ ActionRequest status | 0004 |
 | C9 | Kill switch | 01 atomic PANIC vs 05 3-level freeze | Merged **81.0** · 05-only 72.5 | Merged L1/L2/L3 | 0005 |
 | C10 | Cost control | 01 LLM vs 05 real-world | — | Two ledgers | 0005 |
-| C11 | Approval channel | 02 ntfy; 06/07 undecided | Telegram **78.0** · web UI 77.5 · ntfy 58.0 | Telegram MVP + web step-up; ntfy alerts only | 0006 |
+| C11 | Approval channel | 02 ntfy; 06/07 undecided | Telegram 78.0 · web UI 77.5 · ntfy 58.0 (tie) | **Operator UI** primary (higher on provenance and safety; synthesis lane F); Telegram optional; ntfy alerts only | 0006 |
 | C12 | Outbound ownership | 06 vs 07 | — | 06 owns all effectors; 07 drafts | 0006 |
 | C13 | Per-mile cost & distance rule | 02 ($0.65–0.70, rings) vs 03 ($0.46, 0.35 ratio) | — | 03 config is single source; 02 `profit_per_mile` display-only; values = Michael (P1) | 03-001 |
 | C14 | 03 internal inconsistency | 03 | — | §17.1 trailer YES at $62/h vs $65 rule; AT-14 locks it. 03 must fix rule **or** test | 03-001 |
@@ -211,7 +211,7 @@ Every transition writes an `ITEM_STATE_CHANGED` receipt in the same transaction.
 5. 3-level PANIC
 6. SourceAdapters and the normalization mapping
 7. 03's scoring engine
-8. Telegram approval bot (YES/NO/MODIFY/HOLD)
+8. Operator UI approval queue (YES/NO/MODIFY/HOLD)
 9. LEARN loop
 10. Consent/DNC ledger
 11. Manual-assist packet generator (07)
@@ -228,7 +228,7 @@ Every transition writes an `ITEM_STATE_CHANGED` receipt in the same transaction.
 | 8–12 | eBay Browse + Craigslist (Conway/Little Rock) `SourceAdapter` MCP tools (read-only), normalized to Item v1 | 02 |
 | 12–15 | 03 engine v0 against `scoring-config.json` 2026.10.0. Must pass AT-1 (replay) and the AT-12/13 gates | 03 |
 | 15–19 | ActionRequest, PDP table (everything tier 0), gateway with all 8 guard checks, **dry-run effector**, LiteLLM daily cap, L3 PANIC stub (FROZEN flag, fail-closed) | 05 |
-| 19–22 | Telegram bot with YES/NO/MODIFY/HOLD buttons; HOLD as a durable wait plus timer | 06 |
+| 19–22 | Minimal Operator UI queue (opportunity cards, YES/NO/MODIFY/HOLD); HOLD as a durable wait plus timer | F (Operator UI lane) |
 | 22–24 | Crash-resume drill, `verify_chain`, one end-to-end walkthrough, `RUNBOOK.md` | 01/04 |
 
 **MVP acceptance:** tests A1–A10 in §8 pass.
@@ -237,12 +237,12 @@ Every transition writes an `ITEM_STATE_CHANGED` receipt in the same transaction.
 - **Day 2.** Service lane: one inbound lead source (website form or referral intake) as `type=service`, using 03 service weights and 07's attribution capture.
 - **Day 2–3.** Governance:
   - 05's full budget ledger (reserve, commit, release)
-  - tiers 0–1, with the 60-second undo for reversible actions only
+  - tier 0 only, per MICHAEL_DECISIONS #5 (no delegation during the MVP)
   - PANIC L1/L2/L3 for real: OpenBao leases, egress proxy deny-all, LiteLLM budget zeroed
-  - fail-closed behavior, plus the Telegram and CLI triggers
+  - fail-closed behavior, plus the Operator UI and CLI triggers
 - **Day 3.** Observability: Langfuse on every LLM call; Prometheus/Alertmanager alerts for stuck workflows, DLQ, budget breach, FREEZE and INJECTION_SUSPECTED; ntfy for alerts.
 - **Day 4.** Security: OpenBao + SOPS, gVisor for adapters, the egress allow-list, and E2B only if a model-generated-code path exists.
-- **Day 4–5.** Communications: 06's three scenarios run **against Michael's own or test phones only**, with the disclosure script, consent ledger and `details.kind=comms` receipts. Postmark runs in sandbox mode. Any live outbound waits for Michael's P2 decisions.
+- **Day 4–5.** Communications stays a **mocked adapter** in the first implementation wave (synthesis). It emits `details.kind=comms` receipts with `dry_run=true`, and the consent/DNC ledger schema is in place. 06's three live scenarios wait for MICHAEL_DECISIONS #4.
 - **Day 5.** Backups: pgBackRest PITR off-box, nightly `pg_dump`, and a restore drill followed by `verify_chain`.
 - **Day 6.** LEARN: an outcome recorded on one sold flip and one completed service updates 03's Brier/MAPE and proposes a config bump (which itself needs approval).
 - **Day 6–7.** Optional: the Twenty projection, the web step-up approval page, and a GovDeals/HiBid adapter (only if Michael approves the ToS posture).
@@ -319,7 +319,7 @@ The original 11 risks in `agent-01-coordinator.md` §11 still stand.
 3. **The legal path is the critical path** for any live outbound: TCPA AI-voice rules, A2P 10DLC (which needs an EIN), all-party recording consent, and UETA/E-SIGN rules on binding offers. *Mitigation:* all outbound stays dry-run until the P2 decisions; tier 0 is permanent for offers and commitments.
 4. **Gray-zone source ToS** (internal JSON endpoints on GovDeals, HiBid, etc.). *Mitigation:* ADR-02-0202 tiers, the do-not-automate list, and the L2 per-source freeze. Michael decides P2.
 5. **AGPL contamination.** BoPeng `ai-marketplace-monitor` (AGPL) is reference-only and must not be vendored. Twenty and Garage are used unmodified as services.
-6. **HumanLayer is effectively deprecated** (05: FACT, the repo is "pretty much all deprecated"). The 01 survey's "consider HumanLayer" is withdrawn; the custom Telegram bot replaces it.
+6. **HumanLayer is effectively deprecated** (05: FACT, the repo is "pretty much all deprecated"). The 01 survey's "consider HumanLayer" is withdrawn; the custom Operator UI approval queue replaces it.
 7. **Unverified assumptions in 03's thresholds** (most are REC/UNK). Wrong $/hr targets would mis-rank everything. *Mitigation:* the P1 decisions plus LEARN calibration.
 8. **Two kinds of "receipt".** An action receipt is different from a financial receipt document (04). *Mitigation:* financial documents are artifacts referenced by `artifact_hashes`.
 
@@ -327,46 +327,51 @@ The original 11 risks in `agent-01-coordinator.md` §11 still stand.
 
 ## 10. Round-two gap requests (exact; each agent answers in its branch)
 
+These lists feed the synthesis build lanes:
+
+| Build lane | Specialist input |
+|---|---|
+| A Core Platform | 01 |
+| B Discovery | 02 |
+| C Economics | 03 |
+| D State/Receipts | 04 |
+| E Governance | 05 |
+| F Operator UI | 06 approval UX + 07 |
+| G QA/Integration | §8 acceptance suite + `validate_contracts.py` |
+
+06's live comms and 07's publishing are research-only or mocked in wave one.
+
 | Agent | Must deliver |
 |---|---|
 | **02** | (1) Estimated items/day for the top-10 sources, flip and service lanes separately. (2) Per-source field mapping raw → Item v1 `normalized`/`sources[]`, with a `raw_ref` retention rule. (3) The data source for each 03 input: comps (sold), DOM, active-listing count, listing age, auction end. (4) Service-lane lead sources with access method and cost per lead. (5) Re-target to Postgres; drop n8n as the backbone; ntfy is alerts only. (6) Cost per source (Apify, proxies) in $/month. |
 | **03** | (1) Resolve C14: change §12.4 or AT-14, and state which. (2) Add the missing formula inputs to the schemas: `market_buy_median`, `active_comparable_listings`, `listing_age_hours`, `auction_ends_in_hours`, `evidence_quality`, `requires_license_he_lacks`, `cost_to_quote`, plus a skill-proficiency store. (3) Add `lead_quality` to flip (or document its absence) and `buy_fees` to service. (4) Add `inputs_hash` and `scorecard_id` per ADR-0004. (5) Write worked examples for at least 3 flip categories (trailer, mower or generator, `project_vehicle`) and at least 3 service categories (drywall, smart-home install, equipment repair). (6) Specify the config-bump approval flow for LEARN. |
 | **04** | (1) Adopt Receipt v1 field names, prefixed ULIDs and `seq`. (2) DDL for `approvals`, `outcomes`, `lessons`, `action_requests`, `policy` and `budget_ledger`. (3) Twenty projection mapping: fields, direction (one-way) and rebuild procedure. (4) Reporting views: pipeline by lane, P&L by item, approval latency, HOLD backlog. (5) RPO/RTO proposal for Michael. (6) A 1-week plan. (7) Remove the custom "resume position" tables; DBOS owns that. |
 | **05** | (1) Category × tier × threshold matrix as **data** (CSV/JSON), with defaults set to deny. (2) Confirm the merged PANIC, and specify the egress-cut and queue-drain mechanics. (3) Sandbox policy: which tools run under gVisor and which need E2B. (4) Egress allow-list per adapter and effector. (5) LLM-spend policy via LiteLLM (per-agent daily caps). (6) Accept or contest deferring Biscuit and SPIFFE. (7) A 24h/1-week build slice for the gateway. |
-| **06** | (1) Generalize from used cars to all flip categories (seller Q&A per category) and to service-customer intake, scheduling and follow-up. (2) Telegram approval UX spec: message layout, MODIFY form, HOLD presets, expiry, re-notify. (3) Template registry with versioning and pre-approval. (4) Numeric rate and consent rules: messages per contact per day, TCPA 8am–9pm local time, DNC scrub cadence. (5) `inputs_hash` and `idempotency_key` on sends. (6) Pass/fail thresholds for E1–E7. (7) Confirm ownership of 07's sends. |
+| **06** | (1) Generalize from used cars to all flip categories (seller Q&A per category) and to service-customer intake, scheduling and follow-up. (2) Approval UX spec for the Operator UI (lane F): card layout, MODIFY form, HOLD presets, expiry, re-notify. Optional Telegram quick-decide. (3) Template registry with versioning and pre-approval. (4) Numeric rate and consent rules: messages per contact per day, TCPA 8am–9pm local time, DNC scrub cadence. (5) `inputs_hash` and `idempotency_key` on sends. (6) Pass/fail thresholds for E1–E7. (7) Confirm ownership of 07's sends. |
 | **07** | (1) A Campaign entity: budget, schedule, audience, variants, linked to Item and ActionRequest. (2) A reversible/irreversible classification for every `action_type`. (3) Numeric spend and volume caps per channel. (4) Map attribution to `outcome.schema.json`. (5) Content provenance: content hash, prompt version, AI-content labeling policy. (6) TCPA and 10DLC compliance for SMS review requests, via 06. (7) Accept Postgres as system of record with Twenty as a projection. (8) Resale-listing drafts for **flips** (Marketplace, Craigslist, eBay) in the manual-assist lane. |
 | **All** | Answer in FACT/INFERENCE/RECOMMENDATION/UNKNOWN. Validate any example payloads with `docs/research/contracts/validate_contracts.py`. Object in `AGENT_STATUS.md` → "Needs coordinator review" if a ruling here is wrong; the objection is then scored with the §7 rubric. |
 
 ---
 
-## 11. Michael decision packet (prioritized; answer YES / NO / MODIFY / HOLD)
+## 11. Michael's owner decisions: see `docs/status/MICHAEL_DECISIONS.md` (authoritative)
 
-**P1: blocks the round-two build**
+Only business-policy decisions go to Michael. Reversible technical choices are settled by the coordinator. These were settled technically, not by Michael: Python, Postgres, DBOS, MCP, n8n at the edge only, no CRM required for the MVP, and the Operator UI approval surface.
 
-| # | Decision | Recommendation |
-|---|---|---|
-| 1 | Implementation language | **Python** (ADR-0008) |
-| 2 | Economics constants (03) | **$40/h floor; $65/h flip and $75/h service targets; $1,500 cash per deal; $800 max loss; home base Conway, AR; work-truck mpg** (to be supplied). These are 03's defaults. |
-| 3 | Spend and comms limits (05) | **Default-deny everything in the MVP** (dry-run). For 1-week: purchases ≤ $500/day, comms ≤ $5/day, 20:00–08:00 quiet hours (05's examples). |
-| 4 | Approval channel | **Telegram bot** + web step-up page for money and irreversible actions (ADR-0006) |
+**None of the five decisions blocks the dry-run MVP.** Each is mapped to where it lands in the system:
 
-**P2: blocks any live outbound or gray-zone access**
+| MICHAEL_DECISIONS # | Decision | Where it lands | Default until decided |
+|---|---|---|---|
+| 1 | Cash-at-risk per flip and in total | 03 `capital_and_risk.*` in `scoring-config.json` + 05 budget ledger hard caps | Conservative: 03's REC $1,500 per deal / $800 max loss, real-world spend deny-all (dry-run) |
+| 2 | Time-value floor and target ($/Michael-hour) | 03 `time_value.*` → YES/MAYBE/PASS thresholds | 03's provisional $40 floor; $65 flip / $75 service targets; calibrated by LEARN |
+| 3 | Higher-risk source access | ADR-02-0202 tiers + L2 per-source freeze; per-source enable flag | Official/sanctioned sources only; no evasion after a block |
+| 4 | Outbound AI calling/texting and counsel | 06 effectors (ADR-0006), tier 0 permanent for offers | **Disabled**; mocked adapters only |
+| 5 | Approval delegation | 05 tiers 1–3 / standing rules (`approval.scope=standing_rule`) | **No delegation**: everything at tier 0 |
 
-| # | Decision | Recommendation |
-|---|---|---|
-| 5 | Legal counsel before any AI voice or SMS to non-consenting parties (06) | **YES**, consult first |
-| 6 | Business entity / EIN for A2P 10DLC (06) | Status needed |
-| 7 | Risk tolerance for internal JSON endpoints on gov-surplus and auction sites (02) | **HOLD.** APIs, email and RSS only until reviewed. |
-| 8 | Auto-send pre-approved review-request templates within hard caps (07) | **NO for the MVP**; revisit after 2 weeks of tier-0 history |
-
-**P3: later**
-- RPO/RTO. Recommended: RPO 15 min, RTO 4 h.
-- Whether to have a CRM UI at all (Twenty optional).
-- Dead-man switch. Recommended: on, 72 h.
-- Hash-chain vs signed or anchored receipts. Recommended: hash-chain now.
-- Paid fallbacks (Apify, sold-comps service) and DNI call-tracking budget.
-- Legal business name, service area, Google primary category.
-- Multiple approvers. Recommended: no.
+Other items that eventually need owner input are not needed now. They come up at the gate where they matter:
+- EIN/entity status, needed for A2P 10DLC
+- business name, service area and Google category, needed for marketing go-live
+- RPO/RTO (coordinator default: RPO 15 min / RTO 4 h)
+- dead-man switch (default off until set)
 
 ---
 

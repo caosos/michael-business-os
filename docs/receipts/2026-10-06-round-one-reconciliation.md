@@ -84,3 +84,25 @@ All files were read with `git show origin/<branch>:<path>`. Nothing was checked 
 - Rubric scores are INFERENCE (judgment), and the inputs are published above so they can be challenged.
 - Peer FACT claims were not re-verified on the web this pass, except the DBOS license (MIT, already verified in round one) and the HumanLayer deprecation (taken from 05, which tagged it FACT).
 - The ntfy license is marked UNKNOWN in the integration doc and must be verified before adoption.
+
+## Addendum, 2026-10-07: merged with the parallel Aria / Agent 01 synthesis
+- **What happened:** the first push of this work was rejected because the remote branch already had 6 newer commits by `caosos`, dated 2026-10-06 23:21–23:29 -0500:
+  - `START_HERE.md`
+  - `docs/AGENT_HANDOFF.md`
+  - `docs/research/ROUND_ONE_SYNTHESIS.md`
+  - `docs/status/MICHAEL_DECISIONS.md`
+  - rewritten status files
+- **How it was handled:** merged, not force-pushed. Those commits were read in full before merging.
+- **Agreement:** the synthesis reaches the same core rulings: Python, Postgres as system of record, DBOS, MCP, n8n at the edge only, CRM as a projection only, one comms subsystem, and dry-run first.
+- **Aligned to the synthesis, which is authoritative:**
+  - ADR-0008 Python is ACCEPTED as a technical choice, not an owner decision.
+  - ADR-0006 approval surface is the Operator UI (lane F). Telegram is optional later.
+  - The owner-decision list is `MICHAEL_DECISIONS.md`. Integration doc §11 now maps each of its five decisions to the contract field or config it controls, plus the default used until it is decided.
+  - 1-week comms is mocked; tier 0 only (no delegation).
+- **Added to the synthesis:**
+  - the frozen machine-readable contracts. They meet the synthesis's own "freeze Round-Two interface contracts" next action, and ADR-0004 has a full field mapping from the synthesis objects.
+  - the C1–C17 rubric register
+  - the ADR registry
+  - the unified acceptance suite
+  - the per-specialist gap lists, mapped to build lanes A–G
+- **Schema additions for synthesis coverage:** `ActionRequest.target` and `recommendation.expires_at`. The validator still passes, including the negative invariant tests.

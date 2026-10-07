@@ -2,7 +2,7 @@
 
 ADR-0005 — Governance control plane: Action Gateway + PDP + execution guard, merged PANIC, two spend ledgers
 
-Status: ACCEPTED (2026-10-06, Agent 01). It adopts Agent 05's ADR-05-001 with changes. The dollar and comms limits are PENDING MICHAEL (P1 in the decision packet) and default to deny until he sets them.
+Status: ACCEPTED (2026-10-06, Agent 01). It adopts Agent 05's ADR-05-001 with changes. The dollar and cash limits are owner decisions (`docs/status/MICHAEL_DECISIONS.md` #1). Until he sets them they default to deny / dry-run.
 
 ## Context
 Agent 05 designed a PEP/PDP control plane. Agent 01 designed an atomic PANIC and an LLM cost gateway. Each design covers gaps in the other:
@@ -31,7 +31,7 @@ Agent 05 designed a PEP/PDP control plane. Agent 01 designed an atomic PANIC and
    - **L1, per agent:** revoke that agent's OpenBao lease and gateway token.
    - **L2, per capability:** freeze one capability or category in the PDP table.
    - **L3, global:** set `system_state=FROZEN`, revoke all OpenBao leases, set the egress proxy to deny-all, set LiteLLM budgets to 0, and cancel queued DBOS workflows that have not started (status `cancelled_by_freeze`). Calls already started are logged as "in-flight at freeze" and are not retried.
-   - **Properties:** the switch fails closed if its state is unreadable. It has an out-of-band trigger (a Telegram command plus a host-local CLI). A dead-man switch is optional (Michael decision P3).
+   - **Properties:** the switch fails closed if its state is unreadable. It has out-of-band triggers: an Operator UI button and a host-local CLI, plus a Telegram command if that channel is adopted. A dead-man switch is optional (Michael decision P3).
 6. **Two spend ledgers, both enforced outside the model:**
    - **LLM spend:** LiteLLM virtual key per agent, hard daily cap, per-call `max_tokens`, and a circuit breaker. Because LiteLLM resets budgets only about every 10 minutes, caps are set conservatively.
    - **Real-world spend:** 05's budget ledger. It reserves on approval, then commits or releases. Reservations are atomic so parallel approvals cannot overshoot. It fails closed, a soft cap triggers confirmation, a hard cap denies, and irreversible actions never auto-retry.

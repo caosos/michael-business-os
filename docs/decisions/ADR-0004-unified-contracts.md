@@ -52,6 +52,49 @@ Key rulings:
    | `valuation{}` / `score` | removed; values come from 03's scorecard |
    | `comps{}` | 03 `estimates_meta.comps[]` |
 
+## Mapping from ROUND_ONE_SYNTHESIS canonical objects
+The synthesis lists the *minimum* fields in prose. The contracts are the machine-readable detail. Every synthesis field is covered:
+
+| Synthesis field | Contract field |
+|---|---|
+| Opportunity `id` / `opportunity_id` | `Item.item_id` |
+| `source`, `source_listing_id`, `source_url`, `ingestion_method`, `first_seen`, `last_seen` | `Item.sources[]` (`url`, `first_seen_at`, `last_seen_at`) |
+| `source_risk` | `sources[].tos_risk` |
+| `raw_payload_hash` | `sources[].raw_ref` (sha256) |
+| `title`, `description`, `condition`, `price`, `fees/premium`, `location`, `distance`, `seller/contact`, `images`, `status` | `Item.normalized.*` (`price.buyer_premium_pct`, `location.road_miles_one_way`, `counterparty`, `listing_status`) |
+| `type`, `category` | `Item.type` (flip/service), `Item.category` |
+| `dedup_key`, `provenance_refs` | same name / `provenance_ids` |
+| Research/Comps | `Item.research[]` + 03 `estimates_meta.comps[]` |
+| Scorecard fields | 03 `scorecard.derived` / `sub_scores` / `composite`; `config_version` → `scoring_config_version` |
+| Recommendation `decision` YES/MAYBE/PASS | `recommendation.verdict` |
+| `recommended_action` | `proposed_actions[]` |
+| `estimated_cost` | `proposed_actions[].estimated_cost` |
+| `expires_at` | `recommendation.expires_at` |
+| `scorecard_ref` | `scores.scorecard_id` |
+| Approval `action_id` | `action_request_id` |
+| `decided_by` | `decider` |
+| `payload_hash` | `payload_hash_seen` |
+| ActionRequest `action_id` | `action_request_id` |
+| `requested_by` | `proposed_by` |
+| `type` | `category` |
+| `required_capability` | `capability` |
+| `target` | `target` |
+| `approval_required` | `tier == 0` |
+| `approval_ref` | Approval rows referencing the request |
+| Receipt `action_id` | `action_request_id` |
+| `action_type` | `type` + `capability` |
+| `started_at` / `completed_at` | `ts` of the `ACTION_EXECUTING` / `ACTION_EXECUTED` receipts |
+| `result` | `effector_response.status` + `after_state` |
+| `cost` | `budget_effect` + `llm_cost` |
+| `external_refs` | `effector_response.provider_msg_id` |
+| `provenance_chain` | `provenance_ids` |
+| `previous_receipt_hash` / `receipt_hash` | `prev_hash` / `row_hash` |
+| Outcome `actual_*`, `actual_net`, `days_to_cash` | `realized.*` + `predicted_vs_actual[]` |
+| `result` | `kind` |
+| `lessons` | a separate `lessons` table (04) emitting `LESSON_RECORDED` receipts |
+
+Round-two lane D (State/Receipts) may rename fields only through a semver bump with a mapping note.
+
 ## Evidence
 - FACT: the schemas are valid 2020-12 and every example in `contracts/examples/` validates. Negative tests confirm the schemas reject:
   - a receipt without provenance

@@ -14,6 +14,8 @@ Dispositions:
 - **SUPERSEDED**: replaced by the named system ADR.
 - **PENDING-MICHAEL**: needs his decision.
 
+The executive synthesis is `docs/research/ROUND_ONE_SYNTHESIS.md`. The ADRs below record the same decisions, plus the contract freeze, as individual, citable records.
+
 ## System ADRs (Agent 01)
 | ADR | Title | Status |
 |---|---|---|
@@ -21,10 +23,10 @@ Dispositions:
 | ADR-0002 | DBOS Transact durable backbone (Temporal = scale-out) | ACCEPTED |
 | ADR-0003 | MCP tool boundary; A2A deferred | ACCEPTED |
 | ADR-0004 | Unified contracts (Item v1, ActionRequest, Approval, Receipt, Provenance, Outcome) | ACCEPTED (frozen v1.0.0) |
-| ADR-0005 | Governance control plane: Action Gateway + PDP + guard, merged PANIC, two spend ledgers | ACCEPTED; limits PENDING-MICHAEL |
-| ADR-0006 | Integration roles: CRM projection, n8n connector-only, 06 owns outbound, approval channel | ACCEPTED; channel provisional |
+| ADR-0005 | Governance control plane: Action Gateway + PDP + guard, merged PANIC, two spend ledgers | ACCEPTED; cash limits = MICHAEL_DECISIONS #1 |
+| ADR-0006 | Integration roles: CRM projection, n8n edge-only, one comms subsystem, Operator UI approvals | ACCEPTED |
 | ADR-0007 | Business scope: flips + services | ACCEPTED (Michael decision) |
-| ADR-0008 | Implementation language: Python | PROPOSED / PENDING-MICHAEL |
+| ADR-0008 | Implementation language: Python | ACCEPTED (technical; per synthesis) |
 
 ## Specialist ADRs
 | Alias | Branch file | Title | Disposition | Binding changes / notes |

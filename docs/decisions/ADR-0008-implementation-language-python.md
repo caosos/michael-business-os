@@ -2,7 +2,7 @@
 
 ADR-0008 — Primary implementation language: Python
 
-Status: PROPOSED. **PENDING MICHAEL** (decision packet P1). It does not block anything until the round-two build starts.
+Status: ACCEPTED (2026-10-07). It is resolved as a reversible technical choice per `docs/research/ROUND_ONE_SYNTHESIS.md` §1 and `docs/status/MICHAEL_DECISIONS.md` ("Michael does NOT need to choose: Python vs TypeScript → Python").
 
 ## Context
 The language has to be chosen before any MVP code is written. Agent 04 lists "Python/FastAPI vs TS" as an UNKNOWN.
@@ -23,4 +23,4 @@ The language has to be chosen before any MVP code is written. Agent 04 lists "Py
 
 Evidence: FACT, from the language support listed for each tool in 01 §6, 02 §3 and 06 §2.B. INFERENCE: it is the lowest-friction single language across 5 of the 6 specialist stacks.
 
-Reversibility: Low once code exists. That is why Michael should confirm it before round two.
+Reversibility: Low once code exists.
