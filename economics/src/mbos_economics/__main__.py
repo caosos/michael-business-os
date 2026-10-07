@@ -2,11 +2,12 @@
 
     python -m mbos_economics score  ITEM.json --scored-at 2026-10-07T12:00:00Z [--config-version V]
     python -m mbos_economics replay ITEM.json        # ITEM.json must carry a `scores` block
+    python -m mbos_economics estimate ITEM.json --as-of 2026-10-07T18:00:00Z [--bundle BUNDLE.json]
 
 ITEM.json may be a bare Item v1 or an examples/*.scored.json wrapper ({item, provenance, ...}).
 
 ``score`` prints {scores, recommendation, provenance, receipt_drafts}. It writes nothing.
-Exit codes: 0 ok / replay match, 1 replay mismatch, 2 invalid input.
+Exit codes: 0 ok / replay match, 1 replay mismatch, 2 invalid input or bundle, 3 estimate insufficient.
 """
 
 from __future__ import annotations
@@ -31,11 +32,25 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--config-version")
     r = sub.add_parser("replay")
     r.add_argument("item", type=Path)
+    e = sub.add_parser("estimate")
+    e.add_argument("item", type=Path)
+    e.add_argument("--as-of", required=True, help="RFC 3339 timestamp; the estimator never reads the clock")
+    e.add_argument("--bundle", type=Path, help="research bundle JSON (comps, evidence, overrides; all with provenance)")
     args = ap.parse_args(argv)
 
     item = json.loads(args.item.read_text(encoding="utf-8"))
     if "item" in item and "type" not in item:   # examples/*.scored.json wrapper
         item = item["item"]
+    if args.cmd == "estimate":
+        from .estimate import BundleError, estimate_item
+        bundle = json.loads(args.bundle.read_text(encoding="utf-8")) if args.bundle else None
+        try:
+            out = estimate_item(item, bundle, args.as_of)
+        except BundleError as e:
+            print(json.dumps({"error": "invalid_bundle", "problems": e.problems}, indent=2))
+            return 2
+        print(json.dumps(out, indent=2))
+        return 0 if out["status"] == "estimated" else 3
     if args.cmd == "score":
         try:
             out = score_item(item, load_config(args.config_version), args.scored_at)
