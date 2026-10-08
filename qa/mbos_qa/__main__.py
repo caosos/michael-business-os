@@ -256,6 +256,30 @@ FINDINGS = [
      "`test_action_path_check_requires_real_executions` greps the gate's source text instead of running the check.",
      "RECOMMENDATION: make a failed fetch a FAIL (or print a loud 'STALE REFS' line and exit non-zero unless `--no-fetch`); compare every file in the package dir; "
      "replace the source-grep test with one that feeds the check a RESULT with 0 effector calls."),
+    ("F-51", "FACT", "01 (card)", "G-10: `economics.current_cash_context` takes ANY value in the profile as Michael's FACT: a negative number, a boolean, a list, a dict, "
+     "and NaN (which crashes `build_card` with CanonicalError). Repro: set `current_cash_context.value` to -50 / true / [] / NaN in a profile and build a card.",
+     "RECOMMENDATION: accept only a finite number >= 0 (or a documented level string); anything else is UNKNOWN."),
+    ("F-52", "FACT", "01 (card) + 03", "G-10: NaN, infinity, 1e308 and numeric strings in the scorecard (`cash_tied_up`, `time_to_cash_days`, `ev_net_profit`) crash `build_card` "
+     "(CanonicalError / ValueError in `_fact_reasons`). The new fields guard with `_finite`, but older fields (`total_cash_at_risk`, `expected_net_profit`) copy the value unchecked. "
+     "Same class as F-26: a card must never crash.",
+     "RECOMMENDATION: run every scorecard number through `_finite` before it becomes a datum."),
+    ("F-53", "FACT", "01 (card)", "G-10: a negative cash at risk (-100) gives cash_multiple 0.5 and velocity -0.25 for a +$50 deal; negative or zero days and zero cash still give class MICRO_FLIP; "
+     "a cash of 1e-9 gives a multiple of 5e10. Nothing in `_velocity_fields`/`_class_of` requires cash > 0 and days > 0.",
+     "RECOMMENDATION: cash <= 0 or days <= 0 (or an implausible multiple) makes multiple, velocity and class UNKNOWN."),
+    ("F-54", "FACT", "01 (card)", "G-10: the class thresholds are DATA but unvalidated. String thresholds crash `_class_of` (TypeError); NaN / None / negative thresholds silently shift a deal to "
+     "QUICK_TURN; a missing capital_intensive block removes the class; with all three blocks missing every deal is STANDARD_FLIP (not UNKNOWN).",
+     "RECOMMENDATION: validate the three blocks (finite numbers, ordered); an invalid block makes the class UNKNOWN with a reason."),
+    ("F-55", "FACT", "01 (card)", "G-10: `liquidity` shows '150% sale probability', '-20%' and '-3 days on market' as INFERENCE (the neighbouring p_ok/salvage fields are range-checked).",
+     "RECOMMENDATION: require 0 <= sale_prob <= 1 and days > 0, else UNKNOWN."),
+    ("F-56", "FACT", "01 (card)", "G-10: the gross-profit low/high is not checked: reversed comps give low 640 > high 40; a deterministic value of 5000 is shown beside a range of 40..640; "
+     "a negative cost_out shifts the range to 2300..2900.",
+     "RECOMMENDATION: show low/high only when low <= value <= high and cost_out >= 0 (same rule as the resale range, F-28)."),
+    ("F-57", "INFER", "03 + 01", "G-10: two sources of 'the cash situation'. The card reads only Michael's profile (UNKNOWN); lane C reads `economics.context.current_cash` from the item "
+     "(`known: true`, e.g. 1200 in the mower case) and applies a cash-pressure factor to the rank. Any lane can write that item field, so the engine may be using a cash figure Michael never stated.",
+     "RECOMMENDATION: one source (the operator profile, passed to the engine); the item field is ignored or rejected."),
+    ("F-58", "FACT", "03", "G-10: the late-season mower with tight funds is 'wrong buy today' only as a rank_score of 0.14 (vs 1.06 in season). The reasons never say so in words "
+     "('season', 'cash pressure', 'funds'); the only mention is the formula text. The decision is PASS either way.",
+     "RECOMMENDATION: add a reason line with the applied seasonality and cash-pressure factors and the sentence the owner used."),
     ("F-16", "FACT", "01", "FIXED by A-10 (verified at 82632c3: a normal install finds its contracts and operator profile). Original finding: Agent 01's package only finds the contracts by a path relative to the source tree. "
      "With a normal (non-editable) `pip install`, 94 of its 109 tests fail or error with `docs/research/contracts "
      "not found; set MBOS_CONTRACTS_DIR`. With that variable set, 108 pass and 1 is skipped "
@@ -323,7 +347,7 @@ def cmd_tests() -> tuple[int, list[tuple[str, str, str, str]]]:
         xml = pathlib.Path(td) / "junit.xml"
         env = dict(os.environ, PYTHONPATH=str(QA_ROOT))
         rc = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", f"--junitxml={xml}",
-                             "tests", "--ignore=tests/card", "--ignore=tests/spec"], cwd=QA_ROOT, env=env).returncode
+                             "tests", "--ignore=tests/card", "--ignore=tests/spec", "--ignore=tests/followup", "--ignore=tests/engine"], cwd=QA_ROOT, env=env).returncode
         rows = []
         for tc in ET.parse(xml).getroot().iter("testcase"):
             outcome = "passed"
@@ -362,6 +386,8 @@ CARD_REQ = OrderedDict([
     ("test_card_hostile", "Hostile listing text: contract, recommendation and text view"),
     ("test_card_authority", "Decision authority: derived recommendation, no authority, read-only"),
     ("test_card_backends", "Real flows on the backend: trail vs ledger, enrichment, poison listings, F-23 regression"),
+    ("test_card_adr0012", "ADR-0012 card fields: honest UNKNOWN, class boundaries as data, malformed numbers, no profit floor (G-10)"),
+    ("test_engine_adr0012", "ADR-0012 engine: no min_profit constant, three training examples, cash never assumed, malformed refused (G-10)"),
 ])
 
 
@@ -372,7 +398,9 @@ def _card_finding(module: str, name: str) -> str:
         return "F-26" if pid in CARD_CRASH_IDS else "F-27"
     if "one_malformed_enrichment_block" in n:
         return "F-27" if "bad-provenance" in n else "F-26"
-    table = [("fuzzed_enrichment", "F-26"), ("lane_values_are_validated", "F-28"), ("impossible_lane_values", "F-28"),
+    table = [("malformed_number_never_crashes", "F-52"), ("nonsensical_cash_or_time", "F-53"), ("malformed_cash_context", "F-51"),
+             ("malformed_class_thresholds", "F-54"), ("impossible_liquidity", "F-55"), ("gross_profit_range_is_ordered", "F-56"),
+             ("single_michael_stated_source", "F-57"), ("wrong_buy_today", "F-58"), ("fuzzed_enrichment", "F-26"), ("lane_values_are_validated", "F-28"), ("impossible_lane_values", "F-28"),
              ("unordered_resale", "F-28"), ("date_formats_that_are_not_iso", "F-28"), ("headline_status", "F-31"), ("lane_why_lines", "F-30"), ("why_lines_from_a_lane", "F-29"),
              ("lint", "F-30"), ("elementary", "F-30"), ("junk_source", "F-30"), ("model_specific", "F-30"), ("basis_fact", "F-30"),
              ("generic_advice", "F-30"), ("contact_sent", "F-31"), ("dry_run", "F-31"), ("contact_approved", "F-32"),
@@ -412,6 +440,8 @@ def cmd_card() -> int:
 
     rows, secs = [], {}
     r, secs["pure"] = _run_pytest("pure", {}, ["tests/card", "--ignore=tests/card/test_card_backends.py"])
+    rows += r
+    r, secs["engine"] = _run_pytest("engine (lane C pinned)", {}, ["tests/engine"])
     rows += r
     base = {"MBOS_QA_IMPL": "mbos_qa.impl_spine:build"}
     r, secs["reference"] = _run_pytest("reference backend", base, ["tests/card/test_card_backends.py"])
@@ -607,7 +637,7 @@ def cmd_spine(release: bool = False) -> int:
 
 
 FINDING_STATUS = {  # verified by the suites at the pins in qa/impl_lane_pins.json (final card re-run)
-    "F-22": "FIXED", "F-23": "FIXED", "F-24": "FIXED", "F-25": "FIXED (R22)", "F-40": "FIXED", "F-41": "FIXED", "F-42": "FIXED (G-09, 01 100d2ed)", "F-43": "FIXED (G-09, 01 100d2ed)", "F-44": "FIXED (G-09, 01 100d2ed)", "F-45": "FIXED (G-09, 01 100d2ed)", "F-46": "FIXED (G-09)", "F-47": "FIXED (G-09)", "F-48": "FIXED (G-09; residual F-50)", "F-49": "FIXED (G-09)", "F-50": "OPEN",
+    "F-22": "FIXED", "F-23": "FIXED", "F-24": "FIXED", "F-25": "FIXED (R22)", "F-40": "FIXED", "F-41": "FIXED", "F-42": "FIXED (G-09, 01 100d2ed)", "F-43": "FIXED (G-09, 01 100d2ed)", "F-44": "FIXED (G-09, 01 100d2ed)", "F-45": "FIXED (G-09, 01 100d2ed)", "F-46": "FIXED (G-09)", "F-47": "FIXED (G-09)", "F-48": "FIXED (G-09; residual F-50)", "F-49": "FIXED (G-09)", "F-50": "OPEN", "F-51": "OPEN", "F-52": "OPEN", "F-53": "OPEN", "F-54": "OPEN", "F-55": "OPEN", "F-56": "OPEN", "F-57": "OPEN", "F-58": "OPEN",
     "F-16": "FIXED", "F-18": "FIXED", "F-19": "FIXED", "F-20": "FIXED", "F-21": "FIXED",
     "F-26": "FIXED", "F-27": "FIXED (an uncheckable risk is dropped, never left invalid)",
     "F-28": "FIXED (ISO strings only; a bare number such as 20261005 is UNKNOWN; valid dates still display)",

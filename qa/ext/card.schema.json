@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://michael-business-os/contracts/card.schema.json",
   "title": "OpportunityCard v1 \u2014 the decision-ready view of one Item (derived, never stored as truth)",
-  "description": "ADDITIVE contract (ADR-0011). A card is a pure projection of an Item, its receipts and lane-supplied enrichment blocks. It is NOT a new source of truth and never carries authority: Michael's decision is still Approval.decision (YES|NO|MODIFY|HOLD) on an ActionRequest. Honesty rule: every datum is either a value with a basis (FACT|INFERENCE|RECOMMENDATION) and optional provenance_id, or the literal UNKNOWN. Nothing unavailable is ever filled in. The score is for the machine; `why` and `recommendation.why` are for Michael. Additive optional fields (2026-10-07, 07 findings F-31/F-29/F-37): item.flags, status.timeline[].dry_run, why_provenance. card_version stays 1.0.0 (optional additions only; consumers re-vendor to validate cards that use them).",
+  "description": "ADDITIVE contract (ADR-0011). A card is a pure projection of an Item, its receipts and lane-supplied enrichment blocks. It is NOT a new source of truth and never carries authority: Michael's decision is still Approval.decision (YES|NO|MODIFY|HOLD) on an ActionRequest. Honesty rule: every datum is either a value with a basis (FACT|INFERENCE|RECOMMENDATION) and optional provenance_id, or the literal UNKNOWN. Nothing unavailable is ever filled in. The score is for the machine; `why` and `recommendation.why` are for Michael. Additive optional fields (2026-10-07, 07 findings F-31/F-29/F-37): item.flags, status.timeline[].dry_run, why_provenance. card_version stays 1.0.0 (optional additions only; consumers re-vendor to validate cards that use them). Capital-velocity fields (cash_multiple, capital_velocity, opportunity_class, parts_out_floor, catastrophic_downside_probability, repair_uncertainty, liquidity, skill_fit, personal_use_value, current_cash_context) added 2026-10-07 from ARIA-20261007-1840; optional; no universal absolute-profit floor.",
   "type": "object",
   "required": [
     "card_version",
@@ -235,6 +235,46 @@
         },
         "scoring_config_version": {
           "type": "string"
+        },
+        "cash_multiple": {
+          "$ref": "#/$defs/datum",
+          "description": "1 + expected net / cash at risk (x)"
+        },
+        "capital_velocity": {
+          "$ref": "#/$defs/datum",
+          "description": "return on cash per day: (expected net / cash at risk) / days to cash"
+        },
+        "opportunity_class": {
+          "$ref": "#/$defs/datum",
+          "description": "value: MICRO_FLIP | QUICK_TURN | STANDARD_FLIP | CAPITAL_INTENSIVE_FLIP | SERVICE_JOB | OTHER_OPPORTUNITY (thresholds are data in operator_profile.v1.json)"
+        },
+        "parts_out_floor": {
+          "$ref": "#/$defs/datum",
+          "description": "what the pieces/liquidation would bring if the repair fails"
+        },
+        "catastrophic_downside_probability": {
+          "$ref": "#/$defs/datum",
+          "description": "chance the repair fails outright (1 - repair success probability)"
+        },
+        "repair_uncertainty": {
+          "$ref": "#/$defs/datum",
+          "description": "value: low | medium | high"
+        },
+        "liquidity": {
+          "$ref": "#/$defs/datum",
+          "description": "how readily it sells: sale probability and days on market"
+        },
+        "skill_fit": {
+          "$ref": "#/$defs/datum",
+          "description": "0..1: how well this matches Michael's repair skill"
+        },
+        "personal_use_value": {
+          "$ref": "#/$defs/datum",
+          "description": "what it is worth to Michael to keep, when relevant"
+        },
+        "current_cash_context": {
+          "$ref": "#/$defs/datum",
+          "description": "Michael-stated cash situation; UNKNOWN unless he set it"
         }
       }
     },
@@ -510,6 +550,64 @@
         "pattern": "^prov_[0-9A-HJKMNP-TV-Z]{26}$"
       },
       "description": "Provenance of reasons supplied by a lane (a lane's reasons are shown only if they carry provenance)."
+    },
+    "category_tags": {
+      "type": "array",
+      "description": "ADR-0013. INFERENCE tags with quoted evidence and lane provenance; empty = none supported by evidence (not a 'no').",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "tag",
+          "basis",
+          "provenance_id",
+          "evidence"
+        ],
+        "properties": {
+          "tag": {
+            "enum": [
+              "mechanic_special",
+              "project",
+              "parts_donor",
+              "quick_turn",
+              "auction_candidate",
+              "contractor_opportunity",
+              "wanted_match"
+            ]
+          },
+          "basis": {
+            "const": "INFERENCE"
+          },
+          "provenance_id": {
+            "type": "string",
+            "pattern": "^prov_[0-9A-HJKMNP-TV-Z]{26}$"
+          },
+          "evidence": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 5,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "field",
+                "quote"
+              ],
+              "properties": {
+                "field": {
+                  "type": "string",
+                  "maxLength": 60
+                },
+                "quote": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "$defs": {

@@ -2,7 +2,10 @@
   "_comment": "Michael's actual capabilities, as data. Source: Michael, direct instruction to Agent 01, 2026-10-07 (FACT, owner-stated). Changing this file is an owner decision, not a code change.",
   "profile_version": "1.0.0",
   "operator": "michael",
-  "skills": {"experience": "experienced mechanic", "note": "Do not give elementary advice (check compression/spark/fuel). Only model-specific, economically material guidance."},
+  "skills": {
+    "experience": "experienced mechanic",
+    "note": "Do not give elementary advice (check compression/spark/fuel). Only model-specific, economically material guidance."
+  },
   "transport": {
     "trailer_owned": false,
     "borrowed_trailer_possible": true,
@@ -10,5 +13,39 @@
     "truck_bed_fits": "unspecified",
     "note": "A deal that requires a trailer is NOT rejected. Transport is an economic/logistics variable; a borrowed trailer must be confirmed with the lender before pickup."
   },
-  "logistics_difficulty_penalty": {"fits_truck": 0.0, "requires_trailer_borrowed": "set by lane C economics config", "note": "numeric penalties live in 03's scoring config, not here"}
+  "logistics_difficulty_penalty": {
+    "fits_truck": 0.0,
+    "requires_trailer_borrowed": "set by lane C economics config",
+    "note": "numeric penalties live in 03's scoring config, not here"
+  },
+  "deal_classes": {
+    "_status": "PROVISIONAL: proposed by Agent 01 from Michael's training examples (ARIA-20261007-1840). Michael confirms or changes these (MICHAEL_DECISIONS #9). They are data, not code.",
+    "basis": "RECOMMENDATION",
+    "micro_flip": {
+      "max_cash_at_risk": 100,
+      "max_days_to_cash": 3,
+      "note": "tiny exposure, same-day/next-day (e.g. a $30 TV that sells in an hour)"
+    },
+    "quick_turn": {
+      "max_days_to_cash": 10,
+      "note": "turns within about a week or so"
+    },
+    "capital_intensive_flip": {
+      "min_cash_at_risk": 750,
+      "or_min_days_to_cash": 45,
+      "note": "large cash and/or long hold (e.g. a mower bought late in the season)"
+    },
+    "no_universal_profit_floor": true,
+    "rule": "Never reject a deal solely because expected gross profit is below an absolute amount. A $30 item that reliably becomes $75-100 in an hour can outrank a $250 item that becomes $600 in four months. Absolute profit, cash multiple, time-to-cash and downside stay separately visible."
+  },
+  "current_cash_context": {
+    "value": null,
+    "note": "Michael-stated available cash / how tight funds are right now (capital-lockup sensitivity). null = UNKNOWN; the card then says so. Set by Michael only."
+  },
+  "mission": {
+    "weekly_target_usd": null,
+    "hours_available": null,
+    "protected_principal_usd": 500,
+    "provenance": "protected_principal_usd: Michael via Aria ARIA-20261007-1905 (owner-set bankroll). weekly_target_usd/hours_available: UNKNOWN until Michael sets them (MICHAEL_DECISIONS #10); the package's $1,500 is an example."
+  }
 }

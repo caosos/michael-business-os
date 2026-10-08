@@ -150,4 +150,7 @@ TRACE_RX = re.compile(r"^value_add_plan\.model_specific_risks \(\d+ lane claim\(
 def unknowns_match(card: dict) -> bool:
     """`unknowns` is exactly the UNKNOWN datum paths, plus (only) the documented rejection trace entries."""
     extra = {u for u in card["unknowns"] if TRACE_RX.match(u)}
+    # A-24 (01): an EMPTY `category_tags` list is declared in `unknowns` by one fixed sentence (a list has no datum to mark UNKNOWN)
+    if not card.get("category_tags"):
+        extra |= {u for u in card["unknowns"] if u.startswith("category_tags (no evidence-based tag")}
     return set(card["unknowns"]) - extra == unknown_paths(card)
