@@ -428,8 +428,11 @@ def _velocity_fields(item: dict, econ: dict, profile: dict, enr: dict) -> dict[s
     out.setdefault("cash_multiple", U("needs a cash-at-risk and an expected net (flips only)"))
     out.setdefault("capital_velocity", U("needs cash at risk, expected net and days to cash"))
     cls = _class_of(cash, days, profile) if flip else None
-    out["opportunity_class"] = _datum(cls, "RECOMMENDATION", note="thresholds are provisional data in operator_profile.v1.json (Michael confirms)") if cls \
-        else U("needs cash at risk and days to cash (flips only)")
+    if item.get("type") == "service":  # ADR-0013: services are their own class; flip-style cash multiple does not apply
+        out["opportunity_class"] = _datum("SERVICE_JOB", "FACT", note="the Item is a service job; flip velocity maths does not apply")
+    else:
+        out["opportunity_class"] = _datum(cls, "RECOMMENDATION", note="thresholds are provisional data in operator_profile.v1.json (Michael confirms)") if cls \
+            else U("needs cash at risk and days to cash (flips only)")
     sal = down.get("salvage_if_repair_fails")
     out["parts_out_floor"] = _datum(sal, "INFERENCE", unit="USD", provenance_id=prov, note="salvage if the repair fails") if _finite(sal) and sal >= 0 \
         else U("no parts-out / liquidation estimate")
@@ -554,6 +557,34 @@ def _lane_why(enr: dict) -> tuple[list[str], list[str]]:
     return _strs(lines, limit=10, size=300), [prov]
 
 
+CATEGORY_TAGS = ("mechanic_special", "project", "parts_donor", "quick_turn", "auction_candidate", "contractor_opportunity",
+                 "wanted_match")
+
+
+def _category_tags(enr: dict) -> list[dict]:
+    """Audience/category tags (ADR-0013). INFERENCE only, and only with provenance AND quoted evidence; anything else is
+    dropped. Absence of a tag is not a "no"."""
+    blk = enr.get("category_tags")
+    prov = (enr.get("_prov") or {}).get("category_tags") if isinstance(enr.get("_prov"), dict) else None
+    items = blk.get("tags") if isinstance(blk, dict) else blk
+    if not (isinstance(prov, str) and _PROV_RX.match(prov)) or not isinstance(items, list):
+        return []
+    out, seen = [], set()
+    for t in items:
+        if not isinstance(t, dict) or t.get("tag") not in CATEGORY_TAGS or t["tag"] in seen:
+            continue
+        ev = []
+        for e in t.get("evidence") if isinstance(t.get("evidence"), list) else []:
+            if isinstance(e, dict) and isinstance(e.get("quote"), str) and e["quote"].strip():
+                ev.append({"field": clean_text(e.get("field") if isinstance(e.get("field"), str) else "listing", 60),
+                           "quote": clean_text(e["quote"], 200)})
+        ev = [e for e in ev if e["quote"]][:5]
+        if ev:
+            seen.add(t["tag"])
+            out.append({"tag": t["tag"], "basis": "INFERENCE", "provenance_id": prov, "evidence": ev})
+    return out
+
+
 def _risks(va_in: dict, dropped: Optional[list] = None) -> list[dict]:
     out = []
     for r in va_in.get("model_specific_risks") if isinstance(va_in.get("model_specific_risks"), list) else []:
@@ -653,12 +684,16 @@ def build_card(item: dict, receipts: list[dict], areqs: list[dict], enrichment: 
         "status": {"current": current, "timeline": timeline},
         "activity_trail": _trail(item, receipts, areqs), "unknowns": [],
     }
+    tags = _category_tags(enr)
+    card["category_tags"] = tags
     if flags:
         card["item"]["flags"] = flags
     if why_prov:
         card["why_provenance"] = why_prov
     unk: list[str] = []
     _collect_unknowns("", {k: v for k, v in card.items() if k not in ("activity_trail", "status", "why", "unknowns", "why_provenance")}, unk)
+    if not tags:
+        unk.append("category_tags (no evidence-based tag; absence is not a 'no')")
     if dropped:
         unk.append(f"value_add_plan.model_specific_risks ({len(dropped)} lane claim(s) rejected: unsourced or elementary)")
     card["unknowns"] = sorted(set(unk))
@@ -799,6 +834,8 @@ def render_text(card: dict) -> str:
     lines += ["", f"VALUE-ADD PLAN: {_fmt(plan['plan'])}"] + [f"  ! {T(x['risk'])} [{x['basis']}{', ' + T(x['source'], 120) if x.get('source') else ''}]" for x in plan["model_specific_risks"]]
     se = card["seasonality"]
     lines += ["", f"SEASONALITY: {_fmt(se['note'])}" + (f" (demand now: {_fmt(se['demand_now'])}; hold likely: {_fmt(se['hold_likely'])})" if se['demand_now']['value'] != 'UNKNOWN' else "")]
+    if card.get("category_tags"):
+        lines += ["", "TAGS (inferred from the listing): " + "; ".join(f"{T(t['tag'])} (\"{T(t['evidence'][0]['quote'], 80)}\")" for t in card["category_tags"])]
     mode = lg["transport_mode"]["value"]
     lines += ["", "TRANSPORT: " + {"fits_truck": "Fits truck. No trailer required.", "requires_trailer": "Requires a trailer (not owned; borrowing is possible but MUST be confirmed with the lender before pickup)."}.get(mode, "UNKNOWN (not yet classified)")
               + f" Trip: {_fmt(lg['trip_miles_round_trip'])} mi round trip, {_fmt(lg['trip_hours'])} h, fuel {_fmt(lg['fuel_cost'], True)}, difficulty {_fmt(lg['difficulty'])}."]

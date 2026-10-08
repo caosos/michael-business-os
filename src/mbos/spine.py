@@ -662,7 +662,7 @@ def set_kill_switch(conn: sa.Connection, key: str, frozen: bool, *, reason: str,
 
 # ---------------------------------------------------------------- card enrichment (ADR-0011 interim convention)
 ENRICHMENT_BLOCKS = ("listing_activity", "seller", "economics", "value_add", "seasonality", "logistics", "make_model",
-                     "distance_miles", "why")
+                     "distance_miles", "why", "category_tags")
 
 
 def record_enrichment(conn: sa.Connection, item_id: str, block: str, data: Any, provenance_id: str, *,

@@ -246,7 +246,7 @@
         },
         "opportunity_class": {
           "$ref": "#/$defs/datum",
-          "description": "value: MICRO_FLIP | QUICK_TURN | STANDARD_FLIP | CAPITAL_INTENSIVE_FLIP (thresholds are data in operator_profile.v1.json)"
+          "description": "value: MICRO_FLIP | QUICK_TURN | STANDARD_FLIP | CAPITAL_INTENSIVE_FLIP | SERVICE_JOB | OTHER_OPPORTUNITY (thresholds are data in operator_profile.v1.json)"
         },
         "parts_out_floor": {
           "$ref": "#/$defs/datum",
@@ -550,6 +550,64 @@
         "pattern": "^prov_[0-9A-HJKMNP-TV-Z]{26}$"
       },
       "description": "Provenance of reasons supplied by a lane (a lane's reasons are shown only if they carry provenance)."
+    },
+    "category_tags": {
+      "type": "array",
+      "description": "ADR-0013. INFERENCE tags with quoted evidence and lane provenance; empty = none supported by evidence (not a 'no').",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "tag",
+          "basis",
+          "provenance_id",
+          "evidence"
+        ],
+        "properties": {
+          "tag": {
+            "enum": [
+              "mechanic_special",
+              "project",
+              "parts_donor",
+              "quick_turn",
+              "auction_candidate",
+              "contractor_opportunity",
+              "wanted_match"
+            ]
+          },
+          "basis": {
+            "const": "INFERENCE"
+          },
+          "provenance_id": {
+            "type": "string",
+            "pattern": "^prov_[0-9A-HJKMNP-TV-Z]{26}$"
+          },
+          "evidence": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 5,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "field",
+                "quote"
+              ],
+              "properties": {
+                "field": {
+                  "type": "string",
+                  "maxLength": 60
+                },
+                "quote": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "$defs": {

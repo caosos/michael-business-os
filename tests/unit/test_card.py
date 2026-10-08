@@ -439,3 +439,43 @@ def test_velocity_fields_are_unknown_not_invented_without_numbers(ledger_db):
     for k in ("cash_multiple", "capital_velocity", "opportunity_class"):
         assert c["economics"][k]["value"] == "UNKNOWN", k
     assert cardmod.validate_card(c) == []
+
+
+def test_category_tags_need_evidence_provenance_and_known_tag(ledger_db):
+    ids = seed_flow(ledger_db, act=False)
+    item, receipts, areqs = _inputs(ledger_db, ids["item_id"])
+    blk = {"tags": [
+        {"tag": "mechanic_special", "evidence": [{"field": "description", "quote": "won't start, needs carb work"}]},
+        {"tag": "parts_donor", "evidence": []},                                   # no evidence -> dropped
+        {"tag": "quick_turn", "evidence": [{"field": "price", "quote": ""}]},     # empty quote -> dropped
+        {"tag": "best_deal_ever", "evidence": [{"field": "t", "quote": "x"}]},   # unknown tag -> dropped
+        {"tag": "mechanic_special", "evidence": [{"field": "t", "quote": "dup"}]},  # duplicate -> dropped
+    ]}
+    c = cardmod.build_card(item, receipts, areqs, {"category_tags": blk, "_prov": {"category_tags": PROV}})
+    assert cardmod.validate_card(c) == []
+    assert [t["tag"] for t in c["category_tags"]] == ["mechanic_special"]
+    assert c["category_tags"][0]["basis"] == "INFERENCE" and c["category_tags"][0]["provenance_id"] == PROV
+    assert "TAGS (inferred" in cardmod.render_text(c)
+    # no provenance -> nothing shown, and absence is recorded as UNKNOWN rather than a "no"
+    c2 = cardmod.build_card(item, receipts, areqs, {"category_tags": blk})
+    assert c2["category_tags"] == [] and any(u.startswith("category_tags") for u in c2["unknowns"])
+
+
+def test_category_tags_cleaned_of_injection_markup(ledger_db):
+    ids = seed_flow(ledger_db, act=False)
+    item, receipts, areqs = _inputs(ledger_db, ids["item_id"])
+    q = "mechanic special \x1b[31m<script>alert(1)</script>"
+    c = cardmod.build_card(item, receipts, areqs, {"category_tags": [{"tag": "mechanic_special", "evidence": [{"field": "d", "quote": q}]}],
+                                                    "_prov": {"category_tags": PROV}})
+    assert cardmod.validate_card(c) == []
+    assert "\x1b" not in c["category_tags"][0]["evidence"][0]["quote"]
+
+
+def test_service_item_is_a_service_job_not_a_flip_class(ledger_db):
+    ids = seed_flow(ledger_db, act=False)
+    item, receipts, areqs = _inputs(ledger_db, ids["item_id"])
+    item = dict(item, type="service")
+    c = cardmod.build_card(item, receipts, areqs)
+    assert c["economics"]["opportunity_class"]["value"] == "SERVICE_JOB"
+    assert c["economics"]["cash_multiple"]["value"] == "UNKNOWN"
+    assert cardmod.validate_card(c) == []
