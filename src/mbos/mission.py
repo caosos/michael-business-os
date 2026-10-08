@@ -88,6 +88,12 @@ def plan_errors(plan: dict[str, Any]) -> list[str]:
             errs.append(f"{l['item_id']}: expected_net must satisfy low <= likely <= high")
     if plan["recommendation"] == "DEPLOY" and not legs:
         errs.append("recommendation DEPLOY but there are no legs")
+    verdicts = [l.get("verdict") for l in legs if "verdict" in l]
+    if verdicts and plan["recommendation"] == "DEPLOY" and "YES" not in verdicts:
+        errs.append("recommendation DEPLOY but no leg has a YES verdict (nothing Michael can approve); use HOLD and list what each leg waits on")
+    for l in legs:
+        if l.get("verdict") in ("MAYBE", "UNKNOWN") and not l.get("waiting_on"):
+            errs.append(f"{l['item_id']}: verdict {l['verdict']} needs a non-empty waiting_on")
     if plan["recommendation"] in ("HOLD", "UNKNOWN") and spend > _EPS:
         errs.append(f"recommendation {plan['recommendation']} but legs commit cash; only DEPLOY may commit cash")
     mis = plan["mission"]

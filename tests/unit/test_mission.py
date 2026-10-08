@@ -127,3 +127,20 @@ def test_zero_projection_with_no_legs_is_honest_but_a_positive_one_is_not():
     assert mission.plan_errors(p) == []
     p["projected_week"] = {"low": 0.0, "likely": 5.0, "high": 9.0}; p["remaining_gap"] = 1495
     assert any("not supported" in e for e in mission.plan_errors(p))
+
+
+def test_f94_deploy_needs_a_yes_leg_and_undecided_legs_say_what_they_wait_on():
+    p = load("mission-plan.example.json")
+    for l in p["legs"]:
+        l["title"] = "A named job"
+        l["verdict"] = "MAYBE"
+        l["waiting_on"] = ["customer_screened"]
+    assert any("no leg has a YES" in e for e in mission.plan_errors(p))
+    p["recommendation"] = "HOLD"
+    p["legs"] = [dict(l, cash_at_risk=0) for l in p["legs"]]
+    assert mission.plan_errors(p) == []
+    p["legs"][0].pop("waiting_on")
+    assert any("needs a non-empty waiting_on" in e for e in mission.plan_errors(p))
+    q = load("mission-plan.example.json")
+    q["legs"][0].update(title="Replace sticking doorbell", verdict="YES")
+    assert mission.plan_errors(q) == []
