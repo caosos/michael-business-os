@@ -4,7 +4,7 @@ Agent: 04
 Role: Postgres / State / Receipts (lane D: durable business state, receipts, provenance; sole ledger owner per ADR-0010)
 Branch: research/agent-04-state
 Worktree: /home/michaelos/business-os-worktrees/agent-04-state
-State: CLOSED (D-24 done; handoff: docs/handoff/LANE_04.md)
+State: CLOSED (D-25 done; handoff: docs/handoff/LANE_04.md)
 Claimed: none
 Done: D-01 @ a0d1fbe
 Done: D-02 @ a0d1fbe
@@ -25,6 +25,7 @@ Done: D-16 @ 3a1b004
 Done: P-06-19 @ 0dbddaa (0018: UI role records human outcomes; see docs/receipts/2026-10-07-p06-19-human-outcome-ui.md)
 Done: D-23 @ 39581bd (0019: human-only capital/mission in DB; campaigns; see docs/receipts/2026-10-08-d23-campaigns-human-capital.md)
 Done: D-24 @ aa86cc6 (0020: human actor required on all five owner paths for every session incl. mbos_dbos; see docs/receipts/2026-10-08-d24-human-only-owner-paths.md)
+Done: D-25 @ cd52d6e (0021: owner_channel role, held only by mbos_operator_ui, gates the five owner paths; F-81 campaign validation; F-83 no resurrection; see docs/receipts/2026-10-08-d25-owner-channel.md)
 Blocked: D-09b (off-box destination + drill) on Michael: docs/state/OWNER_QUESTION_BACKUPS.md
 Blocked: D-10 (final acceptance) on A-01 phase 2. The DDL is delivered @ 6533334.
 Current phase: ROUND TWO: foreman loop (READY_QUEUE)
