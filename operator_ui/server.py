@@ -25,7 +25,7 @@ except ImportError:  # pragma: no cover
 
 from . import card_view, ux, views
 from .card_view import ec
-from .backend import FollowupRefused, ItemNotFound, NoteRefused, ProfileUnavailable
+from .backend import FollowupRefused, ItemNotFound, NoteRefused, NumbersRefused, ProfileUnavailable
 from .sources import load_health
 from .ux import InputError
 
@@ -92,7 +92,7 @@ def page(title, body, state, flash=None, error=False):
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>{ec(title)}</title><style>{CSS}</style></head>
 <body><div class="banner">DRY-RUN · nothing leaves this machine · system {e(state)}</div>
-<header><b>Operator UI</b><nav><a href="/">Queue</a><a href="/mission">Weekly mission</a><a href="/usage">Usage</a><a href="/intake">Intake</a><a href="/preview">Audience previews</a><a href="/digest">Morning digest</a><a href="/summary">Daily summary</a><a href="/notes">My notes</a><a href="/holds">HOLD backlog</a><a href="/outcomes">Outcomes</a><a href="/sources">Source health</a><a href="/ledger">Receipt ledger</a></nav></header>
+<header><b>Operator UI</b><nav><a href="/">Queue</a><a href="/mission">Weekly mission</a><a href="/numbers">My numbers</a><a href="/usage">Usage</a><a href="/intake">Intake</a><a href="/preview">Audience previews</a><a href="/digest">Morning digest</a><a href="/summary">Daily summary</a><a href="/notes">My notes</a><a href="/holds">HOLD backlog</a><a href="/outcomes">Outcomes</a><a href="/sources">Source health</a><a href="/ledger">Receipt ledger</a></nav></header>
 <main>{f}{body}</main></body></html>"""
 
 
@@ -529,6 +529,39 @@ class App:
         note_id = self.store.record_operator_note(bundle)
         return f"Note saved ({note_id}). It will show on this model's cards as your recommendation."
 
+    def _numbers_gate(self, f):
+        """CSRF + step-up PIN for any mission/capital change; the author is ALWAYS the server-set operator (R14)."""
+        self._check_csrf(f)
+        if not self.operator_pin:
+            raise InputError("step-up not configured (MBOS_OPERATOR_PIN unset); changes are refused (fail-closed)")
+        if not f.get("pin") or not secrets.compare_digest(str(f["pin"]), str(self.operator_pin)):
+            raise InputError("a PIN is required to change your numbers (it identifies you as the owner)")
+        nonce = f.get("nonce") or ""
+        if not (8 <= len(nonce) <= 64 and nonce.isalnum()):
+            raise InputError("invalid form token; reload the page")
+        return nonce
+
+    def set_mission(self, f):
+        """F-22: weekly target / hours / cash situation -> a receipted mission row. Blank = UNKNOWN."""
+        from . import numbers_view
+
+        nonce = self._numbers_gate(f)
+        mission = numbers_view.parse_mission(f, utcnow())
+        mid = self.store.set_mission(mission, self.author, "f22:mission:" + nonce)
+        return f"Saved ({mid}); each blank value is UNKNOWN."
+
+    def capital_move(self, f):
+        """F-22: fund / withdraw -> mbos.capital_fund / capital_withdraw (owner channel, dry-run ledger)."""
+        from . import numbers_view
+
+        nonce = self._numbers_gate(f)
+        kind = f.get("kind")
+        if kind not in ("fund", "withdraw"):
+            raise InputError("kind must be fund or withdraw")
+        amt = numbers_view.parse_amount(f.get("amount"), "Amount", cap=numbers_view.MAX_USD, required=True, positive=True)
+        rid = self.store.capital_move(kind, format(amt, "f"), self.author, f"f22:{kind}:{nonce}")
+        return f"{kind.title()} of ${amt:,.2f} recorded (receipt {rid})."
+
     def add_followup(self, item_id, f):
         """F-11: draft a follow-up / offer / quote as its OWN request via the public API (A-15). CSRF, human channel. It only
         proposes: the YES (and the PIN for binding actions) is Michael's separate decision."""
@@ -659,6 +692,8 @@ def make_handler(app):
                 loaded = mission_view.load_live(app.store, now, app.mission_file)
                 known = {l["item_id"] for l in (loaded["doc"] or {}).get("legs", []) if app.store.item(l["item_id"])} if loaded["kind"] == "plan" else set()
                 return self._send(200, page("Weekly mission", mission_view.render_page(loaded, known), app.state()))
+            if u.path == "/numbers":
+                return self._numbers_page(flash or err, bool(err))
             if u.path == "/usage":
                 from . import usage_view
 
@@ -744,6 +779,27 @@ def make_handler(app):
             notes = app.store.operator_notes(include_retracted=True)
             return self._send(200, page("My notes", render_notes(notes, app.store.lane, app.csrf, reasons), app.state(), flash, is_err))
 
+        def _numbers_page(self, flash=None, is_err=False, reasons=None, values=None):
+            from . import numbers_view
+
+            body = numbers_view.render_page(app.store.my_numbers(), app.csrf, bool(app.operator_pin), reasons, values)
+            return self._send(200, page("My numbers", body, app.state(), flash, is_err))
+
+        def _post_numbers(self, which):
+            """F-22: mission or capital change. CSRF + PIN; the author is server-set (R14)."""
+            n = min(int(self.headers.get("Content-Length") or 0), 65536)
+            f = {k: v[0] for k, v in parse_qs(self.rfile.read(n).decode("utf-8"), keep_blank_values=True).items()}
+            try:
+                msg = app.set_mission(f) if which == "mission" else app.capital_move(f)
+            except NumbersRefused as ex:
+                return self._numbers_page(reasons=ex.reasons, values={k: v for k, v in f.items() if k not in ("pin", "csrf")})
+            except InputError as ex:
+                return self._numbers_page(reasons=[str(ex)], values={k: v for k, v in f.items() if k not in ("pin", "csrf")})
+            self.send_response(303)
+            self.send_header("Location", f"/numbers?msg={quote(msg)}")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+
         def _post_note_change(self, note_id, action):
             """F-16: edit (new version) or retract. CSRF + PIN; the author is server-set (R14)."""
             n = min(int(self.headers.get("Content-Length") or 0), 65536)
@@ -822,6 +878,8 @@ def make_handler(app):
             parts = u.path.strip("/").split("/")
             if parts == ["intake", "start"] or (len(parts) == 3 and parts[0] == "intake" and parts[2] == "answer"):
                 return self._post_intake(parts)
+            if len(parts) == 2 and parts[0] == "numbers" and parts[1] in ("mission", "capital"):
+                return self._post_numbers(parts[1])
             if parts == ["preview", "check"]:
                 return self._post_preview_check()
             if len(parts) == 3 and parts[0] == "notes" and parts[2] in ("edit", "retract"):

@@ -71,6 +71,14 @@ def load_live(backend: Any, now: datetime, path: Optional[str] = None) -> dict:
             reason = f"live producer failed: {type(ex).__name__}"
     out = load_plan(path)
     out["source"] = f"file fallback ({reason})"
+    if out["kind"] == "none" and getattr(backend, "lane", None) == "lane_d":  # F-22: still show what Michael set
+        try:
+            n = backend.my_numbers()
+            if n.get("mission"):
+                return {"kind": "mission", "doc": n["mission"], "errors": [], "path": None, "ledger": n["ledger"],
+                        "source": f"lane D mission and ledger only ({reason})"}
+        except Exception:  # noqa: BLE001
+            pass
     return out
 
 
@@ -156,5 +164,7 @@ def render_page(loaded: dict, known_items: set[str]) -> str:
         return (head + "<div class='flash err'><b>This plan failed validation, so its numbers are not shown.</b><ul>"
                 + "".join(f"<li>{e(x)}</li>" for x in loaded["errors"][:12]) + "</ul></div>")
     if loaded["kind"] == "mission":
-        return head + render_mission_header(loaded["doc"]) + "<div class='card'><p class='unk'><b>No plan yet.</b> There is a mission but no plan built for it.</p></div>"
+        gap = ("<div class='card'><p class='unk'><b>No plan yet.</b> There is a mission but no plan built for it, so the remaining gap is "
+               "<b class='unk'>UNKNOWN</b>.</p></div>")
+        return head + render_mission_header(loaded["doc"]) + (render_ledger(loaded["ledger"]) if loaded.get("ledger") else "") + gap
     return head + render_plan(loaded["doc"], known_items)

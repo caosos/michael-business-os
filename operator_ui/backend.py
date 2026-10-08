@@ -50,6 +50,14 @@ class FollowupRefused(Exception):
         super().__init__("; ".join(self.reasons))
 
 
+class NumbersRefused(Exception):
+    """F-22: the store refused a mission or capital change; `reasons` are shown verbatim."""
+
+    def __init__(self, reasons):
+        super().__init__("; ".join(reasons))
+        self.reasons = reasons
+
+
 class ItemNotFound(Exception):
     """Unknown item id. Deliberately NOT a LookupError: a KeyError from the card builder must surface as a failure."""
 
@@ -224,6 +232,50 @@ class SpineBackend:
             return workflows.propose_followup(item_id, pa)
         except self._spine.DecisionRefused as ex:
             raise FollowupRefused([str(ex)]) from None
+
+    # ---- F-22: "My numbers" (mission + capital ledger). Lane D only; HUMAN CHANNEL ONLY (R14) ---------------------
+    def my_numbers(self) -> dict:
+        """{'mission': current mission doc or None, 'ledger': capital position document or None, 'impaired': bool}. Read-only."""
+        if self.lane != "lane_d":
+            return {"mission": None, "ledger": None, "available": False}
+        with self.engine.connect() as c:
+            m = c.execute(sa.text("SELECT doc FROM mbos.v_mission_current")).scalar()
+            l = c.execute(sa.text("SELECT mbos.capital_position_document('dry_run')")).scalar()
+        return {"mission": m, "ledger": l, "available": True}
+
+    def _owner_write(self, sql: str, params: dict, entered_by: str, basis_text: str) -> str:
+        """One transaction: a HUMAN provenance record, then the owner-channel function (which appends the receipt). The database
+        refuses any role but the approver; the code path (CSRF + PIN, server-set author) is the only caller (R14)."""
+        import json
+
+        from mbos.clock import iso, utcnow
+
+        if self.lane != "lane_d":
+            raise NumbersRefused(["My numbers needs the lane D store (MBOS_STATE_BACKEND=lane_d)"])
+        prov = {"actor_type": "human", "human_actor": entered_by, "basis": "FACT", "created_at": iso(utcnow()),
+                "tool_name": "operator_ui.my_numbers", "tool_version": "F-22",
+                "inputs_used": [{"ref": "owner:" + basis_text[:80]}]}
+        try:
+            with self.engine.begin() as c:
+                pid = c.execute(sa.text("SELECT mbos.record_provenance(CAST(:p AS jsonb))"), {"p": json.dumps(prov)}).scalar_one()
+                actor = json.dumps({"type": "human", "id": entered_by})
+                return c.execute(sa.text(sql), {**params, "a": actor, "p": [pid]}).scalar_one()
+        except sa.exc.DBAPIError as ex:
+            msg = str(getattr(ex, "orig", ex)).strip().splitlines()[0]
+            raise NumbersRefused([f"the store refused it: {msg}"]) from None
+
+    def set_mission(self, mission: dict, entered_by: str, key: str) -> str:
+        import json
+
+        return self._owner_write(
+            "SELECT mbos.set_mission(CAST(:m AS jsonb), CAST(:a AS jsonb), :i, :p, :k)",
+            {"m": json.dumps(mission), "i": "Michael set the weekly mission (My numbers)", "k": key}, entered_by, "mission")
+
+    def capital_move(self, kind: str, amount: str, entered_by: str, key: str) -> str:
+        fn = {"fund": "capital_fund", "withdraw": "capital_withdraw"}[kind]
+        return self._owner_write(
+            f"SELECT mbos.{fn}(CAST(:amt AS numeric), CAST(:a AS jsonb), :i, :p, :k)",
+            {"amt": amount, "i": f"Michael {kind} capital {amount} USD (My numbers, dry-run)", "k": key}, entered_by, kind)
 
     # ---- F-14: Michael's own model knowledge (operator notes). Lane D only; HUMAN CHANNEL ONLY (R14) -----------
     def operator_notes(self, include_retracted: bool = False) -> list[dict]:
