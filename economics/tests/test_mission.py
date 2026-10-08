@@ -109,7 +109,7 @@ class TestPlanWeek(unittest.TestCase):
     def test_null_target_gives_null_gap_and_unknown(self):
         p = plan_week(mission(None), ledger(500), ITEMS)
         self.check(p)
-        self.assertEqual(p["recommendation"], "UNKNOWN")
+        self.assertEqual(p["recommendation"], "DEPLOY")   # cash legs: only DEPLOY may commit cash (plan_errors)
         self.assertIsNone(p["remaining_gap"])
         self.assertEqual(p["confidence"], "UNKNOWN")
         self.assertIn("weekly_target_usd", p["unknowns"])

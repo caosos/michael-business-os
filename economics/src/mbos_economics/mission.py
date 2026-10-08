@@ -171,8 +171,10 @@ def plan_week(mission: dict, ledger: dict, scorecards: list[dict], *, planner: d
     spend = sum((c["cash"] for c in legs), ZERO)
     skipped_flips = [c for c in cands if c not in legs and c["lane"] == "flip" and c["cash"] > 0]
 
-    if target is None:
-        rec = "UNKNOWN"
+    if target is None and spend <= 0:
+        rec = "UNKNOWN"          # plan_errors: only DEPLOY may commit cash, so a cash-committing plan is DEPLOY
+    elif target is None:
+        rec = "DEPLOY"           # confidence stays UNKNOWN and the target is listed in unknowns
     elif not legs:
         rec = "HOLD"
     elif spend <= 0 and skipped_flips:
