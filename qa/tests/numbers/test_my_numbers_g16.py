@@ -1,5 +1,5 @@
 """G-16: adversarial QA of the F-22 "My numbers" page (owner channel). Assertions state the CORRECT behaviour; open findings
-(F-72..F-78) are strict xfails: remove the marker when the owner fixes it, never loosen the assertion."""
+(F-72..F-78) were strict xfails; all FIXED at G-17 (06 fdacf36, 04 aa86cc6), markers removed, assertions unchanged."""
 from __future__ import annotations
 
 import json
@@ -29,6 +29,7 @@ def reasons(body):
 
 @pytest.fixture(autouse=True)
 def _funded(ui, db):
+    ui.pin_gate.fails, ui.pin_gate.locked_until = 0, 0.0  # F-77 lockout is per process: isolate tests from each other
     if position(db[1])[0] == 0:
         assert post(ui, "/numbers/capital", kind="fund", amount="500")[0] == 303
 
@@ -103,7 +104,6 @@ def test_pin_unset_fails_closed(ui, db):
         ui.operator_pin = PIN
 
 
-@xf("F-73", "a non-ASCII csrf or pin raises TypeError in secrets.compare_digest: unhandled, connection dropped, no refusal page")
 @pytest.mark.parametrize("k", ["csrf", "pin"])
 def test_non_ascii_credentials_are_refused_cleanly(ui, db, k):
     s, body = refused(ui, db[1], "/numbers/capital", kind="fund", amount="1", **{k: "é"})
@@ -117,7 +117,6 @@ def test_replayed_request_writes_once(ui, db):
     assert position(db[1])[0] - p0 == 7
 
 
-@xf("F-72", "same nonce + different amount: only the first is recorded but the page says 'Fund of $900.00 recorded'")
 def test_replay_with_changed_amount_is_not_reported_as_success(ui, db):
     p0 = position(db[1])[0]
     post(ui, "/numbers/capital", kind="fund", amount="7", nonce="replay0002")
@@ -127,16 +126,22 @@ def test_replay_with_changed_amount_is_not_reported_as_success(ui, db):
     assert "900" not in loc, f"page claims $900 recorded; ledger moved by {recorded}"
 
 
+@pytest.mark.xfail(strict=False, reason="F-84 (race; XPASS = no thread lost this run): "
+                   + "REGRESSION from 06's F-72 fix: the 'already submitted' pre-check is not atomic, so losers of a concurrent double-submit get a raw "
+            "'duplicate key ... receipts_idempotency_key_key' refusal page (200) instead of the 303 a sequential replay gets; the ledger is still right")
 def test_parallel_double_submit_writes_once(ui, db):
-    p0, res = position(db[1])[0], []
-    th = [threading.Thread(target=lambda: res.append(post(ui, "/numbers/capital", kind="fund", amount="3", nonce="race000001")[0]))
-          for _ in range(8)]
+    p0, res, bar = position(db[1])[0], [], threading.Barrier(16)
+
+    def go():
+        bar.wait()
+        res.append(post(ui, "/numbers/capital", kind="fund", amount="3", nonce="race000001")[0])
+
+    th = [threading.Thread(target=go) for _ in range(16)]
     [t.start() for t in th]
     [t.join() for t in th]
     assert position(db[1])[0] - p0 == 3 and set(res) == {303}
 
 
-@xf("F-77", "no attempt limit or lockout on the step-up PIN: 40 wrong PINs, then the right one still works")
 def test_pin_guessing_is_throttled(ui, db):
     for i in range(40):
         post(ui, "/numbers/capital", kind="fund", amount="1", pin=f"{i:04d}" if f"{i:04d}" != PIN else "9999")
@@ -145,14 +150,12 @@ def test_pin_guessing_is_throttled(ui, db):
 
 
 # ---- input leniency / bounds ----------------------------------------------------------------------------------------
-@xf("F-75", "parse_amount accepts Unicode digits ('٣٠٠' = 300), '$$5' and '1,5,0,0' (= 1500) that are not 'a plain number'")
 @pytest.mark.parametrize("amt", ["٣٠٠", "９", "$$5", "1,5,0,0"])
 def test_amount_parser_is_strict(ui, db, amt):
     s, body = refused(ui, db[1], "/numbers/capital", kind="fund", amount=amt)
     assert "Not saved" in body
 
 
-@xf("F-76", "a single $10,000,000.00 fund is accepted with no confirmation and no cumulative bound (dry-run position becomes $10M)")
 def test_fund_beyond_sane_bounds_needs_more_than_one_post(ui, db):
     p0 = position(db[1])[0]
     post(ui, "/numbers/capital", kind="fund", amount="10000000")
@@ -181,7 +184,6 @@ def test_clearing_each_value_returns_it_to_unknown(ui, db):
     assert body.count("UNKNOWN") >= 3
 
 
-@xf("F-74", "an explicit 0 is pre-filled as '' (`value or ''`): re-saving the untouched form turns 0 into UNKNOWN")
 def test_zero_survives_a_resave_of_the_untouched_form(ui, db):
     post(ui, "/numbers/mission", weekly_target_usd="0", hours_available="0")
     body = req(ui, "GET", "/numbers")[2]
@@ -201,23 +203,32 @@ def test_form_actor_field_is_ignored_receipt_is_human(ui, db):
 
 AGENT_ROLES = ["mbos_reader", "mbos_state_mcp", "mbos_gateway", "mbos_policy", "mbos_relay", "mbos_dbos"]
 CALLS = ["SELECT mbos.set_mission(jsonb_build_object('mission_version','1.0.0','period',jsonb_build_object('start','2026-10-05','end','2026-10-11'),"
-         "'weekly_target_usd',1), CAST(:a AS jsonb), 'x', ARRAY['prov_x'], 'k-%s-m')",
-         "SELECT mbos.capital_fund(1000, CAST(:a AS jsonb), 'x', ARRAY['prov_x'], 'k-%s-f')",
-         "SELECT mbos.capital_withdraw(1, CAST(:a AS jsonb), 'x', ARRAY['prov_x'], 'k-%s-w')",
+         "'weekly_target_usd',1), CAST(:a AS jsonb), 'x', ARRAY[:pv], 'k-%s-m')",
+         "SELECT mbos.capital_fund(1000, CAST(:a AS jsonb), 'x', ARRAY[:pv], 'k-%s-f')",
+         "SELECT mbos.capital_withdraw(1, CAST(:a AS jsonb), 'x', ARRAY[:pv], 'k-%s-w')",
          "INSERT INTO mbos.mission (period_start, period_end, created_by, provenance_ids) VALUES (now(), now(), 'x', ARRAY['p'])",
          "INSERT INTO mbos.capital_ledger (kind, amount, mode, provenance_ids) VALUES ('fund', 1e6, 'dry_run', ARRAY['p'])"]
 
 
 @pytest.mark.parametrize("role", AGENT_ROLES)
 def test_every_non_owner_login_is_refused_by_the_database(db, role):
+    """G-17: a REAL provenance id is passed (the G-16 version used a nonexistent one, so every call failed on that and proved nothing).
+    mbos_dbos IS an approver (roles.sql: GRANT agent_write, approver, gateway), so with a claimed human actor it is allowed: that is F-80,
+    asserted in test_wanted_g17.py; here it is exercised only with the agent actor."""
+    from .test_wanted_g17 import real_prov
+
+    pv = real_prov(db[1])
     before = counts(db[1])
     eng = login(db[0], role)
     try:
         for i, sql in enumerate(CALLS):
             for actor in (ACTOR_H, ACTOR_A):  # even claiming to be the human
+                if role == "mbos_dbos" and actor == ACTOR_H and ":a" in sql:
+                    continue  # F-80
+                params = {"a": actor, "pv": pv} if ":a" in sql else {}
                 with pytest.raises(sa.exc.DBAPIError):
                     with eng.begin() as c:
-                        c.execute(sa.text(sql.replace("%s", f"{role}{i}")), {"a": actor})
+                        c.execute(sa.text(sql.replace("%s", f"{role}{i}")), params)
     finally:
         eng.dispose()
     assert counts(db[1]) == before
@@ -263,7 +274,6 @@ def test_ui_numbers_module_is_not_importable_by_agent_tool_surface(ui_src):
     assert not re.search(r"mcp|tool\(", (ui_src / "operator_ui/numbers_view.py").read_text(), re.I)
 
 
-@xf("F-78", "mbos.set_mission/capital_fund/withdraw take the actor as a free JSON argument: the approver login can record an AGENT actor, so 'agent actor refused' rests only on the UI code")
 def test_database_refuses_an_agent_actor_from_the_owner_login(db):
     eng = login(db[0], "mbos_operator_ui")
     try:

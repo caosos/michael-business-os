@@ -4,7 +4,7 @@
 
 ## Verdict: **READY**
 
-105 passed, 0 failed, 0 strict-xfail known gaps, 3 not applicable; 108 cases, 117s.
+105 passed, 0 failed, 0 strict-xfail known gaps, 3 not applicable; 108 cases, 104s.
 
 **Scope of this verdict.** READY means: for the DRY-RUN MVP stack above, every acceptance test in this suite passes, stably, and the safety invariants hold. It is not evidence about anything that does not exist in the stack: live sending or publishing (there is no live effector; the provider is a dry-run simulator), the LiteLLM-enforced LLM cap (A8 is tested against `LedgerLLMBudget`), real egress cut / credential revocation on PANIC, lane C's real scoring engine (the stack uses 01's placeholder scorer), real discovery sources, or the Operator UI. Card quality is judged separately in [CARD_ACCEPTANCE.md](CARD_ACCEPTANCE.md), which still has open items (it is a read-only view, not a safety invariant).
 

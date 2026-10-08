@@ -139,3 +139,8 @@ None new. (Round-one marketing questions remain parked until marketing go-live.)
 1. Wire `MBOS_QA_IMPL` to Agent 01's spine (`mbos.runtime` / `mbos.interfaces`) and re-run A1–A10 on real Postgres and DBOS.
 2. Re-run A2 (roles), A3 (anchors) and A5 against Agent 04's store, and A8/A9 against Agent 05's gateway and PANIC.
 3. Re-run `python -m mbos_qa interop` once F-13 and F-14 are ruled on.
+
+## G-17 (2026-10-08)
+Done: G-17 @ PENDING
+State: CLOSED
+Verdict: RC READY 105/0 (3 skipped); card 657/0. F-72..F-78 FIXED. New: F-80 (04, P1: mbos_dbos is approver, passes D-24 by claiming human), F-79/F-82/F-84 (06), F-81/F-83 (04). Receipt: docs/receipts/2026-10-08-G-17-owner-channel-wanted.md
