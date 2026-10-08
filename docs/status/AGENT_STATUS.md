@@ -159,3 +159,8 @@ Verdict: RC READY 105/0 (3 skipped) with 04 4a11f1b + 06 3090e51; card 671/0; ow
 Done: G-20 @ 68a1708
 State: CLOSED
 Verdict: Michael can NOT use it today. Jobs: 4 PASS (after F-88 workaround), 1/3/5/7 PARTIAL, 2/6 FAIL. New F-88 (P0: UI reads MBOS_APPROVER_DATABASE_URL, bootstrap writes MBOS_OWNER_DATABASE_URL -> set_mission/capital_fund denied), F-90 (P0: no item reaches a decision; no input for customer_screened/scope_verified), F-89/F-91/F-92/F-94 (P1), F-93/F-95..F-100 (P2), F-101 (P3). RC READY 105/0 (3 skipped); card 671/0. Receipt: docs/receipts/2026-10-08-G-20-operator-audit.md
+
+## G-21a (2026-10-08)
+Done: G-21a @ fb05429
+State: CLOSED
+Verdict: stages 1-2 PASS, stage 3-4 FAIL on the bootstrapped assembly. New F-106 (P0: TV blocked by `scope_override_required`, no UI for it; research ignores the fixture's inline economics, so A-41's green test is not reproducible via bootstrap_dev), F-110 (P1), F-107/F-108 (P1), F-102 (P1 audit conformance red), F-105/F-104/F-109 (P2), F-103 (P3). G-21b is blocked on F-106/F-110. RC READY 105/0 (3 skipped); card 671/0. Receipt: docs/receipts/2026-10-08-G-21a-mission-dryrun-stages-1-4.md
