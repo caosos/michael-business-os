@@ -1,0 +1,48 @@
+{
+  "inventory_version": "1.0.0",
+  "inventory_id": "inv_01J9Z00000000000000000M0WR",
+  "kind": "goods",
+  "title": "Riding mower, 42 in deck",
+  "category": "mower",
+  "facts": [
+    {
+      "id": "f1",
+      "key": "make_model",
+      "value": "Brand X 42T",
+      "basis": "seller_stated"
+    },
+    {
+      "id": "f2",
+      "key": "operating_status",
+      "value": "runs but smokes",
+      "basis": "seller_stated",
+      "material": true
+    },
+    {
+      "id": "f3",
+      "key": "hours",
+      "value": "unknown",
+      "basis": "UNKNOWN",
+      "material": false
+    }
+  ],
+  "defects": [
+    {
+      "id": "d1",
+      "text": "Engine smokes blue under load",
+      "basis": "seller_stated",
+      "severity": "material"
+    }
+  ],
+  "evidence": [
+    {
+      "kind": "photo",
+      "ref": "photo:mower-front"
+    }
+  ],
+  "terms": {
+    "price_usd": 400,
+    "price_type": "obo",
+    "pickup": "Buyer picks up"
+  }
+}

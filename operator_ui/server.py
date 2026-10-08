@@ -92,7 +92,7 @@ def page(title, body, state, flash=None, error=False):
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>{ec(title)}</title><style>{CSS}</style></head>
 <body><div class="banner">DRY-RUN · nothing leaves this machine · system {e(state)}</div>
-<header><b>Operator UI</b><nav><a href="/">Queue</a><a href="/mission">Weekly mission</a><a href="/digest">Morning digest</a><a href="/summary">Daily summary</a><a href="/notes">My notes</a><a href="/holds">HOLD backlog</a><a href="/outcomes">Outcomes</a><a href="/sources">Source health</a><a href="/ledger">Receipt ledger</a></nav></header>
+<header><b>Operator UI</b><nav><a href="/">Queue</a><a href="/mission">Weekly mission</a><a href="/preview">Audience previews</a><a href="/digest">Morning digest</a><a href="/summary">Daily summary</a><a href="/notes">My notes</a><a href="/holds">HOLD backlog</a><a href="/outcomes">Outcomes</a><a href="/sources">Source health</a><a href="/ledger">Receipt ledger</a></nav></header>
 <main>{f}{body}</main></body></html>"""
 
 
@@ -445,9 +445,10 @@ def render_provenance(p, pid):
 class App:
     """Turns form posts into `spine.decide` calls through the backend. No side effects of its own."""
 
-    def __init__(self, backend, operator_pin=None, health_file=None, mission_file=None):
+    def __init__(self, backend, operator_pin=None, health_file=None, mission_file=None, inventory_file=None):
         self.store = backend
         self.operator_pin = operator_pin
+        self.inventory_file = inventory_file  # inventory JSON to preview (MBOS_INVENTORY_FILE)
         self.mission_file = mission_file  # mission plan JSON (MBOS_MISSION_PLAN_FILE)
         self.health_file = health_file  # lane B health.json (else MBOS_SOURCE_HEALTH_FILE)
         self.csrf = secrets.token_urlsafe(32)
@@ -572,6 +573,24 @@ class App:
         rid = self.store.retract_operator_note(note_id, self.author, iso(utcnow()), reason[:300])
         return f"Note retracted ({rid}). It no longer shows on cards; the history keeps it."
 
+    def check_view(self, f):
+        """F-19: lint Michael's edited wording against the inventory. Read-only: it only LINTS and never publishes."""
+        from . import merch, merch_view
+
+        self._check_csrf(f)
+        loaded = merch_view.load_inventory(self.inventory_file)
+        if loaded["doc"] is None or loaded["errors"]:
+            raise InputError("; ".join(loaded["errors"]) or "no inventory")
+        inv, audience = loaded["doc"], f.get("audience")
+        if audience not in merch.AUDIENCES:
+            raise InputError(f"unknown audience {audience!r}")
+        keep = set(f.get("_disclose", []))  # ticked disclosure checkboxes; an unticked defect is DROPPED so the lint can refuse it
+        dropped = [d["id"] for d in inv["defects"] if d["id"] not in keep]
+        view = merch.build_view(inv, audience, headline=f.get("headline", ""), body=f.get("body", ""),
+                                call_to_action=f.get("call_to_action", ""), drop_disclosures=dropped)
+        return {"audience": audience, "headline": view["headline"], "body": view["body"], "call_to_action": view["call_to_action"],
+                "dropped": dropped, "reasons": merch.check_view(inv, view)}
+
     def wake(self, areq_id, f):
         self._check_csrf(f)
         areq = self.store.action_request(areq_id)
@@ -636,6 +655,10 @@ def make_handler(app):
                 loaded = mission_view.load_plan(app.mission_file)
                 known = {l["item_id"] for l in (loaded["doc"] or {}).get("legs", []) if app.store.item(l["item_id"])} if loaded["kind"] == "plan" else set()
                 return self._send(200, page("Weekly mission", mission_view.render_page(loaded, known), app.state()))
+            if u.path == "/preview":
+                from . import merch_view
+
+                return self._send(200, page("Audience previews", merch_view.render_page(merch_view.load_inventory(app.inventory_file), app.csrf), app.state()))
             if u.path == "/summary":
                 from . import summary as summary_view
 
@@ -667,6 +690,19 @@ def make_handler(app):
                     return self._send(404, "{}", "application/json")
                 return self._send(200, json.dumps({k: v for k, v in c.items() if k != "hold_presets"}, default=str), "application/json")
             return self._send(404, page("Not found", "<p>Not found.</p>", app.state()))
+
+        def _post_preview_check(self):
+            from . import merch_view
+
+            n = min(int(self.headers.get("Content-Length") or 0), 65536)
+            raw = parse_qs(self.rfile.read(n).decode("utf-8"), keep_blank_values=True)
+            f = {k: v[0] for k, v in raw.items()}
+            f["_disclose"] = raw.get("disclose", [])  # a checkbox group: every ticked defect id
+            try:
+                result = app.check_view(f)
+            except InputError as ex:
+                return self._send(200, page("Audience previews", f"<div class='flash err'>{e(ex)}</div>", app.state()))
+            return self._send(200, page("Audience previews", merch_view.render_page(merch_view.load_inventory(app.inventory_file), app.csrf, result), app.state()))
 
         def _notes_page(self, flash=None, is_err=False, reasons=None):
             notes = app.store.operator_notes(include_retracted=True)
@@ -748,6 +784,8 @@ def make_handler(app):
                 return
             u = urlparse(self.path)
             parts = u.path.strip("/").split("/")
+            if parts == ["preview", "check"]:
+                return self._post_preview_check()
             if len(parts) == 3 and parts[0] == "notes" and parts[2] in ("edit", "retract"):
                 return self._post_note_change(parts[1], parts[2])
             if len(parts) == 3 and parts[0] == "item" and parts[2] == "note":

@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://michael-business-os/contracts/merchandising.schema.json",
+  "title": "Merchandising View v1 \u2014 a truthful audience presentation of one inventory object",
+  "description": "ADDITIVE contract (ADR-0013). A view may change headline, body, fact order, emphasis and call to action. It must carry the SAME defects, basis, terms and provenance; `mbos.merchandising.lint(inventory, view)` rejects any view that does not. Views are drafts: publishing is a separate gated ActionRequest (dry-run).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "view_version",
+    "inventory_id",
+    "inventory_hash",
+    "audience",
+    "headline",
+    "body",
+    "facts",
+    "disclosures",
+    "terms",
+    "call_to_action"
+  ],
+  "properties": {
+    "view_version": {
+      "const": "1.0.0"
+    },
+    "inventory_id": {
+      "type": "string",
+      "pattern": "^inv_[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "inventory_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "description": "MBOS-CJSON-1 sha256 of the inventory object this view was made from"
+    },
+    "audience": {
+      "enum": [
+        "ordinary_classified",
+        "mechanic",
+        "flipper",
+        "diy_project",
+        "collector",
+        "homeowner",
+        "contractor",
+        "parts_buyer",
+        "bargain_hunter",
+        "commercial",
+        "auction"
+      ]
+    },
+    "label": {
+      "enum": [
+        "Mechanic Special",
+        "Project / Fix & Flip",
+        "Ready to Work",
+        "Parts / Donor",
+        "Quick Turn",
+        "Auction",
+        "Wanted Match",
+        "Contractor Opportunity",
+        "Classified"
+      ]
+    },
+    "headline": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "body": {
+      "type": "string",
+      "maxLength": 4000
+    },
+    "facts": {
+      "type": "array",
+      "description": "Ordered facts shown; order and emphasis are free, content is not.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "fact_id",
+          "basis"
+        ],
+        "properties": {
+          "fact_id": {
+            "type": "string"
+          },
+          "basis": {
+            "enum": [
+              "seller_stated",
+              "system_inferred",
+              "verified",
+              "UNKNOWN"
+            ]
+          },
+          "provenance_id": {
+            "type": "string",
+            "pattern": "^prov_[0-9A-HJKMNP-TV-Z]{26}$"
+          },
+          "emphasis": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "disclosures": {
+      "type": "array",
+      "description": "EVERY known defect, verbatim.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "defect_id",
+          "text"
+        ],
+        "properties": {
+          "defect_id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "terms": {
+      "type": "object",
+      "description": "Must equal inventory.terms exactly."
+    },
+    "call_to_action": {
+      "type": "string",
+      "maxLength": 200
+    }
+  }
+}

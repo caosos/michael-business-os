@@ -1,0 +1,185 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://michael-business-os/contracts/inventory.schema.json",
+  "title": "Canonical Inventory v1 \u2014 one truth per item or job",
+  "description": "ADDITIVE contract (ADR-0013). The single canonical description of something offered. Every fact carries a basis (seller_stated | system_inferred | verified | UNKNOWN); `verified` requires provenance. Audience views (merchandising.schema.json) are projections that must preserve this truth (mbos.merchandising.lint).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "inventory_version",
+    "inventory_id",
+    "kind",
+    "title",
+    "category",
+    "facts",
+    "defects",
+    "evidence",
+    "terms"
+  ],
+  "properties": {
+    "inventory_version": {
+      "const": "1.0.0"
+    },
+    "inventory_id": {
+      "type": "string",
+      "pattern": "^inv_[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "kind": {
+      "enum": [
+        "goods",
+        "service_job"
+      ]
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "category": {
+      "type": "string",
+      "minLength": 1
+    },
+    "facts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "key",
+          "value",
+          "basis"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^f[0-9]+$"
+          },
+          "key": {
+            "type": "string",
+            "minLength": 1
+          },
+          "value": {},
+          "basis": {
+            "enum": [
+              "seller_stated",
+              "system_inferred",
+              "verified",
+              "UNKNOWN"
+            ]
+          },
+          "material": {
+            "type": "boolean"
+          },
+          "provenance_id": {
+            "type": "string",
+            "pattern": "^prov_[0-9A-HJKMNP-TV-Z]{26}$"
+          }
+        }
+      }
+    },
+    "defects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "text",
+          "basis",
+          "severity"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^d[0-9]+$"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "basis": {
+            "enum": [
+              "seller_stated",
+              "system_inferred",
+              "verified",
+              "UNKNOWN"
+            ]
+          },
+          "severity": {
+            "enum": [
+              "minor",
+              "material"
+            ]
+          },
+          "provenance_id": {
+            "type": "string",
+            "pattern": "^prov_[0-9A-HJKMNP-TV-Z]{26}$"
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "ref"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "photo",
+              "document",
+              "serial",
+              "title",
+              "video",
+              "inspection",
+              "other"
+            ]
+          },
+          "ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "provenance_id": {
+            "type": "string",
+            "pattern": "^prov_[0-9A-HJKMNP-TV-Z]{26}$"
+          }
+        }
+      }
+    },
+    "terms": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "price_usd",
+        "price_type"
+      ],
+      "properties": {
+        "price_usd": {
+          "type": "number",
+          "minimum": 0
+        },
+        "price_type": {
+          "enum": [
+            "fixed",
+            "obo",
+            "auction_start",
+            "reserve",
+            "free"
+          ]
+        },
+        "pickup": {
+          "type": "string"
+        },
+        "delivery": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
