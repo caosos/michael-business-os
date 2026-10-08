@@ -295,5 +295,5 @@ Done: C-24 @ 6b8d9d4 (caps 1500/800 -> 500/500, available_to_deploy honoured, co
 Done: C-26 @ 3d0fd86 (consumer_electronics/small_goods priors via other_asset vocabulary, listing facts kept, true gap text; 377 passed, 22 skipped). State: CLOSED
 
 ## C-27
-Done: C-27 @ PENDING (part b: human scope overrides read from Item.research `scope_override:*` into the estimator as human-attested overrides; 381 passed, 22 skipped). State: CLOSED
+Done: C-27 @ f63011e (part b: human scope overrides read from Item.research `scope_override:*` into the estimator as human-attested overrides; 381 passed, 22 skipped). State: CLOSED
 Partial: part (a) service quote input not built (needs where the quote lands + MICHAEL_DECISIONS #6). Proposed for 01/04: a `record_scope_override` spine helper writing the research entry shape in the receipt; then 06 adds the form.
