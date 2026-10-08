@@ -112,29 +112,53 @@ def render_ledger(l: dict) -> str:
             "that has already come back.</p></div>")
 
 
-def render_legs(legs: list[dict], known_items: set[str]) -> str:
+def leg_title(l: dict, titles: Optional[dict] = None) -> str:
+    """F-94: the job's plain name (plan `title`, else the store's title for the item), never a bare id unless nothing else is known."""
+    return l.get("title") or (titles or {}).get(l.get("item_id")) or l.get("item_id") or "(unnamed)"
+
+
+def render_legs(legs: list[dict], known_items: set[str], titles: Optional[dict] = None) -> str:
     rows = []
     for l in legs:
         n = l["expected_net"]
         link = (f"<a href='/item/{e(l['item_id'])}'>open the card</a>" if l["item_id"] in known_items else
                 f"<a href='/item/{e(l['item_id'])}'>card</a> <b class='bad'>(not in this store: unverified)</b>")
+        wait = l.get("waiting_on") or []
+        waits = ("<ul>" + "".join(f"<li>{e(w)}</li>" for w in wait) + "</ul>") if wait else (
+            "<span class='ok'>ready for your decision</span>" if l.get("verdict") == "YES" else "<span class='mut'>not stated</span>")
         rows.append(
-            f"<tr><td>{e(l['opportunity_class'])}</td><td class='num'>{money(l['cash_at_risk'])}</td>"
+            f"<tr><td><b>{e(leg_title(l, titles))}</b><br><span class='small mut'>{e(l['opportunity_class'])}</span></td>"
+            f"<td>{e(l.get('verdict') or 'UNKNOWN')}</td><td>{waits}</td><td class='num'>{money(l['cash_at_risk'])}</td>"
             f"<td class='num'>{money(n['low'])} / <b>{money(n['likely'])}</b> / {money(n['high'])}</td>"
             f"<td class='num'>{_num(l['days_to_cash'], ' d')}</td><td class='num'>{_num(l['success_probability'])}</td>"
             f"<td class='num'>{_num(l['hours'], ' h')}</td><td>{e(l.get('why'))}</td><td>{link}</td></tr>")
-    body = ("<div style='overflow-x:auto'><table><tr><th>Class</th><th>Cash at risk</th><th>Expected net (low / likely / high)</th>"
+    body = ("<div style='overflow-x:auto'><table><tr><th>Job</th><th>System says</th><th>Waiting on</th><th>Cash at risk</th><th>Expected net (low / likely / high)</th>"
             "<th>Days to cash</th><th>Chance</th><th>Hours</th><th>Why</th><th>Card</th></tr>" + "".join(rows) + "</table></div>") if rows else "<p class='mut'>No legs.</p>"
     return f"<div class='card'><h2>Best next opportunities ({len(legs)})</h2>{body}<p class='small mut'>Plan order, not sorted by profit (ADR-0012).</p></div>"
 
 
-def render_plan(doc: dict, known_items: set[str]) -> str:
+def decidable(doc: dict) -> list[dict]:
+    """Legs Michael can decide today: the system's own verdict is YES. Nothing else can be deployed (F-94)."""
+    return [l for l in doc.get("legs") or [] if l.get("verdict") == "YES"]
+
+
+def render_plan(doc: dict, known_items: set[str], titles: Optional[dict] = None) -> str:
     rec = doc["recommendation"]
-    if rec == "DO_NOT_SPEND":
+    legs = doc.get("legs") or []
+    if rec == "DEPLOY" and legs and not decidable(doc) and any("verdict" in l for l in legs):
+        rec = "HOLD"  # defensive: never say DEPLOY when no leg can be approved
+    if rec == "HOLD":
+        n = len([l for l in legs if l.get("verdict") != "YES"])
+        banner = ("<div class='card'><h2>Recommendation</h2><p style='font-size:22px;margin:4px 0'><b>HOLD.</b> Nothing is ready to approve"
+                  f"{'; ' + str(n) + ' job' + ('' if n == 1 else 's') + ' still need' + ('s' if n == 1 else '') + ' something from you or the system (see Waiting on below)' if n else ''}. "
+                  "No cash is committed.</p></div>")
+    elif rec == "DO_NOT_SPEND":
         banner = ("<div class='flash err' style='font-size:20px'><b>DO NOT SPEND.</b> The plan recommends committing no cash this week. "
                   "Service or other low-cash work is the better route to the target.</div>")
     elif rec == "DEPLOY":
-        banner = "<div class='card'><h2>Recommendation</h2><p style='font-size:22px;margin:4px 0'><b>DEPLOY</b> capital to the legs below. Each still needs your own YES.</p></div>"
+        k = len(decidable(doc)) if any("verdict" in l for l in legs) else len(legs)
+        banner = (f"<div class='card'><h2>Recommendation</h2><p style='font-size:22px;margin:4px 0'><b>DEPLOY</b> capital to the {k} job{'' if k == 1 else 's'} marked "
+                  "YES below. Each still needs your own YES.</p></div>")
     else:
         banner = f"<div class='card'><h2>Recommendation</h2><p style='font-size:22px;margin:4px 0'><b>{e(rec)}</b></p></div>"
     pw = doc["projected_week"]
@@ -149,12 +173,12 @@ def render_plan(doc: dict, known_items: set[str]) -> str:
             f"<p>{e(doc.get('explanation'))}</p></div>")
     stale = doc.get("replace_if_stale") or []
     unknowns = doc.get("unknowns") or []
-    extra = ((f"<div class='card'><h2>Replace if stale</h2><ul>{''.join(f'<li><a href=/item/{e(i)}><code>{e(i)}</code></a></li>' for i in stale)}</ul></div>" if stale else "")
+    extra = ((f"<div class='card'><h2>Replace if stale</h2><ul>{''.join(f'<li><a href=/item/{e(i)}>{e((titles or {}).get(i) or i)}</a></li>' for i in stale)}</ul></div>" if stale else "")
              + (f"<div class='card'><h2>UNKNOWN ({len(unknowns)})</h2><ul>{''.join(f'<li>{e(u)}</li>' for u in unknowns)}</ul></div>" if unknowns else ""))
-    return (banner + render_mission_header(doc["mission"]) + proj + render_ledger(doc["ledger"]) + render_legs(doc["legs"], known_items) + extra)
+    return (banner + render_mission_header(doc["mission"]) + proj + render_ledger(doc["ledger"]) + render_legs(doc["legs"], known_items, titles) + extra)
 
 
-def render_page(loaded: dict, known_items: set[str]) -> str:
+def render_page(loaded: dict, known_items: set[str], titles: Optional[dict] = None) -> str:
     src = f" Source: {e(loaded['source'])}." if loaded.get("source") else ""
     head = ("<div class='card'><h2>Weekly mission</h2><p class='small mut'>Read-only. Built from live Items on lane D, else from a mission plan "
             f"file; nothing here spends, contacts or commits.{src}</p></div>")
@@ -167,4 +191,36 @@ def render_page(loaded: dict, known_items: set[str]) -> str:
         gap = ("<div class='card'><p class='unk'><b>No plan yet.</b> There is a mission but no plan built for it, so the remaining gap is "
                "<b class='unk'>UNKNOWN</b>.</p></div>")
         return head + render_mission_header(loaded["doc"]) + (render_ledger(loaded["ledger"]) if loaded.get("ledger") else "") + gap
-    return head + render_plan(loaded["doc"], known_items)
+    return head + render_plan(loaded["doc"], known_items, titles)
+
+
+def today_header(loaded: dict, titles: Optional[dict] = None) -> str:
+    """F-98: three lines at the top of Today: the gap to the weekly target, cash available to deploy, and the best next move. Every
+    figure comes from the plan or ledger; a missing one says UNKNOWN and what to do about it. Never invents a number."""
+    doc, kind = loaded.get("doc"), loaded.get("kind")
+    ledger = (doc or {}).get("ledger") if kind == "plan" else loaded.get("ledger")
+    gap = (doc or {}).get("remaining_gap") if kind == "plan" else None
+    if kind == "plan" and gap is None:
+        gap_html = "<b class='unk'>UNKNOWN</b> <span class='small mut'>set your weekly target on <a href='/numbers'>My numbers</a></span>"
+    elif kind == "plan":
+        gap_html = f"<b>{money(gap)}</b> <span class='small mut'>still to earn this week</span>"
+    else:
+        gap_html = "<b class='unk'>UNKNOWN</b> <span class='small mut'>no plan yet; see <a href='/mission'>Weekly mission</a></span>"
+    avail = (ledger or {}).get("available_to_deploy")
+    avail_html = (f"<b>{money(avail)}</b> <span class='small mut'>available to deploy</span>" if avail is not None else
+                  "<b class='unk'>UNKNOWN</b> <span class='small mut'>fund your bankroll on <a href='/numbers'>My numbers</a></span>")
+    legs = (doc or {}).get("legs") or [] if kind == "plan" else []
+    yes = [l for l in legs if l.get("verdict") == "YES"]
+    wait = [l for l in legs if l.get("verdict") != "YES" and l.get("waiting_on")]
+    link = lambda l: f"<a href='/item/{e(l['item_id'])}'>{e(leg_title(l, titles))}</a>"  # noqa: E731
+    if yes:
+        move = f"Decide: {link(yes[0])} is ready for your YES or NO."
+    elif wait:
+        move = f"Give the system what it is waiting for on {link(wait[0])}: {e(wait[0]['waiting_on'][0])}."
+    elif kind == "plan":
+        move = "Nothing to approve yet. Nothing is being committed."
+    else:
+        move = "<span class='unk'>UNKNOWN</span> <span class='small mut'>no plan to pick a move from</span>"
+    return ("<div class='card'><div><span class='small mut'>Gap to target</span> " + gap_html + "</div>"
+            "<div><span class='small mut'>Cash</span> " + avail_html + "</div>"
+            "<div><span class='small mut'>Best next move</span> " + move + "</div></div>")

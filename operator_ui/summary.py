@@ -49,7 +49,7 @@ def build_summary(store: Any, as_of: datetime, *, top_n: int = 10, health_file: 
     d = dv["digest"]
     digest = {"error": dv["error"],
               "rows": [{k: r[k] for k in ("rank", "bucket", "lane", "category", "title", "action", "reason", "window",
-                                          "value_per_hour", "item_id")} | {"provenance_id": r["refs"]["provenance_id"]}
+                                          "value_per_hour", "rank_score", "ev_decision", "ev_profit_per_hour", "item_id")} | {"provenance_id": r["refs"]["provenance_id"]}
                        for r in (d["rows"] if d else [])],
               "counts": d["counts"] if d else {}, "digest_hash": d["digest_hash"] if d else None,
               "not_ranked": len(dv["precheck_excluded"]) + (len(d["excluded"]) if d else 0)}
@@ -110,6 +110,14 @@ def md(text: Any) -> str:
     return _MD_SPECIAL.sub(r"\\\1", s)
 
 
+def _fig(r: dict) -> dict:
+    """F-95: one figure per concept: the rank score is a plain number (never $), expected profit is dollars."""
+    from .digest import dollars, figures
+
+    g = figures(r)
+    return {"priority": dollars(g["priority"], ""), "ev": dollars(g["ev"])}
+
+
 def _money(v: Any) -> str:
     return "—" if not isinstance(v, (int, float)) else f"${v:,.0f}"
 
@@ -124,9 +132,9 @@ def render_markdown(s: dict) -> str:
     elif not d["rows"]:
         L += ["Nothing open to rank.", ""]
     else:
-        L += ["| # | Bucket | Lane | Opportunity | Next step | Window | Value $/h |", "|---|---|---|---|---|---|---|"]
+        L += ["| # | Bucket | Lane | Opportunity | Next step | Window | Priority score | Expected profit |", "|---|---|---|---|---|---|---|---|"]
         L += [f"| {r['rank']} | {md(r['bucket'])} | {md(r['lane'])} | {md(r['title'])} | {md(r['action'])} | "
-              f"{md(r['window'])} | {_money(r['value_per_hour'])} |" for r in d["rows"]]
+              f"{md(r['window'])} | {_fig(r)['priority']} | {_fig(r)['ev']} |" for r in d["rows"]]
         L += ["", f"Lane C digest hash `{d['digest_hash']}`; {d['not_ranked']} item(s) not ranked (see the UI).", ""]
     over = [h for h in s["holds"] if h["overdue"]]
     L += [f"## HOLD backlog ({len(s['holds'])}, {len(over)} overdue)", ""]
@@ -167,10 +175,10 @@ def render_html_body(s: dict) -> str:
         parts.append(f"<p class='bad'>Digest unavailable: {e(d['error'])}</p>")
     else:
         rows = "".join(f"<tr><td>{e(r['rank'])}</td><td>{e(r['bucket'])}</td><td>{e(r['lane'])}</td><td>{ec(r['title'])}</td>"
-                       f"<td>{e(r['action'])}</td><td>{e(r['window'])}</td><td>{e(_money(r['value_per_hour']))}</td></tr>"
+                       f"<td>{e(r['action'])}</td><td>{e(r['window'])}</td><td>{e(_fig(r)['priority'])}</td><td>{e(_fig(r)['ev'])}</td></tr>"
                        for r in d["rows"])
         parts.append("<table><tr><th>#</th><th>Bucket</th><th>Lane</th><th>Opportunity</th><th>Next step</th><th>Window</th>"
-                     f"<th>Value $/h</th></tr>{rows or '<tr><td colspan=7>Nothing open to rank.</td></tr>'}</table>")
+                     f"<th title='Lane C rank score: orders the list; not dollars'>Priority score</th><th>Expected profit</th></tr>{rows or '<tr><td colspan=8>Nothing open to rank.</td></tr>'}</table>")
     over = sum(h["overdue"] for h in s["holds"])
     rows = "".join(f"<tr><td>{ec(h['title'])}</td><td>{e(h['capability'])}</td><td>{e(h['hold_until'])}</td>"
                    f"<td class='{'bad' if h['overdue'] else ''}'>{'OVERDUE' if h['overdue'] else 'waiting'}</td><td>{e(h['reason'])}</td></tr>"

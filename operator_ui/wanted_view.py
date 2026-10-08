@@ -114,8 +114,9 @@ def _words(raw: str, label: str) -> list[str]:
     return ws
 
 
-def parse_campaign(f: dict, owner: str, reasons: dict) -> dict:
-    """Form -> a campaign document. A level above RECOMMEND is refused here with the policy reason (nothing is built)."""
+def parse_campaign(f: dict, owner: str, reasons: dict, existing: Optional[dict] = None) -> dict:
+    """Form -> a campaign document. A level above RECOMMEND is refused here with the policy reason (nothing is built).
+    F-97: with `existing` (an edit) the id, owner, status and stop conditions are kept and only the criteria and level change."""
     from . import numbers_view
 
     level = f.get("level") or "RECOMMEND"
@@ -134,13 +135,15 @@ def parse_campaign(f: dict, owner: str, reasons: dict) -> dict:
     origin = (f.get("origin") or "").strip() or None
     if origin and len(origin) > 80:
         raise InputError("Origin is limited to 80 characters")
-    return {"campaign_version": "1.0.0", "campaign_id": new_id(), "owner": owner, "title": title,
+    keep = existing or {}
+    return {"campaign_version": "1.0.0", "campaign_id": keep.get("campaign_id") or new_id(), "owner": keep.get("owner") or owner, "title": title,
             "criteria": {"category": cat, "keywords": _words(f.get("keywords"), "Keywords"), "max_price_usd": float(price),
                          "radius_miles": None if radius is None else float(radius), "origin": origin,
                          "must_have": _words(f.get("must_have"), "Must have"), "nice_to_have": _words(f.get("nice_to_have"), "Nice to have"),
                          "cosmetics_matter": f.get("cosmetics_matter") == "on"},
-            "autonomy": {"level": level}, "stop_conditions": {"fulfilled_by": None, "expires_at": None, "max_matches": None},
-            "status": "ACTIVE"}
+            "autonomy": {"level": level},
+            "stop_conditions": keep.get("stop_conditions") or {"fulfilled_by": None, "expires_at": None, "max_matches": None},
+            "status": keep.get("status") or "ACTIVE"}
 
 
 # ---------------------------------------------------------------- matches
@@ -201,11 +204,28 @@ def render_page(records: list[dict], items: list[dict], now, csrf: str, pin_set:
         ctl = (btn("pause", "Pause") if active else btn("resume", "Resume") if d["status"] == "PAUSED" else "") + \
               (btn("cancel", "Cancel") if d["status"] in ("ACTIVE", "PAUSED") else "")
         spec = (f"{e(c['category'])} · max ${c['max_price_usd']:g}" + (f" · {c['radius_miles']:g} mi" if c.get("radius_miles") is not None else "") +
-                (f" · keywords {e(', '.join(c['keywords']))}" if c.get("keywords") else "") + f" · cosmetics {'matter' if c.get('cosmetics_matter') else 'ignored'}")
+                (f" · keywords {e(', '.join(c['keywords']))}" if c.get("keywords") else "") +
+                f"<br>must have: {e(', '.join(c.get('must_have') or []) or 'none')} · nice to have: {e(', '.join(c.get('nice_to_have') or []) or 'none')}" +
+                f" · cosmetics {'matter' if c.get('cosmetics_matter') else 'ignored'}")
+        edit = ""
+        if d["status"] in ("ACTIVE", "PAUSED"):  # F-97: an edit is a new revision of the same campaign; status and stop conditions are kept
+            ev = lambda k: e(", ".join(c.get(k) or []))  # noqa: E731
+            lvl = "".join(f"<option value='{l}'{' selected' if d['autonomy']['level'] == l else ''}{'' if l in RUNNABLE else ' disabled'}>{l}</option>" for l in LEVELS)
+            edit = (f"<details><summary>Edit</summary><form method='post' action='/wanted/{e(d['campaign_id'])}/edit'>{tok()}"
+                    f"<label>Title <input name='title' size='50' maxlength='{MAX_TITLE}' value='{e(d['title'])}' required></label><br>"
+                    f"<label>Category <input name='category' size='12' value='{e(c['category'])}' required></label> "
+                    f"<label>Keywords <input name='keywords' size='24' value='{ev('keywords')}'></label> "
+                    f"<label>Max price (USD) <input name='max_price_usd' size='8' inputmode='decimal' value='{e(c['max_price_usd'])}' required></label> "
+                    f"<label>Radius (miles) <input name='radius_miles' size='6' inputmode='decimal' value='{e('' if c.get('radius_miles') is None else c['radius_miles'])}'></label><br>"
+                    f"<label>Must have <input name='must_have' size='24' value='{ev('must_have')}'></label> "
+                    f"<label>Nice to have <input name='nice_to_have' size='24' value='{ev('nice_to_have')}'></label> "
+                    f"<label><input type='checkbox' name='cosmetics_matter'{' checked' if c.get('cosmetics_matter') else ''}> cosmetics matter</label><br>"
+                    f"<input type='hidden' name='origin' value='{e(c.get('origin') or '')}'>"
+                    f"<label>Autonomy <select name='level'>{lvl}</select></label> {pin} <button>Save changes</button></form></details>")
         last = hist[-1] if hist else {}
         return (f"<div class='card'><div class='row'><b class='grow'>{e(d['title'])}</b><span class='badge'>{e(d['status'])}</span>"
                      f"<span class='badge'>{e(d['autonomy']['level'])}</span></div><p class='small mut'>{spec}<br>"
-                     f"last change: {e(last.get('what'))} by {e(last.get('by'))} at {e(last.get('at'))}</p>{body}{ctl}</div>")
+                     f"last change: {e(last.get('what'))} by {e(last.get('by'))} at {e(last.get('at'))}</p>{body}{ctl}{edit}</div>")
 
     for r in records:  # F-82: one malformed stored campaign is one error row, never a broken page
         try:

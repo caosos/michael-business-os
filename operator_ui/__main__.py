@@ -35,13 +35,26 @@ def main(argv=None):
     return 0
 
 
+def owner_dsn(env=None):
+    """F-88: (dsn, warning). `MBOS_OWNER_DATABASE_URL` is the one canonical name (what `var/owner.env` exports). The old
+    `MBOS_APPROVER_DATABASE_URL` is still accepted, with a warning. (None, None) = neither is set."""
+    env = os.environ if env is None else env
+    if env.get("MBOS_OWNER_DATABASE_URL"):
+        return env["MBOS_OWNER_DATABASE_URL"], None
+    if env.get("MBOS_APPROVER_DATABASE_URL"):
+        return env["MBOS_APPROVER_DATABASE_URL"], ("MBOS_APPROVER_DATABASE_URL is deprecated; use MBOS_OWNER_DATABASE_URL "
+                                                   "(the name var/owner.env exports)")
+    return None, None
+
+
 def ui_engine():
-    """R14: MBOS_APPROVER_DATABASE_URL = a DSN for lane D's `mbos_operator_ui` login (member of `approver` only). Unset =
-    the shared app engine (`mbos_dbos`, which also holds agent_write + gateway). The approver role can decide, but it
-    cannot record outcomes/notes or propose follow-ups on its own; point only a decide-only deployment at it."""
+    """R14: the owner-channel DSN (see `owner_dsn`) = lane D's `mbos_operator_ui` login. Unset = the shared app engine (`mbos_dbos`,
+    the worker login), on which owner-channel writes are refused by the database; the UI then shows a red notice (F-88)."""
     from mbos.db.engine import app_engine
 
-    dsn = os.environ.get("MBOS_APPROVER_DATABASE_URL")
+    dsn, warn = owner_dsn()
+    if warn:
+        print("warning: " + warn, file=sys.stderr)
     if not dsn:
         return app_engine()
     import sqlalchemy as sa
@@ -50,6 +63,12 @@ def ui_engine():
 
 
 def make_backend():
+    b = _make_backend()
+    b.owner_login = owner_dsn()[0] is not None  # F-88: False = owner-channel writes would run on the worker login
+    return b
+
+
+def _make_backend():
     """MBOS_STATE_BACKEND=reference (default) | lane_d. On lane D the UI is built with the SAME Components as the
     worker (F-04): Agent 05's PDP/gateway/kill switch via `lane_e_components`, because `spine_d.decide` classifies a
     MODIFY successor with the PDP. MBOS_POLICY_PATH = a dev policy file; unset = read lane D's `policy_current`."""

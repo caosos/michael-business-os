@@ -50,3 +50,21 @@ def build(store: Any, as_of: str, limit: int | None = None) -> dict:
         if open_areqs:
             cards[r["item_id"]] = open_areqs[-1]["action_request_id"]
     return {"digest": d, "error": None, "precheck_excluded": pre, "cards": cards}
+
+
+def figures(r: dict) -> dict:
+    """F-95: ONE figure per concept for a digest row. `priority` is lane C's rank score (unitless, used only to order the list; never
+    dollars); `ev` is the expected profit of the decision in dollars; `ev_per_hour` is expected profit per hour. Missing = None."""
+    def f(v):
+        try:
+            return None if v is None else float(v)
+        except (TypeError, ValueError):
+            return None
+
+    return {"priority": f(r.get("rank_score") if r.get("rank_score") is not None else r.get("value_per_hour")),
+            "ev": f(r.get("ev_decision")), "ev_per_hour": f(r.get("ev_profit_per_hour"))}
+
+
+def dollars(v, prefix: str = "$") -> str:
+    """Plain text for one figure (callers escape): UNKNOWN stays UNKNOWN."""
+    return "UNKNOWN" if v is None else f"{prefix}{v:,.2f}".rstrip("0").rstrip(".")

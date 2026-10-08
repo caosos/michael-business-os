@@ -16,7 +16,7 @@ from tests.conftest import PIN  # noqa: F401
 from tests.test_operator_ui import req
 
 ROOT = Path(__file__).resolve().parent.parent
-EX = ROOT / "docs/research/contracts/examples/inventory"
+EX = ROOT / ".tools/mbos-cb55fe8/docs/research/contracts/examples/inventory"  # pinned coordinator copy (the vendored inventory schema/examples predate defect_ids_seen)
 MOWER = json.loads((EX / "mower.example.json").read_text())
 
 
@@ -102,7 +102,7 @@ def test_ui_refuses_overclaims_and_false_verification_with_reasons(rt, ui, inv_f
     s, body = check(ui, inv_file, disclose=["d1"], body="Perfect condition, fully functional, no problems. $400 or best offer.")
     assert "REFUSED" in body and "prose overstates condition" in body
     s, body = check(ui, inv_file, disclose=["d1"], body="Runs; the engine smokes blue under load. Inspected and certified.")
-    assert "REFUSED" in body and "claims verification but nothing in the inventory is verified" in body
+    assert "REFUSED" in body and "claims verification of something the inventory does not have verified" in body
 
 
 def test_untrusted_text_is_escaped_and_guards_hold(rt, ui, inv_file, tmp_path):

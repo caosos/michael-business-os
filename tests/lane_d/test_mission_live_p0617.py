@@ -35,7 +35,10 @@ def test_live_plan_on_lane_d_is_valid_and_never_invented(ui_d):
 
     out = mv.load_live(ui_d.store, datetime.now(timezone.utc))
     if _stub_scorecards(ui_d):
-        assert "file fallback (live producer failed: KeyError)" == out["source"] and out["kind"] == "none"
+        if out["source"].startswith("lane D"):  # lane C 0.14 skips scorecards without branches (P-06-18): the live plan is valid
+            assert out["kind"] == "plan" and out["errors"] == []
+        else:
+            assert "file fallback (live producer failed: KeyError)" == out["source"] and out["kind"] == "none"
         return
     assert out["source"].startswith("lane D") and out["kind"] == "plan" and out["errors"] == []
     mission.validate_plan(out["doc"])

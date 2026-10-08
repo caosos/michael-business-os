@@ -89,7 +89,7 @@ def test_other_states_show_nothing(ui):
 
 def test_saved_comp_is_read_back_by_lane_bs_manual_adapter(ui):
     s, loc, _ = post(ui)
-    assert s == 303 and "Price saved" in loc and "mbos recheck " + ITEM["item_id"] in loc and "cannot re-check" in loc
+    assert s == 303 and "Price saved" in loc and "mbos recheck " + ITEM["item_id"] in loc and "once a minute" in loc
     [p] = inbox(ui)
     from mbos_discovery.comps import ManualCompsAdapter
 

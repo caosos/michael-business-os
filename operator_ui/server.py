@@ -24,7 +24,8 @@ try:  # lane C's package is optional: without it the notes form is simply unavai
 except ImportError:  # pragma: no cover
     NOTE_CATEGORIES, NOTE_KINDS = frozenset(), frozenset()
 
-from . import card_view, comps_view, ux, views, wanted_view
+from . import attest_view, card_view, comps_view, ux, views, wanted_view
+from .digest import figures as digest_figures, dollars as _dollars
 from .card_view import ec
 from .backend import FollowupRefused, ItemNotFound, NoteRefused, NumbersRefused, ProfileUnavailable
 from .sources import load_health
@@ -88,12 +89,46 @@ def _verdict(v):
     return f'<span class="badge v-{e(v)}">System says {e(v)}</span>' if v else ""
 
 
+NAV = [("/", "Queue", None), ("/mission", "Weekly mission", None), ("/numbers", "My numbers", None), ("/wanted", "Wanted", None),
+       ("/usage", "Usage", "usage"), ("/intake", "Intake", None), ("/preview", "Audience previews", "preview"),
+       ("/digest", "Morning digest", None), ("/summary", "Daily summary", None), ("/notes", "My notes", None),
+       ("/holds", "HOLD backlog", None), ("/outcomes", "Outcomes", None), ("/sources", "Source health", "sources"),
+       ("/ledger", "Receipt ledger", None)]
+FROZEN_HELP = ("FROZEN means the global kill switch is on: nothing will be carried out, and a YES you give now ends as cancelled. "
+               "Reading and entering numbers still work. To release it, run on the server as the owner: "
+               "<code>mbos panic off --reason \"why it is safe\"</code> (it is receipted).")
+
+
+class UiState(str):
+    """The system state text plus what the page chrome needs (F-88, F-100): which tabs have no data source configured, and whether
+    owner-channel writes would run on the worker login. A plain str everywhere else."""
+
+    hidden: frozenset = frozenset()
+    owner_login_missing: bool = False
+
+
+def _nav(state):
+    hidden = getattr(state, "hidden", frozenset())
+    return "".join(f'<a href="{h}">{t}</a>' for h, t, k in NAV if k not in hidden)
+
+
+def _notices(state):
+    out = ""
+    if str(state).startswith("FROZEN"):
+        out += f'<div class="flash err" id="frozen"><b>System FROZEN.</b> {FROZEN_HELP}</div>'
+    if getattr(state, "owner_login_missing", False):
+        out += ('<div class="flash err" id="owner-login"><b>Owner writes will be refused.</b> This UI is running on the worker login, not '
+                'the owner login, so saving My numbers, a Wanted campaign or a confirmation will fail with "permission denied". '
+                'Set <code>MBOS_OWNER_DATABASE_URL</code> (<code>source var/owner.env</code>) and restart the UI.</div>')
+    return out
+
+
 def page(title, body, state, flash=None, error=False):
     f = f'<div class="flash{" err" if error else ""}">{e(flash)}</div>' if flash else ""
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>{ec(title)}</title><style>{CSS}</style></head>
 <body><div class="banner">DRY-RUN · nothing leaves this machine · system {e(state)}</div>
-<header><b>Operator UI</b><nav><a href="/">Queue</a><a href="/mission">Weekly mission</a><a href="/numbers">My numbers</a><a href="/wanted">Wanted</a><a href="/usage">Usage</a><a href="/intake">Intake</a><a href="/preview">Audience previews</a><a href="/digest">Morning digest</a><a href="/summary">Daily summary</a><a href="/notes">My notes</a><a href="/holds">HOLD backlog</a><a href="/outcomes">Outcomes</a><a href="/sources">Source health</a><a href="/ledger">Receipt ledger</a></nav></header>
+<header><b>Operator UI</b><nav>{_nav(state)}</nav></header>{_notices(state)}
 <main>{f}{body}</main></body></html>"""
 
 
@@ -415,12 +450,13 @@ def render_digest(view):
         title = ec(r["title"])  # listing text: untrusted (clean_text + escape)
         title = f"<a href='/areq/{e(card)}'>{title}</a>" if card else title
         rf = r["refs"]
+        dg = digest_figures(r)
         rows.append(
             f"<tr><td class='num'>{e(r['rank'])}</td><td><b>{e(_BUCKET_LABEL.get(r['bucket'], r['bucket']))}</b></td>"
             f"<td>{_lane(r['lane'])} <span class='small mut'>{e(r['category'])}</span><br>{title}</td>"
             f"<td><b>{e(r['action'])}</b><br><span class='small mut'>{e(r['reason'])}</span></td>"
             f"<td>{e(r['window'])}{'<br><span class=small>' + e(r['deadline']) + '</span>' if r.get('deadline') else ''}</td>"
-            f"<td class='num'>{e(_num(r['value_per_hour']))}</td>"
+            f"<td class='num'>{e(_dollars(dg['priority'], ''))}</td><td class='num'>{e(_dollars(dg['ev']))}<br><span class='small mut'>{e(_dollars(dg['ev_per_hour']))}/h</span></td>"
             f"<td class='small'>scr <code>{e(rf.get('scorecard_id'))}</code><br>inputs <code>{e((rf.get('inputs_hash') or '')[:19])}</code><br>"
             f"rec <code>{e(rf.get('recommendation_id'))}</code><br>prov {prov(rf.get('provenance_id'))}</td></tr>")
     excl = d["excluded"] + view["precheck_excluded"]
@@ -431,7 +467,7 @@ def render_digest(view):
             f"ranking by lane C (<code>{e(p['tool_name'])} {e(p['tool_version'])}</code>, basis {e(p['basis'])}) · "
             f"digest hash <code>{e(d['digest_hash'][:23])}</code></p><p>{counts}</p></div>"
             f"<div class='card'><table><tr><th>#</th><th>Bucket</th><th>Opportunity</th><th>Next step · why</th><th>Deadline</th>"
-            f"<th>Value $/h</th><th>Refs</th></tr>{''.join(rows) or '<tr><td colspan=7 class=mut>Nothing open to rank.</td></tr>'}</table></div>"
+            f"<th title='Lane C rank score: orders this list; it is not dollars'>Priority score</th><th>Expected profit<br><span class='small mut'>and per hour</span></th><th>Refs</th></tr>{''.join(rows) or '<tr><td colspan=8 class=mut>Nothing open to rank.</td></tr>'}</table></div>"
             f"<div class='card'><h2>Not ranked ({len(excl)})</h2>{'<ul>' + ex + '</ul>' if ex else '<p class=mut>None.</p>'}</div>")
 
 
@@ -464,7 +500,17 @@ class App:
         self.pin_gate = ux.PinGate()  # F-77: shared by every PIN check in this process
 
     def state(self):
-        return self.store.system_state()
+        st = UiState(self.store.system_state())
+        hidden = set()
+        if not (self.health_file or os.environ.get("MBOS_SOURCE_HEALTH_FILE")):
+            hidden.add("sources")
+        if not (self.telemetry_dir or os.environ.get("MBOS_TELEMETRY_DIR") or self.queue_file or os.environ.get("MBOS_READY_QUEUE_FILE")):
+            hidden.add("usage")
+        if not (self.inventory_file or os.environ.get("MBOS_INVENTORY_FILE")):
+            hidden.add("preview")
+        st.hidden = frozenset(hidden)  # F-100: a tab whose data source is not configured is not offered
+        st.owner_login_missing = getattr(self.store, "owner_login", None) is False and getattr(self.store, "lane", "") == "lane_d"
+        return st
 
     def _check_csrf(self, f):
         if not ux.same(f.get("csrf", ""), self.csrf):
@@ -611,6 +657,18 @@ class App:
                 # F-79: the store returns the STORED id (a replay returns the first submit's id, not this request's fresh one)
                 stored = self.store.set_campaign(doc, self.author, "Michael created a Wanted campaign (" + doc["autonomy"]["level"] + ")", key)
                 msg = f"Campaign created ({stored}). It watches and recommends only."
+            elif action == "edit":
+                rec = next((r for r in self.store.campaign_records() if (r.get("doc") or {}).get("campaign_id") == (cid or "")), None)
+                if rec is None:
+                    raise InputError("unknown campaign")
+                if rec["doc"].get("status") not in ("ACTIVE", "PAUSED"):
+                    raise InputError(f"cannot edit a {rec['doc'].get('status')} campaign")
+                doc = wanted_view.parse_campaign(f, self.author, wanted_view.level_reasons(self.policy_path), rec["doc"])
+                errs = campaign_errors(doc)
+                if errs:
+                    raise InputError("; ".join(errs[:3]))
+                self.store.set_campaign(doc, self.author, "Michael edited a Wanted campaign (" + doc["autonomy"]["level"] + ")", key)
+                msg = "Campaign changes saved (a new revision; the history keeps the old one)."
             else:
                 rec = next((r for r in self.store.campaign_records() if (r.get("doc") or {}).get("campaign_id") == (cid or "")), None)
                 if rec is None:
@@ -660,6 +718,15 @@ class App:
         if rec is None:
             raise InputError("unknown campaign")
         doc, st = rec["doc"], rec["doc"]["status"]
+        if action == "edit":
+            if st not in ("ACTIVE", "PAUSED"):
+                raise InputError(f"cannot edit a {st} campaign")
+            nd = wanted_view.parse_campaign(f, self.author, wanted_view.level_reasons(self.policy_path), doc)
+            errs = campaign_errors(nd)
+            if errs:
+                raise InputError("; ".join(errs[:3]))
+            self.campaigns.put(nd, self.author, "edited (" + nd["autonomy"]["level"] + ")", now)
+            return "Campaign changes saved."
         new = {"pause": ("ACTIVE", "PAUSED"), "resume": ("PAUSED", "ACTIVE"), "cancel": (("ACTIVE", "PAUSED"), "CANCELLED")}.get(action)
         if new is None or st not in ((new[0],) if isinstance(new[0], str) else new[0]):
             raise InputError(f"cannot {action} a {st} campaign")
@@ -678,6 +745,20 @@ class App:
         doc = comps_view.parse_comp({**f, "nonce": nonce}, item, self.author, utcnow())
         _, created = comps_view.write_comp(self.comps_inbox, doc)
         return comps_view.saved_message(item_id, created)
+
+    def add_attestation(self, item_id, f):
+        """F-90: "Confirm" one requested evidence key -> `record_attestation` (owner channel). CSRF + PIN; the author is server-set;
+        only a key the engine requested on this item (and a person can attest) is accepted."""
+        self._numbers_gate(f)
+        item = self.store.item(item_id)
+        if item is None:
+            raise InputError("unknown opportunity")
+        key = (f.get("key") or "").strip()
+        if key not in attest_view.requested_keys(item):
+            raise InputError("that evidence was not requested for this item (or is already confirmed)")
+        self.store.record_attestation(item_id, key, attest_view.parse_note(f.get("note")), self.author)
+        return (f"Confirmed: {key}. Your word is recorded (human, receipted). It counts the next time this item is re-checked; "
+                f"if no worker re-check runs, run `mbos recheck {item_id}` on the server.")
 
     def add_followup(self, item_id, f):
         """F-11: draft a follow-up / offer / quote as its OWN request via the public API (A-15). CSRF, human channel. It only
@@ -793,7 +874,13 @@ def make_handler(app):
             flash = (qs.get("msg") or [None])[0]
             err = (qs.get("err") or [None])[0]
             if u.path == "/":
-                return self._send(200, page("Operator queue", comps_view.render_today(self._parked()) + render_queue(views.queue(app.store, now)),
+                from . import mission_view
+
+                try:
+                    head = mission_view.today_header(mission_view.load_live(app.store, now, app.mission_file))
+                except Exception as ex:  # noqa: BLE001 - Today must still render; say the header is unavailable
+                    head = f"<div class='card'><p class='bad'>Today's header is unavailable ({e(type(ex).__name__)}).</p></div>"
+                return self._send(200, page("Operator queue", head + comps_view.render_today(self._parked()) + render_queue(views.queue(app.store, now)),
                                             app.state(), flash or err, bool(err)))
             if u.path == "/digest":
                 from . import digest as digest_view
@@ -808,7 +895,9 @@ def make_handler(app):
 
                 loaded = mission_view.load_live(app.store, now, app.mission_file)
                 known = {l["item_id"] for l in (loaded["doc"] or {}).get("legs", []) if app.store.item(l["item_id"])} if loaded["kind"] == "plan" else set()
-                return self._send(200, page("Weekly mission", mission_view.render_page(loaded, known), app.state()))
+                ids = {l["item_id"] for l in (loaded["doc"] or {}).get("legs", [])} | set((loaded["doc"] or {}).get("replace_if_stale") or []) if loaded["kind"] == "plan" else set()
+                titles = {i: ((app.store.item(i) or {}).get("normalized") or {}).get("title") for i in ids}
+                return self._send(200, page("Weekly mission", mission_view.render_page(loaded, known, {k: v for k, v in titles.items() if v}), app.state()))
             if u.path == "/wanted":
                 return self._wanted_page(flash or err, bool(err))
             if u.path == "/numbers":
@@ -992,6 +1081,18 @@ def make_handler(app):
             self.send_header("Content-Length", "0")
             self.end_headers()
 
+        def _post_attest(self, item_id):
+            n = min(int(self.headers.get("Content-Length") or 0), 65536)
+            f = {k: v[0] for k, v in parse_qs(self.rfile.read(n).decode("utf-8", "replace"), keep_blank_values=True).items()}
+            try:
+                msg = app.add_attestation(item_id, f)
+            except (InputError, NumbersRefused) as ex:
+                return self._item_page(item_id, utcnow(), None, False, attest_reasons=getattr(ex, "reasons", None) or [str(ex)])
+            self.send_response(303)
+            self.send_header("Location", f"/item/{item_id}?msg={quote(msg)}#confirm")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+
         def _post_note(self, item_id):
             n = min(int(self.headers.get("Content-Length") or 0), 65536)
             f = {k: v[0] for k, v in parse_qs(self.rfile.read(n).decode("utf-8"), keep_blank_values=True).items()}
@@ -1009,7 +1110,7 @@ def make_handler(app):
             self.end_headers()
 
         def _item_page(self, item_id, now, flash, is_err, note_reasons=None, note_values=None, followup_reasons=None,
-                       followup_values=None, comp_reasons=None, comp_values=None):
+                       followup_values=None, comp_reasons=None, comp_values=None, attest_reasons=None):
             """F-13: the opportunity card is the primary view of an item."""
             try:
                 res = app.store.opportunity_card(item_id)
@@ -1026,8 +1127,12 @@ def make_handler(app):
                 controls, hold = render_decide(v, app.csrf, ret=True), render_hold_notice(v, app.csrf, ret=True)
                 controls += f"<p class='small'><a href='/areq/{e(open_areq['action_request_id'])}'>Technical view of this request (payload, hashes)</a></p>"
             body = card_view.render_item_card(card, res["errors"], controls, hold)
-            body = comps_view.render_needs(card, (app.store.item(item_id) or {}).get("state", "?"), app.csrf, bool(app.operator_pin),
-                                           bool(app.comps_inbox), comp_reasons, comp_values, secrets.token_hex(8)) + body
+            store_item = app.store.item(item_id) or {}
+            body = comps_view.render_needs(card, store_item.get("state", "?"), app.csrf, bool(app.operator_pin),
+                                           bool(app.comps_inbox), comp_reasons, comp_values, secrets.token_hex(8),
+                                           lane=store_item.get("type")) + body
+            body = attest_view.render_confirm(store_item, app.csrf, bool(app.operator_pin), app.store.lane == "lane_d",
+                                              secrets.token_hex(6), attest_reasons) + body
             body += card_view.render_followup_section(card, (app.store.item(item_id) or {}).get("state", "?"), app.csrf,
                                                       app.store.lane == "lane_d", open_areq is not None,
                                                       flash_reasons=followup_reasons, values=followup_values)
@@ -1047,7 +1152,7 @@ def make_handler(app):
                 return self._post_numbers(parts[1])
             if parts == ["wanted", "create"]:
                 return self._post_wanted(None, "create")
-            if len(parts) == 3 and parts[0] == "wanted" and parts[2] in ("pause", "resume", "cancel"):
+            if len(parts) == 3 and parts[0] == "wanted" and parts[2] in ("pause", "resume", "cancel", "edit"):
                 return self._post_wanted(parts[1], parts[2])
             if parts == ["preview", "check"]:
                 return self._post_preview_check()
@@ -1055,6 +1160,8 @@ def make_handler(app):
                 return self._post_note_change(parts[1], parts[2])
             if len(parts) == 3 and parts[0] == "item" and parts[2] == "comp":
                 return self._post_comp(parts[1])
+            if len(parts) == 3 and parts[0] == "item" and parts[2] == "attest":
+                return self._post_attest(parts[1])
             if len(parts) == 3 and parts[0] == "item" and parts[2] == "note":
                 return self._post_note(parts[1])
             if len(parts) == 3 and parts[0] == "item" and parts[2] == "followup":

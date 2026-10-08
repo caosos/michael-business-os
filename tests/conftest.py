@@ -26,9 +26,9 @@ else:
 FIXTURE = Path(__file__).parent / "fixtures" / "illustrative.json"
 # Contracts for mbos's schema validator (a non-editable install cannot find them): this branch's vendored copy,
 # which includes card.schema.json (ADR-0011) byte-identical to the coordinator's.
-os.environ.setdefault("MBOS_CONTRACTS_DIR", str(Path(__file__).resolve().parent.parent / "docs" / "research" / "contracts"))
+os.environ.setdefault("MBOS_CONTRACTS_DIR", str(Path(__file__).resolve().parent.parent / ".tools" / "mbos-cb55fe8" / "docs" / "research" / "contracts"))  # pinned coordinator contracts (mission legs carry title/verdict/waiting_on)
 # Lane A's operator profile, from the pinned mbos checkout (a non-editable install cannot find it; see backend.py).
-os.environ.setdefault("MBOS_OPERATOR_PROFILE", str(Path(__file__).resolve().parent.parent / ".tools" / "mbos-727931b" / "config" / "operator_profile.v1.json"))
+os.environ.setdefault("MBOS_OPERATOR_PROFILE", str(Path(__file__).resolve().parent.parent / ".tools" / "mbos-cb55fe8" / "config" / "operator_profile.v1.json"))
 PIN = "4321"
 
 

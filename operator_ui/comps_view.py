@@ -130,7 +130,7 @@ def write_comp(inbox: Optional[str], doc: dict) -> tuple[Path, bool]:
         os.unlink(tmp)
 
 
-def render_needs(card: dict, item_state: str, csrf: str, pin_set: bool, inbox_set: bool, reasons=None, values=None, nonce: str = "") -> str:
+def render_needs(card: dict, item_state: str, csrf: str, pin_set: bool, inbox_set: bool, reasons=None, values=None, nonce: str = "", lane: Optional[str] = None) -> str:
     """The "Needs from you" section + the "Add a price I saw" form. Shown only while the item is parked in RESEARCHING."""
     if item_state != "RESEARCHING":
         return ""
@@ -158,15 +158,20 @@ def render_needs(card: dict, item_state: str, csrf: str, pin_set: bool, inbox_se
 <label>Note (optional if you add a link)<input name="note" maxlength="300" value="{e(v.get('note'))}"></label>
 <label>PIN<input name="pin" type="password" autocomplete="off" required></label></div>
 <button class="b-HOLD" style="width:auto">Save this price</button></form>"""
+    if lane == "service":  # F-90: a service job waits on what only Michael can confirm; a sold price is optional context
+        return (f"<div class='card rec' id='needs'><h2>Needs from you</h2><p style='font-size:18px'><b>{e(gap_text(card))}</b></p>"
+                "<p>This is a service job: the system is waiting on things only you can confirm (see <a href='#confirm'>Confirm what you know</a>), "
+                f"not on a sold price. A price you saw is optional.</p>{errs}<details{' open' if errs else ''}><summary>Add a price I saw</summary>{form}</details></div>")
     return (f"<div class='card rec' id='needs'><h2>Needs from you</h2><p style='font-size:18px'><b>{e(gap_text(card))}</b></p>"
             "<p>This item is parked: the system cannot recommend it until it has a price to compare with. "
             f"A price you actually saw is enough.</p>{errs}<h3>Add a price I saw</h3>{form}</div>")
 
 
 def saved_message(item_id: str, created: bool) -> str:
+    """F-92: truthful. The worker (A-40) watches the comps inbox about every 60 s and re-checks parked items itself; this page cannot."""
     head = "Price saved." if created else "That price was already recorded; nothing changed."
-    return (f"{head} The item has not moved yet: this page cannot re-check it. Run `mbos recheck {item_id}` "
-            "(or `mbos recheck --researching`) on the server and it will be re-checked with your price.")
+    return (f"{head} The worker checks the inbox about once a minute and will re-check this item with your price; reload this page in a "
+            f"minute to see the result. If no worker is running, run `mbos recheck {item_id}` on the server.")
 
 
 def render_today(parked: list) -> str:

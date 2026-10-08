@@ -72,6 +72,7 @@ class SpineBackend:
             raise ValueError(f"unknown state backend {lane!r}")
         self.engine = engine
         self.lane = lane
+        self.owner_login = None  # F-88: set by make_backend; False = owner-channel writes would run on the worker login
         if lane == "lane_d":
             from mbos import spine_d as _spine
         else:
@@ -340,6 +341,18 @@ class SpineBackend:
         """F-72: the ledger entry's own amount for a receipt (what was really recorded), or None."""
         with self.engine.connect() as c:
             return c.execute(sa.text("SELECT amount FROM mbos.capital_ledger WHERE source_receipt_id = :r"), {"r": receipt_id}).scalar()
+
+    def record_attestation(self, item_id: str, evidence_key: str, note: str, entered_by: str) -> dict:
+        """F-90: Michael's confirmation of a requested evidence key (D-29 `mbos.record_attestation`: owner channel, human actor,
+        receipted). HUMAN CHANNEL ONLY (R14): the single UI caller is `App.add_attestation` (CSRF + PIN, server-set author)."""
+        if self.lane != "lane_d":
+            raise NumbersRefused(["confirming evidence needs the lane D store (MBOS_STATE_BACKEND=lane_d)"])
+        try:
+            with self.engine.begin() as c:
+                return self._spine.record_attestation(c, item_id, evidence_key, note, entered_by)
+        except sa.exc.DBAPIError as ex:
+            msg = str(getattr(ex, "orig", ex)).strip().splitlines()[0]
+            raise NumbersRefused([f"the store refused it: {msg}"]) from None
 
     # ---- F-14: Michael's own model knowledge (operator notes). Lane D only; HUMAN CHANNEL ONLY (R14) -----------
     def operator_notes(self, include_retracted: bool = False) -> list[dict]:
