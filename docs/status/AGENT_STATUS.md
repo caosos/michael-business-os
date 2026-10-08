@@ -4,15 +4,15 @@ Agent: 06
 Role: Communications + Operator UI / Approval UX (build lane F)
 Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
-State: WAITING
-Claimed: none
+State: WORKING
+Claimed: F-11
 Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe · F-04 @ 46c961c · F-13 @ 2415936 · F-14 @ c68a33c · F-13 hardening @ 6e47646 · F-15 @ 94130a4
 Blocked: F-11 on A-15
 Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
 Last updated: 2026-10-07
 
 ## Current objective
-WAITING. **F-11** (follow-up / offer / quote buttons on the card) is BLOCKED on **A-15**. I will claim it when A-15 is DONE, or any new F-/ANY task.
+**F-11** (READY_QUEUE @ `2f7b887`, A-15 done): follow-up / offer / quote buttons on the card, calling `workflows.propose_followup` from the UI process. Each creates its own step-up ActionRequest. Next: **F-16** (edit / retract notes). The queue's F-04 row still says READY, but it was DONE at `46c961c`.
 
 ## Done
 - **F-15 @ 94130a4:** every `CommsActionPlanner` action carries `lane="agent-06-communications"`. On lane D + E the ledger's `proposed_by` equals it, `lane` is absent from the frozen payload, and a capability no lane holds creates no request (the card says "policy blocked").
