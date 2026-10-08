@@ -215,6 +215,29 @@
         },
         "why": {
           "type": "string"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Plain name of the job, so Michael can tell the legs apart (F-94)."
+        },
+        "verdict": {
+          "enum": [
+            "YES",
+            "MAYBE",
+            "PASS",
+            "UNKNOWN"
+          ],
+          "description": "The machine verdict for this leg. Only YES legs can be deployed."
+        },
+        "waiting_on": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "description": "What this leg still needs (evidence, a price, a decision) before it can be a YES."
         }
       }
     },

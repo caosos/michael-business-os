@@ -16,7 +16,7 @@ from tests.conftest import PIN  # noqa: F401
 from tests.test_operator_ui import req
 
 ROOT = Path(__file__).resolve().parent.parent
-EX = ROOT / ".tools/mbos-cb55fe8/docs/research/contracts/examples/inventory"  # pinned coordinator copy (the vendored inventory schema/examples predate defect_ids_seen)
+EX = ROOT / "docs/research/contracts/examples/inventory"
 MOWER = json.loads((EX / "mower.example.json").read_text())
 
 
@@ -138,3 +138,12 @@ def test_no_generated_imagery_and_no_publish_path_in_the_module():
         mods |= {(n.module or "").split(".")[0] for n in ast.walk(tree) if isinstance(n, ast.ImportFrom)}
         assert not mods & {"socket", "http", "urllib", "requests", "httpx", "PIL", "openai", "anthropic", "subprocess"}, (name, mods)
         assert not re.search(r"def (publish|post|upload|generate|send)\w*\(", src)
+
+
+def test_f30_vendored_contracts_equal_coordinators_bytes():
+    import hashlib
+    pins = json.loads((ROOT / "docs/research/contracts/FROZEN.sha256.json").read_text())["files"]
+    assert {"mission.schema.json", "inventory.schema.json", "campaign.schema.json", "valuation.schema.json",
+            "merchandising.schema.json", "card.schema.json"} <= set(pins)
+    for rel, want in pins.items():
+        assert "sha256:" + hashlib.sha256((ROOT / "docs/research/contracts" / rel).read_bytes()).hexdigest() == want, rel

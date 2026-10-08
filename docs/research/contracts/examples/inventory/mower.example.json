@@ -44,5 +44,8 @@
     "price_usd": 400,
     "price_type": "obo",
     "pickup": "Buyer picks up"
-  }
+  },
+  "defect_ids_seen": [
+    "d1"
+  ]
 }

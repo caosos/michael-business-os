@@ -50,3 +50,17 @@ def test_http_flow_escapes_hostile_text_and_requires_csrf(ui):
     assert "<b>blade brake" not in body and "&lt;b&gt;blade brake" in body and "UNKNOWN" in body
     assert "verified" not in {a["basis"] for a in ui.intake_drafts[iid]["answers"].values()}
     assert req(ui, "GET", f"/intake/{iid}")[0] == 200 and req(ui, "POST", "/intake/int-nope/answer", {"csrf": ui.csrf})[0] == 404
+
+
+def test_f30_intake_inventory_object_is_valid_and_passes_the_merchandising_lint():
+    from mbos import merchandising
+    from operator_ui import merch
+
+    d = intake_view.start(SAY)
+    inv = intake_view.inventory_object(d)
+    assert merchandising.inventory_errors(inv) == []
+    assert inv["defect_ids_seen"] == ["d1"] and inv["defects"][0]["text"] == "smokes" and inv["terms"]["price_usd"] == 400.0
+    assert all(f["basis"] != "verified" for f in inv["facts"])
+    for a in merch.AUDIENCES:
+        assert merch.check_view(inv, merch.render_view(inv, a)) == []                      # smokes is disclosed verbatim in every view
+    assert intake_view.inventory_object(intake.new_draft("mower")) is None                # no price: no terms, no inventory object

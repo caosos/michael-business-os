@@ -1,0 +1,38 @@
+{
+  "valuation_version": "1.0.0",
+  "subject": {
+    "kind": "mower",
+    "description": "Riding mower, runs, smokes"
+  },
+  "ranges": {
+    "suggested_list": {
+      "low": 550,
+      "high": 700
+    },
+    "likely_sale": {
+      "low": 450,
+      "high": 600
+    },
+    "fast_sale": {
+      "low": 350,
+      "high": 420
+    },
+    "as_is": {
+      "low": 300,
+      "high": 420
+    },
+    "after_repair": null
+  },
+  "confidence": "low",
+  "evidence": [
+    {
+      "kind": "asking_comp",
+      "ref": "fixture:mower-comps-2026-09",
+      "note": "asking comps only; no sold comps"
+    }
+  ],
+  "not_an_appraisal": true,
+  "unknowns": [
+    "after_repair needs a diagnosed fault"
+  ]
+}

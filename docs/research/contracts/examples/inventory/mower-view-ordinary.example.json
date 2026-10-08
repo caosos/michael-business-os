@@ -1,11 +1,11 @@
 {
   "view_version": "1.0.0",
   "inventory_id": "inv_01J9Z00000000000000000M0WR",
-  "inventory_hash": "sha256:28a10b5bec7b9b319e85ad682b6aaad3b1c0a73add78393a9ad9e90118b7fea7",
+  "inventory_hash": "sha256:ecfe12b6a84c6357c0c8049e0e4a581a1b97c1804eed7c8f8990d7e7109a4a4b",
   "audience": "ordinary_classified",
   "label": "Classified",
   "headline": "Riding mower, 42 in deck, runs but smokes",
-  "body": "Brand X 42T. Runs; the engine smokes blue under load. $400 or best offer. Pickup only.",
+  "body": "Brand X 42T. Engine smokes blue under load. $400 or best offer. Pickup only.",
   "facts": [
     {
       "fact_id": "f1",

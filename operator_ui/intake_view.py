@@ -6,7 +6,9 @@ still missing (safety and material first). Nothing here can mark a fact `verifie
 
 from __future__ import annotations
 
+import hashlib
 import html
+import json
 import re
 import secrets
 from typing import Optional
@@ -53,6 +55,27 @@ def inventory_draft(d: dict) -> dict:
     return {"status": "DRAFT", "dry_run": True, "published": False, "kind": d["kind"], "category": d["category"], "facts": facts,
             "defects": [{"text": str(f["value"]), "basis": f["basis"]} for f in facts if f["key"] == "known_defects" and f["basis"] != "UNKNOWN"],
             "unverified_facts": [f["key"] for f in facts if f["basis"] != "verified"]}
+
+
+_CROCKFORD = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
+
+
+def inventory_object(d: dict) -> Optional[dict]:
+    """A schema-valid ADR-0013 inventory object from a draft, or None while the price is unknown (terms are required).
+    Bases carry over unchanged; every stated defect is recorded as `material` (conservative, never softened) and listed in
+    `defect_ids_seen`. Still a draft: the caller decides nothing here, and nothing is published."""
+    inv = inventory_draft(d)
+    price = _PRICE.search(str(d["answers"].get("price_usd", {}).get("value") or ""))
+    if not price:
+        return None
+    digest = hashlib.sha256(json.dumps(d["answers"], sort_keys=True).encode()).digest()
+    n = int.from_bytes(digest[:17], "big") >> 8  # 130 bits -> 26 Crockford chars
+    iid = "inv_" + "".join(_CROCKFORD[(n >> (5 * i)) & 31] for i in range(25, -1, -1))
+    defects = [{"id": f"d{i}", "text": x["text"][:300], "basis": x["basis"], "severity": "material"} for i, x in enumerate(inv["defects"], 1)]
+    return {"inventory_version": "1.0.0", "inventory_id": iid, "kind": "service_job" if d["kind"] == "service_job" else "goods",
+            "title": f"{d['category']} (draft)"[:200], "category": d["category"], "facts": inv["facts"], "defects": defects,
+            "evidence": [dict(x) for x in d["evidence"]], "terms": {"price_usd": float(price.group(2).replace(",", "")), "price_type": "obo"},
+            "defect_ids_seen": [x["id"] for x in defects]}
 
 
 def apply_answers(d: dict, form: dict) -> dict:
