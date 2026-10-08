@@ -21,6 +21,7 @@
   - 05's PDP denies any `comms.*` payload with a key named `binding` at any depth (even `false`); ours is `is_binding`. A static test pins this.
   - `KeyError` is a `LookupError`: do not `except LookupError` around card building (`ItemNotFound` exists for this).
   - Lane D tests run as a superuser, so they do not exercise role grants; consent GRANTED / DNC CLEAR need the gateway role.
+  - Lane E's PANIC hooks write `var/egress_policy.json` and `var/litellm_keys.json` into the current directory during the lane D tests; `var/` is git-ignored.
   - `os._exit()` in a child process drops unflushed stdout; use `flush=True`.
   - My early commits (before F-15) carry the shared git identity (it was another agent's); set the identity per commit as `docs/COORDINATION.md` says.
 - **Open questions (UNKNOWN):**

@@ -6,3 +6,4 @@ __pycache__/
 .tools/
 .pgdata/
 .pytest_cache/
+var/
