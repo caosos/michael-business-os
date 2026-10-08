@@ -98,3 +98,36 @@ research_step per item (read-only call, current comps): TV RESEARCHING [scope_ov
   lead SCORED [scope_unverified]
 ```
 Per the task I stop at the first real gap. Stage 4 below records what the same state shows, so the owner can see the whole distance in one pass.
+
+## Stage 4: scoring + recommendation: FAIL (1 of 4 expected outcomes met; same root cause as F-106)
+
+Expected (task / A-41) versus observed on the bootstrapped assembly after the Stage 3 comps and the UI attestations:
+
+| Deal | Expected | Observed (`mbos items`, `mbos show`, `mbos card`) | Result |
+|---|---|---|---|
+| 55in TV, $30 | YES, approvable within $500 | `RESEARCHING`, HOLD, no score: blocked on `scope_override_required` (F-106); `mbos queue` -> "Nothing needs a decision." | FAIL |
+| Honda Recon, $300 | MAYBE naming its evidence (`fault_identified`) | verdict `PASS`, state `RESEARCHING`: "Passed because cash tied up of $538 is over your $500 per-deal limit ... held for research"; `cheapest_decisive_evidence` None; repair prior $210 replaces the fixture's $100 + $80 (F-110) | FAIL |
+| Riding mower, $480 | PASS on the bankroll | verdict `PASS` ("cash tied up of $572 is over your $500 per-deal limit"), but state `RESEARCHING`, not ARCHIVED: "R13: PASS is not evidence-backed (cash_ok: no decisive input backed ...): route to RESEARCHING". The fixture's buy price is FACT; the researcher did not carry it (F-110) | PARTIAL (right reason, wrong state) |
+| Drywall lead | MAYBE, then YES after Michael confirms evidence in the UI | MAYBE ("Needs from you: more evidence"); the UI now has seven "Confirm what you know" forms (F-90 fixed); `scope_verified` and `customer_screened` accepted ("Confirmed ... Your word is recorded (human, receipted)"); after `mbos recheck` the card reads "Not a YES yet: about $73/h expected, under your $75/h service target. Quoting $651 or more would clear it. YES blocked: composite 58.20 < 60; EV profit/hour $72.99 < $75.00". Confidence is no longer the blocker (it was 0.15 < 0.60). Still MAYBE | FAIL (but the attestation path works; the economics now decide) |
+
+Commands: `.venv/bin/mbos items`, `.venv/bin/mbos queue`, `.venv/bin/mbos card <id>`, `.venv/bin/mbos show <id>`, UI `POST /item/<lead>/attest` (key `scope_verified`, then `customer_screened`, PIN `g21pin`), `.venv/bin/mbos recheck <lead>`.
+
+Findings:
+- **F-109 (P2, FACT; owner 01 + 06):** a UI attestation does not wake the worker. The comps inbox is watched (60 s) but attestations are not; the lead stayed RESEARCHING after both "Confirmed" banners until I ran `mbos recheck` by hand (the banner tells Michael to do so on the server). Recommendation: have the attest route (or the worker) trigger a recheck of that item.
+- **F-110 (P1, FACT/INFER; owner 03; root cause shared with F-106):** with a REAL researcher the stored inline economics (`acquisition.expected_buy_price` FACT, `rehab.parts_cost` etc.) are replaced by category priors, so the mower PASS is "not evidence-backed" and the Recon becomes a PASS instead of a MAYBE naming `fault_identified`. The fixture documents these as FACT/INFER/UNK with `estimates_meta.assumptions`; the researcher should read them. A-41's green test hides this because it runs without comps wired.
+
+Gaps are not the system's design intent: the cards are honest and every number is labelled; what fails is that the documented production path cannot reproduce Michael's three training examples.
+
+## Verdict (G-21a)
+
+| Stage | Result |
+|---|---|
+| 1 discovery | PASS (4 of 4 listings fetched) |
+| 2 normalization | PASS on acceptance (4 of 4 Items); `mbos audit` conformance red: F-102, F-105 |
+| 3 research (UI comp, worker pickup) | FAIL: UI + worker mechanics work; TV blocked by F-106; F-107, F-108 |
+| 4 scoring + recommendation | FAIL: TV not YES, Recon not MAYBE, mower PASS not archived, lead still MAYBE (F-110) |
+
+Chain, provenance and dry-run held throughout: `mbos audit` -> chain ok (receipts verified), provenance ok, `dry_run.ok true`, `effector_receipts 0`. Nothing was sent, contacted, bought or published.
+
+Findings filed (after F-101): F-102 (P1), F-103 (P3), F-104 (P2), F-105 (P2), F-106 (P0), F-107 (P1), F-108 (P1), F-109 (P2), F-110 (P1).
+G-21b (stages 5-8) is BLOCKED on F-106/F-110: there is no YES to approve on this assembly.
