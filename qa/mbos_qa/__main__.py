@@ -216,6 +216,40 @@ FINDINGS = [
      "identity, so a buggy or hostile planner can put a payment request in front of Michael.",
      "RECOMMENDATION: grant per capability to the lanes that actually draft it (06 comms, 07 publishing), keep the spine "
      "identity to what its default planner emits, and add offer/purchase grants only when their planners exist."),
+    ("F-42", "FACT", "01 (A-15)", "G-08: `workflows.propose_followup` commits the request (item AWAITING_APPROVAL, request pending_approval) in one "
+     "transaction and only THEN enqueues the `followup:<id>` gate on the `followups` queue. If the process dies (or the enqueue raises) between the two, "
+     "the request is orphaned: no gate workflow exists, a retry is refused (item is no longer ACTED), and Michael's YES is ACCEPTED "
+     "(`approved`) but nothing executes and nothing recovers it. Same silent-loss shape as F-40.",
+     "RECOMMENDATION: start the gate inside the creating transaction's outbox, or have startup/reconcile scan `pending_approval` requests with no "
+     "`followup:<id>` workflow and start the missing gates (idempotent: the workflow id is deterministic)."),
+    ("F-43", "FACT", "01 + 05", "G-08: a follow-up for a capability nobody may propose (e.g. `comms.voice.call`) returns "
+     "`{action_request_id: None, policy_denied: True}` and leaves NO request and NO receipt, so the card and the ledger cannot explain why "
+     "nothing happened (a negative cost, by contrast, is recorded as a rejected request with POLICY_DECIDED receipts). R17: no invisible outcomes.",
+     "RECOMMENDATION: record every denied proposal as a rejected ActionRequest with its POLICY_DECIDED receipt, as the negative-cost path already does."),
+    ("F-44", "FACT", "01", "G-08: `propose_followup` does not validate its `proposed_action`. `{}`, `None`, a list, or a dict missing "
+     "capability/summary/reversibility escape as a raw KeyError/AttributeError instead of DecisionRefused. Nothing is written (atomic), "
+     "so this is robustness, not safety, but the caller (and the Telegram handler) gets a stack trace.",
+     "RECOMMENDATION: validate the shape first and raise DecisionRefused with a message naming the missing field."),
+    ("F-45", "FACT", "01 (A-15) + 04", "G-08: eight concurrent `propose_followup` calls on one ACTED item create TWO live requests (reproduced "
+     "3/3 on lane D + E; the reference spine is not affected). Michael's YES on both is accepted: one executes, the other is left `approved` "
+     "with no execution (silent loss, as F-40). The duplicate effect is avoided only because the second gate finds the item already ACTED.",
+     "RECOMMENDATION: take a row lock on the item (SELECT … FOR UPDATE) or use a conditional ACTED → AWAITING_APPROVAL transition inside the "
+     "transaction so the loser gets DecisionRefused; add a partial unique index on live requests per (item, follow-up) in lane D."),
+    ("F-46", "FACT", "01 (release gate)", "G-08: the gate cannot go red on a WEAKENED frozen contract. Dropping `scope` from "
+     "approval.schema.json `required` (examples still validate) left all six checks PASS; `validate_contracts.py` checks only that the examples "
+     "validate, and nothing pins the contract bytes.",
+     "RECOMMENDATION: add a CONTRACTS.sha256 manifest (or compare against the frozen v1.0.0 tag) and fail on any byte difference without an ADR-bump."),
+    ("F-47", "FACT", "01 (release gate)", "G-08: the gate cannot go red on a test suite that tests nothing. With every test marked skip, "
+     "`pytest -q` reports `234 skipped` and exits 0, so the check is PASS. Deleting a failing test also goes green (no test-count floor).",
+     "RECOMMENDATION: parse the pytest summary and require passed >= a pinned floor and skipped <= a pinned ceiling (today 233 / 1)."),
+    ("F-48", "FACT", "01 (release gate)", "G-08: `pins_check` compares only `.py` files that exist in the pushed head. Verified PASS with (a) an extra stale `.py` "
+     "left in the installed package, (b) a replaced `schemas/*.json` in the installed package. It also compares against the LOCAL `origin/*` ref, so "
+     "without `--fetch` a stale clone is checked against stale heads. (Modified, deleted and uninstalled `.py` all turn it red.)",
+     "RECOMMENDATION: compare the full file set both ways (extra files and .json included) and fetch by default, or print the age of each ref."),
+    ("F-49", "FACT", "01 (release gate)", "G-08: in the gate's own lane D/E run `effector 0 (live 0)`: no action executes, so its live-effector and "
+     "dry-run assertions are vacuous there. A live-mode policy (`system_mode: live`) was caught only because the pytest check and the runner failed "
+     "on it, i.e. the protection lives in the test suite (see F-47), not in the gate.",
+     "RECOMMENDATION: have the gate's e2e approve one fixture action and assert exactly one dry-run effector row and zero live rows."),
     ("F-16", "FACT", "01", "FIXED by A-10 (verified at 82632c3: a normal install finds its contracts and operator profile). Original finding: Agent 01's package only finds the contracts by a path relative to the source tree. "
      "With a normal (non-editable) `pip install`, 94 of its 109 tests fail or error with `docs/research/contracts "
      "not found; set MBOS_CONTRACTS_DIR`. With that variable set, 108 pass and 1 is skipped "
@@ -567,7 +601,7 @@ def cmd_spine(release: bool = False) -> int:
 
 
 FINDING_STATUS = {  # verified by the suites at the pins in qa/impl_lane_pins.json (final card re-run)
-    "F-22": "FIXED", "F-23": "FIXED", "F-24": "FIXED", "F-25": "FIXED (R22)", "F-40": "FIXED", "F-41": "FIXED",
+    "F-22": "FIXED", "F-23": "FIXED", "F-24": "FIXED", "F-25": "FIXED (R22)", "F-40": "FIXED", "F-41": "FIXED", "F-42": "OPEN", "F-43": "OPEN", "F-44": "OPEN", "F-45": "OPEN", "F-46": "OPEN", "F-47": "OPEN", "F-48": "OPEN", "F-49": "OPEN",
     "F-16": "FIXED", "F-18": "FIXED", "F-19": "FIXED", "F-20": "FIXED", "F-21": "FIXED",
     "F-26": "FIXED", "F-27": "FIXED (an uncheckable risk is dropped, never left invalid)",
     "F-28": "FIXED (ISO strings only; a bare number such as 20261005 is UNKNOWN; valid dates still display)",
