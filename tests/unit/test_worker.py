@@ -22,6 +22,12 @@ OK = json.dumps({"type": "result", "is_error": False, "result": "did it\n" + DON
 BAD = json.dumps({"type": "result", "is_error": True, "duration_ms": 10, "num_turns": 1, "session_id": "s2", "subtype": "error_max_turns"})
 
 
+@pytest.fixture(autouse=True)
+def _isolated_telemetry(tmp_path_factory, monkeypatch):
+    """The quota guard reads the REAL telemetry file; tests must never depend on Michael's live quota (found when the real window hit 97%)."""
+    monkeypatch.setenv("MBOS_TELEMETRY_DIR", str(tmp_path_factory.mktemp("telemetry")))
+
+
 @pytest.fixture()
 def wt(tmp_path):
     subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
