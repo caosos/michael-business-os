@@ -1,0 +1,243 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://michael-business-os/contracts/valuation.schema.json",
+  "title": "Valuation v1 \u2014 ranges with evidence, never a fake precise number",
+  "description": "ADDITIVE contract (ADR-0013). An estimate, not an appraisal: `not_an_appraisal` MUST be true. Each range is {low, high} or null (UNKNOWN). Rules beyond JSON Schema (low <= high; any non-null range needs evidence) are enforced by mbos.valuation. Homes and vehicles may legitimately return all-null with reason_unknown.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "valuation_version",
+    "subject",
+    "ranges",
+    "confidence",
+    "evidence",
+    "not_an_appraisal",
+    "unknowns"
+  ],
+  "properties": {
+    "valuation_version": {
+      "const": "1.0.0"
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "flip_item",
+            "trailer",
+            "mower",
+            "equipment",
+            "vehicle",
+            "home",
+            "furniture",
+            "collectible",
+            "service_job",
+            "other"
+          ]
+        },
+        "item_id": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500
+        }
+      }
+    },
+    "ranges": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "suggested_list",
+        "likely_sale",
+        "fast_sale",
+        "as_is",
+        "after_repair"
+      ],
+      "properties": {
+        "suggested_list": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "low",
+                "high"
+              ],
+              "properties": {
+                "low": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "high": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "likely_sale": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "low",
+                "high"
+              ],
+              "properties": {
+                "low": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "high": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fast_sale": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "low",
+                "high"
+              ],
+              "properties": {
+                "low": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "high": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "as_is": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "low",
+                "high"
+              ],
+              "properties": {
+                "low": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "high": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "after_repair": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "low",
+                "high"
+              ],
+              "properties": {
+                "low": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "high": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "confidence": {
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "UNKNOWN"
+      ]
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "ref"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "sold_comp",
+              "asking_comp",
+              "prior",
+              "operator_note",
+              "condition_answer",
+              "record"
+            ]
+          },
+          "ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "provenance_id": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "not_an_appraisal": {
+      "const": true
+    },
+    "unknowns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "reason_unknown": {
+      "type": "string"
+    }
+  }
+}
