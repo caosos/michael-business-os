@@ -336,11 +336,20 @@ def _fmt_years(ys: set[int]) -> str:
     return str(ys[0]) if len(ys) == 1 else (f"{ys[0]}-{ys[-1]}" if ys[-1] - ys[0] + 1 == len(ys) else ", ".join(map(str, ys)))
 
 
-def match_hits(item: dict, kb: dict, make_model: str | None = None) -> tuple[list[dict], list[dict]]:
+def _with_extracted_years(text: str, model_years) -> str:
+    """Append years Agent 02's extractor read from shorthand ('18, MY2018) that the text does not already state in four digits.
+    ``model_years`` is its list of ``{"year": int, "evidence": str}``; anything malformed is ignored (nothing guessed)."""
+    stated, _ = listing_years(text)
+    extra = sorted({r["year"] for r in model_years or [] if isinstance(r, dict) and type(r.get("year")) is int} - stated)
+    return f"{text} {' '.join(map(str, extra))}" if extra else text
+
+
+def match_hits(item: dict, kb: dict, make_model: str | None = None, model_years=None) -> tuple[list[dict], list[dict]]:
     """``(hits, blocked)``. A hit is ``{"entry", "year_evidence"}`` (evidence is None for entries that are not year-specific).
     ``blocked`` lists entries whose make AND model matched but whose model-year condition was not met, with the reason:
     the card shows UNKNOWN for them, never a safety claim about a year the listing does not state."""
     text = " ".join([(item.get("normalized") or {}).get("title") or "", make_model or ""]).lower()
+    text = _with_extracted_years(text, model_years)
     hits, blocked = [], []
     for e in kb["entries"]:
         if e["category"] != item.get("category"):
@@ -434,18 +443,19 @@ def _plan(item: dict, cfg: ScoringConfig, hints: list[str]) -> tuple[str | None,
 
 
 def build_value_add(item: dict, as_of: str, *, cfg: ScoringConfig, kb: dict | None = None,
-                    make_model: str | None = None) -> dict:
+                    make_model: str | None = None, model_years=None) -> dict:
     """Return ``{"block", "provenance", "omitted", "matched", "value_add_hash"}``. Pure; ``block`` is {} when
     nothing can be supported."""
     kb = kb or load_kb()
     sc = item.get("scores") or {}
-    hit_rows, blocked = match_hits(item, kb, make_model)
+    hit_rows, blocked = match_hits(item, kb, make_model, model_years)
+    quotes = {str(r["year"]): r.get("evidence") for r in model_years or [] if isinstance(r, dict) and type(r.get("year")) is int}
     hits = [h["entry"] for h in hit_rows]
     evidence_by_id = {h["entry"]["id"]: h["year_evidence"] for h in hit_rows}
     key = content_hash({"spec": "mbos.economics.valueadd/v1", "v": VERSION, "as_of": as_of, "item_id": item.get("item_id"),
                         "inputs_hash": sc.get("inputs_hash"), "kb": kb["_hash"], "config": cfg.hash,
                         "make_model": make_model, "matched": [e["id"] for e in hits],
-                        "year_evidence": evidence_by_id, "blocked": blocked})
+                        "year_evidence": evidence_by_id, "blocked": blocked, **({"model_years": quotes} if quotes else {})})
     pid = derived_ulid("prov", as_of, "valueadd|" + key)
     omitted: list[str] = []
     block: dict = {}
@@ -460,7 +470,8 @@ def build_value_add(item: dict, as_of: str, *, cfg: ScoringConfig, kb: dict | No
     for e in hits:
         s = e["source"]
         yr = evidence_by_id.get(e["id"])
-        yr_note = f" Model year read from the listing title ({yr}); that reading is an inference and is not verified against the unit." if yr else ""
+        shorthand = [f'"{quotes[y]}"' for y in (yr or "").split(", ") if quotes.get(y) and quotes[y] != y]
+        yr_note = f" Model year read from the listing title ({yr}{' from ' + ', '.join(shorthand) if shorthand else ''}); that reading is an inference and is not verified against the unit." if yr else ""
         if e.get("origin") == "manual":       # Michael's own note: owner-stated, human provenance, never FACT
             ref = f" <{s['url']}>" if s.get("url") else ""
             risks.append({"risk": e["risk"] + yr_note + " (Michael's note; the model is taken from the listing text and not verified against the unit.)",
