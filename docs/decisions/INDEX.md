@@ -28,6 +28,7 @@ The executive synthesis is `docs/research/ROUND_ONE_SYNTHESIS.md`. The ADRs belo
 | ADR-0007 | Business scope: flips + services | ACCEPTED (Michael decision) |
 | ADR-0008 | Implementation language: Python | ACCEPTED (technical; per synthesis) |
 | ADR-0009 | Contracts v1.1.0 change set | **PROPOSED**: v1.0.0 stays in force (item 1 moved to ADR-0010) |
+| ADR-0013 | Deal Sniffer product direction: mission engine now, marketplace seams later (owner package, Aria 2026-10-07) | **ACCEPTED** (scope + seams only) |
 | ADR-0012 | No universal absolute-profit floor; capital-velocity scoring; deal classes as data (owner rule, Aria 2026-10-07) | **ACCEPTED**; implementation C-19 |
 | ADR-0011 | Deal Sniffer opportunity card (derived view; UNKNOWN-not-guess; recommendation vocabulary; activity trail; logistics profile) | **ACCEPTED**; enrichment contract change PROPOSED (ADR-0009 items 10–11) |
 | ADR-0010 | MBOS-CJSON-1 canonical JSON (RFC 8785 profile) + MBOS-RH-1 receipt hash; Agent 04 sole ledger owner | **ACCEPTED** (F-13/F-14) |

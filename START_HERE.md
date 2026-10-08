@@ -268,9 +268,11 @@ External providers should be replaceable.
 ## Before doing anything
 A new agent must read:
 1. START_HERE.md
-2. docs/AGENT_HANDOFF.md
-3. docs/status/ALL_AGENTS.md if present
-4. its own branch docs/status/AGENT_STATUS.md
-5. relevant docs/research/ and docs/decisions/
+2. docs/product/DEAL_SNIFFER_START_HERE.md (owner product direction; required before touching scoring, discovery, cards/UI, inventory, campaigns, offers, services, valuation, payments, reputation, jurisdiction or merchandising)
+3. docs/AGENT_HANDOFF.md
+4. docs/status/ALL_AGENTS.md if present
+5. its own branch docs/status/AGENT_STATUS.md
+6. docs/status/READY_QUEUE.md and ACTIVE_WORK.md
+7. relevant docs/research/ and docs/decisions/
 
 Then continue from durable state, not from assumptions.

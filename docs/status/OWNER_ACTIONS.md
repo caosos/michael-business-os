@@ -36,6 +36,9 @@ Full checklist: `docs/runbooks/first-live-run-checklist.md` on `research/agent-0
 | Install Podman or a sandbox runtime (`runsc`, Podman, Docker or E2B) if model-written code will ever run | none installed; not needed for the dry-run MVP (05's checker I1–I8) |
 | EIN / entity status, business name, service area, Google category | A2P 10DLC, Google Business Profile; only when marketing or SMS goes live |
 
+## D2. Runtime foreman (Aria 1905; host-side, outside the repo)
+- The written foreman loop cannot restart a session that has stopped. After A-22 lands, schedule `tools/foreman.py` (read-only) on the host (cron or a systemd timer, every 10-15 min) and use its `--wake-text` output to resume any agent it reports idle. Agent 01 cannot start or wake sessions itself. Nothing in this is an external action; it only reads GitHub.
+
 ## E. Not yet possible (waiting on a build, not on you)
 - Seeing NEGOTIATING / QUALIFIED on the card needs inbound communications (ADR-0009 item 11).
 - Live sends of any kind stay disabled until #4 and #5 are decided and the release gate is green.

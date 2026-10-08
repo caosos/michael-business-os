@@ -92,3 +92,10 @@ Michael does NOT need to choose:
 - MCP vs custom tools → MCP
 - n8n as core vs edge → edge only
 - CRM choice for MVP → none required
+
+## 10. Weekly Money Mission inputs (raised by Agent 01 from Aria ARIA-20261007-1905; does NOT block the dry-run MVP)
+- **Decision:** the real weekly income target and the hours per week Michael can work. The package's $1,500 is an example, not an instruction. The $500 protected principal is already Michael's stated bankroll.
+- **Why:** the mission planner (C-21) and the Mission page (F-18) need them. Until set they are UNKNOWN and the planner reports the gap as UNKNOWN; it never invents a target.
+- **Recommended default:** `weekly_target_usd: null`, `hours_available: null` in `config/operator_profile.v1.json`; Michael sets them when ready (same place as `current_cash_context`, #9).
+- **Blocked:** a numeric projected week. **Continues:** all schemas, planner, ledger and UI against fixtures.
+
