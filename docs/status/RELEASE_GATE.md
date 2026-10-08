@@ -1,6 +1,6 @@
 # Release gate: wave two (PASS)
 
-- **Run:** 2026-10-07 18:19 -0500
+- **Run:** 2026-10-07 19:10 -0500
 - **Command:** `.venv/bin/python -I tools/release_gate.py --fetch`
 - **Mode:** DRY-RUN only. Throwaway local PostgreSQL 16.
 
@@ -8,25 +8,28 @@
 
 | Lane | Commit |
 |---|---|
-| 01-coordinator | `526489a` |
+| 01-coordinator | `bcb6bc2` |
 | 02-opportunity | `bd5076b` |
 | 03-economics | `3d6212c` |
 | 04-state | `c97ba6b` |
 | 05-governance | `4e3c10f` |
 | 06-communications | `8b10212` |
-| 07-marketing | `9a790c5` |
-| 01-coordinator (local HEAD) | `526489a` |
+| 07-marketing | `7342abc` |
+| 01-coordinator (local HEAD) | `823aa39` |
 
 ## Checks
 
 | Check | Result | Time | Summary |
 |---|---|---|---|
-| frozen contracts (validate_contracts.py) | PASS | 0.3s | schemas checked: 10 |
+| frozen contracts (validate_contracts.py) | PASS | 0.4s | schemas checked: 10 |
+| frozen contracts pinned (FROZEN.sha256.json) | PASS | 0.0s | OK: 22 contract files match the pin |
 | ADR-0010 vectors (reference self-test) | PASS | 0.0s | PASS receipt_chain: 2 receipts verified |
-| full test suite (pytest) | PASS | 187.2s | 234 passed in 186.22s (0:03:06) |
+| full test suite (pytest) | PASS | 198.0s | 260 passed in 196.98s (0:03:16) |
+| suite floor (tools/release_gate_floor.json) | PASS | 0.0s | passed 260 (min 240), skipped 0 (max 3), failed 0 |
 | cross-lane interop (tools/interop_check.py) | PASS | 0.1s | 6/6 Python lanes CONFORM (vectors + rejections + vendored-copy identity) |
 | installed lane packages == pushed heads (no stale installs) | PASS | 0.0s | identical: mbos_economics 29 files vs research/agent-03-economics; mbos_governance 24 files vs research/agent-05-governance |
-| lane D/E e2e + strict AT-1 (03 engine, 05 gateway, 04 schema) | PASS | 3.7s | chain 60 ok=True · reference 60 receipts verified · effector 0 (live 0) · contract errors 0 · AT-1 {'ok': True, 'drift_count': 0, 'weak_receipt_count': 0, 'items': 4} · final {'smart_home_install': 'ARCHIVED', 'mower': 'ARCHIVED', 'trailer': 'RESEARCHING', 'drywall_repair': 'RESEARCHING'} |
+| lane D/E ACTION path (real gateway, follow-up, PANIC drill, live effector rows must be 0 and >=2 calls) | PASS | 5.2s | effector calls 2 (live 0) · executed 2 · follow-up {'policy_denied': False, 'executed_receipts': 2, 'second_request': True, 'concurrent': {'accepted': 1, 'refused': ['DecisionRefused', 'DecisionRefused', 'DecisionRefused', 'DecisionRefused', 'DecisionRefused'], 'live_pending': 1}} · panic drill True · chain ok True |
+| lane D/E e2e + strict AT-1 (03 engine, 05 gateway, 04 schema) | PASS | 3.1s | chain 60 ok=True · reference 60 receipts verified · effector 0 (live 0) · contract errors 0 · AT-1 {'ok': True, 'drift_count': 0, 'weak_receipt_count': 0, 'items': 4} · final {'smart_home_install': 'ARCHIVED', 'mower': 'ARCHIVED', 'trailer': 'RESEARCHING', 'drywall_repair': 'RESEARCHING'} |
 
 ## Coverage notes
 

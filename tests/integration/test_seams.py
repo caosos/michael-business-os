@@ -274,3 +274,22 @@ def test_nul_in_a_listing_does_not_abort_discover_batch(rt, tmp_path):
     with SetWorkflowID(f"discover:p-{tag}"):
         results = DBOS.start_workflow(workflows.discover, f"p-{tag}").get_result()
     assert len(results) == 2 and sum(1 for r in results if r["created"]) == 2, results   # scrubbed + ingested, batch continues
+
+
+def test_policy_blocked_followup_leaves_a_receipt_stronger(ledger_db):
+    """07 F-43 with a PDP that really denies."""
+    from mbos.interfaces import PolicyDecision
+
+    class DenyAll:
+        def decide(self, areq):
+            return PolicyDecision(decision="deny", tier=0, category="email", reason="DENY_TEST", policy_version="t")
+
+    ids = seed_flow(ledger_db, outcome=False)  # ACTED
+    pa = {"capability": "comms.email.send", "summary": "follow up", "reversibility": "irreversible",
+          "estimated_cost": {"amount": 0, "currency": "USD"}}
+    n0 = scalar(ledger_db, "SELECT count(*) FROM mbos.receipts WHERE item_id = :i", i=ids["item_id"])
+    with ledger_db.begin() as c:
+        out = spine.propose_followup(c, ids["item_id"], pa, Components(pdp=DenyAll()).with_defaults())
+    assert out["policy_denied"] is True
+    assert scalar(ledger_db, "SELECT count(*) FROM mbos.receipts WHERE item_id = :i", i=ids["item_id"]) > n0
+    assert scalar(ledger_db, "SELECT state FROM mbos.items WHERE item_id = :i", i=ids["item_id"]) == "ACTED"  # item unchanged

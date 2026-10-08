@@ -180,6 +180,29 @@ def lane_d_e2e(fixture: str, gateway_mode: str = "reference") -> None:
             time.sleep(0.3)
         wait_state(engine, trailer, "ACTED", timeout=30)
         followup = {"policy_denied": fu["policy_denied"], "executed_receipts": n, "second_request": f2["action_request_id"] != a["action_request_id"]}
+        # 07 F-45: concurrent follow-ups on one ACTED item -> exactly ONE live request (lane D row lock)
+        import threading
+
+        outs, refused = [], []
+
+        def _go():
+            try:
+                outs.append(workflows.propose_followup(trailer, {"capability": "comms.email.send", "reversibility": "irreversible",
+                                                                 "summary": "concurrent follow-up (DRY-RUN draft)",
+                                                                 "estimated_cost": {"amount": 0, "currency": "USD"}}))
+            except Exception as e:  # noqa: BLE001
+                refused.append(type(e).__name__)
+
+        ths = [threading.Thread(target=_go) for _ in range(6)]
+        [t_.start() for t_ in ths]
+        [t_.join() for t_ in ths]
+        with engine.connect() as c:
+            live = c.execute(sa.text("SELECT count(*) FROM mbos.action_requests WHERE item_id = :i AND status = 'pending_approval'"),
+                             {"i": trailer}).scalar_one()
+        followup["concurrent"] = {"accepted": len(outs), "refused": refused, "live_pending": live}
+        if live:  # leave the item settled: Michael says NO to the concurrent one
+            f3 = pending_request(engine, trailer)
+            workflows.record_decision(f3["action_request_id"], "NO", f3["payload_hash"], reason="e2e cleanup")
     if smart in awaiting:
         b = pending_request(engine, smart)
         workflows.record_decision(b["action_request_id"], "NO", b["payload_hash"], reason="lane D e2e: not this week")

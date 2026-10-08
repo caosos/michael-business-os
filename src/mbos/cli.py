@@ -114,8 +114,11 @@ def cmd_worker(a: argparse.Namespace) -> int:
         if a.once:
             time.sleep(a.settle)
         else:
+            from mbos.workflows import recover_orphan_gates
+
             while True:
-                time.sleep(3600)
+                time.sleep(60)
+                recover_orphan_gates()  # F-42: periodic safety net for follow-up gates
     except KeyboardInterrupt:
         pass
     # Workflows parked at the approval gate run on non-daemon DBOS threads, so a normal interpreter exit

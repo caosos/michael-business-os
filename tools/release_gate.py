@@ -1,6 +1,6 @@
 """Wave-two release gate (A-02). One command; exits non-zero on any failure; writes docs/status/RELEASE_GATE.md.
 
-    .venv/bin/python -I tools/release_gate.py [--fetch]
+    .venv/bin/python -I tools/release_gate.py [--no-fetch]   # fetches origin by default so it checks the REAL pushed heads
 
 Checks: frozen contracts · ADR-0010 vectors · full test suite · cross-lane interop (every lane's pushed code) ·
 lane-D/E end-to-end with lane C's real engine + 05's real gateway · lane C's strict AT-1 replay audit of that run.
@@ -32,6 +32,26 @@ def run(name: str, cmd: list[str], timeout: int = 1800, env: dict | None = None)
             "summary": tail[-1] if tail else "", "stdout": cp.stdout}
 
 
+def contracts_pinned() -> dict:
+    """F-46: the frozen contract bytes must match their pin (changing one needs an accepted ADR + semver bump)."""
+    r = run("frozen contracts pinned (FROZEN.sha256.json)", [PY, "-I", "tools/pin_contracts.py"])
+    r["summary"] = " ".join(r["stdout"].strip().splitlines()[:6])[:300]
+    return r
+
+
+def suite_floor(pytest_result: dict) -> dict:
+    """F-47: the suite must pass AND run enough tests: an all-skipped or shrunken suite is a red gate."""
+    import re
+
+    floor = json.loads((ROOT / "tools" / "release_gate_floor.json").read_text())
+    out = pytest_result["stdout"]
+    n = lambda w: int((re.search(rf"(\d+) {w}", out) or [0, 0])[1])
+    passed, skipped, failed = n("passed"), n("skipped"), n("failed") + n("error")
+    ok = pytest_result["ok"] and passed >= floor["min_passed"] and skipped <= floor["max_skipped"] and failed <= floor["max_failed"]
+    return {"name": "suite floor (tools/release_gate_floor.json)", "ok": ok, "rc": 0 if ok else 1, "secs": 0.0,
+            "summary": f"passed {passed} (min {floor['min_passed']}), skipped {skipped} (max {floor['max_skipped']}), failed {failed}"}
+
+
 def pins_check() -> dict:
     """07's lesson: after a re-pin pip can silently keep OLD code (same version string, stale build/ dir). Compare every
     installed lane package, byte for byte, with the pushed head the gate reports."""
@@ -53,13 +73,54 @@ def pins_check() -> dict:
         with tarfile.open(fileobj=io.BytesIO(tar.stdout)) as t:
             files = {Path(m.name).relative_to(path).as_posix(): t.extractfile(m).read()
                      for m in t.getmembers() if m.isfile() and m.name.endswith((".py", ".json"))}
-        diff = [f for f, data in files.items() if f.endswith(".py") and (root / f).exists() and (root / f).read_bytes() != data]
-        missing = [f for f in files if f.endswith(".py") and not (root / f).exists()]
+        installed = {p.relative_to(root).as_posix() for p in root.rglob("*") if p.is_file() and "__pycache__" not in p.parts
+                     and p.suffix in (".py", ".json")}
+        diff = [f for f, data in files.items() if (root / f).exists() and (root / f).read_bytes() != data]  # .py AND .json (F-48)
+        missing = [f for f in files if not (root / f).exists()]
+        extra = sorted(installed - set(files))  # a stale extra file is drift too (F-48)
         notes.append(f"{pkg} {len(files)} files vs {branch}")
-        if diff or missing:
-            bad.append(f"{pkg}: {len(diff)} differ ({', '.join(diff[:3])}), {len(missing)} missing")
+        if diff or missing or extra:
+            bad.append(f"{pkg}: {len(diff)} differ ({', '.join(diff[:3])}), {len(missing)} missing, {len(extra)} extra ({', '.join(extra[:3])})")
     return {"name": "installed lane packages == pushed heads (no stale installs)", "ok": not bad, "rc": 0 if not bad else 1,
             "secs": 0.0, "summary": "; ".join(bad) if bad else "identical: " + "; ".join(notes)}
+
+
+def action_path_lane_de() -> dict:
+    """F-49: the strict-AT-1 run uses lane C's real engine, which rarely says YES on fixtures, so it executes no action.
+    This run uses the stand-in scorer so the ACTION path (approval -> real gateway -> dry-run effector -> follow-up ->
+    PANIC drill) really executes, and asserts the live-effector check is NOT empty."""
+    sys.path.insert(0, str(ROOT))
+    import pgserver
+
+    from tests.helpers import lane_d
+    from tests.helpers.common import fixture_variant
+
+    tmp = Path(tempfile.mkdtemp(prefix="mbos-gate-act-"))
+    src = tmp / "src"
+    src.mkdir()
+    lane_d.extract(src)
+    tar = subprocess.run(["git", "archive", "origin/research/agent-05-governance", "policy"], cwd=ROOT, capture_output=True, check=True).stdout
+    tarfile.open(fileobj=io.BytesIO(tar)).extractall(tmp, filter="data")
+    server = pgserver.get_server(str(tmp / "pg"), cleanup_mode="stop")
+    try:
+        app = lane_d.build(server, src, "mbos_gate_act")
+        server.psql("CREATE DATABASE mbos_gate_act_sys;")
+        fx = fixture_variant(tmp, "gate", ["FIX-TRAILER-1", "FIX-LEAD-SMARTHOME-1", "FIX-MOWER-1"])
+        r = run("action path", [PY, "-m", "tests.helpers.runner", "lane_d_e2e", str(fx), "lane_e"], timeout=300,
+                env={"MBOS_DATABASE_URL": app, "MBOS_SYSTEM_DATABASE_URL": server.get_uri().replace("/postgres?", "/mbos_gate_act_sys?"),
+                     "MBOS_POLICY_PATH": str(tmp / "policy" / "policy.v1.json"),
+                     "MBOS_EGRESS_FILE": str(tmp / "egress.json"), "MBOS_LITELLM_FILE": str(tmp / "litellm.json")})
+    finally:
+        server.cleanup()
+    res = next((json.loads(line[len("RESULT"):]) for line in r["stdout"].splitlines() if line.startswith("RESULT")), None)
+    ok = bool(r["ok"] and res and res["chain"]["ok"] and res["reference_chain"][0] and res["live_effector_calls"] == 0
+              and res["effector_calls"] >= 2 and res["executed"] >= 2 and not res["contract_errors"]
+              and res["followup"] and res["followup"]["concurrent"]["live_pending"] == 1
+              and res["panic"] and res["panic"]["frozen_blocks"] and not res["panic"]["released_blocks"])
+    summary = "no RESULT" if not res else (f"effector calls {res['effector_calls']} (live {res['live_effector_calls']}) · executed {res['executed']} · "
+                                           f"follow-up {res['followup']} · panic drill {res['panic'] and res['panic']['frozen_blocks']} · chain ok {res['chain']['ok']}")
+    return {"name": "lane D/E ACTION path (real gateway, follow-up, PANIC drill, live effector rows must be 0 and >=2 calls)",
+            "ok": ok, "rc": r["rc"], "secs": r["secs"], "summary": summary[:600]}
 
 
 def at1_lane_de() -> dict:
@@ -100,22 +161,26 @@ def at1_lane_de() -> dict:
 
 
 def main() -> int:
-    if "--fetch" in sys.argv:
+    if "--no-fetch" not in sys.argv:  # F-48: compare against the REAL pushed heads, not stale local refs
         subprocess.run(["git", "fetch", "-q", "origin"], cwd=ROOT)
     heads = {l: subprocess.run(["git", "rev-parse", "--short", f"origin/research/agent-{l}"], cwd=ROOT,
                                capture_output=True, text=True).stdout.strip() for l in LANES}
     heads["01-coordinator (local HEAD)"] = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT,
                                                           capture_output=True, text=True).stdout.strip()
+    pytest_check = run("full test suite (pytest)", [PY, "-m", "pytest", "-q"])
     checks = [
         run("frozen contracts (validate_contracts.py)", [PY, "-I", "docs/research/contracts/validate_contracts.py", "docs/research/contracts"]),
+        contracts_pinned(),
         run("ADR-0010 vectors (reference self-test)", [PY, "-I", "docs/research/contracts/canonical/mbos_canonical.py",
                                                       "docs/research/contracts/canonical/vectors.json"]),
-        run("full test suite (pytest)", [PY, "-m", "pytest", "-q"]),
+        pytest_check,
+        suite_floor(pytest_check),
         run("cross-lane interop (tools/interop_check.py)", [PY, "-I", "tools/interop_check.py"]),
         pins_check(),
+        action_path_lane_de(),
         at1_lane_de(),
     ]
-    ic = checks[3]
+    ic = next(c for c in checks if c["name"].startswith("cross-lane interop"))
     ic["summary"] = f"{ic['stdout'].count('CONFORMS')}/6 Python lanes CONFORM (vectors + rejections + vendored-copy identity)"
     ok = all(c["ok"] for c in checks)
     lines = [f"# Release gate: wave two ({'PASS' if ok else 'FAIL'})", "",

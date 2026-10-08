@@ -12,6 +12,8 @@ Determinism rules (DBOS replays the workflow body on recovery):
 
 from __future__ import annotations
 
+import time
+
 from dataclasses import asdict
 from datetime import timedelta
 from typing import Any, Optional
@@ -278,3 +280,23 @@ def propose_followup(item_id: str, proposed_action: dict[str, Any]) -> dict[str,
         finally:
             c.destroy()
     return out
+
+
+def recover_orphan_gates() -> list[str]:
+    """07 F-42: a crash between a follow-up request's commit and its gate being enqueued leaves a request waiting on
+    Michael with NO workflow behind it (his YES would be accepted and never executed). Find those and start their gate.
+
+    A request is orphaned when neither its item workflow (`item:<id>`) nor a follow-up gate (`followup:<areq>*`) is
+    still active. Run at worker start and periodically (`mbos worker`). Idempotent: an active gate is never duplicated."""
+    started: list[str] = []
+    for g in tx(lambda conn: S().orphan_gates(conn)):
+        item_id, areq_id = g["item_id"], g["action_request_id"]
+        active = DBOS.list_workflows(status=["PENDING", "ENQUEUED", "DELAYED"], load_input=False, load_output=False,
+                                     workflow_id_prefix=[f"item:{item_id}", f"followup:{areq_id}"])
+        if active:
+            continue
+        wf_id = f"followup:{areq_id}:r{int(time.time())}"
+        DBOS.enqueue_workflow_with_options({"queue_name": FOLLOWUP_QUEUE, "workflow_name": "followup_lifecycle",
+                                            "workflow_id": wf_id}, item_id, areq_id)
+        started.append(wf_id)
+    return started

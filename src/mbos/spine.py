@@ -147,12 +147,25 @@ def ingest(conn: sa.Connection, raw: dict[str, Any], norm: Optional[dict[str, An
 
 # ---------------------------------------------------------------- SCORE + RECOMMEND
 
+def _check_proposed_action(pa: Any) -> None:
+    """F-44: a malformed proposed action is a clean refusal, never a raw KeyError."""
+    if not isinstance(pa, dict) or not isinstance(pa.get("capability"), str) or not pa["capability"].strip() \
+            or not isinstance(pa.get("summary"), str) or not pa["summary"].strip() \
+            or pa.get("reversibility") not in ("reversible", "partially_reversible", "irreversible"):
+        raise DecisionRefused("proposed action needs capability, summary and reversibility (reversible|partially_reversible|irreversible)")
+    cost = pa.get("estimated_cost")
+    if cost is not None and not (isinstance(cost, dict) and isinstance(cost.get("amount"), (int, float)) and cost["amount"] >= 0
+                                 and isinstance(cost.get("currency"), str)):
+        raise DecisionRefused("estimated_cost must be {amount >= 0, currency}")
+
+
 
 def propose_followup(conn: sa.Connection, item_id: str, pa: dict, components: Any) -> dict:
     """A follow-up action on an Item that already acted (A-15; R12 edge ACTED -> AWAITING_APPROVAL): e.g. a counter-offer,
     a follow-up message, a quote. A new ActionRequest through the SAME policy path (PDP, proposer_for, step-up); the item
     returns to AWAITING_APPROVAL only if there is something for Michael to decide."""
-    item = load_item(conn, item_id, for_update=True)
+    _check_proposed_action(pa)
+    item = load_item(conn, item_id, for_update=True)  # the row lock serialises concurrent follow-ups (07 F-45)
     if item["state"] != "ACTED":
         raise DecisionRefused(f"{item_id} is {item['state']}; a follow-up needs an item that has already acted")
     if not item.get("recommendation") or not item.get("scores"):
@@ -161,6 +174,11 @@ def propose_followup(conn: sa.Connection, item_id: str, pa: dict, components: An
                            derived_from=[item["recommendation"]["provenance_id"]])
     areq = _propose(conn, item, pa, prov, components)
     if areq.get("no_proposer") or areq["status"] == "rejected":
+        append_receipt(conn, type="ITEM_STATE_CHANGED", intent=f"follow-up blocked by policy: {pa['capability']} "
+                       f"({'no agent may propose it' if areq.get('no_proposer') else 'PDP denied'}); item unchanged",
+                       provenance_ids=[prov], item_id=item_id, entity_type="item", entity_id=item_id, effect="none",
+                       idempotency_key=f"{item_id}:followup-blocked:{sha256_of(pa)[7:23]}",
+                       before_state={"state": item["state"]}, after_state={"state": item["state"]})  # F-43: a blocked proposal still has a receipt
         return {"action_request_id": areq.get("action_request_id"), "policy_denied": True}
     update_item(conn, item_id, to_state="AWAITING_APPROVAL",
                 patch={"action_request_ids": (item.get("action_request_ids") or []) + [areq["action_request_id"]]},
@@ -700,3 +718,10 @@ def retract_operator_note(conn: sa.Connection, note_id: str, entered_by: str, en
 
 def operator_notes_document(conn: sa.Connection) -> dict:
     return {"notes_format": 1, "notes": []}  # the reference DDL has no note store; the card simply has no manual notes
+
+
+def orphan_gates(conn: sa.Connection) -> list[dict]:
+    """Pending/held requests whose item is waiting on Michael: candidates for an orphaned approval gate (F-42)."""
+    return [{"action_request_id": r.action_request_id, "item_id": r.item_id} for r in conn.execute(sa.text(
+        "SELECT a.action_request_id, a.item_id FROM mbos.action_requests a JOIN mbos.items i USING (item_id) "
+        "WHERE a.status IN ('pending_approval', 'held') AND i.state IN ('AWAITING_APPROVAL', 'HELD')")).all()]

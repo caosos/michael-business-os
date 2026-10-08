@@ -77,6 +77,7 @@ def test_full_lifecycle_with_lane_e_gateway(tmp_path_factory, tmp_path):
     assert r["chain"]["ok"] and r["reference_chain"][0], r
     fu = r["followup"]  # A-15: the follow-up ran through lane E's gateway as its own request
     assert fu and fu["policy_denied"] is False and fu["second_request"] and fu["executed_receipts"] == 2, fu
+    assert fu["concurrent"]["accepted"] == 1 and fu["concurrent"]["live_pending"] == 1, fu["concurrent"]  # F-45
     assert r["effector_calls"] == 2 and r["live_effector_calls"] == 0 and r["executed"] == 2
     assert r["receipt_types"].get("ACTION_EXECUTING") == 2, r["receipt_types"]  # exactly one per edge per request (R4)
     # A-18: PANIC runs through lane E (hooks, approver-only release) and the reconcile schedule exists

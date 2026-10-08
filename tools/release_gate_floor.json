@@ -1,0 +1,1 @@
+{"min_passed": 250, "max_skipped": 3, "max_failed": 0, "note": "Raise min_passed when tests are added. A gate with no floor passes an all-skipped suite (07 F-47)."}
