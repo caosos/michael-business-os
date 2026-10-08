@@ -92,7 +92,7 @@ Hard rules: everything is DRY-RUN. Do not send messages, contact sellers or cust
 PERMISSION_MODES = ("acceptEdits", "auto", "dontAsk")   # never bypassPermissions: the deny-list and the classifier must stay in force
 
 
-def command(route: router.Route, prompt: str, *, permission_mode: str = "acceptEdits") -> list[str]:
+def command(route: router.Route, prompt: str, *, permission_mode: str = "auto") -> list[str]:
     if permission_mode not in PERMISSION_MODES:
         raise ValueError(f"permission mode {permission_mode!r} not allowed for workers; use one of {PERMISSION_MODES}")
     return ["claude", "-p", prompt, "--output-format", "stream-json", "--verbose", "--model", route.model, "--max-turns", str(route.max_turns),
@@ -118,7 +118,7 @@ def should_escalate(row: dict) -> bool:
 
 
 def run_one(task_id: str, lane: str, profile: router.TaskProfile, *, worktree: Path, dry: bool, model: Optional[str],
-            escalate: bool = True, allow_dirty: bool = False, permission_mode: str = "acceptEdits", runner: Optional[Callable[..., Any]] = None, tpath: Optional[Path] = None,
+            escalate: bool = True, allow_dirty: bool = False, permission_mode: str = "auto", runner: Optional[Callable[..., Any]] = None, tpath: Optional[Path] = None,
             skip_session_check: bool = False, queue_text: Optional[str] = None, timeout_s: int = 3600) -> dict[str, Any]:
     name, _, branch, _ = LANES[lane]
     if queue_text is None:
@@ -191,7 +191,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     ap.add_argument("--worktree")
     ap.add_argument("--dry", action="store_true")
     ap.add_argument("--no-escalate", action="store_true")
-    ap.add_argument("--permission-mode", default="acceptEdits", choices=PERMISSION_MODES)
+    ap.add_argument("--permission-mode", default="auto", choices=PERMISSION_MODES)
     ap.add_argument("--allow-dirty", action="store_true", help="continue a previous attempt's uncommitted work (the prompt says so)")
     ap.add_argument("--timeout", type=int, default=3600)
     a = ap.parse_args(argv)

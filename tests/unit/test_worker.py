@@ -164,3 +164,5 @@ def test_bypass_permissions_is_never_available_to_workers():
         with pytest.raises(ValueError):
             worker.command(r, "p", permission_mode=bad)
     assert "--dangerously-skip-permissions" not in worker.command(r, "p")
+    cmd = worker.command(r, "p")
+    assert cmd[cmd.index("--permission-mode") + 1] == "auto"             # default: the classifier, with the deny-list still in force

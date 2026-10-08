@@ -7,7 +7,7 @@ Only **Agent 01** (`mbos-tmux 1`). Everyone else is a bounded worker started per
 ```bash
 cd ~/business-os-worktrees/agent-01-coordinator
 .venv/bin/python -I tools/worker.py TASK_ID --lane 03 --dry            # show route, command and prompt; runs nothing
-.venv/bin/python -I tools/worker.py TASK_ID --lane 03 [--kind implement|integration|architecture|...] [--risk low|medium|high] [--cross-lane] [--long-horizon] [--model sonnet|opus|fable]
+.venv/bin/python -I tools/worker.py TASK_ID --lane 03 [--kind implement|integration|architecture|...] [--risk low|medium|high] [--cross-lane] [--long-horizon] [--model sonnet|opus|fable] [--permission-mode auto|acceptEdits|dontAsk] [--allow-dirty]
 ```
 It refuses if: the task is not READY/CLAIMED in `origin/research/agent-01-coordinator:docs/status/READY_QUEUE.md`; the lane still has a live tmux session; the lane worktree is dirty. One escalation on failure (see router). Output: JSON summary; telemetry row(s) appended to `var/telemetry/worker_runs.jsonl`.
 
@@ -26,3 +26,6 @@ The worker may commit and `git push origin HEAD` on its lane branch only. It is 
 
 ## Efficiency rules
 Fresh worker by default. Keep context under about 150k tokens. `/compact` to continue a justified context; `/clear` to change task. At most 2 heavyweight workers in parallel. Durable knowledge goes to the repo, not chat.
+
+## Permission mode (learned from the first real runs)
+Pattern allowlists cannot cover real shell work (`for` loops, process substitution, redirects, `cd x && ...`): under `acceptEdits` the first two F-21 attempts and two C-23 attempts were blocked or no-ops. Workers therefore default to `--permission-mode auto` (Claude Code's classifier decides) **with the deny-list still in force** (network tools, sudo, force-push, `reset --hard`, `rm -rf`). `bypassPermissions` is refused by the launcher. A clean exit is not a completed task: telemetry's `task_completed` needs the worker's DONE report AND a new commit; permission denials never trigger model escalation.
