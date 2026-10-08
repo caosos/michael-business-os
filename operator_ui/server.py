@@ -656,7 +656,7 @@ def make_handler(app):
             if u.path == "/mission":
                 from . import mission_view
 
-                loaded = mission_view.load_plan(app.mission_file)
+                loaded = mission_view.load_live(app.store, now, app.mission_file)
                 known = {l["item_id"] for l in (loaded["doc"] or {}).get("legs", []) if app.store.item(l["item_id"])} if loaded["kind"] == "plan" else set()
                 return self._send(200, page("Weekly mission", mission_view.render_page(loaded, known), app.state()))
             if u.path == "/usage":

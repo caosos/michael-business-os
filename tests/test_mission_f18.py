@@ -124,3 +124,15 @@ def test_page_on_the_live_ui_links_a_real_card_and_is_read_only(rt, discover, ui
     assert "<form" not in body.split("<main>")[1]                                                    # no controls: nothing to spend or commit
     assert req(ui, "GET", "/mission", host="evil.example")[0] == 403
     ui.mission_file = None
+
+
+def test_reference_backend_uses_the_file_fallback(tmp_path):  # P-06-17
+    from datetime import datetime, timezone
+
+    class Ref:
+        lane = "reference"
+    f = tmp_path / "p.json"
+    f.write_text(json.dumps(PLAN))
+    out = mv.load_live(Ref(), datetime.now(timezone.utc), str(f))
+    assert out["kind"] == "plan" and out["errors"] == [] and out["source"].startswith("file fallback")
+    assert mv.current_week(datetime(2026, 10, 7, tzinfo=timezone.utc)) == {"start": "2026-10-05", "end": "2026-10-11"}

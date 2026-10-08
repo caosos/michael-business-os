@@ -15,6 +15,7 @@ from __future__ import annotations
 import html
 import json
 import os
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Optional
 
@@ -44,6 +45,33 @@ def load_plan(path: Optional[str] = None) -> dict:
         errs = mission._check("mission", doc)
         return {"kind": "mission", "doc": doc, "errors": errs, "path": p}
     return {"kind": "none", "doc": None, "errors": ["unrecognised mission document"], "path": p}
+
+
+def current_week(now: datetime) -> dict:
+    """Monday..Sunday (UTC) containing `now`: only a calendar period for plan_from_db when no mission is set."""
+    mon = (now - timedelta(days=now.weekday())).date()
+    return {"start": mon.isoformat(), "end": (mon + timedelta(days=6)).isoformat()}
+
+
+def load_live(backend: Any, now: datetime, path: Optional[str] = None) -> dict:
+    """P-06-17: on lane D the plan is produced by 03's `mission_feed.plan_from_db` over live scorecards + the mission +
+    `mbos.capital_position_document()` and validated with `plan_errors`; nothing is invented (no Items -> DO_NOT_SPEND/UNKNOWN).
+    Anywhere else, or if the producer is unavailable or fails, fall back to the plan file (`load_plan`)."""
+    reason = "not on lane D"
+    if getattr(backend, "lane", None) == "lane_d":
+        try:
+            from mbos import mission
+            from mbos_economics import mission_feed
+
+            with backend.engine.connect() as c:
+                cur = c.connection.cursor()
+                doc = mission_feed.plan_from_db(cur, period=current_week(now))
+            return {"kind": "plan", "doc": doc, "errors": mission.plan_errors(doc), "path": None, "source": "lane D (live Items)"}
+        except Exception as ex:  # noqa: BLE001 - the page must still render; the fallback says why
+            reason = f"live producer failed: {type(ex).__name__}"
+    out = load_plan(path)
+    out["source"] = f"file fallback ({reason})"
+    return out
 
 
 def money(v: Any) -> str:
@@ -119,7 +147,9 @@ def render_plan(doc: dict, known_items: set[str]) -> str:
 
 
 def render_page(loaded: dict, known_items: set[str]) -> str:
-    head = "<div class='card'><h2>Weekly mission</h2><p class='small mut'>Read-only. Built from a mission plan file; nothing here spends, contacts or commits.</p></div>"
+    src = f" Source: {e(loaded['source'])}." if loaded.get("source") else ""
+    head = ("<div class='card'><h2>Weekly mission</h2><p class='small mut'>Read-only. Built from live Items on lane D, else from a mission plan "
+            f"file; nothing here spends, contacts or commits.{src}</p></div>")
     if loaded["kind"] == "none":
         return head + f"<div class='card'><p class='bad'>{e('; '.join(loaded['errors']))}</p></div>"
     if loaded["errors"]:
