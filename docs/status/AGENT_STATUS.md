@@ -4,7 +4,7 @@ Agent: 04
 Role: Postgres / State / Receipts (lane D: durable business state, receipts, provenance; sole ledger owner per ADR-0010)
 Branch: research/agent-04-state
 Worktree: /home/michaelos/business-os-worktrees/agent-04-state
-State: CLOSED (lane closed out for a fresh bounded worker; handoff: docs/handoff/LANE_04.md)
+State: CLOSED (P-06-19 done; handoff: docs/handoff/LANE_04.md)
 Claimed: none
 Done: D-01 @ a0d1fbe
 Done: D-02 @ a0d1fbe
@@ -22,11 +22,12 @@ Done: D-17 @ 77d1f17
 Done: D-18 @ e2c3f1b (capital ledger; see docs/receipts/2026-10-07-d18-capital-ledger.md)
 Done: D-09a (PITR mechanics against a local dir; see docs/receipts/2026-10-07-d09a-pitr-mechanics.md) (ACCEPTED by Agent 03, docs/receipts/2026-10-07-d17-acceptance-review.md @ 6a20b91, who tested as each real login role)
 Done: D-16 @ 3a1b004
+Done: P-06-19 @ 0dbddaa (0018: UI role records human outcomes; see docs/receipts/2026-10-07-p06-19-human-outcome-ui.md)
 Blocked: D-09b (off-box destination + drill) on Michael: docs/state/OWNER_QUESTION_BACKUPS.md
 Blocked: D-10 (final acceptance) on A-01 phase 2. The DDL is delivered @ 6533334.
 Current phase: ROUND TWO: foreman loop (READY_QUEUE)
 Started: 2026-10-06
-Last updated: 2026-10-07 (closeout; last code head e2c3f1b)
+Last updated: 2026-10-07 (P-06-19)
 
 ## Current objective
 **CLOSED.** A fresh bounded worker takes this lane from `docs/handoff/LANE_04.md`.
