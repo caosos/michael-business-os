@@ -57,6 +57,7 @@ button{font:inherit;font-weight:700;border:0;border-radius:6px;padding:8px 14px;
 input,textarea,select{font:inherit;width:100%;margin:4px 0 8px;padding:6px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink)}
 input[type=checkbox],input[type=radio]{width:auto;margin-right:6px}textarea{min-height:120px;font-family:ui-monospace,monospace;font-size:13px}
 .flash{padding:10px 14px;border-radius:8px;margin-bottom:14px;border:1px solid var(--line);background:var(--card)}.err{border-color:var(--no);color:var(--no)}
+.cap-row{gap:18px;align-items:flex-start}.cap-big{min-width:150px}.cap-val{font-size:22px;font-weight:700}
 .unk{color:var(--mod)}.tag{display:inline-block;padding:0 6px;border-radius:99px;font-size:11px;font-weight:700;border:1px solid currentColor}
 .tag.fact{color:var(--yes)}.tag.inf{color:var(--hold)}.tag.rec{color:var(--mod)}.rec{border-color:var(--acc)}
 .q a.rowlink{display:block;text-decoration:none;color:inherit}.bad{color:var(--no);font-weight:600}.ok{color:var(--yes);font-weight:600}

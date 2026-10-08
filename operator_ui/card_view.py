@@ -121,6 +121,39 @@ def render_economics(card: dict) -> str:
     return f"<div class='card'><h2>Estimated numbers</h2><table>{rows}</table></div>"
 
 
+_CLASS_LABEL = {"MICRO_FLIP": "Micro flip", "QUICK_TURN": "Quick turn", "STANDARD_FLIP": "Standard flip",
+                "CAPITAL_INTENSIVE_FLIP": "Capital-intensive flip"}
+
+
+def _cap(econ: dict, key: str) -> dict:
+    """A capital field is optional on the card; absent means the card did not establish it, so it is UNKNOWN."""
+    return econ.get(key) or {"value": "UNKNOWN", "reason": "the card does not carry this field"}
+
+
+def render_capital(card: dict) -> str:
+    """F-17 (ADR-0012): how well this deal uses Michael's cash. Class, multiple and velocity are prominent with the downside
+    beside them. UNKNOWN stays visible, above all `current_cash_context`. There is NO universal profit floor and nothing
+    here sorts or filters by absolute profit: a small fast flip can be a better use of cash than a big slow one."""
+    x = card["economics"]
+    cls, mult, vel = _cap(x, "opportunity_class"), _cap(x, "cash_multiple"), _cap(x, "capital_velocity")
+    down = _cap(x, "catastrophic_downside_probability")
+    big = lambda label, d, fmt=None: (f"<div class='cap-big'><div class='small mut'>{label}</div><div class='cap-val'>{fmt(d) if fmt and not unknown(d) else datum(d)}</div></div>")  # noqa: E731
+    cls_txt = lambda d: f"{e(_CLASS_LABEL.get(d['value'], d['value']))} <span class='tag {_BASIS_CLASS.get(d.get('basis'), '')}'>{e(d.get('basis'))}</span>"  # noqa: E731
+    mult_txt = lambda d: f"{e(d['value'])}x <span class='tag {_BASIS_CLASS.get(d.get('basis'), '')}'>{e(d.get('basis'))}</span>"  # noqa: E731
+    row = lambda label, k, money=False: _row(label, _cap(x, k), money)  # noqa: E731
+    ctx = _cap(x, "current_cash_context")
+    ctx_html = (f"<p class='unk'><b>Cash situation: UNKNOWN.</b> You have not told the system how much cash you have free right now, "
+                f"so it cannot judge whether this deal fits your cash. {datum(ctx).split('</b>', 1)[1] if '</b>' in datum(ctx) else ''}</p>"
+                if unknown(ctx) else f"<p><b>Cash situation:</b> {datum(ctx)}</p>")
+    return (f"<div class='card' id='capital'><h2>Capital: why a small fast flip can outrank a big slow one</h2>"
+            f"<div class='row cap-row'>{big('Class', cls, cls_txt)}{big('Cash multiple', mult, mult_txt)}{big('Capital velocity (per day)', vel)}"
+            f"{big('Downside: repair fails outright', down)}</div>"
+            "<div class='grid'><table>" + row("Parts-out floor (if the repair fails)", "parts_out_floor", True) + row("Repair uncertainty", "repair_uncertainty")
+            + "</table><table>" + row("Liquidity", "liquidity") + row("Skill fit (0 to 1)", "skill_fit") + row("Personal-use value", "personal_use_value")
+            + f"</table></div>{ctx_html}"
+            "<p class='small mut'>There is no universal profit floor (ADR-0012). This page does not sort or filter by absolute profit.</p></div>")
+
+
 def render_value_add(card: dict) -> str:
     v = card["value_add_plan"]
     risks = "".join(
@@ -283,6 +316,6 @@ def render_item_card(card: dict, errors: list[str], controls_html: str, hold_htm
               "<div class='card'><h2>Your decision</h2><p class='mut'>No open request is waiting for a decision on this item.</p></div>")
     return (banner + render_flags(card) + render_header(card)
             + "<div class='grid'>" + render_listing_activity(card) + render_seller(card) + "</div>"
-            + render_why(card) + render_economics(card)
+            + render_why(card) + render_economics(card) + render_capital(card)
             + "<div class='grid'>" + render_value_add(card) + render_seasonality(card) + render_transport(card) + "</div>"
             + render_status(card) + render_recommendation(card) + decide + render_trail(card) + render_unknowns(card))
