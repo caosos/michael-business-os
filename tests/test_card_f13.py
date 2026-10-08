@@ -34,7 +34,9 @@ def test_zero_enrichment_card_is_honest_and_complete(rt, discover, ui):
     assert res["errors"] == []                                   # validate_card is empty
     card = res["card"]
     unk = card["unknowns"]
-    assert unk and all(f"<code>{u}</code>" in body for u in unk)  # the page lists every UNKNOWN the card lists
+    import html as _h
+
+    assert unk and all(f"<code>{_h.escape(u)}</code>" in body for u in unk)  # the page lists every UNKNOWN the card lists (escaped)
     # the page never adds data: nothing is shown as known that the card marks UNKNOWN
     assert card["listing_activity"]["posted_at"]["value"] == "UNKNOWN" and "POSTED" not in body.upper().split("LISTING ACTIVITY")[0]
     assert card["item"]["title"] in body or card["item"]["title"].replace("&", "&amp;") in body

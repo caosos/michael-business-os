@@ -5,16 +5,17 @@ Role: Communications + Operator UI / Approval UX (build lane F)
 Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
 State: WORKING
-Claimed: F-18
-Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe · F-04 @ 46c961c · F-13 @ 2415936 · F-14 @ c68a33c · F-13 hardening @ 6e47646 · F-15 @ 94130a4 · F-11 @ 20d88ee · F-17 @ 47c0621 · F-16 @ 9c2012d
+Claimed: F-19
+Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe · F-04 @ 46c961c · F-13 @ 2415936 · F-14 @ c68a33c · F-13 hardening @ 6e47646 · F-15 @ 94130a4 · F-11 @ 20d88ee · F-17 @ 47c0621 · F-16 @ 9c2012d · F-18 @ HEADPH
 Blocked: none
 Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
 Last updated: 2026-10-07
 
 ## Current objective
-**F-18** (P1; A-23 landed): the Weekly Mission page, built from `docs/research/contracts/examples/mission/mission-plan.example.json` and validated with `mbos.mission.validate_plan`. A null target or hours renders UNKNOWN (and `remaining_gap` stays UNKNOWN); DO_NOT_SPEND is shown plainly; no plan leg without a link to its card; human channel only (R14). F-19/F-20 are behind A-25/A-27.
+**F-19** (READY; A-25 landed): deterministic audience-view renderer (`render_view(inventory, audience)`, templates, no LLM) shown as a dry-run draft preview, always passing `mbos.merchandising.lint`; current photos are never mixed with any AI "possible finished look". Then **F-20** (conversational intake front door, A-27).
 
 ## Done
+- **F-18 @ HEADPH:** the Weekly Mission page (`/mission`) from a validated mission plan file. A plan failing `mbos.mission.plan_errors` is not rendered; a null target or hours shows UNKNOWN and the gap stays UNKNOWN; DO_NOT_SPEND is a red banner first; the five-field capital position; every leg links to its card (unverified ones flagged); plan order, no profit sorting. Read-only. 145 + 31 tests. Receipt: `docs/receipts/2026-10-07-f18-weekly-mission.md`.
 - **F-16 @ 9c2012d:** Edit (a new version, `supersedes`) and Retract (a reason is required) on `/notes`, with CSRF, the PIN and a server-set author; every refusal reason shown; only the head can be changed. After a retraction the next card no longer shows the risk, and the history keeps it. 133 + 31 tests. Receipt: `docs/receipts/2026-10-07-f16-edit-retract-notes.md`.
 - **F-17 @ 47c0621:** the Capital section on the card: class, cash multiple and velocity prominently with the downside beside them; parts-out floor, repair uncertainty, liquidity, skill fit and personal-use value; UNKNOWN visible, with a banner for the cash situation. Tested on Michael's three examples; a static test forbids sorting or filtering by profit. 133 + 27 tests. Receipt: `docs/receipts/2026-10-07-f17-capital-section.md`.
 - **F-11 @ 20d88ee:** Follow-up questions / Offer / Quote buttons on an ACTED card, each its own step-up request via `workflows.propose_followup` (drafts from the comms planner; offers never above the ask). Verified on lane D + E, including a separate UI process. 124 + 27 tests. Receipt: `docs/receipts/2026-10-07-f11-followup-buttons.md`.
@@ -125,6 +126,7 @@ None. Live comms stay disabled (MICHAEL_DECISIONS #4).
 - The comms policy values in `comms_spec/data/comms_policy.v1.json` are PROPOSED (conservative). Loosening any of them is a version bump.
 
 ## Proposed tasks
+- **P-06-17 (lane A/C):** nothing produces a mission plan yet (a planner that builds legs from live cards plus a mission and capital-ledger store). The F-18 page reads a plan file (`MBOS_MISSION_PLAN_FILE`) until a producer or spine reader exists.
 - P-06-15 RESOLVED by Agent 01 (`build/` untracked; release gate compares installed lane packages byte for byte). Original note:  the coordinator repo commits `build/` (setuptools output) and `setup.py`. `git archive` ships a stale `build/lib`, and a non-editable install from that tree silently installs the old code (mine lacked `clean_text` until I removed `build/`). Remove `build/` from git and add it to `.gitignore`.
 - **P-06-16 (lane E):** the PDP's `binding_payload_keys` check is key-name based at any depth, so an innocent flag named `binding` blocks a first contact. Consider checking only top-level payload keys, or documenting the reserved names for drafting lanes. Mine are renamed.
 - **P-06-14 (lane F, now unblocked):** `mbos.spine_d.retract_operator_note(conn, note_id, entered_by, entered_at, reason)` exists (Agent 01, deec1d1 or earlier). Proposed UI task: "Retract" and "Edit" (a new note with `supersedes`) on `/notes`, with the server-set author, the PIN, and the refusal reasons shown. Not started: it is not in the queue yet, and COORDINATION says not to start unqueued work.

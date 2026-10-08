@@ -90,7 +90,7 @@ def test_ui_owns_no_gateway_timer_or_ledger():
         assert banned not in src, banned
     assert "spine.decide(" in (PKG / "backend.py").read_text()
     assert {p.name for p in PKG.glob("*.py")} == {"__init__.py", "__main__.py", "backend.py", "mbos_canonical.py",
-                                               "server.py", "sources.py", "ux.py", "views.py", "digest.py", "summary.py", "card_view.py"}
+                                               "server.py", "sources.py", "ux.py", "views.py", "digest.py", "summary.py", "card_view.py", "mission_view.py"}
 
 
 # ---------------------------------------------------------------- cards
