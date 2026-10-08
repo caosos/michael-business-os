@@ -14,7 +14,7 @@ import sqlalchemy as sa
 from .conftest import PIN, login, post, req
 from .test_my_numbers_g16 import ACTOR_A, ACTOR_H, _funded  # noqa: F401  (autouse: resets the PIN lockout between tests)
 
-xf = lambda fid, why: pytest.mark.xfail(strict=True, reason=f"{fid}: {why}")  # noqa: E731
+xf = lambda fid, why: pytest.mark.xfail(strict=True, reason=f"{fid}: {why}")  # noqa: E731  (all G-17 findings FIXED at G-18)
 CID = re.compile(r"cmp_[0-9A-HJKMNP-TV-Z]{26}")
 BASE = {"title": "5x8 utility trailer", "category": "trailer", "keywords": "5x8, utility", "max_price_usd": "1500", "level": "RECOMMEND"}
 
@@ -213,7 +213,6 @@ def test_campaigns_are_append_only_for_every_login(ui_login, db, sql, who):
     assert n_campaign_state(db[1]) == before
 
 
-@xf("F-83", "cancel_campaign refuses an already-cancelled campaign, but set_campaign can store a new ACTIVE revision of a CANCELLED one (cancel is not terminal)")
 def test_cancel_is_terminal_at_the_database(ui_login, db):
     d = doc()
     call(ui_login, "set", d)
@@ -223,14 +222,13 @@ def test_cancel_is_terminal_at_the_database(ui_login, db):
 
 
 # ---- malformed bodies straight to set_campaign (the owner login is trusted, but the DB should not store garbage) --------
-_F81 = pytest.mark.xfail(strict=True, reason="F-81: set_campaign stores any structurally-shaped body (campaign.schema.json is not enforced in SQL)")
 @pytest.mark.parametrize("mut", [
-    pytest.param(lambda d: d["criteria"].update(max_price_usd=-5), marks=_F81, id="negative-price"),
-    pytest.param(lambda d: d["criteria"].update(max_price_usd="abc"), marks=_F81, id="string-price"),
-    pytest.param(lambda d: d["criteria"].update(keywords="not-a-list"), marks=_F81, id="string-keywords"),
-    pytest.param(lambda d: d.update(title=""), marks=_F81, id="empty-title"),
-    pytest.param(lambda d: d.update(title="x" * 100000), marks=_F81, id="100k-title"),
-    pytest.param(lambda d: d.update(owner=""), marks=_F81, id="empty-owner"),
+    pytest.param(lambda d: d["criteria"].update(max_price_usd=-5), id="negative-price"),
+    pytest.param(lambda d: d["criteria"].update(max_price_usd="abc"), id="string-price"),
+    pytest.param(lambda d: d["criteria"].update(keywords="not-a-list"), id="string-keywords"),
+    pytest.param(lambda d: d.update(title=""), id="empty-title"),
+    pytest.param(lambda d: d.update(title="x" * 100000), id="100k-title"),
+    pytest.param(lambda d: d.update(owner=""), id="empty-owner"),
     pytest.param(lambda d: d["autonomy"].update(level="GOD_MODE"), id="unknown-level")])
 def test_set_campaign_rejects_a_body_that_fails_the_campaign_schema(db2, mut):
     d = doc()
@@ -301,7 +299,6 @@ def test_bad_campaign_inputs_refused_with_nothing_written(ui, db, p):
 
 
 # ---- replay ---------------------------------------------------------------------------------------------------------
-@xf("F-79", "a replayed create (same nonce) writes once but the page names a NEW random campaign id that was never stored")
 def test_replayed_create_writes_once_and_names_the_campaign_that_exists(ui, db):
     b = n_campaign_state(db[1])
     locs = [create(ui, nonce="replayc001")[1] for _ in range(3)]
@@ -328,8 +325,9 @@ def test_same_nonce_reused_across_create_and_cancel_does_not_swallow_the_second(
     assert rows(db[1], cid)[-1][1] == "CANCELLED"
 
 
-@pytest.mark.xfail(strict=False, reason="F-84 (race; XPASS = no thread lost this run): "
-                   + "concurrent double-submit of one create: one row is stored (data safe) but the losers get a raw 'duplicate key ... receipts_idempotency_key_key' / 'no receipt in this transaction' refusal page for a request that actually succeeded")
+@pytest.mark.xfail(strict=False, reason="F-84 PARTIAL (G-18, race; fails ~50% of runs, XPASS = no loser this run): /numbers/capital is fixed, but "
+                   "/wanted losers of a concurrent create still get 'Not saved. the store refused it: no receipt for {CONFIG_VERSION_BUMPED} ... in this "
+                   "transaction' (200) for a request that succeeded; data is correct (one row, one receipt)")
 def test_parallel_double_create_writes_once(ui, db):
     import threading
 
@@ -404,7 +402,6 @@ def test_five_owner_functions_refuse_a_non_human_actor_for_every_login(db, role,
             db[1].connect().scalar(sa.text("SELECT count(*) FROM mbos.capital_ledger"))) == pre
 
 
-@xf("F-80", "mbos_dbos (agent_write + approver + gateway) passes the owner checks by merely CLAIMING actor {type:human,id:michael}: D-24 checks the claim, not the session")
 @pytest.mark.parametrize("which", ["set_mission", "capital_fund", "set_campaign"])  # withdraw is refused anyway (no earned capital): not a probe
 def test_mbos_dbos_cannot_run_the_owner_functions_even_claiming_to_be_human(db, which):
     eng = login(db[0], "mbos_dbos")
@@ -421,7 +418,6 @@ def test_mbos_dbos_cannot_run_the_owner_functions_even_claiming_to_be_human(db, 
         eng.dispose()
 
 
-@xf("F-80", "cancel_campaign as mbos_dbos claiming a human actor also succeeds (same cause)")
 def test_mbos_dbos_cannot_cancel_a_campaign_claiming_to_be_human(ui_login, db):
     d = doc()
     call(ui_login, "set", d)
@@ -486,7 +482,6 @@ def test_idempotency_key_replay_on_the_five_functions_with_a_different_body_is_n
     assert rows(db[1], d["campaign_id"])[-1][3]["title"] == "g17", "second payload silently dropped; caller believes it was stored"
 
 
-@xf("F-82", "a stored campaign with a non-numeric max_price_usd makes render_page raise ValueError: GET /wanted AND every /wanted POST drop the connection")
 def test_one_stored_bad_campaign_does_not_take_the_whole_wanted_page_down(db2, ui2):
     """Whatever the store holds, /wanted must still render (a bad row is shown as broken, not a dropped connection for every visitor)."""
     eng = login(db2[0], "mbos_operator_ui")

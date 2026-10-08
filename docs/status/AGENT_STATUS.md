@@ -144,3 +144,8 @@ None new. (Round-one marketing questions remain parked until marketing go-live.)
 Done: G-17 @ 09302c5
 State: CLOSED
 Verdict: RC READY 105/0 (3 skipped); card 657/0. F-72..F-78 FIXED. New: F-80 (04, P1: mbos_dbos is approver, passes D-24 by claiming human), F-79/F-82/F-84 (06), F-81/F-83 (04). Receipt: docs/receipts/2026-10-08-G-17-owner-channel-wanted.md
+
+## G-18 (2026-10-08)
+Done: G-18 @ PLACEHOLDER
+State: CLOSED
+Verdict: RC READY 105/0 (3 skipped) at mbos 71d5cdb + 04 23060eb; card 671/0. F-79/F-80/F-81/F-82/F-83 FIXED; F-84 PARTIAL (/wanted create race). New: F-85 (04, P1: mbos_dbos releases PANIC via direct panic_state INSERT + forged receipt), F-86 (04: forged human outcome), F-87 (01, INFER: R14 needs two processes). Receipt: docs/receipts/2026-10-08-G-18-r14-in-the-database.md

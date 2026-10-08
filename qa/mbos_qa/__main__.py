@@ -346,6 +346,17 @@ FINDINGS = [
      "REPRO: `-k cancel_is_terminal`. RECOMMENDATION: refuse any revision after CANCELLED (or document that cancel is not terminal)."),
     ("F-84", "FACT", "06 (operator_ui)", "G-17: concurrent double-submit of the SAME form (same nonce) writes exactly once, but the losers get a raw refusal page (`duplicate key value violates unique constraint receipts_idempotency_key_key`, or `no receipt for {CONFIG_VERSION_BUMPED} ... in this transaction`) for a request that did succeed. On /numbers/capital this is a REGRESSION from the F-72 fix (its 'already submitted' pre-check is read-then-write, so it races); G-16's parallel test passed before F-24. Data is correct; the message is wrong and invites a second click. ",
      "REPRO: `-k parallel_double` (a race: non-strict xfail, XPASS when no thread loses). RECOMMENDATION: catch the unique-violation (SQLSTATE 23505 on the idempotency key) and treat it as a replay; on /wanted derive the key's campaign_id from the nonce (F-79)."),
+    ("F-85", "FACT", "04 (lane D)", "G-18 (P1): the workflow login `mbos_dbos` (agent_write + gateway) RELEASES PANIC without `approver`: `panic_set` refuses it (42501) and so does `panic_mutate`, "
+     "but `mbos.panic_state` is a table the gateway role can INSERT into (0005 grant, only agent_write was revoked in 0007) and `mbos.append_receipt`/`panic_seal` are executable, so in ONE transaction it "
+     "appends a human-claimed KILL_SWITCH_CHANGED receipt (entity_id `panic:N`) and INSERTs a sealed RUNNING revision; the only guard is the receipt-presence constraint trigger. Result: global state RUNNING, no approver.",
+     "REPRO: `tests/owner_channel/test_r14_g18.py -k engage_panic_but_cannot_release`. RECOMMENDATION: REVOKE INSERT ON mbos.panic_state (and append_receipt/panic_seal EXECUTE) from gateway; let only the SECURITY DEFINER "
+     "panic_set/panic_mutate write it, and make panic_require_receipt check the receipt's actor/role, not just its presence."),
+    ("F-86", "FACT", "04 (lane D)", "G-18 (P2): `record_outcome` accepts actor `{type: human, id: michael}` from the workflow login `mbos_dbos` (agent_write): a forged human outcome with `realized.net_profit_usd` 9999 is stored and receipted. "
+     "0018 gates only agent claims for this path; 0019-0021 gate the five owner functions but not outcomes. Realized figures feed scorecards and the earned-capital view.",
+     "REPRO: `-k forged_human_claim_by_the_workflow_login`. RECOMMENDATION: require owner_channel (or approver) for a human-claimed outcome and let agent_write record only agent/system outcomes."),
+    ("F-87", "INFER", "01 (spine/gate)", "G-18 (P3): `set_kill_switch(release)` in a process that holds BOTH DSNs succeeds even when `engine` is the workflow login, because lane E's governance object carries the owner (approver) DSN. "
+     "R14 therefore holds in the database but not inside one OS process; production must run workflows in a process that has no MBOS_OWNER_DATABASE_URL (the gate currently starts both together).",
+     "REPRO: `python -m mbos_qa._split_e2e` (field `library_release_in_a_process_holding_both_dsns_refused` = false). RECOMMENDATION: document/enforce two processes (workflow worker without the owner DSN; owner CLI/UI with it) and add a gate step that boots the worker without it."),
     ("F-16", "FACT", "01", "FIXED by A-10 (verified at 82632c3: a normal install finds its contracts and operator profile). Original finding: Agent 01's package only finds the contracts by a path relative to the source tree. "
      "With a normal (non-editable) `pip install`, 94 of its 109 tests fail or error with `docs/research/contracts "
      "not found; set MBOS_CONTRACTS_DIR`. With that variable set, 108 pass and 1 is skipped "
@@ -725,7 +736,7 @@ FINDING_STATUS = {  # verified by the suites at the pins in qa/impl_lane_pins.js
     "F-72": "FIXED (G-17, 06 944093e)", "F-73": "FIXED (G-17, 06 944093e)", "F-74": "FIXED (G-17, 06 944093e)", "F-75": "FIXED (G-17, 06 944093e)",
     "F-76": "FIXED (G-17, 06 944093e: $5,000 cumulative as data + typed confirm above $2,000)", "F-77": "FIXED (G-17, 06 944093e: 5 tries, 5-minute lock)",
     "F-78": "FIXED (G-17, 04 0019/0020 for non-human claims; the forged-human claim by mbos_dbos is F-80)",
-    "F-79": "OPEN", "F-80": "OPEN", "F-81": "OPEN", "F-82": "OPEN", "F-83": "OPEN", "F-84": "OPEN (race)",
+    "F-79": "FIXED (G-18, 06 23af990)", "F-80": "FIXED (G-18, 04 0021 owner_channel + D-26a split login)", "F-81": "FIXED (G-18, 04 0021)", "F-82": "FIXED (G-18, 06 23af990)", "F-83": "FIXED (G-18, 04 0021)", "F-85": "OPEN (P1)", "F-86": "OPEN", "F-87": "OPEN (INFER)", "F-84": "PARTIAL (G-18: /numbers/capital fixed; /wanted concurrent create losers still see a raw no-receipt refusal)",
 }
 
 

@@ -126,9 +126,6 @@ def test_replay_with_changed_amount_is_not_reported_as_success(ui, db):
     assert "900" not in loc, f"page claims $900 recorded; ledger moved by {recorded}"
 
 
-@pytest.mark.xfail(strict=False, reason="F-84 (race; XPASS = no thread lost this run): "
-                   + "REGRESSION from 06's F-72 fix: the 'already submitted' pre-check is not atomic, so losers of a concurrent double-submit get a raw "
-            "'duplicate key ... receipts_idempotency_key_key' refusal page (200) instead of the 303 a sequential replay gets; the ledger is still right")
 def test_parallel_double_submit_writes_once(ui, db):
     p0, res, bar = position(db[1])[0], [], threading.Barrier(16)
 
