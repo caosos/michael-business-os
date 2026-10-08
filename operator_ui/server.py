@@ -460,12 +460,13 @@ class App:
         self.intake_drafts = {}  # F-20: in-memory DRY-RUN drafts, never published
         self.csrf = secrets.token_urlsafe(32)
         self.session_id = "web-" + secrets.token_hex(4)
+        self.pin_gate = ux.PinGate()  # F-77: shared by every PIN check in this process
 
     def state(self):
         return self.store.system_state()
 
     def _check_csrf(self, f):
-        if not secrets.compare_digest(f.get("csrf", ""), self.csrf):
+        if not ux.same(f.get("csrf", ""), self.csrf):
             raise InputError("invalid form token; reload the page")
 
     def decide(self, areq_id, f):
@@ -476,7 +477,7 @@ class App:
             raise InputError(f"unknown action request {areq_id}")
         if d not in ("YES", "NO", "MODIFY", "HOLD"):
             raise InputError(f"unknown decision {d!r}")
-        kw = {"auth_context": ux.auth_context(areq, f.get("pin"), self.operator_pin, self.session_id, d)}
+        kw = {"auth_context": ux.auth_context(areq, f.get("pin"), self.operator_pin, self.session_id, d, self.pin_gate)}
         reason = (f.get("reason") or f.get("note") or "").strip() or None
         if reason:
             kw["reason"] = reason
@@ -520,8 +521,7 @@ class App:
         self._check_csrf(f)
         if not self.operator_pin:
             raise InputError("step-up not configured (MBOS_OPERATOR_PIN unset); notes are refused (fail-closed)")
-        if not f.get("pin") or not secrets.compare_digest(str(f["pin"]), str(self.operator_pin)):
-            raise InputError("a PIN is required to enter a note (it identifies you as the author)")
+        self.pin_gate.check(f.get("pin"), self.operator_pin, "a PIN is required to enter a note (it identifies you as the author).")
         try:
             self.store.opportunity_card(item_id)
         except ItemNotFound:
@@ -537,10 +537,9 @@ class App:
         self._check_csrf(f)
         if not self.operator_pin:
             raise InputError("step-up not configured (MBOS_OPERATOR_PIN unset); changes are refused (fail-closed)")
-        if not f.get("pin") or not secrets.compare_digest(str(f["pin"]), str(self.operator_pin)):
-            raise InputError("a PIN is required to change your numbers (it identifies you as the owner)")
+        self.pin_gate.check(f.get("pin"), self.operator_pin, "a PIN is required to change your numbers (it identifies you as the owner).")
         nonce = f.get("nonce") or ""
-        if not (8 <= len(nonce) <= 64 and nonce.isalnum()):
+        if not (8 <= len(nonce) <= 64 and nonce.isascii() and nonce.isalnum()):
             raise InputError("invalid form token; reload the page")
         return nonce
 
@@ -562,8 +561,18 @@ class App:
         if kind not in ("fund", "withdraw"):
             raise InputError("kind must be fund or withdraw")
         amt = numbers_view.parse_amount(f.get("amount"), "Amount", cap=numbers_view.MAX_USD, required=True, positive=True)
-        rid = self.store.capital_move(kind, format(amt, "f"), self.author, f"f22:{kind}:{nonce}")
-        return f"{kind.title()} of ${amt:,.2f} recorded (receipt {rid})."
+        key = f"f22:{kind}:{nonce}"
+        seen = self.store.capital_seen(kind, key)
+        if seen:  # a replay of an earlier form: report what the receipt recorded, never what this request says (F-72)
+            got = self.store.capital_recorded(seen)
+            return (f"This form was already submitted: it is recorded as {kind.title()} of ${got:,.2f} (receipt {seen}). "
+                    "Nothing new was added.")
+        if kind == "fund":
+            have = ((self.store.my_numbers().get("ledger") or {}).get("protected_principal"))
+            numbers_view.check_fund(amt, have, f.get("confirm"))
+        rid = self.store.capital_move(kind, format(amt, "f"), self.author, key)
+        got = self.store.capital_recorded(rid)
+        return f"{kind.title()} of ${got:,.2f} recorded (receipt {rid})."
 
     def wanted_change(self, f, cid=None, action="create"):
         """F-23: create / pause / resume / cancel a campaign. CSRF + PIN, server-set author. WATCH_ONLY/RECOMMEND only: a higher
@@ -610,8 +619,7 @@ class App:
         self._check_csrf(f)
         if not self.operator_pin:
             raise InputError("step-up not configured (MBOS_OPERATOR_PIN unset); note changes are refused (fail-closed)")
-        if not f.get("pin") or not secrets.compare_digest(str(f["pin"]), str(self.operator_pin)):
-            raise InputError("a PIN is required to change a note (it identifies you as the author)")
+        self.pin_gate.check(f.get("pin"), self.operator_pin, "a PIN is required to change a note (it identifies you as the author).")
 
     def _head(self, note_id):
         n = next((x for x in self.store.operator_notes(include_retracted=True) if x["note_id"] == note_id), None)
@@ -813,7 +821,8 @@ def make_handler(app):
         def _numbers_page(self, flash=None, is_err=False, reasons=None, values=None):
             from . import numbers_view
 
-            body = numbers_view.render_page(app.store.my_numbers(), app.csrf, bool(app.operator_pin), reasons, values)
+            body = numbers_view.render_page(app.store.my_numbers(), app.csrf, bool(app.operator_pin), reasons, values,
+                                            (app.pin_gate.remaining() + 59) // 60)
             return self._send(200, page("My numbers", body, app.state(), flash, is_err))
 
         def _post_numbers(self, which):

@@ -8,6 +8,7 @@ into the arguments `spine.decide` expects.
 from __future__ import annotations
 
 import hmac
+import time
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
@@ -33,6 +34,39 @@ class InputError(ValueError):
     """Bad form input; nothing was sent to the spine."""
 
 
+def same(a, b) -> bool:
+    """Constant-time equality for form secrets. Compares UTF-8 bytes, so a non-ASCII value is a plain mismatch, never a TypeError (F-73)."""
+    return hmac.compare_digest(str(a or "").encode("utf-8", "replace"), str(b or "").encode("utf-8", "replace"))
+
+
+class PinGate:
+    """F-77: 5 consecutive wrong PINs lock every PIN check for 5 minutes. Per process, in memory; a right PIN resets the count."""
+
+    MAX_FAILS, LOCK_SECONDS = 5, 300
+
+    def __init__(self, clock=time.monotonic):
+        self.clock, self.fails, self.locked_until = clock, 0, 0.0
+
+    def remaining(self) -> int:
+        return max(0, int(self.locked_until - self.clock() + 0.999)) if self.locked_until else 0
+
+    def check(self, pin, configured_pin, refusal: str) -> None:
+        """Raise InputError(refusal) on a wrong or missing PIN, or a lock message (with the minutes left) while locked."""
+        left = self.remaining()
+        if left:
+            raise InputError(f"PIN entry is locked after {self.MAX_FAILS} wrong tries: try again in {(left + 59) // 60} minute(s). Nothing was changed.")
+        if self.locked_until:
+            self.locked_until, self.fails = 0.0, 0
+        if pin and configured_pin and same(pin, configured_pin):
+            self.fails = 0
+            return
+        self.fails += 1
+        if self.fails >= self.MAX_FAILS:
+            self.locked_until = self.clock() + self.LOCK_SECONDS
+            raise InputError(f"{refusal} That was wrong try {self.MAX_FAILS}: PIN entry is locked for {self.LOCK_SECONDS // 60} minutes.")
+        raise InputError(f"{refusal} ({self.MAX_FAILS - self.fails} tries left before a {self.LOCK_SECONDS // 60}-minute lock.)")
+
+
 def hold_for(preset: str, now: datetime, hold_until: str | None = None) -> dict:
     """Build the `hold` argument for spine.decide. Every preset sets a concrete hold_until,
     so the spine's default (+24h) never silently overrides Michael's choice."""
@@ -52,15 +86,18 @@ def hold_for(preset: str, now: datetime, hold_until: str | None = None) -> dict:
     return {"hold_until": iso(until), "wake_on": list(p.get("wake_on", DEFAULT_WAKE_ON)), "renotify_after": "PT24H"}
 
 
-def auth_context(areq: dict, pin: str | None, configured_pin: str | None, session_id: str, decision: str) -> dict:
+def auth_context(areq: dict, pin: str | None, configured_pin: str | None, session_id: str, decision: str, gate: PinGate | None = None) -> dict:
     """auth_context for spine.decide. YES on an irreversible / money-like request needs a valid
     PIN; with no PIN configured such a YES is refused here (fail closed) before the spine sees it."""
     step_up = False
     if decision == "YES" and requires_step_up(areq):
         if not configured_pin:
             raise InputError("step-up not configured (MBOS_OPERATOR_PIN unset); irreversible/money YES refused")
-        if not pin or not hmac.compare_digest(str(pin), str(configured_pin)):
-            raise InputError("this action is irreversible or moves money: step-up PIN required")
+        refusal = "this action is irreversible or moves money: step-up PIN required"
+        if gate is not None:
+            gate.check(pin, configured_pin, refusal)
+        elif not pin or not same(pin, configured_pin):
+            raise InputError(refusal)
         step_up = True
     return {"method": "local_pin" if step_up else "localhost_csrf_session", "session_id": session_id, "step_up": step_up}
 

@@ -277,6 +277,18 @@ class SpineBackend:
             f"SELECT mbos.{fn}(CAST(:amt AS numeric), CAST(:a AS jsonb), :i, :p, :k)",
             {"amt": amount, "i": f"Michael {kind} capital {amount} USD (My numbers, dry-run)", "k": key}, entered_by, kind)
 
+    def capital_seen(self, kind: str, key: str):
+        """F-72: the receipt id already recorded under this idempotency key, else None (a replay is a no-op)."""
+        if self.lane != "lane_d":
+            return None
+        with self.engine.connect() as c:
+            return c.execute(sa.text("SELECT receipt_id FROM mbos.receipts WHERE idempotency_key = :k"), {"k": key}).scalar()
+
+    def capital_recorded(self, receipt_id: str):
+        """F-72: the ledger entry's own amount for a receipt (what was really recorded), or None."""
+        with self.engine.connect() as c:
+            return c.execute(sa.text("SELECT amount FROM mbos.capital_ledger WHERE source_receipt_id = :r"), {"r": receipt_id}).scalar()
+
     # ---- F-14: Michael's own model knowledge (operator notes). Lane D only; HUMAN CHANNEL ONLY (R14) -----------
     def operator_notes(self, include_retracted: bool = False) -> list[dict]:
         """Current head of every note chain, from lane D's folded document (read-only SQL function)."""

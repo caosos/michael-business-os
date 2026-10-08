@@ -1,0 +1,6 @@
+{
+  "_note": "PROVISIONAL defaults (F-24 / F-76 ruling). Michael raises these by editing this file; the page reads it on every request.",
+  "max_fund_per_transaction_usd": 10000000,
+  "max_total_funded_usd": 5000,
+  "confirm_fund_above_usd": 2000
+}
