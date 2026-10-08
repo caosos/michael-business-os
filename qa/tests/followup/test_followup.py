@@ -53,7 +53,9 @@ def _item_in(qa, kind: str) -> str:
         qa.wait_state(i, "ARCHIVED")
         return i
     if kind == "archived_pass":
-        return qa.discover("FIX-MOWER-1")
+        i = qa.discover("FIX-MOWER-1")
+        qa.wait_state(i, "ARCHIVED")  # a pass is still moving through the workflow right after discover
+        return i
     if kind == "researching_maybe":
         return qa.discover("FIX-LEAD-DRYWALL-1")
     if kind == "failed_by_freeze":
@@ -110,15 +112,18 @@ def test_a_followup_the_pdp_denies_leaves_the_item_acted_and_creates_no_workflow
 
 
 @pytest.mark.skipif(not LANE_E, reason="the denial comes from lane E's policy")
-@pytest.mark.xfail(strict=True, reason="F-43: a policy-denied follow-up returns id None and leaves no request and no receipt")
 def test_a_denied_followup_attempt_is_visible_in_the_ledger(qa):
-    """R17 (no invisible autonomous actions) applies to Michael's own tools too: if a follow-up is refused by policy, there
-    must be a receipt saying so, otherwise the card/ledger cannot explain why nothing happened."""
+    """R17 (no invisible autonomous actions) applies to Michael's own tools too: a refused follow-up must leave a receipt on
+    the item that names the capability, otherwise the card and ledger cannot explain why nothing happened. F-43 fix (01): an
+    ITEM_STATE_CHANGED receipt with effect none, item unchanged."""
     i, _ = acted_item(qa)
+    before = qa.receipts(item_id=i)
     out = followup(qa, i, FU_UNGRANTED)
-    assert out["policy_denied"] is True
-    rs = qa.receipts(action_request_id=out["action_request_id"])
-    assert any(r["type"] == "POLICY_DECIDED" for r in rs), f"the policy refusal left no POLICY_DECIDED receipt: {[r['type'] for r in rs]}"
+    assert out["policy_denied"] is True and not live_followups(qa, i, _["action_request_id"])
+    new = qa.receipts(item_id=i)[len(before):]
+    assert new, "the policy refusal left no receipt on the item"
+    assert any("comms.voice.call" in (r.get("intent") or "") and "block" in (r.get("intent") or "").lower() for r in new), [r.get("intent") for r in new]
+    assert qa.item(i)["state"] == "ACTED"
 
 
 # ---------------------------------------------------------------- 3. PANIC engaged
@@ -162,7 +167,6 @@ def test_a_sequential_double_submit_creates_one_request_and_one_gate(qa):
     assert [r["action_request_id"] for r in live_followups(qa, i, first["action_request_id"])] == [a["action_request_id"]]
 
 
-@pytest.mark.xfail(LANE_D, strict=True, reason="F-45: 8 concurrent propose_followup calls on one ACTED item create 2 live requests (3/3 runs, lane D+E)")
 def test_a_concurrent_double_submit_creates_exactly_one_request_and_one_execution(qa):
     i, first = acted_item(qa)
     results, errors = [], []
@@ -202,7 +206,6 @@ def _enqueue_breaks(monkeypatch):
     monkeypatch.setattr(rt, "client", boom)
 
 
-@pytest.mark.xfail(strict=True, reason="F-42: a follow-up whose gate never started is accepted on YES and never executes")
 def test_a_crash_between_request_creation_and_gate_start_is_recoverable(qa, monkeypatch):
     """The request is committed (item AWAITING_APPROVAL, request pending) but its approval-gate workflow was never started.
     Whatever recovers it - a retry of the same call, a startup scan, a reconcile - Michael's YES must still lead to ONE
@@ -218,11 +221,18 @@ def test_a_crash_between_request_creation_and_gate_start_is_recoverable(qa, monk
     from dbos import DBOS
 
     assert DBOS.get_workflow_status(f"followup:{fid}") is None, "no gate was started (the crash window)"
-    # recovery attempt 1: the caller retries the same call
+    # recovery: 01's documented path (F-42 fix) is `workflows.recover_orphan_gates()` at worker start and every 60 s. A retry of
+    # the same call is also an acceptable answer.
+    from mbos import workflows
+
     try:
         followup(qa, i)
-    except Exception:  # noqa: BLE001 - a refusal is an acceptable answer to a retry, recovery may live elsewhere
+    except Exception:  # noqa: BLE001
         pass
+    if hasattr(workflows, "recover_orphan_gates"):
+        started = workflows.recover_orphan_gates()
+        assert len(started) <= 1, f"recovery started {len(started)} gates for one orphan"
+        assert workflows.recover_orphan_gates() == [] or DBOS_active(fid), "a second recovery pass duplicated an active gate"
     qa.decide(fid, "YES")
     done = wait_for(lambda: qa.areq(fid)["status"] == "executed", 25)
     assert done, (f"Michael's YES was accepted but nothing executed: request={qa.areq(fid)['status']}, item={qa.item(i)['state']}; "
@@ -300,11 +310,9 @@ MALFORMED = [("empty", {}), ("none", None), ("no-summary", {"capability": "comms
              ("cost-string", {**FU_EMAIL, "estimated_cost": "free"}), ("list", [1, 2])]
 
 
-REFONLY = {"capability-int", "capability-unknown", "cost-negative"}
+REFONLY = {"capability-unknown"}
 _REF = pytest.mark.xfail(not LANE_E, strict=True, reason="reference spine has no PDP; lane E validates these")
-F44 = {"empty", "none", "no-summary", "no-capability", "no-reversibility", "list"}
-_X = pytest.mark.xfail(strict=True, raises=AssertionError, reason="F-44: a malformed payload escapes as a raw KeyError/AttributeError, not DecisionRefused")
-@pytest.mark.parametrize("name,pa", [pytest.param(n, p, id=n, marks=[_X] if n in F44 else ([_REF] if n in REFONLY else [])) for n, p in MALFORMED])
+@pytest.mark.parametrize("name,pa", [pytest.param(n, p, id=n, marks=[_REF] if n in REFONLY else []) for n, p in MALFORMED])
 def test_a_malformed_followup_is_refused_cleanly_and_atomically(qa, name, pa):
     i, first = acted_item(qa)
     before = snapshot(qa, i)
@@ -351,3 +359,10 @@ def test_the_chain_and_the_dry_run_invariant_survive_every_follow_up_abuse(qa):
         assert r["provenance_ids"] and all(qa.find_provenance(p) for p in r["provenance_ids"])
     json.dumps(0)
     assert FLIP
+
+
+def DBOS_active(areq_id: str) -> bool:
+    from dbos import DBOS
+
+    return bool(DBOS.list_workflows(status=["PENDING", "ENQUEUED", "DELAYED"], load_input=False, load_output=False,
+                                    workflow_id_prefix=[f"followup:{areq_id}"]))

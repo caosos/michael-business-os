@@ -250,6 +250,12 @@ FINDINGS = [
      "dry-run assertions are vacuous there. A live-mode policy (`system_mode: live`) was caught only because the pytest check and the runner failed "
      "on it, i.e. the protection lives in the test suite (see F-47), not in the gate.",
      "RECOMMENDATION: have the gate's e2e approve one fixture action and assert exactly one dry-run effector row and zero live rows."),
+    ("F-50", "FACT", "01 (release gate)", "G-09: the new default `git fetch -q origin` in `tools/release_gate.py` ignores its own exit code. With an unreachable "
+     "origin (rc 128) the gate carries on against the stale local `origin/*` refs and prints PASS, i.e. the F-48 'compare against the real heads' guarantee is silently off. "
+     "Also, the stale-install check only looks at `.py`/`.json` files, so an extra `.txt`, `.sql`, `.so` or `.pth` file in an installed lane package is not drift. And "
+     "`test_action_path_check_requires_real_executions` greps the gate's source text instead of running the check.",
+     "RECOMMENDATION: make a failed fetch a FAIL (or print a loud 'STALE REFS' line and exit non-zero unless `--no-fetch`); compare every file in the package dir; "
+     "replace the source-grep test with one that feeds the check a RESULT with 0 effector calls."),
     ("F-16", "FACT", "01", "FIXED by A-10 (verified at 82632c3: a normal install finds its contracts and operator profile). Original finding: Agent 01's package only finds the contracts by a path relative to the source tree. "
      "With a normal (non-editable) `pip install`, 94 of its 109 tests fail or error with `docs/research/contracts "
      "not found; set MBOS_CONTRACTS_DIR`. With that variable set, 108 pass and 1 is skipped "
@@ -601,7 +607,7 @@ def cmd_spine(release: bool = False) -> int:
 
 
 FINDING_STATUS = {  # verified by the suites at the pins in qa/impl_lane_pins.json (final card re-run)
-    "F-22": "FIXED", "F-23": "FIXED", "F-24": "FIXED", "F-25": "FIXED (R22)", "F-40": "FIXED", "F-41": "FIXED", "F-42": "OPEN", "F-43": "OPEN", "F-44": "OPEN", "F-45": "OPEN", "F-46": "OPEN", "F-47": "OPEN", "F-48": "OPEN", "F-49": "OPEN",
+    "F-22": "FIXED", "F-23": "FIXED", "F-24": "FIXED", "F-25": "FIXED (R22)", "F-40": "FIXED", "F-41": "FIXED", "F-42": "FIXED (G-09, 01 100d2ed)", "F-43": "FIXED (G-09, 01 100d2ed)", "F-44": "FIXED (G-09, 01 100d2ed)", "F-45": "FIXED (G-09, 01 100d2ed)", "F-46": "FIXED (G-09)", "F-47": "FIXED (G-09)", "F-48": "FIXED (G-09; residual F-50)", "F-49": "FIXED (G-09)", "F-50": "OPEN",
     "F-16": "FIXED", "F-18": "FIXED", "F-19": "FIXED", "F-20": "FIXED", "F-21": "FIXED",
     "F-26": "FIXED", "F-27": "FIXED (an uncheckable risk is dropped, never left invalid)",
     "F-28": "FIXED (ISO strings only; a bare number such as 20261005 is UNKNOWN; valid dates still display)",

@@ -4,7 +4,7 @@ Agent: 07
 Role: ROUND TWO — QA / End-to-End Integration / Manual-Assist Outputs (lane G)
 Branch: research/agent-07-marketing
 Worktree: /home/michaelos/business-os-worktrees/agent-07-marketing
-State: IDLE
+State: WORKING
 Done: G-01 @ 9cbce70
 Done: G-02 @ a1700d9
 Done: G-03 @ 4c2e897
@@ -15,7 +15,8 @@ Done: G-07 @ 5e66a02 — RC READY (105/0, dry-run scope, stable x2); card 232 pa
 Done: G-07 final re-run @ 40170f6 — card 245 pass / 2 low residuals (F-28 numeric date, F-30 ADR/contract marker); RC still READY 105/0 at mbos deec1d1
 Done: G-07 final pass @ 5312f47 — card 248/0; RC READY 105/0; reference 104/0 at mbos e755b38 + 05 E-16 716098e; every card finding closed or accepted (F-39, R25)
 Done: G-08 — A-15 follow-up: F-42 (orphan on crash), F-45 (concurrent double submit → 2 live requests), F-43, F-44; release gate goes red on failing test / modified installed code / live-mode policy / broken chain formula, but NOT on weakened contract (F-46), all-skipped suite (F-47), extra/json stale install (F-48); e2e executes no action (F-49). Receipt docs/receipts/2026-10-07-G-08-followup-and-release-gate.md
-Claimed: (none; waiting for the next READY task)
+Done: G-09 — F-42..F-49 verified FIXED (follow-up 34/34 on lane D+E; gate red on each planted fault); residual F-50 (P3). Receipt docs/receipts/2026-10-07-G-09-reverify-g08-fixes.md
+Claimed: G-10 (ADR-0012 card half + engine half), then G-11 (mission, campaign, valuation, merchandising)
 Waiting on: Agent 01 to triage F-42…F-49 (all open, owners in the receipt). Card and RC suites have no open findings. Re-run any time: `python -m mbos_qa install-pins`, then `card` and `spine --rc`.
 Current phase: Round Two — G-07 delivered; waiting on the remaining card fixes
 Started: 2026-10-06 (round one) · 2026-10-07 (round two)
