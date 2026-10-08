@@ -180,6 +180,30 @@
           "type": "string"
         }
       }
+    },
+    "resolved_defects": {
+      "type": "array",
+      "description": "A defect may leave `defects` only by being listed here with the provenance of the evidence that resolved it (revision check).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "resolved_by_provenance_id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "resolved_by_provenance_id": {
+            "type": "string",
+            "pattern": "^prov_[0-9A-HJKMNP-TV-Z]{26}$"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
     }
   }
 }

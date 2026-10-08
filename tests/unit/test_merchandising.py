@@ -108,3 +108,84 @@ def test_validate_raises():
     v["disclosures"] = []
     with pytest.raises(ContractViolation):
         mer.validate(INV, v)
+
+
+DEFECT = "Engine smokes blue under load"
+
+
+def _with_body(extra, *, headline=None):
+    v = view()
+    v["body"] = f"{DEFECT}. {extra}"
+    if headline:
+        v["headline"] = headline
+    return v
+
+
+@pytest.mark.parametrize("extra", [
+    "Runs when it wants to. Sold as is, minor cosmetic smoke.",
+    "Just needs a tune-up.", "Just needs a little carb cleaning.", "Easy fix.", "Small repair and it is good to go.",
+    "Minor issues only.", "Has some character.", "Well maintained and ready to mow.", "Runs good.", "Works great.",
+    "Turnkey.", "Barely smokes.", "Cosmetic smoke only.", "Only a little smoke.", "Good running condition.", "Runs strong.",
+])
+def test_f59_euphemisms_for_a_material_defect_are_rejected(extra):
+    errs = mer.lint(INV, _with_body(extra))
+    assert any("overstates" in e or "operating-condition" in e for e in errs), (extra, errs)
+
+
+@pytest.mark.parametrize("extra", [
+    "Like new.", "Like new.", "Like  new.", "Li​ke new.", "Like n‍ew.", "L1ke n3w.", "likе new.",   # Cyrillic е
+    "N0thing wr0ng.", "nοthing wrong.", "Μint condition.",
+])
+def test_f59_obfuscated_overclaims_are_rejected(extra):
+    errs = mer.lint(INV, _with_body(extra))
+    assert any("overstates" in e for e in errs), (extra, errs)
+
+
+def test_f60_material_defect_must_be_in_the_prose():
+    v = view()
+    v["body"] = "A fine riding mower."
+    v["headline"] = "Riding mower for sale"
+    assert any("not stated verbatim" in e for e in mer.lint(INV, v))
+
+
+def test_f60_ready_to_work_label_invalid_with_material_defect():
+    v = view()
+    v["label"] = "Ready to Work"
+    assert any("claims readiness" in e for e in mer.lint(INV, v))
+
+
+def test_the_honest_statement_of_a_defect_is_not_an_overclaim():
+    inv = copy.deepcopy(INV)
+    inv["defects"][0]["text"] = "Only a little power at idle"       # contains an overclaim phrase as an honest defect statement
+    v = _rehash(inv, view())
+    v["disclosures"][0]["text"] = inv["defects"][0]["text"]
+    v["body"] = "Seller says: Only a little power at idle. Hours unknown."
+    assert mer.lint(inv, v) == []
+
+
+def test_f61_severity_downgrade_or_deletion_is_caught_by_the_baseline_check():
+    softer = copy.deepcopy(INV)
+    softer["defects"][0]["severity"] = "minor"
+    assert any("severity lowered" in e for e in mer.revision_errors(INV, softer))
+    gone = copy.deepcopy(INV)
+    gone["defects"] = []
+    assert any("deleted without resolved_defects" in e for e in mer.revision_errors(INV, gone))
+    gone["resolved_defects"] = [{"id": "d1", "resolved_by_provenance_id": "prov_01J9Z0000000000000000000A1"}]
+    assert mer.revision_errors(INV, gone) == []
+    v = _rehash(gone, view())
+    v["disclosures"] = []
+    v["body"] = "Runs great."
+    assert any("severity lowered" in e or "deleted" in e for e in mer.lint(softer, _rehash(softer, view()), baseline=INV))
+
+
+def test_f62_verification_words_need_the_specific_fact_verified():
+    inv = copy.deepcopy(INV)
+    inv["facts"][0].update(basis="verified", provenance_id="prov_01J9Z0000000000000000000A1")   # only make_model is verified
+    v = _rehash(inv, view())
+    for f in v["facts"]:
+        if f["fact_id"] == "f1":
+            f.update(basis="verified", provenance_id="prov_01J9Z0000000000000000000A1")
+    v["body"] = f"{DEFECT}. Tested and working."
+    assert any("operating" in e or "verification" in e for e in mer.lint(inv, v))
+    v["body"] = f"{DEFECT}. Engine hours verified."
+    assert any("verification" in e for e in mer.lint(inv, v))

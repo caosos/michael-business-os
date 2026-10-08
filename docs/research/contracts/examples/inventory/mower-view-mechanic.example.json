@@ -5,7 +5,7 @@
   "audience": "mechanic",
   "label": "Mechanic Special",
   "headline": "Mechanic special: Brand X 42T riding mower, smokes under load",
-  "body": "Runs, but the engine smokes. A good fit if you can diagnose and repair engines. Priced to leave room for the work.",
+  "body": "Known fault: Engine smokes blue under load. Otherwise it runs. A good fit if you can diagnose and repair engines; priced to leave room for the work.",
   "facts": [
     {
       "fact_id": "f2",
