@@ -10,6 +10,7 @@ gateway, no timers and no ledger of its own.
 
 import html
 import json
+import os
 import secrets
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -23,7 +24,7 @@ try:  # lane C's package is optional: without it the notes form is simply unavai
 except ImportError:  # pragma: no cover
     NOTE_CATEGORIES, NOTE_KINDS = frozenset(), frozenset()
 
-from . import card_view, ux, views
+from . import card_view, ux, views, wanted_view
 from .card_view import ec
 from .backend import FollowupRefused, ItemNotFound, NoteRefused, NumbersRefused, ProfileUnavailable
 from .sources import load_health
@@ -92,7 +93,7 @@ def page(title, body, state, flash=None, error=False):
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>{ec(title)}</title><style>{CSS}</style></head>
 <body><div class="banner">DRY-RUN · nothing leaves this machine · system {e(state)}</div>
-<header><b>Operator UI</b><nav><a href="/">Queue</a><a href="/mission">Weekly mission</a><a href="/numbers">My numbers</a><a href="/usage">Usage</a><a href="/intake">Intake</a><a href="/preview">Audience previews</a><a href="/digest">Morning digest</a><a href="/summary">Daily summary</a><a href="/notes">My notes</a><a href="/holds">HOLD backlog</a><a href="/outcomes">Outcomes</a><a href="/sources">Source health</a><a href="/ledger">Receipt ledger</a></nav></header>
+<header><b>Operator UI</b><nav><a href="/">Queue</a><a href="/mission">Weekly mission</a><a href="/numbers">My numbers</a><a href="/wanted">Wanted</a><a href="/usage">Usage</a><a href="/intake">Intake</a><a href="/preview">Audience previews</a><a href="/digest">Morning digest</a><a href="/summary">Daily summary</a><a href="/notes">My notes</a><a href="/holds">HOLD backlog</a><a href="/outcomes">Outcomes</a><a href="/sources">Source health</a><a href="/ledger">Receipt ledger</a></nav></header>
 <main>{f}{body}</main></body></html>"""
 
 
@@ -446,8 +447,10 @@ class App:
     """Turns form posts into `spine.decide` calls through the backend. No side effects of its own."""
 
     def __init__(self, backend, operator_pin=None, health_file=None, mission_file=None, inventory_file=None,
-                 telemetry_dir=None, queue_file=None):
+                 telemetry_dir=None, queue_file=None, campaigns_file=None, policy_path=None):
         self.store = backend
+        self.campaigns = wanted_view.CampaignStore(campaigns_file or os.environ.get("MBOS_CAMPAIGNS_FILE"))  # F-23
+        self.policy_path = policy_path
         self.operator_pin = operator_pin
         self.inventory_file = inventory_file  # inventory JSON to preview (MBOS_INVENTORY_FILE)
         self.telemetry_dir = telemetry_dir  # MBOS_TELEMETRY_DIR (read-only)
@@ -561,6 +564,32 @@ class App:
         amt = numbers_view.parse_amount(f.get("amount"), "Amount", cap=numbers_view.MAX_USD, required=True, positive=True)
         rid = self.store.capital_move(kind, format(amt, "f"), self.author, f"f22:{kind}:{nonce}")
         return f"{kind.title()} of ${amt:,.2f} recorded (receipt {rid})."
+
+    def wanted_change(self, f, cid=None, action="create"):
+        """F-23: create / pause / resume / cancel a campaign. CSRF + PIN, server-set author. WATCH_ONLY/RECOMMEND only: a higher
+        level is refused with the E-17 reason and nothing is stored. No contact is ever made."""
+        from mbos.campaign import errors as campaign_errors
+        from mbos.clock import iso
+
+        self._numbers_gate(f)
+        now = iso(utcnow())
+        if action == "create":
+            doc = wanted_view.parse_campaign(f, self.author, wanted_view.level_reasons(self.policy_path))
+            errs = campaign_errors(doc)
+            if errs:
+                raise InputError("; ".join(errs[:3]))
+            self.campaigns.put(doc, self.author, "created (" + doc["autonomy"]["level"] + ")", now)
+            return f"Campaign created ({doc['campaign_id']}). It watches and recommends only."
+        rec = self.campaigns.get(cid or "")
+        if rec is None:
+            raise InputError("unknown campaign")
+        doc, st = rec["doc"], rec["doc"]["status"]
+        new = {"pause": ("ACTIVE", "PAUSED"), "resume": ("PAUSED", "ACTIVE"), "cancel": (("ACTIVE", "PAUSED"), "CANCELLED")}.get(action)
+        if new is None or st not in ((new[0],) if isinstance(new[0], str) else new[0]):
+            raise InputError(f"cannot {action} a {st} campaign")
+        doc = {**doc, "status": new[1]}
+        self.campaigns.put(doc, self.author, f"{action} ({st} to {new[1]})", now)
+        return f"Campaign {new[1].lower()}."
 
     def add_followup(self, item_id, f):
         """F-11: draft a follow-up / offer / quote as its OWN request via the public API (A-15). CSRF, human channel. It only
@@ -692,6 +721,8 @@ def make_handler(app):
                 loaded = mission_view.load_live(app.store, now, app.mission_file)
                 known = {l["item_id"] for l in (loaded["doc"] or {}).get("legs", []) if app.store.item(l["item_id"])} if loaded["kind"] == "plan" else set()
                 return self._send(200, page("Weekly mission", mission_view.render_page(loaded, known), app.state()))
+            if u.path == "/wanted":
+                return self._wanted_page(flash or err, bool(err))
             if u.path == "/numbers":
                 return self._numbers_page(flash or err, bool(err))
             if u.path == "/usage":
@@ -800,6 +831,25 @@ def make_handler(app):
             self.send_header("Content-Length", "0")
             self.end_headers()
 
+        def _wanted_page(self, flash=None, is_err=False, errors=None, values=None):
+            now = utcnow()
+            items = app.store.items_in_states(wanted_view.OPEN_STATES)
+            body = wanted_view.render_page(app.campaigns.all(), items, now, app.csrf, bool(app.operator_pin),
+                                           wanted_view.level_reasons(app.policy_path), errors, values)
+            return self._send(200, page("Wanted", body, app.state(), flash, is_err))
+
+        def _post_wanted(self, cid, action):
+            n = min(int(self.headers.get("Content-Length") or 0), 65536)
+            f = {k: v[0] for k, v in parse_qs(self.rfile.read(n).decode("utf-8"), keep_blank_values=True).items()}
+            try:
+                msg = app.wanted_change(f, cid, action)
+            except InputError as ex:
+                return self._wanted_page(errors=[str(ex)], values={k: v for k, v in f.items() if k not in ("pin", "csrf")})
+            self.send_response(303)
+            self.send_header("Location", f"/wanted?msg={quote(msg)}")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+
         def _post_note_change(self, note_id, action):
             """F-16: edit (new version) or retract. CSRF + PIN; the author is server-set (R14)."""
             n = min(int(self.headers.get("Content-Length") or 0), 65536)
@@ -880,6 +930,10 @@ def make_handler(app):
                 return self._post_intake(parts)
             if len(parts) == 2 and parts[0] == "numbers" and parts[1] in ("mission", "capital"):
                 return self._post_numbers(parts[1])
+            if parts == ["wanted", "create"]:
+                return self._post_wanted(None, "create")
+            if len(parts) == 3 and parts[0] == "wanted" and parts[2] in ("pause", "resume", "cancel"):
+                return self._post_wanted(parts[1], parts[2])
             if parts == ["preview", "check"]:
                 return self._post_preview_check()
             if len(parts) == 3 and parts[0] == "notes" and parts[2] in ("edit", "retract"):
