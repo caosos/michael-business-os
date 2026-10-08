@@ -574,14 +574,59 @@ class App:
         got = self.store.capital_recorded(rid)
         return f"{kind.title()} of ${got:,.2f} recorded (receipt {rid})."
 
+    def _spine_campaigns(self) -> bool:
+        """F-25: campaigns live on the spine when the DB has migration 0019; otherwise the local JSON file is the fallback."""
+        sup = getattr(self.store, "campaigns_supported", None)
+        return bool(sup and sup())
+
+    def campaign_records(self) -> list[dict]:
+        return self.store.campaign_records() if self._spine_campaigns() else self.campaigns.all()
+
+    def _wanted_change_spine(self, f, cid, action, nonce):
+        """F-25: create/pause/resume -> `mbos.set_campaign`, cancel -> `mbos.cancel_campaign`, as `human:<id>` (the approver login).
+        Each is receipted in the same transaction; the database also refuses ASSISTED_DEAL/AUTOPILOT as ACTIVE (E-17 CHECK)."""
+        from mbos.campaign import errors as campaign_errors
+
+        from .backend import NumbersRefused
+
+        key = f"f25:campaign:{action}:{cid or 'new'}:{nonce}"
+        try:
+            if action == "create":
+                doc = wanted_view.parse_campaign(f, self.author, wanted_view.level_reasons(self.policy_path))
+                errs = campaign_errors(doc)
+                if errs:
+                    raise InputError("; ".join(errs[:3]))
+                self.store.set_campaign(doc, self.author, "Michael created a Wanted campaign (" + doc["autonomy"]["level"] + ")", key)
+                msg = f"Campaign created ({doc['campaign_id']}). It watches and recommends only."
+            else:
+                rec = next((r for r in self.store.campaign_records() if r["doc"]["campaign_id"] == (cid or "")), None)
+                if rec is None:
+                    raise InputError("unknown campaign")
+                st = rec["doc"]["status"]
+                new = {"pause": ("ACTIVE", "PAUSED"), "resume": ("PAUSED", "ACTIVE"), "cancel": (("ACTIVE", "PAUSED"), "CANCELLED")}.get(action)
+                if new is None or st not in ((new[0],) if isinstance(new[0], str) else new[0]):
+                    raise InputError(f"cannot {action} a {st} campaign")
+                intent = f"Michael set a Wanted campaign {st} to {new[1]} ({action})"
+                if action == "cancel":
+                    self.store.cancel_campaign(cid, self.author, intent, key)
+                else:
+                    self.store.set_campaign({**rec["doc"], "status": new[1]}, self.author, intent, key)
+                msg = f"Campaign {new[1].lower()}."
+        except NumbersRefused as ex:
+            raise InputError(str(ex)) from None
+        rid = self.store.campaign_receipt(key)
+        return msg + (f" Receipt {rid}." if rid else "")
+
     def wanted_change(self, f, cid=None, action="create"):
         """F-23: create / pause / resume / cancel a campaign. CSRF + PIN, server-set author. WATCH_ONLY/RECOMMEND only: a higher
         level is refused with the E-17 reason and nothing is stored. No contact is ever made."""
         from mbos.campaign import errors as campaign_errors
         from mbos.clock import iso
 
-        self._numbers_gate(f)
+        nonce = self._numbers_gate(f)
         now = iso(utcnow())
+        if self._spine_campaigns():
+            return self._wanted_change_spine(f, cid, action, nonce)
         if action == "create":
             doc = wanted_view.parse_campaign(f, self.author, wanted_view.level_reasons(self.policy_path))
             errs = campaign_errors(doc)
@@ -843,7 +888,7 @@ def make_handler(app):
         def _wanted_page(self, flash=None, is_err=False, errors=None, values=None):
             now = utcnow()
             items = app.store.items_in_states(wanted_view.OPEN_STATES)
-            body = wanted_view.render_page(app.campaigns.all(), items, now, app.csrf, bool(app.operator_pin),
+            body = wanted_view.render_page(app.campaign_records(), items, now, app.csrf, bool(app.operator_pin),
                                            wanted_view.level_reasons(app.policy_path), errors, values)
             return self._send(200, page("Wanted", body, app.state(), flash, is_err))
 

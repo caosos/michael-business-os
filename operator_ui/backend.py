@@ -271,6 +271,43 @@ class SpineBackend:
             "SELECT mbos.set_mission(CAST(:m AS jsonb), CAST(:a AS jsonb), :i, :p, :k)",
             {"m": json.dumps(mission), "i": "Michael set the weekly mission (My numbers)", "k": key}, entered_by, "mission")
 
+    # ---- F-25: Wanted campaigns on the spine (migration 0019). Reads are open; writes are the owner channel only ------
+    def campaigns_supported(self) -> bool:
+        """True on lane D with migration 0019 (mbos.v_campaigns_current exists); else /wanted keeps its local-file fallback."""
+        if self.lane != "lane_d":
+            return False
+        with self.engine.connect() as c:
+            return c.execute(sa.text("SELECT to_regclass('mbos.v_campaigns_current') IS NOT NULL")).scalar_one()
+
+    def campaign_records(self) -> list[dict]:
+        """[{'doc', 'history'}] for every campaign: the current revision's body plus one history row per revision (who, when, what)."""
+        out: dict[str, dict] = {}
+        with self.engine.connect() as c:
+            for cid, rev, status, level, body, at, by in c.execute(sa.text(
+                    "SELECT campaign_id, revision, status, autonomy_level, body, created_at, created_by "
+                    "FROM mbos.campaigns ORDER BY campaign_id, revision")):
+                rec = out.setdefault(cid, {"doc": body, "history": []})
+                rec["doc"] = body
+                rec["history"].append({"at": at.isoformat(), "by": by, "what": f"revision {rev}: {status} ({level})"})
+        return list(out.values())
+
+    def set_campaign(self, doc: dict, entered_by: str, intent: str, key: str) -> str:
+        import json
+
+        return self._owner_write(
+            "SELECT mbos.set_campaign(CAST(:c AS jsonb), CAST(:a AS jsonb), :i, :p, :k)",
+            {"c": json.dumps(doc), "i": intent, "k": key}, entered_by, "campaign:" + doc["campaign_id"])
+
+    def cancel_campaign(self, cid: str, entered_by: str, intent: str, key: str) -> str:
+        return self._owner_write(
+            "SELECT mbos.cancel_campaign(:cid, CAST(:a AS jsonb), :i, :p, :k)",
+            {"cid": cid, "i": intent, "k": key}, entered_by, "campaign:" + cid)
+
+    def campaign_receipt(self, key: str):
+        """The receipt id recorded under an idempotency key, else None."""
+        with self.engine.connect() as c:
+            return c.execute(sa.text("SELECT receipt_id FROM mbos.receipts WHERE idempotency_key = :k"), {"k": key}).scalar()
+
     def capital_move(self, kind: str, amount: str, entered_by: str, key: str) -> str:
         fn = {"fund": "capital_fund", "withdraw": "capital_withdraw"}[kind]
         return self._owner_write(
