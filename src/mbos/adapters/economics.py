@@ -91,11 +91,12 @@ class EconomicsResearcher:
             from mbos_economics.config import load_config
             from mbos_economics.engine import score_item
 
-            new = with_context(new, self.context_source)
             if out["proposed_next_state"] == "SCORED":
-                out = {**out, "item": new}
-                rescored = score_item(new, load_config(new["scores"]["scorecard"].get("scoring_config_version")), as_of)
+                # F-102: the ledger context is a call-time input only; the stored Item (frozen schema) never carries it
+                rescored = score_item(with_context(new, self.context_source),
+                                      load_config(new["scores"]["scorecard"].get("scoring_config_version")), as_of)
                 new = {**new, "scores": rescored["scores"], "recommendation": rescored["recommendation"]}
+                out = {**out, "item": new}
         if out["proposed_next_state"] == "SCORED":
             sc, rec = new["scores"], new["recommendation"]
             score = ScoreResult(

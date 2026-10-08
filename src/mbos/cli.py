@@ -171,9 +171,9 @@ def cmd_worker(a: argparse.Namespace) -> int:
             comps.adapters["fixture"] = FixtureSourceAdapter(a.fixture, name="fixture")
         report = [{"component": "everything", "kind": "STAND-IN",
                    "detail": "reference store and stand-ins (set MBOS_STATE_BACKEND=lane_d MBOS_GATEWAY_MODE=lane_e for the real lanes)"}]
-    print("components:\n" + render_report(report))
+    print("components:\n" + render_report(report), flush=True)  # F-103: visible in a redirected worker log at once
     init_runtime(s, comps)  # launch recovers every PENDING workflow
-    print("worker up (DRY-RUN). Recovered pending workflows; Ctrl-C to stop — parked workflows resume next start.")
+    print("worker up (DRY-RUN). Recovered pending workflows; Ctrl-C to stop — parked workflows resume next start.", flush=True)
     if a.fixture:
         wf_id = f"discover:fixture:{int(time.time())}"
         with SetWorkflowID(wf_id):
@@ -183,16 +183,22 @@ def cmd_worker(a: argparse.Namespace) -> int:
         if a.once:
             time.sleep(a.settle)
         else:
-            from mbos.inbox import INTERVAL_SECONDS, InboxWatcher
+            from mbos.inbox import INTERVAL_SECONDS, InboxWatcher, ResearchWatcher
             from mbos.workflows import recover_orphan_gates
 
             watcher = InboxWatcher(os.environ.get("MBOS_COMPS_INBOX"), _parked_ids, workflows.recheck)
+            research_watcher = ResearchWatcher(_parked_research_lengths if s.state_backend == "lane_d" else dict, workflows.recheck)  # F-109: attestations / UI comps
             while True:
                 try:
                     for wf in watcher.tick():  # F-92: a comp dropped in the inbox re-checks the parked items by itself
-                        print(f"comps inbox changed: queued {wf}")
+                        print(f"comps inbox changed: queued {wf}", flush=True)
                 except Exception as e:  # noqa: BLE001  (a bad file must not stop the worker)
                     print(f"comps inbox watch failed: {e}", file=sys.stderr)
+                try:
+                    for wf in research_watcher.tick():
+                        print(f"new evidence on a parked item: queued {wf}", flush=True)
+                except Exception as e:  # noqa: BLE001
+                    print(f"research watch failed: {e}", file=sys.stderr)
                 time.sleep(INTERVAL_SECONDS)
                 recover_orphan_gates()  # F-42: periodic safety net for follow-up gates
     except KeyboardInterrupt:
@@ -291,6 +297,12 @@ def cmd_card(a: argparse.Namespace) -> int:
 
     with _engine().connect() as c:
         item, receipts, areqs = cardmod.load_inputs(c, a.item_id)
+        from mbos.config import settings as _settings
+
+        if _settings().state_backend == "lane_d":  # F-102: the ledger figure is added at display time; it is never stored on the Item
+            from mbos.adapters.ledger import LedgerContext, with_context
+
+            item = with_context(item, LedgerContext(_settings().database_url))
         card = cardmod.build_card(item, receipts, areqs, cardmod.enrichment_from_item(c, item))
     errors = cardmod.validate_card(card)
     print(json.dumps(card, indent=2) if a.json else cardmod.render_text(card))
@@ -317,6 +329,12 @@ def cmd_note(a: argparse.Namespace) -> int:
     with engine.begin() as c:
         print("recorded", spine_d.record_operator_note(c, bundle))
     return 0
+
+
+def _parked_research_lengths() -> dict[str, int]:
+    with _engine().connect() as c:
+        return {r[0]: r[1] for r in c.execute(sa.text(
+            "SELECT item_id, coalesce(jsonb_array_length(doc->'research'), 0) FROM mbos.items WHERE state = 'RESEARCHING'"))}
 
 
 def _parked_ids() -> list[str]:

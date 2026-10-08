@@ -15,7 +15,7 @@ from mbos import card as cardmod, config, spine_d
 from mbos.config import Settings
 from mbos.db.engine import engine_for
 from mbos.ids import new_id
-from mbos.inbox import InboxWatcher
+from mbos.inbox import InboxWatcher, ResearchWatcher
 from mbos.reference.fixture_adapter import FixtureSourceAdapter
 from mbos.runtime import Components
 from tests.helpers import lane_d
@@ -111,3 +111,51 @@ def test_inbox_watcher_rechecks_only_when_the_inbox_changes(tmp_path):
     assert w.tick() == [] and len(calls) == 1                 # unchanged
     (tmp_path / "c2.json").write_text("{}")
     assert w.tick() == ["wf"] and len(calls) == 2
+
+
+# ---- A-42 --------------------------------------------------------------------------------------------------------------------------
+
+def test_a42_ingested_items_conform_and_raw_payloads_resolve(db, item_id, tmp_path, monkeypatch):
+    """F-105 (UNKNOWN basis mapped to UNK), F-104 (raw_ref resolves under MBOS_RAW_DIR), conformance green on a real PG16."""
+    from mbos import audit
+
+    monkeypatch.setenv("MBOS_RAW_DIR", str(tmp_path))
+    comps = Components().with_defaults("lane_d")
+    raw = next(r for r in FixtureSourceAdapter(FIXTURE, name="fixture").fetch() if r.source_listing_id == "FIX-TRAILER-1")
+    with db["app"].begin() as c:
+        spine_d.ingest(c, asdict(raw), asdict(comps.normalizer.normalize(raw)), "fixture", "0.1.0", comps)
+    with db["app"].connect() as c:
+        ref = spine_d.read_item(c, item_id)["sources"][0]["raw_ref"]
+        assert audit.full_audit(c)["conformance"]["ok"]
+    assert spine_d._contract_bases({"estimates_meta": {"assumptions": [{"basis": "UNKNOWN"}, {"basis": "FACT"}]}}) == \
+        {"estimates_meta": {"assumptions": [{"basis": "UNK"}, {"basis": "FACT"}]}}
+    path = spine_d.retain_raw(ref, b"x")  # mirror path is content-addressed; an existing object is never overwritten
+    spine_d.retain_raw("sha256:" + "ab" * 32, b"payload")
+    assert (tmp_path / "sha256" / "ab" / "ab" / ("ab" * 32)).read_bytes() == b"payload"
+    assert path is None or path.endswith(ref[7:])
+
+
+def test_a42_researcher_does_not_persist_the_ledger_context():
+    pytest.importorskip("mbos_economics")
+    pytest.importorskip("mbos_discovery")
+    from mbos.adapters.comps import ProductionCompsSource  # noqa: F401
+    from mbos.adapters.economics import EconomicsResearcher
+
+    item = json.loads((ROOT / "docs/research/contracts/examples/item-service-drywall.example.json").read_text())
+    rr = EconomicsResearcher(lambda it: ([], []), context_source=lambda: {"available_to_deploy": 500.0}).research(item)
+    assert "context" not in (rr.economics or {})
+
+
+def test_a42_research_watcher_wakes_on_new_evidence_once():
+    calls = []
+    lens = {"itm_1": 2, "itm_2": 1}
+    w = ResearchWatcher(lambda: dict(lens), lambda ids: calls.append(ids) or ["wf"])
+    assert w.tick() == [] and not calls            # first sight = baseline
+    lens["itm_1"] = 3                              # an attestation landed
+    assert w.tick() == ["wf"] and calls == [["itm_1"]]
+    lens["itm_1"] = 4                              # the re-check's own research entry: absorbed, no loop
+    assert w.tick() == [] and len(calls) == 1
+    lens["itm_2"] = 2
+    assert w.tick() == ["wf"] and calls[-1] == ["itm_2"]
+    del lens["itm_2"]                              # unparked
+    assert w.tick() == [] and len(calls) == 2

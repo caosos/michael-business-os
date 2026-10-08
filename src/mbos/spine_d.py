@@ -13,7 +13,9 @@ request id + event, so a DBOS replay of a transaction step can never double-writ
 from __future__ import annotations
 
 import json
+import os
 from datetime import timedelta
+from pathlib import Path
 from typing import Any, Optional
 
 import sqlalchemy as sa
@@ -79,6 +81,31 @@ def _receipt(conn: sa.Connection, areq: dict, rtype: str, intent: str, prov: lis
 
 
 # ---------------------------------------------------------------- DISCOVER + NORMALIZE
+def _contract_bases(econ: dict) -> dict:
+    """F-105: the contract vocabulary for an assumption's basis is FACT|INFER|REC|UNK; map the spelled-out "UNKNOWN" a source may use."""
+    meta = econ.get("estimates_meta") if isinstance(econ, dict) else None
+    if not isinstance(meta, dict) or not isinstance(meta.get("assumptions"), list):
+        return econ
+    fixed = [{**a, "basis": "UNK"} if isinstance(a, dict) and a.get("basis") == "UNKNOWN" else a for a in meta["assumptions"]]
+    return {**econ, "estimates_meta": {**meta, "assumptions": fixed}}
+
+
+def retain_raw(raw_ref: str, data: bytes) -> Optional[str]:
+    """F-104: also keep the raw payload under MBOS_RAW_DIR (lane B's FileRawStore layout: sha256/ab/cd/<hex>) so `raw_ref` resolves on disk.
+    The canonical copy stays in the artifact store; this mirror is skipped when MBOS_RAW_DIR is unset. Never overwrites."""
+    root = os.environ.get("MBOS_RAW_DIR")
+    if not root or not isinstance(raw_ref, str) or not raw_ref.startswith("sha256:") or len(raw_ref) != 71:
+        return None
+    hexd = raw_ref[7:]
+    path = Path(root) / "sha256" / hexd[:2] / hexd[2:4] / hexd
+    if not path.exists():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_name(f".tmp-{os.getpid()}-{hexd[:8]}")
+        tmp.write_bytes(data)
+        os.replace(tmp, path)
+    return str(path)
+
+
 def _dedup_context(raw: dict, norm: dict) -> dict:
     """A-14: the candidate sighting's source/fetch context for lane B's Deduper (relist + pHash rules)."""
     return {"source": raw["source"], "source_listing_id": raw["source_listing_id"], "url": raw["url"],
@@ -112,6 +139,7 @@ def ingest(conn: sa.Connection, raw: dict, norm: Optional[dict], adapter_name: s
             break
     raw_bytes = canonical_json(raw["payload"])
     raw_ref = conn.execute(sa.text("SELECT mbos.put_artifact(:c, 'application/json')"), {"c": raw_bytes}).scalar_one()
+    retain_raw(raw_ref, raw_bytes)
     src_prov = L.record_provenance(conn, actor_type="agent", agent_name=adapter_name, basis="FACT", source_uri=raw["url"],
                                    fetched_at=raw["fetched_at"], tool_name=adapter_name, tool_version=adapter_version,
                                    inputs_used=[{"ref": raw_ref, "hash": raw_ref}])
@@ -135,7 +163,7 @@ def ingest(conn: sa.Connection, raw: dict, norm: Optional[dict], adapter_name: s
     norm_prov = _prov(conn, f"{adapter_name}.normalizer", inputs=(raw_ref,), derived_from=[src_prov])
     _to(conn, item_id, "NORMALIZED", "normalized to Item v1", [norm_prov], actor)
     if norm.get("economics"):
-        _patch(conn, item_id, {"economics": norm["economics"]}, "source-supplied economics", [norm_prov], actor)
+        _patch(conn, item_id, {"economics": _contract_bases(norm["economics"])}, "source-supplied economics", [norm_prov], actor)
     return {"item_id": item_id, "created": True, "merged": False, "dropped": False}
 
 

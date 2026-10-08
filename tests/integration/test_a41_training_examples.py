@@ -49,7 +49,7 @@ def test_fixture_is_labelled_illustrative_and_every_assumption_has_a_basis():
         assert l["url"].startswith("https://example.invalid/")
         econ = l["record"]["economics"]
         for a in econ["estimates_meta"].get("assumptions", []):
-            assert a["basis"] in ("FACT", "INFER", "UNKNOWN") and a["note"], a
+            assert a["basis"] in ("FACT", "INFER", "REC", "UNK") and a["note"], a
 
 
 def test_a_yes_awaits_approval_within_the_bankroll(result):

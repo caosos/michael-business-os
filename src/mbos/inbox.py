@@ -29,3 +29,33 @@ class InboxWatcher:
         self.seen = fp
         ids = self.parked()
         return self.recheck(ids) if ids else []
+
+
+class ResearchWatcher:
+    """F-109: re-check a parked item when its research grew (a UI attestation or comp), not only when the inbox changed.
+    `lengths() -> {item_id: len(research)}` for the parked (RESEARCHING) items. An item seen for the first time is only baselined
+    (the inbox watcher and the worker start already cover what existed). The length seen is recorded BEFORE the re-check runs, and the
+    re-check's own research entries are absorbed into the baseline on the following tick without queueing again."""
+
+    def __init__(self, lengths: Callable[[], dict[str, int]], recheck: Callable[[list[str]], list[str]]):
+        self.lengths, self.recheck, self.seen, self.pending = lengths, recheck, {}, set()
+
+    def tick(self) -> list[str]:
+        now = self.lengths()
+        grown = []
+        for iid, n in now.items():
+            if iid in self.seen and n > self.seen[iid]:
+                if iid in self.pending:  # grew because our own re-check wrote research: absorb it
+                    self.pending.discard(iid)
+                else:
+                    grown.append(iid)
+            self.seen[iid] = n
+        for iid in list(self.seen):
+            if iid not in now:  # left RESEARCHING: forget it, so a later park starts from a fresh baseline
+                del self.seen[iid]
+                self.pending.discard(iid)
+        if not grown:
+            self.pending.clear()
+            return []
+        self.pending = set(grown)
+        return self.recheck(grown)

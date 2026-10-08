@@ -103,7 +103,7 @@
             "evidence": {"sold_comps_count": 3},
             "assumptions": [
               {"field": "economics.acquisition.expected_buy_price", "value": 280, "basis": "INFER", "note": "offer under the $300 ask"},
-              {"field": "economics.rehab.parts_cost", "value": 80, "basis": "UNKNOWN", "note": "the fault is not identified: a carburetor/ignition prior, not a quote"},
+              {"field": "economics.rehab.parts_cost", "value": 80, "basis": "UNK", "note": "the fault is not identified: a carburetor/ignition prior, not a quote"},
               {"field": "economics.rehab.repair_success_prob", "value": 0.7, "basis": "INFER", "note": "illustrative prior for a non-running ATV"},
               {"field": "economics.resale.target_sell_price", "value": 1100, "basis": "INFER", "note": "running comps are illustrative"}
             ]
@@ -130,7 +130,7 @@
             "assumptions": [
               {"field": "economics.job.quoted_revenue", "value": 450, "basis": "INFER", "note": "illustrative quote, not yet agreed in writing"},
               {"field": "economics.job.labor_hours", "value": 3, "basis": "INFER", "note": "scope seen only in the customer's photos"},
-              {"field": "economics.job.win_prob", "value": 0.7, "basis": "UNKNOWN", "note": "config prior; no history yet"}
+              {"field": "economics.job.win_prob", "value": 0.7, "basis": "UNK", "note": "config prior; no history yet"}
             ]
           }
         }
