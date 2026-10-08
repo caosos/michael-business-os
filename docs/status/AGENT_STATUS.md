@@ -4,8 +4,8 @@ Agent: 02
 Role: Discovery / Source Adapters (DISCOVER + NORMALIZE lane)
 Branch: research/agent-02-opportunity
 Worktree: /home/michaelos/business-os-worktrees/agent-02-opportunity
-State: WAITING
-Waiting on: B-12 unblock (MICHAEL_DECISIONS #8 + credentials); queue refill
+State: CLOSED
+Handoff: docs/handoff/LANE_02.md (closed out at Agent 01's request, ADR-0014; session to be closed by Agent 01)
 Blocked: B-12 on MICHAEL_DECISIONS #8 + operator credentials (prep DONE: docs/runbooks/first-live-run-checklist.md; SAM.gov added to the CLI)
 Done: B-01 @ 7c9da45
 Done: B-02 @ cadfdae
@@ -28,7 +28,7 @@ Done: B-18 @ bae240e (NHTSA entries admitted with model years; verified vs Agent
 Done: B-21 @ d6eec69 (evidence-based category tags; quoted INFERENCE; injection-safe; card validates; 246 tests)
 Done: B-20 @ d4e8670 (campaign matcher; gated, read-only, explained; 267 tests)
 Done: C-04 (support, source side) @ a1a7730 (lead Agent 03 C-04 @ 882c726)
-Current phase: Round Two — B-01..B-11, B-13..B-21 DONE; B-12 blocked; WAITING
+Current phase: CLOSED. B-01..B-11 and B-13..B-21 DONE; B-12 blocked (Michael #8 + credentials); see docs/handoff/LANE_02.md
 Started: 2026-10-06 (Round One) · Round Two started 2026-10-07
 Last updated: 2026-10-07
 
@@ -54,6 +54,14 @@ Heads-up from 05: E-02 moves PANIC to Postgres (04 migration 0007); `MBOS_PANIC_
 constructor changes; `blocks(...)` signature/codes unchanged. 02 adapts its CLI wiring when 05 announces it.
 
 ## Proposed tasks
+- **P-02-13 (lane B, P2): NHTSA technical service bulletins** from the downloadable year-range files (not an API),
+  with the same admission standard and years. Acceptance: fixture files become KB entries or review items; entries
+  carry `years`; nothing unsourced.
+- **P-02-14 (lanes B+C, P2): real year forms.** When real listings exist, report how model years are stated (`'18`,
+  `MY2018`, description-only) so Agent 03 can extend extraction. Acceptance: a counted sample of at least 50 real
+  listings, with the forms listed.
+- **B-12 stays in READY_QUEUE** (blocked on MICHAEL_DECISIONS #8 and credentials); procedure in
+  `docs/runbooks/first-live-run-checklist.md`.
 - **P-03/02-13 (lane C, P2): model-year support in the KB matcher.** Add optional `years` to match groups. A listing
   must name the year or a covered year range for the entry to match; no year in the listing means no match (or a
   labelled weaker match). Agent 03 owns this. Then flip `vehicle_safety.KB_SUPPORTS_MODEL_YEARS`, and the NHTSA entries
