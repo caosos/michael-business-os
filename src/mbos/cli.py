@@ -66,6 +66,23 @@ def _engine() -> sa.Engine:
     return engine
 
 
+def _owner_engine() -> sa.Engine:
+    """D-26 / R14: human decisions (decide, outcome, notes, kill switch) go through the OWNER login, never the workflow login.
+    With MBOS_OWNER_DATABASE_URL unset (dev, single-login reference backend) this falls back to the worker login and says so."""
+    from mbos.config import settings
+    from mbos.db.engine import engine_for
+    from mbos.db.migrate import migrate
+
+    url = settings().owner_database_url
+    if not url:
+        print("NOTE: MBOS_OWNER_DATABASE_URL is not set; using the worker login for a human action (dev only). In production set it "
+              "to the owner (approver) login; the workflow login must not hold approver (D-26, R14).", file=sys.stderr)
+        return _engine()
+    engine = engine_for(url)
+    migrate(engine)
+    return engine
+
+
 def _components():
     from mbos.runtime import Components
 
@@ -181,7 +198,7 @@ def cmd_show(a: argparse.Namespace) -> int:
 def cmd_decide(a: argparse.Namespace) -> int:
     from mbos import spine
 
-    engine = _engine()
+    engine = _owner_engine()
     with engine.connect() as c:
         h = c.execute(sa.text("SELECT payload_hash FROM mbos.action_requests WHERE action_request_id = :a"),
                       {"a": a.areq}).scalar_one_or_none()
@@ -224,7 +241,7 @@ def cmd_note(a: argparse.Namespace) -> int:
     from mbos import spine_d
     from mbos.clock import now_iso
 
-    engine = _engine()
+    engine = _engine() if a.action == "list" else _owner_engine()
     if a.action == "list":
         with engine.connect() as c:
             _print(spine_d.operator_notes_document(c))
@@ -251,7 +268,7 @@ def cmd_outcome(a: argparse.Namespace) -> int:
     realized = {k: v for k, v in {"revenue": a.revenue, "total_cost": a.cost, "hours": a.hours}.items() if v is not None}
     if a.revenue is not None and a.cost is not None:
         realized["net_profit"] = a.revenue - a.cost
-    with _engine().begin() as c:
+    with _owner_engine().begin() as c:
         _print(spine.record_outcome(c, a.item_id, a.kind, realized=realized or None, notes=a.notes))
     return 0
 
@@ -259,7 +276,7 @@ def cmd_outcome(a: argparse.Namespace) -> int:
 def cmd_panic(a: argparse.Namespace) -> int:
     from mbos import spine
 
-    with _engine().begin() as c:
+    with _owner_engine().begin() as c:
         _print(spine.set_kill_switch(c, a.key, a.state == "on", reason=a.reason))
     return 0
 

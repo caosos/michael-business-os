@@ -3,6 +3,8 @@ gateway refuses to run if anything claims otherwise (ADR-0005 guard check 8)."""
 
 from __future__ import annotations
 
+from typing import Optional
+
 import os
 from dataclasses import dataclass, field
 from functools import lru_cache
@@ -14,6 +16,7 @@ DRY_RUN = True  # Round two / MVP: hard-coded. Changing this needs an ADR and MI
 class Settings:
     database_url: str
     system_database_url: str
+    owner_database_url: Optional[str] = None   # D-26: the owner/approver login for human decisions; workflows must NOT hold this
     app_name: str = "mbos"
     application_version: str = "mbos-spine-0.1.0"
     # Provisional defaults (MICHAEL_DECISIONS #1/#2 not yet decided); placeholder scorer only.
@@ -49,4 +52,4 @@ def settings() -> Settings:
     sysdb = os.environ.get("MBOS_SYSTEM_DATABASE_URL")
     if not db or not sysdb:
         raise RuntimeError("MBOS_DATABASE_URL and MBOS_SYSTEM_DATABASE_URL must be set (see RUNBOOK.md: `mbos devdb up`)")
-    return Settings(database_url=db, system_database_url=sysdb)
+    return Settings(database_url=db, system_database_url=sysdb, owner_database_url=os.environ.get("MBOS_OWNER_DATABASE_URL") or None)

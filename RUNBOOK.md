@@ -201,3 +201,6 @@ D=$(mktemp -d); git archive origin/research/agent-06-communications operator_ui 
 MBOS_OPERATOR_PIN=<choose-a-pin> PYTHONPATH=$D .venv/bin/python -u -m operator_ui serve --port 8765   # -u so the banner is visible
 ```
 Then open http://127.0.0.1:8765/. Find ids with `mbos items` (and `mbos queue`, which now prints each item id). The cold-start walk-through with expected output is `docs/qa/COLD_START.md` on lane 07's branch.
+
+## Owner login (D-26 / R14)
+Human decisions (`mbos decide`, `outcome`, `note add`, `panic`) use `MBOS_OWNER_DATABASE_URL`, a login that holds `approver`. The workflow login (`MBOS_DATABASE_URL`, `mbos_dbos`) must NOT hold `approver` or the owner-channel role in production, so an agent-reachable process cannot record an approval or move capital. Unset = dev fallback to the worker login, with a warning on stderr.
