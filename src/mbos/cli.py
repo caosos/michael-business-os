@@ -145,10 +145,26 @@ def cmd_queue(a: argparse.Namespace) -> int:
         for line in item["recommendation"]["rationale"]:
             print(f"    - {line}")
         print(f"  action  {areq['capability']} (tier {areq['tier']}, {areq['reversibility']}): {areq['payload']['summary']}")
+        print(f"  item    {item['item_id']}   (mbos card {item['item_id']})")
         print(f"  areq    {areq['action_request_id']}   expires {areq['expires_at']}")
         print(f"  payload {areq['payload_hash']}")
         step = " (YES needs --step-up)" if areq["reversibility"] == "irreversible" else ""
         print(f"  decide: mbos decide {areq['action_request_id']} YES|NO|MODIFY|HOLD --seen {areq['payload_hash'][7:19]}{step}")
+    return 0
+
+
+def cmd_items(a: argparse.Namespace) -> int:
+    """F-70 (07 cold-start): list Items so `card`, `show` and `outcome` have an id to use."""
+    import sqlalchemy as sa
+
+    sql = ("SELECT item_id, state, type, category, body->'normalized'->>'title', body->>'created_at' FROM mbos.items "
+           + ("WHERE state = :st " if a.state else "") + "ORDER BY body->>'created_at' DESC LIMIT :n")
+    with _engine().connect() as c:
+        rows = c.execute(sa.text(sql), {"st": a.state, "n": a.limit}).all()
+    if not rows:
+        print("No items.")
+    for iid, state, typ, cat, title, created in rows:
+        print(f"{iid}  {state:<18} {typ}/{cat:<14} {(title or '')[:70]}")
     return 0
 
 
@@ -266,6 +282,7 @@ def main(argv: list[str] | None = None) -> int:
     s = sub.add_parser("worker"); s.add_argument("--fixture"); s.add_argument("--once", action="store_true")
     s.add_argument("--settle", type=float, default=3.0); s.set_defaults(fn=cmd_worker)
     sub.add_parser("queue").set_defaults(fn=cmd_queue)
+    s = sub.add_parser("items"); s.add_argument("--state"); s.add_argument("--limit", type=int, default=50); s.set_defaults(fn=cmd_items)
     s = sub.add_parser("show"); s.add_argument("item_id"); s.set_defaults(fn=cmd_show)
     s = sub.add_parser("decide"); s.add_argument("areq"); s.add_argument("decision", choices=["YES", "NO", "MODIFY", "HOLD"])
     s.add_argument("--seen", required=True, help="payload hash prefix as shown by `mbos queue`")

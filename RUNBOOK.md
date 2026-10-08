@@ -191,3 +191,13 @@ Not yet built (lane E): egress cut, credential lease revocation, LiteLLM budget 
 
 ## Bounded workers and usage telemetry
 See `docs/runbooks/AGENT_RUNTIME.md` (launcher `tools/worker.py`, router `config/model_router.v1.json`, telemetry `var/telemetry/worker_runs.jsonl`).
+
+
+## Operator UI (F-71)
+The UI is lane 06's package and is not on the coordinator branch. Start it from lane 06's pushed head (needs the same DB env as `mbos devdb up`, and a PIN of your choosing):
+```bash
+eval "$(.venv/bin/mbos devdb up)"        # re-run in every new shell: the env vars do not persist
+D=$(mktemp -d); git archive origin/research/agent-06-communications operator_ui comms_spec | tar -x -C $D
+MBOS_OPERATOR_PIN=<choose-a-pin> PYTHONPATH=$D .venv/bin/python -u -m operator_ui serve --port 8765   # -u so the banner is visible
+```
+Then open http://127.0.0.1:8765/. Find ids with `mbos items` (and `mbos queue`, which now prints each item id). The cold-start walk-through with expected output is `docs/qa/COLD_START.md` on lane 07's branch.
