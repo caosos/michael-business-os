@@ -184,3 +184,10 @@ def test_quota_guard_refuses_launch_and_override_is_explicit(wt, tmp_path, monke
     r2 = worker.run_one("T-1", "03", prof(), worktree=wt, dry=False, model=None, queue_text=QUEUE, runner=lambda *a: cp(0, OK), tpath=tp,
                         skip_session_check=True, ignore_quota=True)
     assert "quota guard" not in str(r2.get("error"))
+
+
+def test_max_turns_override_is_capped_by_policy(wt, tmp_path):
+    seen = []
+    worker.run_one("T-1", "03", prof(), worktree=wt, dry=False, model=None, queue_text=QUEUE, escalate=False, max_turns=999,
+                   runner=lambda c, cwd, env, to: (seen.append(c[c.index("--max-turns") + 1]), cp(1, BAD))[1], tpath=tmp_path / "m.jsonl", skip_session_check=True)
+    assert seen == [str(router.load_policy()["defaults"]["max_turns_cap"])]

@@ -118,7 +118,7 @@ def should_escalate(row: dict) -> bool:
 
 
 def run_one(task_id: str, lane: str, profile: router.TaskProfile, *, worktree: Path, dry: bool, model: Optional[str],
-            escalate: bool = True, allow_dirty: bool = False, permission_mode: str = "auto", ignore_quota: bool = False, branch_override: Optional[str] = None, runner: Optional[Callable[..., Any]] = None, tpath: Optional[Path] = None,
+            escalate: bool = True, allow_dirty: bool = False, permission_mode: str = "auto", ignore_quota: bool = False, branch_override: Optional[str] = None, max_turns: Optional[int] = None, runner: Optional[Callable[..., Any]] = None, tpath: Optional[Path] = None,
             skip_session_check: bool = False, queue_text: Optional[str] = None, timeout_s: int = 3600) -> dict[str, Any]:
     name, _, branch, _ = LANES[lane]
     branch = branch_override or branch
@@ -141,6 +141,10 @@ def run_one(task_id: str, lane: str, profile: router.TaskProfile, *, worktree: P
         if st and not allow_dirty:
             return {"ok": False, "error": f"worktree {worktree} is not clean", "status": st.splitlines()[:5]}
     route = router.route(profile)
+    if max_turns:
+        cap = router.load_policy()["defaults"]["max_turns_cap"]
+        route = router.Route(model=route.model, tier=route.tier, rule_id=route.rule_id, reason=route.reason + f" (max_turns {min(max_turns, cap)} by request)",
+                             max_turns=min(max_turns, cap), escalate_to=route.escalate_to, notes=route.notes)
     override = None
     if model:
         override, route = route.model, router.Route(model=model, tier="override", rule_id="OVERRIDE", reason=f"explicit --model (router chose {route.model})",
@@ -193,6 +197,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     ap.add_argument("--cross-lane", action="store_true")
     ap.add_argument("--long-horizon", action="store_true")
     ap.add_argument("--model")
+    ap.add_argument("--max-turns", type=int, help="override the router's turn budget (capped by the policy max_turns_cap)")
     ap.add_argument("--worktree")
     ap.add_argument("--branch", help="branch name to tell the worker it is on (use with --worktree for a side worktree of the coordinator)")
     ap.add_argument("--dry", action="store_true")
@@ -204,7 +209,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     a = ap.parse_args(argv)
     wt = Path(a.worktree) if a.worktree else WORKTREES / LANES[a.lane][3]
     prof = router.TaskProfile(task_id=a.task_id, lane=a.lane, kind=a.kind, risk=a.risk, cross_lane=a.cross_lane, long_horizon=a.long_horizon)
-    out = run_one(a.task_id, a.lane, prof, worktree=wt, dry=a.dry, model=a.model, escalate=not a.no_escalate, allow_dirty=a.allow_dirty, permission_mode=a.permission_mode, ignore_quota=a.ignore_quota, branch_override=a.branch, timeout_s=a.timeout,
+    out = run_one(a.task_id, a.lane, prof, worktree=wt, dry=a.dry, model=a.model, escalate=not a.no_escalate, allow_dirty=a.allow_dirty, permission_mode=a.permission_mode, ignore_quota=a.ignore_quota, branch_override=a.branch, max_turns=a.max_turns, timeout_s=a.timeout,
                   skip_session_check=bool(a.worktree))
     print(json.dumps({k: v for k, v in out.items() if k != "prompt"}, indent=2, default=str))
     if a.dry and out.get("prompt"):
