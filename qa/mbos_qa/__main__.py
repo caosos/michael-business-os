@@ -320,6 +320,20 @@ FINDINGS = [
     ("F-71", "FACT", "01 (runbook)", "G-15 cold start: RUNBOOK says the Operator UI renders the card at `/item/<id>` but gives no command, and the UI is not in the coordinator head (it lives on `research/agent-06-communications`, `python -m operator_ui serve`). "
      "RUNBOOK section 2 also hard-codes the `agent-01-coordinator` worktree path.",
      "RECOMMENDATION: add an Operator UI section to RUNBOOK (archive-install recipe from LANE_06 handoff, MBOS_OPERATOR_PIN, port 8765) once 01 integrates the UI; use `<your worktree>` in section 2."),
+    ("F-72", "FACT", "06 (operator_ui)", "G-16: `/numbers/capital` replay with the SAME nonce but a different amount is idempotent (only the first is recorded) yet the page says `Fund of $900.00 recorded` while the ledger moved by $7. The success message echoes the request, not the receipt.",
+     "REPRO: `cd qa && ../.venv/bin/python -m pytest -q tests/numbers -k changed_amount -rx`. RECOMMENDATION: build the message from the stored receipt/after_state, or refuse a reused key whose payload differs."),
+    ("F-73", "FACT", "06 (operator_ui)", "G-16: a non-ASCII `csrf` or `pin` (e.g. `é`) makes `secrets.compare_digest` raise TypeError in `_check_csrf` / `_numbers_gate` (also `_note_gate`, `add_note`): the handler thread dies and the client gets a dropped connection instead of the refusal page. Nothing is written (fail-closed), P3.",
+     "REPRO: `-k non_ascii`. RECOMMENDATION: compare `.encode()` bytes, or catch TypeError as a refusal."),
+    ("F-74", "FACT", "06 (operator_ui)", "G-16: `numbers_view.render_page` pre-fills the form with `value or ''`, so an explicit 0 (target or hours) renders as an empty box; saving the untouched form silently turns Michael's 0 into UNKNOWN (a receipted change nobody asked for). P2.",
+     "REPRO: `-k zero_survives`. RECOMMENDATION: use `'' if v is None else v`."),
+    ("F-75", "FACT", "06 (operator_ui)", "G-16: `parse_amount` accepts Unicode digits (`٣٠٠`, fullwidth `９`), repeated `$` (`$$5`) and comma anywhere (`1,5,0,0` = 1500), though its own message says 'a plain number like 1500 or 12.50'. NaN/Infinity/negative/exponent/over-cap/3-decimals are all refused. P3.",
+     "REPRO: `-k amount_parser_is_strict`. RECOMMENDATION: `re.ASCII`, strip one leading `$`, require 3-digit comma groups."),
+    ("F-76", "INFER", "06 (+ Michael: sane bound)", "G-16: one POST can fund $10,000,000.00 (the cap is per transaction, there is no cumulative bound and no confirm step), making a dry-run `available_to_deploy` of $10M for a one-person flipping business. Not exploitable without the PIN; a fat-finger guard is missing. P3.",
+     "REPRO: `-k sane_bounds`. RECOMMENDATION: a much lower per-transaction cap or a confirm step above a Michael-owned threshold (DECISIONS item)."),
+    ("F-77", "FACT", "06 (operator_ui)", "G-16: no attempt limit or lockout on the step-up PIN for My numbers (or approvals/notes): 40 wrong PINs, then the right PIN still works at once. Mitigated by the 127.0.0.1 bind and Host check. P3.",
+     "REPRO: `-k throttled`. RECOMMENDATION: per-process failure counter with exponential delay."),
+    ("F-78", "FACT", "04 (lane D)", "G-16: `mbos.set_mission/capital_fund/capital_withdraw` take the actor as a free JSON argument and only check the LOGIN's role; the approver login can record `{type: agent}`. 'An agent actor is refused' therefore rests on the UI code setting `human:michael`, not on the database. Non-approver logins (reader, state_mcp, gateway, policy, relay, dbos) ARE refused for the functions, direct INSERTs and forged `capital_fund` receipts (verified, passing tests).",
+     "REPRO: `-k agent_actor_from_the_owner_login`. RECOMMENDATION: require `p_actor->>'type' = 'human'` in these three functions."),
     ("F-16", "FACT", "01", "FIXED by A-10 (verified at 82632c3: a normal install finds its contracts and operator profile). Original finding: Agent 01's package only finds the contracts by a path relative to the source tree. "
      "With a normal (non-editable) `pip install`, 94 of its 109 tests fail or error with `docs/research/contracts "
      "not found; set MBOS_CONTRACTS_DIR`. With that variable set, 108 pass and 1 is skipped "
@@ -387,7 +401,7 @@ def cmd_tests() -> tuple[int, list[tuple[str, str, str, str]]]:
         xml = pathlib.Path(td) / "junit.xml"
         env = dict(os.environ, PYTHONPATH=str(QA_ROOT))
         rc = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", f"--junitxml={xml}",
-                             "tests", "--ignore=tests/card", "--ignore=tests/spec", "--ignore=tests/followup", "--ignore=tests/engine", "--ignore=tests/seams"], cwd=QA_ROOT, env=env).returncode
+                             "tests", "--ignore=tests/card", "--ignore=tests/spec", "--ignore=tests/followup", "--ignore=tests/engine", "--ignore=tests/seams", "--ignore=tests/numbers"], cwd=QA_ROOT, env=env).returncode
         rows = []
         for tc in ET.parse(xml).getroot().iter("testcase"):
             outcome = "passed"
@@ -489,6 +503,8 @@ def cmd_card() -> int:
     r, secs["engine"] = _run_pytest("engine (lane C pinned)", {}, ["tests/engine"])
     rows += r
     r, secs["seams"] = _run_pytest("product seams", {}, ["tests/seams"])
+    rows += r
+    r, secs["numbers"] = _run_pytest("My numbers (F-22, G-16)", {}, ["tests/numbers"])
     rows += r
     base = {"MBOS_QA_IMPL": "mbos_qa.impl_spine:build"}
     r, secs["reference"] = _run_pytest("reference backend", base, ["tests/card/test_card_backends.py"])
@@ -684,7 +700,7 @@ def cmd_spine(release: bool = False) -> int:
 
 
 FINDING_STATUS = {  # verified by the suites at the pins in qa/impl_lane_pins.json (G-12 re-run)
-    "F-22": "FIXED", "F-23": "FIXED", "F-24": "FIXED", "F-25": "FIXED (R22)", "F-40": "FIXED", "F-41": "FIXED", "F-42": "FIXED (G-09, 01 100d2ed)", "F-43": "FIXED (G-09, 01 100d2ed)", "F-44": "FIXED (G-09, 01 100d2ed)", "F-45": "FIXED (G-09, 01 100d2ed)", "F-46": "FIXED (G-09)", "F-47": "FIXED (G-09)", "F-48": "FIXED (G-09; residual F-50)", "F-49": "FIXED (G-09)", "F-50": "OPEN", "F-51": "FIXED (G-12, A-34)", "F-52": "FIXED (G-13, A-35 da72f5c)", "F-53": "FIXED (G-13, A-35 da72f5c)", "F-54": "FIXED (G-12, A-34)", "F-55": "FIXED (G-13, A-35 da72f5c)", "F-56": "FIXED (G-13, A-35 da72f5c)", "F-57": "FIXED (G-12, C-23 3eb358f)", "F-58": "FIXED (G-12, C-23 3eb358f)", "F-59": "FIXED (G-12, A-32)", "F-60": "FIXED (G-12, A-32)", "F-69": "FIXED (G-14, 01 944f8e4)", "F-70": "OPEN", "F-71": "OPEN", "F-61": "FIXED (G-13, A-35 da72f5c)", "F-62": "FIXED (G-13, A-35 da72f5c)", "F-63": "FIXED (G-12, A-33)", "F-64": "FIXED (G-12, A-33)", "F-65": "FIXED (G-13, A-35 da72f5c)", "F-66": "FIXED (G-13, A-35 da72f5c)", "F-67": "FIXED (G-14, 01 944f8e4)", "F-68": "FIXED (G-13, A-35 da72f5c)",
+    "F-22": "FIXED", "F-23": "FIXED", "F-24": "FIXED", "F-25": "FIXED (R22)", "F-40": "FIXED", "F-41": "FIXED", "F-42": "FIXED (G-09, 01 100d2ed)", "F-43": "FIXED (G-09, 01 100d2ed)", "F-44": "FIXED (G-09, 01 100d2ed)", "F-45": "FIXED (G-09, 01 100d2ed)", "F-46": "FIXED (G-09)", "F-47": "FIXED (G-09)", "F-48": "FIXED (G-09; residual F-50)", "F-49": "FIXED (G-09)", "F-50": "OPEN", "F-51": "FIXED (G-12, A-34)", "F-52": "FIXED (G-13, A-35 da72f5c)", "F-53": "FIXED (G-13, A-35 da72f5c)", "F-54": "FIXED (G-12, A-34)", "F-55": "FIXED (G-13, A-35 da72f5c)", "F-56": "FIXED (G-13, A-35 da72f5c)", "F-57": "FIXED (G-12, C-23 3eb358f)", "F-58": "FIXED (G-12, C-23 3eb358f)", "F-59": "FIXED (G-12, A-32)", "F-60": "FIXED (G-12, A-32)", "F-69": "FIXED (G-14, 01 944f8e4)", "F-70": "OPEN", "F-71": "OPEN", "F-72": "OPEN", "F-73": "OPEN", "F-74": "OPEN", "F-75": "OPEN", "F-76": "OPEN", "F-77": "OPEN", "F-78": "OPEN", "F-61": "FIXED (G-13, A-35 da72f5c)", "F-62": "FIXED (G-13, A-35 da72f5c)", "F-63": "FIXED (G-12, A-33)", "F-64": "FIXED (G-12, A-33)", "F-65": "FIXED (G-13, A-35 da72f5c)", "F-66": "FIXED (G-13, A-35 da72f5c)", "F-67": "FIXED (G-14, 01 944f8e4)", "F-68": "FIXED (G-13, A-35 da72f5c)",
     "F-16": "FIXED", "F-18": "FIXED", "F-19": "FIXED", "F-20": "FIXED", "F-21": "FIXED",
     "F-26": "FIXED", "F-27": "FIXED (an uncheckable risk is dropped, never left invalid)",
     "F-28": "FIXED (ISO strings only; a bare number such as 20261005 is UNKNOWN; valid dates still display)",

@@ -1,8 +1,10 @@
 {
- "note": "G-14: 01 mbos 944f8e4 (F-67/F-69 fix); 05 716098e; 04 c97ba6b; 03 engine 3eb358f (C-23) checked via git archive only.",
+ "note": "G-14: 01 mbos 944f8e4 (F-67/F-69 fix); 05 716098e; 04 c97ba6b; 03 engine 3eb358f (C-23) checked via git archive only. G-16: 04 819b5c7 (capital ledger 0017/0018) and 06 operator_ui 6bc8a54 (F-22) for tests/numbers via git archive only.",
  "mbos_01": "944f8e43218de735a36641bc7aa24a6353e94aa4",
  "lane_d_04": "c97ba6bb78bb20c3fdbcbebbc1f78d044c5d3ee8",
  "lane_e_05": "716098eb1b592e0f96a109606b753650e9e655d5",
  "lane_c_03_not_installed": "3d6212c3b1b5441ee4de4e63486f5e28a8e02a7e",
- "lane_c_03_engine": "3eb358f84bf62e2969ec4cb8cc4a62638a1229c0"
+ "lane_c_03_engine": "3eb358f84bf62e2969ec4cb8cc4a62638a1229c0",
+ "lane_d_04_numbers": "819b5c7bf823826b6bf849b206348aac8a1c450e",
+ "lane_f_06_numbers": "6bc8a5488a05ca35192241d6ea6d8206f137ad73"
 }

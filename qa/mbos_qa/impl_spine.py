@@ -142,14 +142,15 @@ def _archive(ref: str, dest: pathlib.Path, *paths: str) -> None:
     tarfile.open(fileobj=io.BytesIO(tar)).extractall(dest, filter="data")
 
 
-def lane_d_src() -> pathlib.Path:
-    """Agent 04's `state/` at the pinned head (read-only `git archive`; never merged)."""
+def lane_d_src(pin: str = "lane_d_04") -> pathlib.Path:
+    """Agent 04's `state/` at the pinned head (read-only `git archive`; never merged). `pin` selects the key in impl_lane_pins.json
+    (G-16 uses `lane_d_04_numbers`: the head with the capital ledger, 0017/0018)."""
     with _LOCK:
-        if "lane_d_src" not in _STATE:
+        if "lane_d_src:" + pin not in _STATE:
             d = pathlib.Path(tempfile.mkdtemp(prefix="a07-lane-d-"))
-            _archive(LANE_PINS["lane_d_04"], d, "state")
-            _STATE["lane_d_src"] = d
-        return _STATE["lane_d_src"]
+            _archive(LANE_PINS[pin], d, "state")
+            _STATE["lane_d_src:" + pin] = d
+        return _STATE["lane_d_src:" + pin]
 
 
 def policy_path() -> str:
@@ -162,14 +163,14 @@ def policy_path() -> str:
         return str(_STATE["policy"])
 
 
-def new_lane_d_database(prefix: str = "qa_d") -> str:
+def new_lane_d_database(prefix: str = "qa_d", pin: str = "lane_d_04") -> str:
     """roles.sql (idempotent per cluster) + CREATE DATABASE + pgvector + lane D's own migrator. Mirrors 01's recipe
     (`tests/helpers/lane_d.py`) and lane D's `bootstrap.sh`; the app connects as the owner, as 01's tests do."""
     import importlib
 
     import psycopg
 
-    src = lane_d_src()
+    src = lane_d_src(pin)
     srv = server()
     name = f"{prefix}_{uuid.uuid4().hex[:10]}"
     with _LOCK:
