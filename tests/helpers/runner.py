@@ -265,10 +265,11 @@ def lane_d_e2e(fixture: str, gateway_mode: str = "reference") -> None:
             card_stats[cat] = [cd["status"]["current"], cd["recommendation"]["action"], len(cd["unknowns"]), len(cd["activity_trail"])]
     with engine.connect() as c:
         by_type = dict(c.execute(sa.text("SELECT type, count(*) FROM mbos.receipts GROUP BY type")).all())
+        who = c.execute(sa.text("SELECT session_user, (SELECT rolsuper FROM pg_roles WHERE rolname = session_user)")).one()
     id_addressable = sum(1 for r in exported if r["type"] in ("SCORE_RECORDED", "RECOMMENDATION_RECORDED")
                          and r.get("entity_type") in ("scorecard", "recommendation") and r.get("entity_id", "")[:4] in ("scr_", "rec_"))
     scored = sum(1 for r in exported if r["type"] in ("SCORE_RECORDED", "RECOMMENDATION_RECORDED"))
-    say("RESULT", json.dumps({"followup": followup, "id_addressable": [id_addressable, scored], "panic": panic, "reconcile_schedule": sched, "cards": card_stats, "card_errors": card_errors[:5], "at1": at1, "receipt_types": by_type, "gateway_mode": gateway_mode, "final": final, "chain": chain, "reference_chain": [ref_ok, ref_msg],
+    say("RESULT", json.dumps({"db_login": [who[0], bool(who[1])], "followup": followup, "id_addressable": [id_addressable, scored], "panic": panic, "reconcile_schedule": sched, "cards": card_stats, "card_errors": card_errors[:5], "at1": at1, "receipt_types": by_type, "gateway_mode": gateway_mode, "final": final, "chain": chain, "reference_chain": [ref_ok, ref_msg],
                               "effector_calls": calls, "live_effector_calls": live, "receipts": len(exported),
                               "contract_errors": errors[:5], "executed": sum(r["type"] == "ACTION_EXECUTED" for r in exported)}))
     os._exit(0)

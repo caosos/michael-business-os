@@ -85,6 +85,11 @@ def pins_check() -> dict:
             "secs": 0.0, "summary": "; ".join(bad) if bad else "identical: " + "; ".join(notes)}
 
 
+def _runs_as_worker(res: dict | None) -> bool:
+    """A-01 phase 2: the e2e must run as the real non-superuser worker login, or it proves less than production does."""
+    return bool(res and res.get("db_login") and res["db_login"][0] == "mbos_dbos" and res["db_login"][1] is False)
+
+
 def action_path_verdict(run_ok: bool, res: dict | None) -> bool:
     """F-49/F-50: the action-path check must be NON-EMPTY: real executions, zero live effector calls, a verifying chain,
     one live pending follow-up, and a PANIC drill that blocks while frozen and not after release."""
@@ -115,18 +120,17 @@ def action_path_lane_de() -> dict:
     tarfile.open(fileobj=io.BytesIO(tar)).extractall(tmp, filter="data")
     server = pgserver.get_server(str(tmp / "pg"), cleanup_mode="stop")
     try:
-        app = lane_d.build(server, src, "mbos_gate_act")
-        server.psql("CREATE DATABASE mbos_gate_act_sys;")
+        app, sysu = lane_d.build_as_worker(server, src, "mbos_gate_act")   # the real mbos_dbos login, no superuser (A-01 phase 2)
         fx = fixture_variant(tmp, "gate", ["FIX-TRAILER-1", "FIX-LEAD-SMARTHOME-1", "FIX-MOWER-1"])
         r = run("action path", [PY, "-m", "tests.helpers.runner", "lane_d_e2e", str(fx), "lane_e"], timeout=300,
-                env={"MBOS_DATABASE_URL": app, "MBOS_SYSTEM_DATABASE_URL": server.get_uri().replace("/postgres?", "/mbos_gate_act_sys?"),
+                env={"MBOS_DATABASE_URL": app, "MBOS_SYSTEM_DATABASE_URL": sysu,
                      "MBOS_POLICY_PATH": str(tmp / "policy" / "policy.v1.json"),
                      "MBOS_EGRESS_FILE": str(tmp / "egress.json"), "MBOS_LITELLM_FILE": str(tmp / "litellm.json")})
     finally:
         server.cleanup()
     res = next((json.loads(line[len("RESULT"):]) for line in r["stdout"].splitlines() if line.startswith("RESULT")), None)
-    ok = action_path_verdict(bool(r["ok"]), res)
-    summary = "no RESULT" if not res else (f"effector calls {res['effector_calls']} (live {res['live_effector_calls']}) · executed {res['executed']} · "
+    ok = action_path_verdict(bool(r["ok"]), res) and _runs_as_worker(res)
+    summary = "no RESULT" if not res else (f"login {res.get('db_login')} · effector calls {res['effector_calls']} (live {res['live_effector_calls']}) · executed {res['executed']} · "
                                            f"follow-up {res['followup']} · panic drill {res['panic'] and res['panic']['frozen_blocks']} · chain ok {res['chain']['ok']}")
     return {"name": "lane D/E ACTION path (real gateway, follow-up, PANIC drill, live effector rows must be 0 and >=2 calls)",
             "ok": ok, "rc": r["rc"], "secs": r["secs"], "summary": summary[:600]}
@@ -149,21 +153,20 @@ def at1_lane_de() -> dict:
     tarfile.open(fileobj=io.BytesIO(tar)).extractall(tmp, filter="data")
     server = pgserver.get_server(str(tmp / "pg"), cleanup_mode="stop")
     try:
-        app = lane_d.build(server, src, "mbos_gate")
-        server.psql("CREATE DATABASE mbos_gate_sys;")
+        app, sysu = lane_d.build_as_worker(server, src, "mbos_gate")   # the real mbos_dbos login, no superuser (A-01 phase 2)
         fx = fixture_variant(tmp, "gate", ["FIX-TRAILER-1", "FIX-LEAD-SMARTHOME-1", "FIX-MOWER-1", "FIX-LEAD-DRYWALL-1"])
         r = run("lane D/E e2e + AT-1", [PY, "-m", "tests.helpers.runner", "lane_d_e2e", str(fx), "lane_e"], timeout=300,
-                env={"MBOS_DATABASE_URL": app, "MBOS_SYSTEM_DATABASE_URL": server.get_uri().replace("/postgres?", "/mbos_gate_sys?"),
+                env={"MBOS_DATABASE_URL": app, "MBOS_SYSTEM_DATABASE_URL": sysu,
                      "MBOS_POLICY_PATH": str(tmp / "policy" / "policy.v1.json"), "MBOS_SCORER": "engine",
                      "MBOS_EGRESS_FILE": str(tmp / "egress.json"), "MBOS_LITELLM_FILE": str(tmp / "litellm.json")})
     finally:
         server.cleanup()
     res = next((json.loads(line[len("RESULT"):]) for line in r["stdout"].splitlines() if line.startswith("RESULT")), None)
-    ok = bool(r["ok"] and res and res["chain"]["ok"] and res["reference_chain"][0] and res["live_effector_calls"] == 0
+    ok = bool(r["ok"] and res and _runs_as_worker(res) and res["chain"]["ok"] and res["reference_chain"][0] and res["live_effector_calls"] == 0
               and not res["contract_errors"] and res["at1"] and res["at1"]["ok"] and res["at1"]["drift_count"] == 0)
     summary = ("no RESULT: " + " ".join((r["stdout"] + r.get("stderr", "")).strip().splitlines()[-2:])[:300]) if not res else (
         f"chain {res['chain']['checked']} ok={res['chain']['ok']} · reference {res['reference_chain'][1]} · "
-        f"effector {res['effector_calls']} (live {res['live_effector_calls']}) · contract errors {len(res['contract_errors'])} · "
+        f"login {res['db_login'][0]} (superuser={res['db_login'][1]}) · effector {res['effector_calls']} (live {res['live_effector_calls']}) · contract errors {len(res['contract_errors'])} · "
         f"AT-1 {res['at1']} · final {res['final']}")
     return {"name": "lane D/E e2e + strict AT-1 (03 engine, 05 gateway, 04 schema)", "ok": ok, "rc": r["rc"],
             "secs": r["secs"], "summary": summary}

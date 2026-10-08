@@ -1,6 +1,6 @@
-# ADR-0009: Contracts v1.1.0 (PROPOSED, NOT applied)
+# ADR-0009: Contracts v1.1.0 (DEFERRED by Agent 01, 2026-10-08; v1.0.0 stays frozen)
 
-- **Status:** PROPOSED (Agent 01, 2026-10-07). Frozen contracts **v1.0.0 stay in force** until this is ACCEPTED.
+- **Status:** **DEFERRED** (A-06 decision, Agent 01, 2026-10-08). Originally PROPOSED 2026-10-07. Frozen contracts **v1.0.0 stay in force** until this is ACCEPTED.
 - **Context:** round-two implementation surfaced gaps in all six lanes. The full list, with who asked and why, is in `docs/integration/ROUND_TWO_INTEGRATION.md` §4.
 - **Rule:** no lane edits frozen v1.0.0 files. Every lane already keeps byte-identical copies (FACT, sha256 check on 2026-10-07).
 
@@ -23,3 +23,11 @@
 10. (ADR-0011) First-class card enrichment on the Item (typed `enrichment` object or fields for listing activity, seller intelligence, logistics, seasonality, value-add) replacing the interim artifact-citation convention. Receipt type `ITEM_UPDATED` for enrichment.
 11. (ADR-0011) Events for the NEGOTIATING and QUALIFIED stages (new outcome kinds or an Item sub-state), once inbound communications exist.
 12. (ADR-0011/C-17) Receipt type `OPERATOR_NOTE_RECORDED`. Until then operator notes use `LESSON_RECORDED` with `entity_type="operator_note"` (no contract change); queries must filter on entity_type.
+
+
+## Decision (A-06, 2026-10-08): DEFER, do not apply v1.1.0 before the first live run
+- **FACT:** every gap listed here already has a working, tested interim convention, proven by the release gate (437 passed; lane D/E ACTION path and strict AT-1 running as the non-superuser `mbos_dbos` login; 07's RC READY 105/0): lane D owns the extra receipt types and status edges (R4, R12, R20-R22), enrichment rides as content-addressed artifacts cited from `Item.research[]` (ADR-0011), operator notes use `LESSON_RECORDED` with an entity type.
+- **Why defer:** applying v1.1.0 edits frozen schemas that six lanes vendor byte-for-byte, so it forces a simultaneous re-vendor, re-pin and re-verification across every lane, for no change in dry-run behaviour. New objects (mission, campaign, valuation, inventory, merchandising, card) were added as separate additive schemas instead, which is the pattern to keep using.
+- **What stays blocked, honestly:** item 9 (system-scoped ActionRequests / `config_change` for LEARN's `config.scoring.bump` proposals; lane D refuses those drafts; D-12) and item 11 (NEGOTIATING/QUALIFIED events need inbound communications). Neither is part of the dry-run MVP.
+- **Trigger to revisit (any one):** the first live run needs LEARN to change scoring config; inbound communications are built; a frozen-contract defect is found that no convention can absorb. Then take items 2-12 as ONE coordinated release: lanes acknowledge, regenerate vectors/examples, bump `schema_version`, re-pin `FROZEN.sha256.json`.
+- **Owner impact:** none. Technical decision; not a MICHAEL_DECISIONS item.

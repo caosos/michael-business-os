@@ -42,3 +42,16 @@ def build(server, src: Path, dbname: str) -> str:
         for m in [m for m in sys.modules if m.startswith("mbos_state")]:
             del sys.modules[m]
     return url
+
+
+def build_as_worker(server, src: Path, dbname: str, login: str = "mbos_dbos") -> tuple[str, str]:
+    """A-01 phase 2: provision the DB with 04's `provision()` (the only superuser step) and return (app_url, sys_url) for the REAL worker
+    login `mbos_dbos`, so the spine and DBOS run with NO superuser, exactly as in production (roles, grants and PUBLIC stripped)."""
+    sys.path.insert(0, str(src / "state"))
+    try:
+        prov = importlib.import_module("mbos_state.provision").provision(server.get_uri(), app_db=dbname, sys_db=f"{dbname}_sys", login=login)
+    finally:
+        sys.path.remove(str(src / "state"))
+        for m in [m for m in sys.modules if m.startswith("mbos_state")]:
+            del sys.modules[m]
+    return prov.app_url, prov.sys_url

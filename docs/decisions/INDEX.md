@@ -27,7 +27,7 @@ The executive synthesis is `docs/research/ROUND_ONE_SYNTHESIS.md`. The ADRs belo
 | ADR-0006 | Integration roles: CRM projection, n8n edge-only, one comms subsystem, Operator UI approvals | ACCEPTED |
 | ADR-0007 | Business scope: flips + services | ACCEPTED (Michael decision) |
 | ADR-0008 | Implementation language: Python | ACCEPTED (technical; per synthesis) |
-| ADR-0009 | Contracts v1.1.0 change set | **PROPOSED**: v1.0.0 stays in force (item 1 moved to ADR-0010) |
+| ADR-0009 | Contracts v1.1.0 change set | **DEFERRED** (A-06, 2026-10-08): v1.0.0 stays frozen; interim conventions proven by the gate; revisit triggers recorded |
 | ADR-0014 | Bounded workers, model routing (Sonnet/Opus/Fable) and usage telemetry; Agent 01 the only persistent session (Aria 1945) | **ACCEPTED** |
 | ADR-0013 | Deal Sniffer product direction: mission engine now, marketplace seams later (owner package, Aria 2026-10-07) | **ACCEPTED** (scope + seams only) |
 | ADR-0012 | No universal absolute-profit floor; capital-velocity scoring; deal classes as data (owner rule, Aria 2026-10-07) | **ACCEPTED**; implementation C-19 |
