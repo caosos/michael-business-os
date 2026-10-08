@@ -85,6 +85,23 @@ def _finite(x: Any) -> bool:
     return isinstance(x, (int, float)) and not isinstance(x, bool) and x == x and x not in (float("inf"), float("-inf"))
 
 
+_NUMSTR = re.compile(r"^\s*[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?\s*$|^\s*[-+]?(nan|inf(inity)?)\s*$", re.I)
+
+
+def _sane(obj: Any) -> Any:
+    """F-52: lane data is untrusted. NaN/Infinity and numeric STRINGS ("12", "nan") become None (= UNKNOWN downstream) instead of
+    crashing arithmetic or leaking into the card as numbers."""
+    if isinstance(obj, float) and not _finite(obj):
+        return None
+    if isinstance(obj, str) and _NUMSTR.match(obj):
+        return None
+    if isinstance(obj, dict):
+        return {k: _sane(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_sane(v) for v in obj]
+    return obj
+
+
 def _blk(src: Any, key: str) -> dict:
     """A lane block, or {} if absent / not an object. A bad block must never take the card down."""
     v = src.get(key) if isinstance(src, dict) else None
@@ -345,7 +362,7 @@ def _recommend(item: dict, areqs: list[dict], stage: str, dry_run_sent: bool = F
 def _economics(item: dict, enrich: Optional[dict]) -> dict[str, Any]:
     e = item.get("economics") or {}
     card = (item.get("scores") or {}).get("scorecard") or {}
-    d = card.get("derived") or {}
+    d = {k: v for k, v in (card.get("derived") or {}).items() if _finite(v)}   # derived values are numbers; anything else is dropped (F-52)
     prov = (item.get("recommendation") or {}).get("provenance_id")
     ask = (item["normalized"].get("price") or {}).get("amount")
     out: dict[str, Any] = {
@@ -354,7 +371,7 @@ def _economics(item: dict, enrich: Optional[dict]) -> dict[str, Any]:
     acq, rehab, resale = e.get("acquisition") or {}, e.get("rehab") or {}, e.get("resale") or {}
     cost = None
     if rehab and (rehab.get("parts_cost") is not None or rehab.get("materials_cost") is not None):
-        cost = float(rehab.get("parts_cost", 0)) + float(rehab.get("materials_cost", 0))
+        cost = sum(v for v in (rehab.get("parts_cost"), rehab.get("materials_cost")) if _finite(v))
     ex = (enrich or {}).get("economics") or {}
     out["recommended_opening_offer"] = _from_block(ex, "opening_offer", "not computed yet (lane C)")
     out["maximum_acquisition_price"] = (_from_block(ex, "max_acquisition", "") if not _is_unknown(_from_block(ex, "max_acquisition", ""))
@@ -378,8 +395,10 @@ def _economics(item: dict, enrich: Optional[dict]) -> dict[str, Any]:
                                     else _unknown("not scored yet"))
     if (not _is_unknown(out["expected_gross_profit"]) and _finite(resale.get("comp_price_low")) and _finite(resale.get("comp_price_high"))
             and _finite(d.get("cost_out")) and d.get("net_profit_deterministic") is not None):
-        out["expected_gross_profit"]["low"] = round(resale["comp_price_low"] - d["cost_out"], 2)    # conservative resale
-        out["expected_gross_profit"]["high"] = round(resale["comp_price_high"] - d["cost_out"], 2)  # optimistic resale
+        lo, hi = round(resale["comp_price_low"] - d["cost_out"], 2), round(resale["comp_price_high"] - d["cost_out"], 2)
+        if lo <= hi:   # F-56: a reversed range is lane data we cannot trust; show the single value only
+            out["expected_gross_profit"]["low"] = lo    # conservative resale
+            out["expected_gross_profit"]["high"] = hi   # optimistic resale
     out["expected_net_profit"] = (_datum(d["ev_net_profit"], "INFERENCE", unit="USD", provenance_id=prov,
                                          note="probability-weighted expected value") if d.get("ev_net_profit") is not None
                                   else _unknown("not scored yet"))
@@ -392,12 +411,32 @@ def _economics(item: dict, enrich: Optional[dict]) -> dict[str, Any]:
     return out
 
 
+def class_threshold_errors(dc: Any) -> list[str]:
+    """Class thresholds are data; validate them before they classify anything (F-54)."""
+    if not isinstance(dc, dict):
+        return ["deal_classes is not an object"]
+    mi, qt, ci = (dc.get(k) if isinstance(dc.get(k), dict) else {} for k in ("micro_flip", "quick_turn", "capital_intensive_flip"))
+    vals = {"micro_flip.max_cash_at_risk": mi.get("max_cash_at_risk"), "micro_flip.max_days_to_cash": mi.get("max_days_to_cash"),
+            "quick_turn.max_days_to_cash": qt.get("max_days_to_cash"), "capital_intensive_flip.min_cash_at_risk": ci.get("min_cash_at_risk"),
+            "capital_intensive_flip.or_min_days_to_cash": ci.get("or_min_days_to_cash")}
+    errs = [f"{k} must be a finite positive number" for k, v in vals.items() if not (_finite(v) and v > 0)]
+    if errs:
+        return errs
+    if not mi["max_cash_at_risk"] < ci["min_cash_at_risk"]:
+        errs.append("micro_flip.max_cash_at_risk must be below capital_intensive_flip.min_cash_at_risk")
+    if not (mi["max_days_to_cash"] <= qt["max_days_to_cash"] < ci["or_min_days_to_cash"]):
+        errs.append("days thresholds must satisfy micro <= quick_turn < capital_intensive")
+    return errs
+
+
 def _class_of(cash: Optional[float], days: Optional[float], profile: dict) -> Optional[str]:
     """MICRO_FLIP / QUICK_TURN / STANDARD_FLIP / CAPITAL_INTENSIVE_FLIP from Michael's class thresholds (profile DATA)."""
     dc = (profile or {}).get("deal_classes") or {}
     if cash is None or days is None or not dc:
         return None
     mi, qt, ci = dc.get("micro_flip") or {}, dc.get("quick_turn") or {}, dc.get("capital_intensive_flip") or {}
+    if class_threshold_errors(dc):
+        return None   # F-54: broken thresholds never classify
     if cash >= ci.get("min_cash_at_risk", 10**9) or days >= ci.get("or_min_days_to_cash", 10**9):
         return "CAPITAL_INTENSIVE_FLIP"
     if cash <= mi.get("max_cash_at_risk", -1) and days <= mi.get("max_days_to_cash", -1):
@@ -411,7 +450,7 @@ def _velocity_fields(item: dict, econ: dict, profile: dict, enr: dict) -> dict[s
     """Aria/Michael 2026-10-07: capital velocity, cash multiple, class, downside, liquidity, skill, cash context are SEPARATE visible
     fields. Everything here is derived from numbers already on the card/item (INFERENCE) or UNKNOWN; nothing is invented."""
     e = item.get("economics") or {}
-    d = ((item.get("scores") or {}).get("scorecard") or {}).get("derived") or {}
+    d = {k: v for k, v in (((item.get("scores") or {}).get("scorecard") or {}).get("derived") or {}).items() if _finite(v)}
     prov = (item.get("recommendation") or {}).get("provenance_id")
     rehab, resale, down = e.get("rehab") or {}, e.get("resale") or {}, e.get("downside") or {}
     cash = d.get("cash_tied_up") if _finite(d.get("cash_tied_up")) else None
@@ -420,6 +459,10 @@ def _velocity_fields(item: dict, econ: dict, profile: dict, enr: dict) -> dict[s
     U = lambda why: _unknown(why)
     out: dict[str, Any] = {}
     flip = item.get("type") == "flip"
+    if cash is not None and cash <= 0:
+        cash = None   # F-53: non-positive cash at risk has no multiple/velocity/class
+    if days is not None and days < 0:
+        days = None
     if flip and cash and net is not None:
         out["cash_multiple"] = _datum(round(1 + net / cash, 2), "INFERENCE", unit="x", provenance_id=prov, note="1 + expected net / cash at risk")
         if days and days > 0:
@@ -446,13 +489,18 @@ def _velocity_fields(item: dict, econ: dict, profile: dict, enr: dict) -> dict[s
         out["repair_uncertainty"] = U("no repair scope / success estimate")
     sp, dom = resale.get("sale_prob"), resale.get("expected_dom_days")
     out["liquidity"] = _datum(f"{sp:.0%} sale probability, about {dom:g} days on market", "INFERENCE", provenance_id=prov) \
-        if _finite(sp) and _finite(dom) else U("no sale-probability / days-on-market estimate")
+        if _finite(sp) and 0 <= sp <= 1 and _finite(dom) and dom >= 0 else U("no valid sale-probability / days-on-market estimate")
     sk = d.get("skill_fit")
     out["skill_fit"] = _datum(sk, "INFERENCE", provenance_id=prov) if _finite(sk) and 0 <= sk <= 1 else U("no skill-fit score")
     out["personal_use_value"] = _from_block(_blk(enr, "economics"), "personal_use_value", "not supplied (only relevant if Michael might keep it)")
     cc = (profile or {}).get("current_cash_context") or {}
-    out["current_cash_context"] = _datum(cc["value"], "FACT", note="stated by Michael in operator_profile.v1.json") if cc.get("value") is not None \
-        else U("Michael has not stated his cash situation (so lock-up sensitivity cannot be judged)")
+    cv = cc.get("value") if isinstance(cc, dict) else None
+    valid_cash = (_finite(cv) and cv >= 0) or (isinstance(cv, str) and bool(clean_text(cv, 200).strip()))
+    if cv is not None and not valid_cash:   # F-51: only a finite non-negative amount or a known label counts as Michael's statement
+        out["current_cash_context"] = U("operator_profile current_cash_context.value is not a non-negative amount or a short statement; ignored (never assumed)")
+    else:
+        out["current_cash_context"] = _datum(clean_text(cv, 200) if isinstance(cv, str) else cv, "FACT", note="stated by Michael in operator_profile.v1.json") if cv is not None \
+            else U("Michael has not stated his cash situation (so lock-up sensitivity cannot be judged)")
     return out
 
 
@@ -463,7 +511,7 @@ def _logistics(item: dict, enrich: Optional[dict], profile: dict) -> dict[str, A
     needed = _datum(mode["value"] == "requires_trailer", "INFERENCE", provenance_id=mode.get("provenance_id")) if not _is_unknown(mode) \
         else _unknown("depends on transport_mode")
     trips = ((item.get("economics") or {}).get("logistics") or {}).get("trips") or []
-    miles = sum(float(x.get("round_trip_miles", 0)) for x in trips) if trips else None
+    miles = sum(x["round_trip_miles"] for x in trips if isinstance(x, dict) and _finite(x.get("round_trip_miles")) and x["round_trip_miles"] >= 0) if trips else None
     out = {
         "transport_mode": mode, "trailer_needed": needed,
         "trailer_owned": _datum(bool(t["trailer_owned"]), "FACT", note="operator_profile.v1.json (Michael)"),
@@ -616,6 +664,8 @@ def build_card(item: dict, receipts: list[dict], areqs: list[dict], enrichment: 
     data degrades to UNKNOWN instead of failing (F-26)."""
     profile = profile or load_profile()
     enr = enrichment if isinstance(enrichment, dict) else {}
+    item = {**item, "economics": _sane(item.get("economics")) if isinstance(item.get("economics"), dict) else item.get("economics"),
+            "scores": _sane(item.get("scores")) if isinstance(item.get("scores"), dict) else item.get("scores")}
     n = item["normalized"]
     src0 = item["sources"][0]
     # only this Item's own receipts (F-38): its item_id, or one of its action requests

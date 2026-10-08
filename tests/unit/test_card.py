@@ -479,3 +479,68 @@ def test_service_item_is_a_service_job_not_a_flip_class(ledger_db):
     assert c["economics"]["opportunity_class"]["value"] == "SERVICE_JOB"
     assert c["economics"]["cash_multiple"]["value"] == "UNKNOWN"
     assert cardmod.validate_card(c) == []
+
+
+def test_f51_invalid_cash_context_values_are_ignored(ledger_db):
+    base = _base(ledger_db)
+    for bad in (-5, True, ["x"], {"a": 1}, float("nan"), ""):
+        profile = cardmod.load_profile()
+        profile["current_cash_context"] = {"value": bad}
+        c = _scenario(base, cash=30, net=45, days=0.1, profile=profile)
+        assert c["economics"]["current_cash_context"]["value"] == "UNKNOWN", bad
+    profile = cardmod.load_profile()
+    profile["current_cash_context"] = {"value": 400}
+    assert _scenario(base, cash=30, net=45, days=0.1, profile=profile)["economics"]["current_cash_context"]["value"] == 400
+
+
+def test_f52_nan_and_numeric_strings_in_the_scorecard_do_not_crash(ledger_db):
+    base = _base(ledger_db)
+    for bad in (float("nan"), float("inf"), "12", "nan", "abc", None, [], {}):
+        c = _scenario(base, cash=bad, net=bad, days=bad)
+        assert cardmod.validate_card(c) == [], bad
+
+
+def test_f53_negative_cash_or_days_give_no_multiple_velocity_or_class(ledger_db):
+    base = _base(ledger_db)
+    for cash, days in ((-30, 1), (0, 1), (30, -2)):
+        c = _scenario(base, cash=cash, net=45, days=days)
+        e = c["economics"]
+        assert e["cash_multiple"]["value"] == "UNKNOWN" or cash > 0, (cash, days)
+        assert e["capital_velocity"]["value"] == "UNKNOWN", (cash, days)
+        assert e["opportunity_class"]["value"] == "UNKNOWN", (cash, days)
+
+
+def test_f54_broken_class_thresholds_never_classify():
+    ok = cardmod.load_profile()["deal_classes"]
+    assert cardmod.class_threshold_errors(ok) == []
+    assert cardmod._class_of(30, 1, {"deal_classes": ok}) == "MICRO_FLIP"
+    for mut in (lambda d: d["micro_flip"].update(max_cash_at_risk=-1), lambda d: d["micro_flip"].update(max_cash_at_risk=float("nan")),
+                lambda d: d["micro_flip"].update(max_cash_at_risk=5000), lambda d: d["quick_turn"].update(max_days_to_cash=1),
+                lambda d: d["quick_turn"].update(max_days_to_cash=99), lambda d: d.pop("capital_intensive_flip"),
+                lambda d: d["micro_flip"].update(max_days_to_cash="3")):
+        import copy
+        bad = copy.deepcopy(ok)
+        mut(bad)
+        assert cardmod.class_threshold_errors(bad), bad
+        assert cardmod._class_of(30, 1, {"deal_classes": bad}) is None
+
+
+def test_f55_liquidity_out_of_range_is_unknown(ledger_db):
+    ids = seed_flow(ledger_db, act=False)
+    item, receipts, areqs = _inputs(ledger_db, ids["item_id"])
+    for sp, dom in ((1.5, 10), (-0.2, 10), (0.5, -3), (float("nan"), 3)):
+        it = dict(item)
+        it["economics"] = {**(item.get("economics") or {}), "resale": {**((item.get("economics") or {}).get("resale") or {}), "sale_prob": sp, "expected_dom_days": dom}}
+        assert cardmod.build_card(it, receipts, areqs)["economics"]["liquidity"]["value"] == "UNKNOWN", (sp, dom)
+
+
+def test_f56_reversed_gross_profit_range_is_not_shown(ledger_db):
+    ids = seed_flow(ledger_db, act=False)
+    item, receipts, areqs = _inputs(ledger_db, ids["item_id"])
+    e = item.get("economics") or {}
+    it = dict(item)
+    it["economics"] = {**e, "resale": {**(e.get("resale") or {}), "comp_price_low": 900, "comp_price_high": 400}}
+    it["scores"] = {**(item.get("scores") or {}), "scorecard": {**((item.get("scores") or {}).get("scorecard") or {}),
+                    "derived": {**(((item.get("scores") or {}).get("scorecard") or {}).get("derived") or {}), "net_profit_deterministic": 100, "cost_out": 50}}}
+    g = cardmod.build_card(it, receipts, areqs)["economics"]["expected_gross_profit"]
+    assert "low" not in g and "high" not in g

@@ -20,6 +20,13 @@ def _v() -> Draft202012Validator:
 
 
 def errors(doc: Any) -> list[str]:
+    from .mission import nonfinite_paths
+
+    if not isinstance(doc, dict):
+        return ["campaign must be an object"]
+    errs = [f"{b}: non-finite number is not a valid value" for b in nonfinite_paths(doc)]
+    if errs:
+        return errs
     errs = [f"{'/'.join(map(str, e.absolute_path)) or '<root>'}: {e.message}" for e in _v().iter_errors(doc)]
     if errs:
         return errs
@@ -37,6 +44,18 @@ def validate(doc: Any) -> None:
         raise ContractViolation("campaign", errs)
 
 
-def may_run(doc: dict) -> bool:
-    """True only for autonomy levels that act without a human (none) or only notify/recommend. Anything else needs governance."""
-    return doc["autonomy"]["level"] in RUNNABLE_LEVELS and doc["status"] == "ACTIVE"
+def may_run(doc: Any, now: Any = None) -> bool:
+    """True only for a VALID, ACTIVE, unexpired campaign at an autonomy level that only notifies or recommends. Malformed input is
+    False (never an exception) and anything above RECOMMEND needs governance (E-17)."""
+    from datetime import datetime, timezone
+
+    try:
+        if errors(doc):
+            return False
+        now = now or datetime.now(timezone.utc)
+        for exp in ((doc.get("stop_conditions") or {}).get("expires_at"), (doc["autonomy"].get("limits") or {}).get("expires_at")):
+            if exp and datetime.fromisoformat(str(exp).replace("Z", "+00:00")) <= now:
+                return False
+        return doc["autonomy"]["level"] in RUNNABLE_LEVELS and doc["status"] == "ACTIVE"
+    except (KeyError, TypeError, ValueError, AttributeError):
+        return False

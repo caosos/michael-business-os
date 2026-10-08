@@ -67,6 +67,8 @@ def test_do_not_spend_is_a_valid_plan():
     p = load("mission-plan.example.json")
     p["recommendation"] = "DO_NOT_SPEND"
     p["legs"] = [l for l in p["legs"] if l["cash_at_risk"] == 0]
+    p["projected_week"] = {"low": 250, "likely": 400, "high": 500}   # must equal what the remaining legs can produce (F-64)
+    p["remaining_gap"] = 1100
     p["replace_if_stale"] = []
     assert mission.plan_errors(p) == []
 
@@ -83,3 +85,23 @@ def test_loss_beyond_earned_is_an_impairment_not_a_rewrite():
     l["earned_working_capital"] = 20
     l["available_to_deploy"] = 460
     assert any("earned capital first" in e for e in mission.ledger_errors(l))
+
+
+def test_f63_nan_and_infinity_rejected():
+    for bad in (float("nan"), float("inf"), float("-inf")):
+        l = load("capital-ledger.example.json"); l["protected_principal"] = bad
+        assert mission.ledger_errors(l)
+        p = load("mission-plan.example.json"); p["legs"][0]["cash_at_risk"] = bad
+        assert mission.plan_errors(p)
+
+
+def test_f64_projection_must_be_supported_by_legs_and_recommendation_rules():
+    p = load("mission-plan.example.json"); p["projected_week"] = {"low": 9000, "likely": 9500, "high": 9900}; p["remaining_gap"] = -8000
+    assert any("not supported by the legs" in e for e in mission.plan_errors(p))
+    p = load("mission-plan.example.json"); p["projected_week"] = {"low": None, "likely": None, "high": None}; p["remaining_gap"] = 0
+    assert any("remaining_gap must be null" in e for e in mission.plan_errors(p))
+    p = load("mission-plan.example.json"); p["legs"] = []; p["projected_week"] = {"low": None, "likely": None, "high": None}; p["remaining_gap"] = None
+    assert any("DEPLOY but there are no legs" in e for e in mission.plan_errors(p))
+    for rec in ("HOLD", "UNKNOWN"):
+        p = load("mission-plan.example.json"); p["recommendation"] = rec
+        assert any("only DEPLOY may commit cash" in e for e in mission.plan_errors(p))

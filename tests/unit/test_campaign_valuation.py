@@ -75,3 +75,33 @@ def test_unknown_valuation_needs_a_reason_and_may_not_claim_confidence():
 def test_validate_raises():
     with pytest.raises(ContractViolation):
         valuation.validate({})
+
+
+def test_f63_nan_everywhere():
+    c = load("campaign/trailer-wanted.example.json"); c["criteria"]["max_price_usd"] = float("nan")
+    assert campaign.errors(c) and not campaign.may_run(c)
+    v = load("valuation/mower.example.json"); v["ranges"]["likely_sale"]["high"] = float("inf")
+    assert valuation.errors(v)
+
+
+def test_f66_may_run_honours_expiry_and_tolerates_garbage():
+    from datetime import datetime, timezone
+    c = load("campaign/trailer-wanted.example.json")
+    c["stop_conditions"]["expires_at"] = "2020-01-01T00:00:00Z"
+    assert not campaign.may_run(c)
+    c["stop_conditions"]["expires_at"] = "2099-01-01T00:00:00Z"
+    assert campaign.may_run(c) and not campaign.may_run(c, now=datetime(2100, 1, 1, tzinfo=timezone.utc))
+    for junk in ({}, None, [], "x", {"autonomy": 1}):
+        assert campaign.may_run(junk) is False
+
+
+def test_f67_valuation_ordering_confidence_and_appraisal_claims():
+    v = load("valuation/mower.example.json"); v["ranges"]["fast_sale"] = {"low": 700, "high": 900}
+    assert any("fast_sale" in e for e in valuation.errors(v))
+    v = load("valuation/mower.example.json"); v["confidence"] = "high"; v["evidence"] = [{"kind": "sold_comp", "ref": "one"}]
+    assert any("at least two" in e for e in valuation.errors(v))
+    v["evidence"].append({"kind": "sold_comp", "ref": "two"})
+    assert valuation.errors(v) == []
+    for txt in ("Appraised at $500", "licensed appraisal attached", "appraisal value 500"):
+        v = load("valuation/mower.example.json"); v["subject"]["description"] = txt
+        assert any("appraisal" in e for e in valuation.errors(v)), txt

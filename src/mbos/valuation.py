@@ -16,7 +16,25 @@ def _v() -> Draft202012Validator:
     return Draft202012Validator(json.loads((contracts_dir() / "valuation.schema.json").read_text()), format_checker=FormatChecker())
 
 
+_APPRAISAL_CLAIM = __import__("re").compile(r"\bappraised\b|\b(licensed|certified|official|formal)\s+appraisal\b|\bappraisal value\b", __import__("re").I)
+
+
+def _strings(doc: Any) -> list[str]:
+    if isinstance(doc, str):
+        return [doc]
+    if isinstance(doc, dict):
+        return [x for k, v in doc.items() if k != "not_an_appraisal" for x in _strings(v)]
+    if isinstance(doc, list):
+        return [x for v in doc for x in _strings(v)]
+    return []
+
+
 def errors(doc: Any) -> list[str]:
+    from .mission import nonfinite_paths
+
+    bad = nonfinite_paths(doc)
+    if bad:
+        return [f"{b}: non-finite number is not a valid value" for b in bad]
     errs = [f"{'/'.join(map(str, e.absolute_path)) or '<root>'}: {e.message}" for e in _v().iter_errors(doc)]
     if errs:
         return errs
@@ -31,8 +49,20 @@ def errors(doc: Any) -> list[str]:
         errs.append("no ranges but confidence is not UNKNOWN/low")
     if not known and not doc.get("reason_unknown"):
         errs.append("all ranges UNKNOWN requires reason_unknown")
-    if known and doc["confidence"] == "high" and not any(e["kind"] in ("sold_comp", "record") for e in doc["evidence"]):
-        errs.append("confidence high requires sold comps or a record, not asking comps/priors alone")
+    if known and doc["confidence"] == "high" and sum(1 for e in doc["evidence"] if e["kind"] in ("sold_comp", "record")) < 2:
+        errs.append("confidence high requires at least two independent sold comps or records, not one comp or asking comps/priors")
+    sl, ls, fs = ranges.get("suggested_list"), ranges.get("likely_sale"), ranges.get("fast_sale")
+    if fs and sl and fs["high"] > sl["high"]:
+        errs.append("fast_sale.high exceeds suggested_list.high")
+    if fs and ls and fs["low"] > ls["low"]:
+        errs.append("fast_sale.low exceeds likely_sale.low (a fast sale cannot be worth more than a likely one)")
+    if ls and sl and ls["high"] > sl["high"]:
+        errs.append("likely_sale.high exceeds suggested_list.high")
+    for sx in _strings(doc):
+        m = _APPRAISAL_CLAIM.search(sx)
+        if m:
+            errs.append(f"free text claims an appraisal ({m.group(0)!r}); this is an estimate, not an appraisal")
+            break
     return errs
 
 

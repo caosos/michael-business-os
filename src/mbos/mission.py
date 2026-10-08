@@ -27,7 +27,26 @@ def _validator(defn: str) -> Draft202012Validator:
     return Draft202012Validator(s, format_checker=FormatChecker())
 
 
+def nonfinite_paths(doc: Any, path: str = "") -> list[str]:
+    """F-63: NaN / +-Infinity pass JSON-Schema `number`; every contract validator rejects them (also used by campaign/valuation)."""
+    import math
+
+    out: list[str] = []
+    if isinstance(doc, float) and not math.isfinite(doc):
+        out.append(path or "<root>")
+    elif isinstance(doc, dict):
+        for k, v in doc.items():
+            out += nonfinite_paths(v, f"{path}/{k}")
+    elif isinstance(doc, list):
+        for i, v in enumerate(doc):
+            out += nonfinite_paths(v, f"{path}/{i}")
+    return out
+
+
 def _check(defn: str, doc: Any) -> list[str]:
+    bad = nonfinite_paths(doc)
+    if bad:
+        return [f"{b}: non-finite number (NaN/Infinity) is not a valid value" for b in bad]
     return [f"{'/'.join(map(str, e.absolute_path)) or '<root>'}: {e.message}" for e in _validator(defn).iter_errors(doc)]
 
 
@@ -67,7 +86,18 @@ def plan_errors(plan: dict[str, Any]) -> list[str]:
         vals = [r[k] for k in ("low", "likely", "high")]
         if None not in vals and not (vals[0] <= vals[1] <= vals[2]):
             errs.append(f"{l['item_id']}: expected_net must satisfy low <= likely <= high")
+    if plan["recommendation"] == "DEPLOY" and not legs:
+        errs.append("recommendation DEPLOY but there are no legs")
+    if plan["recommendation"] in ("HOLD", "UNKNOWN") and spend > _EPS:
+        errs.append(f"recommendation {plan['recommendation']} but legs commit cash; only DEPLOY may commit cash")
     pw, target = plan["projected_week"], plan["mission"]["weekly_target_usd"]
+    for k in ("low", "likely", "high"):  # F-64: a projection can never exceed what its legs can produce
+        vals = [l["expected_net"][k] for l in legs]
+        if pw[k] is not None and (not legs or None in vals or pw[k] > sum(vals) + _EPS):
+            errs.append(f"projected_week.{k} {pw[k]} is not supported by the legs (sum of expected_net.{k} = "
+                        f"{'unknown' if None in vals else sum(vals)})")
+    if pw["likely"] is None and plan["remaining_gap"] is not None:
+        errs.append("projected_week.likely is null (UNKNOWN) so remaining_gap must be null")
     if None not in (pw["low"], pw["likely"], pw["high"]) and not (pw["low"] <= pw["likely"] <= pw["high"]):
         errs.append("projected_week must satisfy low <= likely <= high")
     if target is None and plan["remaining_gap"] is not None:
