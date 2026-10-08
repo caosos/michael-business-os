@@ -41,5 +41,11 @@
   "current_cash_context": {
     "value": null,
     "note": "Michael-stated available cash / how tight funds are right now (capital-lockup sensitivity). null = UNKNOWN; the card then says so. Set by Michael only."
+  },
+  "mission": {
+    "weekly_target_usd": null,
+    "hours_available": null,
+    "protected_principal_usd": 500,
+    "provenance": "protected_principal_usd: Michael via Aria ARIA-20261007-1905 (owner-set bankroll). weekly_target_usd/hours_available: UNKNOWN until Michael sets them (MICHAEL_DECISIONS #10); the package's $1,500 is an example."
   }
 }

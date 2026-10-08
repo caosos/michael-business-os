@@ -1,0 +1,342 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://michael-business-os/contracts/mission.schema.json",
+  "title": "Weekly Money Mission v1 \u2014 mission, capital ledger and mission plan",
+  "description": "ADDITIVE contract (ADR-0013). Touches no frozen v1.0.0 object. null means UNKNOWN and is never replaced by a guess. The invariants beyond JSON Schema (ledger arithmetic, plan spend <= available_to_deploy) are enforced by mbos.mission.validate_*. Money is USD.",
+  "$defs": {
+    "mission": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mission_version",
+        "period",
+        "weekly_target_usd",
+        "hours_available"
+      ],
+      "properties": {
+        "mission_version": {
+          "const": "1.0.0"
+        },
+        "period": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "start",
+            "end"
+          ],
+          "properties": {
+            "start": {
+              "type": "string",
+              "format": "date"
+            },
+            "end": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        },
+        "weekly_target_usd": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hours_available": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "capital_ledger": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protected_principal",
+        "earned_working_capital",
+        "capital_deployed",
+        "realized_profit",
+        "available_to_deploy"
+      ],
+      "properties": {
+        "protected_principal": {
+          "type": "number",
+          "minimum": 0
+        },
+        "earned_working_capital": {
+          "type": "number"
+        },
+        "capital_deployed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "realized_profit": {
+          "type": "number"
+        },
+        "available_to_deploy": {
+          "type": "number",
+          "minimum": 0
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "leg": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "item_id",
+        "scorecard_id",
+        "opportunity_class",
+        "cash_at_risk",
+        "expected_net",
+        "days_to_cash",
+        "success_probability",
+        "hours"
+      ],
+      "properties": {
+        "item_id": {
+          "type": "string",
+          "pattern": "^itm_[0-9A-HJKMNP-TV-Z]{26}$"
+        },
+        "scorecard_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "opportunity_class": {
+          "enum": [
+            "MICRO_FLIP",
+            "QUICK_TURN",
+            "STANDARD_FLIP",
+            "CAPITAL_INTENSIVE_FLIP",
+            "SERVICE_JOB",
+            "OTHER_OPPORTUNITY"
+          ]
+        },
+        "cash_at_risk": {
+          "type": "number",
+          "minimum": 0
+        },
+        "expected_net": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "low",
+            "likely",
+            "high"
+          ],
+          "properties": {
+            "low": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "likely": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "high": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        },
+        "days_to_cash": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "success_probability": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hours": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "why": {
+          "type": "string"
+        }
+      }
+    },
+    "mission_plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "plan_version",
+        "mission",
+        "ledger",
+        "recommendation",
+        "legs",
+        "projected_week",
+        "remaining_gap",
+        "confidence",
+        "replace_if_stale"
+      ],
+      "properties": {
+        "plan_version": {
+          "const": "1.0.0"
+        },
+        "mission": {
+          "$ref": "#/$defs/mission"
+        },
+        "ledger": {
+          "$ref": "#/$defs/capital_ledger"
+        },
+        "recommendation": {
+          "enum": [
+            "DEPLOY",
+            "DO_NOT_SPEND",
+            "HOLD",
+            "UNKNOWN"
+          ]
+        },
+        "legs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/leg"
+          }
+        },
+        "projected_week": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "low",
+            "likely",
+            "high"
+          ],
+          "properties": {
+            "low": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "likely": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "high": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        },
+        "remaining_gap": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "confidence": {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "UNKNOWN"
+          ]
+        },
+        "replace_if_stale": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "unknowns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "explanation": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/mission"
+    },
+    {
+      "$ref": "#/$defs/capital_ledger"
+    },
+    {
+      "$ref": "#/$defs/mission_plan"
+    }
+  ]
+}
