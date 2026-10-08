@@ -97,7 +97,11 @@ Starts the pgserver cluster, provisions lane D (04's `provision()`: worker login
 source var/dev.env && .venv/bin/mbos worker --fixture fixtures/sources/illustrative.json   # report: all REAL except `sources`
 source var/dev.env && source var/owner.env && .venv/bin/mbos decide AREQ_ID YES --seen HASHPREFIX
 ```
-Re-running is idempotent. The fixture items stop at RESEARCHING (no comps in the fixture), so `mbos queue` is empty until a source supplies comps.
+Re-running is idempotent. `fixtures/sources/illustrative.json` carries inline economics; a listing without them (`no_economics.json`) needs comps.
+
+Comps (A-39): a raw listing has no economics until lane C gets comps. `var/dev.env` sets `MBOS_COMPS_STORE` (lane B `comps.json`, from `mbos-discover`) and
+`MBOS_COMPS_INBOX` (`var/comps_inbox/`: JSON files in `ManualCompsAdapter` shape, i.e. a price Michael saw). With neither the report says
+`STAND-IN research (comps): none` and listings park at RESEARCHING. After adding a comp: `source var/dev.env && .venv/bin/mbos recheck` (all parked Items) while `mbos worker` runs.
 
 ## 4. Daily operation
 

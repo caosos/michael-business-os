@@ -134,8 +134,9 @@ def init_runtime(s: Settings, comps: Optional[Components] = None, *, launch: boo
                   engine=app_engine())
     if launch:
         DBOS.launch()
-        from mbos.workflows import FOLLOWUP_QUEUE
+        from mbos.workflows import FOLLOWUP_QUEUE, RECHECK_QUEUE
 
+        DBOS.register_queue(RECHECK_QUEUE)  # A-39: `mbos recheck` re-launches parked items through this queue
         DBOS.register_queue(FOLLOWUP_QUEUE)  # follow-up approval gates (A-15) are dequeued by this worker (needs a launched DBOS)
         try:  # 07 F-42: restart any approval gate a crash left behind
             from mbos.workflows import recover_orphan_gates

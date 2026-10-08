@@ -1,0 +1,20 @@
+{
+  "_comment": "ILLUSTRATIVE (A-39): a raw listing with NO inline economics, as a real source delivers it. Lane C must get its numbers from comps. Not a real listing.",
+  "listings": [
+    {
+      "source": "craigslist", "source_listing_id": "FIX-NOECON-TRAILER-1", "url": "https://example.invalid/cl/trailer-5x10",
+      "ingestion_method": "rss", "tos_risk": "med",
+      "record": {
+        "type": "flip", "category": "trailer", "subcategory": "5x10 utility trailer", "opportunity_kind": "buy_item",
+        "dedup_key": "trailer|noecon|conway|5x10 utility",
+        "normalized": {
+          "title": "5x10 utility trailer with ramp gate", "condition": "used",
+          "price": {"amount": 350, "currency": "USD", "type": "fixed"},
+          "location": {"city": "Conway", "state": "AR", "road_miles_one_way": 20, "geo_tier": 1},
+          "counterparty": {"role": "seller", "is_dealer": false, "contact_method": "relay_email"},
+          "listing_status": "active"
+        }
+      }
+    }
+  ]
+}

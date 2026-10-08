@@ -83,6 +83,7 @@ def main(argv: list[str] | None = None) -> int:
     prov = _provision(server.get_uri(), lanes_dir / "state" / "state")
     raw = var / "raw"
     raw.mkdir(exist_ok=True)
+    (var / "comps_inbox").mkdir(exist_ok=True)
 
     py_path = os.pathsep.join([str(lanes_dir / "agent-06"), os.environ.get("PYTHONPATH", "")]).rstrip(os.pathsep)
     _write(var / "dev.env", [
@@ -93,6 +94,8 @@ def main(argv: list[str] | None = None) -> int:
         "export MBOS_GATEWAY_MODE='lane_e'",
         "export MBOS_SCORER='engine'",
         f"export MBOS_RAW_DIR='{raw}'",
+        f"export MBOS_COMPS_STORE='{var / 'discovery' / 'comps.json'}'",   # written by `mbos-discover` comps collection
+        f"export MBOS_COMPS_INBOX='{var / 'comps_inbox'}'",               # comps Michael entered (ManualCompsAdapter JSON files)
         f"export MBOS_POLICY_PATH='{policy_dir / 'policy.v1.json'}'",
         f"export MBOS_EGRESS_FILE='{ROOT / 'var' / 'egress_policy.json'}'",
         f"export MBOS_LITELLM_FILE='{ROOT / 'var' / 'litellm_keys.json'}'",

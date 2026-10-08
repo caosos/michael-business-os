@@ -26,6 +26,7 @@ from mbos.runtime import components, item_workflow_id, owner_tx, runtime, spine_
 
 DECISION_TOPIC = "decision"
 FOLLOWUP_QUEUE = "followups"
+RECHECK_QUEUE = "rechecks"
 WAKE_EVENTS = ("price_change", "auction_ending", "new_info")
 
 
@@ -127,6 +128,31 @@ def item_lifecycle(item_id: str) -> dict[str, Any]:
     if routed.get("policy_denied"):  # nothing to approve: the item stays RECOMMENDED and the card says why
         return {"status": "policy_denied", "action_request_id": routed["action_request_id"]}
     return _approval_gate(item_id, routed["action_request_id"])
+
+
+@DBOS.workflow()
+def recheck_lifecycle(item_id: str) -> dict[str, Any]:
+    """A-39: re-run the lifecycle for an Item parked at RESEARCHING (a comp was added since). The original per-item workflow id
+    is spent, so this is its own workflow; `item_lifecycle` itself skips anything not NORMALIZED/RESEARCHING."""
+    return item_lifecycle(item_id)
+
+
+def recheck(item_ids: list[str]) -> list[str]:
+    """Public API (CLI, UI): enqueue `recheck_lifecycle` per Item on the `rechecks` queue (a running worker executes it)."""
+    import time
+
+    from mbos.runtime import client
+
+    ids = []
+    c = client()
+    try:
+        for iid in item_ids:
+            wf = f"recheck:{iid}:{int(time.time() * 1000)}"
+            c.enqueue({"queue_name": RECHECK_QUEUE, "workflow_name": "recheck_lifecycle", "workflow_id": wf}, iid)
+            ids.append(wf)
+    finally:
+        c.destroy()
+    return ids
 
 
 def _approval_gate(item_id: str, areq_id: str) -> dict[str, Any]:

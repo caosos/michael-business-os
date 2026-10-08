@@ -312,6 +312,23 @@ def cmd_note(a: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_recheck(a: argparse.Namespace) -> int:
+    """A-39: re-launch the lifecycle for parked items (after a comp was added). The RUNNING worker executes it (its comps source)."""
+    from mbos import workflows
+
+    if a.item_id:
+        ids = [a.item_id]
+    else:
+        with _engine().connect() as c:
+            ids = [r[0] for r in c.execute(sa.text("SELECT item_id FROM mbos.items WHERE state = 'RESEARCHING' ORDER BY item_id"))]
+    if not ids:
+        print("Nothing parked at RESEARCHING.")
+        return 0
+    for iid, wf in zip(ids, workflows.recheck(ids)):
+        print(f"queued {wf} for {iid} (a running `mbos worker` executes it; then `mbos items` / `mbos queue`)")
+    return 0
+
+
 def cmd_ping(a: argparse.Namespace) -> int:
     _wake(a.item_id, {"kind": "ping"})
     print("pinged", a.item_id)
@@ -369,6 +386,9 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--make", action="append"); s.add_argument("--model", action="append"); s.add_argument("--kind")
     s.add_argument("--statement"); s.add_argument("--author", default="michael"); s.add_argument("--basis-of-knowledge", dest="basis_of_knowledge")
     s.add_argument("--plan-hint"); s.add_argument("--reference-url"); s.set_defaults(fn=cmd_note)
+    s = sub.add_parser("recheck"); s.add_argument("item_id", nargs="?"); s.add_argument("--researching", action="store_true",
+                                                                                  help="every Item parked at RESEARCHING (default when no ITEM_ID)")
+    s.set_defaults(fn=cmd_recheck)
     s = sub.add_parser("ping"); s.add_argument("item_id"); s.set_defaults(fn=cmd_ping)
     s = sub.add_parser("outcome"); s.add_argument("item_id"); s.add_argument("kind")
     s.add_argument("--revenue", type=float); s.add_argument("--cost", type=float); s.add_argument("--hours", type=float)

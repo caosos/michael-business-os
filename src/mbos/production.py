@@ -75,6 +75,18 @@ def build_components(s: Settings, *, fixture: Optional[str] = None, raw_dir: Opt
     else:
         say("card enrichment: listing activity/seller", "STAND-IN", "mbos_discovery not installed: listing age/seller stay UNKNOWN")
 
+    cs, inbox = os.environ.get("MBOS_COMPS_STORE") or None, os.environ.get("MBOS_COMPS_INBOX") or None
+    if _have("mbos_economics") and _have("mbos_discovery") and (cs or inbox):
+        from mbos.adapters.comps import ProductionCompsSource
+        from mbos.adapters.economics import EconomicsResearcher
+
+        src = ProductionCompsSource(cs, inbox)
+        comps.researcher = EconomicsResearcher(src)
+        say("research (comps)", "REAL", f"lane C research step; comps source: {src.describe()}")
+    else:
+        say("research (comps)", "STAND-IN", "none: MBOS_COMPS_STORE / MBOS_COMPS_INBOX not set (or lane B/C not installed); "
+            "every listing without inline economics parks at RESEARCHING")
+
     try:
         from comms_spec.planner import CommsActionPlanner  # type: ignore
 
