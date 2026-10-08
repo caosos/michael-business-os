@@ -162,12 +162,28 @@ class EconomicsEnricher:
                 logging.getLogger("mbos.enrich").warning("operator notes skipped by lane C loader: %s", problems)
                 self.skipped_notes = problems
             kb = merge_manual(kb, good)
-        v = build_value_add(item, as_of, cfg=load_config(), kb=kb, make_model=mm if isinstance(mm, str) else None)
+        v = build_value_add(item, as_of, cfg=load_config(), kb=kb, make_model=mm if isinstance(mm, str) else None,
+                            model_years=self._model_years(item))
         if not v.get("block"):
             return 0
         pid = spine.record_lane_provenance(conn, v["provenance"])
         spine.record_enrichment(conn, item["item_id"], "value_add", v["block"], pid, summary="lane C value-add", agent=self.AGENT)
         return 1
+
+    @staticmethod
+    def _model_years(item: dict):
+        """Shorthand model years ('18, MY2018) from the listing title, as INFERENCE with quoted evidence (lane B's extractor, P-02-14).
+        Optional: without lane B's package, or when nothing is found, lane C falls back to its own four-digit-year matching."""
+        try:
+            from mbos_discovery.model_years import extract_model_years
+        except ImportError:
+            return None
+        title = ((item.get("normalized") or {}).get("title")) or ""
+        try:
+            found = extract_model_years(title)
+        except Exception:  # an extractor bug must never take enrichment down
+            return None
+        return found or None
 
     @staticmethod
     def _listing_activity(conn, item: dict):
