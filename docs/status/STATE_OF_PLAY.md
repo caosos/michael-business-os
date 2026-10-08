@@ -1,31 +1,39 @@
-# State of play (Agent 01, 2026-10-08 ~16:30Z)
+# State of play (Agent 01, 2026-10-08 ~17:05Z)
 
-Written when the autonomous run stopped on a genuine limit: **the Claude 5-hour usage window read 97% (guard: 90%), resets 19:20Z**. Weekly: 56%. Release gate at this head: **GREEN, 461 passed, 8/8 checks**. Everything is DRY-RUN.
+Run paused again on the **5-hour usage window (94%, guard 90%, resets 2026-10-09T00:20Z)**. Weekly ~65%. Release gate last run GREEN (467 tests, 8/8 checks; re-run after A-44 merges). Everything is DRY-RUN.
 
-## DONE (verified)
-- Cold-start operator audit as Michael (G-20, `docs/qa/OPERATOR_AUDIT.md` on lane 07): verdict **NO, not usable for making money yet**, with ranked findings F-88..F-101.
-- Bankroll canon enforced everywhere: protected principal **$500**; the stale $1,500/$3,000 defaults were live in lane 03's engine (cash_ok 1500, max loss 800) and lane 05's policy (1500/3000, money buckets 1500); fixed in C-24 and E-23 (caps now 500/500, global 600), and a **gate check** now fails if any lane cap exceeds the protected principal (planted-fault test). Provenance: Aria 1905 owner package; receipts in lanes 03 and 05.
-- Production assembly (A-36): `mbos worker` now runs the real lane engine, gateway, enrichers and comps source and prints a REAL/STAND-IN report; before, it ran the placeholder scorer on the reference store.
-- CLI works on lane D (A-37); one-command dev environment with split logins (A-38 `tools/bootstrap_dev.py`); comps wiring + `mbos recheck` (A-39); bootstrap/freeze/recheck/inbox-watcher/ledger-context fixes + `record_attestation` (A-40); attested-evidence support, true status text, plan legs with title/verdict/waiting_on (C-25); mission contract: DEPLOY needs a YES leg.
-- UI additions this session: My numbers (F-22/F-24/F-26/F-27), Wanted (F-23/F-25), needs-from-you + Add a price I saw (F-28), usage dashboard (F-21), intake (F-20), mission page on real plans (P-06-17).
-- R14 in the database (D-23..D-28): owner_channel role, workflow login holds no approver, PANIC release bypass closed (F-85), forged human outcomes closed (F-86), APPROVED edge gated.
-- Owner decision packets: `docs/status/OWNER_DECISION_PACKETS.md`.
+## Where the money flow stands (the question that matters)
+Dry-run on the REAL assembly (bootstrap_dev, `mbos worker`, Operator UI), Michael's three training deals + a service lead (`docs/qa/MISSION_DRYRUN.md` on lane 07):
+| Stage | Result |
+|---|---|
+| 1 discovery, 2 normalization | PASS (4 of 4 deals become Items; `mbos audit` conformance green) |
+| 3 research (price entered through the UI form, worker picks it up by itself) | PASS |
+| 4 scoring + recommendation | 3 of 4: **$30 TV = YES, approvable in Today/queue (EV $53, cash tied up $36, within $500)**; Recon = MAYBE naming the missing evidence; riding mower = PASS and archived on the bankroll; drywall lead stays MAYBE because Michael cannot set his quote yet |
+| 5 approval boundary | PASS (wrong PIN refused; NO and HOLD paths; nothing runs undecided) |
+| 6 dry-run action + receipts | PASS (live_effector_calls = 0; chain verified) |
+| 7 human outcome, capital | PARTIAL: profit becomes earned capital ($500 -> $560) but nothing ever DEPLOYS capital (Michael buys off-system and cannot yet record it) |
+| 8 learning hook | PARTIAL: proposal produced and safely blocked; TV class cannot calibrate yet |
+The earlier cold-start audit verdict was NO; after the fixes the core path now works end to end. The remaining gaps are listed below; none is a safety issue.
 
-## READY (resume when the quota window resets; the launcher's quota guard releases itself)
+## DONE this stretch (all verified, gate-checked)
+Bankroll canon ($500) enforced in lanes 03/05 + a gate check; production assembly (`mbos worker` runs the real lanes and reports stand-ins); CLI on lane D; one-command dev environment with split logins (`tools/bootstrap_dev.py`); comps wiring + worker inbox watcher; consumer-electronics priors and listing facts as evidence (C-26); comps paired to their item (B-22); attestations (owner-only, receipted); UI: My numbers, Wanted, add-a-price, confirm-evidence forms, Today header, FROZEN explainer; human-input store (D-30); owner decision packets.
+
+## READY (resumes automatically when the window resets; `tools/foreman.py --launch` prints the commands)
 | Order | Task | Lane | What it fixes |
 |---|---|---|---|
-| 1 | D-29 owner-only `record_attestation` | 04 | UI can confirm evidence (A-40 caveat) |
-| 1 | A-41 viable dry-run deal set from Michael's training examples | 01 (side worktree) | at least one YES within the $500 bankroll |
-| 2 | F-29 UI half of the audit (F-88, 89, 90, 92, 94, 95, 97, 98, 100) | 06 | Today header, evidence confirm form, FROZEN explainer, campaign edit |
-| 3 | G-21 full dry-run of the Weekly Money Mission (Priority 4) | 07 | discovery to outcome/learning, zero external actions |
-| 3 | G-22 re-run the audit as Michael | 07 | new verdict |
-Resume command: `.venv/bin/python -I tools/foreman.py --launch` prints the exact worker commands.
+| now | A-44 (running) | 01 side | HOLD cannot be approved (F-116); duplicate-decision tracebacks (F-113/F-118) |
+| 1 | C-28 | 03 | engine reads Michael's service quote -> the drywall lead can reach YES |
+| 1 | D-31 | 04 | "I bought it" deploys capital; duplicate close refused (F-114/F-115) |
+| 2 | A-43 | 01 side | wrapper + worker recheck for typed inputs |
+| 2 | F-32, F-33 | 06 | forms: set my quote, tell me about the job, I bought it |
+| 3 | C-29 | 03 | TV class can calibrate (F-117) |
+| 4 | G-22 | 07 | re-run the Michael audit and publish the new verdict |
 
-## NEEDS MICHAEL (none blocks the dry-run; see OWNER_DECISION_PACKETS.md)
-Weekly target and hours (#10); cash situation and deal-class thresholds (#9); backup destination (#11, the one real risk); licences held; service rate; plus host steps (`loginctl enable-linger`, Podman) and credentials for the first live read-only run.
+## NEEDS MICHAEL (none blocks the dry-run; `docs/status/OWNER_DECISION_PACKETS.md`)
+Weekly target and hours (#10); cash situation and class thresholds (#9, recommend capital-intensive line ~$300); backup destination (#11, the one real risk); licences held; service rate (#6); host steps (`loginctl enable-linger`, Podman); credentials for the first live read-only run.
 
 ## BLOCKED
-B-12 live source smoke (credentials, #8); D-09b/D-19/D-20 (backup destination); D-21 (CRM decision); D-22 (linger + Podman); E-20/E-21 (licences held); E-22 (host software).
+B-12 live sources (credentials, #8); D-09b/D-19/D-20 (backup destination); D-21 (CRM); D-22 (linger + Podman); E-20/E-21 (licences held); E-22 (host software).
 
-## PARKED (deliberately not built)
-Level 2-3 marketplace features (payments, public listings, auctions, reputation engine), AI "possible finished look" imagery, contracts v1.1.0 (ADR-0009 deferred), live outbound contact of any kind.
+## PARKED
+Marketplace levels 2-3, AI "finished look" imagery, contracts v1.1.0 (ADR-0009 deferred), any live outbound contact.
