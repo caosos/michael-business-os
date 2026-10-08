@@ -42,7 +42,8 @@ LANES = {
 WORKTREES = Path(os.environ.get("MBOS_WORKTREES", str(Path.home() / "business-os-worktrees")))
 ALLOWED = ["Read", "Edit", "Write", "Grep", "Glob", "Bash(git status:*)", "Bash(git diff:*)", "Bash(git log:*)", "Bash(git add:*)",
            "Bash(git commit:*)", "Bash(git fetch:*)", "Bash(git show:*)", "Bash(git push origin HEAD)", "Bash(ls:*)", "Bash(cat:*)",
-           "Bash(.venv/bin/python:*)", "Bash(python3:*)", "Bash(pytest:*)", "Bash(.venv/bin/pytest:*)", "Bash(wc:*)", "Bash(grep:*)"]
+           "Bash(.venv/bin/python:*)", "Bash(python3:*)", "Bash(pytest:*)", "Bash(.venv/bin/pytest:*)", "Bash(wc:*)", "Bash(grep:*)", "Bash(tools/*)", "Bash(bash tools/*)", "Bash(.tools/uv pip install:*)",
+           "Bash(git archive:*)", "Bash(tar:*)", "Bash(mktemp:*)", "Bash(mkdir:*)", "Bash(cp:*)", "Bash(git rev-parse:*)", "Bash(git ls-tree:*)"]
 DENIED = ["Bash(curl:*)", "Bash(wget:*)", "Bash(ssh:*)", "Bash(scp:*)", "Bash(sudo:*)", "Bash(gh:*)", "Bash(git push --force:*)",
           "Bash(git push -f:*)", "Bash(git reset --hard:*)", "Bash(rm -rf:*)", "Bash(git branch -D:*)", "Bash(git worktree remove:*)"]
 
