@@ -92,7 +92,7 @@ def page(title, body, state, flash=None, error=False):
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>{ec(title)}</title><style>{CSS}</style></head>
 <body><div class="banner">DRY-RUN · nothing leaves this machine · system {e(state)}</div>
-<header><b>Operator UI</b><nav><a href="/">Queue</a><a href="/mission">Weekly mission</a><a href="/usage">Usage</a><a href="/preview">Audience previews</a><a href="/digest">Morning digest</a><a href="/summary">Daily summary</a><a href="/notes">My notes</a><a href="/holds">HOLD backlog</a><a href="/outcomes">Outcomes</a><a href="/sources">Source health</a><a href="/ledger">Receipt ledger</a></nav></header>
+<header><b>Operator UI</b><nav><a href="/">Queue</a><a href="/mission">Weekly mission</a><a href="/usage">Usage</a><a href="/intake">Intake</a><a href="/preview">Audience previews</a><a href="/digest">Morning digest</a><a href="/summary">Daily summary</a><a href="/notes">My notes</a><a href="/holds">HOLD backlog</a><a href="/outcomes">Outcomes</a><a href="/sources">Source health</a><a href="/ledger">Receipt ledger</a></nav></header>
 <main>{f}{body}</main></body></html>"""
 
 
@@ -454,6 +454,7 @@ class App:
         self.queue_file = queue_file  # READY_QUEUE.md copy (MBOS_READY_QUEUE_FILE)
         self.mission_file = mission_file  # mission plan JSON (MBOS_MISSION_PLAN_FILE)
         self.health_file = health_file  # lane B health.json (else MBOS_SOURCE_HEALTH_FILE)
+        self.intake_drafts = {}  # F-20: in-memory DRY-RUN drafts, never published
         self.csrf = secrets.token_urlsafe(32)
         self.session_id = "web-" + secrets.token_hex(4)
 
@@ -662,6 +663,15 @@ def make_handler(app):
                 from . import usage_view
 
                 return self._send(200, page("Usage and agents", usage_view.render_page(usage_view.load(app.telemetry_dir), usage_view.queue_states(app.queue_file)), app.state()))
+            if u.path == "/intake":
+                from . import intake_view
+
+                return self._send(200, page("Intake", intake_view.render_start(app.csrf), app.state()))
+            if u.path.startswith("/intake/") and u.path.split("/")[2] in app.intake_drafts:
+                from . import intake_view
+
+                iid = u.path.split("/")[2]
+                return self._send(200, page("Intake", intake_view.render_draft(iid, app.intake_drafts[iid], app.csrf), app.state()))
             if u.path == "/preview":
                 from . import merch_view
 
@@ -697,6 +707,25 @@ def make_handler(app):
                     return self._send(404, "{}", "application/json")
                 return self._send(200, json.dumps({k: v for k, v in c.items() if k != "hold_presets"}, default=str), "application/json")
             return self._send(404, page("Not found", "<p>Not found.</p>", app.state()))
+
+        def _post_intake(self, parts):
+            from . import intake_view
+
+            n = min(int(self.headers.get("Content-Length") or 0), 65536)
+            f = {k: v[0] for k, v in parse_qs(self.rfile.read(n).decode("utf-8"), keep_blank_values=True).items()}
+            try:
+                app._check_csrf(f)
+                if parts == ["intake", "start"]:
+                    iid, d = intake_view.new_id(), intake_view.start(f.get("text", "")[:500])
+                else:
+                    iid = parts[1]
+                    if iid not in app.intake_drafts:
+                        return self._send(404, page("Not found", "<p>No such draft.</p>", app.state()))
+                    d = intake_view.apply_answers(app.intake_drafts[iid], f)
+            except Exception as ex:  # InputError, ValueError, ContractViolation: shown, nothing recorded
+                return self._send(200, page("Intake", intake_view.render_start(app.csrf, f"<div class='flash err'>{e(ex)}</div>"), app.state()))
+            app.intake_drafts[iid] = d
+            return self._send(200, page("Intake", intake_view.render_draft(iid, d, app.csrf), app.state()))
 
         def _post_preview_check(self):
             from . import merch_view
@@ -791,6 +820,8 @@ def make_handler(app):
                 return
             u = urlparse(self.path)
             parts = u.path.strip("/").split("/")
+            if parts == ["intake", "start"] or (len(parts) == 3 and parts[0] == "intake" and parts[2] == "answer"):
+                return self._post_intake(parts)
             if parts == ["preview", "check"]:
                 return self._post_preview_check()
             if len(parts) == 3 and parts[0] == "notes" and parts[2] in ("edit", "retract"):
