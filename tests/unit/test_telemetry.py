@@ -76,3 +76,19 @@ def test_no_rate_limit_info_records_nothing(tmp_path):
     assert T.quota_from_rate_limit(None, path=p) is None
     assert T.quota_from_rate_limit({"unifiedWindows": {"five_hour": {"utilization": 7}}}, path=p) is None   # out of 0..1: rejected
     assert T.read(p) == []
+
+
+def test_quota_guard_blocks_only_on_a_fresh_supported_reading_over_the_limit(tmp_path):
+    from datetime import datetime, timedelta, timezone
+    from mbos.router import load_policy
+    pol = load_policy()
+    now = datetime.now(timezone.utc)
+    assert T.quota_guard(pol, [], now=now)["allow"]                                   # no reading: UNKNOWN is not a stop
+    def snap(pct, week, age_min, source="claude_code_rate_limit_event"):
+        return {"kind": "quota_snapshot", "source": source, "session_pct": pct, "week_all_pct": week, "session_resets_at": "x", "week_resets_at": "y",
+                "at": (now - timedelta(minutes=age_min)).isoformat().replace("+00:00", "Z")}
+    assert not T.quota_guard(pol, [snap(95, 40, 5)], now=now)["allow"]
+    assert not T.quota_guard(pol, [snap(40, 95, 5)], now=now)["allow"]
+    assert T.quota_guard(pol, [snap(89, 40, 5)], now=now)["allow"]
+    assert T.quota_guard(pol, [snap(99, 99, 600)], now=now)["allow"]                  # stale reading never blocks
+    assert T.quota_guard(pol, [snap(99, 99, 5, source="manual")], now=now)["allow"]   # manual entries are not used for gating

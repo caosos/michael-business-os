@@ -205,3 +205,25 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "cost_note": "Claude Code's computed estimate; not a separate bill under Max.",
             "quota": snaps[-1] if snaps else {"session_pct": None, "week_all_pct": None, "week_fable_pct": None, "source": "UNKNOWN (no supported programmatic source; enter a manual snapshot)"},
             "chain_errors": verify(rows)}
+
+
+def quota_guard(policy: dict, rows: Optional[list[dict[str, Any]]] = None, *, now: Optional[datetime] = None, path: Optional[Path] = None) -> dict[str, Any]:
+    """Should a new worker launch? Looks only at the latest SUPPORTED quota reading. Missing/old/manual-less = allowed (UNKNOWN is not a stop)."""
+    g = (policy.get("efficiency") or {}).get("quota_guard") or {}
+    rows = rows if rows is not None else read(path)
+    snaps = [r for r in rows if r.get("kind") == "quota_snapshot" and r.get("source") == "claude_code_rate_limit_event"]
+    if not g or not snaps:
+        return {"allow": True, "reason": "no supported quota reading yet"}
+    last, now = snaps[-1], now or datetime.now(timezone.utc)
+    try:
+        age_min = (now - datetime.fromisoformat(last["at"].replace("Z", "+00:00"))).total_seconds() / 60
+    except (KeyError, ValueError):
+        return {"allow": True, "reason": "latest reading has no valid timestamp"}
+    if age_min > g.get("snapshot_max_age_minutes", 45):
+        return {"allow": True, "reason": f"latest reading is {age_min:.0f} min old (older than {g.get('snapshot_max_age_minutes', 45)})"}
+    s5, s7 = last.get("session_pct"), last.get("week_all_pct")
+    if s5 is not None and s5 > g.get("pause_launch_above_session_pct", 101):
+        return {"allow": False, "reason": f"5-hour session window at {s5:g}% (limit {g['pause_launch_above_session_pct']}%); resets {last.get('session_resets_at')}"}
+    if s7 is not None and s7 > g.get("pause_launch_above_week_pct", 101):
+        return {"allow": False, "reason": f"weekly window at {s7:g}% (limit {g['pause_launch_above_week_pct']}%); resets {last.get('week_resets_at')}"}
+    return {"allow": True, "reason": f"session {s5}% / week {s7}% are under the limits"}

@@ -166,3 +166,15 @@ def test_bypass_permissions_is_never_available_to_workers():
     assert "--dangerously-skip-permissions" not in worker.command(r, "p")
     cmd = worker.command(r, "p")
     assert cmd[cmd.index("--permission-mode") + 1] == "auto"             # default: the classifier, with the deny-list still in force
+
+
+def test_quota_guard_refuses_launch_and_override_is_explicit(wt, tmp_path, monkeypatch):
+    from datetime import datetime, timezone
+    tp = tmp_path / "q.jsonl"
+    telemetry.append({"kind": "quota_snapshot", "source": "claude_code_rate_limit_event", "session_pct": 97.0, "week_all_pct": 10.0,
+                      "session_resets_at": "soon", "week_resets_at": "later", "at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")}, tp)
+    r = worker.run_one("T-1", "03", prof(), worktree=wt, dry=False, model=None, queue_text=QUEUE, runner=lambda *a: cp(0, OK), tpath=tp, skip_session_check=True)
+    assert not r["ok"] and "quota guard" in r["error"] and len(telemetry.read(tp)) == 1       # nothing launched
+    r2 = worker.run_one("T-1", "03", prof(), worktree=wt, dry=False, model=None, queue_text=QUEUE, runner=lambda *a: cp(0, OK), tpath=tp,
+                        skip_session_check=True, ignore_quota=True)
+    assert "quota guard" not in str(r2.get("error"))

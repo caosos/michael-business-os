@@ -118,7 +118,7 @@ def should_escalate(row: dict) -> bool:
 
 
 def run_one(task_id: str, lane: str, profile: router.TaskProfile, *, worktree: Path, dry: bool, model: Optional[str],
-            escalate: bool = True, allow_dirty: bool = False, permission_mode: str = "auto", runner: Optional[Callable[..., Any]] = None, tpath: Optional[Path] = None,
+            escalate: bool = True, allow_dirty: bool = False, permission_mode: str = "auto", ignore_quota: bool = False, runner: Optional[Callable[..., Any]] = None, tpath: Optional[Path] = None,
             skip_session_check: bool = False, queue_text: Optional[str] = None, timeout_s: int = 3600) -> dict[str, Any]:
     name, _, branch, _ = LANES[lane]
     if queue_text is None:
@@ -131,6 +131,10 @@ def run_one(task_id: str, lane: str, profile: router.TaskProfile, *, worktree: P
         return {"ok": False, "error": f"task {task_id} is {task['status']!r}, not READY"}
     if not skip_session_check and lane_session_alive(lane):
         return {"ok": False, "error": f"lane {lane} still has a live tmux session (mbos-agent-{lane}); close it out first (docs/handoff/CLOSEOUT_CHECKLIST.md)"}
+    if not dry and not ignore_quota:
+        g = telemetry.quota_guard(router.load_policy(), path=tpath)
+        if not g["allow"]:
+            return {"ok": False, "error": "quota guard: " + g["reason"], "quota_guard": g}
     if not dry:
         st = sh(["git", "status", "--porcelain"], worktree).stdout.strip()
         if st and not allow_dirty:
@@ -192,12 +196,13 @@ def main(argv: Optional[list[str]] = None) -> int:
     ap.add_argument("--dry", action="store_true")
     ap.add_argument("--no-escalate", action="store_true")
     ap.add_argument("--permission-mode", default="auto", choices=PERMISSION_MODES)
+    ap.add_argument("--ignore-quota", action="store_true", help="launch even if the supported quota reading is above the guard (recorded in the output)")
     ap.add_argument("--allow-dirty", action="store_true", help="continue a previous attempt's uncommitted work (the prompt says so)")
     ap.add_argument("--timeout", type=int, default=3600)
     a = ap.parse_args(argv)
     wt = Path(a.worktree) if a.worktree else WORKTREES / LANES[a.lane][3]
     prof = router.TaskProfile(task_id=a.task_id, lane=a.lane, kind=a.kind, risk=a.risk, cross_lane=a.cross_lane, long_horizon=a.long_horizon)
-    out = run_one(a.task_id, a.lane, prof, worktree=wt, dry=a.dry, model=a.model, escalate=not a.no_escalate, allow_dirty=a.allow_dirty, permission_mode=a.permission_mode, timeout_s=a.timeout,
+    out = run_one(a.task_id, a.lane, prof, worktree=wt, dry=a.dry, model=a.model, escalate=not a.no_escalate, allow_dirty=a.allow_dirty, permission_mode=a.permission_mode, ignore_quota=a.ignore_quota, timeout_s=a.timeout,
                   skip_session_check=bool(a.worktree))
     print(json.dumps({k: v for k, v in out.items() if k != "prompt"}, indent=2, default=str))
     if a.dry and out.get("prompt"):
