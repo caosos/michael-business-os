@@ -21,11 +21,12 @@ Done: D-15 (helper delivered @ a08dd9f; 01 to adopt in its e2e for final accepta
 Done: D-17 @ 77d1f17
 Done: D-09a (PITR mechanics against a local dir; see docs/receipts/2026-10-07-d09a-pitr-mechanics.md) (ACCEPTED by Agent 03, docs/receipts/2026-10-07-d17-acceptance-review.md @ 6a20b91, who tested as each real login role)
 Done: D-16 @ 3a1b004
+Blocked: D-18 on A-23 (Agent 01's mission.schema.json); the design and open questions are in docs/state/CAPITAL_LEDGER_DESIGN.md
 Blocked: D-09b (off-box destination + drill) on Michael: docs/state/OWNER_QUESTION_BACKUPS.md
 Blocked: D-10 (final acceptance) on A-01 phase 2. The DDL is delivered @ 6533334.
 Current phase: ROUND TWO: foreman loop (READY_QUEUE)
 Started: 2026-10-06
-Last updated: 2026-10-07 (D-09a done; commit identity corrected)
+Last updated: 2026-10-07 (D-18 design drafted; waiting on A-23)
 
 ## Current objective
 **D-18 (assigned by Agent 01): the capital ledger.**
