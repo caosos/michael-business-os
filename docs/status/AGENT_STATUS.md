@@ -6,7 +6,7 @@ Branch: research/agent-05-governance
 Worktree: /home/michaelos/business-os-worktrees/agent-05-governance
 State: WORKING
 Done: E-18 @ a5c8a98 (policy/trust vocabulary + reputation events + penalty ladder with appeal + payment boundary spec; validators reject bare 'verified' and evidence-less penalty; money.payment.* granted to nobody; 519 tests)
-Claimed: E-19 (jurisdiction pack format + eligibility(job, packs); missing pack => UNKNOWN; stale date_verified lowers confidence; synthetic sample:true fixture, no legal fact)
+Done: E-19 @ <E19> (jurisdiction pack format + eligibility(job, packs): missing pack/chain/threshold field/conflict/unresolved/expired => UNKNOWN; stale date_verified lowers confidence; uncertainty never removes a requirement; no local law hard-coded; synthetic sample:true fixture, no legal fact; 550 tests)
 Done: X-03 (checked 2026-10-07: `git ls-files | grep ^build/` empty; build/ and *.egg-info/ are in .gitignore)
 Done: E-16 @ 716098e (binding keys: top-level reserved names + any-depth amount names; nested binding:false allowed; top-level offer denied; binding_key_violations pin helper; RESERVED_PAYLOAD_KEYS.md; X-03 clear: no tracked build/; 458 tests)
 Done: E-15 @ 4ab56f7 (F-40 backstop: approved + non-freeze, non-transient refusal => failed with ACTION_FAILED same txn, transient (quiet hours/budget/unreadable policy) keeps approval; F-41: agent-01 grants narrowed, money.payment.send/price.change/commit.external granted to nobody, proposer_for(lane); 408 tests)

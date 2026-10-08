@@ -1,0 +1,131 @@
+{
+  "fixture_notice": "SYNTHETIC SAMPLE DATA (sample: true). No real jurisdiction, regulator or legal fact is asserted. Names are placeholders. Real packs are researched, cited and dated separately and are NOT part of this task.",
+  "packs": [
+    {
+      "pack_id": "sample-st-electrical",
+      "jurisdiction": "SAMPLE-ST",
+      "job_class": "electrical_repair",
+      "rule": "SAMPLE RULE: electrical repair requires a state electrical licence.",
+      "source": "SYNTHETIC-FIXTURE",
+      "date_verified": "2026-08-01",
+      "credential_required": [
+        "electrical_license_verified"
+      ],
+      "permit_notes": "SAMPLE: permit required for panel work.",
+      "confidence": 0.9,
+      "unresolved": [],
+      "sample": true
+    },
+    {
+      "pack_id": "sample-city1-drywall",
+      "jurisdiction": "SAMPLE-ST/SAMPLE-COUNTY-A/SAMPLE-CITY-1",
+      "job_class": "drywall_repair",
+      "rule": "SAMPLE RULE: cosmetic drywall repair needs no credential inside SAMPLE-CITY-1 below the threshold.",
+      "source": "SYNTHETIC-FIXTURE",
+      "date_verified": "2026-08-01",
+      "credential_required": [],
+      "permit_notes": "",
+      "confidence": 0.9,
+      "unresolved": [],
+      "sample": true,
+      "threshold": {
+        "field": "value_usd",
+        "op": "lt",
+        "value": 1000
+      }
+    },
+    {
+      "pack_id": "sample-city1-drywall-large",
+      "jurisdiction": "SAMPLE-ST/SAMPLE-COUNTY-A/SAMPLE-CITY-1",
+      "job_class": "drywall_repair",
+      "rule": "SAMPLE RULE: drywall work at or above the threshold needs a residential contractor licence.",
+      "source": "SYNTHETIC-FIXTURE",
+      "date_verified": "2026-08-01",
+      "credential_required": [
+        "residential_license_verified"
+      ],
+      "permit_notes": "",
+      "confidence": 0.85,
+      "unresolved": [],
+      "sample": true,
+      "threshold": {
+        "field": "value_usd",
+        "op": "gte",
+        "value": 1000
+      }
+    },
+    {
+      "pack_id": "sample-county-a-plumbing",
+      "jurisdiction": "SAMPLE-ST/SAMPLE-COUNTY-A",
+      "job_class": "plumbing_repair",
+      "rule": "SAMPLE RULE: plumbing requires a plumbing licence; county permit scope not yet confirmed.",
+      "source": "SYNTHETIC-FIXTURE",
+      "date_verified": "2026-08-01",
+      "credential_required": [
+        "plumbing_license_verified"
+      ],
+      "permit_notes": "",
+      "confidence": 0.8,
+      "unresolved": [
+        "Does the county require a separate permit for fixture swaps?"
+      ],
+      "sample": true
+    },
+    {
+      "pack_id": "sample-city1-handyman",
+      "jurisdiction": "SAMPLE-ST/SAMPLE-COUNTY-A/SAMPLE-CITY-1",
+      "job_class": "furniture_assembly",
+      "rule": "SAMPLE RULE: furniture assembly needs no credential.",
+      "source": "SYNTHETIC-FIXTURE",
+      "date_verified": "2026-08-01",
+      "credential_required": [],
+      "permit_notes": "",
+      "confidence": 0.9,
+      "unresolved": [],
+      "sample": true
+    },
+    {
+      "pack_id": "sample-city1-handyman-unresolved",
+      "jurisdiction": "SAMPLE-ST/SAMPLE-COUNTY-A/SAMPLE-CITY-1",
+      "job_class": "smart_home_install",
+      "rule": "SAMPLE: low-voltage smart-home installs - credential question still open.",
+      "source": "SYNTHETIC-FIXTURE",
+      "date_verified": "2026-08-01",
+      "credential_required": null,
+      "permit_notes": "",
+      "confidence": 0.4,
+      "unresolved": [
+        "Is a low-voltage licence required?"
+      ],
+      "sample": true
+    },
+    {
+      "pack_id": "sample-st-hvac-old",
+      "jurisdiction": "SAMPLE-ST",
+      "job_class": "hvac_service",
+      "rule": "SAMPLE RULE: HVAC refrigerant work requires an HVAC licence.",
+      "source": "SYNTHETIC-FIXTURE",
+      "date_verified": "2025-06-01",
+      "credential_required": [
+        "hvac_license_verified"
+      ],
+      "permit_notes": "SAMPLE: deliberately old date to exercise staleness.",
+      "confidence": 0.9,
+      "unresolved": [],
+      "sample": true
+    },
+    {
+      "pack_id": "sample-unin-drywall",
+      "jurisdiction": "SAMPLE-ST/SAMPLE-COUNTY-A/UNINCORPORATED",
+      "job_class": "drywall_repair",
+      "rule": "SAMPLE RULE: in the unincorporated area drywall repair needs no credential (synthetic; says nothing about any real place).",
+      "source": "SYNTHETIC-FIXTURE",
+      "date_verified": "2026-08-01",
+      "credential_required": [],
+      "permit_notes": "",
+      "confidence": 0.9,
+      "unresolved": [],
+      "sample": true
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "rules_schema": "mbos.jurisdiction.rules/1",
+  "version": "2026.10.07-e19",
+  "description": "E-19 (ADR-0013 §8/§12). How the evaluator treats jurisdiction packs. The evaluator hard-codes NO local legal assumption (no 'outside city limits means no licence'): everything it concludes comes from a cited pack. Absence of a pack is UNKNOWN, never 'no licence needed'. Uncertainty only ever KEEPS a credential requirement; it can never remove one. All numbers are REC priors.",
+  "staleness": { "fresh_days": 180, "stale_days": 365, "expired_days": 730,
+    "stale_confidence_factor": 0.7, "very_stale_confidence_factor": 0.4,
+    "note": "age of date_verified: <= fresh_days: full confidence; <= stale_days: x0.7; <= expired_days: x0.4; beyond expired_days the pack is EXPIRED_PACK => UNKNOWN" },
+  "min_confidence_to_clear": 0.7,
+  "gate": { "authoritative_eligible": "allow", "needs_credential": "block_until_credential", "unknown": "ask_michael", "non_authoritative": "ask_michael",
+    "note": "A sample/fixture pack is never authoritative: its result may not unblock a job." },
+  "threshold_ops": ["gte", "gt", "lte", "lt"]
+}

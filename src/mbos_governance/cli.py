@@ -11,6 +11,8 @@
   mbos-gov reconcile [--older-than SECONDS]      (E-05: stuck claims; provider lookup, never re-send)
   mbos-gov sandbox check [--spec FILE] [--host]  (E-08: sandbox spec invariants; --host reports runtimes, installs nothing)
   mbos-gov trust check [--dir policy/trust]      (E-18: credential vocabulary, reputation/penalty data, payment boundary; exit 1 on problems)
+  mbos-gov jurisdiction check [--dir policy/jurisdiction]            (E-19: pack data valid; exit 1 on problems)
+  mbos-gov jurisdiction eligibility --job FILE.json [--dir ...]       (E-19: eligible | needs_credential | UNKNOWN + gate)
   mbos-gov alerts [--since-hours 24] [--ntfy]    (E-09: read-only alert queries; exit 2 on any CRITICAL; sends nothing)
 
 Connection: --dsn, or env MBOS_GOV_DSN (one login for every role), or per role
@@ -62,6 +64,10 @@ def main(argv: list[str] | None = None) -> int:
     fr = sub.add_parser("freeze-requests")
     fr.add_argument("action", choices=["apply"])
     fr.add_argument("file")
+    jr = sub.add_parser("jurisdiction")
+    jr.add_argument("action", choices=["check", "eligibility"])
+    jr.add_argument("--dir")
+    jr.add_argument("--job")
     tr = sub.add_parser("trust")
     tr.add_argument("action", choices=["check"])
     tr.add_argument("--dir")
@@ -100,6 +106,22 @@ def main(argv: list[str] | None = None) -> int:
         print(f"policy ok: {pol.version} mode={pol.data['system_mode']} delegation={pol.data['delegation_enabled']}")
         return 0
 
+    if a.cmd == "jurisdiction":
+        from . import jurisdiction as jx
+        d = a.dir or str(Path(policy_path).with_name("jurisdiction"))
+        try:
+            data = jx.JurisdictionData(d)
+            if a.action == "check":
+                problems = jx.data_problems(data)
+                print(json.dumps({"dir": d, "packs": len(data.packs), "ok": not problems, "problems": problems}, indent=2))
+                return 0 if not problems else 1
+            job = json.loads(Path(a.job).read_text("utf-8"))
+            res = jx.eligibility(job, data.packs, data)
+            print(json.dumps({**res, "gate": jx.gate(res, data)}, indent=2))
+            return 0 if res["status"] != "UNKNOWN" else 3
+        except Exception as exc:  # noqa: BLE001
+            print(f"jurisdiction data unreadable: {exc}", file=sys.stderr)
+            return 1
     if a.cmd == "trust":
         from .trust import TrustData, check_all
         d = a.dir or str(Path(policy_path).with_name("trust"))
