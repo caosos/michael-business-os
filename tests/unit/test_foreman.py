@@ -81,7 +81,7 @@ def test_launch_prints_worker_commands_for_idle_lanes_only(tmp_path, capsys):
     clone = make_repo(tmp_path, {
         "research/agent-02-opportunity": lane("WAITING"),
         "research/agent-03-economics": lane("WORKING", "C-19"),
-        "research/agent-05-governance": lane("WAITING", done="Done: E-17 E-18"),
+        "research/agent-05-governance": lane("WAITING", done="Done: E-17 @ a · E-18 @ b"),
         "research/agent-07-marketing": lane("CLOSED"),
     })
     rc = foreman.main(["--repo", str(clone), "--no-fetch", "--launch"])
@@ -96,3 +96,24 @@ def test_exec_refuses_when_queue_is_stale(tmp_path, capsys):
     # QUEUE says "Last synced: heads x" while real heads differ -> stale warning -> refuse
     rc = foreman.main(["--repo", str(clone), "--no-fetch", "--launch", "--exec", "1"])
     assert rc == 3 and "REFUSING" in capsys.readouterr().out
+
+
+def test_reconcile_marks_only_what_the_owning_lane_reports_done():
+    q = """- **Last synced:** old
+| ID | Pri | Task | Deps | Status | Agent | Acceptance |
+|---|---|---|---|---|---|---|
+| B-21 | P1 | tags | none | READY | 02 | ok |
+| B-22 | P1 | other | none | READY | 02 | ok |
+| C-19 | P0 | floor | none | **CLAIMED** | 03 | ok |
+| E-18 | P2 | seams | none | DONE | 05 | ok |
+| X-03 | P1 | builds | none | READY | ALL (02, 03) | ok |
+"""
+    new, ch = foreman.reconcile(q, {"02": {"B-21"}, "03": {"C-19"}, "05": set()}, {"02": "abc1234"})
+    assert sorted(ch) == ["B-21: READY -> DONE", "C-19: CLAIMED -> DONE"]
+    assert "| B-22 | P1 | other | none | READY |" in new and "abc1234" in new
+    assert "| X-03 | P1 | builds | none | READY |" in new      # needs every named lane to report it
+
+
+def test_done_line_with_many_ids_is_fully_parsed():
+    st = foreman.parse_status("State: CLOSED\nDone: F-01 @ 190bb9b (+ x) · F-02 @ fc31896 · F-18 @ d56f8d2 · X-03 (checked)\n")
+    assert st["done"] == {"F-01", "F-02", "F-18", "X-03"}

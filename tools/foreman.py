@@ -40,7 +40,7 @@ def parse_status(text: str | None) -> dict:
             key = m.group(1).lower()
             out["state" if key == "state" else key] = m.group(2).strip()
         elif line.startswith("Done:"):
-            out["done"].update(re.findall(r"\b([A-GX]-\d+)\b", line.split("@")[0].split("(")[0]))
+            out["done"].update(re.findall(r"\b([A-GX]-\d+)\b(?=\s*[@(])", line))   # every "ID @ sha" / "ID (note)" on the line
     out["state"] = (re.match(r"[A-Z]+", out["state"]) or [""])[0] if out["state"] else ""
     c = out["claimed"]
     out["claimed"] = "" if c.startswith("(none") or c.lower() in ("none", "") else c
@@ -61,6 +61,35 @@ def parse_queue(text: str | None) -> list[dict]:
 def ready_for(rows: list[dict], lane: str, done: set[str]) -> list[dict]:
     mine = [r for r in rows if lane in re.findall(r"\d\d", r["agent"]) and re.match(r"READY", r["status"]) and r["id"] not in done]
     return sorted(mine, key=lambda r: (not r["pri"].startswith("P0"), r["pri"], r["id"]))
+
+
+def done_by_lane(repo: Path) -> dict[str, set[str]]:
+    """Task ids each lane's own AGENT_STATUS lists as Done (the lane's word, pushed)."""
+    out = {}
+    for lane, branch in LANES.items():
+        out[lane] = parse_status(show(repo, branch, "docs/status/AGENT_STATUS.md"))["done"]
+    return out
+
+
+def reconcile(queue_text: str, done: dict[str, set[str]], heads: dict[str, str]) -> tuple[str, list[str]]:
+    """Mark queue rows DONE when the owning lane lists the id under Done, and refresh the recorded heads line. Never edits a row
+    that is not READY/CLAIMED/BLOCKED, and never marks DONE on anyone's word but the owning lane's. Returns (new_text, changes)."""
+    changes, out = [], []
+    for line in queue_text.splitlines():
+        c = line.split("|")
+        if len(c) >= 8 and re.fullmatch(r"\s*[A-GX]-\d+\s*", c[1]):
+            tid, status = c[1].strip(), re.sub(r"[*`]", "", c[5]).strip()
+            lanes = re.findall(r"\d\d", re.sub(r"\*", "", c[6]))
+            if re.match(r"(READY|CLAIMED|BLOCKED)", status) and lanes and all(tid in done.get(l, set()) for l in lanes if l in done) \
+                    and any(l in done for l in lanes):
+                c[5] = f" **DONE** (reconciled from lane {','.join(lanes)} AGENT_STATUS Done) "
+                changes.append(f"{tid}: {status[:30]} -> DONE")
+                line = "|".join(c)
+        out.append(line)
+    text = "\n".join(out) + ("\n" if queue_text.endswith("\n") else "")
+    hs = " · ".join(f"{l} `{h}`" for l, h in heads.items())
+    text = re.sub(r"- \*\*Last synced:\*\*.*", f"- **Last synced:** reconciled by tools/foreman.py against heads {hs}.", text, count=1)
+    return text, changes
 
 
 def survey(repo: Path) -> tuple[list[dict], list[str]]:
@@ -95,12 +124,20 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--repo", default=str(ROOT))
     ap.add_argument("--no-fetch", action="store_true")
     ap.add_argument("--wake-text", action="store_true")
+    ap.add_argument("--reconcile", action="store_true", help="rewrite READY_QUEUE.md rows to DONE per each lane's own Done lines and refresh heads")
     ap.add_argument("--launch", action="store_true", help="print the exact tools/worker.py command for each idle lane's top READY task")
     ap.add_argument("--exec", type=int, default=0, metavar="N", help="with --launch: actually run at most N workers (max 2) sequentially")
     a = ap.parse_args(argv)
     repo = Path(a.repo)
     if not a.no_fetch:
         git(repo, "fetch", "-q", "origin")
+    if a.reconcile:
+        qp = repo / "docs" / "status" / "READY_QUEUE.md"
+        heads = {l: (git(repo, "log", "-1", "--format=%h", f"origin/{b}") or "?").strip() for l, b in LANES.items()}
+        new, changes = reconcile(qp.read_text(), done_by_lane(repo), heads)
+        qp.write_text(new)
+        print(f"reconciled {len(changes)} row(s)" + ("".join("\n  " + c for c in changes)))
+        return 0
     report, warnings = survey(repo)
     for r in report:
         nxt = ", ".join(f"{t['id']}({t['pri']})" for t in r["ready"][:3]) or "-"
