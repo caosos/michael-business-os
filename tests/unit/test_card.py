@@ -367,3 +367,75 @@ def test_a_dropped_risk_leaves_a_trace(ledger_db, caplog):
             {"risk": "Known head-gasket weakness on this engine", "basis": "INFERENCE", "source": "n/a"}]}})
     assert c["value_add_plan"]["model_specific_risks"] == []
     assert any("rejected" in u for u in c["unknowns"]) and "dropped 1 model-specific risk" in caplog.text
+
+
+# ---- Michael's training examples (ARIA-20261007-1840): capital velocity, not a universal profit floor ----
+def _base(ledger_db):
+    ids = seed_flow(ledger_db, act=False)
+    return _inputs(ledger_db, ids["item_id"])
+
+
+def _scenario(base, *, cash, net, days, p_ok=0.9, scope=True, salvage=0, dom=3, sale_prob=0.95, comp_low=None, comp_high=None, profile=None):
+    item, receipts, areqs = copy.deepcopy(base)
+    d = item["scores"]["scorecard"].setdefault("derived", {})
+    d.update(cash_tied_up=cash, ev_net_profit=net, time_to_cash_days=days, skill_fit=0.9, cost_out=cash, net_profit_deterministic=net)
+    e = item["economics"]
+    e["rehab"].update(repair_success_prob=p_ok, repair_scope_known=scope)
+    e["downside"]["salvage_if_repair_fails"] = salvage
+    e["resale"].update(sale_prob=sale_prob, expected_dom_days=dom)
+    if comp_low is not None:
+        e["resale"].update(comp_price_low=comp_low, comp_price_high=comp_high)
+    return cardmod.build_card(item, receipts, areqs, profile=profile)
+
+
+def test_micro_flip_tv_is_a_great_use_of_cash_despite_tiny_absolute_profit(ledger_db):
+    c = _scenario(_base(ledger_db), cash=30, net=45, days=0.1, p_ok=0.8, salvage=15, comp_low=60, comp_high=100)  # 65-inch TV at ~$30
+    e = c["economics"]
+    assert e["opportunity_class"]["value"] == "MICRO_FLIP" and e["cash_multiple"]["value"] == 2.5
+    assert e["capital_velocity"]["value"] > 10                                  # 150% return on cash in 0.1 day
+    assert e["catastrophic_downside_probability"]["value"] == 0.2 and e["parts_out_floor"]["value"] == 15
+    assert e["expected_gross_profit"]["low"] == 30 and e["expected_gross_profit"]["high"] == 70
+    assert any("micro flip" in w for w in c["why"]) and cardmod.validate_card(c) == []
+
+
+def test_old_mower_late_season_is_capital_intensive_despite_a_big_spread(ledger_db):
+    c = _scenario(_base(ledger_db), cash=900, net=700, days=150, p_ok=0.9, dom=120, sale_prob=0.6)
+    e = c["economics"]
+    assert e["opportunity_class"]["value"] == "CAPITAL_INTENSIVE_FLIP"
+    assert e["capital_velocity"]["value"] < 0.01                                # cash trapped for months
+    assert any("capital-intensive" in w for w in c["why"])
+
+
+def test_non_running_recon_is_a_different_class_from_the_tv(ledger_db):
+    base = _base(ledger_db)
+    tv = _scenario(base, cash=30, net=45, days=0.1)["economics"]["opportunity_class"]["value"]
+    recon = _scenario(base, cash=300, net=500, days=14, p_ok=0.75, scope=False, salvage=120)
+    assert tv != recon["economics"]["opportunity_class"]["value"] == "STANDARD_FLIP"
+    assert recon["economics"]["repair_uncertainty"]["value"] == "high"          # engine/transmission fundamentals not yet confirmed
+
+
+def test_no_universal_profit_floor_a_30_dollar_profit_item_is_not_rejected_by_the_card(ledger_db):
+    c = _scenario(_base(ledger_db), cash=30, net=30, days=0.05)
+    assert c["recommendation"]["action"] in ("CONTACT", "OFFER", "BUY", "COUNTER", "HOLD")  # derived from the machine verdict, never from a $ floor
+    assert c["economics"]["capital_velocity"]["value"] > 10
+
+
+def test_unknown_cash_context_is_said_not_assumed(ledger_db):
+    base = _base(ledger_db)
+    c = _scenario(base, cash=30, net=45, days=0.1)
+    assert c["economics"]["current_cash_context"]["value"] == "UNKNOWN" and "economics.current_cash_context" in c["unknowns"]
+    profile = cardmod.load_profile()
+    profile["current_cash_context"] = {"value": "tight: about $400 available this week"}
+    c2 = _scenario(base, cash=30, net=45, days=0.1, profile=profile)
+    assert c2["economics"]["current_cash_context"]["basis"] == "FACT"
+
+
+def test_velocity_fields_are_unknown_not_invented_without_numbers(ledger_db):
+    ids = seed_flow(ledger_db, act=False)
+    item, receipts, areqs = _inputs(ledger_db, ids["item_id"])
+    item["scores"] = None
+    item.pop("scores")
+    c = cardmod.build_card(item, receipts, areqs)
+    for k in ("cash_multiple", "capital_velocity", "opportunity_class"):
+        assert c["economics"][k]["value"] == "UNKNOWN", k
+    assert cardmod.validate_card(c) == []

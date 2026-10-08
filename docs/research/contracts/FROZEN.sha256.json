@@ -7,7 +7,7 @@
     "canonical/mbos_canonical.py": "sha256:da2745456f4ac1d1c6aa7a23350c76d65e9e06427422e23ebf9b9eb578799628",
     "canonical/mbos_canonical.sql": "sha256:9fe2d24ceda4d1e9bf4e18ecf8cf3df2317108326433a9d154f4810ce0fed9c3",
     "canonical/vectors.json": "sha256:4ff072e400a8517af73b3d38062cf9538629b9adca14d35031bebab385069082",
-    "card.schema.json": "sha256:e065e61b6df0c6e9e162c01f21e15a3e528cd480a87c8962c370c764c5ea60b9",
+    "card.schema.json": "sha256:d8f78d0ef0bd3e8b3280c9f0d4dc2664a6a4df53dfeff07f5012d72bb222b5ea",
     "examples/action-request-email-held.example.json": "sha256:14e7a343c7550ed6b67371b7325096e21a0bc734f8cf6083d5bc967296d17ed5",
     "examples/approval-hold.example.json": "sha256:99f2f703c675beac7efe067c16e956cba68589b9d6413fd3897b069a3d059bfe",
     "examples/item-flip-trailer.example.json": "sha256:5fa97c15e4a8b013a6c5ebe2925fe2e0e495c6f26c07a73e6800bf9fcaa08602",

@@ -12,6 +12,7 @@ Last updated: 2026-10-07 by Agent 01. Nothing here blocks the dry-run MVP; each 
 | 3 | Higher-risk source access (ToS-adverse, browser automation) | Marketplace / GovDeals / HiBid | official sources only |
 | 4 | Outbound AI calling/texting posture and legal counsel | live seller/customer contact | disabled; dry-run only |
 | 5 | Approval delegation | narrow actions without asking you | none; everything asks you |
+| 9 | Confirm deal-class thresholds (micro / quick / capital-intensive) and state your current cash situation | the system can say whether a good asset is the right buy today | provisional thresholds; cash context UNKNOWN |
 | 7 | Reselling items given away free in community gift groups | Trash Nothing flips | flagged for review; case-by-case YES |
 | 8 | Apply for eBay Marketplace Insights (sold prices) | sold-price comparables | sold comps entered manually |
 

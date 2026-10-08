@@ -72,6 +72,15 @@ Default: these items are flagged `needs_review`, and nothing is pursued without 
 ## 8. eBay Marketplace Insights access (optional)
 Applying to eBay's Limited Release program would give the system sold-price comparables. Applying is an external account action, so it is your call. Until then, sold comps are entered manually.
 
+## 9. Deal classes and your cash situation (raised by Agent 01; not blocking)
+Standing rule recorded from your training: **no universal profit floor** (ADR-0012). To classify deals, Agent 01 proposed these starting thresholds from your examples (they are data in `config/operator_profile.v1.json`):
+- **MICRO_FLIP:** at most $100 cash at risk and back within 3 days (a $30 TV that sells in an hour)
+- **QUICK_TURN:** back within about 10 days
+- **CAPITAL_INTENSIVE_FLIP:** $750 or more at risk, or 45 or more days to cash (a mower bought late in the season)
+- everything else: STANDARD_FLIP
+
+Please confirm or change them, and tell the system your current cash situation (how tight funds are right now), since that decides whether a good asset is the right buy today. Until you do, the card shows the class as a recommendation and the cash context as UNKNOWN.
+
 ---
 
 ## Decisions already resolved technically

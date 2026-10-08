@@ -376,6 +376,10 @@ def _economics(item: dict, enrich: Optional[dict]) -> dict[str, Any]:
     out["expected_gross_profit"] = (_datum(d["net_profit_deterministic"], "INFERENCE", unit="USD", provenance_id=prov,
                                            note="deterministic, before probability weighting") if d.get("net_profit_deterministic") is not None
                                     else _unknown("not scored yet"))
+    if (not _is_unknown(out["expected_gross_profit"]) and _finite(resale.get("comp_price_low")) and _finite(resale.get("comp_price_high"))
+            and _finite(d.get("cost_out")) and d.get("net_profit_deterministic") is not None):
+        out["expected_gross_profit"]["low"] = round(resale["comp_price_low"] - d["cost_out"], 2)    # conservative resale
+        out["expected_gross_profit"]["high"] = round(resale["comp_price_high"] - d["cost_out"], 2)  # optimistic resale
     out["expected_net_profit"] = (_datum(d["ev_net_profit"], "INFERENCE", unit="USD", provenance_id=prov,
                                          note="probability-weighted expected value") if d.get("ev_net_profit") is not None
                                   else _unknown("not scored yet"))
@@ -385,6 +389,67 @@ def _economics(item: dict, enrich: Optional[dict]) -> dict[str, Any]:
                                     if d.get("time_to_cash_days") is not None else _unknown("not scored yet"))
     if card.get("scoring_config_version"):
         out["scoring_config_version"] = card["scoring_config_version"]
+    return out
+
+
+def _class_of(cash: Optional[float], days: Optional[float], profile: dict) -> Optional[str]:
+    """MICRO_FLIP / QUICK_TURN / STANDARD_FLIP / CAPITAL_INTENSIVE_FLIP from Michael's class thresholds (profile DATA)."""
+    dc = (profile or {}).get("deal_classes") or {}
+    if cash is None or days is None or not dc:
+        return None
+    mi, qt, ci = dc.get("micro_flip") or {}, dc.get("quick_turn") or {}, dc.get("capital_intensive_flip") or {}
+    if cash >= ci.get("min_cash_at_risk", 10**9) or days >= ci.get("or_min_days_to_cash", 10**9):
+        return "CAPITAL_INTENSIVE_FLIP"
+    if cash <= mi.get("max_cash_at_risk", -1) and days <= mi.get("max_days_to_cash", -1):
+        return "MICRO_FLIP"
+    if days <= qt.get("max_days_to_cash", -1):
+        return "QUICK_TURN"
+    return "STANDARD_FLIP"
+
+
+def _velocity_fields(item: dict, econ: dict, profile: dict, enr: dict) -> dict[str, Any]:
+    """Aria/Michael 2026-10-07: capital velocity, cash multiple, class, downside, liquidity, skill, cash context are SEPARATE visible
+    fields. Everything here is derived from numbers already on the card/item (INFERENCE) or UNKNOWN; nothing is invented."""
+    e = item.get("economics") or {}
+    d = ((item.get("scores") or {}).get("scorecard") or {}).get("derived") or {}
+    prov = (item.get("recommendation") or {}).get("provenance_id")
+    rehab, resale, down = e.get("rehab") or {}, e.get("resale") or {}, e.get("downside") or {}
+    cash = d.get("cash_tied_up") if _finite(d.get("cash_tied_up")) else None
+    net = d.get("ev_net_profit") if _finite(d.get("ev_net_profit")) else None
+    days = d.get("time_to_cash_days") if _finite(d.get("time_to_cash_days")) else None
+    U = lambda why: _unknown(why)
+    out: dict[str, Any] = {}
+    flip = item.get("type") == "flip"
+    if flip and cash and net is not None:
+        out["cash_multiple"] = _datum(round(1 + net / cash, 2), "INFERENCE", unit="x", provenance_id=prov, note="1 + expected net / cash at risk")
+        if days and days > 0:
+            out["capital_velocity"] = _datum(round(net / cash / days, 3), "INFERENCE", unit="return on cash per day", provenance_id=prov,
+                                             note=f"{net / cash:.0%} expected return on cash over about {days:g} day(s)")
+    out.setdefault("cash_multiple", U("needs a cash-at-risk and an expected net (flips only)"))
+    out.setdefault("capital_velocity", U("needs cash at risk, expected net and days to cash"))
+    cls = _class_of(cash, days, profile) if flip else None
+    out["opportunity_class"] = _datum(cls, "RECOMMENDATION", note="thresholds are provisional data in operator_profile.v1.json (Michael confirms)") if cls \
+        else U("needs cash at risk and days to cash (flips only)")
+    sal = down.get("salvage_if_repair_fails")
+    out["parts_out_floor"] = _datum(sal, "INFERENCE", unit="USD", provenance_id=prov, note="salvage if the repair fails") if _finite(sal) and sal >= 0 \
+        else U("no parts-out / liquidation estimate")
+    p_ok = rehab.get("repair_success_prob")
+    out["catastrophic_downside_probability"] = _datum(round(1 - p_ok, 3), "INFERENCE", provenance_id=prov, note="1 - repair success probability") \
+        if _finite(p_ok) and 0 <= p_ok <= 1 else U("no repair success probability")
+    if _finite(p_ok) and "repair_scope_known" in rehab:
+        lvl = "low" if (rehab["repair_scope_known"] and p_ok >= 0.9) else ("high" if (not rehab["repair_scope_known"] or p_ok < 0.7) else "medium")
+        out["repair_uncertainty"] = _datum(lvl, "INFERENCE", provenance_id=prov, note="from repair_scope_known and repair success probability")
+    else:
+        out["repair_uncertainty"] = U("no repair scope / success estimate")
+    sp, dom = resale.get("sale_prob"), resale.get("expected_dom_days")
+    out["liquidity"] = _datum(f"{sp:.0%} sale probability, about {dom:g} days on market", "INFERENCE", provenance_id=prov) \
+        if _finite(sp) and _finite(dom) else U("no sale-probability / days-on-market estimate")
+    sk = d.get("skill_fit")
+    out["skill_fit"] = _datum(sk, "INFERENCE", provenance_id=prov) if _finite(sk) and 0 <= sk <= 1 else U("no skill-fit score")
+    out["personal_use_value"] = _from_block(_blk(enr, "economics"), "personal_use_value", "not supplied (only relevant if Michael might keep it)")
+    cc = (profile or {}).get("current_cash_context") or {}
+    out["current_cash_context"] = _datum(cc["value"], "FACT", note="stated by Michael in operator_profile.v1.json") if cc.get("value") is not None \
+        else U("Michael has not stated his cash situation (so lock-up sensitivity cannot be judged)")
     return out
 
 
@@ -444,6 +509,14 @@ def _fact_reasons(item: dict, econ: dict, la: dict, lg: dict) -> list[str]:
     if not _is_unknown(sr):
         recent = f" — {la['recent_activity'][0]}" if la["recent_activity"] else ""
         out.append(f"Stale-listing risk is {sr['value']}{recent}.")
+    cls, mult = econ.get("opportunity_class", {}), econ.get("cash_multiple", {})
+    if not _is_unknown(cls) and not _is_unknown(mult):
+        shape = {"MICRO_FLIP": "a micro flip: a tiny amount of cash that turns almost at once, so a small absolute profit can still be an excellent use of money",
+                 "QUICK_TURN": "a quick turn: cash comes back within about a week, so it can be redeployed",
+                 "STANDARD_FLIP": "a standard flip",
+                 "CAPITAL_INTENSIVE_FLIP": "capital-intensive: a lot of cash tied up and/or a long hold, so it has to clear a meaningful profit to be worth it"}[cls["value"]]
+        d_ = econ.get("expected_days_to_cash", {})
+        out.append(f"This is {shape} (about {mult['value']:g}x your cash" + (f", back in about {d_['value']:g} day(s)" if not _is_unknown(d_) else "") + ").")
     if lg["transport_mode"]["value"] == "requires_trailer":
         out.append("Needs a trailer. That is a cost and a confirmation step (borrowed trailer), not a reason to skip the deal.")
     elif lg["transport_mode"]["value"] == "fits_truck":
@@ -537,6 +610,7 @@ def build_card(item: dict, receipts: list[dict], areqs: list[dict], enrichment: 
               ("account_age", "rating", "prior_listings", "complaint_signals", "response_history", "inconsistencies")}
     seller["confidence"] = sel_in.get("confidence") if sel_in.get("confidence") in ("high", "medium", "low") else "UNKNOWN"
     econ = _economics(item, enr)
+    econ.update(_velocity_fields(item, econ, profile, enr))
     va_in = _blk(enr, "value_add")
     se_in = _blk(enr, "seasonality")
     seasonality = {"demand_now": _from_block(se_in, "demand_now", "no seasonality evidence for this category"),
@@ -712,6 +786,15 @@ def render_text(card: dict) -> str:
               f"  Repair/material: {_fmt(e['expected_repair_material_cost'], True)}   Transport: {_fmt(e['transport_cost'], True)}   Cash at risk: {_fmt(e['total_cash_at_risk'], True)}",
               f"  Resale: conservative {_fmt(e['resale_conservative'], True)} / likely {_fmt(e['resale_likely'], True)} / optimistic {_fmt(e['resale_optimistic'], True)}",
               f"  Gross {_fmt(e['expected_gross_profit'], True)}   Net {_fmt(e['expected_net_profit'], True)}   Per hour {_fmt(e['expected_profit_per_hour'], True)}   Days to cash {_fmt(e['expected_days_to_cash'])}"]
+    def _v(k: str, money: bool = False) -> str:
+        return _fmt(e[k], money) if k in e else "UNKNOWN"
+
+    cap = [f"  Class: {_v('opportunity_class')}   Cash multiple: {_v('cash_multiple')}x   Capital velocity: {_v('capital_velocity')}/day"
+           if e.get("cash_multiple", {}).get("value") != "UNKNOWN" else f"  Class: {_v('opportunity_class')}   Cash multiple: UNKNOWN   Capital velocity: UNKNOWN",
+           f"  Downside: repair fails outright {_v('catastrophic_downside_probability')} · parts-out floor {_v('parts_out_floor', True)} · repair uncertainty {_v('repair_uncertainty')}",
+           f"  Liquidity: {_v('liquidity')} · skill fit {_v('skill_fit')} · personal-use value {_v('personal_use_value')}",
+           f"  Cash situation: {_v('current_cash_context')}"]
+    lines += ["", "CAPITAL (why a small fast flip can outrank a big slow one):"] + cap
     plan = card["value_add_plan"]
     lines += ["", f"VALUE-ADD PLAN: {_fmt(plan['plan'])}"] + [f"  ! {T(x['risk'])} [{x['basis']}{', ' + T(x['source'], 120) if x.get('source') else ''}]" for x in plan["model_specific_risks"]]
     se = card["seasonality"]
