@@ -16,7 +16,8 @@ QUEUE = """| ID | Pri | Task | Deps | Status | Agent | Acceptance |
 | T-1 | P1 | do a thing | none | READY | 03 | thing exists |
 | T-2 | P1 | blocked thing | T-1 | BLOCKED | 03 | x |
 """
-OK = json.dumps({"type": "result", "is_error": False, "duration_ms": 10, "duration_api_ms": 5, "num_turns": 2, "session_id": "s", "total_cost_usd": 0.1,
+DONE_LINE = '{"task":"T-1","status":"DONE","commit":"abc","tests":"3 passed/0 failed","notes":"x"}'
+OK = json.dumps({"type": "result", "is_error": False, "result": "did it\n" + DONE_LINE, "duration_ms": 10, "duration_api_ms": 5, "num_turns": 2, "session_id": "s", "total_cost_usd": 0.1,
                  "modelUsage": {"claude-x": {}}})
 BAD = json.dumps({"type": "result", "is_error": True, "duration_ms": 10, "num_turns": 1, "session_id": "s2", "subtype": "error_max_turns"})
 
@@ -59,6 +60,7 @@ def test_successful_run_records_telemetry_with_identity_env(wt, tmp_path):
 
     def runner(cmd, cwd, env, to):
         seen.update(env=env, cmd=cmd, cwd=cwd)
+        subprocess.run(["git", "-c", "user.name=w", "-c", "user.email=w@w", "-C", str(cwd), "commit", "-q", "--allow-empty", "-m", "work"], check=True)
         return cp(0, OK)
 
     tp = tmp_path / "t.jsonl"
@@ -100,3 +102,21 @@ def test_timeout_is_a_failed_run_not_a_crash(wt, tmp_path):
     r = worker.run_one("T-1", "03", prof(), worktree=wt, dry=False, model=None, queue_text=QUEUE, escalate=False, runner=runner,
                        tpath=tmp_path / "t.jsonl", skip_session_check=True)
     assert not r["ok"] and r["runs"][0]["exit_code"] == 124
+
+
+def test_clean_exit_without_a_commit_is_not_a_completed_task(wt, tmp_path):
+    """Found by the first real worker run: exit 0 + is_error false but no commit and no DONE report = the task was NOT done."""
+    tp = tmp_path / "t.jsonl"
+    r = worker.run_one("T-1", "03", prof(), worktree=wt, dry=False, model=None, queue_text=QUEUE, escalate=False,
+                       runner=lambda *a: cp(0, OK), tpath=tp, skip_session_check=True)   # claims DONE but HEAD did not move
+    row = telemetry.read(tp)[0]
+    assert row["success"] is True and row["task_completed"] is False and r["ok"] is False and r["process_ok"] is True
+    assert telemetry.summarize(telemetry.read(tp))["tasks_completed"] == 0
+
+
+def test_blocked_report_is_recorded_and_not_completed(wt, tmp_path):
+    tp = tmp_path / "t.jsonl"
+    out = json.dumps({"type": "result", "is_error": False, "result": '{"task":"T-1","status":"BLOCKED","commit":null,"tests":"","notes":"needs owner"}'})
+    r = worker.run_one("T-1", "03", prof(), worktree=wt, dry=False, model=None, queue_text=QUEUE, escalate=False,
+                       runner=lambda *a: cp(0, out), tpath=tp, skip_session_check=True)
+    assert not r["ok"] and r["worker_report"]["status"] == "BLOCKED"

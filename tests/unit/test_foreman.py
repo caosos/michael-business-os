@@ -75,3 +75,24 @@ def test_done_tasks_and_blocked_only_lanes_do_not_trigger(tmp_path, capsys):
 def test_parse_queue_ignores_non_task_rows():
     rows = foreman.parse_queue(QUEUE)
     assert [r["id"] for r in rows if r["status"].startswith("READY")] == ["B-21", "E-18", "G-09"]
+
+
+def test_launch_prints_worker_commands_for_idle_lanes_only(tmp_path, capsys):
+    clone = make_repo(tmp_path, {
+        "research/agent-02-opportunity": lane("WAITING"),
+        "research/agent-03-economics": lane("WORKING", "C-19"),
+        "research/agent-05-governance": lane("WAITING", done="Done: E-17 E-18"),
+        "research/agent-07-marketing": lane("CLOSED"),
+    })
+    rc = foreman.main(["--repo", str(clone), "--no-fetch", "--launch"])
+    out = capsys.readouterr().out
+    assert rc == 2
+    assert "LAUNCH" in out and "worker.py B-21 --lane 02" in out and "worker.py G-09 --lane 07" in out
+    assert "--lane 03" not in out and "--lane 05" not in out
+
+
+def test_exec_refuses_when_queue_is_stale(tmp_path, capsys):
+    clone = make_repo(tmp_path, {"research/agent-02-opportunity": lane("WAITING")})
+    # QUEUE says "Last synced: heads x" while real heads differ -> stale warning -> refuse
+    rc = foreman.main(["--repo", str(clone), "--no-fetch", "--launch", "--exec", "1"])
+    assert rc == 3 and "REFUSING" in capsys.readouterr().out

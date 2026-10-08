@@ -43,7 +43,7 @@ WORKTREES = Path(os.environ.get("MBOS_WORKTREES", str(Path.home() / "business-os
 ALLOWED = ["Read", "Edit", "Write", "Grep", "Glob", "Bash(git status:*)", "Bash(git diff:*)", "Bash(git log:*)", "Bash(git add:*)",
            "Bash(git commit:*)", "Bash(git fetch:*)", "Bash(git show:*)", "Bash(git push origin HEAD)", "Bash(ls:*)", "Bash(cat:*)",
            "Bash(.venv/bin/python:*)", "Bash(python3:*)", "Bash(pytest:*)", "Bash(.venv/bin/pytest:*)", "Bash(wc:*)", "Bash(grep:*)", "Bash(tools/*)", "Bash(bash tools/*)", "Bash(.tools/uv pip install:*)",
-           "Bash(git archive:*)", "Bash(tar:*)", "Bash(mktemp:*)", "Bash(mkdir:*)", "Bash(cp:*)", "Bash(git rev-parse:*)", "Bash(git ls-tree:*)"]
+           "Bash(*uv pip install*)", "Bash(*pip install*)", "Bash(git archive:*)", "Bash(tar:*)", "Bash(mktemp:*)", "Bash(mkdir:*)", "Bash(cp:*)", "Bash(git rev-parse:*)", "Bash(git ls-tree:*)"]
 DENIED = ["Bash(curl:*)", "Bash(wget:*)", "Bash(ssh:*)", "Bash(scp:*)", "Bash(sudo:*)", "Bash(gh:*)", "Bash(git push --force:*)",
           "Bash(git push -f:*)", "Bash(git reset --hard:*)", "Bash(rm -rf:*)", "Bash(git branch -D:*)", "Bash(git worktree remove:*)"]
 
@@ -74,7 +74,7 @@ ACCEPTANCE: {task['acceptance']}
 DEPENDENCIES: {task['deps']}
 
 Do exactly this task, then stop:
-1. Read, in order: START_HERE.md, docs/product/DEAL_SNIFFER_START_HERE.md, docs/COORDINATION.md, docs/handoff/LANE_{lane}.md (if present), docs/status/AGENT_STATUS.md, and only the files and ADRs the task needs. The queue row above is authoritative; the full queue is `git show origin/research/agent-01-coordinator:docs/status/READY_QUEUE.md`.
+1. Run `git fetch -q origin`. The coordination files live on the coordinator branch, NOT on your lane branch: read them with `git show origin/research/agent-01-coordinator:<path>` for START_HERE.md, docs/product/DEAL_SNIFFER_START_HERE.md, docs/COORDINATION.md and docs/runbooks/AGENT_RUNTIME.md. Then read, from your own worktree: docs/handoff/LANE_{lane}.md (if present) and docs/status/AGENT_STATUS.md, plus only the files and ADRs the task needs. The queue row above is authoritative; the full queue is `git show origin/research/agent-01-coordinator:docs/status/READY_QUEUE.md`. To use code from the coordinator branch (for example the `mbos` package), `git archive origin/research/agent-01-coordinator <paths>` into a temp dir and install it with `uv pip install` / `pip install` from that local directory (remove any build/ dir first).
 2. Work on branch `{branch}` only (you are already in its worktree). Never edit another lane's branch or worktree. Never merge to main.
 3. Implement and test. Keep the diff small. Run the lane's health command from its handoff and report the exact pass/fail numbers.
 4. Write a receipt under docs/receipts/ for consequential work. No action without a receipt; no receipt without provenance.
@@ -144,14 +144,15 @@ def run_one(task_id: str, lane: str, profile: router.TaskProfile, *, worktree: P
                                                  head_before=head_before, head_after=head_after,
                                                  note=("override of " + override) if override else None), tpath)
         rows.append(row)
-        if row["success"] or not escalate or retry >= 1:
+        if row["task_completed"] or not escalate or retry >= 1:
             break
         nxt = router.escalate(cur, profile)
         if nxt is None:
             break
         escalated_from, retry = cur.model, retry + 1
         attempts.append(nxt)
-    return {"ok": rows[-1]["success"], "route": route.as_dict(), "runs": rows, "final_model": attempts[-1].model}
+    return {"ok": rows[-1]["task_completed"], "process_ok": rows[-1]["success"], "worker_report": rows[-1].get("worker_report"),
+            "permission_denials": rows[-1].get("permission_denials"), "result_text": rows[-1].get("result_text"), "route": route.as_dict(), "runs": rows, "final_model": attempts[-1].model}
 
 
 def main(argv: Optional[list[str]] = None) -> int:

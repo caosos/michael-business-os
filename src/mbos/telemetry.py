@@ -30,6 +30,22 @@ def _num(v: Any) -> Optional[float]:
     return float(v) if isinstance(v, (int, float)) and not isinstance(v, bool) else None
 
 
+def _worker_report(text: Any) -> Optional[dict[str, Any]]:
+    """The worker's own final JSON line {"task","status","commit","tests","notes"}; None if it did not print one."""
+    if not isinstance(text, str):
+        return None
+    for ln in reversed(text.strip().splitlines()):
+        ln = ln.strip().strip("`")
+        if ln.startswith("{") and ln.endswith("}"):
+            try:
+                d = json.loads(ln)
+            except ValueError:
+                continue
+            if isinstance(d, dict) and d.get("status") in ("DONE", "BLOCKED", "FAILED"):
+                return d
+    return None
+
+
 def parse_result(raw: Any) -> dict[str, Any]:
     """Normalise a Claude Code JSON result (a dict, or a list of stream events containing one `result`)."""
     if isinstance(raw, list):
@@ -48,6 +64,12 @@ def parse_result(raw: Any) -> dict[str, Any]:
         "input_tokens": _num(u.get("input_tokens")), "output_tokens": _num(u.get("output_tokens")),
         "cache_read_tokens": _num(u.get("cache_read_input_tokens")), "cache_creation_tokens": _num(u.get("cache_creation_input_tokens")),
         "is_error": bool(d.get("is_error")) if "is_error" in d else None,
+        "permission_denials": len(d["permission_denials"]) if isinstance(d.get("permission_denials"), list) else None,
+        "denial_samples": [f"{x.get('tool_name')}: {str((x.get('tool_input') or {}).get('command') or (x.get('tool_input') or {}).get('file_path') or '')[:100]}"
+                           for x in d["permission_denials"][:5] if isinstance(x, dict)] if isinstance(d.get("permission_denials"), list) else None,
+        "terminal_reason": d.get("terminal_reason") if isinstance(d.get("terminal_reason"), str) else None,
+        "result_text": d["result"][:1500] if isinstance(d.get("result"), str) else None,
+        "worker_report": _worker_report(d.get("result")),
         "subtype": d.get("subtype") if isinstance(d.get("subtype"), str) else None,
     }
 
@@ -143,10 +165,13 @@ def run_row(*, task_id: str, lane: str, route: dict, started_at: str, ended_at: 
             retry: int = 0, escalated_from: Optional[str] = None, head_before: Optional[str] = None, head_after: Optional[str] = None,
             dry_run: bool = False, note: Optional[str] = None) -> dict[str, Any]:
     p = parse_result(result)
-    ok = exit_code == 0 and p["is_error"] is False
+    ok = exit_code == 0 and p["is_error"] is False          # process-level success only
+    rep = p["worker_report"]
+    committed = bool(head_before and head_after and head_before != head_after)
+    completed = bool(ok and rep and rep.get("status") == "DONE" and committed)   # the TASK is done only with a DONE report AND a new commit
     return {"kind": "worker_run", "task_id": task_id, "lane": lane, "model_requested": route.get("model"), "tier": route.get("tier"),
             "route_rule": route.get("rule_id"), "route_reason": route.get("reason"), "started_at": started_at, "ended_at": ended_at,
-            **p, "exit_code": exit_code, "success": ok, "retry": retry, "escalated_from": escalated_from,
+            **p, "exit_code": exit_code, "success": ok, "task_completed": completed, "retry": retry, "escalated_from": escalated_from,
             "head_before": head_before, "head_after": head_after, "dry_run": dry_run, "note": note,
             "cost_is_estimate_not_a_bill": True}
 
@@ -171,7 +196,8 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
     by_day: dict[str, int] = {}
     for r in runs:
         by_day[(r.get("ended_at") or "")[:10]] = by_day.get((r.get("ended_at") or "")[:10], 0) + 1
-    return {"runs": len(runs), "succeeded": sum(1 for r in runs if r.get("success")), "failed": sum(1 for r in runs if not r.get("success")),
+    return {"runs": len(runs), "tasks_completed": sum(1 for r in runs if r.get("task_completed")),
+            "succeeded": sum(1 for r in runs if r.get("success")), "failed": sum(1 for r in runs if not r.get("success")),
             "escalations": sum(1 for r in runs if r.get("escalated_from")), "retries": sum(r.get("retry") or 0 for r in runs),
             "model_mix": mix, "avg_duration_ms": (sum(dur) / len(dur)) if dur else None, "throughput_per_day": by_day,
             "turns_total": sum(r["num_turns"] for r in runs if r.get("num_turns") is not None),

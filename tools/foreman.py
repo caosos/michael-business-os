@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 COORD = "research/agent-01-coordinator"
 LANES = {"02": "research/agent-02-opportunity", "03": "research/agent-03-economics", "04": "research/agent-04-state",
          "05": "research/agent-05-governance", "06": "research/agent-06-communications", "07": "research/agent-07-marketing"}
-IDLE_STATES = {"WAITING", "IDLE", "COMPLETE", ""}
+IDLE_STATES = {"WAITING", "IDLE", "COMPLETE", "CLOSED", ""}  # CLOSED = lane handed off; a fresh worker is due when READY work exists
 
 
 def git(repo: Path, *args: str) -> str | None:
@@ -84,11 +84,19 @@ def survey(repo: Path) -> tuple[list[dict], list[str]]:
     return report, warnings
 
 
+def launch_commands(idle: list[dict]) -> list[list[str]]:
+    """`tools/worker.py` commands for idle lanes (never lane 01: the persistent coordinator picks its own work). The worker itself
+    refuses a lane that still has a live session or a dirty worktree."""
+    return [[sys.executable, "-I", "tools/worker.py", r["ready"][0]["id"], "--lane", r["lane"]] for r in idle if r["lane"] != "01"]
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--repo", default=str(ROOT))
     ap.add_argument("--no-fetch", action="store_true")
     ap.add_argument("--wake-text", action="store_true")
+    ap.add_argument("--launch", action="store_true", help="print the exact tools/worker.py command for each idle lane's top READY task")
+    ap.add_argument("--exec", type=int, default=0, metavar="N", help="with --launch: actually run at most N workers (max 2) sequentially")
     a = ap.parse_args(argv)
     repo = Path(a.repo)
     if not a.no_fetch:
@@ -106,6 +114,16 @@ def main(argv: list[str] | None = None) -> int:
             t = r["ready"][0]
             print(f"WAKE {r['lane']}: Fetch origin, read docs/status/READY_QUEUE.md on research/agent-01-coordinator, claim {t['id']} "
                   f"({t['title']}), push the claim, work it DRY-RUN only, push, then claim the next READY task.")
+    if a.launch:
+        cmds = launch_commands(idle)
+        for c in cmds:
+            print("LAUNCH", " ".join(c))
+        if a.exec:
+            if warnings:
+                print("REFUSING --exec: the queue is stale (see WARN); refresh READY_QUEUE first")
+                return 3
+            for c in cmds[:min(a.exec, 2)]:
+                subprocess.run(c, cwd=repo)
     return 2 if idle else 0
 
 

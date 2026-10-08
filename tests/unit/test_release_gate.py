@@ -73,6 +73,20 @@ def test_pins_check_catches_extra_and_modified_installed_files(monkeypatch):
         extra.unlink(missing_ok=True)
 
 
-def test_action_path_check_requires_real_executions():
-    src = (ROOT / "tools" / "release_gate.py").read_text()
-    assert 'res["effector_calls"] >= 2' in src and 'res["live_effector_calls"] == 0' in src  # F-49: not an empty check
+def test_action_path_verdict_requires_real_executions():
+    """F-50: runs the verdict function on planted results instead of grepping source text."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("rg", ROOT / "tools" / "release_gate.py")
+    rg = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(rg)
+    good = {"chain": {"ok": True}, "reference_chain": [True], "live_effector_calls": 0, "effector_calls": 2, "executed": 2, "contract_errors": [],
+            "followup": {"concurrent": {"live_pending": 1}}, "panic": {"frozen_blocks": True, "released_blocks": False}}
+    assert rg.action_path_verdict(True, good)
+    import copy
+    for mut in (lambda r: r.update(live_effector_calls=1), lambda r: r.update(effector_calls=0, executed=0), lambda r: r.update(executed=1),
+                lambda r: r["chain"].update(ok=False), lambda r: r["panic"].update(frozen_blocks=False), lambda r: r["panic"].update(released_blocks=True),
+                lambda r: r["followup"]["concurrent"].update(live_pending=2), lambda r: r.update(contract_errors=["x"]), lambda r: r.pop("panic")):
+        bad = copy.deepcopy(good)
+        mut(bad)
+        assert not rg.action_path_verdict(True, bad)
+    assert not rg.action_path_verdict(False, good) and not rg.action_path_verdict(True, None)

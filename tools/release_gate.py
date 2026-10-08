@@ -72,9 +72,9 @@ def pins_check() -> dict:
             continue
         with tarfile.open(fileobj=io.BytesIO(tar.stdout)) as t:
             files = {Path(m.name).relative_to(path).as_posix(): t.extractfile(m).read()
-                     for m in t.getmembers() if m.isfile() and m.name.endswith((".py", ".json"))}
+                     for m in t.getmembers() if m.isfile() and "__pycache__" not in m.name and not m.name.endswith(".pyc")}
         installed = {p.relative_to(root).as_posix() for p in root.rglob("*") if p.is_file() and "__pycache__" not in p.parts
-                     and p.suffix in (".py", ".json")}
+                     and p.suffix != ".pyc"}  # F-50: ANY file type counts (.txt .sql .so .pth ...)
         diff = [f for f, data in files.items() if (root / f).exists() and (root / f).read_bytes() != data]  # .py AND .json (F-48)
         missing = [f for f in files if not (root / f).exists()]
         extra = sorted(installed - set(files))  # a stale extra file is drift too (F-48)
@@ -83,6 +83,18 @@ def pins_check() -> dict:
             bad.append(f"{pkg}: {len(diff)} differ ({', '.join(diff[:3])}), {len(missing)} missing, {len(extra)} extra ({', '.join(extra[:3])})")
     return {"name": "installed lane packages == pushed heads (no stale installs)", "ok": not bad, "rc": 0 if not bad else 1,
             "secs": 0.0, "summary": "; ".join(bad) if bad else "identical: " + "; ".join(notes)}
+
+
+def action_path_verdict(run_ok: bool, res: dict | None) -> bool:
+    """F-49/F-50: the action-path check must be NON-EMPTY: real executions, zero live effector calls, a verifying chain,
+    one live pending follow-up, and a PANIC drill that blocks while frozen and not after release."""
+    try:
+        return bool(run_ok and res and res["chain"]["ok"] and res["reference_chain"][0] and res["live_effector_calls"] == 0
+                    and res["effector_calls"] >= 2 and res["executed"] >= 2 and not res["contract_errors"]
+                    and res["followup"] and res["followup"]["concurrent"]["live_pending"] == 1
+                    and res["panic"] and res["panic"]["frozen_blocks"] and not res["panic"]["released_blocks"])
+    except (KeyError, TypeError, IndexError):
+        return False
 
 
 def action_path_lane_de() -> dict:
@@ -113,10 +125,7 @@ def action_path_lane_de() -> dict:
     finally:
         server.cleanup()
     res = next((json.loads(line[len("RESULT"):]) for line in r["stdout"].splitlines() if line.startswith("RESULT")), None)
-    ok = bool(r["ok"] and res and res["chain"]["ok"] and res["reference_chain"][0] and res["live_effector_calls"] == 0
-              and res["effector_calls"] >= 2 and res["executed"] >= 2 and not res["contract_errors"]
-              and res["followup"] and res["followup"]["concurrent"]["live_pending"] == 1
-              and res["panic"] and res["panic"]["frozen_blocks"] and not res["panic"]["released_blocks"])
+    ok = action_path_verdict(bool(r["ok"]), res)
     summary = "no RESULT" if not res else (f"effector calls {res['effector_calls']} (live {res['live_effector_calls']}) · executed {res['executed']} · "
                                            f"follow-up {res['followup']} · panic drill {res['panic'] and res['panic']['frozen_blocks']} · chain ok {res['chain']['ok']}")
     return {"name": "lane D/E ACTION path (real gateway, follow-up, PANIC drill, live effector rows must be 0 and >=2 calls)",
@@ -161,14 +170,17 @@ def at1_lane_de() -> dict:
 
 
 def main() -> int:
+    fetch_check = None
     if "--no-fetch" not in sys.argv:  # F-48: compare against the REAL pushed heads, not stale local refs
-        subprocess.run(["git", "fetch", "-q", "origin"], cwd=ROOT)
+        fr = subprocess.run(["git", "fetch", "-q", "origin"], cwd=ROOT, capture_output=True, text=True)  # F-50: a failed fetch is RED
+        fetch_check = {"name": "git fetch origin (the gate must compare against REAL pushed heads)", "ok": fr.returncode == 0, "rc": fr.returncode,
+                       "secs": 0.0, "summary": "ok" if fr.returncode == 0 else f"FAILED rc={fr.returncode}: {fr.stderr.strip()[:200]}"}
     heads = {l: subprocess.run(["git", "rev-parse", "--short", f"origin/research/agent-{l}"], cwd=ROOT,
                                capture_output=True, text=True).stdout.strip() for l in LANES}
     heads["01-coordinator (local HEAD)"] = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT,
                                                           capture_output=True, text=True).stdout.strip()
     pytest_check = run("full test suite (pytest)", [PY, "-m", "pytest", "-q"])
-    checks = [
+    checks = ([fetch_check] if fetch_check else []) + [
         run("frozen contracts (validate_contracts.py)", [PY, "-I", "docs/research/contracts/validate_contracts.py", "docs/research/contracts"]),
         contracts_pinned(),
         run("ADR-0010 vectors (reference self-test)", [PY, "-I", "docs/research/contracts/canonical/mbos_canonical.py",
