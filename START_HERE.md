@@ -256,7 +256,8 @@ External providers should be replaceable.
 ## Before doing anything
 A new agent must read:
 1. START_HERE.md
-2. docs/AGENT_HANDOFF.md
+2. docs/product/DEAL_SNIFFER_START_HERE.md
+3. docs/AGENT_HANDOFF.md
 3. docs/status/ALL_AGENTS.md if present
 4. its own branch docs/status/AGENT_STATUS.md
 5. relevant docs/research/ and docs/decisions/
