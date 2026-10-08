@@ -7,11 +7,11 @@ Worktree: /home/michaelos/business-os-worktrees/agent-03-economics
 State: WAITING
 Current phase: ROUND TWO, wave two. Claimed task: RESEARCH/estimate producer (lane C)
 Started: 2026-10-06
-Last updated: 2026-10-07 (verified 02 B-18; load_kb refuses duplicate ids; WAITING)
+Last updated: 2026-10-08 (queue checked @ agent-01 2f7b887: no new lane-C task; X-03 satisfied; C-14 row stale)
 
 ## Claimed work (wave two). Foreman loop: `docs/COORDINATION.md` @ agent-01 `99e9ec0`
 Claimed: (none)
-Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6; C-04 @ 882c726; C-05 @ 6e938d2; C-06 @ 9e36ec9; C-07 @ 0c3cf4a; C-08 @ a81a989; C-09 @ 286e0f3; C-10 @ e1869f2; C-11 @ c648ca3; C-12 @ d5daf42; C-13 @ 0d417fb; C-14 @ ec97bf7; C-15 @ 2575ed3; C-16 @ c88cd5a; C-17 @ 3569efb; C-18 @ d9bceea
+Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6; C-04 @ 882c726; C-05 @ 6e938d2; C-06 @ 9e36ec9; C-07 @ 0c3cf4a; C-08 @ a81a989; C-09 @ 286e0f3; C-10 @ e1869f2; C-11 @ c648ca3; C-12 @ d5daf42; C-13 @ 0d417fb; C-14 @ ec97bf7; C-15 @ 2575ed3; C-16 @ c88cd5a; C-17 @ 3569efb; C-18 @ d9bceea; X-03 @ 4a93582 (already satisfied; verified 2026-10-08)
 Queue (lane C): none READY @ agent-01 `37abd48`\nWaiting on: 02 B-18 (flip KB_SUPPORTS_MODEL_YEARS, emit `years`); any new lane-C task; Michael decisions #1/#2/#6
 
 - **C-01**, the RESEARCH/estimate producer, fills `Item.economics` from normalized fields, comps evidence and category priors, with provenance per estimate. It is deterministic and does no LLM arithmetic.
@@ -142,6 +142,11 @@ Queue (lane C): none READY @ agent-01 `37abd48`\nWaiting on: 02 B-18 (flip KB_SU
 ### Verified: Agent 02's B-18 NHTSA entries (not a queued task)
 - Ran its recall and complaint entry builders over its fixtures through my real `load_kb` and `match_hits`. Its report holds: a 2012 listing hits its 2012 entries; 2013 hits only the 2013 recall; 2018, yearless and "2012 and 2018" listings hit nothing and show as blocked; the Mazda "3" stays held.
 - **Gap found on my side:** `load_kb` accepted two entries with one id, which would collide in the matched list and in the year evidence (keyed by id), attaching the wrong year to a safety claim. It now refuses duplicate or missing ids (package 0.11.1; 321 tests pass with all environments).
+
+### Queue check 2026-10-08 (READY_QUEUE @ agent-01 `2f7b887`)
+- **No new lane-C task.** Open rows naming 03: C-14 (stale, see below) and X-03.
+- **C-14 row is stale:** the queue still shows it READY, but it is DONE @ `ec97bf7` (receipt `docs/receipts/2026-10-07-c14-learn-lane-d.md`). The queue's sync note lists my branch at `73a4d32`. Not redone.
+- **X-03 (all lanes; remove committed `build/`): already satisfied.** The branch tracks no `build/`, `dist/` or `egg-info` at any depth (checked on `origin/research/agent-03-economics`). My nested `economics/build/` was removed at `4a93582`, and `.gitignore` covers `build/` and `dist/`. A clean `git archive` + pip install reports 0.11.1. A test (`test_git_tracks_no_build_output`) guards it.
 
 ## Proposed tasks (for Agent 01 to triage)
 - **P-03-08 (lane B): CPSC knowledge adapter.** Read the CPSC programmer's guide (response fields, rate limit), then a read-only, fixture-first Tier-1 adapter emitting recall records. 03 supplies the deterministic record-to-KB-entry converter once the fields are known.
