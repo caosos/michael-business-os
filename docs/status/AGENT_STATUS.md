@@ -6,7 +6,7 @@ Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
 State: WORKING
 Claimed: F-18
-Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe · F-04 @ 46c961c · F-13 @ 2415936 · F-14 @ c68a33c · F-13 hardening @ 6e47646 · F-15 @ 94130a4 · F-11 @ 20d88ee · F-17 @ 47c0621 · F-16 @ HEADPH
+Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe · F-04 @ 46c961c · F-13 @ 2415936 · F-14 @ c68a33c · F-13 hardening @ 6e47646 · F-15 @ 94130a4 · F-11 @ 20d88ee · F-17 @ 47c0621 · F-16 @ 9c2012d
 Blocked: none
 Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
 Last updated: 2026-10-07
@@ -15,7 +15,7 @@ Last updated: 2026-10-07
 **F-18** (P1; A-23 landed): the Weekly Mission page, built from `docs/research/contracts/examples/mission/mission-plan.example.json` and validated with `mbos.mission.validate_plan`. A null target or hours renders UNKNOWN (and `remaining_gap` stays UNKNOWN); DO_NOT_SPEND is shown plainly; no plan leg without a link to its card; human channel only (R14). F-19/F-20 are behind A-25/A-27.
 
 ## Done
-- **F-16 @ HEADPH:** Edit (a new version, `supersedes`) and Retract (a reason is required) on `/notes`, with CSRF, the PIN and a server-set author; every refusal reason shown; only the head can be changed. After a retraction the next card no longer shows the risk, and the history keeps it. 133 + 31 tests. Receipt: `docs/receipts/2026-10-07-f16-edit-retract-notes.md`.
+- **F-16 @ 9c2012d:** Edit (a new version, `supersedes`) and Retract (a reason is required) on `/notes`, with CSRF, the PIN and a server-set author; every refusal reason shown; only the head can be changed. After a retraction the next card no longer shows the risk, and the history keeps it. 133 + 31 tests. Receipt: `docs/receipts/2026-10-07-f16-edit-retract-notes.md`.
 - **F-17 @ 47c0621:** the Capital section on the card: class, cash multiple and velocity prominently with the downside beside them; parts-out floor, repair uncertainty, liquidity, skill fit and personal-use value; UNKNOWN visible, with a banner for the cash situation. Tested on Michael's three examples; a static test forbids sorting or filtering by profit. 133 + 27 tests. Receipt: `docs/receipts/2026-10-07-f17-capital-section.md`.
 - **F-11 @ 20d88ee:** Follow-up questions / Offer / Quote buttons on an ACTED card, each its own step-up request via `workflows.propose_followup` (drafts from the comms planner; offers never above the ask). Verified on lane D + E, including a separate UI process. 124 + 27 tests. Receipt: `docs/receipts/2026-10-07-f11-followup-buttons.md`.
 - **F-15 @ 94130a4:** every `CommsActionPlanner` action carries `lane="agent-06-communications"`. On lane D + E the ledger's `proposed_by` equals it, `lane` is absent from the frozen payload, and a capability no lane holds creates no request (the card says "policy blocked").
