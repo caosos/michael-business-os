@@ -99,3 +99,11 @@ Michael does NOT need to choose:
 - **Recommended default:** `weekly_target_usd: null`, `hours_available: null` in `config/operator_profile.v1.json`; Michael sets them when ready (same place as `current_cash_context`, #9).
 - **Blocked:** a numeric projected week. **Continues:** all schemas, planner, ledger and UI against fixtures.
 
+
+## 11. Where do off-box backups go? (raised by Agent 04; blocks only D-09 part b, not the dry-run MVP)
+- **Full question, options, costs:** Agent 04's branch, `docs/state/OWNER_QUESTION_BACKUPS.md` (`git show origin/research/agent-04-state:docs/state/OWNER_QUESTION_BACKUPS.md`).
+- **Decision:** one off-box destination: A another machine you own over SSH, B encrypted cloud object storage, C rotated USB drive, D second internal disk (not off-box; stopgap only).
+- **Why:** today a lost disk, theft or SSD failure loses everything since the last copy (RPO 24 h for host loss). The backups contain raw seller contact values, so anything off-box must be encrypted with a key kept elsewhere.
+- **Recommended default:** B if you are willing to open an account, otherwise A. C or D only as an interim stopgap.
+- **Blocked:** continuous off-box WAL shipping and the restore drill from the off-box copy. **Continues:** PITR mechanics proven against a local directory (done, D-09 part a), nightly dump, anchor, fresh-cluster restore drill.
+- **Also an owner command, not a decision:** `sudo loginctl enable-linger michaelos`, so the database starts after a reboot.

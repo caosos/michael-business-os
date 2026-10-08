@@ -74,3 +74,12 @@ def test_do_not_spend_is_a_valid_plan():
 def test_validate_raises_contract_violation():
     with pytest.raises(ContractViolation):
         mission.validate_ledger({"protected_principal": 1})
+
+
+def test_loss_beyond_earned_is_an_impairment_not_a_rewrite():
+    l = {"protected_principal": 500, "earned_working_capital": 0, "capital_deployed": 0, "realized_profit": -60,
+         "principal_impairment": 60, "available_to_deploy": 440}
+    assert mission.ledger_errors(l) == []
+    l["earned_working_capital"] = 20
+    l["available_to_deploy"] = 460
+    assert any("earned capital first" in e for e in mission.ledger_errors(l))

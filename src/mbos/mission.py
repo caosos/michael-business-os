@@ -35,11 +35,16 @@ def ledger_errors(ledger: dict[str, Any]) -> list[str]:
     errs = _check("capital_ledger", ledger)
     if errs:
         return errs
-    expected = ledger["protected_principal"] + ledger["earned_working_capital"] - ledger["capital_deployed"]
+    imp = ledger.get("principal_impairment", 0)
+    if imp > ledger["protected_principal"] + _EPS:
+        errs.append("principal_impairment exceeds protected_principal")
+    if imp > _EPS and ledger["earned_working_capital"] > _EPS:
+        errs.append("principal_impairment while earned_working_capital > 0: losses consume earned capital first")
+    expected = ledger["protected_principal"] - imp + ledger["earned_working_capital"] - ledger["capital_deployed"]
     if abs(ledger["available_to_deploy"] - expected) > _EPS:
-        errs.append(f"available_to_deploy {ledger['available_to_deploy']} != protected_principal + earned_working_capital - "
+        errs.append(f"available_to_deploy {ledger['available_to_deploy']} != protected_principal - principal_impairment + earned_working_capital - "
                     f"capital_deployed ({expected})")
-    if ledger["capital_deployed"] > ledger["protected_principal"] + max(ledger["earned_working_capital"], 0) + _EPS:
+    if ledger["capital_deployed"] > ledger["protected_principal"] - imp + max(ledger["earned_working_capital"], 0) + _EPS:
         errs.append("capital_deployed exceeds principal + earned working capital")
     return errs
 

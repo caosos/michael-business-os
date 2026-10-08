@@ -94,6 +94,11 @@
         "as_of": {
           "type": "string",
           "format": "date-time"
+        },
+        "principal_impairment": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Losses beyond earned_working_capital. protected_principal stays the owner's original contribution; the impairment is recorded, flagged, and only Michael decides whether to rebuild. Missing = 0."
         }
       }
     },

@@ -19,7 +19,7 @@
     "examples/provenance-human.example.json": "sha256:451f463b1232549848ebba0a21eb0bc2f99b51bf4d50818e1a93c943e353fa2d",
     "examples/receipt-approval-decided.example.json": "sha256:4379925aa4fd8408d6ed63ca05ab787ea394d2a786c351631b6122353c4dd560",
     "item.schema.json": "sha256:c5a806f6ce98265dc697f53ec564b5c326d68d3eeed120d13c5caf2e40ee3ad4",
-    "mission.schema.json": "sha256:ca221a267aa8c99819795f48acbe44054bd692fdddeb0bf161e053966775ca57",
+    "mission.schema.json": "sha256:a1fc92ce4c6ff6ba4693aea68454206e4d3f3b5fde07502af9e79d4a7278b1fa",
     "outcome.schema.json": "sha256:b7c29fce0b9274526c50d5af264b77443b7b15dbca0c03c925a2f44d4949f02f",
     "provenance.schema.json": "sha256:15db68a4c6ef28d442209cd35e45970330653e7dff76ce5431bd8b05ec807b4c",
     "receipt.schema.json": "sha256:c6a55d47583541aef839bc66f5ecf07dcca187d0325b64b380a3a1bf52f155f9",
