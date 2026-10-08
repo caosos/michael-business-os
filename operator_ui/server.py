@@ -24,7 +24,7 @@ try:  # lane C's package is optional: without it the notes form is simply unavai
 except ImportError:  # pragma: no cover
     NOTE_CATEGORIES, NOTE_KINDS = frozenset(), frozenset()
 
-from . import card_view, ux, views, wanted_view
+from . import card_view, comps_view, ux, views, wanted_view
 from .card_view import ec
 from .backend import FollowupRefused, ItemNotFound, NoteRefused, NumbersRefused, ProfileUnavailable
 from .sources import load_health
@@ -447,10 +447,11 @@ class App:
     """Turns form posts into `spine.decide` calls through the backend. No side effects of its own."""
 
     def __init__(self, backend, operator_pin=None, health_file=None, mission_file=None, inventory_file=None,
-                 telemetry_dir=None, queue_file=None, campaigns_file=None, policy_path=None):
+                 telemetry_dir=None, queue_file=None, campaigns_file=None, policy_path=None, comps_inbox=None):
         self.store = backend
         self.campaigns = wanted_view.CampaignStore(campaigns_file or os.environ.get("MBOS_CAMPAIGNS_FILE"))  # F-23
         self.policy_path = policy_path
+        self.comps_inbox = comps_inbox or os.environ.get("MBOS_COMPS_INBOX")  # F-28: the ManualCompsAdapter inbox (A-39)
         self.operator_pin = operator_pin
         self.inventory_file = inventory_file  # inventory JSON to preview (MBOS_INVENTORY_FILE)
         self.telemetry_dir = telemetry_dir  # MBOS_TELEMETRY_DIR (read-only)
@@ -666,6 +667,18 @@ class App:
         self.campaigns.put(doc, self.author, f"{action} ({st} to {new[1]})", now)
         return f"Campaign {new[1].lower()}."
 
+    def add_comp(self, item_id, f):
+        """F-28: "Add a price I saw". CSRF + PIN (human channel); the author is server-set. Writes one ManualCompsAdapter inbox file."""
+        nonce = self._numbers_gate(f)
+        item = self.store.item(item_id)
+        if item is None:
+            raise InputError("unknown opportunity")
+        if item.get("state") != "RESEARCHING":
+            raise InputError("this item is not waiting for a price")
+        doc = comps_view.parse_comp({**f, "nonce": nonce}, item, self.author, utcnow())
+        _, created = comps_view.write_comp(self.comps_inbox, doc)
+        return comps_view.saved_message(item_id, created)
+
     def add_followup(self, item_id, f):
         """F-11: draft a follow-up / offer / quote as its OWN request via the public API (A-15). CSRF, human channel. It only
         proposes: the YES (and the PIN for binding actions) is Michael's separate decision."""
@@ -780,7 +793,8 @@ def make_handler(app):
             flash = (qs.get("msg") or [None])[0]
             err = (qs.get("err") or [None])[0]
             if u.path == "/":
-                return self._send(200, page("Operator queue", render_queue(views.queue(app.store, now)), app.state(), flash or err, bool(err)))
+                return self._send(200, page("Operator queue", comps_view.render_today(self._parked()) + render_queue(views.queue(app.store, now)),
+                                            app.state(), flash or err, bool(err)))
             if u.path == "/digest":
                 from . import digest as digest_view
 
@@ -954,6 +968,30 @@ def make_handler(app):
             self.send_header("Content-Length", "0")
             self.end_headers()
 
+        def _parked(self):
+            """F-28: [(item, gap text)] for Items in RESEARCHING, for the "Needs from you" block on the queue."""
+            out = []
+            for it in app.store.items_in_states(("RESEARCHING",)):
+                try:
+                    gap = comps_view.gap_text(app.store.opportunity_card(it["item_id"])["card"])
+                except Exception:  # noqa: BLE001 - the list must render even when a card cannot be built
+                    gap = comps_view.DEFAULT_GAP
+                out.append((it, gap))
+            return out
+
+        def _post_comp(self, item_id):
+            n = min(int(self.headers.get("Content-Length") or 0), 65536)
+            f = {k: v[0] for k, v in parse_qs(self.rfile.read(n).decode("utf-8", "replace"), keep_blank_values=True).items()}
+            try:
+                msg = app.add_comp(item_id, f)
+            except (comps_view.CompRefused, InputError) as ex:
+                return self._item_page(item_id, utcnow(), None, False, comp_reasons=getattr(ex, "reasons", None) or [str(ex)],
+                                       comp_values={k: v for k, v in f.items() if k not in ("pin", "csrf")})
+            self.send_response(303)
+            self.send_header("Location", f"/item/{item_id}?msg={quote(msg)}#needs")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+
         def _post_note(self, item_id):
             n = min(int(self.headers.get("Content-Length") or 0), 65536)
             f = {k: v[0] for k, v in parse_qs(self.rfile.read(n).decode("utf-8"), keep_blank_values=True).items()}
@@ -971,7 +1009,7 @@ def make_handler(app):
             self.end_headers()
 
         def _item_page(self, item_id, now, flash, is_err, note_reasons=None, note_values=None, followup_reasons=None,
-                       followup_values=None):
+                       followup_values=None, comp_reasons=None, comp_values=None):
             """F-13: the opportunity card is the primary view of an item."""
             try:
                 res = app.store.opportunity_card(item_id)
@@ -988,6 +1026,8 @@ def make_handler(app):
                 controls, hold = render_decide(v, app.csrf, ret=True), render_hold_notice(v, app.csrf, ret=True)
                 controls += f"<p class='small'><a href='/areq/{e(open_areq['action_request_id'])}'>Technical view of this request (payload, hashes)</a></p>"
             body = card_view.render_item_card(card, res["errors"], controls, hold)
+            body = comps_view.render_needs(card, (app.store.item(item_id) or {}).get("state", "?"), app.csrf, bool(app.operator_pin),
+                                           bool(app.comps_inbox), comp_reasons, comp_values, secrets.token_hex(8)) + body
             body += card_view.render_followup_section(card, (app.store.item(item_id) or {}).get("state", "?"), app.csrf,
                                                       app.store.lane == "lane_d", open_areq is not None,
                                                       flash_reasons=followup_reasons, values=followup_values)
@@ -1013,6 +1053,8 @@ def make_handler(app):
                 return self._post_preview_check()
             if len(parts) == 3 and parts[0] == "notes" and parts[2] in ("edit", "retract"):
                 return self._post_note_change(parts[1], parts[2])
+            if len(parts) == 3 and parts[0] == "item" and parts[2] == "comp":
+                return self._post_comp(parts[1])
             if len(parts) == 3 and parts[0] == "item" and parts[2] == "note":
                 return self._post_note(parts[1])
             if len(parts) == 3 and parts[0] == "item" and parts[2] == "followup":
