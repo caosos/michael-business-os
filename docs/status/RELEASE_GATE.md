@@ -1,6 +1,6 @@
-# Release gate: wave two (FAIL)
+# Release gate: wave two (PASS)
 
-- **Run:** 2026-10-07 20:30 -0500
+- **Run:** 2026-10-07 20:41 -0500
 - **Command:** `.venv/bin/python -I tools/release_gate.py --fetch`
 - **Mode:** DRY-RUN only. Throwaway local PostgreSQL 16.
 
@@ -8,14 +8,14 @@
 
 | Lane | Commit |
 |---|---|
-| 01-coordinator | `73aaec7` |
+| 01-coordinator | `bc0e8d8` |
 | 02-opportunity | `543d939` |
-| 03-economics | `427217a` |
+| 03-economics | `0f109e0` |
 | 04-state | `cf3bd8c` |
 | 05-governance | `4f12ab7` |
 | 06-communications | `e9281dd` |
 | 07-marketing | `52dff65` |
-| 01-coordinator (local HEAD) | `73aaec7` |
+| 01-coordinator (local HEAD) | `bc0e8d8` |
 
 ## Checks
 
@@ -25,12 +25,12 @@
 | frozen contracts (validate_contracts.py) | PASS | 0.4s | schemas checked: 15 |
 | frozen contracts pinned (FROZEN.sha256.json) | PASS | 0.1s | OK: 38 contract files match the pin |
 | ADR-0010 vectors (reference self-test) | PASS | 0.0s | PASS receipt_chain: 2 receipts verified |
-| full test suite (pytest) | PASS | 209.9s | 411 passed in 208.77s (0:03:28) |
-| suite floor (tools/release_gate_floor.json) | PASS | 0.0s | passed 411 (min 250), skipped 0 (max 3), failed 0 |
-| cross-lane interop (tools/interop_check.py) | PASS | 0.1s | 6/6 Python lanes CONFORM (vectors + rejections + vendored-copy identity) |
-| installed lane packages == pushed heads (no stale installs) | FAIL (rc 1) | 0.0s | mbos_economics: 3 differ (__init__.py, digest.py, engine.py), 2 missing, 0 extra () |
-| lane D/E ACTION path (real gateway, follow-up, PANIC drill, live effector rows must be 0 and >=2 calls) | PASS | 5.3s | effector calls 2 (live 0) · executed 2 · follow-up {'policy_denied': False, 'executed_receipts': 2, 'second_request': True, 'concurrent': {'accepted': 1, 'refused': ['DecisionRefused', 'DecisionRefused', 'DecisionRefused', 'DecisionRefused', 'DecisionRefused'], 'live_pending': 1}} · panic drill True · chain ok True |
-| lane D/E e2e + strict AT-1 (03 engine, 05 gateway, 04 schema) | PASS | 3.4s | chain 61 ok=True · reference 61 receipts verified · effector 0 (live 0) · contract errors 0 · AT-1 {'ok': True, 'drift_count': 0, 'weak_receipt_count': 0, 'items': 4} · final {'drywall_repair': 'RESEARCHING', 'smart_home_install': 'RESEARCHING', 'trailer': 'RESEARCHING', 'mower': 'RESEARCHING'} |
+| full test suite (pytest) | PASS | 211.6s | 415 passed in 210.49s (0:03:30) |
+| suite floor (tools/release_gate_floor.json) | PASS | 0.0s | passed 415 (min 250), skipped 0 (max 3), failed 0 |
+| cross-lane interop (tools/interop_check.py) | PASS | 0.2s | 6/6 Python lanes CONFORM (vectors + rejections + vendored-copy identity) |
+| installed lane packages == pushed heads (no stale installs) | PASS | 0.0s | identical: mbos_economics 33 files vs research/agent-03-economics; mbos_governance 29 files vs research/agent-05-governance |
+| lane D/E ACTION path (real gateway, follow-up, PANIC drill, live effector rows must be 0 and >=2 calls) | PASS | 5.2s | effector calls 2 (live 0) · executed 2 · follow-up {'policy_denied': False, 'executed_receipts': 2, 'second_request': True, 'concurrent': {'accepted': 1, 'refused': ['DecisionRefused', 'DecisionRefused', 'DecisionRefused', 'DecisionRefused', 'DecisionRefused'], 'live_pending': 1}} · panic drill True · chain ok True |
+| lane D/E e2e + strict AT-1 (03 engine, 05 gateway, 04 schema) | PASS | 3.2s | chain 61 ok=True · reference 61 receipts verified · effector 0 (live 0) · contract errors 0 · AT-1 {'ok': True, 'drift_count': 0, 'weak_receipt_count': 0, 'items': 4} · final {'trailer': 'RESEARCHING', 'drywall_repair': 'RESEARCHING', 'mower': 'RESEARCHING', 'smart_home_install': 'RESEARCHING'} |
 
 ## Coverage notes
 
