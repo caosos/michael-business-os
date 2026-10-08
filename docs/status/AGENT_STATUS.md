@@ -164,3 +164,7 @@ Verdict: Michael can NOT use it today. Jobs: 4 PASS (after F-88 workaround), 1/3
 Done: G-21a @ fb05429
 State: CLOSED
 Verdict: stages 1-2 PASS, stage 3-4 FAIL on the bootstrapped assembly. New F-106 (P0: TV blocked by `scope_override_required`, no UI for it; research ignores the fixture's inline economics, so A-41's green test is not reproducible via bootstrap_dev), F-110 (P1), F-107/F-108 (P1), F-102 (P1 audit conformance red), F-105/F-104/F-109 (P2), F-103 (P3). G-21b is blocked on F-106/F-110. RC READY 105/0 (3 skipped); card 671/0. Receipt: docs/receipts/2026-10-08-G-21a-mission-dryrun-stages-1-4.md
+
+## G-21c (2026-10-08)
+Claimed: G-21c
+State: WORKING
