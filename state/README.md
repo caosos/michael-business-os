@@ -38,6 +38,7 @@ state/
   migrations/0014_item_doc_entity.sql  D-14: doc receipts may name a scorecard/recommendation entity (scr_/rec_)
   migrations/0015_card_inputs.sql  D-16: append_item_research (atomic) + v_item_card_inputs (ADR-0011); see docs/state/CARD_INPUTS.md
   migrations/0016_operator_notes.sql  D-17: operator-note store (append-only, human-only, receipted); see docs/state/OPERATOR_NOTES.md
+  migrations/0017_capital_ledger.sql  D-18: mission + capital ledger derived from receipts; see docs/state/CAPITAL_LEDGER_DESIGN.md
   mbos_state/provision.py          D-15: superuser-only setup so workers run as the real mbos_dbos login
   mbos_state/mbos_canonical.py     ADR-0010 Python reference (byte-identical vendored copy)
   tests/canonical/vectors.json     ADR-0010 golden vectors (byte-identical vendored copy)
@@ -48,7 +49,7 @@ state/
   bootstrap/archive-wal.sh, pitr-base-backup.sh, restore-pitr.sh   D-09a: WAL archiving, base backup, PITR restore
   bootstrap/podman/                Quadlet units for the target runtime (UNTESTED: no Podman on host yet)
   mbos_state/                      Python: migrate, StateStore facade, chain export/anchor/offline verify, CLI
-  tests/                           230 tests; vendored frozen contracts v1.0.0 in tests/contracts-v1.0.0/
+  tests/                           241 tests; vendored frozen contracts v1.0.0 in tests/contracts-v1.0.0/
 ```
 
 ## Tables

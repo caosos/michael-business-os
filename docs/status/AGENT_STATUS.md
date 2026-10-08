@@ -4,8 +4,8 @@ Agent: 04
 Role: Postgres / State / Receipts (lane D: durable business state, receipts, provenance; sole ledger owner per ADR-0010)
 Branch: research/agent-04-state
 Worktree: /home/michaelos/business-os-worktrees/agent-04-state
-State: WORKING
-Claimed: D-18 (capital ledger)
+State: WAITING (no READY lane-D task: D-10 final acceptance on A-01; D-12 on ADR-0009; D-09b on Michael, MICHAEL_DECISIONS #11)
+Claimed: none
 Done: D-01 @ a0d1fbe
 Done: D-02 @ a0d1fbe
 Done: D-03 @ ca59e3c
@@ -19,22 +19,21 @@ Done: D-11 @ 341c5d2
 Done: D-14 @ 80bb135
 Done: D-15 (helper delivered @ a08dd9f; 01 to adopt in its e2e for final acceptance)
 Done: D-17 @ 77d1f17
+Done: D-18 (capital ledger; see docs/receipts/2026-10-07-d18-capital-ledger.md)
 Done: D-09a (PITR mechanics against a local dir; see docs/receipts/2026-10-07-d09a-pitr-mechanics.md) (ACCEPTED by Agent 03, docs/receipts/2026-10-07-d17-acceptance-review.md @ 6a20b91, who tested as each real login role)
 Done: D-16 @ 3a1b004
 Blocked: D-09b (off-box destination + drill) on Michael: docs/state/OWNER_QUESTION_BACKUPS.md
 Blocked: D-10 (final acceptance) on A-01 phase 2. The DDL is delivered @ 6533334.
 Current phase: ROUND TWO: foreman loop (READY_QUEUE)
 Started: 2026-10-06
-Last updated: 2026-10-07 (A-23 landed; claimed D-18)
+Last updated: 2026-10-07 (D-18 done)
 
 ## Current objective
-**D-18 (assigned by Agent 01): the capital ledger.**
-- `mbos.mission` + `mbos.capital_ledger`, derived from receipts, with a `v_capital_position` view.
-- Principal returns on close, profit becomes earned working capital, and replay from receipts reproduces the position.
-- Blocked only on Agent 01's A-23 `mission.schema.json`.
-- Until then I'm reading `docs/product/DEAL_SNIFFER_START_HERE.md` §1 and ADR-0013 to design against.
+No READY lane-D task. WAITING on: A-01 (D-10 final acceptance), ADR-0009 (D-12), and Michael for the off-box destination (D-09b).
 
-D-09a is done: PITR mechanics, proven against a local directory (`docs/receipts/2026-10-07-d09a-pitr-mechanics.md`).
+Latest: D-18 done. The capital ledger is migration 0017, and `docs/state/CAPITAL_LEDGER_DESIGN.md` is the as-built design.
+- **For Agent 01 to confirm:** profit after an impairment repairs it first, because the invariant leaves it nowhere else to go.
+- **Capital moves only on human-confirmed outcomes.** Agent-reported ones are counted in `unconfirmed_closing_outcomes`.
 
 ### Interface notes for Agent 05 (E-02) and Agent 01 (A-01/A-03)
 - **PANIC:**

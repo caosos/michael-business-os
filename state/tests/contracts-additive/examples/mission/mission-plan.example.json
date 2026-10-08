@@ -1,0 +1,69 @@
+{
+  "plan_version": "1.0.0",
+  "mission": {
+    "mission_version": "1.0.0",
+    "period": {
+      "start": "2026-10-05",
+      "end": "2026-10-11"
+    },
+    "weekly_target_usd": 1500,
+    "hours_available": 30,
+    "notes": "Example numbers from the product package; not Michael's real target."
+  },
+  "ledger": {
+    "protected_principal": 500,
+    "earned_working_capital": 0,
+    "capital_deployed": 30,
+    "realized_profit": 0,
+    "available_to_deploy": 470,
+    "as_of": "2026-10-08T12:00:00Z"
+  },
+  "recommendation": "DEPLOY",
+  "legs": [
+    {
+      "item_id": "itm_01J9ZTV0000000000000000001",
+      "scorecard_id": "sc_01j9zt",
+      "opportunity_class": "MICRO_FLIP",
+      "cash_at_risk": 30,
+      "expected_net": {
+        "low": 25,
+        "likely": 55,
+        "high": 70
+      },
+      "days_to_cash": 1,
+      "success_probability": 0.8,
+      "hours": 1.5,
+      "why": "Fast turn, small cash at risk; panel failure is binary and the parts-out floor is low."
+    },
+    {
+      "item_id": "itm_01J9ZDRYWAMM00000000000002",
+      "scorecard_id": "sc_01j9zd",
+      "opportunity_class": "SERVICE_JOB",
+      "cash_at_risk": 0,
+      "expected_net": {
+        "low": 250,
+        "likely": 400,
+        "high": 500
+      },
+      "days_to_cash": 3,
+      "success_probability": 0.7,
+      "hours": 6,
+      "why": "Service work needs no capital and runs in parallel."
+    }
+  ],
+  "projected_week": {
+    "low": 275,
+    "likely": 455,
+    "high": 570
+  },
+  "remaining_gap": 1045,
+  "confidence": "low",
+  "replace_if_stale": [
+    "itm_01J9ZTV0000000000000000001"
+  ],
+  "unknowns": [
+    "current_cash_context",
+    "real weekly target"
+  ],
+  "explanation": "Illustrative only. The plan does not close the gap; it says so rather than stretching into a risky buy."
+}

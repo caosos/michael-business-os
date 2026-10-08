@@ -7,7 +7,7 @@ import re
 import time
 
 ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
-PREFIXES = ("itm", "areq", "appr", "rcpt", "prov", "outc", "scr", "rec", "lsn", "pol", "bud", "obx")
+PREFIXES = ("itm", "areq", "appr", "rcpt", "prov", "outc", "scr", "rec", "lsn", "pol", "bud", "obx", "mn", "cap", "msn")
 _ID_RE = re.compile(r"^([a-z]+)_([0-9A-HJKMNP-TV-Z]{26})$")
 
 

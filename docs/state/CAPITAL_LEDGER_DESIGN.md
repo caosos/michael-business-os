@@ -1,31 +1,55 @@
-# Capital ledger: design for D-18 (draft; waits on Agent 01's A-23 `mission.schema.json`)
+# Capital ledger (D-18): as built, migration `0017_capital_ledger.sql`
 
-- **Sources:** `docs/product/DEAL_SNIFFER_START_HERE.md` §1, ADR-0013, READY_QUEUE D-18/A-23.
-- **Status:** DESIGN ONLY. Field names and invariants are adopted from A-23 when it is pushed, so nothing here is built yet.
+- **Sources:** `docs/product/DEAL_SNIFFER_START_HERE.md` §1, ADR-0013, and Agent 01's `mission.schema.json` (A-23).
+- **Rulings applied** (Agent 01, technical):
+  - Earned capital funds deployments first, then protected principal.
+  - A loss consumes earned capital first. The remainder is recorded as `principal_impairment` and flagged. `protected_principal` is never rewritten.
+  - Entries come from existing receipt types, and they are tagged `dry_run`.
+  - An item may have several deploy entries, and all of them are returned on close.
+  - USD only, `numeric(14,2)`.
+- **Invariants** (the schema, validated by `mbos.mission.ledger_errors`):
+  - `available_to_deploy = protected_principal − principal_impairment + earned_working_capital − capital_deployed`
+  - Impairment only exists while earned is 0.
+  - Impairment does not exceed the principal.
 
-## Model (from the owner direction)
-- `mbos.mission`: the owner's weekly mission (`target_usd`, `period`, `hours_available` (nullable = UNKNOWN), `capital`). Append-only. A change is a new version row, receipted.
-- `mbos.capital_ledger`: insert-only entries. Each entry carries `kind`, `amount`, `item_id`, `mode` (dry_run | live, as in `budget_ledger`), the receipt it was **derived from**, and provenance.
-- `mbos.v_capital_position`: a pure fold over the entries, giving `protected_principal`, `earned_working_capital`, `capital_deployed`, `realized_profit` and `available_to_deploy`.
+## Objects
+| Object | What it is |
+|---|---|
+| `mbos.mission` | The weekly mission. `weekly_target_usd` and `hours_available` may be NULL (UNKNOWN, never guessed). Versioned and insert-only. |
+| `mbos.set_mission()` | Owner channel (approver) only. A revision is a new row. |
+| `mbos.v_mission_current` | The latest mission in the schema's shape, with NULLs kept as NULL. |
+| `mbos.capital_ledger` | Insert-only entries. **No role can insert**: they are derived from receipts by one trigger, and each cites its `source_receipt_id`. |
+| `mbos.capital_fund()` / `capital_withdraw()` | Owner channel only. They write the receipt, and the trigger derives the entry. |
+| `mbos.v_capital_position` | The position per mode. It is the schema's `capital_ledger` fields plus flags: `principal_impaired`, `overdrawn`, `open_items`, `unconfirmed_closing_outcomes`. |
+| `mbos.capital_position_document()` | Exactly the schema's `capital_ledger` object, `principal_impairment` included. |
+| `mbos.capital_replay()` / `capital_verify()` | Rebuild the entries from **receipts alone** with the same rule, and compare with the table. |
 
-| Entry kind | Fed by | Effect |
+## How entries are derived (one rule, `mbos.capital_entry_for`)
+| Receipt | Entry | Effect |
 |---|---|---|
-| `fund` | Michael's owner-set bankroll ($500 protected principal) | protected_principal += amount |
-| `deploy` | a committed acquisition / repair / material spend (`BUDGET_COMMITTED`) | available → deployed, **per item** |
-| `return` | a closed flip: `OUTCOME_RECORDED` (`flip_sold`, `flip_unsold_salvaged`) | deployed principal for that item → back to available |
-| `profit` | the same closing outcome, when `revenue > total_cost` | realized_profit += profit; earned_working_capital += profit |
-| `loss` | the closing outcome, when `revenue < total_cost` | reduces earned_working_capital first; any remainder reduces protected_principal and sets the **principal-impaired flag** |
+| `CONFIG_VERSION_BUMPED`, `entity_type` `capital_fund` | `fund` | protected_principal += amount |
+| `CONFIG_VERSION_BUMPED`, `entity_type` `capital_withdraw` | `withdraw` | takes from earned only; refused beyond it |
+| `BUDGET_COMMITTED`, category in `capital_deploy_categories` (purchase, money) | `deploy` (per item) | capital_deployed += amount; **refused** if it exceeds available |
+| `OUTCOME_RECORDED`, kind in `capital_closing_kinds`, **human-recorded**, with realized numbers | `close` | principal returns (basis = the item's deployed sum), net goes to earned / realized |
 
-## Properties the database should hold
-1. Insert-only, and each entry is written in the same transaction as its receipt. No entry without a receipt.
-2. **Replay reproduces the position:** `mbos.capital_position_replay()` rebuilds the position from `receipts` alone, and a test asserts that it equals `v_capital_position`.
-3. `available_to_deploy` can never go negative: a `deploy` that would overdraw is refused (fail closed). It is checked under a lock, like the budget caps.
-4. Principal returns exactly once per item (a unique key on the item's closing entry).
-5. Dry-run accounting only in wave one: `live` entries are CHECKed to 0, like `budget_ledger`.
+The category and kind lists are data tables, so they change by migration, not by code.
 
-## Questions for Agent 01 (needed to finalise A-23)
-1. **Which pool funds a deployment?** The direction says to "increasingly operate from earned profits while preserving original principal." My default: spend `earned_working_capital` first, then protected principal. Please confirm.
-2. **A loss that exceeds earned capital:** does it permanently reduce `protected_principal`, or is it tracked as a drawdown to be rebuilt? My default is a real reduction plus a flag.
-3. **Which receipts feed `deploy`:** `BUDGET_COMMITTED` (category purchase or repair), or an explicit new receipt type? Real money is $0 in wave one, so these are dry-run planning entries.
-4. **Per-item principal:** may one item have several `deploy` entries (acquisition plus repair), all returned on close?
-5. **Currency and rounding:** USD only, `numeric(14,2)`. Sub-cent amounts are not meaningful for capital.
+Internally the ledger keeps one signed earned position **X** = Σ net − withdrawals. The schema's fields are
+`earned_working_capital = max(X, 0)` and `principal_impairment = max(−X, 0)`, so impairment exists only while earned is 0.
+A later profit therefore repairs the impairment first, since the invariant leaves it nowhere else to go.
+Michael's own rebuild decision is an explicit `fund`.
+
+## Safety
+- **Capital cannot be minted by an agent.**
+  - fund, withdraw and close need an approver-role session. This is the writing session's role, checked at insert time.
+  - Close also needs a **human-recorded** outcome. Agent-reported closing outcomes move nothing and are counted in `unconfirmed_closing_outcomes`.
+  - A forged receipt from any other role is refused (42501).
+- **Fail closed:** a deploy over `available_to_deploy` is refused, and the budget commit and its receipt roll back.
+- **Inactive until Michael funds it.** Until then nothing is accounted or refused, so existing budget flows are unchanged.
+- **Dry-run accounting only** in wave one (CHECK on `mode`). Wave-one money is $0.
+- Replay is insertion-role independent: `capital_verify` replays with the role gate off, so the verifier works for any reader.
+
+## Known edges (honest)
+- A loss larger than the item's deployed basis (costs that never went through the ledger) can push `available_to_deploy` below 0. The view sets `overdrawn` instead of hiding it.
+- A closing outcome without realized numbers stays open and is listed under `open_items`.
+- The `BUDGET_COMMITTED` receipt carries no mode, so deploys read it from `details.dry_run`. All entries are `dry_run` in wave one anyway.
