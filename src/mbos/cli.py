@@ -57,12 +57,35 @@ def cmd_devdb(a: argparse.Namespace) -> int:
 
 
 # ---------------------------------------------------------------- helpers
+def _lane_d() -> bool:
+    from mbos.config import settings
+
+    return settings().state_backend == "lane_d"
+
+
+def _spine():
+    """The spine for the configured backend (the CLI has no runtime, so this reads settings, not `runtime.spine_module()`)."""
+    if _lane_d():
+        from mbos import spine_d
+
+        return spine_d
+    from mbos import spine
+
+    return spine
+
+
+def _migrate(engine: sa.Engine) -> None:
+    if not _lane_d():  # a lane D database is migrated by lane D's own migrator; the reference DDL must never touch it
+        from mbos.db.migrate import migrate
+
+        migrate(engine)
+
+
 def _engine() -> sa.Engine:
     from mbos.db.engine import app_engine
-    from mbos.db.migrate import migrate
 
     engine = app_engine()
-    migrate(engine)
+    _migrate(engine)
     return engine
 
 
@@ -71,7 +94,6 @@ def _owner_engine() -> sa.Engine:
     With MBOS_OWNER_DATABASE_URL unset (dev, single-login reference backend) this falls back to the worker login and says so."""
     from mbos.config import settings
     from mbos.db.engine import engine_for
-    from mbos.db.migrate import migrate
 
     url = settings().owner_database_url
     if not url:
@@ -79,14 +101,15 @@ def _owner_engine() -> sa.Engine:
               "to the owner (approver) login; the workflow login must not hold approver (D-26, R14).", file=sys.stderr)
         return _engine()
     engine = engine_for(url)
-    migrate(engine)
+    _migrate(engine)
     return engine
 
 
 def _components():
+    from mbos.config import settings
     from mbos.runtime import Components
 
-    return Components().with_defaults()
+    return Components().with_defaults(settings().state_backend)
 
 
 def _wake(item_id: str, message: dict) -> None:
@@ -102,6 +125,9 @@ def _wake(item_id: str, message: dict) -> None:
 
 # ---------------------------------------------------------------- commands
 def cmd_migrate(a: argparse.Namespace) -> int:
+    if _lane_d():
+        print("state_backend=lane_d: nothing applied; migrate with lane D's own migrator (state/mbos_state/migrate.py).", file=sys.stderr)
+        return 2
     from mbos.db.engine import app_engine
     from mbos.db.migrate import migrate
 
@@ -164,10 +190,8 @@ def cmd_worker(a: argparse.Namespace) -> int:
 
 
 def cmd_queue(a: argparse.Namespace) -> int:
-    from mbos.spine import pending_decisions
-
     with _engine().connect() as c:
-        rows = pending_decisions(c)
+        rows = _spine().pending_decisions(c)
     if not rows:
         print("Nothing needs a decision.")
     for r in rows:
@@ -192,8 +216,9 @@ def cmd_items(a: argparse.Namespace) -> int:
     """F-70 (07 cold-start): list Items so `card`, `show` and `outcome` have an id to use."""
     import sqlalchemy as sa
 
-    sql = ("SELECT item_id, state, type, category, body->'normalized'->>'title', body->>'created_at' FROM mbos.items "
-           + ("WHERE state = :st " if a.state else "") + "ORDER BY body->>'created_at' DESC LIMIT :n")
+    col = "doc" if _lane_d() else "body"  # lane D keeps the document in `doc`
+    sql = (f"SELECT item_id, state, type, category, {col}->'normalized'->>'title', {col}->>'created_at' FROM mbos.items "
+           + ("WHERE state = :st " if a.state else "") + f"ORDER BY {col}->>'created_at' DESC LIMIT :n")
     with _engine().connect() as c:
         rows = c.execute(sa.text(sql), {"st": a.state, "n": a.limit}).all()
     if not rows:
@@ -204,18 +229,23 @@ def cmd_items(a: argparse.Namespace) -> int:
 
 
 def cmd_show(a: argparse.Namespace) -> int:
-    from mbos.ledger import load_item, load_receipts
-
     with _engine().connect() as c:
-        item = load_item(c, a.item_id)
-        receipts = load_receipts(c, "item_id = :i", {"i": a.item_id})
+        if _lane_d():
+            item = _spine().read_item(c, a.item_id)
+            receipts = [r[0] for r in c.execute(sa.text(
+                "SELECT d.doc FROM mbos.receipts r JOIN mbos.v_receipt_documents d USING (receipt_id) WHERE r.item_id = :i ORDER BY r.seq"),
+                {"i": a.item_id})]
+        else:
+            from mbos.ledger import load_item, load_receipts
+
+            item = load_item(c, a.item_id)
+            receipts = load_receipts(c, "item_id = :i", {"i": a.item_id})
     _print({"item": item, "receipts": [{k: r.get(k) for k in ("seq", "type", "intent", "actor", "ts")} for r in receipts]})
     return 0
 
 
 def cmd_decide(a: argparse.Namespace) -> int:
-    from mbos import spine
-
+    spine = _spine()
     engine = _owner_engine()
     with engine.connect() as c:
         h = c.execute(sa.text("SELECT payload_hash FROM mbos.action_requests WHERE action_request_id = :a"),
@@ -281,8 +311,7 @@ def cmd_ping(a: argparse.Namespace) -> int:
 
 
 def cmd_outcome(a: argparse.Namespace) -> int:
-    from mbos import spine
-
+    spine = _spine()
     realized = {k: v for k, v in {"revenue": a.revenue, "total_cost": a.cost, "hours": a.hours}.items() if v is not None}
     if a.revenue is not None and a.cost is not None:
         realized["net_profit"] = a.revenue - a.cost
@@ -292,8 +321,7 @@ def cmd_outcome(a: argparse.Namespace) -> int:
 
 
 def cmd_panic(a: argparse.Namespace) -> int:
-    from mbos import spine
-
+    spine = _spine()
     with _owner_engine().begin() as c:
         _print(spine.set_kill_switch(c, a.key, a.state == "on", reason=a.reason))
     return 0
