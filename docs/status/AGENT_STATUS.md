@@ -23,7 +23,7 @@ Done: D-16 @ 3a1b004
 Blocked: D-10 (final acceptance) on A-01 phase 2. The DDL is delivered @ 6533334.
 Current phase: ROUND TWO: foreman loop (READY_QUEUE)
 Started: 2026-10-06
-Last updated: 2026-10-07 (read-through of spine_d @ f4c6529; D-18 proposed)
+Last updated: 2026-10-07 (commit identity corrected; D-09 owner question written; PITR mechanics in progress)
 
 ## Current objective
 No READY lane-D task. WAITING on: A-01 (D-10 acceptance), ADR-0009 (D-12), and an off-box target (D-09, operator).
@@ -53,7 +53,7 @@ Latest: D-17 done @ `77d1f17`. Migration 0016 adds the operator-note store; see 
 | Proposed ID | Pri | Task | Deps | Acceptance |
 |---|---|---|---|---|
 | (queued as D-11) | P2 | `caps.velocity_actions_per_hour` in `budget_reserve_caps`: a count of unreleased bucket reservations in the last hour, zero-amount rows included. Requested by 05 after E-02, so lane E's 3-money-actions/h rule lives in one place | none | 05 switches from its own count; a parallel test never exceeds N actions/h |
-| D-18 | P2 | `mbos.attach_card_block(...)`: an atomic upsert for a card-enrichment block, a no-op if the latest entry for that block already cites the same artifact, so A, B, A is correct for every lane (fixes R1 of the read-through lane-side) | none | `v_item_card_inputs` shows the true latest after A, B, A |
+| (withdrawn: 01 fixed it caller-side) D-18 | P2 | `mbos.attach_card_block(...)`: an atomic upsert for a card-enrichment block, a no-op if the latest entry for that block already cites the same artifact, so A, B, A is correct for every lane (fixes R1 of the read-through lane-side) | none | `v_item_card_inputs` shows the true latest after A, B, A |
 | D-12 | P2 | Contract v1.1.0 (ADR-0009) DDL follow-up: ITEM_UPDATED, ACTION_EXPIRED, GUARD_REFUSED, `superseded` | ADR-0009 accepted | Migration + tests; old receipts still verify |
 
 ### Read-through of 01's spine_d (@ f4c6529): see `docs/receipts/2026-10-07-spine-d-readthrough-2.md`
@@ -164,6 +164,7 @@ All items below are FACT, verified by 93 passing tests on PostgreSQL 16.2 on thi
 None for wave one.
 
 ## Needs Michael decision
+**Off-box backup target (blocks D-09):** see `docs/state/OWNER_QUESTION_BACKUPS.md`. Recommended: encrypted cloud storage, else another machine you own. The backups contain raw seller contact values, so they must be encrypted off-box.
 - RPO/RTO. Proposal: 15 min / 4 h once WAL ships off-box. Today: 0 for a crash, 24 h for host loss.
 - Off-box backup location.
 - Host operations (or delegate to Agent 01 / ops):
