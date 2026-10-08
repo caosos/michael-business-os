@@ -13,4 +13,4 @@
 | **06** Operator UI | CLOSED | P-06-18 partial -> P-06-19 done | re-run P-06-18's human-outcome test now that 0018 landed | none |
 | **07** QA | CLOSED (fresh worker per release window) | G-14 `2e1e5f8` (RC READY, 0 residual xfails) | next release window | none |
 
-**Useful READY work is exhausted** except the owner-gated items above and the P-06-18 re-run. Next dispatch happens when Michael answers #9/#10/#11, supplies credentials, or a new gap is found.
+**Useful READY work is exhausted** (2026-10-08, after the R14-in-the-database sequence D-23..D-28, G-16..G-19; gate green 443; 25+ bounded workers) except the owner-gated items above and the P-06-18 re-run. Next dispatch happens when Michael answers #9/#10/#11, supplies credentials, or a new gap is found.
