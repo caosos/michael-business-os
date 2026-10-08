@@ -141,6 +141,6 @@ None new. (Round-one marketing questions remain parked until marketing go-live.)
 3. Re-run `python -m mbos_qa interop` once F-13 and F-14 are ruled on.
 
 ## G-17 (2026-10-08)
-Done: G-17 @ PENDING
+Done: G-17 @ 09302c5
 State: CLOSED
 Verdict: RC READY 105/0 (3 skipped); card 657/0. F-72..F-78 FIXED. New: F-80 (04, P1: mbos_dbos is approver, passes D-24 by claiming human), F-79/F-82/F-84 (06), F-81/F-83 (04). Receipt: docs/receipts/2026-10-08-G-17-owner-channel-wanted.md
