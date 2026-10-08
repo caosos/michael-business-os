@@ -6,7 +6,7 @@ Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
 State: CLOSED
 Claimed: none
-Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe · F-04 @ 46c961c · F-13 @ 2415936 · F-14 @ c68a33c · F-13 hardening @ 6e47646 · F-15 @ 94130a4 · F-11 @ 20d88ee · F-17 @ 47c0621 · F-16 @ 9c2012d · F-18 @ d56f8d2 · F-19 @ f038a80 · F-21 @ da87d26 · F-20 @ f499a99 · P-06-12 @ PENDING
+Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe · F-04 @ 46c961c · F-13 @ 2415936 · F-14 @ c68a33c · F-13 hardening @ 6e47646 · F-15 @ 94130a4 · F-11 @ 20d88ee · F-17 @ 47c0621 · F-16 @ 9c2012d · F-18 @ d56f8d2 · F-19 @ f038a80 · F-21 @ da87d26 · F-20 @ f499a99 · P-06-12 @ 27d2d0f
 Blocked: none
 Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
 Last updated: 2026-10-07 (F-20 done; 166 + 31 tests)
