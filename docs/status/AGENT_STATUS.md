@@ -166,6 +166,6 @@ State: CLOSED
 Verdict: stages 1-2 PASS, stage 3-4 FAIL on the bootstrapped assembly. New F-106 (P0: TV blocked by `scope_override_required`, no UI for it; research ignores the fixture's inline economics, so A-41's green test is not reproducible via bootstrap_dev), F-110 (P1), F-107/F-108 (P1), F-102 (P1 audit conformance red), F-105/F-104/F-109 (P2), F-103 (P3). G-21b is blocked on F-106/F-110. RC READY 105/0 (3 skipped); card 671/0. Receipt: docs/receipts/2026-10-08-G-21a-mission-dryrun-stages-1-4.md
 
 ## G-21c (2026-10-08)
-Done: G-21c @ COMMIT
+Done: G-21c @ ddef0bd
 State: CLOSED
 Verdict: stage 3 PASS; stage 4 3/4: TV YES in queue/Today, Recon MAYBE naming fault_identified, mower ARCHIVED, worker rechecks itself (F-102/103/104/106/108/109/110 fixed). New F-111 (P1: drywall lead never reaches YES, \$/h gate 72.99<75, no quote input), F-112 candidate (P3 wording). RC READY 105/0 (3 skipped); card 671/0. G-21b unblocked. Receipt: docs/receipts/2026-10-08-G-21c-mission-dryrun-rerun-stages-3-4.md
