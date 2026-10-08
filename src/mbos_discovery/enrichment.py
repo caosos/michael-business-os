@@ -252,3 +252,29 @@ def attach_enrichment(conn, spine, item_id: str, raw_store, as_of: datetime,
                                         + f" [key={keys[name]}]")
         attached.append(name)
     return {"provenance_id": prov, "attached": attached, "skipped": skipped, "unsupported": unsupported}
+
+
+# ---------------------------------------------------------------- P-02-15: year-specific KB hits for the card
+def kb_hits(item: dict, kb: dict, match_hits: Callable, own_prov: str) -> dict[str, Any]:
+    """Match the Item against Agent 03's KB (`match_hits`, passed in so this lane keeps no hard dependency) after
+    reading shorthand model years from the title (P-02-14). Returns
+    `{"hits": [...], "blocked": [...], "model_years": [...], "item_for_value_add": <Item>}`.
+    Each hit cites the entry's own source provenance (a FACT about the bulletin/recall) and quotes the title text a
+    year was read from; the year reading itself is an INFERENCE under `own_prov`. `item_for_value_add` is the copy
+    to hand to `build_value_add` so the card shows the same hits."""
+    from .model_years import extract_model_years, for_kb_match
+    aug, found = for_kb_match(item)
+    rows, blocked = match_hits(aug, kb)
+    title = (item.get("normalized") or {}).get("title") or ""
+    hits = []
+    for h in rows:
+        e = h["entry"]
+        yr = None if h["year_evidence"] is None else int(h["year_evidence"])
+        quoted = [r["evidence"] for r in found if yr is not None and r["year"] == yr] or (
+            [str(yr)] if yr is not None else [])
+        hits.append({"entry_id": e["id"], "kind": e["kind"], "risk": e["risk"], "source": e["source"],
+                     "entry_provenance_id": (e.get("evidence") or {}).get("provenance_id"),
+                     "year_read": None if yr is None else _datum(
+                         yr, "INFERENCE", own_prov,
+                         f'read from the listing title "{title}" ({", ".join(quoted)}); not verified against the unit')})
+    return {"hits": hits, "blocked": blocked, "model_years": found, "item_for_value_add": aug}
