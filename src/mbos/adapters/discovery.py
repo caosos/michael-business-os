@@ -22,5 +22,10 @@ class LaneBEnricher:
         if item["state"] in ("ARCHIVED", "FAILED"):
             return 0
         as_of = item["created_at"]  # stable: re-running attaches nothing new
+        if isinstance(as_of, str):  # lane D returns ISO text; lane B compares datetimes (found by the A-38 real-environment run)
+            from datetime import datetime, timezone
+
+            as_of = datetime.fromisoformat(as_of.replace("Z", "+00:00"))
+            as_of = as_of if as_of.tzinfo else as_of.replace(tzinfo=timezone.utc)
         out = attach_enrichment(conn, spine, item_id, self.raw_store, as_of, history=self.history)
         return int(out if isinstance(out, int) else len(out or []))

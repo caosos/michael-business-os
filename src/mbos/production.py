@@ -66,7 +66,7 @@ def build_components(s: Settings, *, fixture: Optional[str] = None, raw_dir: Opt
 
         rd = raw_dir or os.environ.get("MBOS_RAW_DIR")
         if rd:
-            from mbos_discovery.store import FileRawStore  # type: ignore
+            from mbos_discovery.rawstore import FileRawStore  # type: ignore
 
             comps.enrichers.append(LaneBEnricher(FileRawStore(rd)))
             say("card enrichment: listing activity/seller", "REAL", f"lane B (Agent 02) from retained raw payloads in {rd}")
