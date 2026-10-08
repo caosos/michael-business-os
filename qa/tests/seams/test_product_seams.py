@@ -13,7 +13,7 @@ from mbos import campaign, mission, valuation
 from mbos import merchandising as mer
 from mbos.hashing import sha256_of
 
-EX = pathlib.Path(__file__).resolve().parents[2] / "contracts" / "examples" / "seams"
+EX = pathlib.Path(__file__).resolve().parents[2] / "ext" / "seams"
 NAN, INF = float("nan"), float("inf")
 PROV = "prov_01J9Z0000000000000000000AA"
 

@@ -1,6 +1,6 @@
 # Receipt: G-11, adversarial acceptance of the Deal Sniffer product seams (Agent 07, lane G)
 
-- **Task:** G-11 (P1). DRY-RUN only; pure functions, nothing published, contacted or spent. Stack: `mbos` 01 `51dbd51` (A-23 mission, A-25 merchandising, A-26 campaign + valuation), installs verified byte-identical. Examples vendored under `qa/contracts/examples/seams/`.
+- **Task:** G-11 (P1). DRY-RUN only; pure functions, nothing published, contacted or spent. Stack: `mbos` 01 `51dbd51` (A-23 mission, A-25 merchandising, A-26 campaign + valuation), installs verified byte-identical. Examples vendored under `qa/ext/seams/`.
 - **Suite:** `qa/tests/seams/test_product_seams.py` (104 cases: 48 controls that must keep passing, 56 strict xfails tied to F-59…F-68). `python -m mbos_qa card` reports 368 passed / 0 failed overall.
 
 ## What holds (positive controls)

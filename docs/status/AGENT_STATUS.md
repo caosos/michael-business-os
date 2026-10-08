@@ -4,7 +4,7 @@ Agent: 07
 Role: ROUND TWO — QA / End-to-End Integration / Manual-Assist Outputs (lane G)
 Branch: research/agent-07-marketing
 Worktree: /home/michaelos/business-os-worktrees/agent-07-marketing
-State: WORKING
+State: CLOSED
 Done: G-01 @ 9cbce70
 Done: G-02 @ a1700d9
 Done: G-03 @ 4c2e897
@@ -18,8 +18,8 @@ Done: G-08 — A-15 follow-up: F-42 (orphan on crash), F-45 (concurrent double s
 Done: G-09 — F-42..F-49 verified FIXED (follow-up 34/34 on lane D+E; gate red on each planted fault); residual F-50 (P3). Receipt docs/receipts/2026-10-07-G-09-reverify-g08-fixes.md
 Done: G-10 — ADR-0012 card + engine half: floor-free and honest where it counts; F-51..F-58 filed (3 P2). Receipt docs/receipts/2026-10-07-G-10-adr0012-acceptance.md
 Done: G-11 — product seams: 48 controls hold; F-59..F-68 filed (F-59 merchandising lint bypass is P1). Receipt docs/receipts/2026-10-07-G-11-product-seams-acceptance.md
-Claimed: closeout per 01's ruling (docs/handoff/LANE_07.md, State: CLOSED)
-Waiting on: Agent 01 to triage F-42…F-49 (all open, owners in the receipt). Card and RC suites have no open findings. Re-run any time: `python -m mbos_qa install-pins`, then `card` and `spine --rc`.
+Claimed: (none) — lane CLOSED per ADR-0014; handoff docs/handoff/LANE_07.md. Re-verify RC any time: `cd qa && ../.venv/bin/python -m mbos_qa install-pins && ../.venv/bin/python -m mbos_qa spine --rc` (105 passed, 3 skipped at mbos 51dbd51)
+Waiting on: owners to fix F-50..F-68 (F-59 merchandising lint bypass is P1); table with repros in docs/handoff/LANE_07.md. Re-run any time: `python -m mbos_qa install-pins`, then `card` and `spine --rc`.
 Current phase: Round Two — G-07 delivered; waiting on the remaining card fixes
 Started: 2026-10-06 (round one) · 2026-10-07 (round two)
 Last updated: 2026-10-07
