@@ -1,4 +1,4 @@
-"""Install lanes 03 (mbos-economics) and 05 (mbos-governance) from their PUSHED heads into .venv, so the gate's
+"""Install lanes 02 (mbos-discovery), 03 (mbos-economics) and 05 (mbos-governance) from their PUSHED heads into .venv, so the gate's
 "installed == pushed" check compares like with like. Never uses a lane's working tree or a stale build/ directory.
 
     .venv/bin/python -I tools/sync_lanes.py
@@ -14,7 +14,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 UV = ROOT / ".tools" / "uv"
 PY = ROOT / ".venv" / "bin" / "python"
-LANES = [("mbos-economics", "origin/research/agent-03-economics", "economics"), ("mbos-governance", "origin/research/agent-05-governance", "")]
+LANES = [("mbos-economics", "origin/research/agent-03-economics", "economics"), ("mbos-governance", "origin/research/agent-05-governance", ""),
+         ("mbos-discovery", "origin/research/agent-02-opportunity", "")]
 
 
 def main() -> int:

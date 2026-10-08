@@ -85,6 +85,20 @@ Rules:
 - `MBOS_SYSTEM_DATABASE_URL` holds DBOS workflow state. Keep it separate.
 - Receipts may only be written under READ COMMITTED. The chain trigger raises otherwise, because a snapshot-isolated writer could fork the chain.
 
+## Real local dry-run environment in one command (A-38)
+```bash
+mbos devdb up --lane-d          # or: .venv/bin/python -I tools/bootstrap_dev.py [--skip-install] [--ui-pin PIN]
+```
+Starts the pgserver cluster, provisions lane D (04's `provision()`: worker login `mbos_dbos`, owner login `mbos_operator_ui`), installs lanes 02/03/05 from their PUSHED heads (`tools/sync_lanes.py`), extracts lane 06's planner and Operator UI, copies 05's policy to `var/policy/`, and writes:
+- `var/dev.env`: every `MBOS_*` variable for the WORKER (no approver). `source` it in every shell that runs `mbos worker`, `queue`, `card`.
+- `var/owner.env` (mode 0600): `MBOS_OWNER_DATABASE_URL` only. `source` it additionally, and only, in the shell where you decide (`mbos decide`, `outcome`, `note`, `panic`, the Operator UI). Never for `mbos worker`.
+
+```bash
+source var/dev.env && .venv/bin/mbos worker --fixture fixtures/sources/illustrative.json   # report: all REAL except `sources`
+source var/dev.env && source var/owner.env && .venv/bin/mbos decide AREQ_ID YES --seen HASHPREFIX
+```
+Re-running is idempotent. The fixture items stop at RESEARCHING (no comps in the fixture), so `mbos queue` is empty until a source supplies comps.
+
 ## 4. Daily operation
 
 ```bash

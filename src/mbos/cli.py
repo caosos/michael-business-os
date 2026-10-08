@@ -1,7 +1,7 @@
 """`mbos` — operator CLI for the dry-run spine. The Operator UI (lane F) replaces the decision commands;
 everything here goes through the same spine functions, so receipts are identical.
 
-    mbos devdb up|down|env          project-local Postgres 16 (pgserver) for development
+    mbos devdb up|down|env [--lane-d]  project-local Postgres 16 (pgserver); --lane-d = the full REAL env (A-38)
     mbos migrate
     mbos worker [--fixture PATH]    run DBOS: recover workflows, optionally discover a fixture, keep serving
     mbos queue                      what needs Michael's decision
@@ -43,6 +43,14 @@ def _devdb_urls(server) -> tuple[str, str]:
 def cmd_devdb(a: argparse.Namespace) -> int:
     import pgserver  # dev dependency
 
+    if a.lane_d and a.action == "up":  # A-38: the real environment (lane D split logins, lane packages, policy, var/dev.env + var/owner.env)
+        import importlib.util
+
+        path = Path(__file__).resolve().parents[2] / "tools" / "bootstrap_dev.py"
+        spec = importlib.util.spec_from_file_location("bootstrap_dev", path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod.main([])
     if a.action == "down":
         pgserver.get_server(DEVDB_DIR, cleanup_mode="stop").cleanup()
         print("dev postgres stopped")
@@ -340,7 +348,8 @@ def cmd_audit(a: argparse.Namespace) -> int:
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="mbos", description="Michael Business OS — dry-run spine operator CLI")
     sub = p.add_subparsers(dest="cmd", required=True)
-    s = sub.add_parser("devdb"); s.add_argument("action", choices=["up", "down", "env"]); s.set_defaults(fn=cmd_devdb)
+    s = sub.add_parser("devdb"); s.add_argument("action", choices=["up", "down", "env"])
+    s.add_argument("--lane-d", action="store_true", help="up only: full REAL dev environment via tools/bootstrap_dev.py"); s.set_defaults(fn=cmd_devdb)
     sub.add_parser("migrate").set_defaults(fn=cmd_migrate)
     s = sub.add_parser("worker"); s.add_argument("--fixture"); s.add_argument("--once", action="store_true")
     s.add_argument("--allow-owner-dsn", action="store_true", help="dev only: let the worker hold the owner login too (defeats F-87)")
