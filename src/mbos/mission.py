@@ -111,7 +111,7 @@ def plan_errors(plan: dict[str, Any]) -> list[str]:
     pw, target = plan["projected_week"], plan["mission"]["weekly_target_usd"]
     for k in ("low", "likely", "high"):  # F-64: a projection can never exceed what its legs can produce
         vals = [l["expected_net"][k] for l in legs]
-        if pw[k] is not None and (not legs or None in vals or pw[k] > sum(vals) + _EPS):
+        if pw[k] is not None and (None in vals or pw[k] > sum(vals) + _EPS):   # no legs => supported sum is 0, so a 0 projection is honest
             errs.append(f"projected_week.{k} {pw[k]} is not supported by the legs (sum of expected_net.{k} = "
                         f"{'unknown' if None in vals else sum(vals)})")
     if pw["likely"] is None and plan["remaining_gap"] is not None:

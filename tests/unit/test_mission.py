@@ -118,3 +118,12 @@ def test_a35_plan_coherence(mut, frag):
     p = load("mission-plan.example.json")
     mut(p)
     assert any(frag in e for e in mission.plan_errors(p)), mission.plan_errors(p)
+
+
+def test_zero_projection_with_no_legs_is_honest_but_a_positive_one_is_not():
+    p = load("mission-plan.example.json")
+    p["recommendation"] = "DO_NOT_SPEND"; p["legs"] = []; p["replace_if_stale"] = []
+    p["projected_week"] = {"low": 0.0, "likely": 0.0, "high": 0.0}; p["remaining_gap"] = 1500
+    assert mission.plan_errors(p) == []
+    p["projected_week"] = {"low": 0.0, "likely": 5.0, "high": 9.0}; p["remaining_gap"] = 1495
+    assert any("not supported" in e for e in mission.plan_errors(p))
