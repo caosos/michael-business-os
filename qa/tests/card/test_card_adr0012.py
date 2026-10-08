@@ -62,6 +62,7 @@ def test_without_numbers_every_new_field_is_unknown_and_listed(mc, profile):
     assert unknowns_match(c)
 
 
+@pytest.mark.xfail(strict=True, reason="F-69: A-35 regression, cash_multiple is UNKNOWN when only days is missing")
 def test_each_derived_field_is_unknown_when_only_its_own_input_is_missing(mc, profile):
     c = build(mc, profile, cash=None)
     assert E(c)["cash_multiple"]["value"] == "UNKNOWN" and E(c)["capital_velocity"]["value"] == "UNKNOWN"
@@ -142,14 +143,10 @@ def test_a_service_item_is_its_own_class_not_a_flip_class(mc, profile):
     assert E(c)["opportunity_class"]["value"] == "SERVICE_JOB"
 
 
-def residual(reason):
-    """G-12: the owner fix closed the other cases of this finding; only this case stays a strict xfail."""
-    return pytest.mark.xfail(strict=True, reason=reason)
-
 
 # ------------------------------------------------------------------ malformed numbers
-@pytest.mark.parametrize("name,kw", [("cash-nan", dict(cash=NAN)), pytest.param("days-nan", dict(days=NAN), marks=residual("F-52 residual: NaN days still yields a multiple")), pytest.param("net-nan", dict(net=NAN), marks=residual("F-52 residual: NaN net still yields a class")), ("cash-inf", dict(cash=INF)),
-                                     ("cash-string", dict(cash="50")), pytest.param("net-string", dict(net="60"), marks=residual("F-52 residual: a string net still yields a class")), pytest.param("cash-huge", dict(cash=1e308, net=1e308), marks=residual("F-52 residual: 1e308 crashes build_card (CanonicalError, I-JSON)"))])
+@pytest.mark.parametrize("name,kw", [("cash-nan", dict(cash=NAN)), pytest.param("days-nan", dict(days=NAN)), pytest.param("net-nan", dict(net=NAN)), ("cash-inf", dict(cash=INF)),
+                                     ("cash-string", dict(cash="50")), pytest.param("net-string", dict(net="60")), pytest.param("cash-huge", dict(cash=1e308, net=1e308))])
 def test_a_malformed_number_never_crashes_the_card(mc, profile, name, kw):
     c = build(mc, profile, **kw)
     assert independent_schema_errors(c) == [] and mc.validate_card(c) == []
@@ -167,8 +164,8 @@ def test_zero_bool_and_none_never_produce_a_multiple_or_velocity(mc, profile, na
         assert E(c)["cash_multiple"]["value"] == "UNKNOWN"
 
 
-@pytest.mark.parametrize("name,kw", [("cash-negative", dict(cash=-100)), ("days-negative", dict(days=-5)), pytest.param("days-zero", dict(days=0), marks=residual("F-53 residual: zero days still classified")),
-                                     pytest.param("cash-tiny", dict(cash=1e-9), marks=residual("F-53 residual: 1e-9 cash still classified")), ("cash-zero", dict(cash=0))])
+@pytest.mark.parametrize("name,kw", [("cash-negative", dict(cash=-100)), ("days-negative", dict(days=-5)), pytest.param("days-zero", dict(days=0)),
+                                     pytest.param("cash-tiny", dict(cash=1e-9)), ("cash-zero", dict(cash=0))])
 def test_a_nonsensical_cash_or_time_is_unknown_not_a_class(mc, profile, name, kw):
     e = E(build(mc, profile, **kw))
     assert e["opportunity_class"]["value"] == "UNKNOWN", f"classified from {kw}: {e['opportunity_class']}"
@@ -192,7 +189,7 @@ def test_malformed_class_thresholds_give_unknown_never_a_crash_or_a_silent_class
 
 
 @pytest.mark.parametrize("name,r", [("prob-1.5", dict(sale_prob=1.5)), ("prob-negative", dict(sale_prob=-0.2)), ("dom-negative", dict(expected_dom_days=-3)),
-                                    pytest.param("dom-zero", dict(expected_dom_days=0), marks=residual("F-55 residual: zero days-on-market shown as liquidity"))])
+                                    pytest.param("dom-zero", dict(expected_dom_days=0))])
 def test_an_impossible_liquidity_is_unknown(mc, profile, name, r):
     assert E(build(mc, profile, econ={"resale": r}))["liquidity"]["value"] == "UNKNOWN"
 
@@ -211,8 +208,8 @@ def test_certain_failure_is_probability_one_not_unknown(mc, profile):
     assert E(c)["catastrophic_downside_probability"]["value"] == 1 and E(c)["repair_uncertainty"]["value"] == "high"
 
 
-@pytest.mark.parametrize("name,net,cost,lo,hi", [("reversed", 340, 1760, 2400, 1800), pytest.param("value-outside-range", 5000, 1760, 1800, 2400, marks=residual("F-56 residual: the value may lie outside its low/high")),
-                                                 pytest.param("negative-cost", 340, -500, 1800, 2400, marks=residual("F-56 residual: a negative cost still yields a range"))])
+@pytest.mark.parametrize("name,net,cost,lo,hi", [("reversed", 340, 1760, 2400, 1800), pytest.param("value-outside-range", 5000, 1760, 1800, 2400),
+                                                 pytest.param("negative-cost", 340, -500, 1800, 2400)])
 def test_the_gross_profit_range_is_ordered_and_contains_the_value(mc, profile, name, net, cost, lo, hi):
     it = base_item()
     it["economics"]["resale"].update(comp_price_low=lo, comp_price_expected=2100, comp_price_high=hi)

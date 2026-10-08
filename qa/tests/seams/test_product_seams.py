@@ -18,11 +18,6 @@ NAN, INF = float("nan"), float("inf")
 PROV = "prov_01J9Z0000000000000000000AA"
 
 
-def residual(reason):
-    """G-12: the owner fix closed the other cases of this finding; only this case stays a strict xfail."""
-    return pytest.mark.xfail(strict=True, reason=reason)
-
-
 def load(name):
     return json.loads((EX / name).read_text())
 
@@ -115,12 +110,10 @@ def test_downgrading_or_deleting_a_defect_in_the_inventory_does_not_unlock_untru
     assert lint(setf("body", "Runs great and mows fine."), lambda i: i["defects"][0].update(severity="minor")), "severity downgrade unlocked 'runs great'"
 
 
-@pytest.mark.xfail(strict=True, reason="F-61: an inventory with the defect deleted lints clean against a view without it")
 def test_a_defect_cannot_vanish_between_inventory_versions():
     assert lint(lambda v: v.__setitem__("disclosures", []), lambda i: i.__setitem__("defects", []))
 
 
-@pytest.mark.xfail(strict=True, reason="F-62: a view can attach a provenance_id the inventory fact does not have (the check only runs when the inventory fact has one)")
 def test_a_view_cannot_invent_provenance_for_a_fact():
     assert lint(lambda v: v["facts"][0].update(provenance_id=PROV))
 
@@ -176,9 +169,9 @@ def test_the_projection_and_the_gap_are_derived_never_invented():
 @pytest.mark.parametrize("name,f", [
     ("deploy-no-legs", lambda p: (p.__setitem__("legs", []), p["projected_week"].update(low=0, likely=0, high=0), p.__setitem__("remaining_gap", 1500))),
     ("hold-with-spend", lambda p: p.__setitem__("recommendation", "HOLD")), ("unknown-with-spend", lambda p: p.__setitem__("recommendation", "UNKNOWN")),
-    pytest.param("hours-exceeded", lambda p: p["mission"].update(hours_available=2), marks=residual("F-65 residual: legs needing more hours than available")), pytest.param("period-inverted", lambda p: p["mission"]["period"].update(start="2026-10-11", end="2026-10-05"), marks=residual("F-65 residual: inverted period")),
-    pytest.param("duplicate-scorecard", lambda p: p["legs"][1].update(scorecard_id=p["legs"][0]["scorecard_id"]), marks=residual("F-65 residual: duplicate scorecard in two legs")), pytest.param("stale-ledger", lambda p: p["ledger"].update(as_of="2020-01-01T00:00:00Z"), marks=residual("F-65 residual: ancient ledger as_of")),
-    pytest.param("deploy-with-impairment", lambda p: p["ledger"].update(principal_impairment=100, available_to_deploy=370), marks=residual("F-65 residual: DEPLOY while principal is impaired"))])
+    pytest.param("hours-exceeded", lambda p: p["mission"].update(hours_available=2)), pytest.param("period-inverted", lambda p: p["mission"]["period"].update(start="2026-10-11", end="2026-10-05")),
+    pytest.param("duplicate-scorecard", lambda p: p["legs"][1].update(scorecard_id=p["legs"][0]["scorecard_id"])), pytest.param("stale-ledger", lambda p: p["ledger"].update(as_of="2020-01-01T00:00:00Z")),
+    pytest.param("deploy-with-impairment", lambda p: p["ledger"].update(principal_impairment=100, available_to_deploy=370))])
 def test_a_plan_must_be_coherent(name, f):
     assert mp(f), f"{name} accepted"
 
@@ -217,7 +210,6 @@ def test_an_expired_or_invalid_campaign_does_not_run():
     assert campaign.may_run({}) is False
 
 
-@pytest.mark.xfail(strict=True, reason="F-66: an autopilot whose own limits.expires_at is already in the past validates")
 def test_autopilot_limits_must_not_be_expired_at_creation():
     assert cp(lambda c: c["autonomy"].update(level="BOUNDED_AUTOPILOT", limits={"max_total_spend_usd": 300, "max_offer_usd": 200, "expires_at": "2000-01-01T00:00:00Z"}))
 
@@ -246,11 +238,11 @@ def test_a_home_may_return_all_unknown_with_a_reason():
 
 @pytest.mark.parametrize("name,f", [
     ("fast-sale-above-suggested-list", lambda v: v["ranges"].update(fast_sale={"low": 9000, "high": 9500})),
-    pytest.param("as-is-above-after-repair", lambda v: v["ranges"].update(as_is={"low": 9000, "high": 9500}), marks=residual("F-67 residual: as_is above after-repair values")),
+    pytest.param("as-is-above-after-repair", lambda v: v["ranges"].update(as_is={"low": 9000, "high": 9500}), marks=pytest.mark.xfail(strict=True, reason="F-67 residual: as_is above after-repair values")),
     ("zero-width-fake-precision", lambda v: v["ranges"]["likely_sale"].update(low=1234, high=1234)),
     ("useless-width", lambda v: v["ranges"]["likely_sale"].update(low=1, high=1000000)),
     ("high-on-one-bare-sold-comp", lambda v: (v.__setitem__("confidence", "high"), v.__setitem__("evidence", [{"kind": "sold_comp", "ref": "x"}]))),
-    pytest.param("medium-on-priors-only", lambda v: (v.__setitem__("confidence", "medium"), v.__setitem__("evidence", [{"kind": "prior", "ref": "p"}])), marks=residual("F-67 residual: medium confidence on priors only")),
+    pytest.param("medium-on-priors-only", lambda v: (v.__setitem__("confidence", "medium"), v.__setitem__("evidence", [{"kind": "prior", "ref": "p"}]))),
     ("home-high-on-one-record", lambda v: (v["subject"].update(kind="home"), v.__setitem__("confidence", "high"), v.__setitem__("evidence", [{"kind": "record", "ref": "county"}])))])
 def test_a_valuation_is_internally_consistent_and_confidence_is_earned(name, f):
     assert vp(f), f"{name} accepted"
@@ -258,7 +250,7 @@ def test_a_valuation_is_internally_consistent_and_confidence_is_earned(name, f):
 
 @pytest.mark.parametrize("name,f", [
     ("description-appraised", lambda v: v["subject"].update(description="Certified appraised value $5,000")),
-    pytest.param("note-guaranteed", lambda v: v["evidence"][0].update(note="verified and guaranteed by appraiser"), marks=residual("F-68 residual: 'verified and guaranteed by appraiser' in an evidence note")),
-    pytest.param("null-range-not-in-unknowns", lambda v: (v["ranges"].update(as_is=None), v.__setitem__("unknowns", [])), marks=residual("F-68 residual: null range not reconciled with `unknowns`"))])
+    pytest.param("note-guaranteed", lambda v: v["evidence"][0].update(note="verified and guaranteed by appraiser")),
+    pytest.param("null-range-not-in-unknowns", lambda v: (v["ranges"].update(as_is=None), v.__setitem__("unknowns", [])))])
 def test_a_valuation_never_claims_to_be_an_appraisal_and_lists_its_unknowns(name, f):
     assert vp(f), f"{name} accepted"
