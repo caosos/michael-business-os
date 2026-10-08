@@ -47,9 +47,9 @@ def test_stuck_claim_and_reconciled(env, monkeypatch):
 
 
 def test_budget_refusals_at_approval_and_execution(env):
-    a = env.approved("purchase", estimated_cost={"amount": 1000, "currency": "USD"})   # money bucket: 1 of 3/h
-    b = env.propose("purchase", estimated_cost={"amount": 600, "currency": "USD"})
-    env.gw.record_approval(env.approval(b))                         # daily cap ($1,500) at approval
+    a = env.approved("money", estimated_cost={"amount": 300, "currency": "USD"})   # money bucket: 1 of 3/h
+    b = env.propose("money", estimated_cost={"amount": 300, "currency": "USD"})
+    env.gw.record_approval(env.approval(b))                         # daily cap ($500) at approval
     for _ in range(2):
         env.approved("money", estimated_cost={"amount": 1, "currency": "USD"})        # 3 of 3/h
     fourth = env.propose("money", estimated_cost={"amount": 1, "currency": "USD"})

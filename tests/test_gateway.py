@@ -261,7 +261,7 @@ def test_duplicate_proposal_collapses(env):
 def test_max_cost_over_per_action_cap_refused(env):
     """§17 #9."""
     ar = env.propose("purchase", estimated_cost={"amount": 100, "currency": "USD"},
-                     max_cost={"amount": 1500.01, "currency": "USD"})
+                     max_cost={"amount": 500.01, "currency": "USD"})
     res = env.gw.record_approval(env.approval(ar))
     assert any("BUDGET_PER_ACTION_CAP" in r for r in res.reasons)
     assert any("BUDGET_PER_ACTION_CAP" in r for r in env.gw.execute(ar["action_request_id"]).reasons)
@@ -269,8 +269,8 @@ def test_max_cost_over_per_action_cap_refused(env):
 
 def test_daily_cap_is_hard(env):
     """§17 #10."""
-    a = env.approved("purchase", estimated_cost={"amount": 1000, "currency": "USD"})
-    b = env.propose("purchase", estimated_cost={"amount": 600, "currency": "USD"})
+    a = env.approved("money", estimated_cost={"amount": 300, "currency": "USD"})
+    b = env.propose("money", estimated_cost={"amount": 300, "currency": "USD"})
     env.gw.record_approval(env.approval(b))
     assert env.gw.execute(a["action_request_id"]).outcome == "executed"
     res = env.gw.execute(b["action_request_id"])
@@ -302,7 +302,7 @@ def test_parallel_approvals_never_overshoot(env):
     assert not errors, errors[:3]
     spent = env.sql("SELECT coalesce(sum(reserved - released), 0) FROM mbos.v_budget_reservations")[0][0]
     executed = env.sql("SELECT count(*) FROM mbos.action_requests WHERE status='executed'")[0][0]
-    assert spent <= 1500 and executed == 37  # floor(1500/40)
+    assert spent <= 500 and executed == 12  # floor(500/40)
     assert_ledger_sound(env)
 
 

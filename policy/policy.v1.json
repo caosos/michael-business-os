@@ -1,7 +1,7 @@
 {
   "policy_schema": "mbos.governance.policy/1",
   "policy_id": "wave-one-default-deny",
-  "version": "2026.10.07-w1.10",
+  "version": "2026.10.08-w1.11",
   "description": "Round Two wave one. Everything tier 0, every externally consequential action needs Michael's YES, every effector DRY-RUN, no delegation, no real-world spend. Anything not listed here is DENIED.",
   "system_mode": "mvp",
   "delegation_enabled": false,
@@ -96,11 +96,11 @@
       }
     },
     "dry_run": {
-      "note": "Shadow caps: simulated spend is reserved/committed against these so the budget guard is exercised without spending. Money defaults follow Agent 03 REC ($1,500 per deal) pending MICHAEL_DECISIONS #1.",
-      "global_daily_hard_cap": 2000,
+      "note": "Shadow caps: simulated spend is reserved/committed against these so the budget guard is exercised without spending. Money caps equal the owner-set protected principal ($500, config/operator_profile mission.protected_principal_usd); earned working capital raises the LIVE limit through the capital ledger (available_to_deploy, enforced by the DB), not these shadow caps.",
+      "global_daily_hard_cap": 600,
       "buckets": {
         "comms":      { "per_action_hard_cap": 1,    "daily_hard_cap": 5 },
-        "money":      { "per_action_hard_cap": 1500, "daily_hard_cap": 1500 },
+        "money":      { "per_action_hard_cap": 500,  "daily_hard_cap": 500 },
         "publishing": { "per_action_hard_cap": 50,   "daily_hard_cap": 50 },
         "scheduling": { "per_action_hard_cap": 0,    "daily_hard_cap": 0 }
       }
@@ -120,9 +120,9 @@
     "binding_payload_keys_any_depth": ["offer_amount", "offer_usd", "counter_offer", "bid_amount"],
     "binding_keys_note": "E-16 (06 P-06-16). Reserved names are matched case-insensitively on KEY NAMES only, never values. `binding_payload_keys` are reserved at the TOP LEVEL of a comms.*/publish.* payload (any value, even `binding: false`). `binding_payload_keys_any_depth` are unambiguous amount names reserved at ANY depth. Everything else may be nested freely, so a draft with a nested `binding: false` or `meta.offer` text is allowed. Drafting lanes: pin your planners against these two lists (spine_adapter.binding_key_violations).",
     "cash_at_risk": {
-      "max_per_flip_usd": 1500,
-      "max_total_active_usd": 3000,
-      "basis": "MICHAEL_DECISIONS #1 is UNDECIDED: conservative defaults. Per-flip follows Agent 03 REC ($1,500 per deal); total is 2x. Applies to dry-run (shadow) reservations of offer/purchase requests; live spend stays pinned at 0."
+      "max_per_flip_usd": 500,
+      "max_total_active_usd": 500,
+      "basis": "Total active cash cannot exceed the protected principal ($500, owner-set). Earned working capital raises the LIVE limit through the capital ledger (available_to_deploy, enforced by the DB). Applies to dry-run (shadow) reservations of offer/purchase requests; live spend stays pinned at 0."
     }
   },
 

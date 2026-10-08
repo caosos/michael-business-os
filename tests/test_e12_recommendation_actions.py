@@ -83,7 +83,7 @@ def test_full_flow_offer_counter_buy_dry_run(env):
     for cap, cat, agent in (("offer.email.send", "offer", "agent-06-communications"),
                             ("offer.sms.counter", "offer", "agent-06-communications"),
                             ("purchase.create", "purchase", "agent-01-coordinator")):
-        ar = ar_for(env, cap, cat, agent, estimated_cost={"amount": 300, "currency": "USD"})
+        ar = ar_for(env, cap, cat, agent, estimated_cost={"amount": 150, "currency": "USD"})
         assert env.gw.propose(ar, agent).outcome == "pending_approval"
         weak = env.gw.record_approval(env.approval(ar, auth_context={"method": "webauthn", "step_up": False}))
         assert weak.outcome == "refused" and "STEP_UP_REQUIRED" in weak.reasons
@@ -100,36 +100,36 @@ def test_proposal_via_gateway_refuses_binding_under_comms(env):
 # ---------------------------------------------------------------- cash at risk (MICHAEL_DECISIONS #1 defaults)
 def test_cash_at_risk_per_flip(env):
     item = env.item()
-    a = ar_for(env, "offer.submit", "offer", "agent-01-coordinator", estimated_cost={"amount": 1000, "currency": "USD"})
-    b = ar_for(env, "purchase.create", "purchase", "agent-01-coordinator", estimated_cost={"amount": 600, "currency": "USD"})
+    a = ar_for(env, "offer.submit", "offer", "agent-01-coordinator", estimated_cost={"amount": 300, "currency": "USD"})
+    b = ar_for(env, "purchase.create", "purchase", "agent-01-coordinator", estimated_cost={"amount": 250, "currency": "USD"})
     a["item_id"] = b["item_id"] = item                        # the SAME flip
     for ar in (a, b):
         assert env.gw.propose(ar, "agent-01-coordinator").outcome == "pending_approval"
     assert env.gw.record_approval(env.approval(a)).reasons == []
     res = env.gw.record_approval(env.approval(b))
-    assert res.reasons == [f"CASH_AT_RISK_PER_FLIP:{item}"]   # 1,000 + 600 > 1,500
+    assert res.reasons == [f"CASH_AT_RISK_PER_FLIP:{item}"]   # 300 + 250 > 500
     assert env.gw.execute(b["action_request_id"]).outcome == "refused"
 
 
 def test_cash_at_risk_total_across_flips(env):
-    env.policy_edit(lambda d: d["recommendation_actions"]["cash_at_risk"].update(max_total_active_usd=1200))
+    env.policy_edit(lambda d: d["recommendation_actions"]["cash_at_risk"].update(max_total_active_usd=450))
     env.policy_edit(lambda d: d["budgets"]["velocity"].__setitem__("money_bucket_actions_per_hour", 50))
-    first = env.approved("purchase", estimated_cost={"amount": 700, "currency": "USD"})
-    second = env.propose("offer", estimated_cost={"amount": 600, "currency": "USD"})        # a different flip
+    first = env.approved("purchase", estimated_cost={"amount": 300, "currency": "USD"})
+    second = env.propose("offer", estimated_cost={"amount": 200, "currency": "USD"})        # a different flip
     assert env.gw.record_approval(env.approval(second)).reasons == ["CASH_AT_RISK_TOTAL"]
-    third = env.propose("offer", estimated_cost={"amount": 500, "currency": "USD"})
-    assert env.gw.record_approval(env.approval(third)).reasons == []                          # 700 + 500 = 1,200 fits
+    third = env.propose("offer", estimated_cost={"amount": 150, "currency": "USD"})
+    assert env.gw.record_approval(env.approval(third)).reasons == []                          # 300 + 150 = 450 fits
     assert first
 
 
 def test_released_cash_frees_the_limit(env):
     item = env.item()
-    a = ar_for(env, "offer.submit", "offer", "agent-01-coordinator", estimated_cost={"amount": 1400, "currency": "USD"})
+    a = ar_for(env, "offer.submit", "offer", "agent-01-coordinator", estimated_cost={"amount": 400, "currency": "USD"})
     a["item_id"] = item
     env.gw.propose(a, "agent-01-coordinator"); env.gw.record_approval(env.approval(a))
     env.gw.engage_panic("L3", None, "michael", "stop")                       # cancels + releases the reservation
     env.gw.release_panic("L3", None, "michael", "go")
-    b = ar_for(env, "purchase.create", "purchase", "agent-01-coordinator", estimated_cost={"amount": 1400, "currency": "USD"})
+    b = ar_for(env, "purchase.create", "purchase", "agent-01-coordinator", estimated_cost={"amount": 400, "currency": "USD"})
     b["item_id"] = item
     env.gw.propose(b, "agent-01-coordinator")
     assert env.gw.record_approval(env.approval(b)).reasons == []

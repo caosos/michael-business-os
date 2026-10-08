@@ -80,8 +80,8 @@ def test_transient_refusals_keep_the_approval(env):
     env.approval(sms)                                                        # (approval TTL 24 h: still valid)
     assert env.gw.execute(sms["action_request_id"]).outcome == "executed"
 
-    a = env.approved("purchase", estimated_cost={"amount": 1000, "currency": "USD"})
-    b = env.propose("purchase", estimated_cost={"amount": 600, "currency": "USD"})
+    a = env.approved("money", estimated_cost={"amount": 300, "currency": "USD"})
+    b = env.propose("money", estimated_cost={"amount": 300, "currency": "USD"})
     env.gw.record_approval(env.approval(b))                                  # daily cap refuses the reservation
     env.gw.execute(a["action_request_id"])
     res = env.gw.execute(b["action_request_id"])

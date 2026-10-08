@@ -136,7 +136,7 @@ def test_cli_publish_and_check(env, monkeypatch, capsys):
     assert main(["--policy", str(env.policy_path), "policy", "check"]) == 1          # nothing published yet
     assert main(["--policy", str(env.policy_path), "policy", "publish", "--actor", "michael"]) == 0
     assert main(["--policy", str(env.policy_path), "policy", "check"]) == 0
-    assert "2026.10.07" in capsys.readouterr().out
+    assert "2026.10.08" in capsys.readouterr().out
 
 
 def test_spine_adapter_build_defaults_to_db_policy(env):

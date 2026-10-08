@@ -117,7 +117,7 @@ mbos-gov policy check
 `policy/policy.v1.json` (`version 2026.10.07-w1`) holds the 11-category × tier × threshold matrix, the capability → category → effector map, the agent grants, quiet hours, live and shadow budgets, the money velocity cap, and the LLM-spend caps (which LiteLLM will enforce). `policy/policy.schema.json` validates the file and pins the wave-one invariants. The PDP re-reads the file whenever it changes, and every decision records `policy_version = <version>+<content hash>`. If a reload fails, the PDP refuses. It never falls back to a stale policy.
 
 These defaults wait on Michael's decisions (`MICHAEL_DECISIONS.md`):
-- dry-run shadow caps: money $1,500 per action and per day (Agent 03 REC), comms $5/day, publishing $50/day
+- dry-run shadow caps: money $500 per action and per day (= the protected principal), global $600, comms $5/day, publishing $50/day
 - money velocity: 3 per hour
 - quiet hours: 20:00–08:00 America/Chicago
 
@@ -136,7 +136,7 @@ These defaults wait on Michael's decisions (`MICHAEL_DECISIONS.md`):
   - The PDP also denies a `comms.*` request whose payload carries a binding key (`offer`, `counter_offer`, `offer_amount`, …; a data list) with `BINDING_UNDER_COMMS`.
 - **Reserved binding key names (E-16):** the top-level and any-depth lists are in `docs/governance/RESERVED_PAYLOAD_KEYS.md`. A nested `binding: false` is allowed, and a top-level `offer` is denied.
 - **`step_up_required(ar, policy)`** is the one rule behind the card's `requires_step_up`. The PDP result carries it (`PolicyDecision.step_up`), and the spine adapter appends `step_up=required` to the reason.
-- **Cash at risk (MICHAEL_DECISIONS #1, UNDECIDED, conservative defaults as data):** `max_per_flip_usd 1500` and `max_total_active_usd 3000`.
+- **Cash at risk (E-23, owner ruling):** `max_per_flip_usd 500` and `max_total_active_usd 500`. Total active cash cannot exceed the protected principal (`mission.protected_principal_usd`, $500); earned working capital raises the LIVE limit through the capital ledger (`available_to_deploy`, enforced by the DB), not these shadow caps. A test pins every cap to the operator profile.
   - Outstanding offer and purchase reservations (reserved minus released) are summed under the budget lock.
   - The refusals are `CASH_AT_RISK_PER_FLIP:<item>` and `CASH_AT_RISK_TOTAL`.
   - The limits apply to dry-run reservations. Live spend stays pinned at 0.

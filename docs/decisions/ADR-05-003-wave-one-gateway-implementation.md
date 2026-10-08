@@ -40,7 +40,7 @@ ADR-0005 (ACCEPTED) adopted the Agent 05 gateway with a merged 3-level PANIC. It
   - bait-and-switch
   - double delivery
   - crash with no blind retry
-  - 100 parallel approvals never overshooting (exactly ⌊1500/40⌋ = 37 executed)
+  - 100 parallel approvals never overshooting (exactly ⌊500/40⌋ = 12 executed)
   - L1, L2 and L3
   - unreadable PANIC or policy fails closed
   - a forged effector token refused

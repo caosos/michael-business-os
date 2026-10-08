@@ -173,7 +173,7 @@ def test_pdp_decisions(env, gov):
     _, _, p = gov
     ok = p.decide(env.ar("email"))
     assert isinstance(ok, I.PolicyDecision) and (ok.decision, ok.tier, ok.category) == ("require_approval", 0, "email")
-    assert ok.policy_version.startswith("2026.10.07")
+    assert ok.policy_version.startswith("2026.10.08")
     bad = p.decide({**env.ar("email"), "capability": "comms.fax.send"})
     assert bad.decision == "deny" and "UNKNOWN_CAPABILITY" in bad.reason
     assert p.decide({"category": "money"}).decision == "deny"           # malformed draft: fail closed

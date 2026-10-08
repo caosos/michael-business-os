@@ -6,7 +6,7 @@ Branch: research/agent-05-governance
 Worktree: /home/michaelos/business-os-worktrees/agent-05-governance
 State: CLOSED
 Last head: see `git log -1` on origin/research/agent-05-governance (handoff: docs/handoff/LANE_05.md)
-Last updated: 2026-10-07 (lane closeout, ADR-0014; everything DRY-RUN)
+Last updated: 2026-10-08 (E-23 cash caps; everything DRY-RUN)
 
 ## Where to start
 Read `docs/handoff/LANE_05.md`. It has the commands, the interfaces and the pitfalls. This file is the ledger of what is done and what is proposed.
@@ -31,6 +31,7 @@ Done: E-16 @ 716098e (binding keys: top-level reserved names + any-depth amount 
 Done: E-17 @ 4474c1d (campaigns policy data pinned by schema; WATCH_ONLY/RECOMMEND no action; ASSISTED_DEAL draft-only offer.*/comms.* + step-up; BOUNDED_AUTOPILOT AUTOPILOT_NOT_AUTHORIZED even with valid limits; unknown level fail closed; campaign-sourced requests tainted, cannot skip approval; 598 tests)
 Done: E-18 @ a5c8a98 (policy/trust vocabulary + reputation events + penalty ladder with appeal + payment boundary spec; validators reject bare 'verified' and evidence-less penalty; money.payment.* granted to nobody; 519 tests)
 Done: E-19 @ 44f6d62 (jurisdiction pack format + eligibility(job, packs): missing pack/chain/threshold field/conflict/unresolved/expired => UNKNOWN; stale date_verified lowers confidence; uncertainty never removes a requirement; no local law hard-coded; synthetic sample:true fixture, no legal fact; 550 tests)
+Done: E-23 @ COMMIT (queue-row E-23: cash caps = protected principal $500, global 600, policy 2026.10.08-w1.11; 601 tests)
 Done: X-03 (checked 2026-10-07: `git ls-files | grep ^build/` empty; build/ and *.egg-info/ are in .gitignore)
 Done: B-04 lane-E half @ d3b9948 (02's fixture applies + blocks exactly that source; auto-apply decided, release human-only)
 
