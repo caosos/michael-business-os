@@ -17,12 +17,13 @@ Done: G-07 final pass @ 5312f47 — card 248/0; RC READY 105/0; reference 104/0 
 Done: G-08 — A-15 follow-up: F-42 (orphan on crash), F-45 (concurrent double submit → 2 live requests), F-43, F-44; release gate goes red on failing test / modified installed code / live-mode policy / broken chain formula, but NOT on weakened contract (F-46), all-skipped suite (F-47), extra/json stale install (F-48); e2e executes no action (F-49). Receipt docs/receipts/2026-10-07-G-08-followup-and-release-gate.md
 Done: G-09 — F-42..F-49 verified FIXED (follow-up 34/34 on lane D+E; gate red on each planted fault); residual F-50 (P3). Receipt docs/receipts/2026-10-07-G-09-reverify-g08-fixes.md
 Done: G-10 — ADR-0012 card + engine half: floor-free and honest where it counts; F-51..F-58 filed (3 P2). Receipt docs/receipts/2026-10-07-G-10-adr0012-acceptance.md
+Done: G-12 @ PENDING — RC READY 105/0 at mbos 8ef8802; card 436/0; 68 strict xfails flipped (F-51,54,57..60,63,64 fixed; F-52,53,55,56,61,62,65..68 partial, 21 residual xfails). Receipt docs/receipts/2026-10-07-G-12-release-window-rerun.md
 Done: G-11 — product seams: 48 controls hold; F-59..F-68 filed (F-59 merchandising lint bypass is P1). Receipt docs/receipts/2026-10-07-G-11-product-seams-acceptance.md
-Claimed: (none) — lane CLOSED per ADR-0014; handoff docs/handoff/LANE_07.md. Re-verify RC any time: `cd qa && ../.venv/bin/python -m mbos_qa install-pins && ../.venv/bin/python -m mbos_qa spine --rc` (105 passed, 3 skipped at mbos 51dbd51)
-Waiting on: owners to fix F-50..F-68 (F-59 merchandising lint bypass is P1); table with repros in docs/handoff/LANE_07.md. Re-run any time: `python -m mbos_qa install-pins`, then `card` and `spine --rc`.
+Claimed: (none) — lane CLOSED per ADR-0014; handoff docs/handoff/LANE_07.md. Re-verify RC any time: `cd qa && ../.venv/bin/python -m mbos_qa install-pins && ../.venv/bin/python -m mbos_qa spine --rc` (105 passed, 3 skipped at mbos 8ef8802)
+Waiting on: owner 01 for F-50 and the G-12 residuals of F-52,53,55,56,61,62,65..68 (P-07-19); table with repros in docs/handoff/LANE_07.md. Re-run any time: `python -m mbos_qa install-pins`, then `card` and `spine --rc`.
 Current phase: Round Two — G-07 delivered; waiting on the remaining card fixes
 Started: 2026-10-06 (round one) · 2026-10-07 (round two)
-Last updated: 2026-10-07
+Last updated: 2026-10-07 (G-12)
 
 ## Work queue (foreman loop, docs/COORDINATION.md)
 - **Done: G-01 @ 9cbce70.**
@@ -64,6 +65,7 @@ Last updated: 2026-10-07
 - Receipt: `docs/receipts/2026-10-07-G-07-final-rerun.md`.
 
 ## Proposed tasks
+- **P-07-19 (01) G-12 residuals:** close the 21 remaining strict-xfail cases (F-52 NaN days/net, string net, 1e308; F-53 zero days, 1e-9 cash; F-55 zero DOM; F-56 value outside range, negative cost; F-61 defect deleted in both; F-62 invented provenance_id; F-65 hours/period/duplicate/stale/impairment; F-66 expired autopilot limits; F-67 as_is order, medium-on-priors; F-68 'guaranteed' note, unknowns reconciliation). Repro: `cd qa && PYTHONPATH=. ../.venv/bin/python -m pytest -q tests/card tests/seams -rx`.
 - **P-07-18 (01) F-36:** isolate each record in `discover` (try/except around normalize_step, convert domain errors to picklable ones), so one bad listing cannot abort the batch regardless of the normalizer.
 - **P-07-16 (01 + 05) F-40:** `decide` consults the PDP's step_up requirement on the request and refuses a YES that lacks it; a guard-refused request settles failed, not `approved`.
 - **P-07-17 (05) F-41:** per-lane propose grants (06: comms; 07: publishing), the spine identity limited to what its default planner emits.

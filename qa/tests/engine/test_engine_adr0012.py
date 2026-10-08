@@ -8,7 +8,7 @@ from decimal import Decimal
 
 import pytest
 
-from .conftest import QA, score
+from .conftest import QA, score, with_profile_cash
 
 PROFILE = json.loads((QA / "ext" / "operator_profile.v1.json").read_text())["deal_classes"]
 
@@ -90,16 +90,18 @@ def test_the_30_dollar_tv_is_a_micro_flip_and_is_not_passed(eco):
 
 
 def test_the_late_season_mower_is_capital_intensive_and_ranks_low_today(eco):
+    """RESTATED (G-12): C-23 refuses a per-item `current_cash` (F-57 fix), so tight/loose cash is set through the profile-mirrored
+    config `operator_context.current_cash`; the assertion (tighter cash => stronger pressure) is unchanged."""
     s = score(eco, "mower_late_season")
     assert s["derived"]["deal_class"] == "CAPITAL_INTENSIVE_FLIP"
     in_season = score(eco, "mower_late_season", lambda e: e["context"].update(seasonality_factor=1))
     assert s["ranking"]["rank_score"] < in_season["ranking"]["rank_score"] * 0.5, "late season must cut today's rank sharply"
-    tight = score(eco, "mower_late_season", lambda e: e["context"].update(current_cash=900))
-    loose = score(eco, "mower_late_season", lambda e: e["context"].update(current_cash=50000))
+    drop = lambda e: e["context"].pop("current_cash", None)  # noqa: E731
+    tight = score(eco, "mower_late_season", drop, with_profile_cash(eco, 900))
+    loose = score(eco, "mower_late_season", drop, with_profile_cash(eco, 50000))
     assert tight["ranking"]["cash_pressure_factor"] < loose["ranking"]["cash_pressure_factor"] <= 1
 
 
-@pytest.mark.xfail(strict=True, reason="F-58: a late-season mower with tight funds is only a low rank_score; no reason line says 'wrong buy today' (season, cash pressure)")
 def test_the_late_season_mower_is_flagged_as_the_wrong_buy_today_in_words(eco):
     s = score(eco, "mower_late_season")
     said = [r for r in s["reasons"] if "rank score" not in r.lower() and re.search(r"(?i)season|cash pressure|funds|wrong buy|tight", r)]
@@ -134,9 +136,8 @@ def test_without_a_stated_cash_the_engine_applies_no_pressure(eco):
     assert s["ranking"]["cash_pressure_factor"] == 1 and s["ranking"]["cash_share_of_current_cash"] is None
 
 
-@pytest.mark.xfail(strict=True, reason="F-57: the engine takes `current_cash` from the item (any lane can write it) and applies a pressure factor; the card says UNKNOWN because only Michael's profile may state it")
 def test_cash_context_has_a_single_michael_stated_source(eco):
-    s = score(eco, "mower_late_season")  # the case carries context.current_cash = 1200 with no profile statement
+    s = score(eco, "mower_late_season")  # F-57 fixed by C-23: per-item current_cash is refused; the profile states none
     assert s["derived"]["current_cash_context"]["known"] is False
 
 

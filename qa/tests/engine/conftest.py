@@ -37,11 +37,22 @@ def eco(tmp_path_factory):
     yield ns
 
 
-def score(eco, name, mutate=None):
+def score(eco, name, mutate=None, cfg=None):
     it = eco.cases.fresh(name)
     if mutate:
         mutate(it["economics"])
-    return eco.engine.score_item(it, eco.cfg, eco.scored_at)["scores"]["scorecard"]
+    return eco.engine.score_item(it, cfg or eco.cfg, eco.scored_at)["scores"]["scorecard"]
+
+
+def with_profile_cash(eco, value):
+    """C-23: current cash comes only from Michael's profile, mirrored into config `operator_context.current_cash`."""
+    import copy
+    import dataclasses
+    from decimal import Decimal
+
+    raw = copy.deepcopy(eco.cfg.raw)
+    raw["operator_context"]["current_cash"]["value"] = Decimal(value)
+    return dataclasses.replace(eco.cfg, raw=raw)
 
 
 @pytest.fixture(scope="session")

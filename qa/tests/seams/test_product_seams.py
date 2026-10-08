@@ -18,6 +18,11 @@ NAN, INF = float("nan"), float("inf")
 PROV = "prov_01J9Z0000000000000000000AA"
 
 
+def residual(reason):
+    """G-12: the owner fix closed the other cases of this finding; only this case stays a strict xfail."""
+    return pytest.mark.xfail(strict=True, reason=reason)
+
+
 def load(name):
     return json.loads((EX / name).read_text())
 
@@ -86,31 +91,26 @@ EUPHEMISMS = ["Runs when it wants to. Sold as is, minor cosmetic smoke.", "Start
 OBFUSCATED = ["Runs g r e a t.", "Runs gr​eat.", "Like  new condition.", "like new", "L1KE NEW", "lіke new", "NOTHING   WRONG with it."]
 
 
-@pytest.mark.xfail(strict=True, reason="F-59: prose that minimises or denies a material defect passes unless it hits a short regex list")
 @pytest.mark.parametrize("txt", EUPHEMISMS, ids=[t[:40] for t in EUPHEMISMS])
 def test_euphemisms_for_a_material_defect_are_caught(txt):
     assert lint(setf("body", txt)), f"slipped: {txt!r}"
 
 
-@pytest.mark.xfail(strict=True, reason="F-59: the claim regexes use literal single spaces and ASCII letters (nbsp, double space, zero-width, leet, homoglyph pass)")
 @pytest.mark.parametrize("txt", OBFUSCATED, ids=["spaced", "zero-width", "double-space", "nbsp", "leet", "cyrillic-i", "multi-space"])
 def test_obfuscated_overstatements_are_caught(txt):
     assert lint(setf("body", txt)), f"slipped: {txt!r}"
 
 
-@pytest.mark.xfail(strict=True, reason="F-60: a material defect need not appear in the prose at all, and the label is not linted against the defects")
 def test_a_material_defect_must_be_visible_in_the_headline_or_start_of_the_body():
     fluff = "Great deal on a classic mower. " * 120
     assert lint(setf("body", fluff[:3900])), "3900 chars of fluff with the defect only in the disclosures list"
 
 
-@pytest.mark.xfail(strict=True, reason="F-60: label 'Ready to Work' / 'Quick Turn' on a mower with a material defect")
 @pytest.mark.parametrize("label", ["Ready to Work", "Quick Turn"])
 def test_a_label_cannot_overstate_a_material_defect(label):
     assert lint(lambda v: (v.__setitem__("label", label), v.__setitem__("headline", "Ready to work riding mower"))), label
 
 
-@pytest.mark.xfail(strict=True, reason="F-61: lowering a defect's severity in the inventory (or deleting it) switches off the prose checks; the lint trusts the inventory")
 def test_downgrading_or_deleting_a_defect_in_the_inventory_does_not_unlock_untruthful_prose():
     assert lint(setf("body", "Runs great and mows fine."), lambda i: i["defects"][0].update(severity="minor")), "severity downgrade unlocked 'runs great'"
 
@@ -125,7 +125,6 @@ def test_a_view_cannot_invent_provenance_for_a_fact():
     assert lint(lambda v: v["facts"][0].update(provenance_id=PROV))
 
 
-@pytest.mark.xfail(strict=True, reason="F-62: the verification-claim check is disabled as soon as ANY fact is verified (an unrelated VIN check unlocks 'inspected, certified, tested and working')")
 def test_a_verification_claim_needs_a_verified_fact_about_that_claim():
     def inv_f(i):
         i["facts"][0].update(basis="verified", provenance_id=PROV)
@@ -156,7 +155,6 @@ def test_mission_plan_invariants_that_hold(name, f):
     assert mp(f), f"{name} slipped"
 
 
-@pytest.mark.xfail(strict=True, reason="F-63: NaN / Infinity pass every mission, campaign and valuation comparison (all comparisons with NaN are false)")
 @pytest.mark.parametrize("what,fn", [
     ("ledger-available-nan", lambda: mp(lambda p: p["ledger"].update(available_to_deploy=NAN))),
     ("ledger-deployed-nan", lambda: mp(lambda p: p["ledger"].update(capital_deployed=NAN))),
@@ -170,19 +168,17 @@ def test_non_finite_numbers_are_rejected(what, fn):
     assert fn(), f"{what} accepted"
 
 
-@pytest.mark.xfail(strict=True, reason="F-64: remaining_gap is only checked when projected_week.likely is known (a null projection with gap 0 'closes' the mission); projected_week is not tied to the legs")
 def test_the_projection_and_the_gap_are_derived_never_invented():
     assert mp(lambda p: (p["projected_week"].update(low=None, likely=None, high=None), p.__setitem__("remaining_gap", 0))), "null projection with gap 0"
     assert mp(lambda p: (p["projected_week"].update(low=9000, likely=9500, high=9999), p.__setitem__("remaining_gap", 1500 - 9500))), "9500 projected from legs worth 455"
 
 
-@pytest.mark.xfail(strict=True, reason="F-65: plan coherence: DEPLOY with no legs, HOLD/UNKNOWN that still spend, legs needing more hours than available, inverted period, duplicate scorecards, ancient as_of")
 @pytest.mark.parametrize("name,f", [
     ("deploy-no-legs", lambda p: (p.__setitem__("legs", []), p["projected_week"].update(low=0, likely=0, high=0), p.__setitem__("remaining_gap", 1500))),
     ("hold-with-spend", lambda p: p.__setitem__("recommendation", "HOLD")), ("unknown-with-spend", lambda p: p.__setitem__("recommendation", "UNKNOWN")),
-    ("hours-exceeded", lambda p: p["mission"].update(hours_available=2)), ("period-inverted", lambda p: p["mission"]["period"].update(start="2026-10-11", end="2026-10-05")),
-    ("duplicate-scorecard", lambda p: p["legs"][1].update(scorecard_id=p["legs"][0]["scorecard_id"])), ("stale-ledger", lambda p: p["ledger"].update(as_of="2020-01-01T00:00:00Z")),
-    ("deploy-with-impairment", lambda p: p["ledger"].update(principal_impairment=100, available_to_deploy=370))])
+    pytest.param("hours-exceeded", lambda p: p["mission"].update(hours_available=2), marks=residual("F-65 residual: legs needing more hours than available")), pytest.param("period-inverted", lambda p: p["mission"]["period"].update(start="2026-10-11", end="2026-10-05"), marks=residual("F-65 residual: inverted period")),
+    pytest.param("duplicate-scorecard", lambda p: p["legs"][1].update(scorecard_id=p["legs"][0]["scorecard_id"]), marks=residual("F-65 residual: duplicate scorecard in two legs")), pytest.param("stale-ledger", lambda p: p["ledger"].update(as_of="2020-01-01T00:00:00Z"), marks=residual("F-65 residual: ancient ledger as_of")),
+    pytest.param("deploy-with-impairment", lambda p: p["ledger"].update(principal_impairment=100, available_to_deploy=370), marks=residual("F-65 residual: DEPLOY while principal is impaired"))])
 def test_a_plan_must_be_coherent(name, f):
     assert mp(f), f"{name} accepted"
 
@@ -213,7 +209,6 @@ def test_only_watch_only_and_recommend_may_run_and_only_when_active():
         assert campaign.may_run(c) is want, (level, status)
 
 
-@pytest.mark.xfail(strict=True, reason="F-66: `may_run` ignores expiry (stop_conditions.expires_at and limits.expires_at in the past stay runnable), and raises KeyError on an invalid document instead of returning False")
 def test_an_expired_or_invalid_campaign_does_not_run():
     c = copy.deepcopy(CAMP)
     c["autonomy"]["level"], c["status"] = "RECOMMEND", "ACTIVE"
@@ -249,23 +244,21 @@ def test_a_home_may_return_all_unknown_with_a_reason():
     assert valuation.errors(load("valuation--home-unknown.example.json")) == []
 
 
-@pytest.mark.xfail(strict=True, reason="F-67: ranges are not checked against each other or for fake precision; confidence 'high'/'medium' rests on a single unprovenanced ref")
 @pytest.mark.parametrize("name,f", [
     ("fast-sale-above-suggested-list", lambda v: v["ranges"].update(fast_sale={"low": 9000, "high": 9500})),
-    ("as-is-above-after-repair", lambda v: v["ranges"].update(as_is={"low": 9000, "high": 9500})),
+    pytest.param("as-is-above-after-repair", lambda v: v["ranges"].update(as_is={"low": 9000, "high": 9500}), marks=residual("F-67 residual: as_is above after-repair values")),
     ("zero-width-fake-precision", lambda v: v["ranges"]["likely_sale"].update(low=1234, high=1234)),
     ("useless-width", lambda v: v["ranges"]["likely_sale"].update(low=1, high=1000000)),
     ("high-on-one-bare-sold-comp", lambda v: (v.__setitem__("confidence", "high"), v.__setitem__("evidence", [{"kind": "sold_comp", "ref": "x"}]))),
-    ("medium-on-priors-only", lambda v: (v.__setitem__("confidence", "medium"), v.__setitem__("evidence", [{"kind": "prior", "ref": "p"}]))),
+    pytest.param("medium-on-priors-only", lambda v: (v.__setitem__("confidence", "medium"), v.__setitem__("evidence", [{"kind": "prior", "ref": "p"}])), marks=residual("F-67 residual: medium confidence on priors only")),
     ("home-high-on-one-record", lambda v: (v["subject"].update(kind="home"), v.__setitem__("confidence", "high"), v.__setitem__("evidence", [{"kind": "record", "ref": "county"}])))])
 def test_a_valuation_is_internally_consistent_and_confidence_is_earned(name, f):
     assert vp(f), f"{name} accepted"
 
 
-@pytest.mark.xfail(strict=True, reason="F-68: free text may call the estimate an appraisal / verified / guaranteed; `unknowns` is not reconciled with the null ranges")
 @pytest.mark.parametrize("name,f", [
     ("description-appraised", lambda v: v["subject"].update(description="Certified appraised value $5,000")),
-    ("note-guaranteed", lambda v: v["evidence"][0].update(note="verified and guaranteed by appraiser")),
-    ("null-range-not-in-unknowns", lambda v: (v["ranges"].update(as_is=None), v.__setitem__("unknowns", [])))])
+    pytest.param("note-guaranteed", lambda v: v["evidence"][0].update(note="verified and guaranteed by appraiser"), marks=residual("F-68 residual: 'verified and guaranteed by appraiser' in an evidence note")),
+    pytest.param("null-range-not-in-unknowns", lambda v: (v["ranges"].update(as_is=None), v.__setitem__("unknowns", [])), marks=residual("F-68 residual: null range not reconciled with `unknowns`"))])
 def test_a_valuation_never_claims_to_be_an_appraisal_and_lists_its_unknowns(name, f):
     assert vp(f), f"{name} accepted"

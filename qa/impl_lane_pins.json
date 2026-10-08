@@ -1,8 +1,8 @@
 {
- "note": "G-10: 01 mbos 51dbd51 (ADR-0012 card fields, A-24..A-27); 05 716098e; 04 c97ba6b; 03 engine 4f49c8b/3c3201c checked via git archive only.",
- "mbos_01": "51dbd51ebadd06e200efd27718c74673535efef5",
+ "note": "G-12: 01 mbos 8ef8802 (A-32..A-34); 05 716098e; 04 c97ba6b; 03 engine 3eb358f (C-23) checked via git archive only.",
+ "mbos_01": "8ef88026c9075d87971bf4cf3b8db2af17e46adc",
  "lane_d_04": "c97ba6bb78bb20c3fdbcbebbc1f78d044c5d3ee8",
  "lane_e_05": "716098eb1b592e0f96a109606b753650e9e655d5",
  "lane_c_03_not_installed": "3d6212c3b1b5441ee4de4e63486f5e28a8e02a7e",
- "lane_c_03_engine": "5ae60e47d25806796783c382c8b51f9f269f94c5"
+ "lane_c_03_engine": "3eb358f84bf62e2969ec4cb8cc4a62638a1229c0"
 }
