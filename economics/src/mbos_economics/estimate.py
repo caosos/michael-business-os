@@ -44,7 +44,7 @@ from . import __version__ as ESTIMATOR_VERSION
 from .canonical import CanonicalError, content_hash, derived_ulid, parse_ts
 from .comps import aggregate_sold_comps
 from .config import CONFIG_DIR, ScoringConfig, load_config
-from .inputs import FLIP_CATEGORIES, SERVICE_CATEGORIES
+from .inputs import FLIP_CATEGORIES, SERVICE_CATEGORIES, scope_overrides
 from .logistics import classify_transport, transport_input
 from .numeric import D, ONE, ZERO, fine, money, to_json_number
 
@@ -206,7 +206,8 @@ def _apply_overrides(econ: dict, bundle: dict, led: _Ledger) -> None:
         econ[block][field] = o["value"]
         led.assumptions = [a for a in led.assumptions if a["field"] != f"economics.{path}"]
         led.note(f"economics.{path}", o["value"], o["basis"],
-                 f"override from research ({o['provenance_id']})" + (f": {o['note']}" if o.get("note") else ""))
+                 ("human-attested override" if o.get("human_attested") else "override from research")
+                 + f" ({o['provenance_id']})" + (f": {o['note']}" if o.get("note") else ""))
 
 
 def _num(x: Decimal) -> int | float:
@@ -577,6 +578,9 @@ def estimate_item(item: dict, bundle: dict | None, as_of: str, *, priors: Scorin
         if inline:
             bundle["overrides"] = {**(bundle.get("overrides") or {}), **inline}
         _inline_evidence(item, bundle)
+    human = scope_overrides(item)
+    if human:
+        bundle["overrides"] = {**(bundle.get("overrides") or {}), **human}   # C-27: Michael's stated scope wins
     _validate_bundle(bundle)
     scfg = scoring_cfg or load_config()
     led = _Ledger()

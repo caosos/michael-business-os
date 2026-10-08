@@ -1,0 +1,8 @@
+# Receipt: C-27 human scope overrides feed the engine (F-106)
+Tags: FACT / INFERENCE / UNKNOWN. DRY-RUN; nothing sent, spent or published.
+
+- FACT: `economics/src/mbos_economics/inputs.py` `scope_overrides(item)` reads `Item.research` entries with `field = scope_override:<rehab|job>.<field>`, a `value`, a basis (FACT|INFER|REC|UNK), a human `provenance_id` and a named `entered_by`. Allowed fields: rehab parts_cost / labor_hours / admin_hours / required_skills; job labor_hours / materials_cost / admin_hours / required_skills. Negative, boolean, UNKNOWN-basis, author-less or provenance-less records are ignored; the last record per field wins.
+- FACT: `estimate_item` merges them into the bundle overrides (they win over inline and priors); the assumption note reads "human-attested override (prov_...)" and the provenance record's `derived_from` includes the human provenance id. `scope_override_required` clears once rehab/job parts-or-materials, hours and skills are all recorded.
+- FACT: tests `tests/test_c27_scope_override.py` (4): unknown flip and unknown service move from `scope_override_required` to `estimated`; invalid records ignored; deterministic hash. Suite: 381 passed, 22 skipped (was 377).
+- INFERENCE: the owner-channel writer (04 stores the record and its receipt; 06 form) must write the research entry in the shape above. Part (a), a service quote input, is NOT done here: the quote field needs an owner decision on where Michael's set quote lands in the job block (MICHAEL_DECISIONS #6, quote rate) and a 04 store; filed as a follow-up.
+- UNKNOWN: whether the spine's `record_*` helper for this entry exists; 04/01 to add alongside `record_attestation`.

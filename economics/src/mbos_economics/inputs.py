@@ -65,6 +65,39 @@ def attested_keys(item: dict) -> list[str]:
     return sorted(keys)
 
 
+# C-27 / F-106. A scope override for a truly unknown category is an Item.research entry (spine human provenance,
+# receipted by the owner channel) whose ``field`` is ``scope_override:<block>.<field>`` and whose ``value`` is the
+# number (or skill list) Michael stated. ``estimate_item`` feeds them to the engine as human-attested overrides.
+SCOPE_PREFIX = "scope_override:"
+SCOPE_FIELDS = {"rehab": {"parts_cost", "labor_hours", "admin_hours", "required_skills"},
+                "job": {"labor_hours", "materials_cost", "admin_hours", "required_skills"}}
+
+
+def scope_overrides(item: dict) -> dict:
+    """Valid human scope overrides on this Item as estimator bundle overrides (last entry per field wins).
+    Needs a named author (``entered_by``), a provenance id and a basis other than UNKNOWN; a bad value is skipped."""
+    out: dict = {}
+    for r in item.get("research") or []:
+        f = r.get("field")
+        if not (isinstance(f, str) and f.startswith(SCOPE_PREFIX)):
+            continue
+        path = f[len(SCOPE_PREFIX):]
+        block, _, field = path.partition(".")
+        v, basis = r.get("value"), r.get("basis")
+        if field not in SCOPE_FIELDS.get(block, ()) or basis not in ("FACT", "INFER", "REC", "UNK"):
+            continue
+        if not (r.get("entered_by") and str(r.get("provenance_id", "")).startswith("prov_")):
+            continue
+        if field == "required_skills":
+            ok = isinstance(v, list) and bool(v) and all(isinstance(x, str) and x for x in v)
+        else:
+            ok = isinstance(v, (int, float)) and not isinstance(v, bool) and v >= 0
+        if ok:
+            out[path] = {"value": v, "basis": basis, "provenance_id": r["provenance_id"], "human_attested": True,
+                         "note": f"stated by {r['entered_by']}"}
+    return out
+
+
 def build_engine_input(item: dict) -> dict:
     """Project an Item v1 onto the engine input. Pure; does not mutate ``item``."""
     loc = (item.get("normalized") or {}).get("location") or {}
