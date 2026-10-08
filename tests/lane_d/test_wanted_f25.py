@@ -108,3 +108,47 @@ def test_double_submit_loser_sees_already_recorded(rtd, ui_least, monkeypatch): 
     s, loc, _ = post(ui_least, "/numbers/capital", kind="withdraw", amount="900", nonce="raceF2600")
     assert s == 303 and "already" in loc and "7.00" in loc and "900" not in loc and "duplicate" not in loc.lower()
     assert issubclass(AlreadyRecorded, Exception)
+
+
+def _race(ui, path, n, **form):
+    """F-27: n threads POST the same form (same nonce) at the real server at once; returns [(status, Location, body)]."""
+    import threading
+
+    out, gate = [None] * n, threading.Barrier(n)
+
+    def go(i):
+        gate.wait()
+        out[i] = post(ui, path, **form)
+
+    ts = [threading.Thread(target=go, args=(i,)) for i in range(n)]
+    [t.start() for t in ts]
+    [t.join() for t in ts]
+    return out
+
+
+def _clean(res):
+    for s, loc, body in res:
+        text = (loc + re.sub(r"<[^>]+>", " ", re.sub(r"<style.*?</style>", "", body, flags=re.S))).lower()  # the message, not the CSS
+        assert s in (303, 200), (s, loc, body[:300])
+        assert not any(w in text for w in ("duplicate", "unique", "violat", "the store refused", "sqlstate", "traceback")), (loc, text[text.find("not saved"):][:400])
+
+
+def test_real_concurrent_capital_double_submit_records_once_and_shows_no_db_error(rtd, ui_least, monkeypatch):  # F-27
+    from operator_ui import numbers_view
+
+    real = numbers_view.limits  # earlier tests in the session may have used up the cumulative cap; this one needs headroom
+    monkeypatch.setattr(numbers_view, "limits", lambda: {**real(), "max_total_funded_usd": 10**9})
+    res = _race(ui_least, "/numbers/capital", 8, kind="fund", amount="3", nonce="raceF27cap")
+    _clean(res)
+    with rtd.engine.connect() as c:
+        n = c.execute(sa.text("SELECT count(*) FROM mbos.receipts WHERE idempotency_key LIKE '%raceF27cap'")).scalar()
+    assert n == 1
+    assert sum(1 for s, loc, _ in res if "already" in loc) >= 1
+
+
+def test_real_concurrent_wanted_create_double_submit_records_once_and_shows_no_db_error(rtd, ui_least):  # F-27
+    before = len(rows(rtd))
+    res = _race(ui_least, "/wanted/create", 8, nonce="raceF27wnt", **TRAILER)
+    _clean(res)
+    assert len(rows(rtd)) == before + 1
+    assert sum(1 for s, loc, b in res if "already" in (loc + b)) >= 1

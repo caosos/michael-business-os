@@ -264,14 +264,20 @@ class SpineBackend:
                 pid = c.execute(sa.text("SELECT mbos.record_provenance(CAST(:p AS jsonb))"), {"p": json.dumps(prov)}).scalar_one()
                 actor = json.dumps({"type": "human", "id": entered_by})
                 return c.execute(sa.text(sql), {**params, "a": actor, "p": [pid]}).scalar_one()
-        except sa.exc.IntegrityError as ex:
-            if getattr(getattr(ex, "orig", None), "sqlstate", None) == "23505" or "duplicate key" in str(ex.orig).lower():
-                raise AlreadyRecorded() from None  # F-84: the double-submit loser; the winner's receipt is the answer
-            msg = str(getattr(ex, "orig", ex)).strip().splitlines()[0]
-            raise NumbersRefused([f"the store refused it: {msg}"]) from None
         except sa.exc.DBAPIError as ex:
+            # F-27: a double-submit loser can fail as a unique violation OR as "no receipt for ..." (the replay appended none). Either
+            # way, if the winner's receipt exists under this key the answer is "already recorded", never the raw database text.
+            if self._receipt_for(params.get("k")):
+                raise AlreadyRecorded() from None
             msg = str(getattr(ex, "orig", ex)).strip().splitlines()[0]
             raise NumbersRefused([f"the store refused it: {msg}"]) from None
+
+    def _receipt_for(self, key):
+        """The receipt id recorded under an idempotency key (a fresh connection, so the winner's commit is visible), else None."""
+        if not key:
+            return None
+        with self.engine.connect() as c:
+            return c.execute(sa.text("SELECT receipt_id FROM mbos.receipts WHERE idempotency_key = :k"), {"k": key}).scalar()
 
     def set_mission(self, mission: dict, entered_by: str, key: str) -> str:
         import json

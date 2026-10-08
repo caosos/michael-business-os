@@ -1,0 +1,7 @@
+# Receipt: F-27 finish F-84, real concurrent double-submit (lane 06, DRY-RUN)
+
+- **Finding reproduced first (FACT):** 8 threads POSTing the same form to the real server showed losers `the store refused it: mbos: no receipt for {config_version_bumped} entity_id = cmp_...` on /wanted (the replayed write appended no receipt, so the DB raised a non-unique error that F-26's 23505-only catch missed).
+- **Fix:** `SpineBackend._owner_write` now catches any `DBAPIError`; if a receipt already exists under the request's idempotency key (checked on a fresh connection) it raises `AlreadyRecorded`, and the server composes "already submitted ... (receipt <id>)" from that receipt. Otherwise the refusal text is unchanged. No raw DB text for a loser.
+- **Tests (`tests/lane_d/test_wanted_f25.py`):** two real-thread races (8 threads, barrier start, real HTTP server, least-privilege UI login) on `/numbers/capital` and `/wanted/create`: no response contains DB wording, exactly one receipt / one campaign row, at least one loser says "already". The capital test lifts the cumulative-fund cap by monkeypatch so earlier session tests cannot starve it.
+- **Provenance:** FACT from test runs. UNKNOWN: 07's own repro script was not run; the threaded tests mirror its description.
+- **Health:** `tools/run_tests.sh` (twice): reference 178 passed; lane D + E 100 passed; exit 0 · exit 0. No sends, spend, publish or credential change.
