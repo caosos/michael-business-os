@@ -180,6 +180,21 @@ def proposer_for(gov: Governance, capability: str, lane: str | None, spine_ident
     return None
 
 
+def campaign_decision(gov: Governance, campaign: Any, *, capability: str | None = None, cost_usd: float | None = None) -> dict[str, Any]:
+    """E-17: what may this wanted-campaign do? Plain JSON; fail closed (deny) if policy is unreadable.
+    Use it before drafting: `decision` is no_action | require_approval | deny, `reasons` explains
+    (e.g. AUTOPILOT_NOT_AUTHORIZED). Then pass `campaign=` to `gov.action_gateway.propose(...)` so the request is
+    decided, tainted (tier 0 + step-up) and recorded as campaign-sourced."""
+    from .campaigns import decide_campaign
+    try:
+        policy = gov.action_gateway.policies.current()
+    except PolicyUnavailable:
+        return {"level": None, "decision": "deny", "may_request_action": False, "tier": None, "step_up": False,
+                "reasons": ["POLICY_UNREADABLE"]}
+    return decide_campaign(campaign, policy, capability=capability, cost_usd=cost_usd,
+                           now=gov.action_gateway.clock()).as_dict()
+
+
 def binding_key_violations(gov: Governance, capability: str, payload: Any) -> list[str]:
     """Pin your planners against the reserved binding names (E-16). Returns the reserved key names the PDP would deny
     for this comms.*/publish.* payload ([] = fine, or not a comms/publish capability). Fails closed: if policy is

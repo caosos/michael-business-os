@@ -21,7 +21,8 @@
     "egress",
     "llm_spend",
     "execution",
-    "recommendation_actions"
+    "recommendation_actions",
+    "campaigns"
   ],
   "properties": {
     "policy_schema": {
@@ -556,6 +557,163 @@
         },
         "binding_keys_note": {
           "type": "string"
+        }
+      }
+    },
+    "campaigns": {
+      "type": "object",
+      "required": [
+        "levels",
+        "unknown_level",
+        "enforce_max_price"
+      ],
+      "properties": {
+        "note": {
+          "type": "string"
+        },
+        "levels": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "WATCH_ONLY",
+            "RECOMMEND",
+            "ASSISTED_DEAL",
+            "BOUNDED_AUTOPILOT"
+          ],
+          "properties": {
+            "WATCH_ONLY": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "may_request_action",
+                "decision",
+                "tier",
+                "step_up",
+                "reason"
+              ],
+              "properties": {
+                "may_request_action": {
+                  "const": false
+                },
+                "decision": {
+                  "const": "no_action"
+                },
+                "tier": {
+                  "const": null
+                },
+                "step_up": {
+                  "const": false
+                },
+                "reason": {
+                  "const": "CAMPAIGN_LEVEL_NO_ACTION"
+                }
+              }
+            },
+            "RECOMMEND": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "may_request_action",
+                "decision",
+                "tier",
+                "step_up",
+                "reason"
+              ],
+              "properties": {
+                "may_request_action": {
+                  "const": false
+                },
+                "decision": {
+                  "const": "no_action"
+                },
+                "tier": {
+                  "const": null
+                },
+                "step_up": {
+                  "const": false
+                },
+                "reason": {
+                  "const": "CAMPAIGN_LEVEL_NO_ACTION"
+                }
+              }
+            },
+            "ASSISTED_DEAL": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "may_request_action",
+                "decision",
+                "tier",
+                "step_up",
+                "reason",
+                "allowed_capability_prefixes"
+              ],
+              "properties": {
+                "may_request_action": {
+                  "const": true
+                },
+                "decision": {
+                  "const": "require_approval"
+                },
+                "tier": {
+                  "const": 0
+                },
+                "step_up": {
+                  "const": true
+                },
+                "reason": {
+                  "const": "ASSISTED_DEAL_DRAFT_ONLY"
+                },
+                "allowed_capability_prefixes": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "enum": [
+                      "offer.",
+                      "comms."
+                    ]
+                  }
+                }
+              }
+            },
+            "BOUNDED_AUTOPILOT": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "may_request_action",
+                "decision",
+                "tier",
+                "step_up",
+                "reason"
+              ],
+              "properties": {
+                "may_request_action": {
+                  "const": false
+                },
+                "decision": {
+                  "const": "deny"
+                },
+                "tier": {
+                  "const": null
+                },
+                "step_up": {
+                  "const": false
+                },
+                "reason": {
+                  "const": "AUTOPILOT_NOT_AUTHORIZED"
+                }
+              }
+            }
+          }
+        },
+        "unknown_level": {
+          "const": {
+            "decision": "deny",
+            "reason": "CAMPAIGN_LEVEL_UNKNOWN"
+          }
+        },
+        "enforce_max_price": {
+          "const": true
         }
       }
     }

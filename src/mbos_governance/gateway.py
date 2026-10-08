@@ -38,6 +38,7 @@ from zoneinfo import ZoneInfo
 import psycopg
 
 from . import __version__, contracts
+from .campaigns import decide_campaign
 from .content_guard import ContentRulesStore, ContentRulesUnavailable, injection_findings, secret_findings
 from .effectors import DryRunEffector, Effector, TokenMinter
 from .hooks import run_hooks
@@ -189,12 +190,18 @@ class ActionGateway:
             "details": {"kind": "generic", "proposed_action_request_id": ar["action_request_id"], **details},
         })
 
-    def propose(self, ar: dict, caller: str, untrusted_texts: list[dict] | None = None) -> Result:
+    def propose(self, ar: dict, caller: str, untrusted_texts: list[dict] | None = None,
+                campaign: dict | None = None) -> Result:
         """An agent submits a proposed side-effect. Never executes anything.
 
         `untrusted_texts`: the attacker-controllable inputs that fed this proposal (listing body,
         inbound message), as [{"ref": ..., "text": ...}]. Supplying any marks the request tainted
-        (tier 0, step-up on YES); injection markers in them or in the payload fire the tripwire."""
+        (tier 0, step-up on YES); injection markers in them or in the payload fire the tripwire.
+
+        `campaign` (E-17): the wanted-campaign document this request was drafted for. A campaign-sourced request is
+        decided against policy `campaigns` (WATCH_ONLY/RECOMMEND request nothing; ASSISTED_DEAL drafts offer.*/comms.*
+        only; BOUNDED_AUTOPILOT -> AUTOPILOT_NOT_AUTHORIZED; unknown level -> deny), is tainted (tier 0 + step-up
+        forced), and can never skip approval: the guard still requires an approved YES on the exact payload."""
         contracts.require_valid("action-request", ar)
         try:
             recomputed = payload_hash(ar["payload"])
@@ -220,7 +227,7 @@ class ActionGateway:
                                        rules.version)
             raise GatewayRefused("SECRET_IN_PAYLOAD:" + ",".join(f"{f.rule}@{f.path}" for f in secrets_found))
         injections = injection_findings(rules, untrusted=untrusted_texts or [], payload=ar["payload"])
-        if untrusted_texts or injections:
+        if untrusted_texts or injections or campaign is not None:
             ar = {**ar, "untrusted_inputs_present": True, "tier": 0}  # taint: schema then pins tier 0
         policy, policy_err = self._policy()
         panic_state = self.panic.read()
@@ -242,6 +249,16 @@ class ActionGateway:
             reasons += panic_state.blocks(ar["proposed_by"], ar["capability"], ar["category"])
             if policy_err:
                 reasons.append(policy_err)
+            camp = None
+            if campaign is not None:
+                if policy is None:
+                    reasons.append("CAMPAIGN_POLICY_UNREADABLE")
+                else:
+                    cost = (ar.get("max_cost") or ar.get("estimated_cost") or {}).get("amount")
+                    camp = decide_campaign(campaign, policy, capability=ar["capability"],
+                                           cost_usd=cost, now=self.clock())
+                    if camp.decision != REQUIRE_APPROVAL:
+                        reasons += camp.reasons or ["CAMPAIGN_DENIED"]
             decision = None
             if policy is not None and not reasons:
                 decision = decide(ar, policy)
@@ -264,6 +281,9 @@ class ActionGateway:
                                        rules.version)
             verdict = DENY if reasons else REQUIRE_APPROVAL
             details = {"kind": "generic", "decision": verdict, "tier": 0, "reasons": reasons, "policy_version": config_version}
+            if campaign is not None:
+                details["campaign"] = {"campaign_id": (campaign or {}).get("campaign_id") if isinstance(campaign, dict) else None,
+                                       **(camp.as_dict() if camp else {"decision": "deny"})}
             rids = [self.store.set_status(cur, areq, "classified", "POLICY_DECIDED", GATEWAY_ACTOR, f"PDP: {verdict}",
                                           prov, f"{areq}:CLASSIFIED",
                                           {"policy_decision_ref": pdp_ref, "effect": "none", "details": details},

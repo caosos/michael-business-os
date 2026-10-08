@@ -20,3 +20,8 @@ through Agent 01 (semver bump), then are re-copied here.
 
 - Source: `origin/research/agent-02-opportunity` `docs/integration/freeze-request/freeze-request.schema.json` @ `029356c`.
 - Copied byte for byte on 2026-10-07. The sha256 is pinned in `tests/test_b04_freeze_requests.py`.
+
+## campaign.schema.json (E-17, owned by Agent 01)
+
+- Source: `origin/research/agent-01-coordinator` `docs/research/contracts/campaign.schema.json` @ `c18cabc` (A-26).
+- Copied byte for byte on 2026-10-07. The sha256 is pinned in `tests/test_e17_campaigns.py`.

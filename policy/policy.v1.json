@@ -1,7 +1,7 @@
 {
   "policy_schema": "mbos.governance.policy/1",
   "policy_id": "wave-one-default-deny",
-  "version": "2026.10.07-w1.9",
+  "version": "2026.10.07-w1.10",
   "description": "Round Two wave one. Everything tier 0, every externally consequential action needs Michael's YES, every effector DRY-RUN, no delegation, no real-world spend. Anything not listed here is DENIED.",
   "system_mode": "mvp",
   "delegation_enabled": false,
@@ -124,6 +124,19 @@
       "max_total_active_usd": 3000,
       "basis": "MICHAEL_DECISIONS #1 is UNDECIDED: conservative defaults. Per-flip follows Agent 03 REC ($1,500 per deal); total is 2x. Applies to dry-run (shadow) reservations of offer/purchase requests; live spend stays pinned at 0."
     }
+  },
+
+  "campaigns": {
+    "note": "E-17 (ADR-0013 §9). Wanted-campaign autonomy mapped to governance. A campaign AUTHORISES NOTHING by itself. WATCH_ONLY and RECOMMEND request no action. ASSISTED_DEAL may only DRAFT offer/counter/contact requests, which still go through tier 0 + step-up + Michael's YES on the exact payload (existing offer path); a campaign-sourced request is tainted (untrusted_inputs_present) so tier 0 and step-up are forced. BOUNDED_AUTOPILOT is denied with AUTOPILOT_NOT_AUTHORIZED even with valid limits until a later explicit Michael decision AND a schema change. An unknown level fails closed.",
+    "levels": {
+      "WATCH_ONLY":        { "may_request_action": false, "decision": "no_action", "tier": null, "step_up": false, "reason": "CAMPAIGN_LEVEL_NO_ACTION" },
+      "RECOMMEND":         { "may_request_action": false, "decision": "no_action", "tier": null, "step_up": false, "reason": "CAMPAIGN_LEVEL_NO_ACTION" },
+      "ASSISTED_DEAL":     { "may_request_action": true,  "decision": "require_approval", "tier": 0, "step_up": true, "reason": "ASSISTED_DEAL_DRAFT_ONLY",
+                             "allowed_capability_prefixes": ["offer.", "comms."] },
+      "BOUNDED_AUTOPILOT": { "may_request_action": false, "decision": "deny", "tier": null, "step_up": false, "reason": "AUTOPILOT_NOT_AUTHORIZED" }
+    },
+    "unknown_level": { "decision": "deny", "reason": "CAMPAIGN_LEVEL_UNKNOWN" },
+    "enforce_max_price": true
   },
 
   "egress": {
