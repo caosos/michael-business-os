@@ -204,3 +204,5 @@ Then open http://127.0.0.1:8765/. Find ids with `mbos items` (and `mbos queue`, 
 
 ## Owner login (D-26 / R14)
 Human decisions (`mbos decide`, `outcome`, `note add`, `panic`) use `MBOS_OWNER_DATABASE_URL`, a login that holds `approver`. The workflow login (`MBOS_DATABASE_URL`, `mbos_dbos`) must NOT hold `approver` or the owner-channel role in production, so an agent-reachable process cannot record an approval or move capital. Unset = dev fallback to the worker login, with a warning on stderr.
+
+Production topology (F-87): the workflow worker runs WITHOUT `MBOS_OWNER_DATABASE_URL` (`mbos worker` refuses to start with it; `--allow-owner-dsn` is a dev override). `mbos decide/outcome/note/panic`, the Operator UI and anything human run in separate processes that have it.

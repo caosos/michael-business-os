@@ -29,3 +29,10 @@ def test_human_commands_use_the_owner_engine():
         assert "_owner_engine()" in inspect.getsource(fn), fn.__name__
     assert "_owner_engine()" in inspect.getsource(cli.cmd_note)
     assert "_owner_engine()" not in inspect.getsource(cli.cmd_queue)     # reading the queue needs no owner rights
+
+
+def test_worker_refuses_to_start_with_the_owner_dsn(monkeypatch, capsys):
+    monkeypatch.setattr("mbos.config.settings", lambda: Settings(database_url="postgresql://w/x", system_database_url="postgresql://w/y",
+                                                                 owner_database_url="postgresql://o/x"))
+    rc = cli.cmd_worker(__import__("argparse").Namespace(fixture=None, once=True, allow_owner_dsn=False))
+    assert rc == 2 and "REFUSING to start" in capsys.readouterr().err

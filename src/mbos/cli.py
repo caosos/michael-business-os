@@ -117,6 +117,13 @@ def cmd_worker(a: argparse.Namespace) -> int:
     from mbos.reference.fixture_adapter import FixtureSourceAdapter
     from mbos.runtime import Components, init_runtime
 
+    if settings().owner_database_url and not a.allow_owner_dsn:
+        # F-87 / R14: R14 holds in the database, but one OS process holding BOTH logins can use either. The workflow worker (the process an
+        # agent-reachable workflow runs in) must start WITHOUT the owner login; the owner CLI/UI run in their own processes with it.
+        print("REFUSING to start: MBOS_OWNER_DATABASE_URL is set in the workflow worker's environment. Run the worker without it "
+              "(`env -u MBOS_OWNER_DATABASE_URL mbos worker`); human decisions use the owner CLI/UI process. "
+              "Dev override: --allow-owner-dsn.", file=sys.stderr)
+        return 2
     comps = Components()
     if a.fixture:
         comps.adapters["fixture"] = FixtureSourceAdapter(a.fixture, name="fixture")
@@ -297,6 +304,7 @@ def main(argv: list[str] | None = None) -> int:
     s = sub.add_parser("devdb"); s.add_argument("action", choices=["up", "down", "env"]); s.set_defaults(fn=cmd_devdb)
     sub.add_parser("migrate").set_defaults(fn=cmd_migrate)
     s = sub.add_parser("worker"); s.add_argument("--fixture"); s.add_argument("--once", action="store_true")
+    s.add_argument("--allow-owner-dsn", action="store_true", help="dev only: let the worker hold the owner login too (defeats F-87)")
     s.add_argument("--settle", type=float, default=3.0); s.set_defaults(fn=cmd_worker)
     sub.add_parser("queue").set_defaults(fn=cmd_queue)
     s = sub.add_parser("items"); s.add_argument("--state"); s.add_argument("--limit", type=int, default=50); s.set_defaults(fn=cmd_items)
