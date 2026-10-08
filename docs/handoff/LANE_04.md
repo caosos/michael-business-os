@@ -6,13 +6,13 @@
   - **Never touches:** another lane's branch or worktree, `main`, CAOSCare, or anything live. It never contacts, spends, publishes or deploys.
   - **Does not own workflow durability.** DBOS does, in its own database (`mbos_dbos`). There are deliberately no resume or step tables in the spine.
 - **Completed:** D-01..D-08, D-09a, D-10 (DDL), D-11, D-13..D-18. Receipts are in `docs/receipts/2026-10-07-*`. Commit hashes are in `AGENT_STATUS.md` (`Done:` lines).
-  - **Migrations `0000`–`0017`, in `state/migrations/`:**
+  - **Migrations `0000`–`0018`, in `state/migrations/`:**
     - `0000` ADR-0010 canonical JSON
     - `0001`–`0004` foundation, domain, API, views and grants
     - `0005` R1 tables, `0006` R12 strict item edges, `0007` Lane E requirements
     - `0008` MCP audit, `0009` fs artifacts, `0010` pgvector, `0011` comms ledger
     - `0012` deferred provenance FK, `0013` action-count velocity, `0014` doc-entity, `0015` card inputs
-    - `0016` operator notes, `0017` capital ledger
+    - `0016` operator notes, `0017` capital ledger, `0018` human outcomes via the UI role (P-06-19)
   - **Round one:** `docs/research/agent-04-state.md`, plus `docs/research/agent-04-round-two.md`.
 - **Outstanding:**
   - **D-10 final acceptance:** 06's F-07 suite running on lane D's schema. Acceptance: it passes. Blocked on Agent 01's A-01 (the spine on lane D). The DDL is delivered.
@@ -35,7 +35,7 @@
 - **Run commands:**
   - **Setup:** `python3 -m venv state/.venv && state/.venv/bin/pip install "psycopg[binary]>=3.1" "mcp>=2.3,<3" pytest jsonschema pgserver`
   - **Health (the one command):** `cd state && .venv/bin/python -m pytest`
-    - Expect `240 passed, 1 skipped` in about 4 minutes.
+    - Expect `246 passed, 1 skipped` in about 4 minutes.
     - The 1 skip needs `MBOS_ECONOMICS_SRC=<Agent 03's economics/src>`. With it, 241 pass.
     - Each test gets a throwaway PG16 database from the `pgserver` wheel. Nothing persistent is created.
   - **Bring up a real cluster:** `./state/bootstrap/pg-local.sh init && ./state/bootstrap/pg-local.sh start && ./state/bootstrap/bootstrap.sh`.
