@@ -60,9 +60,12 @@ class SoldComp:
     location: dict = field(default_factory=dict)
     dom_days: Optional[int] = None
     kind: str = "sold"
+    for_item_id: Optional[str] = None          # F-108: a comp a human entered FOR this exact Item
 
     def to_record(self) -> dict:
         d = asdict(self)
+        if d["for_item_id"] is None:
+            del d["for_item_id"]
         if d["dom_days"] is None:
             del d["dom_days"]
         if not d["location"]:
@@ -84,6 +87,7 @@ class CompDraft:
     location: dict = field(default_factory=dict)
     dom_days: Optional[int] = None
     human_actor: Optional[str] = None          # set → provenance actor_type human
+    for_item_id: Optional[str] = None
 
 
 class CompSourceAdapter(SourceAdapter):
@@ -170,7 +174,8 @@ class ManualCompsAdapter(CompSourceAdapter):
         return CompDraft(source_comp_id=cid, price=price, currency="USD", sold_date=_sold_date(e.get("sold_date"), fetched_at),
                          url=clean_text(e.get("url")) or f"intake://comps/{cid}", category=cat, title=title,
                          condition=_condition(e.get("condition")), location=loc,
-                         dom_days=int(dom) if str(dom).isdigit() else None, human_actor=who)
+                         dom_days=int(dom) if str(dom).isdigit() else None, human_actor=who,
+                         for_item_id=clean_text(e.get("for_item_id"), 100) or None)
 
 
 # ---------------------------------------------------------------- collection
@@ -267,7 +272,7 @@ def collect_comps(jobs: list[tuple[CompSourceAdapter, SearchProfile]], store: Co
                 comp_id=comp_id, price=d.price, currency=d.currency, sold_date=d.sold_date, source=adapter.source,
                 source_comp_id=d.source_comp_id, url=d.url, category=d.category, title=d.title, condition=d.condition,
                 fetched_at=iso(rec.fetched_at), raw_ref=raw_ref, provenance_id=prov["provenance_id"],
-                location=d.location, dom_days=d.dom_days).to_record()
+                location=d.location, dom_days=d.dom_days, for_item_id=d.for_item_id).to_record()
             row["updated" if old else "added"] += 1
         health.record_success(adapter.source, now, len(res.records))
     return rep
@@ -275,11 +280,16 @@ def collect_comps(jobs: list[tuple[CompSourceAdapter, SearchProfile]], store: Co
 
 # ---------------------------------------------------------------- retrieval (pre-filter; 03 owns selection)
 def candidate_comps(item: dict, comps: list[dict], as_of: datetime, *, window_days: int = 365,
-                    min_similarity: float = 0.5, limit: int = 25) -> list[dict]:
+                    min_similarity: float = 0.5, limit: int = 25, unmatched: Optional[list] = None) -> list[dict]:
     """Deterministic candidates for one flip Item (sold or asking comps; never the subject's own listing): same
     category, sold/observed in (as_of - window, as_of], title
     similarity ≥ min_similarity; ordered by similarity desc, sold_date desc, comp_id. Agent 03's
-    `build_comps_bundle` applies the real selection policy (90-day window, vocabulary agreement, FACT check)."""
+    `build_comps_bundle` applies the real selection policy (90-day window, vocabulary agreement, FACT check).
+
+    F-108: a comp whose `for_item_id` equals this Item's `item_id` was entered by a human FOR this Item, so it skips
+    the category/window/similarity cuts and sorts first. A comp paired to a different Item is not a candidate. Pass a
+    list as `unmatched` to receive `{"comp_id", "title", "reason"}` for every comp that was dropped (see
+    `unmatched_gap_text`); nothing is dropped silently."""
     if item.get("type") != "flip":
         return []
     own = {s.get("url") for s in item.get("sources", [])} | {
@@ -288,16 +298,44 @@ def candidate_comps(item: dict, comps: list[dict], as_of: datetime, *, window_da
     lo = (as_of - timedelta(days=window_days)).date().isoformat()
     hi = as_of.date().isoformat()
     scored = []
+
+    def drop(c, why):
+        if unmatched is not None:
+            unmatched.append({"comp_id": c.get("comp_id"), "title": c.get("title", ""), "reason": why})
+
     for c in comps:
         if c.get("url") in own or c.get("source_comp_id") in own:
-            continue                                    # never the subject's own listing (its ask is not a comp)
+            drop(c, "it is the subject's own listing")  # its ask is not a comp
+            continue
+        paired = c.get("for_item_id")
+        if paired:
+            if paired == item.get("item_id"):
+                scored.append((-2.0, 0, c["comp_id"], c))
+            else:
+                drop(c, f"entered for a different item ({paired})")
+            continue
         when = c.get("sold_date") or c.get("observed_date") or ""
-        if c["category"] != item.get("category") or not (lo < when <= hi):
+        if c["category"] != item.get("category"):
+            drop(c, f"category {c['category']} differs from {item.get('category')}")
+            continue
+        if not (lo < when <= hi):
+            drop(c, f"date {when or 'missing'} is outside the {window_days}-day window")
             continue
         sim = title_similarity(title, c["title"])
         if sim >= min_similarity:
             scored.append((-round(sim, 6), _neg_date(when), c["comp_id"], c))
+        else:
+            drop(c, f"title similarity {sim:.2f} is below {min_similarity}; not entered for this item")
     return [c for *_, c in sorted(scored, key=lambda t: t[:3])[:limit]]
+
+
+def unmatched_gap_text(unmatched: list[dict], limit: int = 5) -> str:
+    """Plain-text gap line for the card/UI: which comps were not used and why."""
+    if not unmatched:
+        return ""
+    parts = [f"'{u['title']}' ({u['reason']})" for u in unmatched[:limit]]
+    more = f"; +{len(unmatched) - limit} more" if len(unmatched) > limit else ""
+    return f"{len(unmatched)} comp(s) not used: " + "; ".join(parts) + more
 
 
 def _neg_date(d: str) -> int:

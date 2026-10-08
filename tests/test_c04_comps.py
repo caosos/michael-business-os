@@ -155,3 +155,28 @@ def test_flip_with_comps_advances_to_scored_with_fact_comp_provenance(env):
     assert used and all(p["basis"] == "FACT" for p in used)               # FACT-tagged comp provenance
     research = out["item"].get("research", [])
     assert any(r["provenance_id"] in set(out["comps"]["selected"]) and r["basis"] == "FACT" for r in research)
+
+
+def test_f108_comp_entered_for_item_is_always_a_candidate(env, tmp_path):
+    from mbos_discovery.comps import unmatched_gap_text
+    world, store, _, _, run = env
+    inbox = tmp_path / "inbox"
+    shutil.copytree(FIX / "comps" / "manual", inbox)
+    item = _trailer_item(world)
+    base = {"entered_by": "michael", "sold_date": "2026-09-20", "sold_price": 92, "url": "https://example.invalid/tv"}
+    (inbox / "tv.json").write_text(json.dumps({**base, "comp_id": "tv1", "category": "tool",
+                                               "title": "Generic / 55in LED TV", "for_item_id": item["item_id"]}))
+    (inbox / "tv2.json").write_text(json.dumps({**base, "comp_id": "tv2", "category": "tool", "url": "https://example.invalid/tv2",
+                                                "title": "Generic / 55in LED TV", "for_item_id": "itm_OTHER"}))
+    (inbox / "tv3.json").write_text(json.dumps({**base, "comp_id": "tv3", "category": "trailer", "url": "https://example.invalid/tv3",
+                                                "title": "Unrelated 55in LED TV"}))
+    run([(_manual(world, inbox), COMPS)])
+    unmatched: list = []
+    cands = candidate_comps(item, store.records(), T0, unmatched=unmatched)
+    ids = [c["source_comp_id"] for c in cands]
+    assert ids[0] == "tv1" and "tv2" not in ids and "tv3" not in ids
+    by_title = {u["comp_id"]: u["reason"] for u in unmatched}
+    reasons = " ".join(by_title.values())
+    assert "different item" in reasons and "not entered for this item" in reasons
+    assert "Unrelated 55in LED TV" in unmatched_gap_text(unmatched, limit=50)
+    assert candidate_comps(item, store.records(), T0) == cands          # default call unchanged

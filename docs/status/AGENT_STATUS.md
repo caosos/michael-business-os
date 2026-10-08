@@ -27,6 +27,7 @@ Done: B-19 @ a9cd922 (mbos-discover run covers every source; --dry prints exact 
 Done: B-18 @ bae240e (NHTSA entries admitted with model years; verified vs Agent 03 load_kb/match_hits; 218 tests)
 Done: B-21 @ d6eec69 (evidence-based category tags; quoted INFERENCE; injection-safe; card validates; 246 tests)
 Done: B-20 @ d4e8670 (campaign matcher; gated, read-only, explained; 267 tests)
+Done: B-22 @ COMMIT (comps entered for an Item always candidates via for_item_id; unmatched comps reported with reason; 312 tests)
 Done: C-04 (support, source side) @ a1a7730 (lead Agent 03 C-04 @ 882c726)
 Current phase: CLOSED. B-01..B-11 and B-13..B-21 DONE; B-12 blocked (Michael #8 + credentials); see docs/handoff/LANE_02.md
 Started: 2026-10-06 (Round One) · Round Two started 2026-10-07
