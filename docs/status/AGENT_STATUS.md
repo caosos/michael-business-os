@@ -4,26 +4,27 @@ Agent: 04
 Role: Postgres / State / Receipts (lane D: durable business state, receipts, provenance; sole ledger owner per ADR-0010)
 Branch: research/agent-04-state
 Worktree: /home/michaelos/business-os-worktrees/agent-04-state
-State: CLOSED
+State: CLOSED (D-24 done; handoff: docs/handoff/LANE_04.md)
 Claimed: none
-Done: D-24 @ aa86cc6
-Done: D-24 @ aa86cc6
-Done: D-24 @ aa86cc6
-Done: D-24 @ aa86cc6
-Done: D-24 @ aa86cc6
-Done: D-24 @ aa86cc6
-Done: D-24 @ aa86cc6
-Done: D-24 @ aa86cc6
-Done: D-24 @ aa86cc6
-Done: D-24 @ aa86cc6
-Done: D-24 @ aa86cc6
-Done: D-24 @ aa86cc6
-Done: D-24 @ aa86cc6
-Done: D-24 @ aa86cc6
-Done: D-24 @ aa86cc6
-Done: D-24 @ aa86cc6
-Done: D-24 @ aa86cc6
-Done: D-24 @ aa86cc6
+Done: D-01 @ a0d1fbe
+Done: D-02 @ a0d1fbe
+Done: D-03 @ ca59e3c
+Done: D-05 @ 797a4e5
+Done: D-04 @ 14bd690
+Done: D-06 @ 012c141
+Done: D-07 @ 215a861
+Done: D-08 @ d668386
+Done: D-13 @ ffb9e24
+Done: D-11 @ 341c5d2
+Done: D-14 @ 80bb135
+Done: D-15 (helper delivered @ a08dd9f; 01 to adopt in its e2e for final acceptance)
+Done: D-17 @ 77d1f17
+Done: D-18 @ e2c3f1b (capital ledger; see docs/receipts/2026-10-07-d18-capital-ledger.md)
+Done: D-09a (PITR mechanics against a local dir; see docs/receipts/2026-10-07-d09a-pitr-mechanics.md) (ACCEPTED by Agent 03, docs/receipts/2026-10-07-d17-acceptance-review.md @ 6a20b91, who tested as each real login role)
+Done: D-16 @ 3a1b004
+Done: P-06-19 @ 0dbddaa (0018: UI role records human outcomes; see docs/receipts/2026-10-07-p06-19-human-outcome-ui.md)
+Done: D-23 @ 39581bd (0019: human-only capital/mission in DB; campaigns; see docs/receipts/2026-10-08-d23-campaigns-human-capital.md)
+Done: D-24 @ aa86cc6 (0020: human actor required on all five owner paths for every session incl. mbos_dbos; see docs/receipts/2026-10-08-d24-human-only-owner-paths.md)
 Blocked: D-09b (off-box destination + drill) on Michael: docs/state/OWNER_QUESTION_BACKUPS.md
 Blocked: D-10 (final acceptance) on A-01 phase 2. The DDL is delivered @ 6533334.
 Current phase: ROUND TWO: foreman loop (READY_QUEUE)
