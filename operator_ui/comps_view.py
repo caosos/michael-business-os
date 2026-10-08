@@ -28,13 +28,33 @@ DATE_RE = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", re.ASCII)
 DEFAULT_GAP = "no comparable sold price"
 
 
+GAP_CODES = ("scope_override_required", "category_unestimable", "thin_comps", "no_sold_comps", "repair_scope_unknown",
+             "transport_unclassified")
+_GAP_RE = re.compile(r"(?:BLOCKING )?(" + "|".join(GAP_CODES) + r"): ")
+
+
+def _engine_gap_text(raw: str) -> str:
+    """F-107: the engine's own true-blocker wording (`mbos_economics.comps_feed.gap_text`) for a spine 'gaps:' string, else the raw text.
+    A code the engine does not know keeps the raw reason; nothing is invented."""
+    parts = _GAP_RE.split(raw)
+    if len(parts) < 3:
+        return raw
+    try:
+        from mbos_economics.comps_feed import gap_text as engine
+    except ImportError:  # pragma: no cover - engine not installed: show the system's raw words
+        return raw
+    out = [engine({"code": parts[i], "detail": parts[i + 1].strip(" ,;.")}) for i in range(1, len(parts) - 1, 2)]
+    return " ".join(x if x.endswith((".", ")")) else x + "." for x in out)
+
+
 def gap_text(card: dict) -> str:
-    """The research gap in the system's own words: the latest 'gaps: ...' or 'needs ...' reason on the card's trail."""
+    """The research gap in the system's own words: the latest 'gaps: ...' or 'needs ...' reason on the card's trail,
+    re-worded per gap code by the engine (F-107)."""
     for t in reversed(card.get("activity_trail") or []):
         why = str(t.get("why") or "")
         for key in ("gaps:", "needs "):
             if key in why:
-                return why.split(key, 1)[1].strip(" .;") or DEFAULT_GAP
+                return _engine_gap_text(why.split(key, 1)[1].strip(" .;")) or DEFAULT_GAP
     return DEFAULT_GAP
 
 
@@ -98,7 +118,8 @@ def parse_comp(f: dict, item: dict, author: str, now: datetime) -> dict:
             f"({where}). Nothing was fetched or automated." + (f" Note: {note}" if note else ""))
     doc = {"comp_id": cid, "category": item.get("category") or "", "title": f"{make} {model}", "make": make, "model": model,
            "sold_price": float(price), "sold_date": sold, "where_sold": where, "url": url, "condition": cond,
-           "entered_by": author, "provenance_note": prov, "item_id": item["item_id"], "entered_via": "operator_ui"}
+           "entered_by": author, "provenance_note": prov, "item_id": item["item_id"], "for_item_id": item["item_id"],
+           "entered_via": "operator_ui"}  # F-108: always a candidate for exactly this Item (B-22 reads `for_item_id`)
     if note:
         doc["note"] = note
     return doc

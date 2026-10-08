@@ -150,3 +150,19 @@ def test_gap_text_fallback_and_no_llm_path():
 
     src = inspect.getsource(comps_view)
     assert "urllib" not in src and "requests" not in src and "socket" not in src   # nothing is fetched; a human types the price
+
+
+def test_f31_gap_text_uses_the_engines_true_blocker_wording():
+    t = lambda why: comps_view.gap_text({"activity_trail": [{"why": why}]})  # noqa: E731
+    assert t("RESEARCHING; gaps: BLOCKING thin_comps: 1 of 3 needed").startswith("Too few sold prices: 1 of 3 needed")
+    assert t("RESEARCHING; gaps: BLOCKING scope_override_required: other/x is unknown").startswith("Waiting for you: other/x")
+    assert t("RESEARCHING; gaps: BLOCKING repair_scope_unknown: x").endswith("(fault_identified).")
+    assert t("RESEARCHING; gaps: something novel") == "something novel"       # unknown wording is never invented over
+
+
+def test_f31_comp_is_paired_to_its_item_and_attest_banner_names_the_worker():
+    from datetime import datetime, timezone
+    doc = comps_view.parse_comp({"sold_price": "92", "make": "Generic", "model": "55in LED TV", "where_sold": "FB", "note": "saw it",
+                                 "condition": "used", "sold_date": "2026-10-01", "nonce": "n"}, ITEM, "michael",
+                                datetime(2026, 10, 8, tzinfo=timezone.utc))
+    assert doc["for_item_id"] == ITEM["item_id"] == doc["item_id"]

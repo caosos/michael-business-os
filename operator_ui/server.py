@@ -757,8 +757,9 @@ class App:
         if key not in attest_view.requested_keys(item):
             raise InputError("that evidence was not requested for this item (or is already confirmed)")
         self.store.record_attestation(item_id, key, attest_view.parse_note(f.get("note")), self.author)
-        return (f"Confirmed: {key}. Your word is recorded (human, receipted). It counts the next time this item is re-checked; "
-                f"if no worker re-check runs, run `mbos recheck {item_id}` on the server.")
+        return (f"Confirmed: {key}. Your word is recorded (human, receipted). "
+                f"The worker will re-check this item with it (about a minute); reload to see the result. "
+                f"If no worker is running, run `mbos recheck {item_id}` on the server.")
 
     def add_followup(self, item_id, f):
         """F-11: draft a follow-up / offer / quote as its OWN request via the public API (A-15). CSRF, human channel. It only
