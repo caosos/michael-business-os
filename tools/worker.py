@@ -68,7 +68,7 @@ def find_task(queue_text: str, task_id: str) -> Optional[dict]:
     return None
 
 
-def build_prompt(lane: str, task: dict, branch: str) -> str:
+def build_prompt(lane: str, task: dict, branch: str) -> str:   # `branch` is the branch the worker must push (HEAD)
     name = LANES[lane][0]
     return f"""You are a fresh bounded worker for {name} (lane {lane}) in Michael Business OS. You have no prior chat context; repo truth is your memory.
 
@@ -118,9 +118,10 @@ def should_escalate(row: dict) -> bool:
 
 
 def run_one(task_id: str, lane: str, profile: router.TaskProfile, *, worktree: Path, dry: bool, model: Optional[str],
-            escalate: bool = True, allow_dirty: bool = False, permission_mode: str = "auto", ignore_quota: bool = False, runner: Optional[Callable[..., Any]] = None, tpath: Optional[Path] = None,
+            escalate: bool = True, allow_dirty: bool = False, permission_mode: str = "auto", ignore_quota: bool = False, branch_override: Optional[str] = None, runner: Optional[Callable[..., Any]] = None, tpath: Optional[Path] = None,
             skip_session_check: bool = False, queue_text: Optional[str] = None, timeout_s: int = 3600) -> dict[str, Any]:
     name, _, branch, _ = LANES[lane]
+    branch = branch_override or branch
     if queue_text is None:
         sh(["git", "fetch", "-q", "origin"], ROOT)
         queue_text = sh(["git", "show", "origin/research/agent-01-coordinator:docs/status/READY_QUEUE.md"], ROOT).stdout
@@ -193,6 +194,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     ap.add_argument("--long-horizon", action="store_true")
     ap.add_argument("--model")
     ap.add_argument("--worktree")
+    ap.add_argument("--branch", help="branch name to tell the worker it is on (use with --worktree for a side worktree of the coordinator)")
     ap.add_argument("--dry", action="store_true")
     ap.add_argument("--no-escalate", action="store_true")
     ap.add_argument("--permission-mode", default="auto", choices=PERMISSION_MODES)
@@ -202,7 +204,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     a = ap.parse_args(argv)
     wt = Path(a.worktree) if a.worktree else WORKTREES / LANES[a.lane][3]
     prof = router.TaskProfile(task_id=a.task_id, lane=a.lane, kind=a.kind, risk=a.risk, cross_lane=a.cross_lane, long_horizon=a.long_horizon)
-    out = run_one(a.task_id, a.lane, prof, worktree=wt, dry=a.dry, model=a.model, escalate=not a.no_escalate, allow_dirty=a.allow_dirty, permission_mode=a.permission_mode, ignore_quota=a.ignore_quota, timeout_s=a.timeout,
+    out = run_one(a.task_id, a.lane, prof, worktree=wt, dry=a.dry, model=a.model, escalate=not a.no_escalate, allow_dirty=a.allow_dirty, permission_mode=a.permission_mode, ignore_quota=a.ignore_quota, branch_override=a.branch, timeout_s=a.timeout,
                   skip_session_check=bool(a.worktree))
     print(json.dumps({k: v for k, v in out.items() if k != "prompt"}, indent=2, default=str))
     if a.dry and out.get("prompt"):

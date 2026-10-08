@@ -52,4 +52,11 @@ def settings() -> Settings:
     sysdb = os.environ.get("MBOS_SYSTEM_DATABASE_URL")
     if not db or not sysdb:
         raise RuntimeError("MBOS_DATABASE_URL and MBOS_SYSTEM_DATABASE_URL must be set (see RUNBOOK.md: `mbos devdb up`)")
-    return Settings(database_url=db, system_database_url=sysdb, owner_database_url=os.environ.get("MBOS_OWNER_DATABASE_URL") or None)
+    backend = os.environ.get("MBOS_STATE_BACKEND", "reference")
+    gateway = os.environ.get("MBOS_GATEWAY_MODE", "reference")
+    if backend not in ("reference", "lane_d") or gateway not in ("reference", "lane_e"):
+        raise RuntimeError("MBOS_STATE_BACKEND must be reference|lane_d and MBOS_GATEWAY_MODE reference|lane_e")
+    if gateway == "lane_e" and backend != "lane_d":
+        raise RuntimeError("MBOS_GATEWAY_MODE=lane_e requires MBOS_STATE_BACKEND=lane_d")
+    return Settings(database_url=db, system_database_url=sysdb, owner_database_url=os.environ.get("MBOS_OWNER_DATABASE_URL") or None,
+                    state_backend=backend, gateway_mode=gateway)

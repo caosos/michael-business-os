@@ -124,10 +124,21 @@ def cmd_worker(a: argparse.Namespace) -> int:
               "(`env -u MBOS_OWNER_DATABASE_URL mbos worker`); human decisions use the owner CLI/UI process. "
               "Dev override: --allow-owner-dsn.", file=sys.stderr)
         return 2
-    comps = Components()
-    if a.fixture:
-        comps.adapters["fixture"] = FixtureSourceAdapter(a.fixture, name="fixture")
-    init_runtime(settings(), comps)  # launch recovers every PENDING workflow
+    from mbos.production import build_components, render_report
+
+    s = settings()
+    if s.state_backend == "lane_d":
+        from dbos import DBOS as _D
+
+        comps, report = build_components(s, fixture=a.fixture, dbos=_D)
+    else:
+        comps = Components()
+        if a.fixture:
+            comps.adapters["fixture"] = FixtureSourceAdapter(a.fixture, name="fixture")
+        report = [{"component": "everything", "kind": "STAND-IN",
+                   "detail": "reference store and stand-ins (set MBOS_STATE_BACKEND=lane_d MBOS_GATEWAY_MODE=lane_e for the real lanes)"}]
+    print("components:\n" + render_report(report))
+    init_runtime(s, comps)  # launch recovers every PENDING workflow
     print("worker up (DRY-RUN). Recovered pending workflows; Ctrl-C to stop — parked workflows resume next start.")
     if a.fixture:
         wf_id = f"discover:fixture:{int(time.time())}"
