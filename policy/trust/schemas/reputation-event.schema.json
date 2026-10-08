@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://michael-business-os/trust/reputation-event.schema.json",
+  "title": "Reputation event: a receipted FACT with evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "type",
+    "subject",
+    "occurred_at",
+    "evidence",
+    "receipt_id",
+    "provenance_ids"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "pattern": "^rev_[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "type": {
+      "type": "string"
+    },
+    "subject": {
+      "type": "string",
+      "minLength": 1
+    },
+    "counterparty": {
+      "type": "string",
+      "minLength": 1
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "ref"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "receipt_id": {
+      "type": "string",
+      "pattern": "^rcpt_[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "provenance_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^prov_[0-9A-HJKMNP-TV-Z]{26}$"
+      }
+    },
+    "note": {
+      "type": "string"
+    }
+  }
+}

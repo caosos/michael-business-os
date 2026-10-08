@@ -10,6 +10,7 @@
   mbos-gov freeze-requests apply FILE.jsonl     (B-04: apply lane B's side-channel freeze requests)
   mbos-gov reconcile [--older-than SECONDS]      (E-05: stuck claims; provider lookup, never re-send)
   mbos-gov sandbox check [--spec FILE] [--host]  (E-08: sandbox spec invariants; --host reports runtimes, installs nothing)
+  mbos-gov trust check [--dir policy/trust]      (E-18: credential vocabulary, reputation/penalty data, payment boundary; exit 1 on problems)
   mbos-gov alerts [--since-hours 24] [--ntfy]    (E-09: read-only alert queries; exit 2 on any CRITICAL; sends nothing)
 
 Connection: --dsn, or env MBOS_GOV_DSN (one login for every role), or per role
@@ -61,6 +62,9 @@ def main(argv: list[str] | None = None) -> int:
     fr = sub.add_parser("freeze-requests")
     fr.add_argument("action", choices=["apply"])
     fr.add_argument("file")
+    tr = sub.add_parser("trust")
+    tr.add_argument("action", choices=["check"])
+    tr.add_argument("--dir")
     sb = sub.add_parser("sandbox")
     sb.add_argument("action", choices=["check"])
     sb.add_argument("--spec")
@@ -96,6 +100,19 @@ def main(argv: list[str] | None = None) -> int:
         print(f"policy ok: {pol.version} mode={pol.data['system_mode']} delegation={pol.data['delegation_enabled']}")
         return 0
 
+    if a.cmd == "trust":
+        from .trust import TrustData, check_all
+        d = a.dir or str(Path(policy_path).with_name("trust"))
+        try:
+            data = PolicyStore(policy_path).current().data
+        except PolicyUnavailable:
+            data = None
+        try:
+            problems = check_all(TrustData(d), data)
+        except Exception as exc:  # noqa: BLE001
+            problems = [f"trust data unreadable: {exc}"]
+        print(json.dumps({"dir": d, "ok": not problems, "problems": problems}, indent=2))
+        return 0 if not problems else 1
     if a.cmd == "sandbox":
         from . import sandbox
         spec_path = a.spec or str(Path(policy_path).with_name("sandbox.v1.json"))

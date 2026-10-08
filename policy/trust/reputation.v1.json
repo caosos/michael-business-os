@@ -1,0 +1,39 @@
+{
+  "reputation_schema": "mbos.trust.reputation/1",
+  "version": "2026.10.07-e18",
+  "description": "E-18 (ADR-0013 §8, START_HERE §11). Reputation is BEHAVIOUR, not stars: every event is a receipted fact with evidence. Penalties are evidence-based, GRADUATED and APPEALABLE. Models may PROPOSE a penalty; only a human decision (approval id) authorises anything above a notice. All numbers below are REC priors (basis REC) for Michael to confirm; nothing here is applied to a real user (Level 1 has none).",
+  "evidence_kinds": ["receipt", "message_thread", "payment_provider_event", "photo_set", "pickup_checkin", "resolved_dispute", "inspection_report", "seller_disclosure_diff", "timestamped_log"],
+  "event_types": [
+    { "id": "completed_purchase", "polarity": "positive", "requires_evidence": ["receipt"], "requires_counterparty": true },
+    { "id": "completed_sale", "polarity": "positive", "requires_evidence": ["receipt"], "requires_counterparty": true },
+    { "id": "completed_job", "polarity": "positive", "requires_evidence": ["receipt", "pickup_checkin"], "requires_counterparty": true },
+    { "id": "on_time_completion", "polarity": "positive", "requires_evidence": ["timestamped_log"], "requires_counterparty": true },
+    { "id": "no_show", "polarity": "negative", "requires_evidence": ["pickup_checkin", "message_thread", "timestamped_log"], "requires_counterparty": true },
+    { "id": "unpaid_winning_bid", "polarity": "negative", "requires_evidence": ["payment_provider_event", "receipt"], "requires_counterparty": true },
+    { "id": "cancellation", "polarity": "negative", "requires_evidence": ["message_thread", "receipt", "timestamped_log"], "requires_counterparty": true },
+    { "id": "dispute_resolved_against", "polarity": "negative", "requires_evidence": ["resolved_dispute"], "requires_counterparty": true },
+    { "id": "seller_misrepresentation_finding", "polarity": "negative", "requires_evidence": ["resolved_dispute"], "also_requires": ["seller_disclosure_diff", "photo_set", "inspection_report"], "requires_counterparty": true,
+      "note": "Needs a RESOLVED dispute plus at least one corroborating artefact; an accusation alone is not a finding." },
+    { "id": "response_time_sample", "polarity": "neutral", "requires_evidence": ["timestamped_log"], "requires_counterparty": false }
+  ],
+  "penalty_ladder": {
+    "steps": [
+      { "id": "notice", "rank": 0, "min_negative_events": 1, "requires_human_decision": false, "appeal_window_days": 14, "effect": "warning shown to the user; no loss of privileges" },
+      { "id": "score_reduction", "rank": 1, "min_negative_events": 2, "requires_human_decision": true, "appeal_window_days": 14, "max_reduction_points": 10, "effect": "bounded reduction of the behaviour-based standing" },
+      { "id": "restriction", "rank": 2, "min_negative_events": 2, "requires_human_decision": true, "appeal_window_days": 14, "max_duration_days": 30, "effect": "temporary hold on bidding or posting" },
+      { "id": "suspension", "rank": 3, "min_negative_events": 3, "requires_human_decision": true, "appeal_window_days": 30, "max_duration_days": 90, "effect": "account suspended for a bounded period" },
+      { "id": "removal", "rank": 4, "min_negative_events": 3, "requires_human_decision": true, "appeal_window_days": 30, "effect": "account removed; only after a prior suspension unless the event type allows a skip" }
+    ],
+    "max_rank_without_prior_step": { "default": 0, "seller_misrepresentation_finding": 2 },
+    "one_step_at_a_time": true,
+    "takes_effect_after_appeal_window": true,
+    "emergency_exception": { "allowed_event_types": ["seller_misrepresentation_finding"], "requires_evidence_kinds": ["resolved_dispute"], "max_rank": 2, "requires_human_decision": true }
+  },
+  "appeal": {
+    "states": ["none", "filed", "under_review", "upheld", "overturned", "expired"],
+    "transitions": { "none": ["filed", "expired"], "filed": ["under_review"], "under_review": ["upheld", "overturned"], "upheld": [], "overturned": [], "expired": [] },
+    "overturned_requires_reversal": true,
+    "reviewer_must_differ_from_issuer": true
+  },
+  "basis": "REC"
+}

@@ -1,0 +1,27 @@
+{
+  "spec_schema": "mbos.trust.payment_boundary/1",
+  "version": "2026.10.07-e18",
+  "status": "SPEC_ONLY_NOT_BUILT",
+  "principle": "Deal Sniffer is NOT the bank. Payment authorization, capture, refunds, payouts, KYC/identity obligations (where applicable) and related compliance belong to a marketplace payment provider. This file is the BOUNDARY our code will call across; the provider is replaceable and is not chosen (UNKNOWN; a Michael + legal decision). Nothing here is built, enabled or granted.",
+  "provider": { "selected": null, "replaceable": true,
+    "note": "UNKNOWN. A provider must be able to: hold funds outside Deal Sniffer, perform KYC/identity checks it is obliged to, support idempotency keys, return a durable event id for every call, and support lookup by idempotency key (the reconciliation rule: ask the provider, never resend)." },
+  "provider_obligations": ["payment authorization", "capture", "refunds", "payouts", "KYC/identity obligations where applicable", "related compliance"],
+  "amount_unit": "integer minor units (cents); never floats",
+  "operations": [
+    { "id": "authorize", "capability": "money.payment.authorize", "reversibility": "reversible", "tier": 0, "step_up_required": true, "idempotency_key_required": true, "granted_to": [],
+      "note": "Hold funds against a bid/booking. Undone by release_authorization." },
+    { "id": "release_authorization", "capability": "money.payment.release", "reversibility": "reversible", "tier": 0, "step_up_required": true, "idempotency_key_required": true, "granted_to": [] },
+    { "id": "capture", "capability": "money.payment.capture", "reversibility": "irreversible", "tier": 0, "step_up_required": true, "idempotency_key_required": true, "granted_to": [],
+      "note": "Take the money. Refund is a separate, partially reversible act." },
+    { "id": "refund", "capability": "money.payment.refund", "reversibility": "partially_reversible", "tier": 0, "step_up_required": true, "idempotency_key_required": true, "granted_to": [] },
+    { "id": "payout", "capability": "money.payment.payout", "reversibility": "irreversible", "tier": 0, "step_up_required": true, "idempotency_key_required": true, "granted_to": [] }
+  ],
+  "controls": {
+    "namespace": "money.payment.",
+    "granted_to_nobody": true,
+    "live_spend": "pinned 0 by the policy schema in wave one; lifting it needs a separate explicit Michael decision, a schema change and a migration",
+    "every_call_requires": ["ActionRequest", "tier 0", "step-up YES on the exact payload hash", "idempotency key", "guard checks G1-G8", "receipts with provenance", "dry_run until separately authorised"],
+    "never_retry_blind": "an irreversible operation that times out is reconciled by provider lookup, then settled failed or executed; never resent (E-05/R22)",
+    "bounded_by": "mbos.budget_ledger caps (per action, daily, global, cash-at-risk); a money.payment.* call counts against the money bucket"
+  }
+}

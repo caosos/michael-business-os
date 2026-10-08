@@ -1,0 +1,185 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://michael-business-os/trust/penalty.schema.json",
+  "title": "Penalty: evidence-based, graduated, appealable",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "penalty_id",
+    "subject",
+    "step",
+    "reason_event_ids",
+    "evidence",
+    "issued_at",
+    "issued_by",
+    "effective_from",
+    "appeal",
+    "provenance_ids"
+  ],
+  "properties": {
+    "penalty_id": {
+      "type": "string",
+      "pattern": "^pen_[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "subject": {
+      "type": "string",
+      "minLength": 1
+    },
+    "step": {
+      "enum": [
+        "notice",
+        "score_reduction",
+        "restriction",
+        "suspension",
+        "removal"
+      ]
+    },
+    "reason_event_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^rev_[0-9A-HJKMNP-TV-Z]{26}$"
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "ref"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "effective_from": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "issued_by": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "id"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "human",
+            "system"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "decision_approval_id": {
+      "type": "string",
+      "pattern": "^appr_[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "reduction_points": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "duration_days": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "emergency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reason"
+      ],
+      "properties": {
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "appeal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "window_days",
+        "deadline"
+      ],
+      "properties": {
+        "state": {
+          "enum": [
+            "none",
+            "filed",
+            "under_review",
+            "upheld",
+            "overturned",
+            "expired"
+          ]
+        },
+        "window_days": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "deadline": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "filed_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "reviewer": {
+          "type": "string"
+        },
+        "resolved_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "reversal_receipt_id": {
+          "type": "string",
+          "pattern": "^rcpt_[0-9A-HJKMNP-TV-Z]{26}$"
+        }
+      }
+    },
+    "provenance_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^prov_[0-9A-HJKMNP-TV-Z]{26}$"
+      }
+    }
+  }
+}
