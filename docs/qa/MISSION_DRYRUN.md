@@ -69,3 +69,32 @@ conformance.ok FALSE:
 - **F-104 (P2, INFER; owner 02/01):** `var/raw/` is empty although items carry `raw_ref sha256:`; raw payloads cannot be re-read from disk for audit.
 
 I do not treat F-102/F-105 as blocking Stage 3: the Items exist, are RESEARCHING with provenance and a valid receipt chain, and later stages can run. They are filed as gaps and the audit stays red until fixed.
+
+## Stage 3: research ("Add a price I saw" through the UI): FAIL (the TV cannot leave research; F-106, F-107, F-108)
+
+Setup: Operator UI started exactly as bootstrap printed it (`source var/dev.env && source var/owner.env && MBOS_OPERATOR_PIN=g21pin .venv/bin/python -u -m operator_ui serve --port 8765`; `MBOS_OWNER_DATABASE_URL` is read, F-88 fixed). Driven over HTTP the way the browser posts (CSRF + nonce + PIN). Home `/` lists "Needs from you (4)": TV, mower and Recon "no comparable sold price"; the lead "more evidence".
+
+What worked:
+- Bad PIN on `/item/<tv>/comp` is refused and writes nothing; right PIN writes `var/comps_inbox/ui-*.json` with `entered_by michael`, `entered_via operator_ui`, a provenance note. The banner is now true: "The worker checks the inbox about once a minute and will re-check this item with your price" (F-92 FIXED).
+- The running `mbos worker` picked the file up by itself within ~45 s and re-checked all four items (`recheck:<item>:<epoch>` DBOS workflows, all SUCCESS). No `mbos recheck` needed (F-91 not hit: a second `mbos recheck` for the TV also SUCCEEDED).
+- After comps for the mower ($700) and Recon ($1,050), both moved from "no comparable sold price" to scored cards (see Stage 4).
+
+What failed, in order met:
+1. **F-106 (P0, FACT; owner 03 + 01 + 06): the TV, the primary training deal, cannot reach a recommendation in the bootstrapped assembly.** With its comp in place, lane C's research step still returns `RESEARCHING` with a blocking gap `scope_override_required`: "flip/other_asset is uncategorized: a human must supply rehab.parts_cost, rehab.labor_hours, rehab.required_skills as provenance-carrying overrides". The Operator UI has no form for this (only "Add a price I saw", "My notes" and the lead's attest keys), and `training_examples.json` already carries exactly these values inline (`rehab.parts_cost 0, labor_hours 0.2, required_skills [assembly]`). Repro: bootstrap, worker with the fixture, add a TV comp titled "55 inch LED TV" (the research call in a Python shell: `research_step(item, comps, prov, as_of)` -> `proposed_next_state RESEARCHING`, gaps `[scope_override_required, blocking]`). **INFER (cause of the A-41 divergence):** A-41's `training_set` runner sets no `MBOS_COMPS_STORE`/`MBOS_COMPS_INBOX`, so research is a STAND-IN and the inline economics are scored as given (TV = YES); `bootstrap_dev`'s `var/dev.env` sets both, so the REAL researcher re-estimates every listing from category priors and overrides the fixture's FACT values. The documented path (bootstrap + `mbos worker` + UI) therefore does not reproduce A-41. Recommendation: (a) the researcher must honour inline FACT/attested economics (or accept a human scope override from the UI); (b) add an A-41-style test through `bootstrap_dev`'s env, not a stripped env.
+2. **F-107 (P1, FACT; owner 03 + 06):** the status text lies for the TV. After a matching comp is on file the UI still says "Needs from you: no comparable sold price ... This item is parked: the system cannot recommend it until it has a price to compare with"; the true blocker is `scope_override_required`. The card says "more research is running" (nothing is). This is F-93 again for a new gap code; the card's `UNKNOWN (36)` list does not name it either.
+3. **F-108 (P1, FACT; owner 02 + 06):** a saved comp can be silently ignored. The first TV comp I typed with the form's natural fields ("Generic" / "55in LED TV", $92, used) was saved, the banner said it would be re-checked, the worker re-checked, and nothing changed: lane B's `candidate_comps` drops comps whose title similarity to the listing title is below 0.5 (`title_similarity("55 inch LED TV, works great, $30 firm, today only", "Generic 55in LED TV") = 0.453`; "Generic 55 inch LED TV" = 0.50, "55 inch LED TV" = 0.58). The UI never tells Michael a price was not used. Second comp ("55 inch" / "LED TV") matched. Recommendation: the form should say which listing it is attached to and use its title when make/model is blank; report "price saved but not matched to this listing (similarity 0.45 < 0.5)".
+
+Evidence of state after stage 3 (dev DB; the TV is the blocker):
+```
+$ .venv/bin/mbos items
+itm_01M4EK0246KT4QGPG5RK46GRQK  RESEARCHING  service/drywall_repair       Patch two drywall holes and a ceiling stain
+itm_01M4EK01ZQDJ2CN4V3B2KMY3MQ  RESEARCHING  flip/mechanical_equipment    Honda Recon ATV, doesn't run, $300
+itm_01M4EK01VFDZ4JK3QPCX6SSYF6  RESEARCHING  flip/mower                   Older riding mower 42in, runs, needs a belt, $480
+itm_01M4EK01Q9NPYPMQA69CC0EWJG  RESEARCHING  flip/other_asset             55 inch LED TV, works great, $30 firm, today only
+$ .venv/bin/mbos queue
+Nothing needs a decision.
+research_step per item (read-only call, current comps): TV RESEARCHING [scope_override_required, blocking] (1 comp);
+  mower SCORED [thin_comps "1 sold comps; YES needs 3", repair_scope_unknown]; Recon SCORED [thin_comps, repair_scope_unknown, transport_unclassified];
+  lead SCORED [scope_unverified]
+```
+Per the task I stop at the first real gap. Stage 4 below records what the same state shows, so the owner can see the whole distance in one pass.
