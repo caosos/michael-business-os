@@ -11,8 +11,8 @@ Last updated: 2026-10-08 (lane CLOSED; C-21 done; handoff docs/handoff/LANE_03.m
 
 ## Claimed work (wave two). Foreman loop: `docs/COORDINATION.md` @ agent-01 `99e9ec0`
 Claimed: none (closed)
-Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6; C-04 @ 882c726; C-05 @ 6e938d2; C-06 @ 9e36ec9; C-07 @ 0c3cf4a; C-08 @ a81a989; C-09 @ 286e0f3; C-10 @ e1869f2; C-11 @ c648ca3; C-12 @ d5daf42; C-13 @ 0d417fb; C-14 @ ec97bf7; C-15 @ 2575ed3; C-16 @ c88cd5a; C-17 @ 3569efb; C-18 @ d9bceea; X-03 @ 4a93582 (already satisfied; verified 2026-10-08); C-19 @ 4f49c8b; C-20 @ 3c3201c; C-21 @ 51fc248; C-23 @ 3eb358f
-Queue: C-22 (Valuator) is NOT started; see Proposed tasks P-03-10 @ agent-01 `292adae`
+Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6; C-04 @ 882c726; C-05 @ 6e938d2; C-06 @ 9e36ec9; C-07 @ 0c3cf4a; C-08 @ a81a989; C-09 @ 286e0f3; C-10 @ e1869f2; C-11 @ c648ca3; C-12 @ d5daf42; C-13 @ 0d417fb; C-14 @ ec97bf7; C-15 @ 2575ed3; C-16 @ c88cd5a; C-17 @ 3569efb; C-18 @ d9bceea; X-03 @ 4a93582 (already satisfied; verified 2026-10-08); C-19 @ 4f49c8b; C-20 @ 3c3201c; C-21 @ 51fc248; C-23 @ 3eb358f; C-22 @ COMMIT
+Queue: C-22 (Valuator) DONE; P-03-10 = C-22.
 
 - **C-01**, the RESEARCH/estimate producer, fills `Item.economics` from normalized fields, comps evidence and category priors, with provenance per estimate. It is deterministic and does no LLM arithmetic.
   - Claimed at `b923852`; confirmed CLAIMED in READY_QUEUE @ `99e9ec0`.
@@ -149,6 +149,7 @@ Queue: C-22 (Valuator) is NOT started; see Proposed tasks P-03-10 @ agent-01 `29
 - **X-03 (all lanes; remove committed `build/`): already satisfied.** The branch tracks no `build/`, `dist/` or `egg-info` at any depth (checked on `origin/research/agent-03-economics`). My nested `economics/build/` was removed at `4a93582`, and `.gitignore` covers `build/` and `dist/`. A clean `git archive` + pip install reports 0.11.1. A test (`test_git_tracks_no_build_output`) guards it.
 
 ## Proposed tasks (for Agent 01 to triage)
+- P-03-14 (found in C-22): `plan_week` output fails coordinator A-33 `mbos.mission.plan_errors` in 2 cases (HOLD/UNKNOWN plan with legs committing cash; projected_week.low 0.0 not supported by legs). Fix lane-03 planner or vendor-test expectations. Acceptance: test_mission passes with `mbos` on PYTHONPATH.
 - **P-03-10 (lane C): C-22 Valuator interface + FlipComparablesValuator** (READY in the queue; not started). Acceptance: mower and trailer fixtures produce `valuation.schema.json` ranges with evidence and `not_an_appraisal: true` that pass `mbos.valuation.errors`; asking-only comps cap confidence at medium; sold comps or a record allow high; home and vehicle valuators are interface-only and return UNKNOWN with `reason_unknown`, never a number; reuses `comps.py` / `comps_feed.py` / `estimation-priors.json`.
 - **P-03-11 (lane C): fill the new numeric context from data.** The estimator should set `economics.context.seasonality_factor` from `seasonality.json` (needs a human-read source for each category; today UNKNOWN) and accept Michael's `current_cash` from `config/operator_profile.v1.json` `current_cash_context`. Acceptance: with the profile cash set, the late-season mower row shows cash pressure; with it null, the row says UNKNOWN; seasonality is only set where a sourced entry exists.
 - **P-03-12 (lane C + owner): confirm deal-class thresholds (MICHAEL_DECISIONS #9).** `scoring-config.json` `deal_classes` / `class_gates` mirror the operator profile and are PROVISIONAL. Acceptance: once Michael answers, a config bump (2026.10.3+) with the history copy, the drift test `test_config_classes_mirror_operator_profile` green, goldens regenerated.
