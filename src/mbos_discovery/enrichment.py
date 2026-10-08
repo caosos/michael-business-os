@@ -26,6 +26,7 @@ from typing import Any, Callable, Optional
 from . import AGENT_ID, __version__
 from .ids import iso, parse_ts
 from .normalize import clean_text
+from .tags import build_category_tags
 
 TOOL_NAME = "mbos_discovery.enrichment"
 STALE_MEDIUM_DAYS, STALE_HIGH_DAYS = 14, 45          # INFERENCE thresholds, shown in every stale_risk note
@@ -212,12 +213,18 @@ def attach_enrichment(conn, spine, item_id: str, raw_store, as_of: datetime,
     # does not look like new content; the key is recorded in the research entry's finding.
     placeholder = "prov_" + "0" * 26
     draft = build_blocks(item, facts, as_of, placeholder, history)
+    wants_tags = bool(build_category_tags(item, placeholder)["tags"])
+    tags_supported = "category_tags" in getattr(spine, "ENRICHMENT_BLOCKS", ())
+    if wants_tags and tags_supported:                    # B-21: only when the spine knows the block (else reported)
+        draft["category_tags"] = build_category_tags(item, placeholder)
     keys = {n: sha256_bytes(canonical_json(d))[7:23] for n, d in draft.items() if d}
     todo = [n for n in keys if f"key={keys[n]}" not in " ".join(
         r.get("finding", "") for r in item.get("research") or [] if r.get("field") == f"card.{n}")]
-    skipped = [n for n in ("listing_activity", "seller") if n not in todo]
+    skipped = [n for n in ("listing_activity", "seller") + (("category_tags",) if "category_tags" in draft else ())
+               if n not in todo]
+    unsupported = ["category_tags"] if wants_tags and not tags_supported else []
     if not todo:
-        return {"provenance_id": None, "attached": [], "skipped": skipped}
+        return {"provenance_id": None, "attached": [], "skipped": skipped, "unsupported": unsupported}
     ledger = getattr(spine, "L", None)
     if ledger is None:
         import mbos.ledger as ledger
@@ -226,6 +233,8 @@ def attach_enrichment(conn, spine, item_id: str, raw_store, as_of: datetime,
                                     tool_name=TOOL_NAME, tool_version=__version__, inputs_used=inputs,
                                     source_uri=item["sources"][0]["url"], fetched_at=iso(as_of))
     blocks = build_blocks(item, facts, as_of, prov, history)          # the real blocks cite this provenance
+    if "category_tags" in todo:
+        blocks["category_tags"] = build_category_tags(item, prov)
     attached = []
     for name in todo:
         data = blocks[name]
@@ -234,4 +243,4 @@ def attach_enrichment(conn, spine, item_id: str, raw_store, as_of: datetime,
                                 summary=f"{name}: " + ", ".join(sorted(k for k in data if k != "confidence"))
                                         + f" [key={keys[name]}]")
         attached.append(name)
-    return {"provenance_id": prov, "attached": attached, "skipped": skipped}
+    return {"provenance_id": prov, "attached": attached, "skipped": skipped, "unsupported": unsupported}

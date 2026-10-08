@@ -157,11 +157,11 @@ def spine_db(pg):
     engine.dispose()
 
 
-def _ingest_ebay(engine, tmp_path, clock):
+def _ingest_ebay(engine, tmp_path, clock, keywords=("utility trailer",)):
     from mbos import spine
     from mbos.runtime import Components
     from mbos_discovery.spine import discovery_components
-    prof = FLIP.__class__("p", "flip", ("utility trailer",), limit=2, max_pages=2)
+    prof = FLIP.__class__("p", "flip", tuple(keywords), limit=2 if keywords == ("utility trailer",) else 50, max_pages=2)
     adapters, normalizer, deduper, _ = discovery_components(
         [(EbayBrowseAdapter.from_fixture(FIX / "ebay", clock), prof)], raw_dir=tmp_path / "raw", clock=clock)
     comps = Components(adapters=adapters, normalizer=normalizer, deduper=deduper).with_defaults()

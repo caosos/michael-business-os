@@ -53,7 +53,13 @@ def test_matches_reference_on_every_fixture_payload():
             obj = json.loads(p.read_bytes())
         except ValueError:
             continue
-        assert ids.canonical_json(obj) == ref.canonical_bytes(obj), p
+        try:
+            expected = ref.canonical_bytes(obj)
+        except ref.CanonicalError:                  # outside the profile (e.g. a fixture with U+0000 on purpose): both must refuse
+            with pytest.raises(ValueError):
+                ids.canonical_json(obj)
+        else:
+            assert ids.canonical_json(obj) == expected, p
         n += 1
     assert n >= 10
 
