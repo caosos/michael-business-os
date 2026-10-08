@@ -11,7 +11,7 @@ Last updated: 2026-10-08 (lane CLOSED; C-21 done; handoff docs/handoff/LANE_03.m
 
 ## Claimed work (wave two). Foreman loop: `docs/COORDINATION.md` @ agent-01 `99e9ec0`
 Claimed: none (closed)
-Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6; C-04 @ 882c726; C-05 @ 6e938d2; C-06 @ 9e36ec9; C-07 @ 0c3cf4a; C-08 @ a81a989; C-09 @ 286e0f3; C-10 @ e1869f2; C-11 @ c648ca3; C-12 @ d5daf42; C-13 @ 0d417fb; C-14 @ ec97bf7; C-15 @ 2575ed3; C-16 @ c88cd5a; C-17 @ 3569efb; C-18 @ d9bceea; X-03 @ 4a93582 (already satisfied; verified 2026-10-08); C-19 @ 4f49c8b; C-20 @ 3c3201c; C-21 @ 51fc248; C-23 @ 3eb358f; C-22 @ 6b90685; P-03-14 @ 9d20b1f; P-03-13 @ 1d2e039
+Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6; C-04 @ 882c726; C-05 @ 6e938d2; C-06 @ 9e36ec9; C-07 @ 0c3cf4a; C-08 @ a81a989; C-09 @ 286e0f3; C-10 @ e1869f2; C-11 @ c648ca3; C-12 @ d5daf42; C-13 @ 0d417fb; C-14 @ ec97bf7; C-15 @ 2575ed3; C-16 @ c88cd5a; C-17 @ 3569efb; C-18 @ d9bceea; X-03 @ 4a93582 (already satisfied; verified 2026-10-08); C-19 @ 4f49c8b; C-20 @ 3c3201c; C-21 @ 51fc248; C-23 @ 3eb358f; C-22 @ 6b90685; P-03-14 @ 9d20b1f; P-03-13 @ bb28734
 Queue: C-22 (Valuator) DONE; P-03-10 = C-22.
 
 - **C-01**, the RESEARCH/estimate producer, fills `Item.economics` from normalized fields, comps evidence and category priors, with provenance per estimate. It is deterministic and does no LLM arithmetic.
