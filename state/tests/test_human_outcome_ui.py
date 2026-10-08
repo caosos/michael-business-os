@@ -57,10 +57,10 @@ def test_ui_role_refuses_a_non_human_actor(db, actor):
 def test_agent_write_unchanged(db):
     agent = db.store("agent_write")
     item_id, pid = make_item(agent, "RESEARCHING")
-    for actor in (AGENT, MICHAEL):
-        agent.record_outcome({"item_id": item_id, "kind": "message_replied", "provenance_ids": [pid]},
-                             actor, "agent outcome", key())
-    assert db.connect("reader").execute("SELECT count(*) FROM mbos.outcomes").fetchone()[0] == 2
+    agent.record_outcome({"item_id": item_id, "kind": "message_replied", "provenance_ids": [pid]}, AGENT, "agent outcome", key())
+    with pytest.raises(errors.InsufficientPrivilege):      # D-28 (F-86): a human claim from agent_write is refused
+        agent.record_outcome({"item_id": item_id, "kind": "message_replied", "provenance_ids": [pid]}, MICHAEL, "forged", key())
+    assert db.connect("reader").execute("SELECT count(*) FROM mbos.outcomes").fetchone()[0] == 1
     assert agent.verify_chain().ok
 
 
