@@ -1,0 +1,77 @@
+import importlib.util
+import subprocess
+from pathlib import Path
+
+spec = importlib.util.spec_from_file_location("foreman", Path(__file__).resolve().parents[2] / "tools" / "foreman.py")
+foreman = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(foreman)
+
+QUEUE = """Last synced: heads x
+| ID | Pri | Task | Deps | Status | Agent | Acceptance |
+|---|---|---|---|---|---|---|
+| B-21 | P1 | tags | none | READY | 02 | ok |
+| B-12 | P1 | live | creds | BLOCKED | 02 | ok |
+| C-19 | **P0** | floor | none | **CLAIMED** | 03 | ok |
+| C-20 | P1 | digest | C-19 | BLOCKED | 03 | ok |
+| E-18 | P2 | seams | none | READY | 05 | ok |
+| E-17 | P1 | autonomy | A-26 | BLOCKED on A-26 | 05 | ok |
+| G-09 | P1 | reverify | none | **READY** | 07 | ok |
+"""
+
+
+def sh(cwd, *a):
+    subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@t", *a], cwd=cwd, check=True, capture_output=True)
+
+
+def make_repo(tmp_path, statuses):
+    origin = tmp_path / "origin"
+    origin.mkdir()
+    sh(origin, "init", "-q", "-b", "main")
+    for branch, files in {"research/agent-01-coordinator": {"docs/status/READY_QUEUE.md": QUEUE}, **statuses}.items():
+        sh(origin, "checkout", "-q", "-B", branch, "main") if False else sh(origin, "checkout", "-q", "--orphan", branch.replace("/", "_"))
+        for p, t in files.items():
+            f = origin / p
+            f.parent.mkdir(parents=True, exist_ok=True)
+            f.write_text(t)
+        sh(origin, "add", "-A")
+        sh(origin, "commit", "-qm", "x")
+        sh(origin, "branch", "-M", branch)
+        sh(origin, "rm", "-rfq", ".")
+    clone = tmp_path / "clone"
+    sh(tmp_path, "clone", "-q", str(origin), str(clone))
+    return clone
+
+
+def lane(state, claimed="", done=""):
+    return {"docs/status/AGENT_STATUS.md": f"State: {state}\nClaimed: {claimed}\n{done}\n"}
+
+
+def test_idle_with_ready_work_exits_2_and_names_task(tmp_path, capsys):
+    clone = make_repo(tmp_path, {
+        "research/agent-02-opportunity": lane("WAITING"),
+        "research/agent-03-economics": lane("WORKING", "C-19"),
+        "research/agent-05-governance": lane("WAITING", done="Done: E-17 @ abc"),
+        "research/agent-07-marketing": lane("IDLE", "(none)"),
+    })
+    rc = foreman.main(["--repo", str(clone), "--no-fetch", "--wake-text"])
+    out = capsys.readouterr().out
+    assert rc == 2
+    assert "WAKE 02" in out and "B-21" in out
+    assert "WAKE 07" in out and "G-09" in out
+    assert "WAKE 03" not in out            # busy
+    assert "B-12" not in out               # blocked work is not "ready"
+
+
+def test_done_tasks_and_blocked_only_lanes_do_not_trigger(tmp_path, capsys):
+    clone = make_repo(tmp_path, {
+        "research/agent-02-opportunity": lane("WAITING", done="Done: B-21 @ a"),
+        "research/agent-03-economics": lane("WORKING", "C-19"),
+        "research/agent-05-governance": lane("WAITING", done="Done: E-18 @ b"),
+        "research/agent-07-marketing": lane("WORKING", "G-09"),
+    })
+    assert foreman.main(["--repo", str(clone), "--no-fetch"]) == 0
+
+
+def test_parse_queue_ignores_non_task_rows():
+    rows = foreman.parse_queue(QUEUE)
+    assert [r["id"] for r in rows if r["status"].startswith("READY")] == ["B-21", "E-18", "G-09"]

@@ -183,3 +183,7 @@ Not yet built (lane E): egress cut, credential lease revocation, LiteLLM budget 
 - Is there still no code path to a live effector? `grep -rn "dry_run" src/` should show only `True` and guard checks.
 - Do `mbos audit` and `pytest -q` both pass?
 - Were the frozen contracts left untouched? A contract change needs an ADR, a semver bump and an Agent 01 sign-off.
+
+
+## Foreman check (idle agents)
+`.venv/bin/python -I tools/foreman.py --wake-text` fetches origin, prints each lane's state/claim/next READY tasks and exits 2 if an agent is idle while READY work exists for it. Read-only; it cannot start sessions. Schedule it on the host (OWNER_ACTIONS D2).
