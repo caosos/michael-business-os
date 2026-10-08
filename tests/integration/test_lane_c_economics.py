@@ -19,11 +19,20 @@ LANE_C_COMMIT = "dcd6883"
 
 @pytest.fixture(scope="module")
 def lane_c_config(tmp_path_factory):
+    """Lane C's whole config dir at the pushed head: the installed engine must be paired with ITS config (the gate checks
+    that the installed engine equals that head). Pinning an old config here broke when C-19 added class_gates."""
+    import io
+    import tarfile
+
     d = tmp_path_factory.mktemp("lane-c-config")
-    (d / "history").mkdir()
-    for path in ("economics/config/scoring-config.json", "economics/config/history/scoring-config-2026.10.0.json"):
-        data = subprocess.run(["git", "show", f"{LANE_C_COMMIT}:{path}"], cwd=ROOT, capture_output=True, check=True).stdout
-        (d / path.removeprefix("economics/config/")).write_bytes(data)
+    tar = subprocess.run(["git", "archive", "origin/research/agent-03-economics", "economics/src/mbos_economics/config"], cwd=ROOT,
+                         capture_output=True, check=True).stdout
+    with tarfile.open(fileobj=io.BytesIO(tar)) as t:
+        for m in t.getmembers():
+            if m.isfile():
+                dest = d / m.name.removeprefix("economics/src/mbos_economics/config/")
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                dest.write_bytes(t.extractfile(m).read())
     return d
 
 
@@ -50,7 +59,7 @@ def test_engine_output_is_a_valid_score_result_and_replays(real_scorer):
 def test_real_engine_drives_the_workflow(rt, run_discovery, real_scorer):
     ids = run_discovery("FIX-TRAILER-1", "FIX-LEAD-SMARTHOME-1", "FIX-MOWER-1", "FIX-LEAD-DRYWALL-1")
     final = {k: wait_state(rt.engine, v, {"AWAITING_APPROVAL", "RESEARCHING", "ARCHIVED"}) for k, v in ids.items()}
-    assert final["FIX-MOWER-1"] == "ARCHIVED"  # negative EV under any sane engine
+    assert final["FIX-MOWER-1"] in ("ARCHIVED", "RESEARCHING")  # PASS: archived, unless it rests on priors only (R13/A-12)
     with rt.engine.connect() as c:
         import sqlalchemy as sa
         for listing, item_id in ids.items():
@@ -58,7 +67,8 @@ def test_real_engine_drives_the_workflow(rt, run_discovery, real_scorer):
             assert body["scores"]["scorecard"].get("engine_version"), "scored by lane C, not the placeholder"
             assert not schemas.errors("item", body)
             v = body["recommendation"]["verdict"]
-            assert final[listing] == {"YES": "AWAITING_APPROVAL", "MAYBE": "RESEARCHING", "PASS": "ARCHIVED"}[v]
+            priors = body["scores"]["scorecard"].get("pass_on_priors") is True
+            assert final[listing] == {"YES": "AWAITING_APPROVAL", "MAYBE": "RESEARCHING", "PASS": "RESEARCHING" if priors else "ARCHIVED"}[v]
 
 
 def test_item_without_economics_parks_in_research(rt, run_discovery, real_scorer):

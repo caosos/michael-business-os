@@ -293,3 +293,36 @@ def test_policy_blocked_followup_leaves_a_receipt_stronger(ledger_db):
     assert out["policy_denied"] is True
     assert scalar(ledger_db, "SELECT count(*) FROM mbos.receipts WHERE item_id = :i", i=ids["item_id"]) > n0
     assert scalar(ledger_db, "SELECT state FROM mbos.items WHERE item_id = :i", i=ids["item_id"]) == "ACTED"  # item unchanged
+
+
+def _score_with(ledger_db, verdict, pass_on_priors):
+    from dataclasses import asdict
+
+    from mbos.reference.fixture_adapter import FixtureSourceAdapter
+    from mbos.runtime import Components
+    from tests.helpers.common import FIXTURE
+
+    comps = Components().with_defaults()
+    raw = next(r for r in FixtureSourceAdapter(FIXTURE, name="fixture").fetch() if r.source_listing_id == "FIX-TRAILER-1")
+    with ledger_db.begin() as c:
+        iid = spine.ingest(c, asdict(raw), asdict(comps.normalizer.normalize(raw)), "fixture", "0.1.0", comps)["item_id"]
+    with ledger_db.begin() as c:
+        item = spine.read_item(c, iid)
+    sr = asdict(comps.scorer.score(item))
+    sr["verdict"] = verdict
+    sr["scorecard"] = {**sr["scorecard"], "pass_on_priors": pass_on_priors}
+    with ledger_db.begin() as c:
+        spine.record_score(c, iid, sr)
+    with ledger_db.begin() as c:
+        out = spine.route_recommendation(c, iid, comps)
+        return out, spine.read_item(c, iid)["state"]
+
+
+def test_pass_on_priors_goes_back_to_research_not_archive(ledger_db):
+    out, state = _score_with(ledger_db, "PASS", True)
+    assert state == "RESEARCHING" and out.get("pass_on_priors") is True
+
+
+def test_evidence_backed_pass_is_archived(ledger_db):
+    out, state = _score_with(ledger_db, "PASS", False)
+    assert state == "ARCHIVED" and "pass_on_priors" not in out

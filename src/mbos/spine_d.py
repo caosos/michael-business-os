@@ -239,12 +239,20 @@ def record_score(conn: sa.Connection, item_id: str, sr: dict) -> dict:
     return {"verdict": sr["verdict"], "recommendation_id": rec["recommendation_id"], "scorecard_id": scores["scorecard_id"]}
 
 
+def _pass_on_priors(item: dict) -> bool:
+    sc = (item.get("scores") or {}).get("scorecard")
+    return isinstance(sc, dict) and sc.get("pass_on_priors") is True
+
+
 def route_recommendation(conn: sa.Connection, item_id: str, components: Any) -> dict:
     item = read_item(conn, item_id)
     rec = item["recommendation"]
     prov = _prov(conn, "mbos.spine_d.route_recommendation", basis="RECOMMENDATION",
                  inputs=(item_id, rec["recommendation_id"]), derived_from=[rec["provenance_id"]])
     if rec["verdict"] == "PASS":
+        if _pass_on_priors(item):  # R13: a PASS that rests only on priors is not discarded; it goes back to research
+            _to(conn, item_id, "RESEARCHING", "PASS rests on priors only (no evidence-backed gate): needs evidence, not archived", [prov])
+            return {"verdict": "PASS", "action_request_id": None, "pass_on_priors": True}
         _to(conn, item_id, "ARCHIVED", "machine verdict PASS: archived", [prov])
         return {"verdict": "PASS", "action_request_id": None}
     proposed = rec.get("proposed_actions") or (components.planner.plan(item) if rec["verdict"] == "YES" else [])

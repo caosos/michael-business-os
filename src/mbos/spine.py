@@ -270,6 +270,11 @@ def record_score(conn: sa.Connection, item_id: str, sr: dict[str, Any]) -> dict[
     return {"verdict": sr["verdict"], "recommendation_id": rec["recommendation_id"], "scorecard_id": scores["scorecard_id"]}
 
 
+def _pass_on_priors(item: dict) -> bool:
+    sc = (item.get("scores") or {}).get("scorecard")
+    return isinstance(sc, dict) and sc.get("pass_on_priors") is True
+
+
 def route_recommendation(conn: sa.Connection, item_id: str, components: Any) -> dict[str, Any]:
     """PASS → ARCHIVED · MAYBE → RESEARCHING · YES → ActionRequest (tier 0) → AWAITING_APPROVAL."""
     item = load_item(conn, item_id, for_update=True)
@@ -277,6 +282,10 @@ def route_recommendation(conn: sa.Connection, item_id: str, components: Any) -> 
     prov = tool_provenance(conn, "mbos.spine.route_recommendation", basis="RECOMMENDATION",
                            inputs=[item_id, rec["recommendation_id"]], derived_from=[rec["provenance_id"]])
     if rec["verdict"] == "PASS":
+        if _pass_on_priors(item):  # R13: a PASS that rests only on priors is not discarded; it goes back to research
+            update_item(conn, item_id, to_state="RESEARCHING", provenance_ids=[prov],
+                        intent="PASS rests on priors only (no evidence-backed gate): needs evidence, not archived")
+            return {"verdict": "PASS", "action_request_id": None, "pass_on_priors": True}
         update_item(conn, item_id, to_state="ARCHIVED", intent="machine verdict PASS: archived", provenance_ids=[prov])
         return {"verdict": "PASS", "action_request_id": None}
     proposed = rec.get("proposed_actions") or (components.planner.plan(item) if rec["verdict"] == "YES" else [])
