@@ -1,0 +1,1 @@
+ILLUSTRATIVE fixture of a downloaded NHTSA service-bulletin flat file (tab-delimited, header row). The column names are modelled on the NHTSA TSB flat-file layout from memory and are UNKNOWN until a real download is inspected. Makes (FIXMOTORS), bulletin numbers and text are FICTIONAL.

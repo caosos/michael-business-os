@@ -148,3 +148,7 @@ Read-only DISCOVER + NORMALIZE lane against frozen contracts v1.0.0 (agent-01-co
 ## Next action
 On credentials: live eBay smoke run, record a real fixture, tune the mapping. Otherwise next adapters in order:
 GSA Auctions API → Trash Nothing API → IMAP alert ingestor → SAM.gov.
+
+## P-02-13
+- Done: P-02-13 @ COMMIT
+- State: CLOSED
