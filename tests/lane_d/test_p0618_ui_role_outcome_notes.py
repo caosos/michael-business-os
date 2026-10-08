@@ -3,6 +3,7 @@ is lane D's REAL Operator UI login (`mbos_operator_ui`, non-superuser), plus the
 
 from __future__ import annotations
 
+import json
 import threading
 from http.server import ThreadingHTTPServer
 
@@ -44,21 +45,42 @@ def ui_least(rtd, ui_role):
     httpd.server_close()
 
 
-def test_outcome_entry_as_the_ui_role_is_refused_by_lane_d_FINDING(rtd, discover_d, ui_d, ui_role):
-    """FINDING (lane D, migration 0004): `mbos.record_outcome` is granted to `agent_write` only, so the real UI role cannot
-    record a human outcome. Pinned as observed; flip it when lane D grants the human outcome path to `approver`
-    (proposed P-06-19). The same call succeeds as the shared app role (test_ui_on_lane_d)."""
+def _capital(rtd):
+    with rtd.engine.connect() as c:
+        r = c.execute(sa.text("SELECT earned_working_capital, realized_profit FROM mbos.v_capital_position WHERE mode = 'dry_run'")).first()
+    return (float(r[0]), float(r[1])) if r else (0.0, 0.0)
+
+
+def test_human_outcome_via_the_ui_path_succeeds_as_the_ui_role_and_moves_capital(rtd, discover_d, ui_d, ui_least, ui_role):
+    """P-06-20 (lane D 0018, 819b5c7): the real UI role records Michael's closing outcome through POST /areq/<id>/outcome, and
+    it moves capital (D-18). The capital is funded by the same role (owner channel) so no superuser shortcut is involved."""
     item_id, areq = ready(ui_d, discover_d)
     post(ui_d, areq, "YES", pin=PIN)
     wait(lambda: ui_d.store.item(item_id)["state"] == "ACTED")
-    from mbos.runtime import components
+    with ui_role.begin() as c:
+        pid = c.execute(sa.text("SELECT provenance_id FROM mbos.provenance LIMIT 1")).scalar_one()
+        c.execute(sa.text("SELECT mbos.capital_fund(100::numeric, CAST(:a AS jsonb), 'P-06-20 bankroll', ARRAY[:p], :k)"),
+                  {"a": '{"type": "human", "id": "michael"}', "p": pid, "k": "p0620:" + item_id})
+    before = _capital(rtd)
+    s, loc, _ = req(ui_least, "POST", f"/areq/{areq['action_request_id']}/outcome",
+                    {"csrf": ui_least.csrf, "kind": "flip_sold", "revenue": "250", "total_cost": "200"})
+    assert s == 303 and "msg=Outcome flip_sold recorded" in loc, loc
+    (o,) = ui_d.store.outcomes(item_id)
+    assert o["kind"] == "flip_sold" and ui_d.store.item(item_id)["state"] == "OUTCOME_RECORDED"
+    after = _capital(rtd)
+    assert round(after[0] - before[0], 2) == 50.0 and round(after[1] - before[1], 2) == 50.0, (before, after)
 
-    from operator_ui.backend import SpineBackend
 
+def test_an_agent_actor_under_the_ui_role_is_refused_and_nothing_is_written(rtd, discover_d, ui_d, ui_role):
+    item_id, areq = ready(ui_d, discover_d, "FIX-TRAILER-1")
+    before = _capital(rtd)
     with pytest.raises(sa.exc.DBAPIError) as e:
-        SpineBackend(ui_role, components(), lane="lane_d").record_outcome(item_id, "flip_sold", realized={"net_profit": 1})
-    assert "permission denied for function record_outcome" in str(e.value.orig)
-    assert ui_d.store.outcomes(item_id) == [] and ui_d.store.item(item_id)["state"] == "ACTED"
+        with ui_role.begin() as c:
+            c.execute(sa.text("SELECT mbos.record_outcome(CAST(:o AS jsonb), CAST(:a AS jsonb), 'agent via UI', :k)"),
+                      {"o": json.dumps({"item_id": item_id, "kind": "flip_sold", "realized": {"net_profit": 9999}}),
+                       "a": '{"type": "agent", "id": "agent-x"}', "k": "p0620:agent:" + item_id})
+    assert "may record only a human outcome" in str(e.value.orig)
+    assert ui_d.store.outcomes(item_id) == [] and _capital(rtd) == before
 
 
 def test_operator_note_by_a_human_actor_succeeds_as_the_ui_role(rtd, discover_d, ui_d, ui_least):
