@@ -92,6 +92,47 @@ def _runs_as_worker(res: dict | None) -> bool:
                 and roles.get("worker") == [False, False] and roles.get("owner") == [True, True])   # D-26: worker holds neither approver nor owner_channel
 
 
+def bankroll_canon_errors(principal: float, scoring_cfg: dict, policy: dict) -> list[str]:
+    """Owner canon (Aria 1905 + MICHAEL_DECISIONS #1): no cash cap may exceed the protected principal, so the system can never recommend or
+    pre-approve a deal Michael's bankroll cannot fund. Stale $1,500/$3,000 defaults are what this catches."""
+    errs = []
+
+    def chk(name: str, v: object) -> None:
+        if not isinstance(v, (int, float)) or isinstance(v, bool):
+            errs.append(f"{name}: missing or not a number ({v!r})")
+        elif v > principal:
+            errs.append(f"{name} = {v} exceeds the protected principal {principal}")
+
+    cr = scoring_cfg.get("capital_and_risk", {})
+    for k in ("risk_capital_per_deal_cap", "max_loss_cap"):
+        v = cr.get(k)
+        chk(f"lane 03 capital_and_risk.{k}", v.get("value") if isinstance(v, dict) else v)
+    car = (policy.get("recommendation_actions") or {}).get("cash_at_risk", {})
+    for k in ("max_per_flip_usd", "max_total_active_usd"):
+        chk(f"lane 05 cash_at_risk.{k}", car.get(k))
+    money = (((policy.get("budgets") or {}).get("dry_run") or {}).get("buckets") or {}).get("money", {})
+    for k in ("per_action_hard_cap", "daily_hard_cap"):
+        chk(f"lane 05 dry_run.buckets.money.{k}", money.get(k))
+    return errs
+
+
+def bankroll_canon() -> dict:
+    prof = json.loads((ROOT / "config" / "operator_profile.v1.json").read_text())
+    principal = (prof.get("mission") or {}).get("protected_principal_usd")
+    try:
+        cfg = json.loads(subprocess.run(["git", "show", "origin/research/agent-03-economics:economics/src/mbos_economics/config/scoring-config.json"],
+                                        cwd=ROOT, capture_output=True, text=True, check=True).stdout)
+        pol = json.loads(subprocess.run(["git", "show", "origin/research/agent-05-governance:policy/policy.v1.json"],
+                                        cwd=ROOT, capture_output=True, text=True, check=True).stdout)
+    except (subprocess.CalledProcessError, ValueError) as e:
+        return {"name": "bankroll canon (cash caps <= protected principal)", "ok": False, "rc": 1, "secs": 0.0, "summary": f"cannot read lane configs: {e}"}
+    if not isinstance(principal, (int, float)) or principal <= 0:
+        return {"name": "bankroll canon (cash caps <= protected principal)", "ok": False, "rc": 1, "secs": 0.0, "summary": "operator profile has no protected_principal_usd"}
+    errs = bankroll_canon_errors(float(principal), cfg, pol)
+    return {"name": "bankroll canon (cash caps <= protected principal)", "ok": not errs, "rc": 0 if not errs else 1, "secs": 0.0,
+            "summary": ("all lane cash caps <= $%g" % principal) if not errs else "; ".join(errs)[:400]}
+
+
 def action_path_verdict(run_ok: bool, res: dict | None) -> bool:
     """F-49/F-50: the action-path check must be NON-EMPTY: real executions, zero live effector calls, a verifying chain,
     one live pending follow-up, and a PANIC drill that blocks while frozen and not after release."""
@@ -194,6 +235,7 @@ def main() -> int:
         suite_floor(pytest_check),
         run("cross-lane interop (tools/interop_check.py)", [PY, "-I", "tools/interop_check.py"]),
         pins_check(),
+        bankroll_canon(),
         action_path_lane_de(),
         at1_lane_de(),
     ]

@@ -105,3 +105,17 @@ def test_gate_goes_red_if_the_workflow_login_holds_approver_or_owner_channel():
         mut(bad)
         assert not rg._runs_as_worker(bad)
     assert not rg._runs_as_worker(None)
+
+
+def test_bankroll_canon_catches_stale_defaults():
+    rg = _load("release_gate")
+    cfg = {"capital_and_risk": {"risk_capital_per_deal_cap": {"value": 500}, "max_loss_cap": {"value": 500}}}
+    pol = {"recommendation_actions": {"cash_at_risk": {"max_per_flip_usd": 500, "max_total_active_usd": 500}},
+           "budgets": {"dry_run": {"buckets": {"money": {"per_action_hard_cap": 500, "daily_hard_cap": 500}}}}}
+    assert rg.bankroll_canon_errors(500.0, cfg, pol) == []
+    stale_cfg = {"capital_and_risk": {"risk_capital_per_deal_cap": {"value": 1500}, "max_loss_cap": {"value": 800}}}
+    stale_pol = {"recommendation_actions": {"cash_at_risk": {"max_per_flip_usd": 1500, "max_total_active_usd": 3000}},
+                 "budgets": {"dry_run": {"buckets": {"money": {"per_action_hard_cap": 1500, "daily_hard_cap": 1500}}}}}
+    errs = rg.bankroll_canon_errors(500.0, stale_cfg, stale_pol)
+    assert len(errs) == 6 and all("exceeds the protected principal" in e for e in errs)
+    assert rg.bankroll_canon_errors(500.0, {}, {})        # missing keys are errors, not silent passes
