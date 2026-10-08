@@ -158,3 +158,31 @@ $ .venv/bin/mbos queue
   action comms.email.send (tier 0, irreversible): Ask the seller ... (first contact, no offer)   areq_01M4ENFGT9Q7EG5Y6BVRRWPHSV
 ```
 UI home ("Today"): "Best next move: Decide: 55 inch LED TV ... is ready for your YES or NO", "Needs your decision (1)", "EV $53 $86/h confidence 0.95 irreversible". Cash tied up $36.49 is within the $500 bankroll.
+
+## Stage 4 (G-21c): scoring + recommendation: PARTIAL (3 of 4 expected outcomes met; the lead never reaches YES: F-111)
+
+Comps for the mower ($700) and the Recon ($1,050) were entered through the same UI form; attestations through the UI "Confirm what you know" forms (PIN `g21pin`). No `mbos recheck` was ever run: the worker log shows `comps inbox changed: queued recheck:...` and `new evidence on a parked item: queued recheck:<lead>:...` (about 60 s after each attestation).
+
+| Deal | Expected | Observed | Result |
+|---|---|---|---|
+| 55in TV, $30 | YES within $500, in `mbos queue`/Today | `AWAITING_APPROVAL`, YES, composite 64.27, EV $53.21, $86.28/h, confidence 0.95, cash tied up $36.49; in `mbos queue` and the UI "Needs your decision (1)" / "Best next move" | PASS |
+| Honda Recon, $300 | MAYBE naming its evidence | `recommendation.verdict MAYBE`, state `RESEARCHING`; "YES blocked: repair fault not identified (guessed scope caps at MAYBE)", "confidence 0.42 < 0.60 (gather evidence)", "Economically it works up to $277"; UI offers `fault_identified` among five forms. After I attested `fault_identified`: confidence 0.42 -> 0.57, composite 48.03 -> 49.36, still MAYBE (evidence helps but is not enough alone). F-110 fixed for the listing's own facts | PASS |
+| Riding mower, $480 | PASS, archived | `ARCHIVED`; "Passed because cash tied up of $699 is over your $500 per-deal limit ... " and `R13: PASS is evidence-backed (ev_positive, cash_ok, pph_floor_ok, class_profit_ok)` | PASS |
+| Drywall lead | MAYBE, then YES after attestations, worker rechecks by itself | MAYBE at first (confidence 0.15 < 0.60); worker rechecked on its own after each attestation (F-109 FIXED); after `scope_verified` + `customer_screened` confidence stops blocking, still MAYBE: composite 58.20 < 60 and EV $72.99/h < $75/h service target ("Quoting $651 or more would clear it"). After all six attestations the UI offers (adding `materials_priced`, `repeat_or_referral`, `price_agreed_in_writing`, `access_and_schedule_confirmed`) only the $/h gate remains: "Quoting $625 or more would clear it". Never YES | FAIL |
+
+New finding:
+- **F-111 (P1, FACT/INFER; owner 03, with 02/01 for the lead's own numbers): the drywall training lead cannot reach YES through the UI.** FACT: with every attestation the UI offers, the card stays MAYBE on `EV profit/hour $72.99 < service target $75.00`, and says a quote of $625+ would clear it, but there is no UI field for Michael to enter or accept a quote (the listing is `quote_requested`). The fixture's own economics (`quoted_revenue 450`, `labor_hours 3`, `admin_hours 0.5`, `materials_cost 40`) are the training example's YES case. INFER: the researcher re-estimates the job (6.43 h expected, net $551 deterministic) rather than using the lead's stated hours, same family as F-110 for service jobs. Repro: this document's setup, attest all seven keys on the lead, `mbos card <lead>`. Recommendation: the researcher honours stated job hours/revenue as FACT/INFER, and/or add a "My quote" input to the lead's page so the YES case is reachable; add a `bootstrap_dev` end-to-end test that asserts lead MAYBE -> YES.
+
+Observation (not filed): the Recon and lead cards print "evidence is not the blocker: no missing evidence item changes the verdict" next to "YES blocked: confidence ... (gather evidence)"; the verdict indeed stays MAYBE but the sentence reads as contradictory to Michael. Candidate F-112 (P3, owner 03/06: reword to "more evidence raises confidence but the verdict stays MAYBE because ...").
+
+Audit after all stages: `mbos audit` -> `chain.ok true (136 receipts)`, `provenance.ok true`, `dry_run.ok true (effector_receipts 0)`, **`conformance.ok true`** (F-102 fixed).
+
+## Verdict (G-21c)
+
+| Stage | G-21a | G-21c |
+|---|---|---|
+| 3 research (UI comp, worker pickup) | FAIL (F-106, F-107, F-108) | **PASS**: TV comp via the form is used, TV reaches YES with no override; worker rechecks by itself |
+| 4 scoring + recommendation | FAIL (1/4) | **PARTIAL (3/4)**: TV YES, Recon MAYBE, mower PASS archived; lead stays MAYBE (F-111) |
+
+Fixed since G-21a, re-verified: F-102, F-103 (report printed at start), F-104 (`var/raw` populated, card activity "from retained raw payloads"), F-106 (TV), F-108, F-109, F-110 (TV, mower, Recon). Not exercised: F-107's UI wording for `scope_override_required` (no such item now). Still seen: for the Recon, the page status line still says "parked ... until it has a price to compare with" although a comp is on file (UI text keyed off the state, F-107-like; part of F-112 candidate scope).
+G-21b (stages 5-8) is unblocked: there is a YES to approve (areq_01M4ENFGT9Q7EG5Y6BVRRWPHSV on a throwaway cluster; re-bootstrap per G-21b).
