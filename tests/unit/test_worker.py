@@ -120,3 +120,37 @@ def test_blocked_report_is_recorded_and_not_completed(wt, tmp_path):
     r = worker.run_one("T-1", "03", prof(), worktree=wt, dry=False, model=None, queue_text=QUEUE, escalate=False,
                        runner=lambda *a: cp(0, out), tpath=tp, skip_session_check=True)
     assert not r["ok"] and r["worker_report"]["status"] == "BLOCKED"
+
+
+def test_no_escalation_for_permission_denials_or_blocked_reports(wt, tmp_path):
+    denied = json.dumps({"type": "result", "is_error": False, "result": "can't run python", "permission_denials": [{"tool_name": "Bash", "tool_input": {"command": "pytest"}}]})
+    models = []
+
+    def runner(cmd, cwd, env, to):
+        models.append(cmd[cmd.index("--model") + 1])
+        return cp(0, denied)
+
+    worker.run_one("T-1", "03", prof(), worktree=wt, dry=False, model=None, queue_text=QUEUE, runner=runner, tpath=tmp_path / "a.jsonl", skip_session_check=True)
+    assert models == ["sonnet"]                                        # a stronger model cannot fix an allowlist
+    assert telemetry.read(tmp_path / "a.jsonl")[0]["denial_samples"] == ["Bash: pytest"]
+
+
+def test_allow_dirty_continues_previous_work_and_says_so(wt, tmp_path):
+    (wt / "half_done.txt").write_text("wip")
+    seen = {}
+
+    def runner(cmd, cwd, env, to):
+        seen["prompt"] = cmd[2]
+        return cp(0, OK)
+
+    assert "not clean" in worker.run_one("T-1", "03", prof(), worktree=wt, dry=False, model=None, queue_text=QUEUE, skip_session_check=True)["error"]
+    worker.run_one("T-1", "03", prof(), worktree=wt, dry=False, model=None, queue_text=QUEUE, runner=runner, tpath=tmp_path / "b.jsonl",
+                   skip_session_check=True, allow_dirty=True)
+    assert "UNCOMMITTED changes from a previous attempt" in seen["prompt"]
+
+
+def test_allowlist_never_contains_network_or_destructive_tools():
+    joined = " ".join(worker.ALLOWED)
+    for bad in ("curl", "wget", "ssh", "sudo", "push --force", "reset --hard", "rm "):
+        assert bad not in joined, bad
+    assert "Bash(git push origin HEAD)" in worker.ALLOWED

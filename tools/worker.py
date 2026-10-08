@@ -42,7 +42,10 @@ LANES = {
 WORKTREES = Path(os.environ.get("MBOS_WORKTREES", str(Path.home() / "business-os-worktrees")))
 ALLOWED = ["Read", "Edit", "Write", "Grep", "Glob", "Bash(git status:*)", "Bash(git diff:*)", "Bash(git log:*)", "Bash(git add:*)",
            "Bash(git commit:*)", "Bash(git fetch:*)", "Bash(git show:*)", "Bash(git push origin HEAD)", "Bash(ls:*)", "Bash(cat:*)",
-           "Bash(.venv/bin/python:*)", "Bash(python3:*)", "Bash(pytest:*)", "Bash(.venv/bin/pytest:*)", "Bash(wc:*)", "Bash(grep:*)", "Bash(tools/*)", "Bash(bash tools/*)", "Bash(.tools/uv pip install:*)",
+           "Bash(.venv/bin/python:*)", "Bash(*/.venv/bin/python:*)", "Bash(python:*)", "Bash(python3:*)", "Bash(pytest:*)", "Bash(.venv/bin/pytest:*)",
+           "Bash(*/.venv/bin/*)", "Bash(.venv/bin/*)", "Bash(cd:*)", "Bash(echo:*)", "Bash(head:*)", "Bash(tail:*)", "Bash(sed:*)", "Bash(sort:*)",
+           "Bash(find:*)", "Bash(test:*)", "Bash(cut:*)", "Bash(tr:*)", "Bash(diff:*)", "Bash(git grep:*)", "Bash(git -C * grep:*)",
+           "Bash(git -C * show:*)", "Bash(git -C * log:*)", "Bash(git -C * status:*)", "Bash(git -C * diff:*)", "Bash(git checkout -- :*)", "Bash(wc:*)", "Bash(grep:*)", "Bash(tools/*)", "Bash(bash tools/*)", "Bash(.tools/uv pip install:*)",
            "Bash(*uv pip install*)", "Bash(*pip install*)", "Bash(git archive:*)", "Bash(tar:*)", "Bash(mktemp:*)", "Bash(mkdir:*)", "Bash(cp:*)", "Bash(git rev-parse:*)", "Bash(git ls-tree:*)"]
 DENIED = ["Bash(curl:*)", "Bash(wget:*)", "Bash(ssh:*)", "Bash(scp:*)", "Bash(sudo:*)", "Bash(gh:*)", "Bash(git push --force:*)",
           "Bash(git push -f:*)", "Bash(git reset --hard:*)", "Bash(rm -rf:*)", "Bash(git branch -D:*)", "Bash(git worktree remove:*)"]
@@ -96,8 +99,21 @@ def lane_session_alive(lane: str) -> bool:
     return r.returncode == 0
 
 
+def should_escalate(row: dict) -> bool:
+    """Escalate only when a STRONGER MODEL could help. Not when the run was blocked by permissions (a launcher/allowlist problem),
+    when the worker itself reported BLOCKED (an owner/dependency problem), or when it finished."""
+    if row.get("task_completed"):
+        return False
+    if (row.get("permission_denials") or 0) > 0:
+        return False
+    rep = row.get("worker_report") or {}
+    if rep.get("status") == "BLOCKED":
+        return False
+    return True
+
+
 def run_one(task_id: str, lane: str, profile: router.TaskProfile, *, worktree: Path, dry: bool, model: Optional[str],
-            escalate: bool = True, runner: Optional[Callable[..., Any]] = None, tpath: Optional[Path] = None,
+            escalate: bool = True, allow_dirty: bool = False, runner: Optional[Callable[..., Any]] = None, tpath: Optional[Path] = None,
             skip_session_check: bool = False, queue_text: Optional[str] = None, timeout_s: int = 3600) -> dict[str, Any]:
     name, _, branch, _ = LANES[lane]
     if queue_text is None:
@@ -112,7 +128,7 @@ def run_one(task_id: str, lane: str, profile: router.TaskProfile, *, worktree: P
         return {"ok": False, "error": f"lane {lane} still has a live tmux session (mbos-agent-{lane}); close it out first (docs/handoff/CLOSEOUT_CHECKLIST.md)"}
     if not dry:
         st = sh(["git", "status", "--porcelain"], worktree).stdout.strip()
-        if st:
+        if st and not allow_dirty:
             return {"ok": False, "error": f"worktree {worktree} is not clean", "status": st.splitlines()[:5]}
     route = router.route(profile)
     override = None
@@ -120,6 +136,9 @@ def run_one(task_id: str, lane: str, profile: router.TaskProfile, *, worktree: P
         override, route = route.model, router.Route(model=model, tier="override", rule_id="OVERRIDE", reason=f"explicit --model (router chose {route.model})",
                                                     max_turns=route.max_turns)
     prompt = build_prompt(lane, task, branch)
+    if allow_dirty:
+        prompt += ("\nNOTE: the worktree has UNCOMMITTED changes from a previous attempt at this same task. Review them with `git status` and "
+                   "`git diff`, keep what is correct, finish the task, and commit them. Do not discard work you have not read.\n")
     cmd = command(route, prompt)
     if dry:
         return {"ok": True, "dry": True, "route": route.as_dict(), "cmd": cmd[:2] + ["<prompt>"] + cmd[3:], "prompt": prompt, "task": task}
@@ -144,7 +163,7 @@ def run_one(task_id: str, lane: str, profile: router.TaskProfile, *, worktree: P
                                                  head_before=head_before, head_after=head_after,
                                                  note=("override of " + override) if override else None), tpath)
         rows.append(row)
-        if row["task_completed"] or not escalate or retry >= 1:
+        if row["task_completed"] or not escalate or retry >= 1 or not should_escalate(row):
             break
         nxt = router.escalate(cur, profile)
         if nxt is None:
@@ -167,11 +186,12 @@ def main(argv: Optional[list[str]] = None) -> int:
     ap.add_argument("--worktree")
     ap.add_argument("--dry", action="store_true")
     ap.add_argument("--no-escalate", action="store_true")
+    ap.add_argument("--allow-dirty", action="store_true", help="continue a previous attempt's uncommitted work (the prompt says so)")
     ap.add_argument("--timeout", type=int, default=3600)
     a = ap.parse_args(argv)
     wt = Path(a.worktree) if a.worktree else WORKTREES / LANES[a.lane][3]
     prof = router.TaskProfile(task_id=a.task_id, lane=a.lane, kind=a.kind, risk=a.risk, cross_lane=a.cross_lane, long_horizon=a.long_horizon)
-    out = run_one(a.task_id, a.lane, prof, worktree=wt, dry=a.dry, model=a.model, escalate=not a.no_escalate, timeout_s=a.timeout,
+    out = run_one(a.task_id, a.lane, prof, worktree=wt, dry=a.dry, model=a.model, escalate=not a.no_escalate, allow_dirty=a.allow_dirty, timeout_s=a.timeout,
                   skip_session_check=bool(a.worktree))
     print(json.dumps({k: v for k, v in out.items() if k != "prompt"}, indent=2, default=str))
     if a.dry and out.get("prompt"):
