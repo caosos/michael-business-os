@@ -131,3 +131,30 @@ Chain, provenance and dry-run held throughout: `mbos audit` -> chain ok (receipt
 
 Findings filed (after F-101): F-102 (P1), F-103 (P3), F-104 (P2), F-105 (P2), F-106 (P0), F-107 (P1), F-108 (P1), F-109 (P2), F-110 (P1).
 G-21b (stages 5-8) is BLOCKED on F-106/F-110: there is no YES to approve on this assembly.
+
+---
+
+# G-21c: re-run of stages 3-4 on the FIXED assembly
+
+Date 2026-10-08. Agent 07 QA, fresh worker. DRY-RUN only. Assembly: detached worktree of coordinator `6ddbfb4` (A-42 `69402d9`, C-26 `3d0fd86`, B-22 `3b77cd0`, F-31 partial `cd174fa`), fresh venv, `tools/bootstrap_dev.py --ui-pin g21pin` (lane pins: 03 `3fb7502`, 05 `44a0fb2`, 02 `a2b971d`, 04 `6bdf941`, 06 `96fb674`), fixture `fixtures/sources/training_examples.json`. Worker and Operator UI started exactly as bootstrap printed them (UI on port 8791; 8765 was taken by an unrelated websocket server). The UI is driven over HTTP the way a browser posts (CSRF + nonce + PIN). Worker report: everything REAL except `sources`.
+
+Fresh start: 4 listings -> 4 Items, `chain.ok true` (80 receipts) after the comp below.
+
+## Stage 3 (G-21c): research via "Add a price I saw": PASS
+
+Repro of the exact G-21a failure: on the TV item's form I typed the natural fields that were silently ignored before (F-108): make `Generic`, model `55in LED TV`, $92, used, sold 2026-10-01, PIN `g21pin`.
+
+- UI banner: "Price saved. The worker checks the inbox about once a minute and will re-check this item with your price" (the file `var/comps_inbox/ui-*.json` was written).
+- The running worker queued `recheck:<item>:<epoch>` for all four items by itself (no `mbos recheck`). Within ~75 s of the save the TV moved `RESEARCHING` -> `AWAITING_APPROVAL`. F-108 FIXED: the comp is paired to the TV (`for_item_id`) and used despite a title similarity of 0.45.
+- F-106 FIXED in the path that matters: no `scope_override_required` for the TV; `flip/other_asset` is estimated from C-26 priors (no override form needed).
+- F-110 (listing facts) seen fixed for the TV: card shows `asking $30 FACT provenance`.
+
+```
+$ .venv/bin/mbos items
+itm_01M4ENBSGMQKXGMD4HXTCMAWS0  AWAITING_APPROVAL  flip/other_asset  55 inch LED TV, works great, $30 firm, today only
+$ .venv/bin/mbos queue
+[PENDING_APPROVAL] 55 inch LED TV ... verdict YES composite 64.27 EV $53.21 $86.28/h confidence 0.95
+  deterministic: net $55.51, $90.01/h over 0.6167 h, cash tied up $36.49 ; walk-away price (max buy for YES): $35
+  action comms.email.send (tier 0, irreversible): Ask the seller ... (first contact, no offer)   areq_01M4ENFGT9Q7EG5Y6BVRRWPHSV
+```
+UI home ("Today"): "Best next move: Decide: 55 inch LED TV ... is ready for your YES or NO", "Needs your decision (1)", "EV $53 $86/h confidence 0.95 irreversible". Cash tied up $36.49 is within the $500 bankroll.
