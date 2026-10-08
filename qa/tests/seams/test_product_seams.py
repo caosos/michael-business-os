@@ -238,7 +238,7 @@ def test_a_home_may_return_all_unknown_with_a_reason():
 
 @pytest.mark.parametrize("name,f", [
     ("fast-sale-above-suggested-list", lambda v: v["ranges"].update(fast_sale={"low": 9000, "high": 9500})),
-    pytest.param("as-is-above-after-repair", lambda v: v["ranges"].update(as_is={"low": 9000, "high": 9500}), marks=pytest.mark.xfail(strict=True, reason="F-67 residual: as_is above after-repair values")),
+    pytest.param("as-is-above-after-repair", lambda v: v["ranges"].update(as_is={"low": 9000, "high": 9500})),
     ("zero-width-fake-precision", lambda v: v["ranges"]["likely_sale"].update(low=1234, high=1234)),
     ("useless-width", lambda v: v["ranges"]["likely_sale"].update(low=1, high=1000000)),
     ("high-on-one-bare-sold-comp", lambda v: (v.__setitem__("confidence", "high"), v.__setitem__("evidence", [{"kind": "sold_comp", "ref": "x"}]))),

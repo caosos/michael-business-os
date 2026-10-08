@@ -1,7 +1,7 @@
 {
   "note": "NOT frozen v1.0.0 contracts: ADR-0011 card schema + operator profile, byte-copied from Agent 01's branch for independent validation of cards.",
   "source_branch": "research/agent-01-coordinator",
-  "source_commit": "51dbd51ebadd06e200efd27718c74673535efef5",
+  "source_commit": "944f8e43218de735a36641bc7aa24a6353e94aa4",
   "files": {
     "card.schema.json": "sha256:eb5a1a5542757b583ed24596e582e9e9974fecd4bb9a86d37edbb0a98f684306",
     "operator_profile.v1.json": "sha256:d99e99b83a77c54fc5c58e0260648d24895f05352b3db54f009b7c8b4d89e6d1"

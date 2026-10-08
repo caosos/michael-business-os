@@ -20,6 +20,7 @@ Done: G-10 — ADR-0012 card + engine half: floor-free and honest where it count
 Done: G-12 @ 6a10a55 — RC READY 105/0 at mbos 8ef8802; card 436/0; 68 strict xfails flipped (F-51,54,57..60,63,64 fixed; F-52,53,55,56,61,62,65..68 partial, 21 residual xfails). Receipt docs/receipts/2026-10-07-G-12-release-window-rerun.md
 Done: G-11 — product seams: 48 controls hold; F-59..F-68 filed (F-59 merchandising lint bypass is P1). Receipt docs/receipts/2026-10-07-G-11-product-seams-acceptance.md
 Done: G-13 @ 283a5ae — RC READY 105/0 at mbos da72f5c; card 455/0; 20 of 21 residual xfails removed; F-67 as_is>after_repair still open; new F-69 (A-35 regression: cash_multiple UNKNOWN when only days missing). Receipt docs/receipts/2026-10-07-G-13-a35-reverify.md
+Done: G-14 @ PENDING — F-67/F-69 fixed (01 944f8e4); 0 residual xfails F-51..F-69; RC READY 105/0, card 457/0, run 77/0. Receipt docs/receipts/2026-10-07-G-14-final-xfails.md
 Claimed: (none) — lane CLOSED per ADR-0014; handoff docs/handoff/LANE_07.md. Re-verify RC any time: `cd qa && ../.venv/bin/python -m mbos_qa install-pins && ../.venv/bin/python -m mbos_qa spine --rc` (105 passed, 3 skipped at mbos 8ef8802)
 Waiting on: owner 01 for F-50 and the G-12 residuals of F-52,53,55,56,61,62,65..68 (P-07-19); table with repros in docs/handoff/LANE_07.md. Re-run any time: `python -m mbos_qa install-pins`, then `card` and `spine --rc`.
 Current phase: Round Two — G-07 delivered; waiting on the remaining card fixes

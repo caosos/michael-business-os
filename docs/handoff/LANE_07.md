@@ -18,7 +18,7 @@ MBOS_QA_IMPL=mbos_qa.impl_spine:build MBOS_QA_STATE_BACKEND=lane_d MBOS_QA_GATEW
 Health proof = the first three. Each run starts throwaway PostgreSQL clusters under `/tmp/a07pg-*` (pgserver wheel; short paths, <107 bytes for the socket). If a run is killed: `rm -rf /tmp/a07pg-*`.
 
 ## Pins and vendored copies (re-pin = edit, then `install-pins`)
-- `qa/impl_spine_PIN` = Agent 01 `mbos` **da72f5c** (G-13); `qa/impl_lane_pins.json`: 05 `716098e`, 04 `c97ba6b`, 03 engine `3eb358f` (C-23) (read only via `git archive` in `tests/engine`, never installed).
+- `qa/impl_spine_PIN` = Agent 01 `mbos` **944f8e4** (G-14); `qa/impl_lane_pins.json`: 05 `716098e`, 04 `c97ba6b`, 03 engine `3eb358f` (C-23) (read only via `git archive` in `tests/engine`, never installed).
 - `qa/ext/{card.schema.json,operator_profile.v1.json,PIN.json}`: byte copies from 01 (re-vendor: `git show origin/research/agent-01-coordinator:docs/research/contracts/card.schema.json > qa/ext/card.schema.json`, same for `config/operator_profile.v1.json`, then refresh the sha256 in `PIN.json`).
 - `qa/contracts/` frozen v1.0.0 + canonical (pin-checked); `qa/ext/seams/` ADR-0013 examples copied from 01 (named `<dir>--<file>`, not frozen).
 - Interfaces consumed: 01 `mbos` (spine, card, mission, campaign, valuation, merchandising), 04 lane D schema, 05 lane E gateway/policy, 03 engine. Provided: reports in `docs/qa/`, findings, the release-candidate verdict.

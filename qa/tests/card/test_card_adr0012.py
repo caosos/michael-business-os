@@ -62,7 +62,6 @@ def test_without_numbers_every_new_field_is_unknown_and_listed(mc, profile):
     assert unknowns_match(c)
 
 
-@pytest.mark.xfail(strict=True, reason="F-69: A-35 regression, cash_multiple is UNKNOWN when only days is missing")
 def test_each_derived_field_is_unknown_when_only_its_own_input_is_missing(mc, profile):
     c = build(mc, profile, cash=None)
     assert E(c)["cash_multiple"]["value"] == "UNKNOWN" and E(c)["capital_velocity"]["value"] == "UNKNOWN"
