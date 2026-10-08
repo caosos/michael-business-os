@@ -142,6 +142,8 @@ def _context(v: _V, econ: dict) -> None:
         v.num(ctx, "personal_use_value", "economics.context")
     if ctx.get("seasonality_factor") is not None:
         v.prob(ctx, "seasonality_factor", "economics.context")
+    if ctx.get("available_to_deploy") is not None:     # capital ledger (C-24); null = UNKNOWN, config cap kept
+        v.num(ctx, "available_to_deploy", "economics.context")
 
 
 def _evidence(v: _V, meta: dict) -> None:

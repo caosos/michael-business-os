@@ -4,8 +4,8 @@
  "block": {
   "plan": {
    "basis": "INFERENCE",
-   "provenance_id": "prov_01M4BRBC80A33R67CMF2F9BF3E",
-   "value": "Budget about $100 in parts and $10 in materials plus about 3 h of your time (a category estimate; the fault is not diagnosed yet). Even with no parts spend this does not clear your $65/h flip target at the current buy price. Sell target is $950, the median of 3 sold comparables."
+   "provenance_id": "prov_01M4BRBC80D38TFDHHZ941H407",
+   "value": "Budget about $100 in parts and $10 in materials plus about 3 h of your time (a category estimate; the fault is not diagnosed yet). Even with no parts spend this fails your $500 per-deal cash limit (it ties up $621). Sell target is $950, the median of 3 sold comparables."
   }
  },
  "item_id": "itm_01JK0000000000000000000006",
@@ -24,7 +24,7 @@
   ],
   "inputs_used": [
    {
-    "hash": "sha256:1726d27b450d46f65187d4fd497f6794a87dc1e44d3d85a30a60cb6e8084fc87",
+    "hash": "sha256:600f519e0a1f4febf6a0de7e519bc469674bae2807ea5c11824291d21fc6d026",
     "ref": "scorecard.inputs_hash"
    },
    {
@@ -32,10 +32,10 @@
     "ref": "value_add_kb@2026.10.0"
    }
   ],
-  "provenance_id": "prov_01M4BRBC80A33R67CMF2F9BF3E",
+  "provenance_id": "prov_01M4BRBC80D38TFDHHZ941H407",
   "tool_name": "mbos_economics.valueadd",
-  "tool_version": "0.13.1"
+  "tool_version": "0.14.0"
  },
  "title": "Generac GP7500E 7500 watt portable generator",
- "value_add_hash": "sha256:6d7c2c1c0abbbef157a208ddffe70282bd09b7cbb24c48f9a0195f43cafe2368"
+ "value_add_hash": "sha256:9fbd11ae16898acc72b961b794c6c393153607b93e3cce0a89e7e3aeaf57baab"
 }

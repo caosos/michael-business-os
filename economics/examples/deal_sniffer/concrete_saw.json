@@ -8,28 +8,28 @@
     "high": 19,
     "low": 10,
     "note": "lead + repair + expected days on market (range from the comps' days on market)",
-    "provenance_id": "prov_01M4BRBC80M1BDGD9MD3Q5PH69",
+    "provenance_id": "prov_01M4BRBC8062Q8ETKG3WTMEDT1",
     "unit": "days",
     "value": 14.5
    },
    "max_acquisition": {
     "basis": "INFERENCE",
     "note": "highest buy price that clears your $65/h flip target and every hard limit, provided the evidence still outstanding checks out (not a YES yet)",
-    "provenance_id": "prov_01M4BRBC80M1BDGD9MD3Q5PH69",
+    "provenance_id": "prov_01M4BRBC8062Q8ETKG3WTMEDT1",
     "unit": "USD",
-    "value": 1229
+    "value": 352
    },
    "opening_offer": {
     "basis": "RECOMMENDATION",
     "note": "70% of the ask, never above the price ceiling",
-    "provenance_id": "prov_01M4BRBC80M1BDGD9MD3Q5PH69",
+    "provenance_id": "prov_01M4BRBC8062Q8ETKG3WTMEDT1",
     "unit": "USD",
-    "value": 980
+    "value": 350
    },
    "resale_conservative": {
     "basis": "INFERENCE",
     "note": "4 FACT sold comps: 25th percentile / median / 75th percentile",
-    "provenance_id": "prov_01M4BRBC80M1BDGD9MD3Q5PH69",
+    "provenance_id": "prov_01M4BRBC8062Q8ETKG3WTMEDT1",
     "unit": "USD",
     "value": 2825
    },
@@ -38,21 +38,21 @@
     "high": 3175,
     "low": 2825,
     "note": "4 FACT sold comps: 25th percentile / median / 75th percentile",
-    "provenance_id": "prov_01M4BRBC80M1BDGD9MD3Q5PH69",
+    "provenance_id": "prov_01M4BRBC8062Q8ETKG3WTMEDT1",
     "unit": "USD",
     "value": 3000
    },
    "resale_optimistic": {
     "basis": "INFERENCE",
     "note": "4 FACT sold comps: 25th percentile / median / 75th percentile",
-    "provenance_id": "prov_01M4BRBC80M1BDGD9MD3Q5PH69",
+    "provenance_id": "prov_01M4BRBC8062Q8ETKG3WTMEDT1",
     "unit": "USD",
     "value": 3175
    },
    "transport_cost": {
     "basis": "INFERENCE",
     "note": "fuel and wear for the trips",
-    "provenance_id": "prov_01M4BRBC80M1BDGD9MD3Q5PH69",
+    "provenance_id": "prov_01M4BRBC8062Q8ETKG3WTMEDT1",
     "unit": "USD",
     "value": 30.21
    }
@@ -61,21 +61,21 @@
    "fuel_cost": {
     "basis": "INFERENCE",
     "note": "fuel at the truck's normal mileage; the towing premium is inside transport_cost",
-    "provenance_id": "prov_01M4BRBC80M1BDGD9MD3Q5PH69",
+    "provenance_id": "prov_01M4BRBC8062Q8ETKG3WTMEDT1",
     "unit": "USD",
     "value": 8.89
    },
    "trip_hours": {
     "basis": "INFERENCE",
     "note": "driving time",
-    "provenance_id": "prov_01M4BRBC80M1BDGD9MD3Q5PH69",
+    "provenance_id": "prov_01M4BRBC8062Q8ETKG3WTMEDT1",
     "unit": "hours",
     "value": 1.11
    },
    "trip_miles_round_trip": {
     "basis": "INFERENCE",
     "note": "pickup trip only (inspect and collect); the buyer meeting is a separate local trip",
-    "provenance_id": "prov_01M4BRBC80M1BDGD9MD3Q5PH69",
+    "provenance_id": "prov_01M4BRBC8062Q8ETKG3WTMEDT1",
     "unit": "miles",
     "value": 50
    }
@@ -84,28 +84,29 @@
    "demand_now": {
     "basis": "RECOMMENDATION",
     "note": "October: neither peak nor slow",
-    "provenance_id": "prov_01M4BRBC80M1BDGD9MD3Q5PH69",
+    "provenance_id": "prov_01M4BRBC8062Q8ETKG3WTMEDT1",
     "value": "normal"
    },
    "hold_likely": {
     "basis": "RECOMMENDATION",
-    "provenance_id": "prov_01M4BRBC80M1BDGD9MD3Q5PH69",
+    "provenance_id": "prov_01M4BRBC8062Q8ETKG3WTMEDT1",
     "value": "typical for the category"
    },
    "note": {
     "basis": "RECOMMENDATION",
-    "provenance_id": "prov_01M4BRBC80M1BDGD9MD3Q5PH69",
+    "provenance_id": "prov_01M4BRBC8062Q8ETKG3WTMEDT1",
     "value": "Year-round contractor demand; no strong seasonal swing is assumed. [source: owner statement: Michael's example via Agent 01 (C-15 dispatch, 2026-10-07): a concrete saw has year-round contractor demand.]"
    }
   },
   "why": [
-   "More evidence would settle it: a diagnosed fault.",
-   "Economically it works up to $1,229, once the missing evidence checks out.",
+   "Passed because the worst case loses $761, over your $500 limit; cash tied up of $1,337 is over your $500 per-deal limit.",
+   "That rejection rests on estimates rather than evidence, so it is held for research instead of being discarded.",
+   "Economically it works up to $352, once the missing evidence checks out.",
    "4 sold comparables put likely resale near $3,000 (range $2,825 to $3,175).",
-   "Asking $1,400 is $171 above the most you should pay ($1,229)."
+   "Asking $1,400 is $1,048 above the most you should pay ($352)."
   ]
  },
- "enrichment_hash": "sha256:ea7aa42f5696fba3c52496b2a45b6885aa389b3a569f9018a72c086f9aa1f131",
+ "enrichment_hash": "sha256:e700a946e1aba58c9c3137472782537f04483d0ae6d1b9fdc4fc871eff096a67",
  "item_id": "itm_01JK0000000000000000000002",
  "omitted": {
   "logistics": [
@@ -125,12 +126,12 @@
    "prov_01JK0000000000000000000032",
    "prov_01JK0000000000000000000033",
    "prov_01JK0000000000000000000200",
-   "prov_01M4BRBC800CQCF1MZC860CW3A",
-   "prov_01M4BRBC804MSJ366VKME0T7JW"
+   "prov_01M4BRBC80ATGXMWWHJDHY026Z",
+   "prov_01M4BRBC80ZH8P67TWNEXXX9G7"
   ],
   "inputs_used": [
    {
-    "hash": "sha256:d0bfae34279896ed129987107ff668fa269ea9be47f7b97534afe10f5557bf1d",
+    "hash": "sha256:b852ed78433ae481907e2249f97a8d904570a7b0d1ba32df5e86e7d5aa61947e",
     "ref": "scorecard.inputs_hash"
    },
    {
@@ -142,10 +143,10 @@
     "ref": "seasonality@2026.10.0"
    }
   ],
-  "provenance_id": "prov_01M4BRBC80M1BDGD9MD3Q5PH69",
+  "provenance_id": "prov_01M4BRBC8062Q8ETKG3WTMEDT1",
   "tool_name": "mbos_economics.enrich",
-  "tool_version": "0.13.1"
+  "tool_version": "0.14.0"
  },
  "title": "Husqvarna FS 400 walk-behind concrete saw, blade guard cracked",
- "verdict": "MAYBE"
+ "verdict": "PASS"
 }

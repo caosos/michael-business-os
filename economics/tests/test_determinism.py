@@ -101,12 +101,12 @@ class TestConfig(unittest.TestCase):
             load_config("2026.10.0")
 
     def test_current_version(self):
-        self.assertEqual(CFG.version, "2026.10.3")
-        self.assertEqual(load_config("2026.10.3").hash, CFG.hash)
+        self.assertEqual(CFG.version, "2026.10.4")
+        self.assertEqual(load_config("2026.10.4").hash, CFG.hash)
 
     def test_coordinator_defaults_are_config(self):
-        self.assertEqual(CFG.get("capital_and_risk.risk_capital_per_deal_cap"), 1500)
-        self.assertEqual(CFG.get("capital_and_risk.max_loss_cap"), 800)
+        self.assertEqual(CFG.get("capital_and_risk.risk_capital_per_deal_cap"), 500)
+        self.assertEqual(CFG.get("capital_and_risk.max_loss_cap"), 500)
         self.assertEqual(CFG.get("time_value.w_min_per_hour"), 40)
         self.assertEqual(CFG.get("time_value.w_target_flip_per_hour"), 65)
         self.assertEqual(CFG.get("time_value.w_target_service_per_hour"), 75)

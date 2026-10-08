@@ -20,8 +20,8 @@ from .engine import compute
 from .inputs import build_engine_input
 
 PARAMS = {
-    "cash_cap": ("capital_and_risk.risk_capital_per_deal_cap", "#1 max cash per deal", [1000, 1500, 2000, 2500, 3000], (500, 5000, 50)),
-    "max_loss": ("capital_and_risk.max_loss_cap", "#1 max loss per deal", [600, 800, 1000, 1200], (200, 2000, 25)),
+    "cash_cap": ("capital_and_risk.risk_capital_per_deal_cap", "#1 max cash per deal", [500, 1000, 1500, 2000, 2500, 3000], (500, 5000, 50)),
+    "max_loss": ("capital_and_risk.max_loss_cap", "#1 max loss per deal", [500, 600, 800, 1000, 1200], (200, 2000, 25)),
     "floor": ("time_value.w_min_per_hour", "#2 absolute $/h floor", [30, 35, 40, 45, 50], (10, 100, 1)),
     "flip_target": ("time_value.w_target_flip_per_hour", "#2 flip $/h target", [55, 60, 65, 70, 75], (20, 150, 1)),
     "service_target": ("time_value.w_target_service_per_hour", "#2 service $/h target", [65, 70, 75, 80, 85], (20, 150, 1)),

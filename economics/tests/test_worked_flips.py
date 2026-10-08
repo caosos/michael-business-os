@@ -8,7 +8,7 @@ docs/research/agent-03-worked-examples.md.
 
 import unittest
 
-from helpers import case, reference_flip, run
+from helpers import CFG_BIG, case, reference_flip, run
 
 
 class FlipCase(unittest.TestCase):
@@ -16,7 +16,7 @@ class FlipCase(unittest.TestCase):
 
     def setUp(self):
         self.item = case(self.name)
-        self.out = run(self.item)
+        self.out = run(self.item, CFG_BIG)
         self.sc = self.out["scores"]["scorecard"]
         self.d = self.sc["derived"]
 
@@ -145,7 +145,7 @@ class TestProjectVehicle(FlipCase):
         self.assertEqual(self.sc["walk_away_price"], 1061)
 
     def test_cash_cap_gate(self):
-        truck = run(case("project_vehicle_truck_over_cap"))["scores"]["scorecard"]
+        truck = run(case("project_vehicle_truck_over_cap"), CFG_BIG)["scores"]["scorecard"]
         self.assertGreater(truck["derived"]["net_profit_deterministic"], 1800)
         self.assertEqual(truck["derived"]["cash_tied_up"], 2973.89)
         self.assertEqual(truck["decision"], "PASS")

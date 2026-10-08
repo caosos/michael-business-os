@@ -71,7 +71,7 @@
         "salvage_if_unsold": 3800
       },
       "estimates_meta": {
-        "scoring_config_version": "2026.10.3",
+        "scoring_config_version": "2026.10.4",
         "evidence": {
           "condition_verified": true,
           "title_verified": true,
@@ -122,13 +122,13 @@
       }
     },
     "scores": {
-      "scorecard_id": "scr_01M4B3R6G0CMHSZ9H629NBMZNT",
-      "inputs_hash": "sha256:dfcddd726c66afb948067da0282e17e94c4c9ad2c26c5560e41d961132a6758e",
+      "scorecard_id": "scr_01M4B3R6G01C4X53K88M2JQTPC",
+      "inputs_hash": "sha256:fa847910ca368cd1d93d16a33baf81a6574022f732c8be7ac17514d48684c92e",
       "scorecard": {
-        "scoring_config_version": "2026.10.3",
+        "scoring_config_version": "2026.10.4",
         "computed_at": "2026-10-07T12:00:00Z",
-        "engine_version": "0.13.1",
-        "config_hash": "sha256:98e8bddc2f8a102356da25a4b9200380460db3b516ae986c22658dffc09a1073",
+        "engine_version": "0.14.0",
+        "config_hash": "sha256:8fad7a393bd15f538db22b62782df41a086c30eb48dde38dd7c67dce8f743243",
         "lane": "flip",
         "derived": {
           "deal_class": "CAPITAL_INTENSIVE_FLIP",
@@ -184,7 +184,7 @@
           "max_loss": 788.89,
           "p_loss": 0.1,
           "coefficient_of_variation": 0.5907,
-          "risk_raw": 0.6412,
+          "risk_raw": 0.937,
           "time_to_cash_days": 22,
           "travel_burden": 67.33,
           "travel_burden_limit": 484.61,
@@ -239,7 +239,7 @@
           "pph_score": 100,
           "roi_score": 31.04,
           "ttc_score": 63.33,
-          "risk_score": 35.88,
+          "risk_score": 6.3,
           "conf_score": 93,
           "skill_score": 83.33,
           "scarcity_score": 36.5
@@ -254,11 +254,24 @@
           "skill": 0.1,
           "scarcity": 0.05
         },
-        "composite": 77.83,
+        "composite": 74.88,
         "decision": "PASS",
         "pass_on_priors": false,
         "pass_basis": {
           "gates": {
+            "max_loss_ok": {
+              "rule": ">= 1 decisive input evidence-backed",
+              "decisive_inputs": [
+                "economics.acquisition.expected_buy_price",
+                "economics.acquisition.buy_fees",
+                "economics.rehab.parts_cost",
+                "economics.downside.salvage_if_repair_fails"
+              ],
+              "evidence_backed_inputs": [
+                "economics.acquisition.expected_buy_price"
+              ],
+              "evidence_backed": true
+            },
             "cash_ok": {
               "rule": ">= 1 decisive input evidence-backed",
               "decisive_inputs": [
@@ -276,6 +289,7 @@
           "decisive_inputs": [
             "economics.acquisition.buy_fees",
             "economics.acquisition.expected_buy_price",
+            "economics.downside.salvage_if_repair_fails",
             "economics.rehab.materials_cost",
             "economics.rehab.parts_cost"
           ],
@@ -309,7 +323,7 @@
         },
         "gates": {
           "ev_positive": true,
-          "max_loss_ok": true,
+          "max_loss_ok": false,
           "cash_ok": false,
           "skill_ok": true,
           "license_ok": true,
@@ -343,56 +357,56 @@
           "items": [],
           "reaches": null
         },
-        "walk_away_price": 926,
+        "walk_away_price": null,
         "reasons": [
-          "GATE FAIL cash_ok: cash tied up $2,973.89 exceeds per-deal cap $1,500.00",
-          "R13: PASS is evidence-backed (cash_ok) via economics.acquisition.expected_buy_price",
+          "GATE FAIL max_loss_ok: max loss $788.89 exceeds cap $500.00",
+          "GATE FAIL cash_ok: cash tied up $2,973.89 exceeds the cash you can fund (cap $500.00)",
+          "R13: PASS is evidence-backed (max_loss_ok, cash_ok) via economics.acquisition.expected_buy_price",
           "deterministic: net $1,826.11, $180.60/h over 10.1111 h, cash tied up $2,973.89, ROI 0.6140",
           "expected: net $1,384.61, $136.94/h, max loss $788.89, P(loss) 0.1000, time-to-cash 22 d",
           "class CAPITAL_INTENSIVE_FLIP (provisional thresholds): cash at risk $2,973.89, 22 d to cash, cash multiple 1.4656x; rank score 26.52 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
-          "evidence is not the blocker: no missing evidence item changes the verdict",
-          "walk-away price (max buy for YES): $926"
+          "evidence is not the blocker: no missing evidence item changes the verdict"
         ]
       }
     },
     "recommendation": {
-      "recommendation_id": "rec_01M4B3R6G0TXB8J041C9MFTFQ2",
+      "recommendation_id": "rec_01M4B3R6G04ZEFJYDJRFWTKAS3",
       "verdict": "PASS",
       "rationale": [
-        "GATE FAIL cash_ok: cash tied up $2,973.89 exceeds per-deal cap $1,500.00",
-        "R13: PASS is evidence-backed (cash_ok) via economics.acquisition.expected_buy_price",
+        "GATE FAIL max_loss_ok: max loss $788.89 exceeds cap $500.00",
+        "GATE FAIL cash_ok: cash tied up $2,973.89 exceeds the cash you can fund (cap $500.00)",
+        "R13: PASS is evidence-backed (max_loss_ok, cash_ok) via economics.acquisition.expected_buy_price",
         "deterministic: net $1,826.11, $180.60/h over 10.1111 h, cash tied up $2,973.89, ROI 0.6140",
         "expected: net $1,384.61, $136.94/h, max loss $788.89, P(loss) 0.1000, time-to-cash 22 d",
         "class CAPITAL_INTENSIVE_FLIP (provisional thresholds): cash at risk $2,973.89, 22 d to cash, cash multiple 1.4656x; rank score 26.52 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
-        "evidence is not the blocker: no missing evidence item changes the verdict",
-        "walk-away price (max buy for YES): $926"
+        "evidence is not the blocker: no missing evidence item changes the verdict"
       ],
       "confidence": 0.93,
       "alert": false,
-      "provenance_id": "prov_01M4B3R6G0SHZA795S2JREJJD4"
+      "provenance_id": "prov_01M4B3R6G0BMWREZG6J6DNEFM2"
     },
     "provenance_ids": [
       "prov_01JB0000000000000000000060",
-      "prov_01M4B3R6G0SHZA795S2JREJJD4"
+      "prov_01M4B3R6G0BMWREZG6J6DNEFM2"
     ]
   },
   "provenance": {
-    "provenance_id": "prov_01M4B3R6G0SHZA795S2JREJJD4",
+    "provenance_id": "prov_01M4B3R6G0BMWREZG6J6DNEFM2",
     "created_at": "2026-10-07T12:00:00Z",
     "actor_type": "system",
     "agent_name": "agent-03-economics",
     "basis": "INFERENCE",
     "tool_name": "mbos_economics.engine",
-    "tool_version": "0.13.1",
-    "config_version": "2026.10.3",
+    "tool_version": "0.14.0",
+    "config_version": "2026.10.4",
     "inputs_used": [
       {
         "ref": "engine_input",
-        "hash": "sha256:dfcddd726c66afb948067da0282e17e94c4c9ad2c26c5560e41d961132a6758e"
+        "hash": "sha256:fa847910ca368cd1d93d16a33baf81a6574022f732c8be7ac17514d48684c92e"
       },
       {
-        "ref": "scoring-config@2026.10.3",
-        "hash": "sha256:98e8bddc2f8a102356da25a4b9200380460db3b516ae986c22658dffc09a1073"
+        "ref": "scoring-config@2026.10.4",
+        "hash": "sha256:8fad7a393bd15f538db22b62782df41a086c30eb48dde38dd7c67dce8f743243"
       }
     ],
     "derived_from": [
@@ -405,26 +419,26 @@
       "type": "SCORE_RECORDED",
       "item_id": "itm_01JB0000000000000000000007",
       "entity_type": "scorecard",
-      "entity_id": "scr_01M4B3R6G0CMHSZ9H629NBMZNT",
+      "entity_id": "scr_01M4B3R6G01C4X53K88M2JQTPC",
       "tool_name": "mbos_economics.engine",
-      "inputs_hash": "sha256:dfcddd726c66afb948067da0282e17e94c4c9ad2c26c5560e41d961132a6758e",
-      "payload_hash": "sha256:4a7f23475d58530f87c915bbe2d17db105c0420e65e70f195ddcb171a96e127d",
-      "idempotency_key": "score:scr_01M4B3R6G0CMHSZ9H629NBMZNT",
+      "inputs_hash": "sha256:fa847910ca368cd1d93d16a33baf81a6574022f732c8be7ac17514d48684c92e",
+      "payload_hash": "sha256:dd8e4c12e50c149454322cfe28a799f309a59a247304fc2c9884bfe3c9d030f6",
+      "idempotency_key": "score:scr_01M4B3R6G01C4X53K88M2JQTPC",
       "provenance_ids": [
-        "prov_01M4B3R6G0SHZA795S2JREJJD4"
+        "prov_01M4B3R6G0BMWREZG6J6DNEFM2"
       ]
     },
     {
       "type": "RECOMMENDATION_RECORDED",
       "item_id": "itm_01JB0000000000000000000007",
       "entity_type": "recommendation",
-      "entity_id": "rec_01M4B3R6G0TXB8J041C9MFTFQ2",
+      "entity_id": "rec_01M4B3R6G04ZEFJYDJRFWTKAS3",
       "tool_name": "mbos_economics.engine",
-      "inputs_hash": "sha256:dfcddd726c66afb948067da0282e17e94c4c9ad2c26c5560e41d961132a6758e",
-      "payload_hash": "sha256:9d594987c02ba2b04b6e0255f20afa9154a8403ed82b9c5112a92e256bc5d403",
-      "idempotency_key": "recommend:rec_01M4B3R6G0TXB8J041C9MFTFQ2",
+      "inputs_hash": "sha256:fa847910ca368cd1d93d16a33baf81a6574022f732c8be7ac17514d48684c92e",
+      "payload_hash": "sha256:206a52070ba242f8e600838cba1a2d761d5370912029d39bd05455e2de35b822",
+      "idempotency_key": "recommend:rec_01M4B3R6G04ZEFJYDJRFWTKAS3",
       "provenance_ids": [
-        "prov_01M4B3R6G0SHZA795S2JREJJD4"
+        "prov_01M4B3R6G0BMWREZG6J6DNEFM2"
       ]
     }
   ]

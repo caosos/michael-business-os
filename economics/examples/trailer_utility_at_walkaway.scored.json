@@ -78,7 +78,7 @@
         "salvage_if_unsold": 700
       },
       "estimates_meta": {
-        "scoring_config_version": "2026.10.3",
+        "scoring_config_version": "2026.10.4",
         "evidence": {
           "sold_comps_count": 4,
           "condition_verified": true,
@@ -99,13 +99,13 @@
       }
     ],
     "scores": {
-      "scorecard_id": "scr_01M4B3R6G0Y2RRG3DQNQWF78K9",
-      "inputs_hash": "sha256:8e7a0d077b9a3a8182a29963d725eb5e014d7c6771c16939d1bd3edb9980f672",
+      "scorecard_id": "scr_01M4B3R6G0S8EC3AJ1HYQ3TGC4",
+      "inputs_hash": "sha256:d01651ee33eda4ff63e86b26825244c9bde690460291ab9a0cd00daf697c1793",
       "scorecard": {
-        "scoring_config_version": "2026.10.3",
+        "scoring_config_version": "2026.10.4",
         "computed_at": "2026-10-07T12:00:00Z",
-        "engine_version": "0.13.1",
-        "config_hash": "sha256:98e8bddc2f8a102356da25a4b9200380460db3b516ae986c22658dffc09a1073",
+        "engine_version": "0.14.0",
+        "config_hash": "sha256:8fad7a393bd15f538db22b62782df41a086c30eb48dde38dd7c67dce8f743243",
         "lane": "flip",
         "derived": {
           "deal_class": "QUICK_TURN",
@@ -161,7 +161,7 @@
           "max_loss": 81.31,
           "p_loss": 0.05,
           "coefficient_of_variation": 0.3652,
-          "risk_raw": 0.1389,
+          "risk_raw": 0.1694,
           "time_to_cash_days": 10,
           "travel_burden": 75.41,
           "travel_burden_limit": 171.43,
@@ -222,7 +222,7 @@
           "pph_score": 54.47,
           "roi_score": 68.37,
           "ttc_score": 83.33,
-          "risk_score": 86.11,
+          "risk_score": 83.07,
           "conf_score": 93,
           "skill_score": 76.67,
           "scarcity_score": 66.83
@@ -237,7 +237,7 @@
           "skill": 0.1,
           "scarcity": 0.05
         },
-        "composite": 67.93,
+        "composite": 67.63,
         "decision": "YES",
         "pass_on_priors": false,
         "ranking": {
@@ -297,7 +297,7 @@
         "evidence_search": null,
         "walk_away_price": 227,
         "reasons": [
-          "all hard gates pass; composite 67.93; confidence 0.9300; EV profit/hour $65.36 >= $65.00; EV $476.10",
+          "all hard gates pass; composite 67.63; confidence 0.9300; EV profit/hour $65.36 >= $65.00; EV $476.10",
           "deterministic: net $572.37, $76.37/h over 7.4945 h, cash tied up $477.63, ROI 1.1984",
           "expected: net $489.81, $65.36/h, max loss $81.31, P(loss) 0.0500, time-to-cash 10 d",
           "ALERT: strong and perishable",
@@ -307,10 +307,10 @@
       }
     },
     "recommendation": {
-      "recommendation_id": "rec_01M4B3R6G0TA3JZ591BN54ZWKR",
+      "recommendation_id": "rec_01M4B3R6G07MWR4BV9F22TTZV8",
       "verdict": "YES",
       "rationale": [
-        "all hard gates pass; composite 67.93; confidence 0.9300; EV profit/hour $65.36 >= $65.00; EV $476.10",
+        "all hard gates pass; composite 67.63; confidence 0.9300; EV profit/hour $65.36 >= $65.00; EV $476.10",
         "deterministic: net $572.37, $76.37/h over 7.4945 h, cash tied up $477.63, ROI 1.1984",
         "expected: net $489.81, $65.36/h, max loss $81.31, P(loss) 0.0500, time-to-cash 10 d",
         "ALERT: strong and perishable",
@@ -319,30 +319,30 @@
       ],
       "confidence": 0.93,
       "alert": true,
-      "provenance_id": "prov_01M4B3R6G0ZAV0KGSQWANA4S8M"
+      "provenance_id": "prov_01M4B3R6G0VQTTZ90WDZAP9N4R"
     },
     "provenance_ids": [
       "prov_01JB0000000000000000000010",
-      "prov_01M4B3R6G0ZAV0KGSQWANA4S8M"
+      "prov_01M4B3R6G0VQTTZ90WDZAP9N4R"
     ]
   },
   "provenance": {
-    "provenance_id": "prov_01M4B3R6G0ZAV0KGSQWANA4S8M",
+    "provenance_id": "prov_01M4B3R6G0VQTTZ90WDZAP9N4R",
     "created_at": "2026-10-07T12:00:00Z",
     "actor_type": "system",
     "agent_name": "agent-03-economics",
     "basis": "INFERENCE",
     "tool_name": "mbos_economics.engine",
-    "tool_version": "0.13.1",
-    "config_version": "2026.10.3",
+    "tool_version": "0.14.0",
+    "config_version": "2026.10.4",
     "inputs_used": [
       {
         "ref": "engine_input",
-        "hash": "sha256:8e7a0d077b9a3a8182a29963d725eb5e014d7c6771c16939d1bd3edb9980f672"
+        "hash": "sha256:d01651ee33eda4ff63e86b26825244c9bde690460291ab9a0cd00daf697c1793"
       },
       {
-        "ref": "scoring-config@2026.10.3",
-        "hash": "sha256:98e8bddc2f8a102356da25a4b9200380460db3b516ae986c22658dffc09a1073"
+        "ref": "scoring-config@2026.10.4",
+        "hash": "sha256:8fad7a393bd15f538db22b62782df41a086c30eb48dde38dd7c67dce8f743243"
       }
     ],
     "derived_from": [
@@ -356,26 +356,26 @@
       "type": "SCORE_RECORDED",
       "item_id": "itm_01JB0000000000000000000002",
       "entity_type": "scorecard",
-      "entity_id": "scr_01M4B3R6G0Y2RRG3DQNQWF78K9",
+      "entity_id": "scr_01M4B3R6G0S8EC3AJ1HYQ3TGC4",
       "tool_name": "mbos_economics.engine",
-      "inputs_hash": "sha256:8e7a0d077b9a3a8182a29963d725eb5e014d7c6771c16939d1bd3edb9980f672",
-      "payload_hash": "sha256:a5c8fdd4242327e6754bf1374c5f6761a0ead52835158e10b4196ebbc72a7d49",
-      "idempotency_key": "score:scr_01M4B3R6G0Y2RRG3DQNQWF78K9",
+      "inputs_hash": "sha256:d01651ee33eda4ff63e86b26825244c9bde690460291ab9a0cd00daf697c1793",
+      "payload_hash": "sha256:6fd270452268fe7729f9726dffddc628401de94855358c9457712ce282d28977",
+      "idempotency_key": "score:scr_01M4B3R6G0S8EC3AJ1HYQ3TGC4",
       "provenance_ids": [
-        "prov_01M4B3R6G0ZAV0KGSQWANA4S8M"
+        "prov_01M4B3R6G0VQTTZ90WDZAP9N4R"
       ]
     },
     {
       "type": "RECOMMENDATION_RECORDED",
       "item_id": "itm_01JB0000000000000000000002",
       "entity_type": "recommendation",
-      "entity_id": "rec_01M4B3R6G0TA3JZ591BN54ZWKR",
+      "entity_id": "rec_01M4B3R6G07MWR4BV9F22TTZV8",
       "tool_name": "mbos_economics.engine",
-      "inputs_hash": "sha256:8e7a0d077b9a3a8182a29963d725eb5e014d7c6771c16939d1bd3edb9980f672",
-      "payload_hash": "sha256:dd7ff4b79dd19c98d96d5fb0920cad1c114b06349a9717a1d10d3ff81b117ad3",
-      "idempotency_key": "recommend:rec_01M4B3R6G0TA3JZ591BN54ZWKR",
+      "inputs_hash": "sha256:d01651ee33eda4ff63e86b26825244c9bde690460291ab9a0cd00daf697c1793",
+      "payload_hash": "sha256:d6421812caf0ea3abe1a74283e5ac1388263d1dd05986659a752356f913062a9",
+      "idempotency_key": "recommend:rec_01M4B3R6G07MWR4BV9F22TTZV8",
       "provenance_ids": [
-        "prov_01M4B3R6G0ZAV0KGSQWANA4S8M"
+        "prov_01M4B3R6G0VQTTZ90WDZAP9N4R"
       ]
     }
   ]

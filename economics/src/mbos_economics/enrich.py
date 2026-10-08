@@ -30,7 +30,7 @@ import re
 
 from .comps import aggregate_sold_comps
 from .config import CONFIG_DIR, ScoringConfig
-from .engine import _bisect_int, compute
+from .engine import _bisect_int, compute, effective_caps
 from .inputs import build_engine_input
 from .logistics import acquisition_round_trip_miles, classify_transport, difficulty, trailer_status
 from .numeric import D, fine, money
@@ -283,7 +283,8 @@ def _why_lines(item: dict, as_of: str, econ_b: dict, log_b: dict, season_b: dict
         return []
     d, lane = sc["derived"], sc["lane"]
     target = cfg.num(f"time_value.w_target_{lane}_per_hour")
-    cap = cfg.num("capital_and_risk.risk_capital_per_deal_cap")
+    caps_eff = effective_caps(item.get("economics") or {}, cfg)
+    cap = caps_eff["cash_cap"]
     out: list[str] = []
     ev_pph, cash, verdict = D(d["ev_profit_per_hour"]), D(d["cash_tied_up"]), sc["decision"]
     if verdict == "YES":
@@ -305,7 +306,7 @@ def _why_lines(item: dict, as_of: str, econ_b: dict, log_b: dict, season_b: dict
     else:
         failed = [k for k, ok in (sc.get("gates") or {}).items() if not ok]
         text = {"cash_ok": f"cash tied up of {_usd(cash)} is over your {_usd(cap)} per-deal limit",
-                "max_loss_ok": f"the worst case loses {_usd(d['max_loss'])}, over your {_usd(cfg.num('capital_and_risk.max_loss_cap'))} limit",
+                "max_loss_ok": f"the worst case loses {_usd(d['max_loss'])}, over your {_usd(caps_eff['max_loss_cap'])} limit",
                 "pph_floor_ok": f"it pays about ${D(d['profit_per_hour_deterministic']):,.0f}/h even when everything goes right, under your ${cfg.num('time_value.w_min_per_hour'):g}/h floor",
                 "class_profit_ok": f"the profit if it goes to plan ({_usd(d['net_profit_deterministic'])}) is under what a {str(d.get('deal_class', 'deal')).lower().replace('_', ' ')} must clear",
                 "ev_positive": "the expected value after risk is not positive",

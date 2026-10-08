@@ -55,7 +55,7 @@ def recon_250_non_running() -> dict:
     """Non-running Honda Recon 250 at ~$300: a different class; hunting-season liquidity."""
     return item(103, "flip", "other_asset", "Honda Recon 250 ATV, non-running", 20, {
         "acquisition": {"ask_price": 350, "expected_buy_price": 300, "buy_fees": 0, "listing_age_hours": 5},
-        "rehab": {"parts_cost": 150, "materials_cost": 20, "labor_hours": 8, "admin_hours": 1,
+        "rehab": {"parts_cost": 100, "materials_cost": 20, "labor_hours": 8, "admin_hours": 1,
                   "required_skills": ["small_engine_repair", "mechanical_diagnosis"],
                   "repair_success_prob": 0.6, "repair_scope_known": False},
         "logistics": {"trips": [{"purpose": "inspect_pickup", "round_trip_miles": 40},

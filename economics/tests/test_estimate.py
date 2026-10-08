@@ -8,7 +8,7 @@ import copy
 import json
 import unittest
 
-from helpers import CFG, HERE
+from helpers import CFG, CFG_BIG, HERE
 
 from mbos_economics.engine import score_item
 from mbos_economics.estimate import BundleError, apply_estimate, estimate_item
@@ -60,7 +60,7 @@ class TestAcceptanceC01(unittest.TestCase):
         self.assertNotIn("economics", it)                             # as discovered: nothing to score
         r, est = run(it, TRAILER_BUNDLE)
         self.assertEqual(r["status"], "estimated")
-        out = score_item(est, CFG, AS_OF)
+        out = score_item(est, CFG_BIG, AS_OF)       # pre-C-24 caps: the $1,500 trailer is fundable; at $500 it is a PASS
         sc = out["scores"]["scorecard"]
         self.assertNotIn("inputs missing", " ".join(sc["reasons"]).lower())
         self.assertEqual(sc["decision"], "MAYBE")                     # a real verdict: gather evidence
@@ -70,7 +70,7 @@ class TestAcceptanceC01(unittest.TestCase):
     def test_with_evidence_reaches_yes(self):
         r, est = run(item("trailer", "6x12"), TRAILER_EVIDENCE)
         self.assertEqual([g["code"] for g in r["gaps"]], [])
-        sc = score_item(est, CFG, AS_OF)["scores"]["scorecard"]
+        sc = score_item(est, CFG_BIG, AS_OF)["scores"]["scorecard"]
         self.assertEqual(sc["decision"], "YES")
         self.assertEqual(sc["walk_away_price"], 1234)
 

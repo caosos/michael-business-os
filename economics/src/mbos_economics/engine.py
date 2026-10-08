@@ -167,6 +167,17 @@ def _pass_on_priors(econ: dict, lane: str, failed: list[str], composite_floor: b
 
 # --------------------------------------------------------------------------- deal class & ranking (C-19)
 
+def effective_caps(econ: dict, cfg: ScoringConfig) -> dict[str, Decimal]:
+    """Per-deal cash / loss caps: config cap, lowered to the ledger's available_to_deploy when known (C-24).
+
+    Unknown (absent or null) keeps the config cap. A loss cannot exceed the cash at risk, so both gates use it."""
+    cash_cap, loss_cap = cfg.num("capital_and_risk.risk_capital_per_deal_cap"), cfg.num("capital_and_risk.max_loss_cap")
+    avail = (econ.get("context") or {}).get("available_to_deploy")
+    if avail is not None:
+        cash_cap, loss_cap = min(cash_cap, D(avail)), min(loss_cap, D(avail))
+    return {"cash_cap": cash_cap, "max_loss_cap": loss_cap}
+
+
 def _deal_class(lane: str, cash: Decimal, days: Decimal, cfg: ScoringConfig) -> str:
     """Class from DATA thresholds (config.deal_classes, mirrored from the operator profile)."""
     if lane == "service":
@@ -254,6 +265,8 @@ def compute(inp: dict, cfg: ScoringConfig) -> dict:
     w_target = cfg.num(f"time_value.w_target_{lane}_per_hour")
     block = econ["rehab"] if lane == "flip" else econ["job"]
 
+    caps_eff = effective_caps(econ, cfg)
+
     # skill-fit
     sk = _skill_fit(block.get("required_skills", []), bool(block.get("requires_license_he_lacks")), cfg)
 
@@ -331,8 +344,8 @@ def compute(inp: dict, cfg: ScoringConfig) -> dict:
     # ---------------- STEP 1: hard gates (any fail ⇒ PASS)
     gates = {
         "ev_positive": ev_decision > 0,
-        "max_loss_ok": le.max_loss <= cfg.num("capital_and_risk.max_loss_cap"),
-        "cash_ok": le.cash_tied_up <= cfg.num("capital_and_risk.risk_capital_per_deal_cap"),
+        "max_loss_ok": le.max_loss <= caps_eff["max_loss_cap"],
+        "cash_ok": le.cash_tied_up <= caps_eff["cash_cap"],
         "skill_ok": sk["skill_fit"] >= cfg.num("decision_thresholds.skill_fit_hard_floor"),
         "license_ok": not sk["requires_license_he_lacks"],
         "pph_floor_ok": le.pph >= w_min,
@@ -341,8 +354,8 @@ def compute(inp: dict, cfg: ScoringConfig) -> dict:
     }
     gate_text = {
         "ev_positive": f"EV after haircut {_usd(ev_decision)} is not positive",
-        "max_loss_ok": f"max loss {_usd(le.max_loss)} exceeds cap {_usd(cfg.num('capital_and_risk.max_loss_cap'))}",
-        "cash_ok": f"cash tied up {_usd(le.cash_tied_up)} exceeds per-deal cap {_usd(cfg.num('capital_and_risk.risk_capital_per_deal_cap'))}",
+        "max_loss_ok": f"max loss {_usd(le.max_loss)} exceeds cap {_usd(caps_eff['max_loss_cap'])}",
+        "cash_ok": f"cash tied up {_usd(le.cash_tied_up)} exceeds the cash you can fund (cap {_usd(caps_eff['cash_cap'])})",
         "skill_ok": f"skill fit {sk['skill_fit']} below floor {cfg.num('decision_thresholds.skill_fit_hard_floor')}"
                     + (f" (uncovered: {', '.join(sk['uncovered_skills'])})" if sk["uncovered_skills"] else ""),
         "license_ok": "requires a license Michael lacks"

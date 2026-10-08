@@ -7,7 +7,7 @@ import copy
 import json
 import unittest
 
-from helpers import HERE
+from helpers import CFG_BIG, HERE
 
 from mbos_economics.comps_feed import build_comps_bundle, load_fixture_comps, query_key, research_step
 from mbos_economics.estimate import load_priors
@@ -41,7 +41,9 @@ class TestAcceptanceC04(unittest.TestCase):
     def test_researching_to_scored(self):
         self.assertEqual(self.r["proposed_next_state"], "SCORED")
         self.assertEqual(self.r["item"]["state"], "SCORED")
-        sc = self.r["item"]["scores"]["scorecard"]
+        self.assertEqual(self.r["item"]["scores"]["scorecard"]["decision"], "PASS")     # C-24: $1,500 trailer vs $500 cap
+        big = research_step(trailer(), COMPS, PROV, AS_OF, cfg=CFG_BIG)              # pre-C-24 caps: the verdict logic
+        sc = big["item"]["scores"]["scorecard"]
         self.assertEqual(sc["decision"], "MAYBE")
         self.assertEqual(self.r["item"]["economics"]["resale"]["target_sell_price"], 2100)    # median 2000/2050/2150/2200
         self.assertEqual(self.r["item"]["economics"]["acquisition"]["market_buy_median"], 900)  # the 'parts' sale

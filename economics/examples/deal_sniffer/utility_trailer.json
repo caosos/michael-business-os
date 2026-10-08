@@ -8,28 +8,28 @@
     "high": 16,
     "low": 10,
     "note": "lead + repair + expected days on market (range from the comps' days on market)",
-    "provenance_id": "prov_01M4BRBC80D5KY7MGHRJ5X4MXY",
+    "provenance_id": "prov_01M4BRBC805CD1DD8991948CBG",
     "unit": "days",
     "value": 13
    },
    "max_acquisition": {
     "basis": "INFERENCE",
     "note": "highest buy price that clears your $65/h flip target and every hard limit, provided the evidence still outstanding checks out (not a YES yet)",
-    "provenance_id": "prov_01M4BRBC80D5KY7MGHRJ5X4MXY",
+    "provenance_id": "prov_01M4BRBC805CD1DD8991948CBG",
     "unit": "USD",
-    "value": 1045
+    "value": 263
    },
    "opening_offer": {
     "basis": "RECOMMENDATION",
     "note": "70% of the ask, never above the price ceiling",
-    "provenance_id": "prov_01M4BRBC80D5KY7MGHRJ5X4MXY",
+    "provenance_id": "prov_01M4BRBC805CD1DD8991948CBG",
     "unit": "USD",
-    "value": 490
+    "value": 260
    },
    "resale_conservative": {
     "basis": "INFERENCE",
     "note": "3 FACT sold comps: 25th percentile / median / 75th percentile",
-    "provenance_id": "prov_01M4BRBC80D5KY7MGHRJ5X4MXY",
+    "provenance_id": "prov_01M4BRBC805CD1DD8991948CBG",
     "unit": "USD",
     "value": 1950
    },
@@ -38,21 +38,21 @@
     "high": 2050,
     "low": 1950,
     "note": "3 FACT sold comps: 25th percentile / median / 75th percentile",
-    "provenance_id": "prov_01M4BRBC80D5KY7MGHRJ5X4MXY",
+    "provenance_id": "prov_01M4BRBC805CD1DD8991948CBG",
     "unit": "USD",
     "value": 2000
    },
    "resale_optimistic": {
     "basis": "INFERENCE",
     "note": "3 FACT sold comps: 25th percentile / median / 75th percentile",
-    "provenance_id": "prov_01M4BRBC80D5KY7MGHRJ5X4MXY",
+    "provenance_id": "prov_01M4BRBC805CD1DD8991948CBG",
     "unit": "USD",
     "value": 2050
    },
    "transport_cost": {
     "basis": "INFERENCE",
     "note": "fuel and wear for the trips",
-    "provenance_id": "prov_01M4BRBC80D5KY7MGHRJ5X4MXY",
+    "provenance_id": "prov_01M4BRBC805CD1DD8991948CBG",
     "unit": "USD",
     "value": 25.63
    }
@@ -61,33 +61,33 @@
    "difficulty": {
     "basis": "INFERENCE",
     "note": "fits the truck and is close. An economic input (already in the score), never a rejection",
-    "provenance_id": "prov_01M4BRBC80D5KY7MGHRJ5X4MXY",
+    "provenance_id": "prov_01M4BRBC805CD1DD8991948CBG",
     "value": "easy"
    },
    "fuel_cost": {
     "basis": "INFERENCE",
     "note": "fuel at the truck's normal mileage; the towing premium is inside transport_cost",
-    "provenance_id": "prov_01M4BRBC80D5KY7MGHRJ5X4MXY",
+    "provenance_id": "prov_01M4BRBC805CD1DD8991948CBG",
     "unit": "USD",
     "value": 7.11
    },
    "transport_mode": {
     "basis": "INFERENCE",
     "note": "classified when the economics were estimated; towed behind the truck (tow rating and hitch are not on file)",
-    "provenance_id": "prov_01M4BRBC80D5KY7MGHRJ5X4MXY",
+    "provenance_id": "prov_01M4BRBC805CD1DD8991948CBG",
     "value": "fits_truck"
    },
    "trip_hours": {
     "basis": "INFERENCE",
     "note": "driving time",
-    "provenance_id": "prov_01M4BRBC80D5KY7MGHRJ5X4MXY",
+    "provenance_id": "prov_01M4BRBC805CD1DD8991948CBG",
     "unit": "hours",
     "value": 0.89
    },
    "trip_miles_round_trip": {
     "basis": "INFERENCE",
     "note": "pickup trip only (inspect and collect); the buyer meeting is a separate local trip",
-    "provenance_id": "prov_01M4BRBC80D5KY7MGHRJ5X4MXY",
+    "provenance_id": "prov_01M4BRBC805CD1DD8991948CBG",
     "unit": "miles",
     "value": 40
    }
@@ -96,17 +96,17 @@
    "demand_now": {
     "basis": "INFERENCE",
     "note": "October: neither peak nor slow",
-    "provenance_id": "prov_01M4BRBC80D5KY7MGHRJ5X4MXY",
+    "provenance_id": "prov_01M4BRBC805CD1DD8991948CBG",
     "value": "normal"
    },
    "hold_likely": {
     "basis": "INFERENCE",
-    "provenance_id": "prov_01M4BRBC80D5KY7MGHRJ5X4MXY",
+    "provenance_id": "prov_01M4BRBC805CD1DD8991948CBG",
     "value": "typical for the category"
    },
    "note": {
     "basis": "INFERENCE",
-    "provenance_id": "prov_01M4BRBC80D5KY7MGHRJ5X4MXY",
+    "provenance_id": "prov_01M4BRBC805CD1DD8991948CBG",
     "value": "Utility-trailer demand is low in winter, builds from March, peaks May-August (moves, landscaping, construction). Sun Belt markets show a shallower curve than northern ones. [source: BigRentals: How to Keep Your Utility Trailer Rental Busy Year-Round (rental-marketplace guidance; used as evidence for resale demand by inference)]"
    },
    "peak_months": [
@@ -117,14 +117,15 @@
    ]
   },
   "why": [
-   "More evidence would settle it: a call with the seller, photos or an inspection of the condition, a diagnosed fault and a verified title.",
-   "Economically it works up to $1,045, once the missing evidence checks out.",
+   "Passed because cash tied up of $867 is over your $500 per-deal limit.",
+   "That rejection rests on estimates rather than evidence, so it is held for research instead of being discarded.",
+   "Economically it works up to $263, once the missing evidence checks out.",
    "3 sold comparables put likely resale near $2,000 (range $1,950 to $2,050).",
-   "Asking $700 is $345 below the most you should pay ($1,045).",
+   "Asking $700 is $437 above the most you should pay ($263).",
    "Towed behind the truck; its tow rating and hitch are not on file."
   ]
  },
- "enrichment_hash": "sha256:af2e0d55bb2e2b874eefa1d4ab50dd4246233f6603a2b99c5bca2b0eb6616241",
+ "enrichment_hash": "sha256:0fe8e0ca5bc2285709ad5fa7c96bb95c78f7904da58388e0d3db3553e4071854",
  "item_id": "itm_01JK0000000000000000000003",
  "omitted": {},
  "provenance": {
@@ -138,12 +139,12 @@
    "prov_01JK0000000000000000000051",
    "prov_01JK0000000000000000000052",
    "prov_01JK0000000000000000000300",
-   "prov_01M4BRBC80047CBXEF9SH7H1FE",
-   "prov_01M4BRBC80V7XMZNFZBB529BXZ"
+   "prov_01M4BRBC80R1D266HXX445GCVK",
+   "prov_01M4BRBC80V5PWMHPFDPW3M0EE"
   ],
   "inputs_used": [
    {
-    "hash": "sha256:a94130eaa1112bd08b5609a1e161877df938b0c5723d91abb26391e2ab00efc0",
+    "hash": "sha256:594057716fd666fd5584976ceb195e25e971937d6159d50d41bb4e541b63e44c",
     "ref": "scorecard.inputs_hash"
    },
    {
@@ -155,10 +156,10 @@
     "ref": "seasonality@2026.10.0"
    }
   ],
-  "provenance_id": "prov_01M4BRBC80D5KY7MGHRJ5X4MXY",
+  "provenance_id": "prov_01M4BRBC805CD1DD8991948CBG",
   "tool_name": "mbos_economics.enrich",
-  "tool_version": "0.13.1"
+  "tool_version": "0.14.0"
  },
  "title": "6x12 enclosed utility trailer, needs lights",
- "verdict": "MAYBE"
+ "verdict": "PASS"
 }

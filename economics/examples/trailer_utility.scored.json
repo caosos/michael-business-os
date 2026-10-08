@@ -78,7 +78,7 @@
         "salvage_if_unsold": 700
       },
       "estimates_meta": {
-        "scoring_config_version": "2026.10.3",
+        "scoring_config_version": "2026.10.4",
         "evidence": {
           "sold_comps_count": 4,
           "condition_verified": true,
@@ -99,13 +99,13 @@
       }
     ],
     "scores": {
-      "scorecard_id": "scr_01M4B3R6G0G8BB3T7B6C4JHJR7",
-      "inputs_hash": "sha256:79ca61b6bbcfb8af90b9edcc05471053252d73a1e6c91c03bb9f8cd6416cdc38",
+      "scorecard_id": "scr_01M4B3R6G05GN0X6W1R959A531",
+      "inputs_hash": "sha256:879a186fec327fc9a294da76af214fb82f34b1384feb55939145624a5202534f",
       "scorecard": {
-        "scoring_config_version": "2026.10.3",
+        "scoring_config_version": "2026.10.4",
         "computed_at": "2026-10-07T12:00:00Z",
-        "engine_version": "0.13.1",
-        "config_hash": "sha256:98e8bddc2f8a102356da25a4b9200380460db3b516ae986c22658dffc09a1073",
+        "engine_version": "0.14.0",
+        "config_hash": "sha256:8fad7a393bd15f538db22b62782df41a086c30eb48dde38dd7c67dce8f743243",
         "lane": "flip",
         "derived": {
           "deal_class": "QUICK_TURN",
@@ -161,7 +161,7 @@
           "max_loss": 106.31,
           "p_loss": 0.05,
           "coefficient_of_variation": 0.3849,
-          "risk_raw": 0.1584,
+          "risk_raw": 0.1983,
           "time_to_cash_days": 10,
           "travel_burden": 75.41,
           "travel_burden_limit": 162.68,
@@ -222,7 +222,7 @@
           "pph_score": 51.68,
           "roi_score": 61.65,
           "ttc_score": 83.33,
-          "risk_score": 84.16,
+          "risk_score": 80.17,
           "conf_score": 93,
           "skill_score": 76.67,
           "scarcity_score": 64.33
@@ -237,9 +237,32 @@
           "skill": 0.1,
           "scarcity": 0.05
         },
-        "composite": 65.49,
-        "decision": "MAYBE",
-        "pass_on_priors": false,
+        "composite": 65.09,
+        "decision": "PASS",
+        "pass_on_priors": true,
+        "pass_basis": {
+          "gates": {
+            "cash_ok": {
+              "rule": ">= 1 decisive input evidence-backed",
+              "decisive_inputs": [
+                "economics.acquisition.expected_buy_price",
+                "economics.acquisition.buy_fees",
+                "economics.rehab.parts_cost",
+                "economics.rehab.materials_cost"
+              ],
+              "evidence_backed_inputs": [],
+              "evidence_backed": false
+            }
+          },
+          "decisive_inputs": [
+            "economics.acquisition.buy_fees",
+            "economics.acquisition.expected_buy_price",
+            "economics.rehab.materials_cost",
+            "economics.rehab.parts_cost"
+          ],
+          "evidence_backed_inputs": [],
+          "pass_on_priors": true
+        },
         "ranking": {
           "rank_score": 39.76,
           "formula": "risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
@@ -266,7 +289,7 @@
         "gates": {
           "ev_positive": true,
           "max_loss_ok": true,
-          "cash_ok": true,
+          "cash_ok": false,
           "skill_ok": true,
           "license_ok": true,
           "pph_floor_ok": true,
@@ -295,13 +318,14 @@
           "remote_verification": false
         },
         "evidence_search": {
-          "target": "YES",
+          "target": "MAYBE",
           "items": [],
           "reaches": null
         },
         "walk_away_price": 227,
         "reasons": [
-          "YES blocked: EV profit/hour $62.02 < flip target $65.00",
+          "GATE FAIL cash_ok: cash tied up $502.63 exceeds the cash you can fund (cap $500.00)",
+          "R13: PASS is not evidence-backed (cash_ok: no decisive input backed): route to RESEARCHING, do not archive",
           "deterministic: net $547.37, $73.04/h over 7.4945 h, cash tied up $502.63, ROI 1.0890",
           "expected: net $464.81, $62.02/h, max loss $106.31, P(loss) 0.0500, time-to-cash 10 d",
           "class QUICK_TURN (provisional thresholds): cash at risk $502.63, 10 d to cash, cash multiple 1.9248x; rank score 39.76 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
@@ -311,10 +335,11 @@
       }
     },
     "recommendation": {
-      "recommendation_id": "rec_01M4B3R6G0BNWTMDXCPP3Y745C",
-      "verdict": "MAYBE",
+      "recommendation_id": "rec_01M4B3R6G0J50XBR01HBK63THE",
+      "verdict": "PASS",
       "rationale": [
-        "YES blocked: EV profit/hour $62.02 < flip target $65.00",
+        "GATE FAIL cash_ok: cash tied up $502.63 exceeds the cash you can fund (cap $500.00)",
+        "R13: PASS is not evidence-backed (cash_ok: no decisive input backed): route to RESEARCHING, do not archive",
         "deterministic: net $547.37, $73.04/h over 7.4945 h, cash tied up $502.63, ROI 1.0890",
         "expected: net $464.81, $62.02/h, max loss $106.31, P(loss) 0.0500, time-to-cash 10 d",
         "class QUICK_TURN (provisional thresholds): cash at risk $502.63, 10 d to cash, cash multiple 1.9248x; rank score 39.76 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
@@ -323,30 +348,30 @@
       ],
       "confidence": 0.93,
       "alert": false,
-      "provenance_id": "prov_01M4B3R6G03JGVZQMZ5SSCXFAQ"
+      "provenance_id": "prov_01M4B3R6G0625R0BXXQ3G02N83"
     },
     "provenance_ids": [
       "prov_01JB0000000000000000000010",
-      "prov_01M4B3R6G03JGVZQMZ5SSCXFAQ"
+      "prov_01M4B3R6G0625R0BXXQ3G02N83"
     ]
   },
   "provenance": {
-    "provenance_id": "prov_01M4B3R6G03JGVZQMZ5SSCXFAQ",
+    "provenance_id": "prov_01M4B3R6G0625R0BXXQ3G02N83",
     "created_at": "2026-10-07T12:00:00Z",
     "actor_type": "system",
     "agent_name": "agent-03-economics",
     "basis": "INFERENCE",
     "tool_name": "mbos_economics.engine",
-    "tool_version": "0.13.1",
-    "config_version": "2026.10.3",
+    "tool_version": "0.14.0",
+    "config_version": "2026.10.4",
     "inputs_used": [
       {
         "ref": "engine_input",
-        "hash": "sha256:79ca61b6bbcfb8af90b9edcc05471053252d73a1e6c91c03bb9f8cd6416cdc38"
+        "hash": "sha256:879a186fec327fc9a294da76af214fb82f34b1384feb55939145624a5202534f"
       },
       {
-        "ref": "scoring-config@2026.10.3",
-        "hash": "sha256:98e8bddc2f8a102356da25a4b9200380460db3b516ae986c22658dffc09a1073"
+        "ref": "scoring-config@2026.10.4",
+        "hash": "sha256:8fad7a393bd15f538db22b62782df41a086c30eb48dde38dd7c67dce8f743243"
       }
     ],
     "derived_from": [
@@ -360,26 +385,26 @@
       "type": "SCORE_RECORDED",
       "item_id": "itm_01JB0000000000000000000001",
       "entity_type": "scorecard",
-      "entity_id": "scr_01M4B3R6G0G8BB3T7B6C4JHJR7",
+      "entity_id": "scr_01M4B3R6G05GN0X6W1R959A531",
       "tool_name": "mbos_economics.engine",
-      "inputs_hash": "sha256:79ca61b6bbcfb8af90b9edcc05471053252d73a1e6c91c03bb9f8cd6416cdc38",
-      "payload_hash": "sha256:8c53c266efd5a4956a0826c9610a136aa5ecd8fee027b6d24748a21b602a5b09",
-      "idempotency_key": "score:scr_01M4B3R6G0G8BB3T7B6C4JHJR7",
+      "inputs_hash": "sha256:879a186fec327fc9a294da76af214fb82f34b1384feb55939145624a5202534f",
+      "payload_hash": "sha256:2e6ea5f17ba3f1d6e240938266ccdbef598c0a3a99f899a726dd947c4521a089",
+      "idempotency_key": "score:scr_01M4B3R6G05GN0X6W1R959A531",
       "provenance_ids": [
-        "prov_01M4B3R6G03JGVZQMZ5SSCXFAQ"
+        "prov_01M4B3R6G0625R0BXXQ3G02N83"
       ]
     },
     {
       "type": "RECOMMENDATION_RECORDED",
       "item_id": "itm_01JB0000000000000000000001",
       "entity_type": "recommendation",
-      "entity_id": "rec_01M4B3R6G0BNWTMDXCPP3Y745C",
+      "entity_id": "rec_01M4B3R6G0J50XBR01HBK63THE",
       "tool_name": "mbos_economics.engine",
-      "inputs_hash": "sha256:79ca61b6bbcfb8af90b9edcc05471053252d73a1e6c91c03bb9f8cd6416cdc38",
-      "payload_hash": "sha256:bd50e09a29ac3d00908d10faaf70ad8c18b34f5c8d28d56b6b543962f70bf44d",
-      "idempotency_key": "recommend:rec_01M4B3R6G0BNWTMDXCPP3Y745C",
+      "inputs_hash": "sha256:879a186fec327fc9a294da76af214fb82f34b1384feb55939145624a5202534f",
+      "payload_hash": "sha256:60e294da015eea0923e0bc09d7382941c7d4b2c9df37aa2f025b45f8095d6cb5",
+      "idempotency_key": "recommend:rec_01M4B3R6G0J50XBR01HBK63THE",
       "provenance_ids": [
-        "prov_01M4B3R6G03JGVZQMZ5SSCXFAQ"
+        "prov_01M4B3R6G0625R0BXXQ3G02N83"
       ]
     }
   ]

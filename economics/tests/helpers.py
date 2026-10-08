@@ -23,6 +23,24 @@ from worked_cases import SCORED_AT, fresh  # noqa: E402
 CFG = load_config()
 
 
+def _with_caps(cfg, cash_cap, loss_cap):
+    """A copy of ``cfg`` with other per-deal caps. Mechanics tests on big-ticket worked cases (trailer, truck) use
+    the pre-C-24 $1,500 / $800 caps so they keep testing arithmetic, not the $500 bankroll (C-24)."""
+    import copy
+    from decimal import Decimal
+
+    from mbos_economics.canonical import content_hash
+    from mbos_economics.config import ScoringConfig
+    raw = copy.deepcopy(cfg.raw)
+    raw["capital_and_risk"]["risk_capital_per_deal_cap"]["value"] = Decimal(cash_cap)
+    raw["capital_and_risk"]["max_loss_cap"]["value"] = Decimal(loss_cap)
+    raw["scoring_config_version"] = cfg.version + "-bigcaps"
+    return ScoringConfig(version=raw["scoring_config_version"], raw=raw, hash=content_hash(raw))
+
+
+CFG_BIG = _with_caps(CFG, 1500, 800)
+
+
 def run(item: dict, cfg=CFG, scored_at: str = SCORED_AT) -> dict:
     return score_item(item, cfg, scored_at)
 

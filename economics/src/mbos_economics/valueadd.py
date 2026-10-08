@@ -30,7 +30,7 @@ from pathlib import Path
 from . import __version__ as VERSION
 from .canonical import content_hash, derived_ulid, parse_ts
 from .config import CONFIG_DIR, ScoringConfig
-from .engine import _bisect_int, compute
+from .engine import _bisect_int, compute, effective_caps
 from .inputs import build_engine_input
 from .numeric import D
 
@@ -396,10 +396,11 @@ def _binding(item: dict, cfg: ScoringConfig) -> str:
     inp = build_engine_input(item)
     inp["economics"]["rehab"]["parts_cost"] = 0
     r = compute(inp, cfg)
-    cap = cfg.num("capital_and_risk.risk_capital_per_deal_cap")
+    caps_eff = effective_caps(inp["economics"], cfg)
+    cap = caps_eff["cash_cap"]
     text = {
         "cash_ok": f"your ${cap:,.0f} per-deal cash limit (it ties up ${r['derived']['cash_tied_up']:,.0f})",
-        "max_loss_ok": f"your ${cfg.num('capital_and_risk.max_loss_cap'):,.0f} worst-case loss limit",
+        "max_loss_ok": f"your ${caps_eff['max_loss_cap']:,.0f} worst-case loss limit",
         "pph_floor_ok": f"your ${cfg.num('time_value.w_min_per_hour'):g}/h floor",
         "class_profit_ok": "the profit this deal class must clear",
         "ev_positive": "a positive expected value",

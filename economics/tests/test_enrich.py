@@ -12,7 +12,7 @@ import re
 import unittest
 
 import deal_cases as dc
-from helpers import CFG, HERE
+from helpers import CFG as REAL_CFG, CFG_BIG as CFG, HERE       # CFG: pre-C-24 $1,500 / $800 caps (mechanics); REAL_CFG: shipped
 
 from mbos_economics.canonical import content_hash
 from mbos_economics.comps_feed import research_step
@@ -28,15 +28,15 @@ PID_RE = re.compile(r"^prov_[0-9A-HJKMNP-TV-Z]{26}$")
 MACHINE_NOISE = re.compile(r"PLACEHOLDER|provisional|MICHAEL_DECISIONS|scorer \(lane", re.I)
 
 
-def scored(case, as_of=dc.AS_OF, profile=dc.PROFILE, **kw):
+def scored(case, as_of=dc.AS_OF, profile=dc.PROFILE, cfg=CFG, **kw):
     it, comps, prov = case(**kw)
-    r = research_step(it, comps, prov, as_of, profile=profile)
+    r = research_step(it, comps, prov, as_of, profile=profile, cfg=cfg)
     assert r["proposed_next_state"] == "SCORED", r["estimate"]
     return r["item"]
 
 
-def enrich(item, as_of=dc.AS_OF, **kw):
-    return build_enrichment(item, as_of, cfg=CFG, priors=PRI, seasonality=SEA, profile=dc.PROFILE, **kw)
+def enrich(item, as_of=dc.AS_OF, cfg=CFG, **kw):
+    return build_enrichment(item, as_of, cfg=cfg, priors=PRI, seasonality=SEA, profile=dc.PROFILE, **kw)
 
 
 MOWER, SAW, TRAILER = scored(dc.zero_turn_mower), scored(dc.concrete_saw), scored(dc.utility_trailer)
@@ -235,8 +235,8 @@ class TestWhy(unittest.TestCase):
     def test_pass_reasons_in_plain_english(self):
         truck = copy.deepcopy(MOWER)
         truck["scores"]["scorecard"] = json.loads((HERE.parent / "examples" / "project_vehicle_truck_over_cap.scored.json").read_text())["item"]["scores"]["scorecard"]
-        why = enrich(truck)["blocks"]["why"]
-        self.assertTrue(why[0].startswith("Passed because cash tied up of $2,974 is over your $1,500 per-deal limit"), why[0])
+        why = enrich(truck, cfg=REAL_CFG)["blocks"]["why"]
+        self.assertTrue(why[0].startswith("Passed because the worst case loses $789, over your $500 limit; cash tied up of $2,974 is over your $500 per-deal limit"), why[0])
 
     def test_evidence_list_grammar(self):
         it = copy.deepcopy(TRAILER)
@@ -296,9 +296,9 @@ class TestGoldens(unittest.TestCase):
         self.assertEqual(set(files), {"concrete_saw", "utility_trailer", "zero_turn_mower"})
         for name, doc in files.items():
             it = scored({"zero_turn_mower": dc.zero_turn_mower, "concrete_saw": dc.concrete_saw,
-                         "utility_trailer": dc.utility_trailer}[name])
-            self.assertEqual(doc["blocks"], enrich(it)["blocks"], name)
-            self.assertEqual(doc["enrichment_hash"], enrich(it)["enrichment_hash"], name)
+                         "utility_trailer": dc.utility_trailer}[name], cfg=REAL_CFG)
+            self.assertEqual(doc["blocks"], enrich(it, cfg=REAL_CFG)["blocks"], name)
+            self.assertEqual(doc["enrichment_hash"], enrich(it, cfg=REAL_CFG)["enrichment_hash"], name)
         self.assertNotEqual(files["zero_turn_mower"]["blocks"]["seasonality"]["demand_now"],
                             files["concrete_saw"]["blocks"]["seasonality"]["demand_now"])
 

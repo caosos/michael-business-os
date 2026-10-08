@@ -11,7 +11,7 @@ import unittest
 from datetime import datetime, timezone
 
 import deal_cases as dc
-from helpers import CFG, HERE
+from helpers import CFG, CFG_BIG, HERE
 
 from mbos_economics.comps_feed import research_step
 from mbos_economics.engine import compute
@@ -30,15 +30,15 @@ ELEMENTARY = [re.compile(p, re.I) for p in (
 STRICT_BAN = re.compile(r"\b(check|inspect|make sure|verify (it )?(starts|runs)|look for)\b", re.I)
 
 
-def scored(case, **kw):
+def scored(case, cfg=None, **kw):
     it, comps, prov = case(**kw)
-    r = research_step(it, comps, prov, dc.AS_OF, profile=dc.PROFILE)
+    r = research_step(it, comps, prov, dc.AS_OF, profile=dc.PROFILE, cfg=cfg)
     assert r["proposed_next_state"] == "SCORED", r["estimate"]
     return r["item"]
 
 
-def va(item, **kw):
-    return build_value_add(item, dc.AS_OF, cfg=CFG, kb=KB, **kw)
+def va(item, cfg=CFG, **kw):
+    return build_value_add(item, dc.AS_OF, cfg=cfg, kb=KB, **kw)
 
 
 CUB, GEN, GEN75, COMP = (scored(dc.recalled_cub_cadet), scored(dc.recalled_generac), scored(dc.generac_gp7500e),
@@ -152,23 +152,25 @@ class TestRisks(unittest.TestCase):
 
 class TestPlan(unittest.TestCase):
     def test_parts_ceiling_is_the_real_break_even(self):
-        plan = va(MOWER)["block"]["plan"]
+        mower = scored(dc.zero_turn_mower, cfg=CFG_BIG)          # pre-C-24 $1,500 / $800 caps: the arithmetic of the ceiling
+        plan = va(mower, cfg=CFG_BIG)["block"]["plan"]
         self.assertEqual(plan["basis"], "INFERENCE")
         self.assertIn("Parts can run up to $505", plan["value"])
         for parts, expect in ((505, True), (506, False)):
-            trial = copy.deepcopy(MOWER)
+            trial = copy.deepcopy(mower)
             trial["economics"]["rehab"]["parts_cost"] = parts
-            r = compute(build_engine_input(trial), CFG)
+            r = compute(build_engine_input(trial), CFG_BIG)
             self.assertEqual(all(r["gates"].values()) and r["yes_conditions"]["ev_pph_target_ok"]
                              and r["yes_conditions"]["class_ev_ok"], expect, parts)
         self.assertIn("The trailer run is already costed in ($27 and 1 h).", plan["value"])
         self.assertIn("Sell target is $1,950, the median of 5 sold comparables.", plan["value"])
 
     def test_plan_names_the_limit_that_actually_binds(self):
-        cub = va(CUB)["block"]["plan"]["value"]
+        cub = va(scored(dc.recalled_cub_cadet, cfg=CFG_BIG), cfg=CFG_BIG)["block"]["plan"]["value"]       # CUB's golden score is at $500; the binding text follows the cfg
         self.assertIn("fails your $800 worst-case loss limit and your $1,500 per-deal cash limit", cub)
+        self.assertIn("fails your $500 worst-case loss limit", va(CUB)["block"]["plan"]["value"])     # shipped caps
         self.assertNotIn("does not clear your $65/h", cub)                  # the wrong limit must not be blamed
-        self.assertIn("fails your $40/h floor", va(GEN)["block"]["plan"]["value"])
+        self.assertIn("fails your $40/h floor", va(scored(dc.recalled_generac, cfg=CFG_BIG), cfg=CFG_BIG)["block"]["plan"]["value"])
 
     def test_plan_hints_come_only_from_matched_sourced_entries(self):
         self.assertIn("Do not budget fuel tank parts until a Cub Cadet dealer confirms", va(CUB)["block"]["plan"]["value"])

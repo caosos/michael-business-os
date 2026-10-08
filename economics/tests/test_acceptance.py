@@ -7,7 +7,7 @@ import unittest
 from decimal import Decimal
 from pathlib import Path
 
-from helpers import CFG, case, run, sc_of
+from helpers import CFG, CFG_BIG, case, run, sc_of
 from worked_cases import ALL_CASES, FLIP_CASES, SCORED_AT
 
 from mbos_economics.comps import aggregate_sold_comps
@@ -253,7 +253,7 @@ class AT13_NoYesWithoutConfidence(unittest.TestCase):
         ev = it["economics"]["estimates_meta"]["evidence"]
         for k in ("condition_verified", "seller_screened", "demand_evidence"):
             ev.pop(k)
-        out = run(it)["scores"]["scorecard"]
+        out = run(it, CFG_BIG)["scores"]["scorecard"]
         # .93 - .20 condition - .08 seller - .10 demand = .55
         self.assertEqual(out["derived"]["confidence"], 0.55)
         self.assertEqual(out["decision"], "MAYBE")
@@ -286,7 +286,7 @@ class AT14_WorkedExamplesCorrected(unittest.TestCase):
     def test(self):
         self.assertEqual(set(self.EXPECT), set(ALL_CASES))
         for name, (verdict, alert) in self.EXPECT.items():
-            sc = sc_of(case(name))
+            sc = sc_of(case(name), CFG_BIG)     # pre-C-24 caps: these goldens test verdict logic, not the $500 bankroll
             self.assertEqual((sc["decision"], sc["alert"]), (verdict, alert), name)
 
     def test_yes_requires_target(self):
@@ -338,15 +338,16 @@ class AT17_LearnNeverMutatesHistory(_TempConfigDir):
     def test(self):
         old = scored("trailer_utility")
         frozen = copy.deepcopy(old["scores"])
-        prop = propose_config_bump(CFG, {"time_value.w_target_flip_per_hour": 60},
+        prop = propose_config_bump(CFG, {"time_value.w_target_flip_per_hour": 60, "capital_and_risk.risk_capital_per_deal_cap": 1500,
+                                    "capital_and_risk.max_loss_cap": 800},     # keep the $1,500 trailer fundable
                                    "trailers realized plan in 12/12 outcomes", ["outc_01JB0000000000000000000001"],
                                    "2026-11-01T00:00:00Z")
-        self.assertEqual(prop["to_version"], "2026.10.4")
+        self.assertEqual(prop["to_version"], "2026.10.5")
         self.assertEqual(prop["action_request_draft"]["tier"], 0)
         self.assertEqual(CFG.get("time_value.w_target_flip_per_hour"), 65)    # proposal writes nothing
         self.activate(prop)
         new_cfg = load_config(config_dir=self.dir)
-        self.assertEqual(new_cfg.version, "2026.10.4")
+        self.assertEqual(new_cfg.version, "2026.10.5")
         rescored = score_item(case("trailer_utility"), new_cfg, "2026-11-01T00:00:00Z")["scores"]["scorecard"]
         self.assertEqual(rescored["decision"], "YES")                          # new policy, new verdict
         self.assertEqual(old["scores"], frozen)                                # old scorecard untouched

@@ -4,7 +4,7 @@ import hashlib
 import json
 import unittest
 
-from helpers import CFG, HERE, case
+from helpers import CFG, CFG_BIG, HERE, case
 
 from mbos_economics.config import CONFIG_DIR
 from mbos_economics.sensitivity import PARAMS, render_markdown, sensitivity_report, variant
@@ -26,7 +26,7 @@ class TestSensitivity(unittest.TestCase):
         cls.before = fp()
         cls.cases = {n: case(n) for n in ("trailer_utility", "trailer_utility_at_walkaway", "project_vehicle_civic",
                                           "project_vehicle_truck_over_cap", "equipment_repair_zero_turn")}
-        cls.rep = sensitivity_report(cls.cases, CFG, params=NARROW)
+        cls.rep = sensitivity_report(cls.cases, CFG_BIG, params=NARROW)     # pre-C-24 $1,500 base: the sweep logic
 
     def test_config_untouched(self):
         self.assertEqual(fp(), self.before)
@@ -62,7 +62,7 @@ class TestSensitivity(unittest.TestCase):
         doc = (HERE.parents[1] / "docs" / "research" / "agent-03-sensitivity-michael-decisions.md").read_text()
         self.assertIn(f"config `{CFG.version}`", doc)
         self.assertIn(CFG.hash, doc)
-        self.assertIn("- `trailer_utility`: MAYBE for 63–150; YES for 20–62", doc)
+        self.assertIn("- `equipment_repair_zero_turn`: MAYBE for 72–150; YES for 20–71", doc)
 
 
 if __name__ == "__main__":

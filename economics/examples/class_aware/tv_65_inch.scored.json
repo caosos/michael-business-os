@@ -73,7 +73,7 @@
         "seasonality_factor": 1
       },
       "estimates_meta": {
-        "scoring_config_version": "2026.10.3",
+        "scoring_config_version": "2026.10.4",
         "evidence": {
           "sold_comps_count": 4,
           "condition_verified": true,
@@ -84,13 +84,13 @@
       }
     },
     "scores": {
-      "scorecard_id": "scr_01M4B3R6G0NGTKTZS9VB9DCEGP",
-      "inputs_hash": "sha256:15eb32c4276f49693720b18179f4b7f2138abfc149b726047cf44600004de385",
+      "scorecard_id": "scr_01M4B3R6G0BF4G09KTS8S72BV0",
+      "inputs_hash": "sha256:4c97a2dbc95060392230ef84a3d6b930225870799a79f2a161445d3e0abe6cfa",
       "scorecard": {
-        "scoring_config_version": "2026.10.3",
+        "scoring_config_version": "2026.10.4",
         "computed_at": "2026-10-07T12:00:00Z",
-        "engine_version": "0.13.1",
-        "config_hash": "sha256:98e8bddc2f8a102356da25a4b9200380460db3b516ae986c22658dffc09a1073",
+        "engine_version": "0.14.0",
+        "config_hash": "sha256:8fad7a393bd15f538db22b62782df41a086c30eb48dde38dd7c67dce8f743243",
         "lane": "flip",
         "derived": {
           "deal_class": "MICRO_FLIP",
@@ -146,7 +146,7 @@
           "max_loss": 18.66,
           "p_loss": 0.2,
           "coefficient_of_variation": 0.8315,
-          "risk_raw": 0.238,
+          "risk_raw": 0.245,
           "time_to_cash_days": 1.04,
           "travel_burden": 10.77,
           "travel_burden_limit": 13.07,
@@ -201,7 +201,7 @@
           "pph_score": 45.91,
           "roi_score": 73.95,
           "ttc_score": 98.27,
-          "risk_score": 76.2,
+          "risk_score": 75.5,
           "conf_score": 93,
           "skill_score": 75,
           "scarcity_score": 44.33
@@ -216,7 +216,7 @@
           "skill": 0.1,
           "scarcity": 0.05
         },
-        "composite": 51.82,
+        "composite": 51.75,
         "decision": "MAYBE",
         "pass_on_priors": false,
         "ranking": {
@@ -280,7 +280,7 @@
         },
         "walk_away_price": 15,
         "reasons": [
-          "YES blocked: composite 51.82 < 60",
+          "YES blocked: composite 51.75 < 60",
           "YES blocked: EV profit/hour $55.09 < flip target $65.00",
           "deterministic: net $56.34, $83.12/h over 0.6778 h, cash tied up $33.66, ROI 1.6738",
           "expected: net $37.34, $55.09/h, max loss $18.66, P(loss) 0.2000, time-to-cash 1.04 d",
@@ -291,10 +291,10 @@
       }
     },
     "recommendation": {
-      "recommendation_id": "rec_01M4B3R6G08VGEP9GETX6H400G",
+      "recommendation_id": "rec_01M4B3R6G0T171AH403600SQY2",
       "verdict": "MAYBE",
       "rationale": [
-        "YES blocked: composite 51.82 < 60",
+        "YES blocked: composite 51.75 < 60",
         "YES blocked: EV profit/hour $55.09 < flip target $65.00",
         "deterministic: net $56.34, $83.12/h over 0.6778 h, cash tied up $33.66, ROI 1.6738",
         "expected: net $37.34, $55.09/h, max loss $18.66, P(loss) 0.2000, time-to-cash 1.04 d",
@@ -304,30 +304,30 @@
       ],
       "confidence": 0.93,
       "alert": false,
-      "provenance_id": "prov_01M4B3R6G0R5R09PC9RTE14P4J"
+      "provenance_id": "prov_01M4B3R6G0EE790SVA18WNHY54"
     },
     "provenance_ids": [
       "prov_01JB0000000000000000001010",
-      "prov_01M4B3R6G0R5R09PC9RTE14P4J"
+      "prov_01M4B3R6G0EE790SVA18WNHY54"
     ]
   },
   "provenance": {
-    "provenance_id": "prov_01M4B3R6G0R5R09PC9RTE14P4J",
+    "provenance_id": "prov_01M4B3R6G0EE790SVA18WNHY54",
     "created_at": "2026-10-07T12:00:00Z",
     "actor_type": "system",
     "agent_name": "agent-03-economics",
     "basis": "INFERENCE",
     "tool_name": "mbos_economics.engine",
-    "tool_version": "0.13.1",
-    "config_version": "2026.10.3",
+    "tool_version": "0.14.0",
+    "config_version": "2026.10.4",
     "inputs_used": [
       {
         "ref": "engine_input",
-        "hash": "sha256:15eb32c4276f49693720b18179f4b7f2138abfc149b726047cf44600004de385"
+        "hash": "sha256:4c97a2dbc95060392230ef84a3d6b930225870799a79f2a161445d3e0abe6cfa"
       },
       {
-        "ref": "scoring-config@2026.10.3",
-        "hash": "sha256:98e8bddc2f8a102356da25a4b9200380460db3b516ae986c22658dffc09a1073"
+        "ref": "scoring-config@2026.10.4",
+        "hash": "sha256:8fad7a393bd15f538db22b62782df41a086c30eb48dde38dd7c67dce8f743243"
       }
     ],
     "derived_from": [
@@ -340,26 +340,26 @@
       "type": "SCORE_RECORDED",
       "item_id": "itm_01JB0000000000000000000101",
       "entity_type": "scorecard",
-      "entity_id": "scr_01M4B3R6G0NGTKTZS9VB9DCEGP",
+      "entity_id": "scr_01M4B3R6G0BF4G09KTS8S72BV0",
       "tool_name": "mbos_economics.engine",
-      "inputs_hash": "sha256:15eb32c4276f49693720b18179f4b7f2138abfc149b726047cf44600004de385",
-      "payload_hash": "sha256:447c704947501591aa5eec96fa58b38f858d5b33ba74c88b18ee3ec8c9dcddaf",
-      "idempotency_key": "score:scr_01M4B3R6G0NGTKTZS9VB9DCEGP",
+      "inputs_hash": "sha256:4c97a2dbc95060392230ef84a3d6b930225870799a79f2a161445d3e0abe6cfa",
+      "payload_hash": "sha256:28de0b93a4ef0093f16735960340d92679601af353bd253d08fed903236c1391",
+      "idempotency_key": "score:scr_01M4B3R6G0BF4G09KTS8S72BV0",
       "provenance_ids": [
-        "prov_01M4B3R6G0R5R09PC9RTE14P4J"
+        "prov_01M4B3R6G0EE790SVA18WNHY54"
       ]
     },
     {
       "type": "RECOMMENDATION_RECORDED",
       "item_id": "itm_01JB0000000000000000000101",
       "entity_type": "recommendation",
-      "entity_id": "rec_01M4B3R6G08VGEP9GETX6H400G",
+      "entity_id": "rec_01M4B3R6G0T171AH403600SQY2",
       "tool_name": "mbos_economics.engine",
-      "inputs_hash": "sha256:15eb32c4276f49693720b18179f4b7f2138abfc149b726047cf44600004de385",
-      "payload_hash": "sha256:9fd73958d8a3823300f0733c9c6cc336109dca8f41b9bb66d2dc020be5e64f90",
-      "idempotency_key": "recommend:rec_01M4B3R6G08VGEP9GETX6H400G",
+      "inputs_hash": "sha256:4c97a2dbc95060392230ef84a3d6b930225870799a79f2a161445d3e0abe6cfa",
+      "payload_hash": "sha256:cfba4e242c40eecfa5c944dbd51ebecb1ea6b4a2f1d25ac88520d8ce1c5b2767",
+      "idempotency_key": "recommend:rec_01M4B3R6G0T171AH403600SQY2",
       "provenance_ids": [
-        "prov_01M4B3R6G0R5R09PC9RTE14P4J"
+        "prov_01M4B3R6G0EE790SVA18WNHY54"
       ]
     }
   ]

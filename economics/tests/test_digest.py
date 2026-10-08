@@ -9,7 +9,8 @@ import json
 import random
 import unittest
 
-from helpers import CFG, HERE
+from helpers import CFG, CFG_BIG, HERE
+from worked_cases import SCORED_AT
 
 from mbos_economics.digest import build_digest, render_text
 from mbos_economics.engine import score_item
@@ -20,13 +21,16 @@ AS_OF = "2026-10-07T18:00:00Z"
 
 def corpus() -> list[dict]:
     items = [json.loads(p.read_text())["item"] for p in sorted((HERE.parent / "examples").glob("*.scored.json"))]
+    for it in items:       # digest logic is tested on the pre-C-24 $1,500 / $800 caps; the goldens themselves are at $500
+        o = score_item(it, CFG_BIG, SCORED_AT)
+        it["scores"], it["recommendation"] = o["scores"], o["recommendation"]
     for it in json.loads((HERE / "fixtures" / "agent02" / "items.json").read_text()):
         it = copy.deepcopy(it)
         it["state"] = "RESEARCHING"
         r = estimate_item(it, None, AS_OF)
         if r["status"] == "estimated":
             it = apply_estimate(it, r)
-            o = score_item(it, CFG, AS_OF)
+            o = score_item(it, CFG_BIG, AS_OF)
             it["scores"], it["recommendation"], it["state"] = o["scores"], o["recommendation"], "RECOMMENDED"
         items.append(it)
     return items
