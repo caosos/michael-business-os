@@ -283,4 +283,7 @@ Wait for Agent 01 review of ADR-03-002 and integration wiring. On request:
 
 ## P-03-16
 Done: P-03-16 @ 0e985dc (lane-03 side: `build_value_add(model_years=)`; 355 passed, 22 skipped). State: CLOSED
+
+## P-03-17
+Done: P-03-17 @ 276ecd4 (plan_from_documents skips malformed-scorecard Items, names them in `unknowns`; 356 passed, 22 skipped). State: CLOSED
 Proposed (for 01): in `src/mbos/adapters/economics.py` `_value_add`, pass `model_years=extract_model_years(title)` to `build_value_add` (coordinator-branch file), then run card lint.
