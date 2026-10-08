@@ -90,6 +90,24 @@ def plan_errors(plan: dict[str, Any]) -> list[str]:
         errs.append("recommendation DEPLOY but there are no legs")
     if plan["recommendation"] in ("HOLD", "UNKNOWN") and spend > _EPS:
         errs.append(f"recommendation {plan['recommendation']} but legs commit cash; only DEPLOY may commit cash")
+    mis = plan["mission"]
+    from datetime import date, timedelta
+
+    start, end = date.fromisoformat(mis["period"]["start"]), date.fromisoformat(mis["period"]["end"])
+    if end < start:
+        errs.append("mission period is inverted (end before start)")
+    if mis["hours_available"] is not None:
+        need = sum(l["hours"] for l in legs if l["hours"] is not None)
+        if need > mis["hours_available"] + _EPS:
+            errs.append(f"legs need {need:g} h but only {mis['hours_available']:g} h are available")
+    sc = [l["scorecard_id"] for l in legs]
+    if len(set(sc)) != len(sc):
+        errs.append("the same scorecard backs more than one leg")
+    asof = plan["ledger"].get("as_of")
+    if asof and date.fromisoformat(asof[:10]) < start - timedelta(days=7):
+        errs.append(f"ledger as_of {asof[:10]} is stale for a period starting {start}")
+    if plan["recommendation"] == "DEPLOY" and plan["ledger"].get("principal_impairment", 0) > _EPS:
+        errs.append("DEPLOY while protected principal is impaired: Michael must decide on a rebuild first")
     pw, target = plan["projected_week"], plan["mission"]["weekly_target_usd"]
     for k in ("low", "likely", "high"):  # F-64: a projection can never exceed what its legs can produce
         vals = [l["expected_net"][k] for l in legs]

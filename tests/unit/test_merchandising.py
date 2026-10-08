@@ -189,3 +189,19 @@ def test_f62_verification_words_need_the_specific_fact_verified():
     assert any("operating" in e or "verification" in e for e in mer.lint(inv, v))
     v["body"] = f"{DEFECT}. Engine hours verified."
     assert any("verification" in e for e in mer.lint(inv, v))
+
+
+def test_a35_defect_cannot_vanish_even_without_a_baseline():
+    inv = copy.deepcopy(INV)
+    inv["defects"] = []                      # deleted, but still listed in defect_ids_seen
+    assert any("cannot vanish" in e for e in mer.inventory_errors(inv))
+    inv["resolved_defects"] = [{"id": "d1", "resolved_by_provenance_id": "prov_01J9Z0000000000000000000A1"}]
+    assert mer.inventory_errors(inv) == []
+
+
+def test_a35_view_cannot_invent_provenance():
+    v = view()
+    for f in v["facts"]:
+        if f["fact_id"] == "f1":
+            f["provenance_id"] = "prov_01J9Z0000000000000000000A1"
+    assert any("invented by the view" in e for e in mer.lint(INV, v))

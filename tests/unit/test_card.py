@@ -544,3 +544,14 @@ def test_f56_reversed_gross_profit_range_is_not_shown(ledger_db):
                     "derived": {**(((item.get("scores") or {}).get("scorecard") or {}).get("derived") or {}), "net_profit_deterministic": 100, "cost_out": 50}}}
     g = cardmod.build_card(it, receipts, areqs)["economics"]["expected_gross_profit"]
     assert "low" not in g and "high" not in g
+
+
+def test_a35_residual_numeric_cases(ledger_db):
+    base = _base(ledger_db)
+    for kw in (dict(days=float("nan")), dict(net=float("nan")), dict(net="60"), dict(cash=1e308), dict(days=0), dict(cash=1e-9)):
+        c = _scenario(base, **{"cash": 30, "net": 45, "days": 1, **kw})
+        assert cardmod.validate_card(c) == [], kw
+        e = c["economics"]
+        for f in ("capital_velocity", "opportunity_class") + (() if "days" in kw and kw["days"] == 0 else ("cash_multiple",)):
+            assert e[f]["value"] == "UNKNOWN", (kw, f, e[f])      # a multiple needs no time, so days=0 alone keeps it
+    assert _scenario(base, cash=30, net=45, days=1, dom=0)["economics"]["liquidity"]["value"] == "UNKNOWN"

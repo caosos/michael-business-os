@@ -6,15 +6,16 @@
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "inventory_version",
-    "inventory_id",
-    "kind",
-    "title",
     "category",
-    "facts",
+    "defect_ids_seen",
     "defects",
     "evidence",
-    "terms"
+    "facts",
+    "inventory_id",
+    "inventory_version",
+    "kind",
+    "terms",
+    "title"
   ],
   "properties": {
     "inventory_version": {
@@ -204,6 +205,14 @@
           }
         }
       }
+    },
+    "defect_ids_seen": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^d[0-9]+$"
+      },
+      "description": "Every defect id ever recorded for this item. A defect may leave `defects` only via `resolved_defects` (with provenance); otherwise the object is invalid (F-61)."
     }
   }
 }

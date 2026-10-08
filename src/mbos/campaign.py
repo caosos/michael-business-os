@@ -30,7 +30,15 @@ def errors(doc: Any) -> list[str]:
     errs = [f"{'/'.join(map(str, e.absolute_path)) or '<root>'}: {e.message}" for e in _v().iter_errors(doc)]
     if errs:
         return errs
+    from datetime import datetime, timezone
+
     lim = doc["autonomy"].get("limits") or {}
+    if lim.get("expires_at"):
+        try:
+            if datetime.fromisoformat(str(lim["expires_at"]).replace("Z", "+00:00")) <= datetime.now(timezone.utc):
+                errs.append("autonomy.limits.expires_at is already in the past")
+        except ValueError:
+            errs.append("autonomy.limits.expires_at is not a valid date-time")
     if lim.get("max_offer_usd") is not None and lim.get("max_total_spend_usd") is not None and lim["max_offer_usd"] > lim["max_total_spend_usd"]:
         errs.append("limits.max_offer_usd exceeds max_total_spend_usd")
     if lim.get("max_offer_usd") is not None and lim["max_offer_usd"] > doc["criteria"]["max_price_usd"]:

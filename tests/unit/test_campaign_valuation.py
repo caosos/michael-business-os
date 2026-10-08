@@ -105,3 +105,21 @@ def test_f67_valuation_ordering_confidence_and_appraisal_claims():
     for txt in ("Appraised at $500", "licensed appraisal attached", "appraisal value 500"):
         v = load("valuation/mower.example.json"); v["subject"]["description"] = txt
         assert any("appraisal" in e for e in valuation.errors(v)), txt
+
+
+def test_a35_autopilot_limits_expired_at_creation_rejected():
+    c = load("campaign/trailer-wanted.example.json")
+    c["autonomy"] = {"level": "BOUNDED_AUTOPILOT", "limits": {"max_total_spend_usd": 300, "max_offer_usd": 200, "expires_at": "2000-01-01T00:00:00Z"}}
+    assert any("in the past" in e for e in campaign.errors(c))
+
+
+@pytest.mark.parametrize("mut,frag", [
+    (lambda v: v["ranges"].update(as_is={"low": 9000, "high": 9500}, after_repair={"low": 500, "high": 900}, ), "as_is is above"),
+    (lambda v: v.update(confidence="medium", evidence=[{"kind": "prior", "ref": "p"}]), "priors alone"),
+    (lambda v: v["evidence"][0].update(note="verified and guaranteed by appraiser"), "appraisal"),
+    (lambda v: (v["ranges"].update(as_is=None), v.update(unknowns=[])), "not reconciled"),
+])
+def test_a35_valuation_residuals(mut, frag):
+    v = load("valuation/mower.example.json")
+    mut(v)
+    assert any(frag in e for e in valuation.errors(v)), valuation.errors(v)

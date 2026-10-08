@@ -16,7 +16,7 @@ def _v() -> Draft202012Validator:
     return Draft202012Validator(json.loads((contracts_dir() / "valuation.schema.json").read_text()), format_checker=FormatChecker())
 
 
-_APPRAISAL_CLAIM = __import__("re").compile(r"\bappraised\b|\b(licensed|certified|official|formal)\s+appraisal\b|\bappraisal value\b", __import__("re").I)
+_APPRAISAL_CLAIM = __import__("re").compile(r"\bappraised\b|\b(licensed|certified|official|formal)\s+appraisal\b|\bappraisal value\b|\bguarantee[sd]?\b|\bappraiser\b|\bcertified\b", __import__("re").I)
 
 
 def _strings(doc: Any) -> list[str]:
@@ -51,6 +51,18 @@ def errors(doc: Any) -> list[str]:
         errs.append("all ranges UNKNOWN requires reason_unknown")
     if known and doc["confidence"] == "high" and sum(1 for e in doc["evidence"] if e["kind"] in ("sold_comp", "record")) < 2:
         errs.append("confidence high requires at least two independent sold comps or records, not one comp or asking comps/priors")
+    ai, ar = ranges.get("as_is"), ranges.get("after_repair")
+    if ai and ar and (ai["high"] > ar["high"] or ai["low"] > ar["low"]):
+        errs.append("as_is is above after_repair (repair cannot lower value in this model)")
+    if known and doc["confidence"] == "medium" and not any(e["kind"] != "prior" for e in doc["evidence"]):
+        errs.append("confidence medium needs at least one non-prior evidence item (priors alone are low)")
+    if known:
+        unk = " ".join(doc["unknowns"]).lower()
+        for k, r in ranges.items():
+            pass
+        for k in (k for k, r in doc["ranges"].items() if r is None):
+            if k.replace("_", " ") not in unk and k not in unk:
+                errs.append(f"range {k} is null but not reconciled in unknowns")
     sl, ls, fs = ranges.get("suggested_list"), ranges.get("likely_sale"), ranges.get("fast_sale")
     if fs and sl and fs["high"] > sl["high"]:
         errs.append("fast_sale.high exceeds suggested_list.high")

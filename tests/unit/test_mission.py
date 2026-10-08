@@ -105,3 +105,16 @@ def test_f64_projection_must_be_supported_by_legs_and_recommendation_rules():
     for rec in ("HOLD", "UNKNOWN"):
         p = load("mission-plan.example.json"); p["recommendation"] = rec
         assert any("only DEPLOY may commit cash" in e for e in mission.plan_errors(p))
+
+
+@pytest.mark.parametrize("mut,frag", [
+    (lambda p: p["mission"].update(hours_available=2), "h but only"),
+    (lambda p: p["mission"]["period"].update(start="2026-10-11", end="2026-10-05"), "inverted"),
+    (lambda p: p["legs"][1].update(scorecard_id=p["legs"][0]["scorecard_id"]), "scorecard"),
+    (lambda p: p["ledger"].update(as_of="2020-01-01T00:00:00Z"), "stale"),
+    (lambda p: p["ledger"].update(principal_impairment=100, available_to_deploy=370), "impaired"),
+])
+def test_a35_plan_coherence(mut, frag):
+    p = load("mission-plan.example.json")
+    mut(p)
+    assert any(frag in e for e in mission.plan_errors(p)), mission.plan_errors(p)

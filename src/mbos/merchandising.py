@@ -80,6 +80,13 @@ def inventory_errors(inv: Any) -> list[str]:
             errs.append(f"fact {f['id']}: basis 'verified' requires provenance_id")
         if f["basis"] == "UNKNOWN" and f.get("value") not in ("unknown", "UNKNOWN", None):
             errs.append(f"fact {f['id']}: basis UNKNOWN but a value is given")
+    cur = {d["id"] for d in inv["defects"]}
+    gone = [i for i in inv["defect_ids_seen"] if i not in cur and i not in {r["id"] for r in inv.get("resolved_defects", [])}]
+    if gone:
+        errs.append(f"defect(s) {', '.join(gone)} were recorded but are neither present nor in resolved_defects (a defect cannot vanish)")
+    missing = sorted(cur - set(inv["defect_ids_seen"]))
+    if missing:
+        errs.append(f"defect(s) {', '.join(missing)} are not listed in defect_ids_seen")
     for d in inv["defects"]:
         if d["basis"] == "verified" and not d.get("provenance_id"):
             errs.append(f"defect {d['id']}: basis 'verified' requires provenance_id")
@@ -172,6 +179,8 @@ def lint(inv: dict, view: dict, *, baseline: dict | None = None) -> list[str]:
             errs.append(f"fact {f['id']}: basis changed {f['basis']} -> {sf['basis']}" + (" (upgrade)" if _RANK[sf["basis"]] > _RANK[f["basis"]] else ""))
         if f.get("provenance_id") and sf.get("provenance_id") != f["provenance_id"]:
             errs.append(f"fact {f['id']}: provenance dropped or changed")
+        elif not f.get("provenance_id") and sf.get("provenance_id"):
+            errs.append(f"fact {f['id']}: provenance_id invented by the view (the inventory fact has none)")
     for f in inv["facts"]:
         if f.get("material") and f["id"] not in shown:
             errs.append(f"material fact {f['id']} ({f['key']}) is not shown")

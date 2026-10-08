@@ -85,14 +85,16 @@ def _finite(x: Any) -> bool:
     return isinstance(x, (int, float)) and not isinstance(x, bool) and x == x and x not in (float("inf"), float("-inf"))
 
 
+_MAX_MAG = 1e12
+_MIN_CASH, _MIN_DAYS = 0.01, 1 / 1440   # one cent, one minute: below these a "multiple" or "velocity" is arithmetic noise (F-53)
 _NUMSTR = re.compile(r"^\s*[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?\s*$|^\s*[-+]?(nan|inf(inity)?)\s*$", re.I)
 
 
 def _sane(obj: Any) -> Any:
     """F-52: lane data is untrusted. NaN/Infinity and numeric STRINGS ("12", "nan") become None (= UNKNOWN downstream) instead of
     crashing arithmetic or leaking into the card as numbers."""
-    if isinstance(obj, float) and not _finite(obj):
-        return None
+    if isinstance(obj, (int, float)) and not isinstance(obj, bool) and (not _finite(obj) or abs(obj) > _MAX_MAG):
+        return None   # NaN/Infinity, and magnitudes beyond I-JSON-safe money/time (1e308 crashed the canonical encoder: F-52)
     if isinstance(obj, str) and _NUMSTR.match(obj):
         return None
     if isinstance(obj, dict):
@@ -394,9 +396,9 @@ def _economics(item: dict, enrich: Optional[dict]) -> dict[str, Any]:
                                            note="deterministic, before probability weighting") if d.get("net_profit_deterministic") is not None
                                     else _unknown("not scored yet"))
     if (not _is_unknown(out["expected_gross_profit"]) and _finite(resale.get("comp_price_low")) and _finite(resale.get("comp_price_high"))
-            and _finite(d.get("cost_out")) and d.get("net_profit_deterministic") is not None):
+            and _finite(d.get("cost_out")) and d["cost_out"] >= 0 and d.get("net_profit_deterministic") is not None):
         lo, hi = round(resale["comp_price_low"] - d["cost_out"], 2), round(resale["comp_price_high"] - d["cost_out"], 2)
-        if lo <= hi:   # F-56: a reversed range is lane data we cannot trust; show the single value only
+        if lo <= hi and lo <= d["net_profit_deterministic"] <= hi:   # F-56: a reversed range, or one that does not contain the value, is not shown
             out["expected_gross_profit"]["low"] = lo    # conservative resale
             out["expected_gross_profit"]["high"] = hi   # optimistic resale
     out["expected_net_profit"] = (_datum(d["ev_net_profit"], "INFERENCE", unit="USD", provenance_id=prov,
@@ -450,7 +452,10 @@ def _velocity_fields(item: dict, econ: dict, profile: dict, enr: dict) -> dict[s
     """Aria/Michael 2026-10-07: capital velocity, cash multiple, class, downside, liquidity, skill, cash context are SEPARATE visible
     fields. Everything here is derived from numbers already on the card/item (INFERENCE) or UNKNOWN; nothing is invented."""
     e = item.get("economics") or {}
-    d = {k: v for k, v in (((item.get("scores") or {}).get("scorecard") or {}).get("derived") or {}).items() if _finite(v)}
+    raw_d = ((item.get("scores") or {}).get("scorecard") or {}).get("derived") or {}
+    # F-52: if any of the three velocity inputs is PRESENT but unusable (NaN, string, bool, None, absurd magnitude), do not derive from the others
+    malformed = any(k in raw_d and not (_finite(raw_d[k]) and abs(raw_d[k]) <= _MAX_MAG) for k in ("cash_tied_up", "ev_net_profit", "time_to_cash_days"))
+    d = {k: v for k, v in raw_d.items() if _finite(v)}
     prov = (item.get("recommendation") or {}).get("provenance_id")
     rehab, resale, down = e.get("rehab") or {}, e.get("resale") or {}, e.get("downside") or {}
     cash = d.get("cash_tied_up") if _finite(d.get("cash_tied_up")) else None
@@ -459,9 +464,11 @@ def _velocity_fields(item: dict, econ: dict, profile: dict, enr: dict) -> dict[s
     U = lambda why: _unknown(why)
     out: dict[str, Any] = {}
     flip = item.get("type") == "flip"
-    if cash is not None and cash <= 0:
-        cash = None   # F-53: non-positive cash at risk has no multiple/velocity/class
-    if days is not None and days < 0:
+    if malformed or (cash is not None and cash < _MIN_CASH):
+        cash = None   # F-53: non-positive/negligible cash at risk has no multiple/velocity/class
+    if malformed:
+        net = None
+    if malformed or (days is not None and days < _MIN_DAYS):
         days = None
     if flip and cash and net is not None:
         out["cash_multiple"] = _datum(round(1 + net / cash, 2), "INFERENCE", unit="x", provenance_id=prov, note="1 + expected net / cash at risk")
@@ -489,7 +496,7 @@ def _velocity_fields(item: dict, econ: dict, profile: dict, enr: dict) -> dict[s
         out["repair_uncertainty"] = U("no repair scope / success estimate")
     sp, dom = resale.get("sale_prob"), resale.get("expected_dom_days")
     out["liquidity"] = _datum(f"{sp:.0%} sale probability, about {dom:g} days on market", "INFERENCE", provenance_id=prov) \
-        if _finite(sp) and 0 <= sp <= 1 and _finite(dom) and dom >= 0 else U("no valid sale-probability / days-on-market estimate")
+        if _finite(sp) and 0 <= sp <= 1 and _finite(dom) and dom > 0 else U("no valid sale-probability / days-on-market estimate")
     sk = d.get("skill_fit")
     out["skill_fit"] = _datum(sk, "INFERENCE", provenance_id=prov) if _finite(sk) and 0 <= sk <= 1 else U("no skill-fit score")
     out["personal_use_value"] = _from_block(_blk(enr, "economics"), "personal_use_value", "not supplied (only relevant if Michael might keep it)")
