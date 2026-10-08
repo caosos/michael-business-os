@@ -106,3 +106,31 @@ def test_assembly_report_names_the_comps_source_or_says_stand_in(monkeypatch, tm
     comps, report = build_components(s)
     row = next(r for r in report if r["component"] == "research (comps)")
     assert type(comps.researcher).__name__ == "EconomicsResearcher" and row["kind"] == "REAL" and str(tmp_path) in row["detail"]
+
+
+def test_worker_inbox_watcher_moves_a_parked_item_without_a_command(rt, tmp_path):
+    """F-92: a comp file dropped into the inbox is enough; the watcher (what `mbos worker` runs every 60 s) re-checks the parked item."""
+    from mbos.inbox import InboxWatcher
+
+    inbox = tmp_path / "inbox"
+    inbox.mkdir()
+    comps_, old = components(), components().researcher
+    comps_.researcher = EconomicsResearcher(ProductionCompsSource(inbox=inbox))
+    try:
+        item_id = _discover(rt, tmp_path, "w" + uuid.uuid4().hex[:7])
+        assert wait_state(rt.engine, item_id, {"RESEARCHING", "SCORED", "RECOMMENDED", "AWAITING_APPROVAL"}) == "RESEARCHING"
+        DBOS.retrieve_workflow(item_workflow_id(item_id)).get_result()
+
+        def parked():
+            with rt.engine.connect() as c:
+                return [r[0] for r in c.execute(sa.text("SELECT item_id FROM mbos.items WHERE state = 'RESEARCHING' AND item_id = :i"), {"i": item_id})]
+
+        w = InboxWatcher(inbox, parked, workflows.recheck)
+        assert w.tick() == []
+        for n, (price, ago) in enumerate([(1500, 5), (1650, 12), (1400, 20), (1550, 30)]):
+            _comp(inbox, n, price, ago)
+        (wf,) = w.tick()
+        assert DBOS.retrieve_workflow(wf).get_result()["status"] != "researching"
+        assert w.tick() == []
+    finally:
+        comps_.researcher = old

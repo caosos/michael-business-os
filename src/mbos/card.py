@@ -508,8 +508,10 @@ def _velocity_fields(item: dict, econ: dict, profile: dict, enr: dict) -> dict[s
     if cv is not None and not valid_cash:   # F-51: only a finite non-negative amount or a known label counts as Michael's statement
         out["current_cash_context"] = U("operator_profile current_cash_context.value is not a non-negative amount or a short statement; ignored (never assumed)")
     else:
+        avail = (e.get("context") or {}).get("available_to_deploy")   # F-96: the capital ledger Michael funded
         out["current_cash_context"] = _datum(clean_text(cv, 200) if isinstance(cv, str) else cv, "FACT", note="stated by Michael in operator_profile.v1.json") if cv is not None \
-            else U("Michael has not stated his cash situation (so lock-up sensitivity cannot be judged)")
+            else (_datum(avail, "FACT", unit="USD", note="available to deploy per the capital ledger Michael funded") if _finite(avail) and avail >= 0
+                  else U("Michael has not stated his cash situation (so lock-up sensitivity cannot be judged)"))
     return out
 
 

@@ -49,10 +49,14 @@ def build_components(s: Settings, *, fixture: Optional[str] = None, raw_dir: Opt
     else:
         say("governance (PDP, gateway, PANIC)", "STAND-IN", "reference gateway / deny-by-default PDP (dev only)")
 
+    ledger = None
     if os.environ.get("MBOS_SCORER", "engine") == "engine" and _have("mbos_economics"):
         from mbos.adapters.economics import EconomicsEngineScorer, EconomicsEnricher
 
-        comps.scorer = EconomicsEngineScorer()
+        from mbos.adapters.ledger import LedgerContext
+
+        ledger = LedgerContext(s.database_url) if s.state_backend == "lane_d" else None  # F-96: funded ledger -> scoring context
+        comps.scorer = EconomicsEngineScorer(context_source=ledger)
         import mbos_economics
 
         say("scoring", "REAL", f"lane C (Agent 03) engine {getattr(mbos_economics, '__version__', '?')}, bankroll-bound class-aware gates")
@@ -81,7 +85,7 @@ def build_components(s: Settings, *, fixture: Optional[str] = None, raw_dir: Opt
         from mbos.adapters.economics import EconomicsResearcher
 
         src = ProductionCompsSource(cs, inbox)
-        comps.researcher = EconomicsResearcher(src)
+        comps.researcher = EconomicsResearcher(src, context_source=ledger)
         say("research (comps)", "REAL", f"lane C research step; comps source: {src.describe()}")
     else:
         say("research (comps)", "STAND-IN", "none: MBOS_COMPS_STORE / MBOS_COMPS_INBOX not set (or lane B/C not installed); "

@@ -12,6 +12,7 @@ request id + event, so a DBOS replay of a transaction step can never double-writ
 
 from __future__ import annotations
 
+import json
 from datetime import timedelta
 from typing import Any, Optional
 
@@ -591,7 +592,34 @@ def record_enrichment(conn: sa.Connection, item_id: str, block: str, data: Any, 
 
 def record_lane_provenance(conn: sa.Connection, doc: dict) -> str:
     """Persist a lane-supplied Provenance v1 record (e.g. lane C's `build_enrichment()["provenance"]`)."""
+    row = conn.execute(sa.text("SELECT to_jsonb(p) FROM mbos.provenance p WHERE provenance_id = :p"), {"p": doc["provenance_id"]}).scalar()
+    if row is not None:  # F-91: the same record again (e.g. a second `mbos recheck`) is a no-op; different content under one id is an error
+        stamps = ("created_at", "fetched_at")  # stored as timestamptz: compare as instants, not strings
+        same = all((parse(row[k]) == parse(v)) if k in stamps else row.get(k) == v for k, v in doc.items() if row.get(k) is not None or k not in stamps)
+        if not same:
+            raise ValueError(f"provenance {doc['provenance_id']} already exists with different content")
+        return doc["provenance_id"]
     return L.record_provenance(conn, **doc)
+
+
+def record_attestation(conn: sa.Connection, item_id: str, evidence_key: str, note: str, entered_by: str) -> dict:
+    """Michael's confirmation of a requested evidence key (e.g. `title_in_hand`) as an Item research entry with HUMAN provenance (basis FACT,
+    human_actor). Appended atomically (04 `append_item_research`); the same confirmation again is a no-op. Lane C reads it from `Item.research`
+    (field `attestation.<key>`); the Operator UI / `mbos` call this through the OWNER login."""
+    key, note, who = (evidence_key or "").strip(), (note or "").strip(), (entered_by or "").strip()
+    if not key or not note or not who:
+        raise ValueError("evidence_key, note and entered_by are all required")
+    conn.execute(sa.text("SELECT 1 FROM mbos.items WHERE item_id = :i FOR UPDATE"), {"i": item_id})
+    field = f"attestation.{key}"
+    mine = [r for r in (read_item(conn, item_id).get("research") or []) if r.get("field") == field]
+    if mine and mine[-1].get("finding") == note and mine[-1].get("source_uri") == f"human:{who}":
+        return mine[-1]
+    prov = L.record_provenance(conn, actor_type="human", human_actor=who, basis="FACT", tool_name="mbos.attestation", tool_version="0.1.0")
+    entry = {"finding": note, "field": field, "basis": "FACT", "source_uri": f"human:{who}", "provenance_id": prov}
+    conn.execute(sa.text("SELECT mbos.append_item_research(:i, CAST(:e AS jsonb), CAST(:a AS jsonb), :t, :p, :k)"),
+                 {"i": item_id, "e": canonical_json([entry]).decode(), "a": canonical_json({"type": "human", "id": who}).decode(),
+                  "t": f"{who} confirmed evidence {key}", "p": [prov], "k": f"{item_id}:attest:{key}:{len(mine) + 1}:{sha256_of(note)[7:19]}"})
+    return entry
 
 
 def run_enrichers(conn: sa.Connection, item_id: str, components: Any) -> int:

@@ -183,10 +183,17 @@ def cmd_worker(a: argparse.Namespace) -> int:
         if a.once:
             time.sleep(a.settle)
         else:
+            from mbos.inbox import INTERVAL_SECONDS, InboxWatcher
             from mbos.workflows import recover_orphan_gates
 
+            watcher = InboxWatcher(os.environ.get("MBOS_COMPS_INBOX"), _parked_ids, workflows.recheck)
             while True:
-                time.sleep(60)
+                try:
+                    for wf in watcher.tick():  # F-92: a comp dropped in the inbox re-checks the parked items by itself
+                        print(f"comps inbox changed: queued {wf}")
+                except Exception as e:  # noqa: BLE001  (a bad file must not stop the worker)
+                    print(f"comps inbox watch failed: {e}", file=sys.stderr)
+                time.sleep(INTERVAL_SECONDS)
                 recover_orphan_gates()  # F-42: periodic safety net for follow-up gates
     except KeyboardInterrupt:
         pass
@@ -312,6 +319,11 @@ def cmd_note(a: argparse.Namespace) -> int:
     return 0
 
 
+def _parked_ids() -> list[str]:
+    with _engine().connect() as c:
+        return [r[0] for r in c.execute(sa.text("SELECT item_id FROM mbos.items WHERE state = 'RESEARCHING' ORDER BY item_id"))]
+
+
 def cmd_recheck(a: argparse.Namespace) -> int:
     """A-39: re-launch the lifecycle for parked items (after a comp was added). The RUNNING worker executes it (its comps source)."""
     from mbos import workflows
@@ -319,8 +331,7 @@ def cmd_recheck(a: argparse.Namespace) -> int:
     if a.item_id:
         ids = [a.item_id]
     else:
-        with _engine().connect() as c:
-            ids = [r[0] for r in c.execute(sa.text("SELECT item_id FROM mbos.items WHERE state = 'RESEARCHING' ORDER BY item_id"))]
+        ids = _parked_ids()
     if not ids:
         print("Nothing parked at RESEARCHING.")
         return 0

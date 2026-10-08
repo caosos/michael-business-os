@@ -721,6 +721,10 @@ def record_operator_note(conn: sa.Connection, bundle: dict) -> str:
     raise NotImplementedError("operator notes need the lane D store (state_backend='lane_d')")
 
 
+def record_attestation(conn: sa.Connection, item_id: str, evidence_key: str, note: str, entered_by: str) -> dict:
+    raise NotImplementedError("attestations need the lane D store (state_backend='lane_d')")
+
+
 def retract_operator_note(conn: sa.Connection, note_id: str, entered_by: str, entered_at: str, reason: str) -> str:
     raise NotImplementedError("operator notes need the lane D store (state_backend='lane_d')")
 

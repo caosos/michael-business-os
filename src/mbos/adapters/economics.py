@@ -22,7 +22,8 @@ from mbos.interfaces import ScoreResult
 
 
 class EconomicsEngineScorer:
-    def __init__(self, config_dir: Optional[str | Path] = None, version: Optional[str] = None):
+    def __init__(self, config_dir: Optional[str | Path] = None, version: Optional[str] = None, context_source=None):
+        self.context_source = context_source  # F-96: callable -> {"available_to_deploy": n} from the capital ledger
         from mbos_economics import __version__ as engine_version  # lane C package
         from mbos_economics.config import load_config
 
@@ -34,9 +35,11 @@ class EconomicsEngineScorer:
         from mbos_economics.engine import score_item
         from mbos_economics.inputs import InputError
 
+        from mbos.adapters.ledger import with_context
+
         scored_at = item.get("updated_at") or item["created_at"]
         try:
-            out = score_item(item, self.cfg, scored_at)
+            out = score_item(with_context(item, self.context_source), self.cfg, scored_at)
         except InputError as e:
             reason = f"Economics inputs missing or invalid: {e}"
             card = {"scoring_config_version": self.cfg.version, "derived": {}, "sub_scores": {}, "composite": 0,
@@ -67,8 +70,9 @@ class EconomicsResearcher:
     wall-clock, so the step replays exactly.
     """
 
-    def __init__(self, comps_source):
+    def __init__(self, comps_source, context_source=None):
         self.comps_source = comps_source
+        self.context_source = context_source  # F-96: capital ledger context for the score computed here
 
     def research(self, item: dict[str, Any]):
         from mbos_economics import __version__ as engine_version
@@ -81,6 +85,17 @@ class EconomicsResearcher:
         out = research_step(item, comps, prov, as_of)
         new = out["item"]
         score = None
+        ctx = self.context_source() if self.context_source else {}
+        if ctx and isinstance(new.get("economics"), dict):  # the ledger figure rides on the stored economics and the score is recomputed with it
+            from mbos.adapters.ledger import with_context
+            from mbos_economics.config import load_config
+            from mbos_economics.engine import score_item
+
+            new = with_context(new, self.context_source)
+            if out["proposed_next_state"] == "SCORED":
+                out = {**out, "item": new}
+                rescored = score_item(new, load_config(new["scores"]["scorecard"].get("scoring_config_version")), as_of)
+                new = {**new, "scores": rescored["scores"], "recommendation": rescored["recommendation"]}
         if out["proposed_next_state"] == "SCORED":
             sc, rec = new["scores"], new["recommendation"]
             score = ScoreResult(

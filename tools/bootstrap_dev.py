@@ -49,10 +49,30 @@ def _write(path: Path, lines: list[str], mode: int) -> None:
     path.chmod(mode)
 
 
+def release_initial_freeze(owner_url: str) -> str:
+    """F-89: a fresh lane D database is born FROZEN (global PANIC L3). For the dev DB, release it as the OWNER (approver login, the only
+    role that may), receipted by lane D. Returns a one-line statement for the operator. Idempotent: already RUNNING = no-op."""
+    import sqlalchemy as sa
+
+    from mbos import spine_d
+
+    eng = sa.create_engine(owner_url)
+    try:
+        with eng.begin() as c:
+            if not c.execute(sa.text("SELECT 1 FROM mbos.panic_current WHERE level = 'L3'")).first():
+                return "system RUNNING (no freeze engaged)"
+            spine_d.set_kill_switch(c, "global_freeze", False, reason="dev bootstrap: release the initial freeze of a fresh dev database")
+            return "released the initial global freeze as the owner (receipted, dev only) -> system RUNNING"
+    finally:
+        eng.dispose()
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--skip-install", action="store_true", help="do not (re)install lane packages from pushed heads")
     ap.add_argument("--ui-pin", default="dev-pin", help="PIN printed in the Operator UI command (default: dev-pin)")
+    ap.add_argument("--keep-frozen", action="store_true",
+                    help="leave the initial global freeze engaged (default: release it as the owner, dev only, receipted)")
     ap.add_argument("--var-dir", default=str(ROOT / "var"), help="where dev.env, owner.env, lanes/, policy/, raw/ go (default: ./var, gitignored)")
     a = ap.parse_args(argv)
     var = Path(a.var_dir).resolve()
@@ -107,6 +127,9 @@ def main(argv: list[str] | None = None) -> int:
     ], 0o600)
 
     py = ".venv/bin/python"
+    freeze = ("left FROZEN (--keep-frozen): nothing will act until the owner runs `mbos panic off`"
+              if a.keep_frozen else release_initial_freeze(prov.owner_app_url))
+    print(f"freeze: {freeze}")
     print(f"lane D {state_sha} provisioned ({APP_DB}); lane E policy {gov_sha}; lane F {ui_sha}; migrations applied this run: {len(prov.migrations_applied)}")
     print(f"""
 Next (each in the repo root):
@@ -114,6 +137,7 @@ Next (each in the repo root):
                      (prints the REAL/STAND-IN report; only `sources` should be STAND-IN)
   2. a card:         source var/dev.env && .venv/bin/mbos queue          # then: mbos card ITEM_ID
   3. operator UI:    source var/dev.env && source var/owner.env && MBOS_OPERATOR_PIN={a.ui_pin} {py} -u -m operator_ui serve --port 8765
+                     (owner login variable: MBOS_OWNER_DATABASE_URL, set by var/owner.env; the only one)
   4. decide:         source var/dev.env && source var/owner.env && .venv/bin/mbos decide AREQ_ID YES --seen HASHPREFIX
   stop:              .venv/bin/mbos devdb down""")
     return 0

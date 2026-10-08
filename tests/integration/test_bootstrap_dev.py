@@ -43,6 +43,23 @@ def test_bootstrap_writes_worker_and_owner_env(tmp_path, monkeypatch, capsys):
             assert c.execute("select current_user, pg_has_role(current_user,'approver','member')").fetchone() == ("mbos_dbos", False)
         with psycopg.connect(owner["MBOS_OWNER_DATABASE_URL"]) as c:
             assert c.execute("select current_user, pg_has_role(current_user,'approver','member')").fetchone() == ("mbos_operator_ui", True)
+            assert c.execute("select count(*) from mbos.panic_current").fetchone() == (0,)  # F-89: born FROZEN, released: system RUNNING
+        out = capsys.readouterr().out
+        assert "released the initial global freeze" in out and "MBOS_OWNER_DATABASE_URL" in out
+    finally:
+        import pgserver
+
+        pgserver.get_server(tmp_path / "pg", cleanup_mode="stop").cleanup()
+
+
+def test_keep_frozen_leaves_the_initial_freeze_and_says_so(tmp_path, monkeypatch, capsys):
+    pytest.importorskip("pgserver")
+    monkeypatch.setenv("MBOS_DEVDB_DIR", str(tmp_path / "pg"))
+    try:
+        assert _load().main(["--skip-install", "--keep-frozen", "--var-dir", str(tmp_path / "var")]) == 0
+        with psycopg.connect(_env(tmp_path / "var" / "owner.env")["MBOS_OWNER_DATABASE_URL"]) as c:
+            assert c.execute("select count(*) from mbos.panic_current where level = 'L3'").fetchone() == (1,)
+        assert "left FROZEN" in capsys.readouterr().out
     finally:
         import pgserver
 
