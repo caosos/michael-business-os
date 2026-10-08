@@ -1,0 +1,10 @@
+{
+  "mission_version": "1.0.0",
+  "period": {
+    "start": "2026-10-05",
+    "end": "2026-10-11"
+  },
+  "weekly_target_usd": null,
+  "hours_available": null,
+  "notes": "Target and hours are UNKNOWN until Michael sets them (MICHAEL_DECISIONS #10). The package's $1,500 is an example."
+}

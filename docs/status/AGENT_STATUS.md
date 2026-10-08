@@ -17,7 +17,8 @@ Done: G-07 final pass @ 5312f47 — card 248/0; RC READY 105/0; reference 104/0 
 Done: G-08 — A-15 follow-up: F-42 (orphan on crash), F-45 (concurrent double submit → 2 live requests), F-43, F-44; release gate goes red on failing test / modified installed code / live-mode policy / broken chain formula, but NOT on weakened contract (F-46), all-skipped suite (F-47), extra/json stale install (F-48); e2e executes no action (F-49). Receipt docs/receipts/2026-10-07-G-08-followup-and-release-gate.md
 Done: G-09 — F-42..F-49 verified FIXED (follow-up 34/34 on lane D+E; gate red on each planted fault); residual F-50 (P3). Receipt docs/receipts/2026-10-07-G-09-reverify-g08-fixes.md
 Done: G-10 — ADR-0012 card + engine half: floor-free and honest where it counts; F-51..F-58 filed (3 P2). Receipt docs/receipts/2026-10-07-G-10-adr0012-acceptance.md
-Claimed: G-11 (mission, campaign, valuation, merchandising), then closeout per 01's ruling (State: CLOSED + docs/handoff/LANE_07.md)
+Done: G-11 — product seams: 48 controls hold; F-59..F-68 filed (F-59 merchandising lint bypass is P1). Receipt docs/receipts/2026-10-07-G-11-product-seams-acceptance.md
+Claimed: closeout per 01's ruling (docs/handoff/LANE_07.md, State: CLOSED)
 Waiting on: Agent 01 to triage F-42…F-49 (all open, owners in the receipt). Card and RC suites have no open findings. Re-run any time: `python -m mbos_qa install-pins`, then `card` and `spine --rc`.
 Current phase: Round Two — G-07 delivered; waiting on the remaining card fixes
 Started: 2026-10-06 (round one) · 2026-10-07 (round two)

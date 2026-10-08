@@ -280,6 +280,37 @@ FINDINGS = [
     ("F-58", "FACT", "03", "G-10: the late-season mower with tight funds is 'wrong buy today' only as a rank_score of 0.14 (vs 1.06 in season). The reasons never say so in words "
      "('season', 'cash pressure', 'funds'); the only mention is the formula text. The decision is PASS either way.",
      "RECOMMENDATION: add a reason line with the applied seasonality and cash-pressure factors and the sentence the owner used."),
+    ("F-59", "FACT", "01 (merchandising)", "G-11: the lint's prose checks are three short regexes, so a view that minimises or denies a MATERIAL defect passes: 'Runs when it wants to. Sold as is, minor cosmetic smoke.', "
+     "'Small amount of exhaust haze, normal for the age', 'Strong runner, just needs a tune-up', 'zero complaints', 'Runs excellent', 'Runs like a top', 'Does not smoke at idle', "
+     "'Pre-purchase inspection passed' (13 phrasings). The patterns also use literal single ASCII spaces: 'like\u00a0new', 'Like  new', 'L1KE NEW', Cyrillic i, zero-width characters and 'NOTHING   WRONG' all pass (7).",
+     "RECOMMENDATION: (1) normalise before matching (NFKC, strip zero-width, collapse whitespace, confusables skeleton); (2) for a material defect REQUIRE its verbatim text in the headline or the first 300 characters of the body, and forbid softeners ('minor', 'cosmetic', 'normal for', 'just needs') near it; a regex deny-list can never be complete."),
+    ("F-60", "FACT", "01 (merchandising)", "G-11: a material defect does not have to be visible in the prose at all (a 3900-character body of fluff with the defect only in the disclosures list passes), and the `label` enum is not linted: "
+     "label 'Ready to Work' or 'Quick Turn' on a mower that smokes under load passes.",
+     "RECOMMENDATION: the prose-visibility rule from F-59, and a label-vs-defect table (a material defect forbids 'Ready to Work')."),
+    ("F-61", "FACT", "01 (merchandising)", "G-11: the lint trusts the inventory. Setting a defect's `severity` to `minor` in the inventory switches off all prose checks ('Runs great and mows fine.' then passes); deleting the defect from the inventory "
+     "makes a view without it lint clean. There is no provenance on severity and no append-only defect register.",
+     "RECOMMENDATION: derive a floor for severity from the defect text (does not run / leaks / smokes / unsafe ⇒ material), require provenance to lower a severity or remove a defect, and hash-chain the defect list."),
+    ("F-62", "FACT", "01 (merchandising)", "G-11: (a) `_VERIFY_CLAIMS` is skipped as soon as ANY fact is verified, so an unrelated verified VIN unlocks 'Inspected and certified. Tested and working.'; "
+     "(b) a view fact may carry a `provenance_id` the inventory fact does not have (the check only runs when the inventory fact has one).",
+     "RECOMMENDATION: a verification word needs a verified fact whose key matches the claim; a view provenance_id must equal the inventory's, never appear from nowhere."),
+    ("F-63", "FACT", "01 (mission, campaign, valuation)", "G-11: NaN and Infinity pass every comparison-based rule. Mission: `available_to_deploy`, `capital_deployed`, a leg's `cash_at_risk` = NaN or inf bypasses the ledger arithmetic and the over-spend check. "
+     "Campaign: `max_price_usd` NaN and an autopilot with NaN limits validate (effectively unlimited). Valuation: NaN/inf ranges validate. (8 cases)",
+     "RECOMMENDATION: reject non-finite numbers in each validator (math.isfinite) or in a shared pre-pass."),
+    ("F-64", "FACT", "01 (mission)", "G-11: the plan's numbers are not derived. A null projection with `remaining_gap: 0` validates (the gap is only checked when `projected_week.likely` is known), and a projection of $9,500 validates "
+     "beside legs whose expected nets add up to $455 (just keep `remaining_gap` consistent with it).",
+     "RECOMMENDATION: projected_week.{low,likely,high} must equal the sum over legs (or be null with a reason), and remaining_gap must be null whenever the projection is."),
+    ("F-65", "FACT", "01 (mission)", "G-11: plan coherence is not checked: DEPLOY with no legs; HOLD or UNKNOWN that still commit cash (only DO_NOT_SPEND is checked); legs needing 7.5 hours with `hours_available` 2; "
+     "an inverted period; two legs sharing a scorecard id; a ledger `as_of` in 2020; DEPLOY while the principal is impaired (8 cases).",
+     "RECOMMENDATION: add these invariants to `plan_errors`; stale legs need a `valid_until` the validator can compare with now."),
+    ("F-66", "FACT", "01 (campaign)", "G-11: `may_run` ignores expiry: a RECOMMEND/ACTIVE campaign whose `stop_conditions.expires_at` or `limits.expires_at` is in the past still runs; `may_run({})` raises KeyError instead of False; "
+     "a BOUNDED_AUTOPILOT whose `limits.expires_at` is already past validates. (Autopilot itself is correctly refused: `may_run` is False and the schema demands limits.)",
+     "RECOMMENDATION: `may_run` validates first and checks expiry and `max_matches`; reject past expiries at validation."),
+    ("F-67", "FACT", "01 (valuation)", "G-11: the ranges are not related to each other or to the evidence: fast_sale above suggested_list, as_is above after_repair, a zero-width 'range' (1234..1234, the fake precise number the schema title forbids), 1..1,000,000, "
+     "confidence 'high' on ONE sold_comp whose ref is 'x', 'medium' on priors only, a home at 'high' on a single record.",
+     "RECOMMENDATION: order checks (fast_sale <= likely_sale <= suggested_list; as_is <= after_repair), a minimum relative width, and a count/provenance requirement per confidence level."),
+    ("F-68", "FACT", "01 (valuation)", "G-11: `not_an_appraisal` is enforced but free text is not: a description 'Certified appraised value $5,000' and an evidence note 'verified and guaranteed by appraiser' validate; "
+     "`unknowns` is not reconciled with the null ranges (a null `as_is` with `unknowns: []` validates).",
+     "RECOMMENDATION: run the merchandising claim lint over description/note and require every null range key in `unknowns`."),
     ("F-16", "FACT", "01", "FIXED by A-10 (verified at 82632c3: a normal install finds its contracts and operator profile). Original finding: Agent 01's package only finds the contracts by a path relative to the source tree. "
      "With a normal (non-editable) `pip install`, 94 of its 109 tests fail or error with `docs/research/contracts "
      "not found; set MBOS_CONTRACTS_DIR`. With that variable set, 108 pass and 1 is skipped "
@@ -347,7 +378,7 @@ def cmd_tests() -> tuple[int, list[tuple[str, str, str, str]]]:
         xml = pathlib.Path(td) / "junit.xml"
         env = dict(os.environ, PYTHONPATH=str(QA_ROOT))
         rc = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", f"--junitxml={xml}",
-                             "tests", "--ignore=tests/card", "--ignore=tests/spec", "--ignore=tests/followup", "--ignore=tests/engine"], cwd=QA_ROOT, env=env).returncode
+                             "tests", "--ignore=tests/card", "--ignore=tests/spec", "--ignore=tests/followup", "--ignore=tests/engine", "--ignore=tests/seams"], cwd=QA_ROOT, env=env).returncode
         rows = []
         for tc in ET.parse(xml).getroot().iter("testcase"):
             outcome = "passed"
@@ -387,6 +418,7 @@ CARD_REQ = OrderedDict([
     ("test_card_authority", "Decision authority: derived recommendation, no authority, read-only"),
     ("test_card_backends", "Real flows on the backend: trail vs ledger, enrichment, poison listings, F-23 regression"),
     ("test_card_adr0012", "ADR-0012 card fields: honest UNKNOWN, class boundaries as data, malformed numbers, no profit floor (G-10)"),
+    ("test_product_seams", "Product seams (ADR-0013): merchandising lint, mission plan, campaign autonomy, valuation honesty (G-11)"),
     ("test_engine_adr0012", "ADR-0012 engine: no min_profit constant, three training examples, cash never assumed, malformed refused (G-10)"),
 ])
 
@@ -398,7 +430,11 @@ def _card_finding(module: str, name: str) -> str:
         return "F-26" if pid in CARD_CRASH_IDS else "F-27"
     if "one_malformed_enrichment_block" in n:
         return "F-27" if "bad-provenance" in n else "F-26"
-    table = [("malformed_number_never_crashes", "F-52"), ("nonsensical_cash_or_time", "F-53"), ("malformed_cash_context", "F-51"),
+    table = [("euphemisms_for_a_material", "F-59"), ("obfuscated_overstatements", "F-59"), ("visible_in_the_headline", "F-60"), ("label_cannot_overstate", "F-60"),
+             ("downgrading_or_deleting", "F-61"), ("defect_cannot_vanish", "F-61"), ("invent_provenance", "F-62"), ("verification_claim_needs", "F-62"),
+             ("non_finite_numbers", "F-63"), ("projection_and_the_gap", "F-64"), ("plan_must_be_coherent", "F-65"), ("expired_or_invalid_campaign", "F-66"),
+             ("autopilot_limits_must_not", "F-66"), ("internally_consistent", "F-67"), ("never_claims_to_be_an_appraisal", "F-68"),
+             ("malformed_number_never_crashes", "F-52"), ("nonsensical_cash_or_time", "F-53"), ("malformed_cash_context", "F-51"),
              ("malformed_class_thresholds", "F-54"), ("impossible_liquidity", "F-55"), ("gross_profit_range_is_ordered", "F-56"),
              ("single_michael_stated_source", "F-57"), ("wrong_buy_today", "F-58"), ("fuzzed_enrichment", "F-26"), ("lane_values_are_validated", "F-28"), ("impossible_lane_values", "F-28"),
              ("unordered_resale", "F-28"), ("date_formats_that_are_not_iso", "F-28"), ("headline_status", "F-31"), ("lane_why_lines", "F-30"), ("why_lines_from_a_lane", "F-29"),
@@ -442,6 +478,8 @@ def cmd_card() -> int:
     r, secs["pure"] = _run_pytest("pure", {}, ["tests/card", "--ignore=tests/card/test_card_backends.py"])
     rows += r
     r, secs["engine"] = _run_pytest("engine (lane C pinned)", {}, ["tests/engine"])
+    rows += r
+    r, secs["seams"] = _run_pytest("product seams", {}, ["tests/seams"])
     rows += r
     base = {"MBOS_QA_IMPL": "mbos_qa.impl_spine:build"}
     r, secs["reference"] = _run_pytest("reference backend", base, ["tests/card/test_card_backends.py"])
@@ -637,7 +675,7 @@ def cmd_spine(release: bool = False) -> int:
 
 
 FINDING_STATUS = {  # verified by the suites at the pins in qa/impl_lane_pins.json (final card re-run)
-    "F-22": "FIXED", "F-23": "FIXED", "F-24": "FIXED", "F-25": "FIXED (R22)", "F-40": "FIXED", "F-41": "FIXED", "F-42": "FIXED (G-09, 01 100d2ed)", "F-43": "FIXED (G-09, 01 100d2ed)", "F-44": "FIXED (G-09, 01 100d2ed)", "F-45": "FIXED (G-09, 01 100d2ed)", "F-46": "FIXED (G-09)", "F-47": "FIXED (G-09)", "F-48": "FIXED (G-09; residual F-50)", "F-49": "FIXED (G-09)", "F-50": "OPEN", "F-51": "OPEN", "F-52": "OPEN", "F-53": "OPEN", "F-54": "OPEN", "F-55": "OPEN", "F-56": "OPEN", "F-57": "OPEN", "F-58": "OPEN",
+    "F-22": "FIXED", "F-23": "FIXED", "F-24": "FIXED", "F-25": "FIXED (R22)", "F-40": "FIXED", "F-41": "FIXED", "F-42": "FIXED (G-09, 01 100d2ed)", "F-43": "FIXED (G-09, 01 100d2ed)", "F-44": "FIXED (G-09, 01 100d2ed)", "F-45": "FIXED (G-09, 01 100d2ed)", "F-46": "FIXED (G-09)", "F-47": "FIXED (G-09)", "F-48": "FIXED (G-09; residual F-50)", "F-49": "FIXED (G-09)", "F-50": "OPEN", "F-51": "OPEN", "F-52": "OPEN", "F-53": "OPEN", "F-54": "OPEN", "F-55": "OPEN", "F-56": "OPEN", "F-57": "OPEN", "F-58": "OPEN", "F-59": "OPEN", "F-60": "OPEN", "F-61": "OPEN", "F-62": "OPEN", "F-63": "OPEN", "F-64": "OPEN", "F-65": "OPEN", "F-66": "OPEN", "F-67": "OPEN", "F-68": "OPEN",
     "F-16": "FIXED", "F-18": "FIXED", "F-19": "FIXED", "F-20": "FIXED", "F-21": "FIXED",
     "F-26": "FIXED", "F-27": "FIXED (an uncheckable risk is dropped, never left invalid)",
     "F-28": "FIXED (ISO strings only; a bare number such as 20261005 is UNKNOWN; valid dates still display)",

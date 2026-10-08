@@ -1,0 +1,35 @@
+{
+  "view_version": "1.0.0",
+  "inventory_id": "inv_01J9Z00000000000000000M0WR",
+  "inventory_hash": "sha256:28a10b5bec7b9b319e85ad682b6aaad3b1c0a73add78393a9ad9e90118b7fea7",
+  "audience": "flipper",
+  "label": "Project / Fix & Flip",
+  "headline": "Fix-and-flip candidate: Brand X 42T riding mower",
+  "body": "Seller asks $400 or best offer. Known fault: engine smokes under load. Hours are unknown.",
+  "facts": [
+    {
+      "fact_id": "f1",
+      "basis": "seller_stated"
+    },
+    {
+      "fact_id": "f2",
+      "basis": "seller_stated"
+    },
+    {
+      "fact_id": "f3",
+      "basis": "UNKNOWN"
+    }
+  ],
+  "disclosures": [
+    {
+      "defect_id": "d1",
+      "text": "Engine smokes blue under load"
+    }
+  ],
+  "terms": {
+    "price_usd": 400,
+    "price_type": "obo",
+    "pickup": "Buyer picks up"
+  },
+  "call_to_action": "Make an offer."
+}

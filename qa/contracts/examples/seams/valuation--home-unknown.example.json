@@ -1,0 +1,22 @@
+{
+  "valuation_version": "1.0.0",
+  "subject": {
+    "kind": "home",
+    "description": "No property record supplied"
+  },
+  "ranges": {
+    "suggested_list": null,
+    "likely_sale": null,
+    "fast_sale": null,
+    "as_is": null,
+    "after_repair": null
+  },
+  "confidence": "UNKNOWN",
+  "evidence": [],
+  "not_an_appraisal": true,
+  "unknowns": [
+    "property record",
+    "comps"
+  ],
+  "reason_unknown": "No home valuator is built; returning UNKNOWN rather than a number."
+}
