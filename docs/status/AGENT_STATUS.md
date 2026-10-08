@@ -4,7 +4,7 @@ Agent: 04
 Role: Postgres / State / Receipts (lane D: durable business state, receipts, provenance; sole ledger owner per ADR-0010)
 Branch: research/agent-04-state
 Worktree: /home/michaelos/business-os-worktrees/agent-04-state
-State: CLOSED (D-29 done; handoff: docs/handoff/LANE_04.md)
+State: CLOSED (D-30 done; handoff: docs/handoff/LANE_04.md)
 Claimed: none
 Done: D-01 @ a0d1fbe
 Done: D-02 @ a0d1fbe
@@ -27,6 +27,7 @@ Done: D-23 @ 39581bd (0019: human-only capital/mission in DB; campaigns; see doc
 Done: D-24 @ aa86cc6 (0020: human actor required on all five owner paths for every session incl. mbos_dbos; see docs/receipts/2026-10-08-d24-human-only-owner-paths.md)
 Done: D-28 @ 4a0148a (PANIC release owner-only + human outcome needs owner channel, migration 0023; docs/receipts/2026-10-08-d28-panic-release-owner-only.md)
 Done: D-29 @ fb6f36c (record_attestation for the owner UI login + agent_write attestation guard, migration 0024; docs/receipts/2026-10-08-d29-record-attestation.md)
+Done: D-30 @ PENDING (mbos.record_human_input for scope_override/quote + guard on those entry prefixes, migration 0025; docs/receipts/2026-10-08-d30-record-human-input.md)
 Done: D-27 @ f6c4e15 (item APPROVED edge needs a YES/MODIFY approval receipt + approver/gateway/owner role, migration 0022; docs/receipts/2026-10-08-d27-item-approved-gate.md)
 Done: D-26a @ 40a7da2 (mbos_dbos = agent_write + gateway only; provision() returns owner_app_url for mbos_operator_ui; see docs/receipts/2026-10-08-d26a-workflow-login-no-approver.md)
 Done: D-25 @ cd52d6e (0021: owner_channel role, held only by mbos_operator_ui, gates the five owner paths; F-81 campaign validation; F-83 no resurrection; see docs/receipts/2026-10-08-d25-owner-channel.md)
