@@ -154,3 +154,13 @@ def test_allowlist_never_contains_network_or_destructive_tools():
     for bad in ("curl", "wget", "ssh", "sudo", "push --force", "reset --hard", "rm "):
         assert bad not in joined, bad
     assert "Bash(git push origin HEAD)" in worker.ALLOWED
+
+
+def test_bypass_permissions_is_never_available_to_workers():
+    r = router.route(prof())
+    for ok in ("acceptEdits", "auto", "dontAsk"):
+        assert worker.command(r, "p", permission_mode=ok)[worker.command(r, "p", permission_mode=ok).index("--permission-mode") + 1] == ok
+    for bad in ("bypassPermissions", "default", "plan", ""):
+        with pytest.raises(ValueError):
+            worker.command(r, "p", permission_mode=bad)
+    assert "--dangerously-skip-permissions" not in worker.command(r, "p")

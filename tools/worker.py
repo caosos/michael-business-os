@@ -89,7 +89,12 @@ Hard rules: everything is DRY-RUN. Do not send messages, contact sellers or cust
 """
 
 
+PERMISSION_MODES = ("acceptEdits", "auto", "dontAsk")   # never bypassPermissions: the deny-list and the classifier must stay in force
+
+
 def command(route: router.Route, prompt: str, *, permission_mode: str = "acceptEdits") -> list[str]:
+    if permission_mode not in PERMISSION_MODES:
+        raise ValueError(f"permission mode {permission_mode!r} not allowed for workers; use one of {PERMISSION_MODES}")
     return ["claude", "-p", prompt, "--output-format", "stream-json", "--verbose", "--model", route.model, "--max-turns", str(route.max_turns),
             "--permission-mode", permission_mode, "--allowedTools", *ALLOWED, "--disallowedTools", *DENIED]
 
@@ -113,7 +118,7 @@ def should_escalate(row: dict) -> bool:
 
 
 def run_one(task_id: str, lane: str, profile: router.TaskProfile, *, worktree: Path, dry: bool, model: Optional[str],
-            escalate: bool = True, allow_dirty: bool = False, runner: Optional[Callable[..., Any]] = None, tpath: Optional[Path] = None,
+            escalate: bool = True, allow_dirty: bool = False, permission_mode: str = "acceptEdits", runner: Optional[Callable[..., Any]] = None, tpath: Optional[Path] = None,
             skip_session_check: bool = False, queue_text: Optional[str] = None, timeout_s: int = 3600) -> dict[str, Any]:
     name, _, branch, _ = LANES[lane]
     if queue_text is None:
@@ -139,7 +144,7 @@ def run_one(task_id: str, lane: str, profile: router.TaskProfile, *, worktree: P
     if allow_dirty:
         prompt += ("\nNOTE: the worktree has UNCOMMITTED changes from a previous attempt at this same task. Review them with `git status` and "
                    "`git diff`, keep what is correct, finish the task, and commit them. Do not discard work you have not read.\n")
-    cmd = command(route, prompt)
+    cmd = command(route, prompt, permission_mode=permission_mode)
     if dry:
         return {"ok": True, "dry": True, "route": route.as_dict(), "cmd": cmd[:2] + ["<prompt>"] + cmd[3:], "prompt": prompt, "task": task}
     run = runner or (lambda c, cwd, env, to: subprocess.run(c, cwd=cwd, env=env, capture_output=True, text=True, timeout=to))
@@ -151,7 +156,7 @@ def run_one(task_id: str, lane: str, profile: router.TaskProfile, *, worktree: P
         head_before = sh(["git", "rev-parse", "--short", "HEAD"], worktree).stdout.strip() or None
         t0, started = time.time(), now()
         try:
-            cp = run(command(cur, prompt), worktree, env, timeout_s)
+            cp = run(command(cur, prompt, permission_mode=permission_mode), worktree, env, timeout_s)
             rc, out = cp.returncode, cp.stdout
         except subprocess.TimeoutExpired:
             rc, out = 124, ""
@@ -186,12 +191,13 @@ def main(argv: Optional[list[str]] = None) -> int:
     ap.add_argument("--worktree")
     ap.add_argument("--dry", action="store_true")
     ap.add_argument("--no-escalate", action="store_true")
+    ap.add_argument("--permission-mode", default="acceptEdits", choices=PERMISSION_MODES)
     ap.add_argument("--allow-dirty", action="store_true", help="continue a previous attempt's uncommitted work (the prompt says so)")
     ap.add_argument("--timeout", type=int, default=3600)
     a = ap.parse_args(argv)
     wt = Path(a.worktree) if a.worktree else WORKTREES / LANES[a.lane][3]
     prof = router.TaskProfile(task_id=a.task_id, lane=a.lane, kind=a.kind, risk=a.risk, cross_lane=a.cross_lane, long_horizon=a.long_horizon)
-    out = run_one(a.task_id, a.lane, prof, worktree=wt, dry=a.dry, model=a.model, escalate=not a.no_escalate, allow_dirty=a.allow_dirty, timeout_s=a.timeout,
+    out = run_one(a.task_id, a.lane, prof, worktree=wt, dry=a.dry, model=a.model, escalate=not a.no_escalate, allow_dirty=a.allow_dirty, permission_mode=a.permission_mode, timeout_s=a.timeout,
                   skip_session_check=bool(a.worktree))
     print(json.dumps({k: v for k, v in out.items() if k != "prompt"}, indent=2, default=str))
     if a.dry and out.get("prompt"):
