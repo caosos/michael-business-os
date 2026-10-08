@@ -1,2 +1,3 @@
 Test-only copy of origin/research/agent-01-coordinator@99e9ec0:docs/research/contracts (read-only; used as MBOS_CONTRACTS_DIR for the installed mbos spine). Do not edit.
 Additionally card.schema.json from origin/research/agent-01-coordinator@d2ef52f (ADR-0011; new file, frozen schemas unchanged).
+campaign.schema.json + examples/campaign from origin/research/agent-01-coordinator@c18cabc (A-26; additive).

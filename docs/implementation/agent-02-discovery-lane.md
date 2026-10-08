@@ -538,3 +538,32 @@ Example config: `config/discovery.example.toml` now has a profile for every sour
 **A-24 follow-up (Agent 01 `9cf6f00`).** The spine now allows `category_tags` and the card renders it: tag, `INFERENCE`, lane provenance and up to 5 quoted evidence items. A tag shows only with provenance and a non-empty quote, and with none supported the card lists "category_tags … absence is not a 'no'" under UNKNOWN. `card.schema.json` is re-vendored. The test now asserts the real card output, and the older "spine without the block" case is a simulated pre-A-24 spine.
 
 **Regression found and fixed (B-15 seller rating).** The hardened card now requires `seller.rating` to be a finite **number**, so my object-valued rating silently degraded to UNKNOWN. It is now a number: eBay's positive-feedback percentage (`unit: "% positive feedback"`, with the feedback count in the note), or the feedback count (`unit: "feedback score (count)"`) when no percentage is exposed. The B-15 test asserts it on the real card.
+
+## 27. Campaign matcher — READY_QUEUE B-20 (ADR-0013 §5, `campaign.schema.json` from A-26)
+
+`src/mbos_discovery/campaigns.py` is read-only. It compares normalized Items with a standing-demand campaign and **recommends**; it contacts nobody, bids on nothing and buys nothing.
+
+**The gate.** `refusal(doc, as_of)` runs before anything else, using Agent 01's `mbos.campaign.errors` and `may_run`. A campaign is refused, with the reason, when it:
+- fails the schema
+- has autonomy above RECOMMEND (ASSISTED_DEAL and BOUNDED_AUTOPILOT)
+- is not ACTIVE (paused, fulfilled, expired or cancelled)
+- has passed its `stop_conditions.expires_at`
+
+A refused campaign evaluates nothing, writes no provenance, and `campaign_profile()` returns None. A runner therefore never builds a search for it, and tests confirm an adapter's `fetch` is never called.
+
+**Matching.**
+- **Hard criteria:** category, keywords, must_have, max price, radius, and the listing being active.
+- **Unknown is not met.** Auction prices, a listing with no price, an unlocatable origin, and an unlocated listing are reported as "cannot confirm" and are not matches.
+- **Soft criteria affect rank only:** `nice_to_have`. The term `title` looks for clean-title evidence, and a lost title or bill of sale only is a malus.
+- **Size spellings** match: 5x8, 5 x 8, 5'x8', 5×8 and 5 by 8.
+- **Cosmetics.** With `cosmetics_matter: false`, cosmetic wording (faded paint, dents, scratches, surface rust …) is ignored: same match, same score, with "Cosmetic wording ignored" shown in the explanation. With `true` it costs rank only.
+- **Distance.** Road miles if RESEARCH set them, else straight-line from the listing's lat/lng, else the geo ring as a bound. Ring 0 means at most 35 miles, so it settles "within 40 miles"; ring 1 (35–100 miles) does not, and counts as unknown rather than guessed.
+- **Untrusted text.** A title or description containing instruction-like text is excluded entirely (the same rule as the category tags), so injected "5x8 utility trailer" wording can't create a match.
+
+**Output** per match: `{campaign_id, item_id, matched, rank, score, criteria{met, missed, unknown, nice_to_have}, distance, price, why, provenance_id, basis: INFERENCE, autonomy}`. `why` is plain English derived from the Item's own fields and ends "Recommendation only: nothing was contacted or bought." Non-matches can be requested with `include_non_matches=True`, each with the exact reason. The ordering is deterministic (score, price, id), `max_matches` caps it, and one provenance record per run (deterministic tool + version over hashed campaign and item inputs) is returned for the caller to persist.
+
+**Verified (FACT).** `tests/test_b20_campaigns.py` (20 tests) on 16 illustrative Items, with the vendored `campaign.schema.json` and example from A-26 @ `c18cabc`:
+- The 5x8 trailer campaign returns the right 6 items; none is above $600, and exactly $600 matches.
+- Wrong size, wrong category, over price, too far, ended, no price and auction items are each excluded with the exact reason.
+- Cosmetics ignored; an ASSISTED_DEAL or BOUNDED_AUTOPILOT campaign is refused with zero requests.
+- The same logic works on Items produced by the real discovery pipeline from the eBay fixtures.

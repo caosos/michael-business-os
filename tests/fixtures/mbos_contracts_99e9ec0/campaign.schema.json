@@ -1,0 +1,208 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://michael-business-os/contracts/campaign.schema.json",
+  "title": "Wanted Campaign v1 \u2014 persistent demand",
+  "description": "ADDITIVE contract (ADR-0013). A campaign is data describing standing demand. It authorises nothing: autonomy above RECOMMEND is refused by policy (E-17) in this release, and every action still goes through an ActionRequest + Approval. null = UNKNOWN/unset. BOUNDED_AUTOPILOT must carry explicit limits (schema-enforced).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "campaign_version",
+    "campaign_id",
+    "owner",
+    "title",
+    "criteria",
+    "autonomy",
+    "stop_conditions",
+    "status"
+  ],
+  "properties": {
+    "campaign_version": {
+      "const": "1.0.0"
+    },
+    "campaign_id": {
+      "type": "string",
+      "pattern": "^cmp_[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "criteria": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "category",
+        "max_price_usd"
+      ],
+      "properties": {
+        "category": {
+          "type": "string",
+          "minLength": 1
+        },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "max_price_usd": {
+          "type": "number",
+          "minimum": 0
+        },
+        "radius_miles": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "origin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "must_have": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "nice_to_have": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cosmetics_matter": {
+          "type": "boolean"
+        }
+      }
+    },
+    "autonomy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "level"
+      ],
+      "properties": {
+        "level": {
+          "enum": [
+            "WATCH_ONLY",
+            "RECOMMEND",
+            "ASSISTED_DEAL",
+            "BOUNDED_AUTOPILOT"
+          ]
+        },
+        "limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "max_total_spend_usd": {
+              "type": "number",
+              "minimum": 0
+            },
+            "max_offer_usd": {
+              "type": "number",
+              "minimum": 0
+            },
+            "expires_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        }
+      }
+    },
+    "stop_conditions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "fulfilled_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "expires_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "max_matches": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "status": {
+      "enum": [
+        "ACTIVE",
+        "PAUSED",
+        "FULFILLED",
+        "EXPIRED",
+        "CANCELLED"
+      ]
+    }
+  },
+  "if": {
+    "properties": {
+      "autonomy": {
+        "properties": {
+          "level": {
+            "const": "BOUNDED_AUTOPILOT"
+          }
+        }
+      }
+    }
+  },
+  "then": {
+    "properties": {
+      "autonomy": {
+        "required": [
+          "level",
+          "limits"
+        ],
+        "properties": {
+          "limits": {
+            "required": [
+              "max_total_spend_usd",
+              "max_offer_usd",
+              "expires_at"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
