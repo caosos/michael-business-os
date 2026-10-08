@@ -40,15 +40,46 @@ class InputError(ValueError):
         self.problems = problems
 
 
+# C-25 / F-90. Michael's attested confirmation of a requested decisive-evidence key is an Item.research entry
+# whose ``field`` is ``attestation:<key>`` (spine ``record_attestation``, human provenance). Only boolean
+# evidence a person can actually confirm is attestable: sold-comp counts, price spread and skill fit are
+# computed from data and are never accepted from a statement.
+ATTEST_PREFIX = "attestation:"
+ATTESTABLE = {
+    "flip": {"condition_verified", "fault_identified", "title_verified", "demand_evidence", "seller_screened",
+             "remote_verification"},
+    "service": {"scope_verified", "customer_screened", "price_agreed_in_writing", "materials_priced",
+                "access_and_schedule_confirmed", "repeat_or_referral", "remote_verification"},
+}
+
+
+def attested_keys(item: dict) -> list[str]:
+    """Sorted evidence keys Michael has attested on this Item (valid for its lane only)."""
+    ok = ATTESTABLE.get(item.get("type"), set())
+    keys = set()
+    for r in item.get("research") or []:
+        f = r.get("field")
+        if isinstance(f, str) and f.startswith(ATTEST_PREFIX) and r.get("basis") != "UNKNOWN" and r.get("provenance_id"):
+            if f[len(ATTEST_PREFIX):] in ok:
+                keys.add(f[len(ATTEST_PREFIX):])
+    return sorted(keys)
+
+
 def build_engine_input(item: dict) -> dict:
     """Project an Item v1 onto the engine input. Pure; does not mutate ``item``."""
     loc = (item.get("normalized") or {}).get("location") or {}
     research_ids = sorted({r["provenance_id"] for r in item.get("research", []) if "provenance_id" in r})
+    econ = copy.deepcopy(item.get("economics"))
+    keys = attested_keys(item)
+    if keys and isinstance(econ, dict):
+        ev = econ.setdefault("estimates_meta", {}).setdefault("evidence", {})
+        for k in keys:
+            ev[k] = True            # attested evidence counts as that evidence; nothing else is invented
     return {
         "type": item.get("type"),
         "category": item.get("category"),
         "road_miles_one_way": loc.get("road_miles_one_way"),
-        "economics": copy.deepcopy(item.get("economics")),
+        "economics": econ,
         "research_ids": research_ids,
     }
 

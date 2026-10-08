@@ -47,6 +47,28 @@ def _period_days(mission: dict) -> int:
     return (e - s).days + 1
 
 
+_WAIT_WORDS = {
+    "seller_screened": "a call with the seller", "condition_verified": "photos or an inspection of the condition",
+    "fault_identified": "a diagnosed fault", "title_verified": "a verified title", "demand_evidence": "evidence of demand",
+    "three_sold_comps": "three sold comparables", "price_distribution": "a spread of comparable prices",
+    "remote_verification": "remote verification", "scope_verified": "scope_verified: photos or a visit to size the job",
+    "customer_screened": "customer_screened: a call with the customer", "materials_priced": "priced materials",
+    "access_and_schedule_confirmed": "confirmed access and schedule", "price_agreed_in_writing": "the price in writing",
+}
+
+
+def _waiting_on(sc: dict) -> list[str]:
+    """What a non-YES leg still needs, taken only from the scorecard (never invented). YES => []."""
+    if sc.get("decision") == "YES":
+        return []
+    out = [_WAIT_WORDS.get(k, k.replace("_", " ")) for k in (sc.get("evidence_search") or {}).get("items", [])]
+    if not out:
+        out = [_WAIT_WORDS.get(k, k.replace("_", " ")) for k, ok in (sc.get("evidence") or {}).items() if not ok]
+    if sc.get("walk_away_price") is not None and not out:
+        out.append(f"a price at or below {_usd(D(sc['walk_away_price']))}")
+    return [w[:200] for w in out] or ["more evidence (not yet named)"]
+
+
 def _candidate(item: dict, period_days: int) -> dict | None:
     scores = item.get("scores") or {}
     sc = scores.get("scorecard")
@@ -68,7 +90,8 @@ def _candidate(item: dict, period_days: int) -> dict | None:
         "class": cls, "lane": sc["lane"], "cash": cash, "hours": D(d["total_hours"]),
         "low": money(low), "likely": money(likely), "high": money(high), "days": days, "p": success,
         "in_week": in_week, "branches": branches, "rank_score": D(rk.get("rank_score", 0)),
-        "rank": rk, "cash_multiple": d.get("cash_multiple"), "expires": (item.get("recommendation") or {}).get("expires_at"),
+        "rank": rk, "title": ((item.get("normalized") or {}).get("title") or "").strip()[:200] or None,
+        "waiting_on": _waiting_on(sc), "cash_multiple": d.get("cash_multiple"), "expires": (item.get("recommendation") or {}).get("expires_at"),
     }
 
 
@@ -94,7 +117,7 @@ def _p_close(dist: dict, target: Decimal | None) -> Decimal | None:
     return sum((p for t, p in dist.items() if t >= target), ZERO)
 
 
-def _leg_out(c: dict) -> dict:
+def _leg_out(c: dict, held: bool = False) -> dict:
     cls = c["class"]
     risk = "no capital at risk" if c["cash"] <= 0 else f"{_usd(c['cash'])} at risk"
     r = c["rank"]
@@ -109,8 +132,11 @@ def _leg_out(c: dict) -> dict:
         parts.append("cash returns after this week: counted as locked, not as this week's income")
     if c["decision"] == "MAYBE":
         parts.append("MAYBE: evidence still outstanding")
+    if held:
+        parts.append(f"HOLD: nothing is committed; {_usd(c['cash'])} would be at risk if this became a YES")
     return {"item_id": c["item_id"], "scorecard_id": c["scorecard_id"], "opportunity_class": cls,
-            "cash_at_risk": float(money(c["cash"])),
+            "title": c["title"] or c["item_id"], "verdict": c["decision"], "waiting_on": c["waiting_on"],
+            "cash_at_risk": 0.0 if held else float(money(c["cash"])),
             "expected_net": {"low": float(c["low"]), "likely": float(c["likely"]), "high": float(c["high"])},
             "days_to_cash": float(c["days"]), "success_probability": float(fine(c["p"])),
             "hours": float(c["hours"]), "why": "; ".join(parts)}
@@ -171,12 +197,18 @@ def plan_week(mission: dict, ledger: dict, scorecards: list[dict], *, planner: d
     spend = sum((c["cash"] for c in legs), ZERO)
     skipped_flips = [c for c in cands if c not in legs and c["lane"] == "flip" and c["cash"] > 0]
 
-    if target is None and spend <= 0:
+    if target is None and spend <= 0 and not any(c["decision"] == "YES" for c in legs):
+        rec = "HOLD" if legs else "UNKNOWN"
+    elif target is None and spend <= 0:
         rec = "UNKNOWN"          # plan_errors: only DEPLOY may commit cash, so a cash-committing plan is DEPLOY
+    elif target is None and not any(c["decision"] == "YES" for c in legs):
+        rec = "HOLD"
     elif target is None:
         rec = "DEPLOY"           # confidence stays UNKNOWN and the target is listed in unknowns
     elif not legs:
         rec = "HOLD"
+    elif not any(c["decision"] == "YES" for c in legs):
+        rec = "HOLD"             # F-94: only a YES leg can be deployed; MAYBE legs wait on evidence
     elif spend <= 0 and skipped_flips:
         rec = "DO_NOT_SPEND"
     elif spend <= 0:
@@ -206,6 +238,9 @@ def plan_week(mission: dict, ledger: dict, scorecards: list[dict], *, planner: d
     else:
         conf = "medium"
 
+    held = rec == "HOLD" and bool(legs)      # the contract: only DEPLOY commits cash, so held legs commit none
+    if held:
+        spend = ZERO
     gap = float(money(target - likely)) if target is not None else None
     exp = _explain(rec, target, legs, skipped_flips, p_close, spend, avail, hours_cap, pc, pdays, likely)
     return {
@@ -213,7 +248,7 @@ def plan_week(mission: dict, ledger: dict, scorecards: list[dict], *, planner: d
         "mission": mission,
         "ledger": ledger,
         "recommendation": rec,
-        "legs": [_leg_out(c) for c in legs],
+        "legs": [_leg_out(c, held) for c in legs],
         "projected_week": {"low": float(money(low)), "likely": float(money(likely)), "high": float(money(high))},
         "remaining_gap": gap,
         "confidence": conf,
@@ -241,7 +276,11 @@ def _explain(rec, target, legs, skipped_flips, p_close, spend, avail, hours_cap,
         out.append("Services only: no flip capital is deployed (only the service materials cash shown on the legs); "
                    f"{len(skipped_flips)} flip(s) added no meaningful probability of closing the gap.")
     if rec == "HOLD":
-        out.append("HOLD: no scored opportunity is worth acting on this week.")
+        if legs:
+            waits = sorted({w for c in legs for w in c["waiting_on"]})
+            out.append("HOLD: no leg is a YES yet, so nothing is deployed. Waiting on: " + "; ".join(waits) + ".")
+        else:
+            out.append("HOLD: no scored opportunity is worth acting on this week.")
     if target is not None and likely < target:
         out.append(f"The plan does not close the gap (short by about {_usd(target - likely)}); it says so rather "
                    f"than stretching into a risky buy.")

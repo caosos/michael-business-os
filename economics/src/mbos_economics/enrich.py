@@ -341,6 +341,9 @@ def _why_lines(item: dict, as_of: str, econ_b: dict, log_b: dict, season_b: dict
         out.append("Towed behind the truck; its tow rating and hitch are not on file.")
     elif mode == "fits_truck":
         out.append("Fits the truck; no trailer needed.")
+    elif lane == "flip" and mode is None:
+        out.append("Whether it fits the truck or needs a trailer is UNKNOWN (not definite for this listing); "
+                   "no transport penalty is assumed.")
     if listing_activity:
         out.extend(_listing_lines(listing_activity, as_of))
     dn = (season_b.get("demand_now") or {}).get("value")

@@ -147,6 +147,22 @@ def load_fixture_comps(path: Path) -> tuple[list[dict], list[dict]]:
 
 # --------------------------------------------------------------------------- the RESEARCH step
 
+def waiting_status(gaps: list[dict], comps_selected: int) -> str:
+    """Truthful one-line status for an item that could not be estimated (F-93). Nothing here is "running":
+    research_step is a pure function the worker calls; between calls the item is waiting on a person or a
+    failed re-check."""
+    codes = {g.get("code") for g in gaps}
+    if "category_unestimable" in codes or "scope_override_required" in codes:
+        need = "; ".join(g["detail"] for g in gaps if g.get("blocking"))
+        return f"Waiting for you: {need}"
+    if not comps_selected:
+        return ("Waiting for a price you saw: no usable sold comparable is on file, so resale is not guessed. "
+                "Add a sold price (manual comp) and it is re-checked.")
+    blocking = [g for g in gaps if g.get("blocking")]
+    detail = "; ".join(g["detail"] for g in blocking) or "no reason recorded"
+    return f"Last re-check failed: {detail}"
+
+
 def research_step(item: dict, comp_records: list[dict], provenance_records: list[dict], as_of: str, *,
                   base_bundle: dict | None = None, cfg: ScoringConfig | None = None,
                   priors: ScoringConfig | None = None, profile: dict | None = None) -> dict:
@@ -170,6 +186,7 @@ def research_step(item: dict, comp_records: list[dict], provenance_records: list
                            "estimate": {k: est[k] for k in ("status", "gaps", "estimate_hash")}}
     if est["status"] != "estimated":
         out.update(proposed_next_state="RESEARCHING", item=copy.deepcopy(item),
+                   status_text=waiting_status(est["gaps"], len(sel["selected"])),
                    provenance_records=used_prov + [est["provenance"]], receipt_drafts=[est["receipt_draft"]])
         return out
     new = apply_estimate(item, est)
