@@ -22,7 +22,7 @@ from typing import Any
 
 from . import __version__ as ENGINE_VERSION
 from .canonical import CanonicalError, canonical_json, content_hash, derived_ulid
-from .config import ScoringConfig
+from .config import ConfigError, ScoringConfig
 from .inputs import InputError, build_engine_input, validate_engine_input
 from .lanes import LaneEconomics, flip_economics, scarcity_flip, service_economics
 from .numeric import D, HUNDRED, ONE, ZERO, clamp, fine, money, score2, to_json_number
@@ -181,13 +181,17 @@ def _deal_class(lane: str, cash: Decimal, days: Decimal, cfg: ScoringConfig) -> 
     return "STANDARD_FLIP"
 
 
-def _ranking(lane, econ, le, confidence, cash, days, cfg):
+def _ranking(lane, econ, le, confidence, cash, days, cfg, deal_class):
     """Risk-adjusted profit x confidence x capital velocity, every component visible.
 
     Returns (ranking, extra-derived-fields). Unknown context contributes factor 1 and is reported null."""
     ctx = econ.get("context") or {}
     personal = D(ctx["personal_use_value"]) if ctx.get("personal_use_value") is not None else None
-    current_cash = D(ctx["current_cash"]) if ctx.get("current_cash") is not None else None
+    try:
+        cc = cfg.get("operator_context.current_cash")    # the ONE source: Michael's profile, via config
+    except ConfigError:                                   # configs before 2026.10.3 (historical replay)
+        cc = None
+    current_cash = D(cc) if cc is not None else None
     season = D(ctx["seasonality_factor"]) if ctx.get("seasonality_factor") is not None else None
     risk_penalty = money(cfg.num("ranking.risk_aversion") * le.p_loss * le.max_loss)
     ra_profit = money(le.ev_net_profit + (personal or ZERO) - risk_penalty)
@@ -210,6 +214,9 @@ def _ranking(lane, econ, le, confidence, cash, days, cfg):
         "confidence": confidence, "capital_velocity": velocity, "seasonality_factor": season,
         "seasonality_factor_applied": season_f, "cash_share_of_current_cash": cash_share,
         "cash_pressure_factor": pressure,
+        "timing_flag": "WRONG_BUY_TODAY" if (
+            deal_class == "CAPITAL_INTENSIVE_FLIP" and season is not None
+            and season <= cfg.num("ranking.wrong_buy_season_factor_max")) else None,
     }
     if lane == "flip":
         sale_p = D(econ["resale"]["sale_prob"])
@@ -439,7 +446,11 @@ def compute(inp: dict, cfg: ScoringConfig) -> dict:
     if alert:
         reasons.append("ALERT: strong and perishable")
 
-    ranking, capital = _ranking(lane, econ, le, confidence, cash_at_risk, days_to_cash, cfg)
+    ranking, capital = _ranking(lane, econ, le, confidence, cash_at_risk, days_to_cash, cfg, deal_class)
+    if ranking["timing_flag"]:
+        reasons.append(f"WRONG BUY TODAY: capital-intensive flip out of season (seasonality factor "
+                       f"{ranking['seasonality_factor']}); {_usd(cash_at_risk)} would be locked for {days_to_cash} d. "
+                       f"Wait for the season or pass")
     reasons.append(f"class {deal_class} (provisional thresholds): cash at risk {_usd(cash_at_risk)}, "
                    f"{days_to_cash} d to cash, cash multiple {cash_multiple}x; "
                    f"rank score {ranking['rank_score']} = {ranking['formula']}")

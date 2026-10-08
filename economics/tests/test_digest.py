@@ -124,7 +124,7 @@ class TestC20CapitalVelocityRanking(unittest.TestCase):
             self.assertIn("risk-adjusted", r["reason"])
             self.assertIn("at risk", r["reason"])
         mower = next(r for r in self.d["rows"] if r["item_id"].endswith("102"))
-        self.assertIn("cash pressure", mower["reason"])                   # funds tight is visible
+        self.assertIn("WRONG BUY TODAY", mower["reason"])                  # out-of-season flag is visible
         self.assertIn("capital intensive flip", mower["reason"])
 
     def test_pre_c19_card_sorts_last_in_bucket_and_says_so(self):

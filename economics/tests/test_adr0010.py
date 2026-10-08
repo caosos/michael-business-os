@@ -78,9 +78,9 @@ class TestGoldensRebaselined(unittest.TestCase):
 
     def test_inputs_hashes_pinned(self):
         pinned = {
-            "drywall_basement": "sha256:ddb08330f2255",
-            "drywall_patch_coordinator": "sha256:6c8dc7284882f",
-            "equipment_repair_zero_turn": "sha256:8edafad19b9da",
+            "drywall_basement": "sha256:42c4bac792ca6",
+            "drywall_patch_coordinator": "sha256:315a179582dc6",
+            "equipment_repair_zero_turn": "sha256:654ed8c7b8003",
         }
         for name, prefix in pinned.items():
             self.assertTrue(run(case(name))["scores"]["inputs_hash"].startswith(prefix), name)
@@ -92,7 +92,7 @@ class TestGoldensRebaselined(unittest.TestCase):
             doc = json.loads(p.read_text())
             self.assertEqual(doc["item"]["scores"]["scorecard"]["engine_version"], __version__, p.name)
             self.assertTrue(replay_item(doc["item"])["match"], p.name)
-        self.assertEqual(CFG.version, "2026.10.2")
+        self.assertEqual(CFG.version, "2026.10.3")
 
 
 if __name__ == "__main__":

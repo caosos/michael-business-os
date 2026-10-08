@@ -135,9 +135,11 @@ def _context(v: _V, econ: dict) -> None:
     if not isinstance(ctx, dict):
         v.problems.append("economics.context must be an object")
         return
-    for k in ("personal_use_value", "current_cash"):
-        if ctx.get(k) is not None:
-            v.num(ctx, k, "economics.context", positive=(k == "current_cash"))
+    if "current_cash" in ctx:
+        v.problems.append("economics.context.current_cash is not accepted: current cash is Michael's profile "
+                          "value (config operator_context.current_cash), the single source")
+    if ctx.get("personal_use_value") is not None:
+        v.num(ctx, "personal_use_value", "economics.context")
     if ctx.get("seasonality_factor") is not None:
         v.prob(ctx, "seasonality_factor", "economics.context")
 

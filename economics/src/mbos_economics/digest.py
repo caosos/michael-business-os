@@ -97,6 +97,8 @@ def _row(item: dict, as_of: str, horizon: Decimal) -> tuple[dict | None, str | N
     ttc = D(d["time_to_cash_days"])
     rk = sc.get("ranking")
     parts = [verdict + (" + ALERT" if sc.get("alert") else "")]
+    if rk and rk.get("timing_flag"):
+        parts.append("WRONG BUY TODAY (out of season)")
     if rk:
         risk = ("no capital at risk" if D(d["cash_at_risk"]) <= 0 else f"{_usd(d['cash_at_risk'])} at risk")
         mult = f" ({d['cash_multiple']}x)" if d.get("cash_multiple") is not None else ""

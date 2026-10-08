@@ -71,7 +71,7 @@
         "salvage_if_unsold": 1900
       },
       "estimates_meta": {
-        "scoring_config_version": "2026.10.2",
+        "scoring_config_version": "2026.10.3",
         "evidence": {
           "condition_verified": true,
           "title_verified": true,
@@ -108,13 +108,13 @@
       }
     },
     "scores": {
-      "scorecard_id": "scr_01M4B3R6G0RD2FTK22YYNP25EK",
-      "inputs_hash": "sha256:de49e7e4d7a4d6b77cbb22fd504a4bf33d92d0da123af6bc5a4105c0ba1fb803",
+      "scorecard_id": "scr_01M4B3R6G094ANH48XEJFCES69",
+      "inputs_hash": "sha256:7f7d08919e80e574b0040b33426314d4faf08dd57ea532eed19f98501c7e8e45",
       "scorecard": {
-        "scoring_config_version": "2026.10.2",
+        "scoring_config_version": "2026.10.3",
         "computed_at": "2026-10-07T12:00:00Z",
-        "engine_version": "0.13.0",
-        "config_hash": "sha256:ab452d208f9a0eae5bad5225ed791429d420dcec50b8f8e62b46a274f3dc50b0",
+        "engine_version": "0.13.1",
+        "config_hash": "sha256:98e8bddc2f8a102356da25a4b9200380460db3b516ae986c22658dffc09a1073",
         "lane": "flip",
         "derived": {
           "deal_class": "CAPITAL_INTENSIVE_FLIP",
@@ -255,7 +255,8 @@
           "seasonality_factor": null,
           "seasonality_factor_applied": 1,
           "cash_share_of_current_cash": null,
-          "cash_pressure_factor": 1
+          "cash_pressure_factor": 1,
+          "timing_flag": null
         },
         "alert": false,
         "alert_checks": {
@@ -308,7 +309,7 @@
       }
     },
     "recommendation": {
-      "recommendation_id": "rec_01M4B3R6G032SAXKM6FJ2SN0A5",
+      "recommendation_id": "rec_01M4B3R6G01DT9SQZ822TXKE2X",
       "verdict": "YES",
       "rationale": [
         "all hard gates pass; composite 75.31; confidence 0.9300; EV profit/hour $90.93 >= $65.00; EV $893.67",
@@ -319,30 +320,30 @@
       ],
       "confidence": 0.93,
       "alert": false,
-      "provenance_id": "prov_01M4B3R6G00BN7W806BDAN4H9N"
+      "provenance_id": "prov_01M4B3R6G07E9FK3HP7N8Q875B"
     },
     "provenance_ids": [
       "prov_01JB0000000000000000000060",
-      "prov_01M4B3R6G00BN7W806BDAN4H9N"
+      "prov_01M4B3R6G07E9FK3HP7N8Q875B"
     ]
   },
   "provenance": {
-    "provenance_id": "prov_01M4B3R6G00BN7W806BDAN4H9N",
+    "provenance_id": "prov_01M4B3R6G07E9FK3HP7N8Q875B",
     "created_at": "2026-10-07T12:00:00Z",
     "actor_type": "system",
     "agent_name": "agent-03-economics",
     "basis": "INFERENCE",
     "tool_name": "mbos_economics.engine",
-    "tool_version": "0.13.0",
-    "config_version": "2026.10.2",
+    "tool_version": "0.13.1",
+    "config_version": "2026.10.3",
     "inputs_used": [
       {
         "ref": "engine_input",
-        "hash": "sha256:de49e7e4d7a4d6b77cbb22fd504a4bf33d92d0da123af6bc5a4105c0ba1fb803"
+        "hash": "sha256:7f7d08919e80e574b0040b33426314d4faf08dd57ea532eed19f98501c7e8e45"
       },
       {
-        "ref": "scoring-config@2026.10.2",
-        "hash": "sha256:ab452d208f9a0eae5bad5225ed791429d420dcec50b8f8e62b46a274f3dc50b0"
+        "ref": "scoring-config@2026.10.3",
+        "hash": "sha256:98e8bddc2f8a102356da25a4b9200380460db3b516ae986c22658dffc09a1073"
       }
     ],
     "derived_from": [
@@ -355,26 +356,26 @@
       "type": "SCORE_RECORDED",
       "item_id": "itm_01JB0000000000000000000006",
       "entity_type": "scorecard",
-      "entity_id": "scr_01M4B3R6G0RD2FTK22YYNP25EK",
+      "entity_id": "scr_01M4B3R6G094ANH48XEJFCES69",
       "tool_name": "mbos_economics.engine",
-      "inputs_hash": "sha256:de49e7e4d7a4d6b77cbb22fd504a4bf33d92d0da123af6bc5a4105c0ba1fb803",
-      "payload_hash": "sha256:61a4b55b387e3b0ffd6cf7bfad18495a8a917365d0cb7ef39a10bedcaff115c2",
-      "idempotency_key": "score:scr_01M4B3R6G0RD2FTK22YYNP25EK",
+      "inputs_hash": "sha256:7f7d08919e80e574b0040b33426314d4faf08dd57ea532eed19f98501c7e8e45",
+      "payload_hash": "sha256:8454899c7c65a33fc5ba30141c2eb9283eddc790167f3024bfb0ffd0753e09ce",
+      "idempotency_key": "score:scr_01M4B3R6G094ANH48XEJFCES69",
       "provenance_ids": [
-        "prov_01M4B3R6G00BN7W806BDAN4H9N"
+        "prov_01M4B3R6G07E9FK3HP7N8Q875B"
       ]
     },
     {
       "type": "RECOMMENDATION_RECORDED",
       "item_id": "itm_01JB0000000000000000000006",
       "entity_type": "recommendation",
-      "entity_id": "rec_01M4B3R6G032SAXKM6FJ2SN0A5",
+      "entity_id": "rec_01M4B3R6G01DT9SQZ822TXKE2X",
       "tool_name": "mbos_economics.engine",
-      "inputs_hash": "sha256:de49e7e4d7a4d6b77cbb22fd504a4bf33d92d0da123af6bc5a4105c0ba1fb803",
-      "payload_hash": "sha256:396d6bb9dfb148d92594e4657940cc4781d88aa2be95cc719a80cf6d175c69ba",
-      "idempotency_key": "recommend:rec_01M4B3R6G032SAXKM6FJ2SN0A5",
+      "inputs_hash": "sha256:7f7d08919e80e574b0040b33426314d4faf08dd57ea532eed19f98501c7e8e45",
+      "payload_hash": "sha256:9e5d4cc10d230960b9371060eeb45998323d85b3fee808ac707c1ac0b0263c57",
+      "idempotency_key": "recommend:rec_01M4B3R6G01DT9SQZ822TXKE2X",
       "provenance_ids": [
-        "prov_01M4B3R6G00BN7W806BDAN4H9N"
+        "prov_01M4B3R6G07E9FK3HP7N8Q875B"
       ]
     }
   ]

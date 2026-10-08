@@ -29,7 +29,7 @@
     },
     "opportunity_kind": "buy_item",
     "provenance_ids": [
-      "prov_01M4B3R6G0B95QZAJJRN9DX7R6",
+      "prov_01M4B3R6G03VZJ02GGWDJCDZ35",
       "prov_01M4BNKG0DF7254BE97CR1MAG4"
     ],
     "schema_version": "1.0.0",
@@ -104,7 +104,7 @@
         "salvage_if_repair_fails": 163.2
       },
       "estimates_meta": {
-        "scoring_config_version": "2026.10.2",
+        "scoring_config_version": "2026.10.3",
         "assumptions": [
           {
             "field": "normalized.location.road_miles_one_way",
@@ -244,12 +244,12 @@
           }
         ],
         "estimate": {
-          "estimate_hash": "sha256:b0abaf9d7a310c729314d765a43ecee0694920ae3150fa13ccbe0f0ebc96f2e5",
-          "estimator_version": "0.13.0",
+          "estimate_hash": "sha256:96b2d157461aa42f10c811244623ccc1a89b345f1632739c31706075e45a0149",
+          "estimator_version": "0.13.1",
           "priors_version": "2026.10.4",
           "priors_hash": "sha256:be7e0b9e903ab4e2e313d71280e94bb2dbbb6c7ade9ff5261717ed856fc7c065",
           "as_of": "2026-10-07T12:00:00Z",
-          "provenance_id": "prov_01M4B3R6G0C2BZ2HFZM7N838GD"
+          "provenance_id": "prov_01M4B3R6G07TES9D987SDTWT71"
         },
         "comps": [
           {
@@ -275,7 +275,7 @@
     },
     "research": [
       {
-        "provenance_id": "prov_01M4B3R6G0C2BZ2HFZM7N838GD",
+        "provenance_id": "prov_01M4B3R6G07TES9D987SDTWT71",
         "finding": "3 sold comps; trimmed median $650.00",
         "field": "resale.target_sell_price",
         "basis": "INFERENCE"
@@ -306,13 +306,13 @@
       }
     ],
     "scores": {
-      "scorecard_id": "scr_01M4B3R6G087Q06FP9XXT1JZ3S",
-      "inputs_hash": "sha256:7a31673b5f97fd773a96f8747f388d3e79f3425e9b17bcb339e39afd51fda5d5",
+      "scorecard_id": "scr_01M4B3R6G05FJ3VY3G880WWPGG",
+      "inputs_hash": "sha256:a72a3b1cbf555efb2942bd74e48341341e27959d267cd2c9c89f38f92265c74d",
       "scorecard": {
-        "scoring_config_version": "2026.10.2",
+        "scoring_config_version": "2026.10.3",
         "computed_at": "2026-10-07T12:00:00Z",
-        "engine_version": "0.13.0",
-        "config_hash": "sha256:ab452d208f9a0eae5bad5225ed791429d420dcec50b8f8e62b46a274f3dc50b0",
+        "engine_version": "0.13.1",
+        "config_hash": "sha256:98e8bddc2f8a102356da25a4b9200380460db3b516ae986c22658dffc09a1073",
         "lane": "flip",
         "derived": {
           "deal_class": "STANDARD_FLIP",
@@ -505,7 +505,8 @@
           "seasonality_factor": null,
           "seasonality_factor_applied": 1,
           "cash_share_of_current_cash": null,
-          "cash_pressure_factor": 1
+          "cash_pressure_factor": 1,
+          "timing_flag": null
         },
         "alert": false,
         "alert_checks": {
@@ -563,7 +564,7 @@
       }
     },
     "recommendation": {
-      "recommendation_id": "rec_01M4B3R6G0RJKPB2WG14G520D2",
+      "recommendation_id": "rec_01M4B3R6G0N5W13H983Q5E9WG0",
       "verdict": "PASS",
       "rationale": [
         "GATE FAIL pph_floor_ok: deterministic profit/hour $15.94 below floor $40.00",
@@ -575,33 +576,33 @@
       ],
       "confidence": 0.4,
       "alert": false,
-      "provenance_id": "prov_01M4B3R6G0B95QZAJJRN9DX7R6"
+      "provenance_id": "prov_01M4B3R6G03VZJ02GGWDJCDZ35"
     }
   },
   "provenance": {
-    "provenance_id": "prov_01M4B3R6G0B95QZAJJRN9DX7R6",
+    "provenance_id": "prov_01M4B3R6G03VZJ02GGWDJCDZ35",
     "created_at": "2026-10-07T12:00:00Z",
     "actor_type": "system",
     "agent_name": "agent-03-economics",
     "basis": "INFERENCE",
     "tool_name": "mbos_economics.engine",
-    "tool_version": "0.13.0",
-    "config_version": "2026.10.2",
+    "tool_version": "0.13.1",
+    "config_version": "2026.10.3",
     "inputs_used": [
       {
         "ref": "engine_input",
-        "hash": "sha256:7a31673b5f97fd773a96f8747f388d3e79f3425e9b17bcb339e39afd51fda5d5"
+        "hash": "sha256:a72a3b1cbf555efb2942bd74e48341341e27959d267cd2c9c89f38f92265c74d"
       },
       {
-        "ref": "scoring-config@2026.10.2",
-        "hash": "sha256:ab452d208f9a0eae5bad5225ed791429d420dcec50b8f8e62b46a274f3dc50b0"
+        "ref": "scoring-config@2026.10.3",
+        "hash": "sha256:98e8bddc2f8a102356da25a4b9200380460db3b516ae986c22658dffc09a1073"
       }
     ],
     "derived_from": [
       "prov_01JF0000000000000000000000",
       "prov_01JF0000000000000000000001",
       "prov_01JF0000000000000000000002",
-      "prov_01M4B3R6G0C2BZ2HFZM7N838GD",
+      "prov_01M4B3R6G07TES9D987SDTWT71",
       "prov_01M4BNKG0DF7254BE97CR1MAG4"
     ],
     "confidence": 0.4
@@ -611,26 +612,26 @@
       "type": "SCORE_RECORDED",
       "item_id": "itm_01M4BNKG0DD37NT1Q8QWCHDF93",
       "entity_type": "scorecard",
-      "entity_id": "scr_01M4B3R6G087Q06FP9XXT1JZ3S",
+      "entity_id": "scr_01M4B3R6G05FJ3VY3G880WWPGG",
       "tool_name": "mbos_economics.engine",
-      "inputs_hash": "sha256:7a31673b5f97fd773a96f8747f388d3e79f3425e9b17bcb339e39afd51fda5d5",
-      "payload_hash": "sha256:a733fdcda52d7e5505e5b9902ea4a7e3708bf0eb426f938fe15e23bf10929427",
-      "idempotency_key": "score:scr_01M4B3R6G087Q06FP9XXT1JZ3S",
+      "inputs_hash": "sha256:a72a3b1cbf555efb2942bd74e48341341e27959d267cd2c9c89f38f92265c74d",
+      "payload_hash": "sha256:2b2ac5adb952c101f6a2ff3b406d026835e8c99cf6d89866cdf4b8556aa7cdf9",
+      "idempotency_key": "score:scr_01M4B3R6G05FJ3VY3G880WWPGG",
       "provenance_ids": [
-        "prov_01M4B3R6G0B95QZAJJRN9DX7R6"
+        "prov_01M4B3R6G03VZJ02GGWDJCDZ35"
       ]
     },
     {
       "type": "RECOMMENDATION_RECORDED",
       "item_id": "itm_01M4BNKG0DD37NT1Q8QWCHDF93",
       "entity_type": "recommendation",
-      "entity_id": "rec_01M4B3R6G0RJKPB2WG14G520D2",
+      "entity_id": "rec_01M4B3R6G0N5W13H983Q5E9WG0",
       "tool_name": "mbos_economics.engine",
-      "inputs_hash": "sha256:7a31673b5f97fd773a96f8747f388d3e79f3425e9b17bcb339e39afd51fda5d5",
-      "payload_hash": "sha256:ed8546f7df25e87eea35e0e635d2bb9d5446ac6666726636ec08f72925ad5291",
-      "idempotency_key": "recommend:rec_01M4B3R6G0RJKPB2WG14G520D2",
+      "inputs_hash": "sha256:a72a3b1cbf555efb2942bd74e48341341e27959d267cd2c9c89f38f92265c74d",
+      "payload_hash": "sha256:069f204f9e1266afe38e5e1d8f742ecc087b6478f24ab027be9c118c98b18560",
+      "idempotency_key": "recommend:rec_01M4B3R6G0N5W13H983Q5E9WG0",
       "provenance_ids": [
-        "prov_01M4B3R6G0B95QZAJJRN9DX7R6"
+        "prov_01M4B3R6G03VZJ02GGWDJCDZ35"
       ]
     }
   ]

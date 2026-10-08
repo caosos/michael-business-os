@@ -70,10 +70,31 @@ class TestMichaelsThreeExamples(unittest.TestCase):
         self.assertEqual(d["deal_class"], "CAPITAL_INTENSIVE_FLIP")
         self.assertGreater(d["net_profit_deterministic"], tv["derived"]["net_profit_deterministic"])  # bigger spread
         self.assertLess(s["ranking"]["capital_velocity"], 0.01)
-        self.assertEqual(s["ranking"]["cash_share_of_current_cash"], 0.7236)   # funds tight
-        self.assertLess(s["ranking"]["cash_pressure_factor"], 1)
+        self.assertIsNone(s["ranking"]["cash_share_of_current_cash"])   # profile cash is UNKNOWN: not assumed
+        self.assertEqual(s["ranking"]["timing_flag"], "WRONG_BUY_TODAY")
+        self.assertTrue(any(r.startswith("WRONG BUY TODAY") for r in s["reasons"]))
+        self.assertFalse(any(r.startswith("WRONG BUY TODAY") for r in tv["reasons"]))
         self.assertLess(s["ranking"]["rank_score"], tv["ranking"]["rank_score"])
         self.assertNotEqual(s["decision"], "YES")
+
+    def test_cash_has_one_source_the_profile_via_config(self):
+        import copy
+        from mbos_economics.config import ScoringConfig
+        prof = json.loads((HERE / "contracts" / "operator_profile.v1.json").read_text())["current_cash_context"]
+        self.assertEqual(CFG.get("operator_context.current_cash"), prof["value"])      # no drift from the profile
+        raw = copy.deepcopy(CFG.raw)
+        raw["operator_context"]["current_cash"]["value"] = Decimal(1200)
+        funded = ScoringConfig(version=CFG.version, raw=raw, hash=CFG.hash)
+        s = score_item(fresh("mower_late_season"), funded, SCORED_AT)["scores"]["scorecard"]
+        self.assertEqual(s["ranking"]["cash_share_of_current_cash"], 0.7236)
+        self.assertLess(s["ranking"]["cash_pressure_factor"], 1)
+        self.assertEqual(s["derived"]["current_cash_context"], {"value": 1200, "known": True})
+
+    def test_item_level_current_cash_is_refused(self):
+        it = fresh("mower_late_season")
+        it["economics"]["context"]["current_cash"] = 1200
+        with self.assertRaises(InputError):
+            validate_engine_input(build_engine_input(it))
 
     def test_recon_is_a_different_class(self):
         s = sc("recon_250_non_running")
@@ -141,7 +162,7 @@ class TestUnknownContext(unittest.TestCase):
         self.assertEqual(s["derived"]["current_cash_context"], {"value": None, "known": False})
 
     def test_invalid_context_is_refused(self):
-        for bad in ({"current_cash": 0}, {"seasonality_factor": 1.5}, {"personal_use_value": "100"}, "x"):
+        for bad in ({"current_cash": 1200},{"seasonality_factor": 1.5}, {"personal_use_value": "100"}, "x"):
             it = fresh("tv_65_inch")
             it["economics"]["context"] = bad
             with self.assertRaises(InputError):

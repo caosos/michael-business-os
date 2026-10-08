@@ -45,7 +45,7 @@ def mower_late_season() -> dict:
                    "comp_price_high": 1500, "sale_prob": 0.8, "expected_dom_days": 90,
                    "active_comparable_listings": 9},
         "downside": {"salvage_if_repair_fails": 250, "salvage_if_unsold": 900},
-        "context": {"seasonality_factor": 0.2, "current_cash": 1200},
+        "context": {"seasonality_factor": 0.2},
         "estimates_meta": _meta({"sold_comps_count": 4, "condition_verified": True, "title_verified": True,
                                  "demand_evidence": True, "seller_screened": True}),
     })
