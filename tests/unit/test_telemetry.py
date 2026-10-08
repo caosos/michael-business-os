@@ -1,0 +1,78 @@
+import json
+
+import pytest
+
+from mbos import telemetry as T
+
+RESULT = {"type": "result", "subtype": "success", "is_error": False, "duration_ms": 12345, "duration_api_ms": 9000, "num_turns": 7,
+          "result": "done", "session_id": "11111111-2222-3333-4444-555555555555", "total_cost_usd": 0.42,
+          "usage": {"input_tokens": 10, "output_tokens": 20, "cache_read_input_tokens": 30, "cache_creation_input_tokens": 40},
+          "modelUsage": {"claude-sonnet-5-5": {"inputTokens": 10}}}
+ROUTE = {"model": "sonnet", "tier": "default", "rule_id": "R-SONNET", "reason": "default"}
+
+
+def row(**kw):
+    base = dict(task_id="X-1", lane="01", route=ROUTE, started_at="2026-10-08T00:00:00Z", ended_at="2026-10-08T00:01:00Z", exit_code=0, result=RESULT)
+    base.update(kw)
+    return T.run_row(**base)
+
+
+def test_parse_result_fields_and_unknowns():
+    p = T.parse_result(RESULT)
+    assert p["num_turns"] == 7 and p["cost_estimate_usd"] == 0.42 and p["models_used"] == ["claude-sonnet-5-5"]
+    q = T.parse_result({})
+    assert all(v is None for v in q.values())            # nothing invented
+    assert T.parse_result([{"type": "system"}, RESULT])["session_id"] == RESULT["session_id"]   # stream-json
+
+
+def test_row_marks_cost_as_estimate_and_success():
+    r = row()
+    assert r["success"] is True and r["cost_is_estimate_not_a_bill"] is True and r["cost_estimate_usd"] == 0.42
+    assert row(exit_code=1)["success"] is False
+    assert row(result={})["success"] is False             # unknown is_error is not success
+
+
+def test_chain_appends_and_detects_tampering(tmp_path):
+    p = tmp_path / "w.jsonl"
+    T.append(row(), p); T.append(row(task_id="X-2"), p)
+    assert T.verify(T.read(p)) == []
+    lines = p.read_text().splitlines()
+    d = json.loads(lines[0]); d["success"] = False
+    p.write_text(json.dumps(d) + "\n" + lines[1] + "\n")
+    assert any("edited" in e for e in T.verify(T.read(p)))
+    p.write_text(lines[1] + "\n")
+    assert any("prev_hash" in e for e in T.verify(T.read(p)))
+
+
+def test_summary_and_manual_quota(tmp_path):
+    p = tmp_path / "w.jsonl"
+    s0 = T.summarize(T.read(p))
+    assert s0["quota"]["week_all_pct"] is None and "UNKNOWN" in s0["quota"]["source"]
+    T.append(row(), p); T.append(row(escalated_from="sonnet", retry=1, exit_code=1), p)
+    T.quota_snapshot(session_pct=75, week_all_pct=38, week_fable_pct=0, resets="in 2h", path=p)
+    s = T.summarize(T.read(p))
+    assert s["runs"] == 2 and s["failed"] == 1 and s["escalations"] == 1 and s["retries"] == 1
+    assert s["model_mix"] == {"sonnet": 2} and s["quota"]["week_all_pct"] == 38 and s["quota"]["source"] == "manual"
+    assert s["chain_errors"] == []
+    with pytest.raises(ValueError):
+        T.quota_snapshot(session_pct=140, path=p)
+
+
+def test_real_stream_json_probe_gives_result_and_quota(tmp_path):
+    from pathlib import Path
+    text = (Path(__file__).resolve().parents[1] / "fixtures" / "claude_stream_json_probe.jsonl").read_text()
+    result, rl = T.parse_stream(text)
+    assert result["type"] == "result" and result["num_turns"] == 1 and "claude-sonnet-5-5" in result["modelUsage"]
+    p = tmp_path / "q.jsonl"
+    snap = T.quota_from_rate_limit(rl, path=p)
+    assert snap["session_pct"] == 83.0 and snap["week_all_pct"] == 39.0 and snap["source"] == "claude_code_rate_limit_event"
+    assert snap["week_fable_pct"] is None                   # no supported source for per-model weekly %
+    assert snap["session_resets_at"].endswith("Z")
+    assert T.summarize(T.read(p))["quota"]["session_pct"] == 83.0
+
+
+def test_no_rate_limit_info_records_nothing(tmp_path):
+    p = tmp_path / "q.jsonl"
+    assert T.quota_from_rate_limit(None, path=p) is None
+    assert T.quota_from_rate_limit({"unifiedWindows": {"five_hour": {"utilization": 7}}}, path=p) is None   # out of 0..1: rejected
+    assert T.read(p) == []

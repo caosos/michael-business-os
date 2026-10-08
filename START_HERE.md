@@ -265,11 +265,16 @@ Use paid services where they clearly win on reliability, speed, or ROI.
 Our data and business logic remain ours.
 External providers should be replaceable.
 
+## How agents run (ADR-0014)
+Only Agent 01 is a persistent session. Lanes 02-07 are **fresh bounded workers**: one task per run, started from repo truth by `tools/worker.py` (`docs/runbooks/AGENT_RUNTIME.md`). If you are a worker: read the files below, do the one task, push, print the final JSON line, exit. Your memory is the repo (`docs/handoff/LANE_NN.md`, AGENT_STATUS, receipts), never a prior chat.
+
 ## Before doing anything
 A new agent must read:
 1. START_HERE.md
 2. docs/product/DEAL_SNIFFER_START_HERE.md (owner product direction; required before touching scoring, discovery, cards/UI, inventory, campaigns, offers, services, valuation, payments, reputation, jurisdiction or merchandising)
-3. docs/AGENT_HANDOFF.md
+3. docs/COORDINATION.md
+3b. docs/handoff/LANE_<your lane>.md (cold-start handoff, if present)
+3c. docs/AGENT_HANDOFF.md
 4. docs/status/ALL_AGENTS.md if present
 5. its own branch docs/status/AGENT_STATUS.md
 6. docs/status/READY_QUEUE.md and ACTIVE_WORK.md

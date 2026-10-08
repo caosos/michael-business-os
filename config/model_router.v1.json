@@ -1,0 +1,23 @@
+{
+  "router_version": "1.0.0",
+  "_status": "Policy as DATA (ADR-0014). Aliases are the ones the installed Claude Code accepts via --model ('sonnet', 'opus', 'fable'; confirm with `claude --help`). Never hard-code full model ids here; the CLI resolves the alias to the latest model of that family. 'haiku' is used only if probe_aliases confirms it.",
+  "aliases": {"default": "sonnet", "planning": "opus", "hardest": "fable", "cheap": "haiku"},
+  "probe_aliases": ["sonnet", "opus", "fable", "haiku"],
+  "defaults": {"max_turns": 40, "max_turns_cap": 120, "timeout_s": 3600},
+  "rules": [
+    {"id": "R-CHEAP", "if": {"kind_in": ["classification", "extraction"], "risk": "low"}, "model": "cheap", "fallback": "default", "why": "repetitive low-risk classification/extraction"},
+    {"id": "R-FABLE", "if": {"long_horizon": true, "kind_in": ["architecture", "migration", "synthesis", "deep_research"]}, "model": "hardest", "why": "hardest long-horizon asynchronous work where Fable materially outperforms; not for routine implementation"},
+    {"id": "R-OPUS-INTEGRATION", "if": {"kind_in": ["plan", "architecture", "integration", "debug", "review"], "any_of": [{"cross_lane": true}, {"risk": "high"}, {"prior_failures_gte": 1}]}, "model": "planning", "why": "complex planning, cross-lane integration, high-risk review or a bug that already beat a cheaper attempt"},
+    {"id": "R-ESCALATE-2", "if": {"prior_failures_gte": 2}, "model": "planning", "escalate_to": "hardest", "why": "two failed attempts: use a stronger model, and allow Fable only if long_horizon"},
+    {"id": "R-SONNET", "if": {}, "model": "default", "why": "default bounded implementation, tests, adapters, docs, routine refactors, bounded research"}
+  ],
+  "escalation": {"after_failures": 1, "ladder": ["default", "planning", "hardest"], "hardest_requires": "long_horizon"},
+  "efficiency": {
+    "fresh_worker_by_default": true,
+    "avoid_context_over_tokens": 150000,
+    "max_parallel_heavy_workers": 2,
+    "resume_only_if": "private working context is genuinely valuable and still compact",
+    "compact_when": "continuing a justified context",
+    "clear_when": "changing to an unrelated task"
+  }
+}

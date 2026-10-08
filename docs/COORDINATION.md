@@ -2,6 +2,12 @@
 
 Michael Business OS agents coordinate through GitHub. Michael is not the messenger. This loop applies to every agent, including newly started or restarted ones.
 
+## Runtime model (ADR-0014; supersedes "every agent is a standing session")
+- **Agent 01 is the only persistent session.** Lanes 02-07 are fresh bounded workers launched per task with `tools/worker.py`; they inherit no chat, only repo truth.
+- A worker does: read -> claim -> implement/test -> receipt -> commit (lane identity) -> push lane branch -> final JSON line -> exit. The loop below still defines claims and DONE; "continue automatically" now means **Agent 01 launches the next worker**, not that a session idles.
+- Closing a session requires a pushed closeout and Agent 01's verification (`docs/handoff/CLOSEOUT_CHECKLIST.md`). Idle detection: `tools/foreman.py`.
+- Model routing (Sonnet default; Opus for hard planning/integration; Fable only for long-horizon hard work) is policy data: `config/model_router.v1.json`.
+
 ## Authoritative files (on `research/agent-01-coordinator`)
 | File | Purpose |
 |---|---|

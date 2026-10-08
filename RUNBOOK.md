@@ -187,3 +187,7 @@ Not yet built (lane E): egress cut, credential lease revocation, LiteLLM budget 
 
 ## Foreman check (idle agents)
 `.venv/bin/python -I tools/foreman.py --wake-text` fetches origin, prints each lane's state/claim/next READY tasks and exits 2 if an agent is idle while READY work exists for it. Read-only; it cannot start sessions. Schedule it on the host (OWNER_ACTIONS D2).
+
+
+## Bounded workers and usage telemetry
+See `docs/runbooks/AGENT_RUNTIME.md` (launcher `tools/worker.py`, router `config/model_router.v1.json`, telemetry `var/telemetry/worker_runs.jsonl`).
