@@ -16,6 +16,8 @@ Need:
 
 This becomes a hard governance limit.
 
+**Current default (2026-10-08):** $500 per flip and $500 total active, i.e. your protected principal. The earlier $1,500 / $3,000 defaults were Agent 03's placeholders and are superseded (C-24, E-23). Earned working capital raises the live limit through the capital ledger.
+
 Can be left conservative by default for the first dry-run build.
 
 ## 2. Time-value target

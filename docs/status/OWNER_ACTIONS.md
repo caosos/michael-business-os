@@ -1,12 +1,12 @@
 # What only Michael (or the operator) can do
 
 Everything else is being built and tested by the agents, DRY-RUN only. This is the single list of things that need a human.
-Last updated: 2026-10-07 by Agent 01. Nothing here blocks the dry-run MVP; each item unlocks something.
+Last updated: 2026-10-08 by Agent 01. Short-form packets with recommendations: `docs/status/OWNER_DECISION_PACKETS.md`. Nothing here blocks the dry-run MVP; each item unlocks something.
 
 ## A. Decisions (details in `docs/status/MICHAEL_DECISIONS.md`)
 | # | Decision | Unlocks | Default until decided |
 |---|---|---|---|
-| 1 | Cash at risk per flip and in total | real thresholds for YES/MAYBE/PASS | $1,500 per flip, $3,000 total (data) |
+| 1 | Cash at risk per flip and in total | real thresholds for YES/MAYBE/PASS | $500 per flip, $500 total = the protected principal (data; the capital ledger lifts the live limit as earned capital grows). The old $1,500/$3,000 defaults are superseded (C-24, E-23) |
 | 2 | Profit per Michael-hour: floor and target | what counts as a good deal | $40 floor; $65 flip / $75 service |
 | 6 | Service quote rate and minimum charge (decide with #2) | service quotes the system drafts | $85/h, $125 minimum |
 | 3 | Higher-risk source access (ToS-adverse, browser automation) | Marketplace / GovDeals / HiBid | official sources only |
