@@ -6,7 +6,7 @@ Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
 State: CLOSED
 Claimed: none
-Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe · F-04 @ 46c961c · F-13 @ 2415936 · F-14 @ c68a33c · F-13 hardening @ 6e47646 · F-15 @ 94130a4 · F-11 @ 20d88ee · F-17 @ 47c0621 · F-16 @ 9c2012d · F-18 @ d56f8d2 · F-19 @ f038a80 · F-21 @ da87d26 · F-20 @ f499a99 · P-06-12 @ 27d2d0f · P-06-17 @ PENDING
+Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe · F-04 @ 46c961c · F-13 @ 2415936 · F-14 @ c68a33c · F-13 hardening @ 6e47646 · F-15 @ 94130a4 · F-11 @ 20d88ee · F-17 @ 47c0621 · F-16 @ 9c2012d · F-18 @ d56f8d2 · F-19 @ f038a80 · F-21 @ da87d26 · F-20 @ f499a99 · P-06-12 @ 27d2d0f · P-06-17 @ 0fdf1dc
 Blocked: none
 Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
 Last updated: 2026-10-07 (P-06-17 done; 167 + 43 tests)
@@ -15,7 +15,7 @@ Last updated: 2026-10-07 (P-06-17 done; 167 + 43 tests)
 CLOSED (ADR-0014 / Aria 1945). Everything pushed; the lane is handed to a fresh bounded worker via `docs/handoff/LANE_06.md`. Nothing is half-applied.
 
 ## Done
-- **P-06-17 @ PENDING:** `/mission` on lane D now calls 03's `mission_feed.plan_from_db` (live Items + `capital_position_document()`), validated with `plan_errors`; the file stays as fallback and the page names its source. 167 + 43 tests. FINDING: Items with scorecards lacking `branches` crash the producer (KeyError) -> fallback; proposed P-06-18 for lane 03. Receipt: `docs/receipts/2026-10-07-p0617-mission-live-plan.md`.
+- **P-06-17 @ 0fdf1dc:** `/mission` on lane D now calls 03's `mission_feed.plan_from_db` (live Items + `capital_position_document()`), validated with `plan_errors`; the file stays as fallback and the page names its source. 167 + 43 tests. FINDING: Items with scorecards lacking `branches` crash the producer (KeyError) -> fallback; proposed P-06-18 for lane 03. Receipt: `docs/receipts/2026-10-07-p0617-mission-live-plan.md`.
 - **F-20 @ `f499a99`:** `/intake` conversational-intake draft flow on `mbos.intake`; asks only missing questions (safety first), answers carry basis, nothing verified, never published. 166 + 31 tests. Receipt: `docs/receipts/2026-10-07-f20-intake-front-door.md`.
 - **F-19 @ `f038a80`:** `/preview` renders four audience views of an inventory object (classified, flipper, mechanic, parts buyer) with deterministic templates (no LLM). Each is a lint-gated DRY-RUN draft: defects are verbatim, terms copied, bases and provenance carried, unknowns said. A view that fails `mbos.merchandising.lint` is refused, never softened, and "check my wording" refuses a dropped disclosure, overclaims and false verification. 154 + 31 tests. Receipt: `docs/receipts/2026-10-07-f19-audience-previews.md`.
 - **F-18 @ d56f8d2:** the Weekly Mission page (`/mission`) from a validated mission plan file. A plan failing `mbos.mission.plan_errors` is not rendered; a null target or hours shows UNKNOWN and the gap stays UNKNOWN; DO_NOT_SPEND is a red banner first; the five-field capital position; every leg links to its card (unverified ones flagged); plan order, no profit sorting. Read-only. 145 + 31 tests. Receipt: `docs/receipts/2026-10-07-f18-weekly-mission.md`.
