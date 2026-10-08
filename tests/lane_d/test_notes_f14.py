@@ -143,3 +143,108 @@ def test_note_shows_on_the_next_cards_of_that_model_as_michaels_recommendation(r
     body = req(ui_d, "GET", f"/item/{nid}")[2]
     assert "ZX9 hitch weld cracks" in body and f"href='/provenance/{mine[0]['provenance_id']}'" in body
     assert "No sourced model knowledge is on this card" in body                    # his note is not a sourced recall
+
+
+# ---------------------------------------------------------------- F-16: edit and retract on /notes
+def head(ui, text_start):
+    return next(n for n in ui.store.operator_notes(include_retracted=True) if n["statement"].startswith(text_start))
+
+
+def change(ui, action, note_id, **form):
+    return req(ui, "POST", f"/notes/{note_id}/{action}", {"csrf": ui.csrf, "pin": PIN, **form})
+
+
+EDIT = {"category": "trailer", "makes": "Big Tex", "models": "10PI", "kind": "known_weakness",
+        "statement": "Torsion axle lower spring seats corrode through by year five on this model; budget for new seats.",
+        "basis_of_knowledge": "own experience on this model", "basis_detail": "owned two"}
+
+
+def test_edit_is_a_new_version_the_card_shows_the_head_and_history_is_kept(rtd, discover_d, ui_d):
+    item_id, _ = ready(ui_d, discover_d)
+    add(ui_d, item_id, statement="Front hitch coupler latch wears out quickly on the 14ET and slips under load.")
+    old = head(ui_d, "Front hitch coupler latch wears")
+    body = req(ui_d, "GET", "/notes")[2]
+    assert f"/notes/{old['note_id']}/edit" in body and f"/notes/{old['note_id']}/retract" in body and "Save as a new version" in body
+    s, loc, _ = change(ui_d, "edit", old["note_id"], **{**EDIT, "statement": "Front hitch coupler latch wears out in about two years on the 14ET and slips under load."})
+    assert s == 303 and loc.startswith("/notes?msg=Note edited: new version mn_"), loc
+    new = head(ui_d, "Front hitch coupler latch wears out in about two years")
+    assert new["note_id"] != old["note_id"] and new["entered_by"] == "michael"
+    ((sup,),) = q(rtd, "SELECT supersedes FROM mbos.operator_notes WHERE note_id = :n", n=new["note_id"])
+    assert sup == old["note_id"]                                                  # a new row linked to the old one; nothing overwritten
+    assert q(rtd, "SELECT count(*) FROM mbos.operator_notes WHERE note_id = :n", n=old["note_id"])[0][0] == 1
+    live = [n["statement"] for n in ui_d.store.operator_notes() if "coupler latch" in n["statement"]]
+    assert live == [new["statement"]]                                           # one live version: the head
+    assert ui_d.store.provenance(new["provenance_id"])["human_actor"] == "michael"
+    s, _, body = change(ui_d, "edit", old["note_id"], **EDIT)                   # the old version is no longer editable
+    assert s == 200 and "not the current version" in body
+
+
+def test_retract_drops_the_risk_from_the_next_card_and_keeps_the_history(rtd, discover_d, ui_d, monkeypatch):
+    from mbos.adapters.economics import EconomicsEngineScorer, EconomicsEnricher
+    from mbos.card import load_profile
+    from mbos.runtime import components
+    from operator_ui import ux
+    from mbos.clock import now_iso
+
+    comps = components()
+    monkeypatch.setattr(comps, "scorer", EconomicsEngineScorer())
+    monkeypatch.setattr(comps, "enrichers", [EconomicsEnricher(load_profile())])
+    bundle = ux.parse_note({**NOTE, "makes": "Zeta", "models": "QX1",
+                            "statement": "The QX1 rear brake drum cracks near the studs when overloaded; inspect before towing heavy."},
+                           "michael", now_iso())
+    ui_d.store.record_operator_note(bundle)
+    n1 = discover_d("FIX-TRAILER-1", titles={"FIX-TRAILER-1": "2016 Zeta QX1 utility trailer, needs lights"})["FIX-TRAILER-1"]
+    wait(lambda: ui_d.store.item(n1)["state"] in ("AWAITING_APPROVAL", "RESEARCHING", "ARCHIVED"))
+    assert any("QX1 rear brake drum" in r["risk"] for r in ui_d.store.opportunity_card(n1)["card"]["value_add_plan"]["model_specific_risks"])
+    note = head(ui_d, "The QX1 rear brake drum")
+    s, _, body = change(ui_d, "retract", note["note_id"], reason="")
+    assert s == 200 and "a retraction needs a reason" in body
+    s, loc, _ = change(ui_d, "retract", note["note_id"], reason="sold the one I based this on; not sure it generalises")
+    assert s == 303 and loc.startswith("/notes?msg=Note retracted"), loc
+    assert not [n for n in ui_d.store.operator_notes() if "QX1 rear brake drum" in n["statement"]]       # gone from the live document
+    retracted = [n for n in ui_d.store.operator_notes(include_retracted=True) if "QX1 rear brake drum" in n["statement"]]
+    assert retracted and retracted[0]["retracted"] is True                                                 # history keeps it
+    page = req(ui_d, "GET", "/notes")[2]
+    assert "RETRACTED" in page and "retracted (history kept)" in page
+    n2 = discover_d("FIX-TRAILER-1", titles={"FIX-TRAILER-1": "2017 Zeta QX1 utility trailer, tires new"})["FIX-TRAILER-1"]
+    wait(lambda: ui_d.store.item(n2)["state"] in ("AWAITING_APPROVAL", "RESEARCHING", "ARCHIVED"))
+    assert not any("QX1 rear brake drum" in r["risk"] for r in ui_d.store.opportunity_card(n2)["card"]["value_add_plan"]["model_specific_risks"])
+    _, _, body = change(ui_d, "edit", retracted[0]["note_id"], **EDIT)
+    assert "that note is retracted" in body                                                               # a retracted note cannot be edited
+
+
+def test_edit_and_retract_refusals_show_every_reason_and_guards_hold(rtd, discover_d, ui_d):
+    item_id, _ = ready(ui_d, discover_d)
+    add(ui_d, item_id, statement="Axle stub shafts on this model bend if loaded past the rated limit regularly.")
+    n = head(ui_d, "Axle stub shafts")
+    before = len(ui_d.store.operator_notes(include_retracted=True))
+    s, _, body = change(ui_d, "edit", n["note_id"], **{**EDIT, "statement": "Check the compression and spark first.", "models": "", "basis": "FACT"})
+    assert s == 200 and "Not saved." in body
+    for reason in ("elementary advice", "BOTH makes and models", "never FACT"):
+        assert reason in body, reason
+    s, _, body = change(ui_d, "retract", n["note_id"], reason="")
+    assert s == 200 and "a retraction needs a reason" in body
+    assert "PIN is required" in change(ui_d, "retract", n["note_id"], reason="x", pin="0000")[2]
+    assert "invalid form token" in req(ui_d, "POST", f"/notes/{n['note_id']}/retract", {"pin": PIN, "reason": "x"})[2]
+    assert req(ui_d, "POST", f"/notes/{n['note_id']}/edit", {"csrf": ui_d.csrf, "pin": PIN, **EDIT}, host="evil.example")[0] == 403
+    assert "not the current version" in change(ui_d, "retract", "mn_01JA0000000000000000009999", reason="x")[2]
+    ui_d.operator_pin = None
+    try:
+        assert "fail-closed" in change(ui_d, "retract", n["note_id"], reason="x")[2]
+    finally:
+        ui_d.operator_pin = PIN
+    s, loc, _ = change(ui_d, "edit", n["note_id"], **{**EDIT, "statement": "Axle stub shafts bend if loaded past the rating regularly on this model.", "author": "mallory", "entered_by": "mallory"})
+    assert s == 303
+    assert all(x["entered_by"] == "michael" for x in ui_d.store.operator_notes(include_retracted=True))
+    assert len(ui_d.store.operator_notes(include_retracted=True)) == before     # an edit replaces the head in the folded view
+
+
+def test_retract_is_reachable_only_from_the_ui_human_channel():
+    import pathlib
+
+    import mbos
+
+    root = pathlib.Path(mbos.__file__).parent
+    assert [p.name for p in root.rglob("*.py") if p.name in ("workflows.py", "runtime.py") and "retract_operator_note" in p.read_text()] == []
+    ui = pathlib.Path(__file__).resolve().parents[2] / "operator_ui"
+    assert sorted(p.name for p in ui.glob("*.py") if "retract_operator_note(" in p.read_text()) == ["backend.py", "server.py"]

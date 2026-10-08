@@ -262,20 +262,50 @@ def _pva(o):
     return ", ".join(f"{p['field']}: {_num(p.get('predicted'))} → {_num(p.get('actual'))}" for p in o.get("predicted_vs_actual") or [])
 
 
-def render_notes(notes, lane):
+def render_notes(notes, lane, csrf="", reasons=None, flash_note=None):
+    """/notes: Michael's own model knowledge. Edit = a new version (supersedes); Retract = a new retraction row. Both need the
+    PIN, use the server-set author, and show every refusal reason. History is never edited."""
     if lane != "lane_d":
         return "<div class='card'><h2>My notes</h2><p class='bad'>Notes need the lane D store (<code>MBOS_STATE_BACKEND=lane_d</code>).</p></div>"
+    errs = ("<div class='flash err'><b>Not saved.</b><ul>" + "".join(f"<li>{e(r)}</li>" for r in (reasons or [])) + "</ul></div>") if reasons else ""
+    opts = lambda xs, sel: "".join(f"<option value='{e(x)}'{' selected' if x == sel else ''}>{e(x)}</option>" for x in xs)  # noqa: E731
+    cats, kinds = sorted(NOTE_CATEGORIES), sorted(NOTE_KINDS)
+
+    def actions(n):
+        if n.get("retracted"):
+            return "<span class='small mut'>retracted (history kept)</span>"
+        g = (n.get("match") or [{}])[0]
+        choice, detail = ux.split_basis(n.get("basis_of_knowledge") or "")
+        nid = e(n["note_id"])
+        pin = '<label>PIN<input name="pin" type="password" autocomplete="off" required></label>'
+        return (f"<details><summary>Edit</summary><form method='post' action='/notes/{nid}/edit'><input type='hidden' name='csrf' value='{e(csrf)}'>"
+                f"<label>Category<select name='category'>{opts(cats, n.get('category'))}</select></label>"
+                f"<label>Make(s)<input name='makes' value='{e(', '.join(g.get('makes', [])))}' required></label>"
+                f"<label>Model(s)<input name='models' value='{e(', '.join(g.get('models', [])))}' required></label>"
+                f"<label>Kind<select name='kind'>{opts(kinds, n.get('kind'))}</select></label>"
+                f"<label>Statement<textarea name='statement' maxlength='600' required>{e(n.get('statement'))}</textarea></label>"
+                f"<label>Plan hint<input name='plan_hint' value='{e(n.get('plan_hint'))}' maxlength='600'></label>"
+                f"<label>How do you know?<select name='basis_of_knowledge'>{opts(ux.NOTE_BASIS_CHOICES, choice)}</select></label>"
+                f"<label>Detail<input name='basis_detail' value='{e(detail)}' maxlength='200'></label>"
+                f"<label>Reference (https)<input name='reference_url' value='{e(n.get('reference_url'))}'></label>{pin}"
+                "<button class='b-HOLD' style='width:auto'>Save as a new version</button></form></details>"
+                f"<details><summary>Retract</summary><form method='post' action='/notes/{nid}/retract'><input type='hidden' name='csrf' value='{e(csrf)}'>"
+                f"<label>Reason (required)<input name='reason' maxlength='300' required></label>{pin}"
+                "<button class='b-NO' style='width:auto'>Retract this note</button></form></details>")
+
     rows = "".join(
         f"<tr><td>{e(n.get('entered_at'))}</td><td>{e(n.get('category'))}</td>"
         f"<td>{e(', '.join(g.get('makes', [])))} / {e(', '.join(g.get('models', [])))}</td><td>{e(n.get('kind'))}</td>"
         f"<td>{'<b class=bad>RETRACTED</b> ' if n.get('retracted') else ''}{ec(n.get('statement'), 700)}</td>"
-        f"<td>{e(n.get('basis_of_knowledge'))}</td><td>{e(n.get('entered_by'))}</td>"
-        f"<td><a href='/provenance/{e(n.get('provenance_id'))}'><code>{e(n.get('provenance_id'))}</code></a></td></tr>"
-        for n in (g_ for g_ in notes) for g in [((n.get('match') or [{}])[0])])
-    return ("<div class='card'><h2>My notes (your own model knowledge)</h2><p class='small mut'>Append-only and receipted. They show on cards as "
-            "<b>RECOMMENDATION</b>, behind sourced recalls. Edits are new notes; retraction is not available from this page yet.</p>"
-            "<table><tr><th>Entered</th><th>Category</th><th>Make / model</th><th>Kind</th><th>Statement</th><th>How I know</th>"
-            f"<th>By</th><th>Provenance</th></tr>{rows or '<tr><td colspan=8 class=mut>No notes yet.</td></tr>'}</table></div>")
+        f"<td>{ec(n.get('basis_of_knowledge'), 300)}</td><td>{e(n.get('entered_by'))}</td>"
+        f"<td><a href='/provenance/{e(n.get('provenance_id'))}'><code>{e(n.get('provenance_id'))}</code></a>"
+        f"{'<br><span class=small>revisions: ' + e(n.get('revisions')) + '</span>' if n.get('revisions') else ''}</td>"
+        f"<td>{actions(n)}</td></tr>"
+        for n in notes for g in [((n.get('match') or [{}])[0])])
+    return (f"<div class='card'><h2>My notes (your own model knowledge)</h2>{errs}<p class='small mut'>Append-only and receipted. They show on cards as "
+            "<b>RECOMMENDATION</b>, behind sourced recalls. An edit saves a <b>new version</b>; a retraction is a new row. Nothing is overwritten.</p>"
+            "<div style='overflow-x:auto'><table><tr><th>Entered</th><th>Category</th><th>Make / model</th><th>Kind</th><th>Statement</th><th>How I know</th>"
+            f"<th>By</th><th>Provenance</th><th>Change</th></tr>{rows or '<tr><td colspan=9 class=mut>No notes yet.</td></tr>'}</table></div></div>")
 
 
 def render_outcome_card_section(app, item_id, open_areq, areqs):
@@ -507,6 +537,40 @@ class App:
         kind = {"followup": "Follow-up questions", "offer": "Offer", "quote": "Quote"}[f.get("kind")]
         return f"{kind} drafted ({out['action_request_id']}). It is waiting for your YES below; nothing has been sent."
 
+    def _note_gate(self, f):
+        """CSRF + step-up PIN for any note change; the author is ALWAYS the server-set operator."""
+        self._check_csrf(f)
+        if not self.operator_pin:
+            raise InputError("step-up not configured (MBOS_OPERATOR_PIN unset); note changes are refused (fail-closed)")
+        if not f.get("pin") or not secrets.compare_digest(str(f["pin"]), str(self.operator_pin)):
+            raise InputError("a PIN is required to change a note (it identifies you as the author)")
+
+    def _head(self, note_id):
+        n = next((x for x in self.store.operator_notes(include_retracted=True) if x["note_id"] == note_id), None)
+        if n is None:
+            raise InputError("that note is not the current version (it was edited or retracted); reload the page")
+        if n.get("retracted"):
+            raise InputError("that note is retracted; add a new note instead")
+        return n
+
+    def edit_note(self, note_id, f):
+        """F-16: an edit is a NEW note with `supersedes` = the current head. Nothing is overwritten."""
+        self._note_gate(f)
+        self._head(note_id)
+        bundle = ux.parse_note(f, self.author, iso(utcnow()), supersedes=note_id)
+        new_id = self.store.record_operator_note(bundle)
+        return f"Note edited: new version {new_id} replaces {note_id}. The old version stays in the history."
+
+    def retract_note(self, note_id, f):
+        """F-16: retract the head of the chain via spine_d.retract_operator_note; a reason is required."""
+        self._note_gate(f)
+        self._head(note_id)
+        reason = (f.get("reason") or "").strip()
+        if not reason:
+            raise InputError("a retraction needs a reason")
+        rid = self.store.retract_operator_note(note_id, self.author, iso(utcnow()), reason[:300])
+        return f"Note retracted ({rid}). It no longer shows on cards; the history keeps it."
+
     def wake(self, areq_id, f):
         self._check_csrf(f)
         areq = self.store.action_request(areq_id)
@@ -562,7 +626,7 @@ def make_handler(app):
 
                 return self._send(200, page("Morning digest", render_digest(digest_view.build(app.store, iso(now))), app.state()))
             if u.path == "/notes":
-                return self._send(200, page("My notes", render_notes(app.store.operator_notes(), app.store.lane), app.state(), flash or err, bool(err)))
+                return self._notes_page(flash or err, bool(err))
             if u.path.startswith("/item/"):
                 return self._item_page(u.path.split("/")[2], now, flash or err, bool(err))
             if u.path == "/summary":
@@ -596,6 +660,25 @@ def make_handler(app):
                     return self._send(404, "{}", "application/json")
                 return self._send(200, json.dumps({k: v for k, v in c.items() if k != "hold_presets"}, default=str), "application/json")
             return self._send(404, page("Not found", "<p>Not found.</p>", app.state()))
+
+        def _notes_page(self, flash=None, is_err=False, reasons=None):
+            notes = app.store.operator_notes(include_retracted=True)
+            return self._send(200, page("My notes", render_notes(notes, app.store.lane, app.csrf, reasons), app.state(), flash, is_err))
+
+        def _post_note_change(self, note_id, action):
+            """F-16: edit (new version) or retract. CSRF + PIN; the author is server-set (R14)."""
+            n = min(int(self.headers.get("Content-Length") or 0), 65536)
+            f = {k: v[0] for k, v in parse_qs(self.rfile.read(n).decode("utf-8"), keep_blank_values=True).items()}
+            try:
+                msg = app.edit_note(note_id, f) if action == "edit" else app.retract_note(note_id, f)
+            except (ux.NoteInputError, NoteRefused) as ex:
+                return self._notes_page(reasons=ex.reasons)
+            except InputError as ex:
+                return self._notes_page(reasons=[str(ex)])
+            self.send_response(303)
+            self.send_header("Location", f"/notes?msg={quote(msg)}")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
 
         def _post_followup(self, item_id):
             n = min(int(self.headers.get("Content-Length") or 0), 65536)
@@ -658,6 +741,8 @@ def make_handler(app):
                 return
             u = urlparse(self.path)
             parts = u.path.strip("/").split("/")
+            if len(parts) == 3 and parts[0] == "notes" and parts[2] in ("edit", "retract"):
+                return self._post_note_change(parts[1], parts[2])
             if len(parts) == 3 and parts[0] == "item" and parts[2] == "note":
                 return self._post_note(parts[1])
             if len(parts) == 3 and parts[0] == "item" and parts[2] == "followup":

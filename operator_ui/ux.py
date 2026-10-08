@@ -118,7 +118,7 @@ def _split(s: str) -> list[str]:
     return [x.strip() for x in (s or "").replace("\n", ",").split(",") if x.strip()]
 
 
-def parse_note(form: dict, author: str, entered_at: str) -> dict:
+def parse_note(form: dict, author: str, entered_at: str, supersedes: str | None = None) -> dict:
     """Form → the bundle `spine_d.record_operator_note` takes, via Agent 03's own `new_manual_note` (the single source
     of the rules). `author` is the AUTHENTICATED operator set by the server: there is no author field on the form, and
     a posted one is ignored. All problems are reported together, each with its reason."""
@@ -138,13 +138,23 @@ def parse_note(form: dict, author: str, entered_at: str) -> dict:
             category=(form.get("category") or "").strip(), makes=_split(form.get("makes")), models=_split(form.get("models")),
             kind=(form.get("kind") or "").strip(), statement=(form.get("statement") or ""), entered_by=author,
             entered_at=entered_at, basis_of_knowledge=basis_of_knowledge, plan_hint=(form.get("plan_hint") or "").strip() or None,
-            reference_url=(form.get("reference_url") or "").strip() or None)
+            reference_url=(form.get("reference_url") or "").strip() or None, supersedes=supersedes)
     except NoteError as ex:
         problems += list(ex.problems)
         bundle = None
     if problems:
         raise NoteInputError(problems)
     return bundle
+
+
+def split_basis(stored: str) -> tuple[str, str]:
+    """Stored basis_of_knowledge "<choice>: <detail>" → (choice, detail), for pre-filling an edit form."""
+    for c in NOTE_BASIS_CHOICES:
+        if stored == c:
+            return c, ""
+        if stored.startswith(c + ": "):
+            return c, stored[len(c) + 2:]
+    return "", stored
 
 
 class NoteInputError(InputError):

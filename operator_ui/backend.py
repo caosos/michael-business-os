@@ -226,12 +226,26 @@ class SpineBackend:
             raise FollowupRefused([str(ex)]) from None
 
     # ---- F-14: Michael's own model knowledge (operator notes). Lane D only; HUMAN CHANNEL ONLY (R14) -----------
-    def operator_notes(self) -> list[dict]:
-        """Current head of every note chain (retractions included), from lane D's folded document."""
+    def operator_notes(self, include_retracted: bool = False) -> list[dict]:
+        """Current head of every note chain, from lane D's folded document (read-only SQL function)."""
         if self.lane != "lane_d":
             return []
         with self.engine.connect() as c:
+            if include_retracted:
+                return c.execute(sa.text("SELECT mbos.operator_notes_document(true)")).scalar_one()["notes"]
             return self._spine.operator_notes_document(c)["notes"]
+
+    def retract_operator_note(self, note_id: str, entered_by: str, entered_at: str, reason: str) -> str:
+        """Retract the head of a note chain (a new row; history is never edited). HUMAN CHANNEL ONLY (R14): the single
+        UI caller is `App.retract_note` (CSRF + PIN, server-set author). Database refusals come back as NoteRefused."""
+        if self.lane != "lane_d":
+            raise NoteRefused(["operator notes need the lane D store (MBOS_STATE_BACKEND=lane_d)"])
+        try:
+            with self.engine.begin() as c:
+                return self._spine.retract_operator_note(c, note_id, entered_by, entered_at, reason)
+        except sa.exc.DBAPIError as ex:
+            msg = str(getattr(ex, "orig", ex)).strip().splitlines()[0]
+            raise NoteRefused([f"the store refused the retraction: {msg}"]) from None
 
     def record_operator_note(self, bundle: dict) -> str:
         """The ONLY caller of spine_d.record_operator_note in the system besides the CLI (`mbos_dbos` holds the approver
