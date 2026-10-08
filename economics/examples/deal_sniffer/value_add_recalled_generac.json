@@ -6,14 +6,14 @@
    {
     "basis": "FACT",
     "kind": "failure_mode",
-    "provenance_id": "prov_01M4BRBC80HG1QKF39087E17DE",
+    "provenance_id": "prov_01M4BRBC804686XE9T8PSXB0ZK",
     "risk": "Generac portable generator recall (Apr 16, 2026): when first filled with gasoline, fuel can leak from the carburetor, a fire and burn hazard (114 leak reports, no injuries). Listed models are GP3600, GP4000DF, GP6500, GP6500E, GP6500EDF, GP6700EDF, GP8000E, GP9200E and GP9500ETF, sold May 2025 to Feb 2026. The remedy is a free repair at a dealer. The GP7500E is not on the list. Because the units were sold May 2025 to Feb 2026, a used example is recent enough that the free repair may still be open; whether it is open for this unit is UNKNOWN. (Model taken from the listing text; not verified against the unit.)",
     "source": "NY DHSES (CPSC recall notice): Generac Power Systems Recalls Portable Generators Due to Risk of Serious Injury or Death from Burn and Fire Hazards, recall date Apr 16, 2026 <https://www.dhses.ny.gov/node/32841> (retrieved 2026-10-07)"
    }
   ],
   "plan": {
    "basis": "INFERENCE",
-   "provenance_id": "prov_01M4BRBC80HG1QKF39087E17DE",
+   "provenance_id": "prov_01M4BRBC804686XE9T8PSXB0ZK",
    "value": "Budget about $100 in parts and $10 in materials plus about 3 h of your time (a category estimate; the fault is not diagnosed yet). Even with no parts spend this fails your $40/h floor. Sell target is $850, the median of 3 sold comparables. A recall-eligible unit gets its carburetor repaired free at a Generac dealer, which removes carburetor parts from your budget."
   }
  },
@@ -33,7 +33,7 @@
   ],
   "inputs_used": [
    {
-    "hash": "sha256:ef005bd1e5a23f19a82297438b1725bfeecd815b9efe6db2c3f004b6be08e290",
+    "hash": "sha256:18ee475a156b32e66436ab3e82bb502f1b1ec767feb660510658b597c01fbd4b",
     "ref": "scorecard.inputs_hash"
    },
    {
@@ -41,10 +41,10 @@
     "ref": "value_add_kb@2026.10.0"
    }
   ],
-  "provenance_id": "prov_01M4BRBC80HG1QKF39087E17DE",
+  "provenance_id": "prov_01M4BRBC804686XE9T8PSXB0ZK",
   "tool_name": "mbos_economics.valueadd",
-  "tool_version": "0.12.0"
+  "tool_version": "0.12.1"
  },
  "title": "Generac GP6500E 6500 watt portable generator, barely used",
- "value_add_hash": "sha256:10f79a8eef018b685cb010fea31f2592d50fc2e3dd971a6ca30ce5ec7f68022b"
+ "value_add_hash": "sha256:f694c739a2b31d4713bcb56212ed45c5b0c109a57a29645852544cb38fb60be9"
 }

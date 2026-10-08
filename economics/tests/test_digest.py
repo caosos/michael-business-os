@@ -50,11 +50,12 @@ class TestAcceptanceC08(unittest.TestCase):
     def test_ranking_order(self):
         top = [(r["rank"], r["item_id"], r["bucket"]) for r in self.d["rows"][:5]]
         self.assertEqual(top, [
-            (1, "itm_01JB0000000000000000000022", "act_alert"),   # smart-home: $84.63/h value
-            (2, "itm_01JB0000000000000000000002", "act_alert"),   # trailer at $225: $60.78/h
-            (3, "itm_01JB0000000000000000000006", "act"),         # project vehicle: $84.56/h
-            (4, "itm_01JB0000000000000000000020", "act"),         # drywall: $70.04/h
-            (5, "itm_01JB0000000000000000000001", "research"),    # trailer at $250: negotiate to $227
+            # C-20: inside a bucket, ordered by rank_score (risk-adjusted profit x confidence x velocity)
+            (1, "itm_01JB0000000000000000000022", "act_alert"),   # smart-home: rank 697.73
+            (2, "itm_01JB0000000000000000000002", "act_alert"),   # trailer at $225: rank 46.54
+            (3, "itm_01JB0000000000000000000020", "act"),         # drywall: rank 434.64
+            (4, "itm_01JB0000000000000000000006", "act"),         # project vehicle: tied-up cash, rank 25.11
+            (5, "itm_01JB0000000000000000000024", "research"),    # equipment repair: re-quote
         ])
         self.assertEqual([r["rank"] for r in self.d["rows"]], list(range(1, 18)))
         buckets = [r["bucket"] for r in self.d["rows"]]
@@ -97,6 +98,47 @@ class TestAcceptanceC08(unittest.TestCase):
         self.assertIn(" 1. [later] smart_home_install: YES + ALERT", txt)
 
 
+class TestC20CapitalVelocityRanking(unittest.TestCase):
+    """C-20: the digest ranks by the C-19 objective; the TV outranks the mower today; every row says why."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.items = [json.loads(p.read_text())["item"]
+                     for p in sorted((HERE.parent / "examples" / "class_aware").glob("*.scored.json"))]
+        for it in cls.items:
+            it["state"] = "RESEARCHING"
+        cls.d = build_digest(cls.items, AS_OF)
+
+    def test_tv_above_mower_today(self):
+        by = {r["item_id"]: r for r in self.d["rows"]}
+        tv, mower = by["itm_01JB0000000000000000000101"], by["itm_01JB0000000000000000000102"]
+        self.assertLess(tv["rank"], mower["rank"])
+        self.assertEqual((tv["bucket"], tv["deal_class"]), ("research", "MICRO_FLIP"))
+        self.assertGreater(tv["rank_score"], mower["rank_score"])
+        self.assertLess(tv["ev_decision"], mower["ev_decision"])          # smaller dollars, higher rank
+
+    def test_rows_name_their_components(self):
+        for r in self.d["rows"]:
+            self.assertIn("rank ", r["reason"])
+            self.assertIn("velocity", r["reason"])
+            self.assertIn("risk-adjusted", r["reason"])
+            self.assertIn("at risk", r["reason"])
+        mower = next(r for r in self.d["rows"] if r["item_id"].endswith("102"))
+        self.assertIn("cash pressure", mower["reason"])                   # funds tight is visible
+        self.assertIn("capital intensive flip", mower["reason"])
+
+    def test_pre_c19_card_sorts_last_in_bucket_and_says_so(self):
+        items = copy.deepcopy(self.items)
+        old = next(i for i in items if i["item_id"].endswith("101"))
+        del old["scores"]["scorecard"]["ranking"]
+        rows = build_digest(items, AS_OF)["rows"]
+        row = next(r for r in rows if r["item_id"] == old["item_id"])
+        self.assertIn("re-score", row["reason"])
+        self.assertIsNone(row["rank_score"])
+        same = [r for r in rows if r["bucket"] == row["bucket"]]
+        self.assertEqual(same[-1]["item_id"], old["item_id"])
+
+
 class TestDeadlines(unittest.TestCase):
     def test_deadline_in_window_jumps_its_bucket(self):
         items = copy.deepcopy(ITEMS)
@@ -110,17 +152,17 @@ class TestDeadlines(unittest.TestCase):
 
     def test_deadline_beats_value_inside_a_bucket(self):
         items = copy.deepcopy(ITEMS)
-        drywall = next(i for i in items if i["item_id"] == "itm_01JB0000000000000000000020")   # lower value/h
-        drywall["recommendation"]["expires_at"] = "2026-10-09T18:00:00Z"                      # 48 h
+        civic = next(i for i in items if i["item_id"] == "itm_01JB0000000000000000000006")     # lower rank score
+        civic["recommendation"]["expires_at"] = "2026-10-09T18:00:00Z"                        # 48 h
         acts = [x["item_id"] for x in build_digest(items, AS_OF)["rows"] if x["bucket"] == "act"]
-        self.assertEqual(acts, ["itm_01JB0000000000000000000020", "itm_01JB0000000000000000000006"])
+        self.assertEqual(acts, ["itm_01JB0000000000000000000006", "itm_01JB0000000000000000000020"])
 
     def test_deadline_outside_horizon_ignored_for_order(self):
         items = copy.deepcopy(ITEMS)
         drywall = next(i for i in items if i["item_id"] == "itm_01JB0000000000000000000020")
         drywall["recommendation"]["expires_at"] = "2026-10-20T18:00:00Z"                      # beyond 72 h
         r = next(x for x in build_digest(items, AS_OF)["rows"] if x["item_id"] == drywall["item_id"])
-        self.assertEqual((r["rank"], r["window"]), (4, "later"))
+        self.assertEqual((r["rank"], r["window"]), (3, "later"))
 
     def test_past_deadline_excluded(self):
         items = copy.deepcopy(ITEMS)

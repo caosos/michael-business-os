@@ -14,7 +14,7 @@
    "action_request_ids": [],
    "approval_ids": [],
    "category": "trailer",
-   "created_at": "2026-10-08T00:39:35.504657Z",
+   "created_at": "2026-10-08T00:42:21.426475Z",
    "dedup_key": "trailer|example|1",
    "economics": {
     "acquisition": {
@@ -92,20 +92,20 @@
    "outcome_ids": [],
    "provenance_ids": [
     "prov_01JB0000000000000000000010",
-    "prov_01M4B3R6G0J71NK74131BKZG8B"
+    "prov_01M4B3R6G0A8TH99EWBR2T74HE"
    ],
    "receipt_ids": [
-    "rcpt_01M4CF71TJM261BECRFRE288R7",
-    "rcpt_01M4CF71TNCD0E47Q5MTQKSYGF",
-    "rcpt_01M4CF71TSA8BS73KW6JCBW1QM",
-    "rcpt_01M4CF71V37NH0SNBT0EDRJAJS",
-    "rcpt_01M4CF71V7HR8B03RY6AZBZ49F",
-    "rcpt_01M4CF71VHMECED7GA9PJJ52AX"
+    "rcpt_01M4CFC3VK70K2JM922DJ0NV9H",
+    "rcpt_01M4CFC3VPVPZ51PKHRM1REJP3",
+    "rcpt_01M4CFC3VSJTQ5RKRPF8GYKPVB",
+    "rcpt_01M4CFC3W2K21W2H124FWJFR5V",
+    "rcpt_01M4CFC3W6GHMC4N758RH8QP2X",
+    "rcpt_01M4CFC3W9BWJGGBT4XKH1RZN8"
    ],
    "recommendation": {
     "alert": false,
     "confidence": 0.93,
-    "provenance_id": "prov_01M4B3R6G0J71NK74131BKZG8B",
+    "provenance_id": "prov_01M4B3R6G0A8TH99EWBR2T74HE",
     "rationale": [
      "YES blocked: EV profit/hour $62.02 < flip target $65.00",
      "deterministic: net $547.37, $73.04/h over 7.4945 h, cash tied up $502.63, ROI 1.0890",
@@ -114,7 +114,7 @@
      "evidence is not the blocker: no missing evidence item changes the verdict",
      "walk-away price (max buy for YES): $227"
     ],
-    "recommendation_id": "rec_01M4B3R6G0GDAA5T1V0DR70NZ7",
+    "recommendation_id": "rec_01M4B3R6G09MYQ9P11J5G2SNJZ",
     "verdict": "MAYBE"
    },
    "research": [
@@ -253,7 +253,7 @@
       "vehicle_cost_per_mile": 0.4578,
       "wasted_trip_ev": 0
      },
-     "engine_version": "0.12.0",
+     "engine_version": "0.12.1",
      "evidence": {
       "condition_verified": true,
       "demand_evidence": true,
@@ -337,7 +337,7 @@
       "title_ok": true
      }
     },
-    "scorecard_id": "scr_01M4B3R6G0WJSQQP86W1Y0BXJX"
+    "scorecard_id": "scr_01M4B3R6G0XC2Q7YGWKRQ2EDDT"
    },
    "sources": [
     {
@@ -350,13 +350,13 @@
    ],
    "state": "RECOMMENDED",
    "type": "flip",
-   "updated_at": "2026-10-08T00:39:35.504657Z"
+   "updated_at": "2026-10-08T00:42:21.426475Z"
   },
   {
    "action_request_ids": [],
    "approval_ids": [],
    "category": "trailer",
-   "created_at": "2026-10-08T00:39:35.554774Z",
+   "created_at": "2026-10-08T00:42:21.456342Z",
    "dedup_key": "trailer|example|1",
    "economics": {
     "acquisition": {
@@ -434,20 +434,20 @@
    "outcome_ids": [],
    "provenance_ids": [
     "prov_01JB0000000000000000000010",
-    "prov_01M4B3R6G0C39ZF50KMV50ZDJG"
+    "prov_01M4B3R6G08MZB4ZVAPCZHHPFD"
    ],
    "receipt_ids": [
-    "rcpt_01M4CF71W4Q4MR15PN4PXAXFES",
-    "rcpt_01M4CF71W8FY80XQDXGN98VS5N",
-    "rcpt_01M4CF71WCZ12Y8RTE1WYAV65J",
-    "rcpt_01M4CF71WPAFX0KSEGRCT6BNKB",
-    "rcpt_01M4CF71WTHVYK0CWZFNF85FN0",
-    "rcpt_01M4CF71WYME02D66A07M8QKEJ"
+    "rcpt_01M4CFC3WJV7Q0H977KS264ZC1",
+    "rcpt_01M4CFC3WN3F6T2Z02CRKNK7WE",
+    "rcpt_01M4CFC3WRD8JDYFRJT55XN9T9",
+    "rcpt_01M4CFC3X3VSEJDT639FCYZNBA",
+    "rcpt_01M4CFC3X7M29TFMQDWJ7DDT4N",
+    "rcpt_01M4CFC3XATPJRWHJ04HNH30TZ"
    ],
    "recommendation": {
     "alert": true,
     "confidence": 0.93,
-    "provenance_id": "prov_01M4B3R6G0C39ZF50KMV50ZDJG",
+    "provenance_id": "prov_01M4B3R6G08MZB4ZVAPCZHHPFD",
     "rationale": [
      "all hard gates pass; composite 67.93; confidence 0.9300; EV profit/hour $65.36 >= $65.00; EV $476.10",
      "deterministic: net $572.37, $76.37/h over 7.4945 h, cash tied up $477.63, ROI 1.1984",
@@ -456,7 +456,7 @@
      "class QUICK_TURN (provisional thresholds): cash at risk $477.63, 10 d to cash, cash multiple 2.0255x; rank score 46.54 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
      "walk-away price (max buy for YES): $227"
     ],
-    "recommendation_id": "rec_01M4B3R6G0TQGVXQD1EHN6V1TJ",
+    "recommendation_id": "rec_01M4B3R6G0PC2MKB52FX0EBDMG",
     "verdict": "YES"
    },
    "research": [
@@ -595,7 +595,7 @@
       "vehicle_cost_per_mile": 0.4578,
       "wasted_trip_ev": 0
      },
-     "engine_version": "0.12.0",
+     "engine_version": "0.12.1",
      "evidence": {
       "condition_verified": true,
       "demand_evidence": true,
@@ -675,7 +675,7 @@
       "title_ok": true
      }
     },
-    "scorecard_id": "scr_01M4B3R6G0X929GVJNZ3YVVEQ4"
+    "scorecard_id": "scr_01M4B3R6G0EM3EEFAPNPY3CYA5"
    },
    "sources": [
     {
@@ -688,13 +688,13 @@
    ],
    "state": "RECOMMENDED",
    "type": "flip",
-   "updated_at": "2026-10-08T00:39:35.554774Z"
+   "updated_at": "2026-10-08T00:42:21.456342Z"
   },
   {
    "action_request_ids": [],
    "approval_ids": [],
    "category": "mower",
-   "created_at": "2026-10-08T00:39:35.222094Z",
+   "created_at": "2026-10-08T00:42:21.191858Z",
    "dedup_key": "mower|example|3",
    "economics": {
     "acquisition": {
@@ -764,20 +764,20 @@
    "outcome_ids": [],
    "provenance_ids": [
     "prov_01JB0000000000000000000030",
-    "prov_01M4B3R6G03TYKPZCE1HNC2QFJ"
+    "prov_01M4B3R6G0PDN6YR03TSVFWF6M"
    ],
    "receipt_ids": [
-    "rcpt_01M4CF71HQ61B78XFK4N0PWQC7",
-    "rcpt_01M4CF71HVHHGZG3H51FCG029Z",
-    "rcpt_01M4CF71HZ55PSFZQJCYM0FR9R",
-    "rcpt_01M4CF71JAZ8D2VZMPD3XTE1W1",
-    "rcpt_01M4CF71JFDK6GAKFTVG75AW4A",
-    "rcpt_01M4CF71JJW5GY1A0A5XZ0CK8K"
+    "rcpt_01M4CFC3MA5VDXCA5BT0Y7KYJ5",
+    "rcpt_01M4CFC3MDCRRPZF2W2B12BWZQ",
+    "rcpt_01M4CFC3MHCSSS27G9C7CT7SXH",
+    "rcpt_01M4CFC3N0GRE4Y64KZSV4XNSM",
+    "rcpt_01M4CFC3N34M19FHMB84814F6T",
+    "rcpt_01M4CFC3N6NFZN5X69EBX4SN39"
    ],
    "recommendation": {
     "alert": false,
     "confidence": 0.57,
-    "provenance_id": "prov_01M4B3R6G03TYKPZCE1HNC2QFJ",
+    "provenance_id": "prov_01M4B3R6G0PDN6YR03TSVFWF6M",
     "rationale": [
      "GATE FAIL pph_floor_ok: deterministic profit/hour $39.84 below floor $40.00",
      "R13: PASS is not evidence-backed (pph_floor_ok: revenue NOT backed, cost NOT backed): route to RESEARCHING, do not archive",
@@ -786,7 +786,7 @@
      "class STANDARD_FLIP (provisional thresholds): cash at risk $366.46, 15 d to cash, cash multiple 1.3645x; rank score 1.57 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
      "evidence is not the blocker: no missing evidence item changes the verdict"
     ],
-    "recommendation_id": "rec_01M4B3R6G0KAPYTR2HMKN4KV82",
+    "recommendation_id": "rec_01M4B3R6G05VD481QBM47E964P",
     "verdict": "PASS"
    },
    "schema_version": "1.0.0",
@@ -915,7 +915,7 @@
       "vehicle_cost_per_mile": 0.4578,
       "wasted_trip_ev": 0
      },
-     "engine_version": "0.12.0",
+     "engine_version": "0.12.1",
      "evidence": {
       "condition_verified": false,
       "demand_evidence": true,
@@ -1038,7 +1038,7 @@
       "title_ok": true
      }
     },
-    "scorecard_id": "scr_01M4B3R6G04KKJHAR74KV5RSN1"
+    "scorecard_id": "scr_01M4B3R6G03SV4PB4QH9EADFBC"
    },
    "sources": [
     {
@@ -1051,13 +1051,13 @@
    ],
    "state": "RECOMMENDED",
    "type": "flip",
-   "updated_at": "2026-10-08T00:39:35.222094Z"
+   "updated_at": "2026-10-08T00:42:21.191858Z"
   },
   {
    "action_request_ids": [],
    "approval_ids": [],
    "category": "mower",
-   "created_at": "2026-10-08T00:39:35.182902Z",
+   "created_at": "2026-10-08T00:42:21.153920Z",
    "dedup_key": "mower|example|3",
    "economics": {
     "acquisition": {
@@ -1129,20 +1129,20 @@
    "outcome_ids": [],
    "provenance_ids": [
     "prov_01JB0000000000000000000030",
-    "prov_01M4B3R6G0DCXNXQEA2D4WMWY5"
+    "prov_01M4B3R6G0XQK5SXC57EK4E6NY"
    ],
    "receipt_ids": [
-    "rcpt_01M4CF71GG4M6V9QGQDTV1B7TD",
-    "rcpt_01M4CF71GMPHQ69KVD8DFYENY8",
-    "rcpt_01M4CF71GRWJ231FK303E8P60G",
-    "rcpt_01M4CF71H27A60ZZ35NRSK4M14",
-    "rcpt_01M4CF71H6HB2Z2JP8ZJ3GEP3T",
-    "rcpt_01M4CF71HAQHB7R33SNSNN9DA9"
+    "rcpt_01M4CFC3K3XFSF03N7ZYQRVBZH",
+    "rcpt_01M4CFC3K7G5FQEME8117Z04SR",
+    "rcpt_01M4CFC3KBFACBXAQFCRKSZW56",
+    "rcpt_01M4CFC3KPJKX872HH5P2YY66G",
+    "rcpt_01M4CFC3KTJ3VEVBV13BVZWJ74",
+    "rcpt_01M4CFC3KX86S0G8WVRRKXYQ4R"
    ],
    "recommendation": {
     "alert": false,
     "confidence": 1,
-    "provenance_id": "prov_01M4B3R6G0DCXNXQEA2D4WMWY5",
+    "provenance_id": "prov_01M4B3R6G0XQK5SXC57EK4E6NY",
     "rationale": [
      "GATE FAIL pph_floor_ok: deterministic profit/hour $39.84 below floor $40.00",
      "R13: PASS is not evidence-backed (pph_floor_ok: revenue NOT backed, cost NOT backed): route to RESEARCHING, do not archive",
@@ -1151,7 +1151,7 @@
      "class STANDARD_FLIP (provisional thresholds): cash at risk $366.46, 15 d to cash, cash multiple 1.5755x; rank score 7.83 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
      "evidence is not the blocker: no missing evidence item changes the verdict"
     ],
-    "recommendation_id": "rec_01M4B3R6G0SJ967WASTX7MWP2G",
+    "recommendation_id": "rec_01M4B3R6G0BWHQ2YMQWF1ER7W5",
     "verdict": "PASS"
    },
    "schema_version": "1.0.0",
@@ -1280,7 +1280,7 @@
       "vehicle_cost_per_mile": 0.4578,
       "wasted_trip_ev": 0
      },
-     "engine_version": "0.12.0",
+     "engine_version": "0.12.1",
      "evidence": {
       "condition_verified": true,
       "demand_evidence": true,
@@ -1403,7 +1403,7 @@
       "title_ok": true
      }
     },
-    "scorecard_id": "scr_01M4B3R6G09HDRPPCDTHN3QZX0"
+    "scorecard_id": "scr_01M4B3R6G0H5WPSMAKPBX67GVE"
    },
    "sources": [
     {
@@ -1416,13 +1416,13 @@
    ],
    "state": "RECOMMENDED",
    "type": "flip",
-   "updated_at": "2026-10-08T00:39:35.182902Z"
+   "updated_at": "2026-10-08T00:42:21.153920Z"
   },
   {
    "action_request_ids": [],
    "approval_ids": [],
    "category": "generator",
-   "created_at": "2026-10-08T00:39:35.120064Z",
+   "created_at": "2026-10-08T00:42:21.112261Z",
    "dedup_key": "generator|example|5",
    "economics": {
     "acquisition": {
@@ -1491,20 +1491,20 @@
    "outcome_ids": [],
    "provenance_ids": [
     "prov_01JB0000000000000000000050",
-    "prov_01M4B3R6G0M9AFFHNSDA3C45GN"
+    "prov_01M4B3R6G0R1CJPTAG9ADX2W1E"
    ],
    "receipt_ids": [
-    "rcpt_01M4CF71EJHTBTGC5KD90PQK0J",
-    "rcpt_01M4CF71EQPEB4EJ3KE9QBP2PQ",
-    "rcpt_01M4CF71EVFV44X9CHB7CF1ZJB",
-    "rcpt_01M4CF71F8W5EZPAGS4WERT3EF",
-    "rcpt_01M4CF71FD33FZV5Y5XQFSCTJT",
-    "rcpt_01M4CF71FHAEXARJZD2E5H8S2M"
+    "rcpt_01M4CFC3HSFWZ35TSB6ZKD94ZV",
+    "rcpt_01M4CFC3HW9Q4WQG64JQFCGSM1",
+    "rcpt_01M4CFC3J0S0WFR2PMJ7QJ839D",
+    "rcpt_01M4CFC3JA67N40P65G073XT0T",
+    "rcpt_01M4CFC3JDS0KA9KB0NFSQ0HG1",
+    "rcpt_01M4CFC3JG1E3SGC0ACAKCF2MN"
    ],
    "recommendation": {
     "alert": false,
     "confidence": 0.3,
-    "provenance_id": "prov_01M4B3R6G0M9AFFHNSDA3C45GN",
+    "provenance_id": "prov_01M4B3R6G0R1CJPTAG9ADX2W1E",
     "rationale": [
      "GATE FAIL distance_ratio_ok: long-distance travel burden $496.66 exceeds 0.35 x EV = $134.47",
      "R13: PASS is not evidence-backed (distance_ratio_ok: revenue NOT backed, cost NOT backed): route to RESEARCHING, do not archive",
@@ -1513,7 +1513,7 @@
      "class CAPITAL_INTENSIVE_FLIP (provisional thresholds): cash at risk $1,168.66, 22 d to cash, cash multiple 1.3288x; rank score 1.31 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
      "evidence is not the blocker: no missing evidence item changes the verdict"
     ],
-    "recommendation_id": "rec_01M4B3R6G0J5TK77MKJQ7QZ4MJ",
+    "recommendation_id": "rec_01M4B3R6G0X0NSN042RW2JJ8NE",
     "verdict": "PASS"
    },
    "schema_version": "1.0.0",
@@ -1642,7 +1642,7 @@
       "vehicle_cost_per_mile": 0.4578,
       "wasted_trip_ev": 38.78
      },
-     "engine_version": "0.12.0",
+     "engine_version": "0.12.1",
      "evidence": {
       "condition_verified": false,
       "demand_evidence": false,
@@ -1769,7 +1769,7 @@
       "title_ok": true
      }
     },
-    "scorecard_id": "scr_01M4B3R6G0D3GX9SV6FX902HKS"
+    "scorecard_id": "scr_01M4B3R6G0Y0JA9XZX43X0ZC7Y"
    },
    "sources": [
     {
@@ -1782,13 +1782,13 @@
    ],
    "state": "RECOMMENDED",
    "type": "flip",
-   "updated_at": "2026-10-08T00:39:35.120064Z"
+   "updated_at": "2026-10-08T00:42:21.112261Z"
   },
   {
    "action_request_ids": [],
    "approval_ids": [],
    "category": "project_vehicle",
-   "created_at": "2026-10-08T00:39:35.282350Z",
+   "created_at": "2026-10-08T00:42:21.240165Z",
    "dedup_key": "project_vehicle|example|6",
    "economics": {
     "acquisition": {
@@ -1885,20 +1885,20 @@
    "outcome_ids": [],
    "provenance_ids": [
     "prov_01JB0000000000000000000060",
-    "prov_01M4B3R6G0TDMHRESB9NKG3BB4"
+    "prov_01M4B3R6G0K3DKFTFZA18FW5F7"
    ],
    "receipt_ids": [
-    "rcpt_01M4CF71KM2F5G9J3X0WRC8EH8",
-    "rcpt_01M4CF71KR940D95BGH0CCJYZE",
-    "rcpt_01M4CF71KV9JH605Y4STC6S15G",
-    "rcpt_01M4CF71M5A7WRR0AZ7XBHT448",
-    "rcpt_01M4CF71M99HKCS0AGWE5X9QDZ",
-    "rcpt_01M4CF71MCZ0X7EFAPNRYT8K6W"
+    "rcpt_01M4CFC3NSNDFX44MCCV2QWPK0",
+    "rcpt_01M4CFC3NXW9Q6KC60Z4BZS3VE",
+    "rcpt_01M4CFC3P0CXS0KWK6TZ4NME43",
+    "rcpt_01M4CFC3P9J44EW89KMZNC6Y9M",
+    "rcpt_01M4CFC3PDRE3Z26C1YCS7BW3T",
+    "rcpt_01M4CFC3PHJYP5MWCNNP8ZH52V"
    ],
    "recommendation": {
     "alert": false,
     "confidence": 0.93,
-    "provenance_id": "prov_01M4B3R6G0TDMHRESB9NKG3BB4",
+    "provenance_id": "prov_01M4B3R6G0K3DKFTFZA18FW5F7",
     "rationale": [
      "all hard gates pass; composite 75.31; confidence 0.9300; EV profit/hour $90.93 >= $65.00; EV $893.67",
      "deterministic: net $1,211.11, $119.78/h over 10.1111 h, cash tied up $1,388.89, ROI 0.8720",
@@ -1906,7 +1906,7 @@
      "class CAPITAL_INTENSIVE_FLIP (provisional thresholds): cash at risk $1,388.89, 22 d to cash, cash multiple 1.6620x; rank score 25.11 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
      "walk-away price (max buy for YES): $1,061"
     ],
-    "recommendation_id": "rec_01M4B3R6G0G1JXV5VWFCWX7WJS",
+    "recommendation_id": "rec_01M4B3R6G046GHCKX6R34TTDS2",
     "verdict": "YES"
    },
    "schema_version": "1.0.0",
@@ -2029,7 +2029,7 @@
       "vehicle_cost_per_mile": 0.4578,
       "wasted_trip_ev": 0
      },
-     "engine_version": "0.12.0",
+     "engine_version": "0.12.1",
      "evidence": {
       "condition_verified": true,
       "demand_evidence": true,
@@ -2108,7 +2108,7 @@
       "title_ok": true
      }
     },
-    "scorecard_id": "scr_01M4B3R6G0FGK2FMBVNT3CVT8D"
+    "scorecard_id": "scr_01M4B3R6G0NM2FP6EKNFT257KK"
    },
    "sources": [
     {
@@ -2121,13 +2121,13 @@
    ],
    "state": "RECOMMENDED",
    "type": "flip",
-   "updated_at": "2026-10-08T00:39:35.282350Z"
+   "updated_at": "2026-10-08T00:42:21.240165Z"
   },
   {
    "action_request_ids": [],
    "approval_ids": [],
    "category": "project_vehicle",
-   "created_at": "2026-10-08T00:39:35.326360Z",
+   "created_at": "2026-10-08T00:42:21.279471Z",
    "dedup_key": "project_vehicle|example|6",
    "economics": {
     "acquisition": {
@@ -2238,20 +2238,20 @@
    "outcome_ids": [],
    "provenance_ids": [
     "prov_01JB0000000000000000000060",
-    "prov_01M4B3R6G05XP6X8CJ8M4F7VT5"
+    "prov_01M4B3R6G0XGZKWJR173ZXHZMD"
    ],
    "receipt_ids": [
-    "rcpt_01M4CF71N00ZSVC46AE2SNATVJ",
-    "rcpt_01M4CF71N4DFF1PJWV335WB876",
-    "rcpt_01M4CF71N8EPSXW8ABW0XDKT3F",
-    "rcpt_01M4CF71NJ05E91MPEZFD18PPY",
-    "rcpt_01M4CF71NPEMXGJ742T4RK4ZX6",
-    "rcpt_01M4CF71NT7QNRSGG22GFFDWYG"
+    "rcpt_01M4CFC3Q1841PAPHGTK9DWMMD",
+    "rcpt_01M4CFC3Q4FDTGG0KNE10M1FPH",
+    "rcpt_01M4CFC3Q87616V6ZGE104E54K",
+    "rcpt_01M4CFC3QJYTWB8TMG5Q8NP18Y",
+    "rcpt_01M4CFC3QNBQAPC2VX8FN85P3M",
+    "rcpt_01M4CFC3QRRSP52A14QXCW9JVJ"
    ],
    "recommendation": {
     "alert": false,
     "confidence": 0.93,
-    "provenance_id": "prov_01M4B3R6G05XP6X8CJ8M4F7VT5",
+    "provenance_id": "prov_01M4B3R6G0XGZKWJR173ZXHZMD",
     "rationale": [
      "GATE FAIL cash_ok: cash tied up $2,973.89 exceeds per-deal cap $1,500.00",
      "R13: PASS is evidence-backed (cash_ok) via economics.acquisition.expected_buy_price",
@@ -2261,7 +2261,7 @@
      "evidence is not the blocker: no missing evidence item changes the verdict",
      "walk-away price (max buy for YES): $926"
     ],
-    "recommendation_id": "rec_01M4B3R6G02S8GFXMXND75KPDP",
+    "recommendation_id": "rec_01M4B3R6G0NEBR5DB8MZ46XBPP",
     "verdict": "PASS"
    },
    "schema_version": "1.0.0",
@@ -2384,7 +2384,7 @@
       "vehicle_cost_per_mile": 0.4578,
       "wasted_trip_ev": 0
      },
-     "engine_version": "0.12.0",
+     "engine_version": "0.12.1",
      "evidence": {
       "condition_verified": true,
       "demand_evidence": true,
@@ -2496,7 +2496,7 @@
       "title_ok": true
      }
     },
-    "scorecard_id": "scr_01M4B3R6G0QJJSYJ47JGQ214F2"
+    "scorecard_id": "scr_01M4B3R6G0SQNVJ1MC2EGTM9PK"
    },
    "sources": [
     {
@@ -2509,13 +2509,13 @@
    ],
    "state": "RECOMMENDED",
    "type": "flip",
-   "updated_at": "2026-10-08T00:39:35.326360Z"
+   "updated_at": "2026-10-08T00:42:21.279471Z"
   },
   {
    "action_request_ids": [],
    "approval_ids": [],
    "category": "trailer",
-   "created_at": "2026-10-08T00:39:35.460173Z",
+   "created_at": "2026-10-08T00:42:21.388381Z",
    "dedup_key": "trailer|example|8",
    "economics": {
     "acquisition": {
@@ -2596,21 +2596,21 @@
    "outcome_ids": [],
    "provenance_ids": [
     "prov_01JB0000000000000000000080",
-    "prov_01M4B3R6G0F7210N80PABZDMQ9"
+    "prov_01M4B3R6G05H3CKB2M3MRJQH24"
    ],
    "receipt_ids": [
-    "rcpt_01M4CF71S6GE51CXTEYFRG2NTF",
-    "rcpt_01M4CF71SAX3VY4CNH7XMMST2K",
-    "rcpt_01M4CF71SERZVAKQFW22XF0VXR",
-    "rcpt_01M4CF71SVHVDQNKQRBFJSD087",
-    "rcpt_01M4CF71SZWRSQVNJREHMY1H8R",
-    "rcpt_01M4CF71T3WC5C272WC5NQD1SS"
+    "rcpt_01M4CFC3TE9XJMH4W71FTJ6NE8",
+    "rcpt_01M4CFC3TGD9DVJCPEAAQQ2NBD",
+    "rcpt_01M4CFC3TM6N8YCQPZC0Y43FW9",
+    "rcpt_01M4CFC3TXPEGYRHXY6P45AT3C",
+    "rcpt_01M4CFC3V06H2K6SATMQ7G1F91",
+    "rcpt_01M4CFC3V3RTFXTXGBQQT5H7CX"
    ],
    "recommendation": {
     "alert": false,
     "cheapest_decisive_evidence": "condition_verified -> MAYBE",
     "confidence": 0.2,
-    "provenance_id": "prov_01M4B3R6G0F7210N80PABZDMQ9",
+    "provenance_id": "prov_01M4B3R6G05H3CKB2M3MRJQH24",
     "rationale": [
      "composite 43.06 < pass floor 45",
      "R13: PASS is not evidence-backed (composite_floor: revenue NOT backed, cost NOT backed): route to RESEARCHING, do not archive",
@@ -2620,7 +2620,7 @@
      "class CAPITAL_INTENSIVE_FLIP (provisional thresholds): cash at risk $1,455.46, 15 d to cash, cash multiple 1.3047x; rank score 1.62 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
      "cheapest decisive evidence: condition_verified -> MAYBE"
     ],
-    "recommendation_id": "rec_01M4B3R6G0M63X3230S2G2KR3J",
+    "recommendation_id": "rec_01M4B3R6G06YW8KQ98SB1M0R7B",
     "verdict": "PASS"
    },
    "schema_version": "1.0.0",
@@ -2750,7 +2750,7 @@
       "vehicle_cost_per_mile": 0.4578,
       "wasted_trip_ev": 0.17
      },
-     "engine_version": "0.12.0",
+     "engine_version": "0.12.1",
      "evidence": {
       "condition_verified": false,
       "demand_evidence": false,
@@ -2876,7 +2876,7 @@
       "title_ok": false
      }
     },
-    "scorecard_id": "scr_01M4B3R6G0Q1WE8NERQYBQDKED"
+    "scorecard_id": "scr_01M4B3R6G088H37TGFXADHMR6N"
    },
    "sources": [
     {
@@ -2889,13 +2889,13 @@
    ],
    "state": "RECOMMENDED",
    "type": "flip",
-   "updated_at": "2026-10-08T00:39:35.460173Z"
+   "updated_at": "2026-10-08T00:42:21.388381Z"
   },
   {
    "action_request_ids": [],
    "approval_ids": [],
    "category": "drywall_repair",
-   "created_at": "2026-10-08T00:39:34.911993Z",
+   "created_at": "2026-10-08T00:42:20.969659Z",
    "dedup_key": "drywall_repair|example|20",
    "economics": {
     "estimates_meta": {
@@ -2961,20 +2961,20 @@
    "outcome_ids": [],
    "provenance_ids": [
     "prov_01JB0000000000000000000200",
-    "prov_01M4B3R6G0J24ZSKEN22JD0CYX"
+    "prov_01M4B3R6G04FRGC1ZBQZN8M2MC"
    ],
    "receipt_ids": [
-    "rcpt_01M4CF718BPR27SJ5N87J43YGF",
-    "rcpt_01M4CF718XXYQC7FS20BERNNRH",
-    "rcpt_01M4CF719A4P5J2HE40J81QMGN",
-    "rcpt_01M4CF719W4A5HGPJMMEA00E45",
-    "rcpt_01M4CF71A4YEFJV22HYQERYVM9",
-    "rcpt_01M4CF71AAG6K3NFAKX2KQDJGM"
+    "rcpt_01M4CFC3DKMG5EMXTQSJ2NV8Y2",
+    "rcpt_01M4CFC3DZSQNATG6MKMMPTB4X",
+    "rcpt_01M4CFC3E6XHCWHZPEXW3DM27J",
+    "rcpt_01M4CFC3EN0VGH3MDSAQ2K16WN",
+    "rcpt_01M4CFC3EV7NVFVK2VAEVJSYJH",
+    "rcpt_01M4CFC3EZCR87N9P5MGC3W01H"
    ],
    "recommendation": {
     "alert": false,
     "confidence": 0.8,
-    "provenance_id": "prov_01M4B3R6G0J24ZSKEN22JD0CYX",
+    "provenance_id": "prov_01M4B3R6G04FRGC1ZBQZN8M2MC",
     "rationale": [
      "all hard gates pass; composite 80.07; confidence 0.8000; EV profit/hour $87.55 >= $75.00; EV $1,352.36",
      "deterministic: net $1,488.46, $88.66/h over 16.7890 h, cash tied up $361.54, ROI 4.1170",
@@ -2982,7 +2982,7 @@
      "class SERVICE (provisional thresholds): cash at risk $361.54, 11 d to cash, cash multiple 5.0658x; rank score 434.64 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
      "minimum quote for YES: $1,638"
     ],
-    "recommendation_id": "rec_01M4B3R6G08XFBMKBK95BJ22FY",
+    "recommendation_id": "rec_01M4B3R6G0YPYY62V88YZ6EAQG",
     "verdict": "YES"
    },
    "schema_version": "1.0.0",
@@ -3122,7 +3122,7 @@
       "vehicle_cost_per_mile": 0.4578,
       "wasted_trip_ev": 0
      },
-     "engine_version": "0.12.0",
+     "engine_version": "0.12.1",
      "evidence": {
       "access_and_schedule_confirmed": true,
       "customer_screened": true,
@@ -3197,7 +3197,7 @@
       "remote_verification_ok": true
      }
     },
-    "scorecard_id": "scr_01M4B3R6G02BGQFM0D04S6SYDW"
+    "scorecard_id": "scr_01M4B3R6G0VRW4DVRFZ44PK9Z5"
    },
    "sources": [
     {
@@ -3210,13 +3210,13 @@
    ],
    "state": "RECOMMENDED",
    "type": "service",
-   "updated_at": "2026-10-08T00:39:34.911993Z"
+   "updated_at": "2026-10-08T00:42:20.969659Z"
   },
   {
    "action_request_ids": [],
    "approval_ids": [],
    "category": "drywall_repair",
-   "created_at": "2026-10-08T00:39:35.001915Z",
+   "created_at": "2026-10-08T00:42:21.033850Z",
    "dedup_key": "drywall_repair|example|21",
    "economics": {
     "estimates_meta": {
@@ -3265,20 +3265,20 @@
    "outcome_ids": [],
    "provenance_ids": [
     "prov_01JB0000000000000000000210",
-    "prov_01M4B3R6G0JNC1A8HN1Z1SV0Z2"
+    "prov_01M4B3R6G03VQ2XE6VQ9TT3N6N"
    ],
    "receipt_ids": [
-    "rcpt_01M4CF71AWGG5WJ1PJ0XX47QB8",
-    "rcpt_01M4CF71B0D1Z1CJP8P0Z4NMX2",
-    "rcpt_01M4CF71B43C7Q625NWY8774E0",
-    "rcpt_01M4CF71BQ4YFSWHSRE2WG2Z9B",
-    "rcpt_01M4CF71BWD1A3QPD4EP6PKW17",
-    "rcpt_01M4CF71C0WMQV66P409W4MY8N"
+    "rcpt_01M4CFC3FBH5RDGVZH9QP8Q6TZ",
+    "rcpt_01M4CFC3FE23P7EAXP564JFR5P",
+    "rcpt_01M4CFC3FH4PH1DCZ7JJGH1CM6",
+    "rcpt_01M4CFC3G0N3TMWY17386XBJVW",
+    "rcpt_01M4CFC3G38F0T7BZD1PFBDQN2",
+    "rcpt_01M4CFC3G7QMH2ZRGGX0AY1CAR"
    ],
    "recommendation": {
     "alert": false,
     "confidence": 0.15,
-    "provenance_id": "prov_01M4B3R6G0JNC1A8HN1Z1SV0Z2",
+    "provenance_id": "prov_01M4B3R6G03VQ2XE6VQ9TT3N6N",
     "rationale": [
      "YES blocked: composite 51.09 < 60",
      "YES blocked: confidence 0.1500 < 0.60 (gather evidence)",
@@ -3289,7 +3289,7 @@
      "class SERVICE (provisional thresholds): cash at risk $0.00, 4 d to cash, cash multiple 224.8300x; rank score 33.51 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
      "evidence is not the blocker: no missing evidence item changes the verdict"
     ],
-    "recommendation_id": "rec_01M4B3R6G0XJ0TJDWXSHJGAQ31",
+    "recommendation_id": "rec_01M4B3R6G0Q5RCZ2NDGZY4713Z",
     "verdict": "MAYBE"
    },
    "schema_version": "1.0.0",
@@ -3423,7 +3423,7 @@
       "vehicle_cost_per_mile": 0.4578,
       "wasted_trip_ev": 0
      },
-     "engine_version": "0.12.0",
+     "engine_version": "0.12.1",
      "evidence": {
       "access_and_schedule_confirmed": false,
       "customer_screened": false,
@@ -3505,7 +3505,7 @@
       "remote_verification_ok": true
      }
     },
-    "scorecard_id": "scr_01M4B3R6G0DM7WVPMN3GQGFGYN"
+    "scorecard_id": "scr_01M4B3R6G0GJ9YMKYAWJ4ZXX88"
    },
    "sources": [
     {
@@ -3518,13 +3518,13 @@
    ],
    "state": "RECOMMENDED",
    "type": "service",
-   "updated_at": "2026-10-08T00:39:35.001915Z"
+   "updated_at": "2026-10-08T00:42:21.033850Z"
   },
   {
    "action_request_ids": [],
    "approval_ids": [],
    "category": "smart_home_install",
-   "created_at": "2026-10-08T00:39:35.371233Z",
+   "created_at": "2026-10-08T00:42:21.314349Z",
    "dedup_key": "smart_home_install|example|22",
    "economics": {
     "estimates_meta": {
@@ -3582,20 +3582,20 @@
    "outcome_ids": [],
    "provenance_ids": [
     "prov_01JB0000000000000000000220",
-    "prov_01M4B3R6G0N76Q2ZTSMFHM4VKY"
+    "prov_01M4B3R6G0S7NB358N2MAT7ZWD"
    ],
    "receipt_ids": [
-    "rcpt_01M4CF71PC7VJ6Q8TZE8P27VXJ",
-    "rcpt_01M4CF71PGH3KWEK6VFT7ZRMXS",
-    "rcpt_01M4CF71PMJ8H9V83A7M1CESQP",
-    "rcpt_01M4CF71PZC3TQ7R4Q0JHC2JX0",
-    "rcpt_01M4CF71Q4M3BZ8XGCNG3RKP6B",
-    "rcpt_01M4CF71Q721794QFWAH3TRQ4R"
+    "rcpt_01M4CFC3R3ZC2H99XYR53RB04F",
+    "rcpt_01M4CFC3R6RW1BH0AKQQJ4QR0X",
+    "rcpt_01M4CFC3RAKRGAZEA1VMHTFK5S",
+    "rcpt_01M4CFC3RMQ70QENSZJE01Z56C",
+    "rcpt_01M4CFC3RRJYA2PQRZXS145ME5",
+    "rcpt_01M4CFC3RVG43SRXWX2BJDEY7D"
    ],
    "recommendation": {
     "alert": true,
     "confidence": 0.85,
-    "provenance_id": "prov_01M4B3R6G0N76Q2ZTSMFHM4VKY",
+    "provenance_id": "prov_01M4B3R6G0S7NB358N2MAT7ZWD",
     "rationale": [
      "all hard gates pass; composite 77.55; confidence 0.8500; EV profit/hour $99.57 >= $75.00; EV $771.61",
      "deterministic: net $834.36, $101.20/h over 8.2444 h, cash tied up $65.64, ROI 12.7112",
@@ -3604,7 +3604,7 @@
      "class SERVICE (provisional thresholds): cash at risk $65.64, 5 d to cash, cash multiple 13.5055x; rank score 697.73 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
      "minimum quote for YES: $695"
     ],
-    "recommendation_id": "rec_01M4B3R6G0YBKY7NWCKN557HHZ",
+    "recommendation_id": "rec_01M4B3R6G0JZ5EC1MSG0BD48DP",
     "verdict": "YES"
    },
    "schema_version": "1.0.0",
@@ -3732,7 +3732,7 @@
       "vehicle_cost_per_mile": 0.4578,
       "wasted_trip_ev": 0
      },
-     "engine_version": "0.12.0",
+     "engine_version": "0.12.1",
      "evidence": {
       "access_and_schedule_confirmed": true,
       "customer_screened": true,
@@ -3808,7 +3808,7 @@
       "remote_verification_ok": true
      }
     },
-    "scorecard_id": "scr_01M4B3R6G0TQRK4DNAETW7TSAQ"
+    "scorecard_id": "scr_01M4B3R6G09VDJP7MJ5Y961VBX"
    },
    "sources": [
     {
@@ -3821,13 +3821,13 @@
    ],
    "state": "RECOMMENDED",
    "type": "service",
-   "updated_at": "2026-10-08T00:39:35.371233Z"
+   "updated_at": "2026-10-08T00:42:21.314349Z"
   },
   {
    "action_request_ids": [],
    "approval_ids": [],
    "category": "smart_home_install",
-   "created_at": "2026-10-08T00:39:35.412360Z",
+   "created_at": "2026-10-08T00:42:21.355083Z",
    "dedup_key": "smart_home_install|example|22",
    "economics": {
     "estimates_meta": {
@@ -3884,20 +3884,20 @@
    "outcome_ids": [],
    "provenance_ids": [
     "prov_01JB0000000000000000000220",
-    "prov_01M4B3R6G0E6Z6BH57ZDWXVCQW"
+    "prov_01M4B3R6G0KA9SAM0DNSYS4D03"
    ],
    "receipt_ids": [
-    "rcpt_01M4CF71QNWEB670375ZYX4E5A",
-    "rcpt_01M4CF71QS71E5VJXFCCE0GWD9",
-    "rcpt_01M4CF71QX6R9CJZ2SS0CA0CFJ",
-    "rcpt_01M4CF71R7EZK9NX9GRAKRMK0S",
-    "rcpt_01M4CF71RBEW13EB0VC67H3SJQ",
-    "rcpt_01M4CF71RF6Q7587FYKJ9APDTD"
+    "rcpt_01M4CFC3SC4X5MZRRGE524A6JM",
+    "rcpt_01M4CFC3SFDYFRENAFQCZ0RHMB",
+    "rcpt_01M4CFC3SJ5GWDQ0830HJCKS32",
+    "rcpt_01M4CFC3SVT0FC5DF6AZJF2GVA",
+    "rcpt_01M4CFC3SZ4CCW2Q1XHB24JQAZ",
+    "rcpt_01M4CFC3T2VZ8JB2Q256CPE7ZK"
    ],
    "recommendation": {
     "alert": false,
     "confidence": 0.85,
-    "provenance_id": "prov_01M4B3R6G0E6Z6BH57ZDWXVCQW",
+    "provenance_id": "prov_01M4B3R6G0KA9SAM0DNSYS4D03",
     "rationale": [
      "GATE FAIL license_ok: requires a license Michael lacks (licensed_electrical)",
      "R13: PASS is not evidence-backed (license_ok: no decisive input backed): route to RESEARCHING, do not archive",
@@ -3907,7 +3907,7 @@
      "class SERVICE (provisional thresholds): cash at risk $65.64, 5 d to cash, cash multiple 13.5055x; rank score 697.73 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
      "evidence is not the blocker: no missing evidence item changes the verdict"
     ],
-    "recommendation_id": "rec_01M4B3R6G0DWNYNYWY5JJDR9N2",
+    "recommendation_id": "rec_01M4B3R6G0JZZJAYCHD6745CF0",
     "verdict": "PASS"
    },
    "schema_version": "1.0.0",
@@ -4035,7 +4035,7 @@
       "vehicle_cost_per_mile": 0.4578,
       "wasted_trip_ev": 0
      },
-     "engine_version": "0.12.0",
+     "engine_version": "0.12.1",
      "evidence": {
       "access_and_schedule_confirmed": true,
       "customer_screened": true,
@@ -4135,7 +4135,7 @@
       "remote_verification_ok": true
      }
     },
-    "scorecard_id": "scr_01M4B3R6G0MN9MW7NQ648SYF69"
+    "scorecard_id": "scr_01M4B3R6G0SBQZ6E3XP21Z2A3T"
    },
    "sources": [
     {
@@ -4148,13 +4148,13 @@
    ],
    "state": "RECOMMENDED",
    "type": "service",
-   "updated_at": "2026-10-08T00:39:35.412360Z"
+   "updated_at": "2026-10-08T00:42:21.355083Z"
   },
   {
    "action_request_ids": [],
    "approval_ids": [],
    "category": "equipment_repair",
-   "created_at": "2026-10-08T00:39:35.067661Z",
+   "created_at": "2026-10-08T00:42:21.073748Z",
    "dedup_key": "equipment_repair|example|24",
    "economics": {
     "estimates_meta": {
@@ -4217,20 +4217,20 @@
    "outcome_ids": [],
    "provenance_ids": [
     "prov_01JB0000000000000000000240",
-    "prov_01M4B3R6G0ZJC7F1851J5EE4DA"
+    "prov_01M4B3R6G0R68W2HFN5Q8M7G97"
    ],
    "receipt_ids": [
-    "rcpt_01M4CF71CYWQHXS0DSYB8QYEQK",
-    "rcpt_01M4CF71D040GQB6KWTYN9VFF9",
-    "rcpt_01M4CF71D4CQZW58PY3BXC6QHA",
-    "rcpt_01M4CF71DEMJG4WKYPS9FZ5DDM",
-    "rcpt_01M4CF71DJT3FRA40TD1JPYHAR",
-    "rcpt_01M4CF71DV9F64FCBY8F49M517"
+    "rcpt_01M4CFC3GMNJHR18G4P3H1RQK4",
+    "rcpt_01M4CFC3GQHHXN6AA17017ZHJK",
+    "rcpt_01M4CFC3GVTRW1QS2KJ4ZVC68G",
+    "rcpt_01M4CFC3H5SZBCA2F6PVT59AMC",
+    "rcpt_01M4CFC3H89EWEH6GWWMHZKJ2M",
+    "rcpt_01M4CFC3HBCFQP3A03AVTYDKTM"
    ],
    "recommendation": {
     "alert": false,
     "confidence": 0.7,
-    "provenance_id": "prov_01M4B3R6G0ZJC7F1851J5EE4DA",
+    "provenance_id": "prov_01M4B3R6G0R68W2HFN5Q8M7G97",
     "rationale": [
      "YES blocked: EV profit/hour $71.62 < service target $75.00",
      "deterministic: net $585.72, $79.69/h over 7.3501 h, cash tied up $24.95, ROI 23.4758",
@@ -4239,7 +4239,7 @@
      "evidence is not the blocker: no missing evidence item changes the verdict",
      "minimum quote for YES: $1,098"
     ],
-    "recommendation_id": "rec_01M4B3R6G02BKYDVX5SC0KV1VM",
+    "recommendation_id": "rec_01M4B3R6G01FN3ZXSQXDRF27BC",
     "verdict": "MAYBE"
    },
    "schema_version": "1.0.0",
@@ -4373,7 +4373,7 @@
       "vehicle_cost_per_mile": 0.4578,
       "wasted_trip_ev": 0
      },
-     "engine_version": "0.12.0",
+     "engine_version": "0.12.1",
      "evidence": {
       "access_and_schedule_confirmed": true,
       "customer_screened": true,
@@ -4453,7 +4453,7 @@
       "remote_verification_ok": true
      }
     },
-    "scorecard_id": "scr_01M4B3R6G0TFJQ8KPKEM8WHCZS"
+    "scorecard_id": "scr_01M4B3R6G0D2SEYBWWJZNTS8J2"
    },
    "sources": [
     {
@@ -4466,14 +4466,14 @@
    ],
    "state": "RECOMMENDED",
    "type": "service",
-   "updated_at": "2026-10-08T00:39:35.067661Z"
+   "updated_at": "2026-10-08T00:42:21.073748Z"
   },
   {
    "action_request_ids": [],
    "approval_ids": [],
    "category": "trailer",
    "content_hash": "sha256:fa2343076d47d43d89cdf9c2b306d9c1767afd1b3c4d90a06ed4599b09e47cb5",
-   "created_at": "2026-10-08T00:39:35.998751Z",
+   "created_at": "2026-10-08T00:42:21.700204Z",
    "dedup_key": "trailer|1000-1500|zip-720",
    "economics": {
     "acquisition": {
@@ -4677,11 +4677,11 @@
      ],
      "estimate": {
       "as_of": "2026-10-07T18:00:00Z",
-      "estimate_hash": "sha256:a132d1a2efe2ee08e699fd01b3c1d4d944e84dc23715ef5749c4a1fd41ab6916",
-      "estimator_version": "0.12.0",
+      "estimate_hash": "sha256:f795e5a5e9461f604e9f1d422f17a6e269d530401c3c91626cf8f998f497d557",
+      "estimator_version": "0.12.1",
       "priors_hash": "sha256:be7e0b9e903ab4e2e313d71280e94bb2dbbb6c7ade9ff5261717ed856fc7c065",
       "priors_version": "2026.10.4",
-      "provenance_id": "prov_01M4BRBC80ZEWKXQD9P6XWGQHW"
+      "provenance_id": "prov_01M4BRBC80GAH23R89Z73WKEK0"
      },
      "scoring_config_version": "2026.10.2"
     },
@@ -4759,22 +4759,22 @@
    "outcome_ids": [],
    "provenance_ids": [
     "prov_01M4BNKG0C5QP4M6DCCEA4VZ88",
-    "prov_01M4BRBC80RM2FVSX3NP4T8JTY",
-    "prov_01M4BRBC80ZEWKXQD9P6XWGQHW"
+    "prov_01M4BRBC80F2FMPE7YX6WHM89J",
+    "prov_01M4BRBC80GAH23R89Z73WKEK0"
    ],
    "receipt_ids": [
-    "rcpt_01M4CF72A1MWJGGFTJ1G6HGA37",
-    "rcpt_01M4CF72A4YT78M8P3KW6160WP",
-    "rcpt_01M4CF72A8Z2KDHT7B7N1CXRXX",
-    "rcpt_01M4CF72AJCYGT7W4VJ5G87D27",
-    "rcpt_01M4CF72AQY8GQXE7APXNF02DZ",
-    "rcpt_01M4CF72ATGSRG5NQ183Q72XE2"
+    "rcpt_01M4CFC4464FEW48G3QX8PMYVB",
+    "rcpt_01M4CFC449ZQ516720RPNZD0HD",
+    "rcpt_01M4CFC44C9TDB66KWW2WQGX8B",
+    "rcpt_01M4CFC44P9E3AP5MGQD60BX7A",
+    "rcpt_01M4CFC44SEF5ZHT14JZR6SC43",
+    "rcpt_01M4CFC44WC7YZEQWK1VD9M4T8"
    ],
    "recommendation": {
     "alert": false,
     "cheapest_decisive_evidence": "seller_screened + condition_verified + fault_identified + title_verified -> YES",
     "confidence": 0.3,
-    "provenance_id": "prov_01M4BRBC80RM2FVSX3NP4T8JTY",
+    "provenance_id": "prov_01M4BRBC80F2FMPE7YX6WHM89J",
     "rationale": [
      "YES blocked: confidence 0.3000 < 0.60 (gather evidence)",
      "YES blocked: repair fault not identified (guessed scope caps at MAYBE)",
@@ -4784,7 +4784,7 @@
      "class CAPITAL_INTENSIVE_FLIP (provisional thresholds): cash at risk $1,298.14, 10.5 d to cash, cash multiple 1.4946x; rank score 8.86 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
      "cheapest decisive evidence: seller_screened + condition_verified + fault_identified + title_verified -> YES"
     ],
-    "recommendation_id": "rec_01M4BRBC80HK2TNHEDHSCMAYW8",
+    "recommendation_id": "rec_01M4BRBC80QZBRNBTW1XGT31HX",
     "verdict": "MAYBE"
    },
    "research": [
@@ -4800,7 +4800,7 @@
      "basis": "INFERENCE",
      "field": "resale.target_sell_price",
      "finding": "4 sold comps; trimmed median $2100.00",
-     "provenance_id": "prov_01M4BRBC80ZEWKXQD9P6XWGQHW"
+     "provenance_id": "prov_01M4BRBC80GAH23R89Z73WKEK0"
     },
     {
      "basis": "FACT",
@@ -4837,7 +4837,7 @@
    ],
    "schema_version": "1.0.0",
    "scores": {
-    "inputs_hash": "sha256:4a65995bbdc3f2e9f1dc39bed8c900d31cd0806d53a8b74db5737f96d066b5e7",
+    "inputs_hash": "sha256:e4a5fe87a92e3df38e0272a888fc2b32b215cc098761900b6281674f3f9d3f5d",
     "scorecard": {
      "alert": false,
      "alert_checks": {
@@ -4965,7 +4965,7 @@
       "vehicle_cost_per_mile": 0.4578,
       "wasted_trip_ev": 0
      },
-     "engine_version": "0.12.0",
+     "engine_version": "0.12.1",
      "evidence": {
       "condition_verified": false,
       "demand_evidence": false,
@@ -5055,7 +5055,7 @@
       "title_ok": false
      }
     },
-    "scorecard_id": "scr_01M4BRBC807K8K5FNMS5PE33YC"
+    "scorecard_id": "scr_01M4BRBC80Y3DBG6TSG8MM2BAF"
    },
    "sources": [
     {
@@ -5073,14 +5073,14 @@
    "state": "RECOMMENDED",
    "subcategory": "Trailers",
    "type": "flip",
-   "updated_at": "2026-10-08T00:39:35.998751Z"
+   "updated_at": "2026-10-08T00:42:21.700204Z"
   },
   {
    "action_request_ids": [],
    "approval_ids": [],
    "category": "welder",
    "content_hash": "sha256:81d2c5c8159a980517346209ce4745ce6ad18a19f2cd10ce3c5a57197f229c3d",
-   "created_at": "2026-10-08T00:39:35.596219Z",
+   "created_at": "2026-10-08T00:42:21.494894Z",
    "dedup_key": "welder|250-500|zip-721",
    "economics": {
     "acquisition": {
@@ -5254,11 +5254,11 @@
      ],
      "estimate": {
       "as_of": "2026-10-07T12:00:00Z",
-      "estimate_hash": "sha256:36da600806fdac2b9565d5948aac75fc5c627fa3586a8e95c552cf04559218da",
-      "estimator_version": "0.12.0",
+      "estimate_hash": "sha256:ed166b17298e6a1ee1a9f66f8147283f5b86d0e68d4a871f52e0fd43821c195d",
+      "estimator_version": "0.12.1",
       "priors_hash": "sha256:be7e0b9e903ab4e2e313d71280e94bb2dbbb6c7ade9ff5261717ed856fc7c065",
       "priors_version": "2026.10.4",
-      "provenance_id": "prov_01M4B3R6G01MWE6WD9X5WMYQSS"
+      "provenance_id": "prov_01M4B3R6G0BBPM4XJ8DVNZY46K"
      },
      "scoring_config_version": "2026.10.2"
     },
@@ -5332,21 +5332,21 @@
    "opportunity_kind": "buy_item",
    "outcome_ids": [],
    "provenance_ids": [
-    "prov_01M4B3R6G0B8N4CPY2G8T3W90N",
+    "prov_01M4B3R6G0DFYQRWC9TBX7Q9HW",
     "prov_01M4BNKG0DF7254BE97CR1MAG4"
    ],
    "receipt_ids": [
-    "rcpt_01M4CF71XE1BVTRB72M22PQ3ZB",
-    "rcpt_01M4CF71XH1VNMJ45QH2V2T63W",
-    "rcpt_01M4CF71XNZN9CGC94H0J19TVG",
-    "rcpt_01M4CF71Y1WWFPQC6Y69H7EY14",
-    "rcpt_01M4CF71Y59HR010K13Y0AA5H3",
-    "rcpt_01M4CF71Y9RZPS6D28GW55JWQT"
+    "rcpt_01M4CFC3XR22STG4S3PHJ8YRD4",
+    "rcpt_01M4CFC3XVQ2BZ90KCAY09C3VX",
+    "rcpt_01M4CFC3XZ43AA74ZMY07X8ZEY",
+    "rcpt_01M4CFC3Y9FQ93AWV0Y2XKPYAP",
+    "rcpt_01M4CFC3YDA3Q8MGKK24E7MARE",
+    "rcpt_01M4CFC3YGNJQKJZK3CG7BGBF8"
    ],
    "recommendation": {
     "alert": false,
     "confidence": 0.4,
-    "provenance_id": "prov_01M4B3R6G0B8N4CPY2G8T3W90N",
+    "provenance_id": "prov_01M4B3R6G0DFYQRWC9TBX7Q9HW",
     "rationale": [
      "GATE FAIL pph_floor_ok: deterministic profit/hour $15.94 below floor $40.00",
      "R13: PASS is not evidence-backed (pph_floor_ok: revenue backed, cost NOT backed): route to RESEARCHING, do not archive",
@@ -5355,7 +5355,7 @@
      "class STANDARD_FLIP (provisional thresholds): cash at risk $553.10, 23 d to cash, cash multiple 1.0053x; rank score -18.58 = risk_adjusted_profit x confidence (non-positive profit or velocity is not rescued by speed)",
      "evidence is not the blocker: no missing evidence item changes the verdict"
     ],
-    "recommendation_id": "rec_01M4B3R6G0DPSNJ38TZ12NK671",
+    "recommendation_id": "rec_01M4B3R6G0ME661Q21MWP6D2RX",
     "verdict": "PASS"
    },
    "research": [
@@ -5363,7 +5363,7 @@
      "basis": "INFERENCE",
      "field": "resale.target_sell_price",
      "finding": "3 sold comps; trimmed median $650.00",
-     "provenance_id": "prov_01M4B3R6G01MWE6WD9X5WMYQSS"
+     "provenance_id": "prov_01M4B3R6G0BBPM4XJ8DVNZY46K"
     },
     {
      "basis": "FACT",
@@ -5392,7 +5392,7 @@
    ],
    "schema_version": "1.0.0",
    "scores": {
-    "inputs_hash": "sha256:8b1b32ce64003aa16b9b4e2a06279141011e1311be14f9739548b2831c7e7e73",
+    "inputs_hash": "sha256:20c07aa4fde0e3c8534524b6aa9111d3ac46cb3dc99c89343a8f34ab580c6d95",
     "scorecard": {
      "alert": false,
      "alert_checks": {
@@ -5519,7 +5519,7 @@
       "vehicle_cost_per_mile": 0.4578,
       "wasted_trip_ev": 0
      },
-     "engine_version": "0.12.0",
+     "engine_version": "0.12.1",
      "evidence": {
       "condition_verified": false,
       "demand_evidence": false,
@@ -5646,7 +5646,7 @@
       "title_ok": true
      }
     },
-    "scorecard_id": "scr_01M4B3R6G0VZX2DWX48KH5BSRG"
+    "scorecard_id": "scr_01M4B3R6G077NYGVSCHDS5RXXQ"
    },
    "sources": [
     {
@@ -5663,14 +5663,14 @@
    ],
    "state": "RECOMMENDED",
    "type": "flip",
-   "updated_at": "2026-10-08T00:39:35.596219Z"
+   "updated_at": "2026-10-08T00:42:21.494894Z"
   },
   {
    "action_request_ids": [],
    "approval_ids": [],
    "category": "smart_home_install",
    "content_hash": "sha256:5f5ed680ececb0800b16355c7404e0f76d9ad68ccdc41ea75e99aaf0c6842c96",
-   "created_at": "2026-10-08T00:39:35.934663Z",
+   "created_at": "2026-10-08T00:42:21.654560Z",
    "dedup_key": "smart_home_install|lead|zip-720",
    "economics": {
     "estimates_meta": {
@@ -5772,11 +5772,11 @@
      ],
      "estimate": {
       "as_of": "2026-10-07T18:00:00Z",
-      "estimate_hash": "sha256:21373687c4c89fbd32e5de3af54a45122c0b09bc132018c1434f48683c716a6b",
-      "estimator_version": "0.12.0",
+      "estimate_hash": "sha256:0004b0339177b4f484f1a39ceac081aaa4dd203566d8c7d8f4835ba1c8845f48",
+      "estimator_version": "0.12.1",
       "priors_hash": "sha256:be7e0b9e903ab4e2e313d71280e94bb2dbbb6c7ade9ff5261717ed856fc7c065",
       "priors_version": "2026.10.4",
-      "provenance_id": "prov_01M4BRBC80KGCBFMQ21W0G9E0Z"
+      "provenance_id": "prov_01M4BRBC80CVYZK6SH0C9828HK"
      },
      "scoring_config_version": "2026.10.2"
     },
@@ -5843,20 +5843,20 @@
    "outcome_ids": [],
    "provenance_ids": [
     "prov_01M4BNKG2FX0GHGF993J4NDXRZ",
-    "prov_01M4BRBC80KGCBFMQ21W0G9E0Z"
+    "prov_01M4BRBC80CVYZK6SH0C9828HK"
    ],
    "receipt_ids": [
-    "rcpt_01M4CF72804VMMV8RSBR3F8NJK",
-    "rcpt_01M4CF7284GV9MK3CNA2S0SHEH",
-    "rcpt_01M4CF7289CVMK6ANJNA6RQ3DV",
-    "rcpt_01M4CF728X1H8QHSHM9HPGDQX9",
-    "rcpt_01M4CF7293NH7EW344JB29JP74",
-    "rcpt_01M4CF72999RVAD8RQ45MY5F0F"
+    "rcpt_01M4CFC42RVV31KTP5YXYZG9YQ",
+    "rcpt_01M4CFC42T66XSPHK8QYQG3DWV",
+    "rcpt_01M4CFC42YJEQGBSBYMEYX92Y3",
+    "rcpt_01M4CFC437TVXJD925XVBWBZAD",
+    "rcpt_01M4CFC43BFBJABP3YMEWD80G1",
+    "rcpt_01M4CFC43EC07PEYWERPNWKVRH"
    ],
    "recommendation": {
     "alert": false,
     "confidence": 0.15,
-    "provenance_id": "prov_01M4BRBC80WX74CDXHFM8HQ1W2",
+    "provenance_id": "prov_01M4BRBC80K4V486QCYM9FX06G",
     "rationale": [
      "YES blocked: composite 53.69 < 60",
      "YES blocked: confidence 0.1500 < 0.60 (gather evidence)",
@@ -5866,12 +5866,12 @@
      "class SERVICE (provisional thresholds): cash at risk $49.22, 4 d to cash, cash multiple 5.5788x; rank score 33.53 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
      "evidence is not the blocker: no missing evidence item changes the verdict"
     ],
-    "recommendation_id": "rec_01M4BRBC80CQPVVXG38FDQ9N0A",
+    "recommendation_id": "rec_01M4BRBC802ATPKJ7RR9KP83DK",
     "verdict": "MAYBE"
    },
    "schema_version": "1.0.0",
    "scores": {
-    "inputs_hash": "sha256:c9e115593dff44b0049a82d7be73f78cf52ddcf6884cb93c5ba2e46907f40605",
+    "inputs_hash": "sha256:71fbc1d562f12e18dfcb063d1896db5a26f918d0543ebb4f268e3aeb46b457ef",
     "scorecard": {
      "alert": false,
      "alert_checks": {
@@ -6000,7 +6000,7 @@
       "vehicle_cost_per_mile": 0.4578,
       "wasted_trip_ev": 0
      },
-     "engine_version": "0.12.0",
+     "engine_version": "0.12.1",
      "evidence": {
       "access_and_schedule_confirmed": false,
       "customer_screened": false,
@@ -6081,7 +6081,7 @@
       "remote_verification_ok": true
      }
     },
-    "scorecard_id": "scr_01M4BRBC80T97XSRQ46D9K4CRS"
+    "scorecard_id": "scr_01M4BRBC80KD86DX4CJJZFXYJ5"
    },
    "sources": [
     {
@@ -6099,14 +6099,14 @@
    "state": "RECOMMENDED",
    "subcategory": "Mount TV and install video doorbell",
    "type": "service",
-   "updated_at": "2026-10-08T00:39:35.934663Z"
+   "updated_at": "2026-10-08T00:42:21.654560Z"
   },
   {
    "action_request_ids": [],
    "approval_ids": [],
    "category": "assembly",
    "content_hash": "sha256:7ab9fad6e8eb7b5ee9e3088a0e8fdb3ed7d248245a6a6cb4daafd3cd2666e382",
-   "created_at": "2026-10-08T00:39:35.639030Z",
+   "created_at": "2026-10-08T00:42:21.534812Z",
    "dedup_key": "assembly|lead|zip-720",
    "economics": {
     "estimates_meta": {
@@ -6209,11 +6209,11 @@
      ],
      "estimate": {
       "as_of": "2026-10-07T18:00:00Z",
-      "estimate_hash": "sha256:33fa92bde6300f15c454b43852f6607c45d69e729cb03eb86028d02412dbd87f",
-      "estimator_version": "0.12.0",
+      "estimate_hash": "sha256:09b162e57ebebee0bb135d8d3f34787b65fb5b0f2d8076371fa8280f17010e27",
+      "estimator_version": "0.12.1",
       "priors_hash": "sha256:be7e0b9e903ab4e2e313d71280e94bb2dbbb6c7ade9ff5261717ed856fc7c065",
       "priors_version": "2026.10.4",
-      "provenance_id": "prov_01M4BRBC802GF8GMSW7E297KAB"
+      "provenance_id": "prov_01M4BRBC80JAZKKQPH3YEKDQD4"
      },
      "scoring_config_version": "2026.10.2"
     },
@@ -6277,20 +6277,20 @@
    "outcome_ids": [],
    "provenance_ids": [
     "prov_01M4BNKG2F5C0BFS9JV32KG6FE",
-    "prov_01M4BRBC802GF8GMSW7E297KAB"
+    "prov_01M4BRBC80JAZKKQPH3YEKDQD4"
    ],
    "receipt_ids": [
-    "rcpt_01M4CF71YSE8DW464Z76E3D0F0",
-    "rcpt_01M4CF71YW3ER2571H2NNAS0RS",
-    "rcpt_01M4CF71Z09HE1R15KM0V03FGK",
-    "rcpt_01M4CF71ZATAD25Q5TQWC84TZ3",
-    "rcpt_01M4CF71ZHKXYPDQV4CGRW7KAR",
-    "rcpt_01M4CF71ZNEK50MHY3CXXHXFRZ"
+    "rcpt_01M4CFC3Z0M9647R788W4M4EC3",
+    "rcpt_01M4CFC3Z3H1Y7TVF3NB33K5PX",
+    "rcpt_01M4CFC3Z7SXQNRKV1V8SS9732",
+    "rcpt_01M4CFC3ZJ0YFCNX42PD7PQKNF",
+    "rcpt_01M4CFC3ZN0NCKVME4BB4X9QAD",
+    "rcpt_01M4CFC3ZRMGE3VQPBNW57F4ZX"
    ],
    "recommendation": {
     "alert": false,
     "confidence": 0.15,
-    "provenance_id": "prov_01M4BRBC80NHPACZ1H4DMWWKGZ",
+    "provenance_id": "prov_01M4BRBC80C7A6Z4RRRH1WHB5N",
     "rationale": [
      "YES blocked: composite 52.19 < 60",
      "YES blocked: confidence 0.1500 < 0.60 (gather evidence)",
@@ -6300,12 +6300,12 @@
      "class SERVICE (provisional thresholds): cash at risk $18.32, 4 d to cash, cash multiple 9.7069x; rank score 23.58 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
      "evidence is not the blocker: no missing evidence item changes the verdict"
     ],
-    "recommendation_id": "rec_01M4BRBC802B43YQSCZFHAMSH7",
+    "recommendation_id": "rec_01M4BRBC80MHZF18V5YBC5SSVS",
     "verdict": "MAYBE"
    },
    "schema_version": "1.0.0",
    "scores": {
-    "inputs_hash": "sha256:7b536530ba06cf0cfec45bdb62b90e824241fe45f014e4ef0882b871c222f812",
+    "inputs_hash": "sha256:fd54165107ccb119c7de04c4c66228cfc1f8bfe119ae5a717a4a3918c924c162",
     "scorecard": {
      "alert": false,
      "alert_checks": {
@@ -6428,7 +6428,7 @@
       "vehicle_cost_per_mile": 0.4578,
       "wasted_trip_ev": 0
      },
-     "engine_version": "0.12.0",
+     "engine_version": "0.12.1",
      "evidence": {
       "access_and_schedule_confirmed": false,
       "customer_screened": false,
@@ -6509,7 +6509,7 @@
       "remote_verification_ok": true
      }
     },
-    "scorecard_id": "scr_01M4BRBC80Q8MVKV7SG5WJC419"
+    "scorecard_id": "scr_01M4BRBC8060B3XFQBZW6MFQGM"
    },
    "sources": [
     {
@@ -6527,14 +6527,14 @@
    "state": "RECOMMENDED",
    "subcategory": "Assemble IKEA wardrobe and dresser",
    "type": "service",
-   "updated_at": "2026-10-08T00:39:35.639030Z"
+   "updated_at": "2026-10-08T00:42:21.534812Z"
   },
   {
    "action_request_ids": [],
    "approval_ids": [],
    "category": "drywall_repair",
    "content_hash": "sha256:08abf05b961ab8fef3025f133a627d2b38291fd93c4c84f553ecc9e13829eaed",
-   "created_at": "2026-10-08T00:39:35.700522Z",
+   "created_at": "2026-10-08T00:42:21.574181Z",
    "dedup_key": "drywall_repair|lead|zip-720",
    "economics": {
     "estimates_meta": {
@@ -6635,11 +6635,11 @@
      ],
      "estimate": {
       "as_of": "2026-10-07T18:00:00Z",
-      "estimate_hash": "sha256:8478a047e9082e354e766caee9ee31c9061bf6b2173f3f5353aa32579f935860",
-      "estimator_version": "0.12.0",
+      "estimate_hash": "sha256:13427cdfc6470f08620424f1248eb56bfe71a7da2f54901e158c5d33e299f206",
+      "estimator_version": "0.12.1",
       "priors_hash": "sha256:be7e0b9e903ab4e2e313d71280e94bb2dbbb6c7ade9ff5261717ed856fc7c065",
       "priors_version": "2026.10.4",
-      "provenance_id": "prov_01M4BRBC80Z8VHTYYTZ99S3V3C"
+      "provenance_id": "prov_01M4BRBC809942PV3Z5WQDRFGX"
      },
      "scoring_config_version": "2026.10.2"
     },
@@ -6706,20 +6706,20 @@
    "provenance_ids": [
     "prov_01M4BNKG2FRMPQ0T916S5R1VNQ",
     "prov_01M4BNKG36D1B0GX2ZNJJZ5KEJ",
-    "prov_01M4BRBC80Z8VHTYYTZ99S3V3C"
+    "prov_01M4BRBC809942PV3Z5WQDRFGX"
    ],
    "receipt_ids": [
-    "rcpt_01M4CF720PE82AAJ279GY84E5B",
-    "rcpt_01M4CF720TK1RW8YX2FWVTJNHH",
-    "rcpt_01M4CF7210ZKHXQ0X8W81PXVDF",
-    "rcpt_01M4CF721EQHZA7WVHBTM40DM2",
-    "rcpt_01M4CF721KP8C1BY3MV7B255MW",
-    "rcpt_01M4CF721Q0V2NW6MC50ZGV1YY"
+    "rcpt_01M4CFC407ERK434DBHN4QXSAK",
+    "rcpt_01M4CFC40AK9EW5F99JR0602BX",
+    "rcpt_01M4CFC40DY51AJJFCHBD3WBNF",
+    "rcpt_01M4CFC40RMCXBZX840Q02EAFG",
+    "rcpt_01M4CFC40VQ2X550QGAXV6SZ8N",
+    "rcpt_01M4CFC40Y0QJ9CHW2PZ0690EP"
    ],
    "recommendation": {
     "alert": false,
     "confidence": 0.15,
-    "provenance_id": "prov_01M4BRBC80CKCEHQFZ50V32G64",
+    "provenance_id": "prov_01M4BRBC80MN6WHCX0AND95C47",
     "rationale": [
      "YES blocked: composite 54.43 < 60",
      "YES blocked: confidence 0.1500 < 0.60 (gather evidence)",
@@ -6729,12 +6729,12 @@
      "class SERVICE (provisional thresholds): cash at risk $0.00, 4 d to cash, cash multiple 266.0100x; rank score 39.63 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
      "evidence is not the blocker: no missing evidence item changes the verdict"
     ],
-    "recommendation_id": "rec_01M4BRBC807TW4QXS4X78FSJGQ",
+    "recommendation_id": "rec_01M4BRBC80KDEKA40RGRXMB0J2",
     "verdict": "MAYBE"
    },
    "schema_version": "1.0.0",
    "scores": {
-    "inputs_hash": "sha256:e4023b060c64458206eab7a3a0c82bbd1f8c3d4f83583ee497f4ab3d4ed28c4a",
+    "inputs_hash": "sha256:30ad531390b83e58ad74404b86f9afcd1612704cc2edc73eb1d68fb661a8c47d",
     "scorecard": {
      "alert": false,
      "alert_checks": {
@@ -6863,7 +6863,7 @@
       "vehicle_cost_per_mile": 0.4578,
       "wasted_trip_ev": 0
      },
-     "engine_version": "0.12.0",
+     "engine_version": "0.12.1",
      "evidence": {
       "access_and_schedule_confirmed": false,
       "customer_screened": false,
@@ -6944,7 +6944,7 @@
       "remote_verification_ok": true
      }
     },
-    "scorecard_id": "scr_01M4BRBC80KFD3B3E7CKJYFVBP"
+    "scorecard_id": "scr_01M4BRBC804AZBY647YKS1JWMV"
    },
    "sources": [
     {
@@ -6973,14 +6973,14 @@
    "state": "RECOMMENDED",
    "subcategory": "Drywall patch after plumbing repair",
    "type": "service",
-   "updated_at": "2026-10-08T00:39:35.700522Z"
+   "updated_at": "2026-10-08T00:42:21.574181Z"
   },
   {
    "action_request_ids": [],
    "approval_ids": [],
    "category": "equipment_repair",
    "content_hash": "sha256:a33186226adb77e1aa179cf4f994e8753eb83f01d18aaa8eeffa56a5e777c268",
-   "created_at": "2026-10-08T00:39:35.755772Z",
+   "created_at": "2026-10-08T00:42:21.612213Z",
    "dedup_key": "equipment_repair|lead|zip-721",
    "economics": {
     "estimates_meta": {
@@ -7082,11 +7082,11 @@
      ],
      "estimate": {
       "as_of": "2026-10-07T18:00:00Z",
-      "estimate_hash": "sha256:9fc82371d0a537cb48e865d72bbf7ccd7434769ad7d051f32f6c5c5c59c87894",
-      "estimator_version": "0.12.0",
+      "estimate_hash": "sha256:f48c890864ddedf32554e7ae9a9b331dd95d0d9eb69cb630edef7c0213d4c56f",
+      "estimator_version": "0.12.1",
       "priors_hash": "sha256:be7e0b9e903ab4e2e313d71280e94bb2dbbb6c7ade9ff5261717ed856fc7c065",
       "priors_version": "2026.10.4",
-      "provenance_id": "prov_01M4BRBC80G2REDG2NN17DKPKA"
+      "provenance_id": "prov_01M4BRBC80SN0EFS0SGN9DNKWJ"
      },
      "scoring_config_version": "2026.10.2"
     },
@@ -7157,21 +7157,21 @@
    "outcome_ids": [],
    "provenance_ids": [
     "prov_01M4BNKG3677NSNWJV803RQEVW",
-    "prov_01M4BRBC80G2REDG2NN17DKPKA"
+    "prov_01M4BRBC80SN0EFS0SGN9DNKWJ"
    ],
    "receipt_ids": [
-    "rcpt_01M4CF722DMKP96NEJCXCTY4G9",
-    "rcpt_01M4CF722JTBMXEH953K1H7RBF",
-    "rcpt_01M4CF722QDBY87581XTH0RCF7",
-    "rcpt_01M4CF723491D3XNGV9NQCXX7K",
-    "rcpt_01M4CF7239W67YDMG64P6WYQ50",
-    "rcpt_01M4CF723GSW074NSYBG7GRNKJ"
+    "rcpt_01M4CFC41DBQ6FPB3NRSDK27Y1",
+    "rcpt_01M4CFC41GWXCYMVF8DVVES7R8",
+    "rcpt_01M4CFC41K7YVTCP60C180MKAD",
+    "rcpt_01M4CFC41WNJ3PHP18BHQNQTTG",
+    "rcpt_01M4CFC41Z4GN3NH0HZKF1S0FQ",
+    "rcpt_01M4CFC4285YRAWH6MFR0J2RKX"
    ],
    "recommendation": {
     "alert": false,
     "cheapest_decisive_evidence": "customer_screened + scope_verified -> YES",
     "confidence": 0.15,
-    "provenance_id": "prov_01M4BRBC80JXWJJ74EEV1QMFB0",
+    "provenance_id": "prov_01M4BRBC80CDWA06XEJTHS07CS",
     "rationale": [
      "YES blocked: composite 59.28 < 60",
      "YES blocked: confidence 0.1500 < 0.60 (gather evidence)",
@@ -7180,12 +7180,12 @@
      "class SERVICE (provisional thresholds): cash at risk $0.00, 4 d to cash, cash multiple 387.9000x; rank score 57.99 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
      "cheapest decisive evidence: customer_screened + scope_verified -> YES"
     ],
-    "recommendation_id": "rec_01M4BRBC800KQTZCM5Z1K4P0P1",
+    "recommendation_id": "rec_01M4BRBC80F0GKYG962EGXXFHX",
     "verdict": "MAYBE"
    },
    "schema_version": "1.0.0",
    "scores": {
-    "inputs_hash": "sha256:40821548760bccae3a640654da7375d2d2dbbc4e0a23b063641c4c319e463298",
+    "inputs_hash": "sha256:e833f6aaa6dea93f8ae2ccc4ff1aad0cc0f509552c021dd610e475238a22887f",
     "scorecard": {
      "alert": false,
      "alert_checks": {
@@ -7315,7 +7315,7 @@
       "vehicle_cost_per_mile": 0.4578,
       "wasted_trip_ev": 0.15
      },
-     "engine_version": "0.12.0",
+     "engine_version": "0.12.1",
      "evidence": {
       "access_and_schedule_confirmed": false,
       "customer_screened": false,
@@ -7398,7 +7398,7 @@
       "remote_verification_ok": true
      }
     },
-    "scorecard_id": "scr_01M4BRBC80VRQSV17N14J3868D"
+    "scorecard_id": "scr_01M4BRBC80MMJ0CJF2JX26T5J0"
    },
    "sources": [
     {
@@ -7416,7 +7416,7 @@
    "state": "RECOMMENDED",
    "subcategory": "Zero-turn mower won't start",
    "type": "service",
-   "updated_at": "2026-10-08T00:39:35.755772Z"
+   "updated_at": "2026-10-08T00:42:21.612213Z"
   }
  ],
  "receipts": [
@@ -7563,7 +7563,7 @@
         "vehicle_cost_per_mile": 0.4578,
         "wasted_trip_ev": 0
        },
-       "engine_version": "0.12.0",
+       "engine_version": "0.12.1",
        "evidence": {
         "access_and_schedule_confirmed": true,
         "customer_screened": true,
@@ -7638,7 +7638,7 @@
         "remote_verification_ok": true
        }
       },
-      "scorecard_id": "scr_01M4B3R6G02BGQFM0D04S6SYDW"
+      "scorecard_id": "scr_01M4B3R6G0VRW4DVRFZ44PK9Z5"
      }
     },
     "state": "RESEARCHING",
@@ -7653,21 +7653,21 @@
    "effect": "update",
    "entity_id": "itm_01JB0000000000000000000020",
    "entity_type": "item",
-   "idempotency_key": "score:scr_01M4B3R6G02BGQFM0D04S6SYDW",
+   "idempotency_key": "score:scr_01M4B3R6G0VRW4DVRFZ44PK9Z5",
    "inputs_hash": "sha256:ddb08330f22559a82b8675ce5db1091121a577388303ebbacb758f017fd084b2",
    "intent": "score",
    "item_id": "itm_01JB0000000000000000000020",
-   "payload_hash": "sha256:d950ae9ba2a012e61660f7056a333e093f39a10069ac65c9971e1647bed785a4",
-   "prev_hash": "sha256:5dca83d7a6841d5c11c46141710ed8e5d60af02d5bb004463fa9b4a197d99b73",
+   "payload_hash": "sha256:53c9c2ffd28c981aa11cd4b95e75dd7e0505be8b74f5c69def2bf10add382f62",
+   "prev_hash": "sha256:e7d831576c95ac96e2a9199f775b7ba59c3aadf8c519405e2099b78d04142cd8",
    "provenance_ids": [
-    "prov_01M4B3R6G0J24ZSKEN22JD0CYX"
+    "prov_01M4B3R6G04FRGC1ZBQZN8M2MC"
    ],
-   "receipt_id": "rcpt_01M4CF719A4P5J2HE40J81QMGN",
-   "row_hash": "sha256:56d2e552d1617d79ee0f87bdfcf3368128d5ef27c355141f9c9294ef3446944a",
+   "receipt_id": "rcpt_01M4CFC3E6XHCWHZPEXW3DM27J",
+   "row_hash": "sha256:e8d1e2f46200dd91e63f24c75b77c74a13fda0f5f550045855cd14e6e87342d8",
    "schema_version": "1.0.0",
    "seq": 21,
    "tool_name": "mbos_economics.engine",
-   "ts": "2026-10-08T00:39:34.911993Z",
+   "ts": "2026-10-08T00:42:20.969659Z",
    "type": "SCORE_RECORDED"
   },
   {
@@ -7807,7 +7807,7 @@
         "vehicle_cost_per_mile": 0.4578,
         "wasted_trip_ev": 0
        },
-       "engine_version": "0.12.0",
+       "engine_version": "0.12.1",
        "evidence": {
         "access_and_schedule_confirmed": false,
         "customer_screened": false,
@@ -7889,7 +7889,7 @@
         "remote_verification_ok": true
        }
       },
-      "scorecard_id": "scr_01M4B3R6G0DM7WVPMN3GQGFGYN"
+      "scorecard_id": "scr_01M4B3R6G0GJ9YMKYAWJ4ZXX88"
      }
     },
     "state": "RESEARCHING",
@@ -7904,21 +7904,21 @@
    "effect": "update",
    "entity_id": "itm_01JB0000000000000000000021",
    "entity_type": "item",
-   "idempotency_key": "score:scr_01M4B3R6G0DM7WVPMN3GQGFGYN",
+   "idempotency_key": "score:scr_01M4B3R6G0GJ9YMKYAWJ4ZXX88",
    "inputs_hash": "sha256:6c8dc7284882f506e5d94112b1f5381435add0c19f61a33d36930d2a714a093a",
    "intent": "score",
    "item_id": "itm_01JB0000000000000000000021",
-   "payload_hash": "sha256:47a2c768282b6cea5c707142bf614abbd1046d8c029fb8a7c77e2e9029b2782d",
-   "prev_hash": "sha256:21f9d20b31ed9afb76be161b7661b6b80a54d37f6dfbb1ce292e77069277530d",
+   "payload_hash": "sha256:a5d387a468bbb2696daf79077f6cdf42ae76dad5b8f72a215dad13ad764951e0",
+   "prev_hash": "sha256:bad0aa41b259f5827fceac22047a1acfd58596058f60905b3894880cda0b1486",
    "provenance_ids": [
-    "prov_01M4B3R6G0JNC1A8HN1Z1SV0Z2"
+    "prov_01M4B3R6G03VQ2XE6VQ9TT3N6N"
    ],
-   "receipt_id": "rcpt_01M4CF71B43C7Q625NWY8774E0",
-   "row_hash": "sha256:f699400f8e6261b6c0f688052c96420b1c021b4b559942f5809495e8b2163c10",
+   "receipt_id": "rcpt_01M4CFC3FH4PH1DCZ7JJGH1CM6",
+   "row_hash": "sha256:56498a9c32d4eea765a60bf48173ae96c1b1f0693bfe3ece3f0e6ebd2c3b31e6",
    "schema_version": "1.0.0",
    "seq": 27,
    "tool_name": "mbos_economics.engine",
-   "ts": "2026-10-08T00:39:35.001915Z",
+   "ts": "2026-10-08T00:42:21.033850Z",
    "type": "SCORE_RECORDED"
   },
   {
@@ -8058,7 +8058,7 @@
         "vehicle_cost_per_mile": 0.4578,
         "wasted_trip_ev": 0
        },
-       "engine_version": "0.12.0",
+       "engine_version": "0.12.1",
        "evidence": {
         "access_and_schedule_confirmed": true,
         "customer_screened": true,
@@ -8138,7 +8138,7 @@
         "remote_verification_ok": true
        }
       },
-      "scorecard_id": "scr_01M4B3R6G0TFJQ8KPKEM8WHCZS"
+      "scorecard_id": "scr_01M4B3R6G0D2SEYBWWJZNTS8J2"
      }
     },
     "state": "RESEARCHING",
@@ -8153,21 +8153,21 @@
    "effect": "update",
    "entity_id": "itm_01JB0000000000000000000024",
    "entity_type": "item",
-   "idempotency_key": "score:scr_01M4B3R6G0TFJQ8KPKEM8WHCZS",
+   "idempotency_key": "score:scr_01M4B3R6G0D2SEYBWWJZNTS8J2",
    "inputs_hash": "sha256:8edafad19b9dad0f6d5777038afcfa9abc723c137126482b4019356c1c851eda",
    "intent": "score",
    "item_id": "itm_01JB0000000000000000000024",
-   "payload_hash": "sha256:5e30aefc96a7939d58e4b8d3f74f6cd453d1a8a06b47a686ea073748856e1a2a",
-   "prev_hash": "sha256:9454844771ac3ccf596c4eb40dbe97a11d1f4ea2e02079e1884788d862fbd983",
+   "payload_hash": "sha256:2bf4107054a60b6272a6a7238dde91cce3686e8d864bfd8dc37ab3443c9db3b5",
+   "prev_hash": "sha256:0716809fd330e646202b05e5e604dd4e878b086e99476d8a70aa389a03890cd4",
    "provenance_ids": [
-    "prov_01M4B3R6G0ZJC7F1851J5EE4DA"
+    "prov_01M4B3R6G0R68W2HFN5Q8M7G97"
    ],
-   "receipt_id": "rcpt_01M4CF71D4CQZW58PY3BXC6QHA",
-   "row_hash": "sha256:5e5819d9cb7e0a159e89f6dd30af0cb30f880f2ddb5c94f94ab414a7f002b1c3",
+   "receipt_id": "rcpt_01M4CFC3GVTRW1QS2KJ4ZVC68G",
+   "row_hash": "sha256:845abdf95c4fa58b4c39f27d354e3b5c2e6c7876db5a0543ecf88c407102a52b",
    "schema_version": "1.0.0",
    "seq": 33,
    "tool_name": "mbos_economics.engine",
-   "ts": "2026-10-08T00:39:35.067661Z",
+   "ts": "2026-10-08T00:42:21.073748Z",
    "type": "SCORE_RECORDED"
   },
   {
@@ -8302,7 +8302,7 @@
         "vehicle_cost_per_mile": 0.4578,
         "wasted_trip_ev": 38.78
        },
-       "engine_version": "0.12.0",
+       "engine_version": "0.12.1",
        "evidence": {
         "condition_verified": false,
         "demand_evidence": false,
@@ -8429,7 +8429,7 @@
         "title_ok": true
        }
       },
-      "scorecard_id": "scr_01M4B3R6G0D3GX9SV6FX902HKS"
+      "scorecard_id": "scr_01M4B3R6G0Y0JA9XZX43X0ZC7Y"
      }
     },
     "state": "RESEARCHING",
@@ -8444,21 +8444,21 @@
    "effect": "update",
    "entity_id": "itm_01JB0000000000000000000005",
    "entity_type": "item",
-   "idempotency_key": "score:scr_01M4B3R6G0D3GX9SV6FX902HKS",
+   "idempotency_key": "score:scr_01M4B3R6G0Y0JA9XZX43X0ZC7Y",
    "inputs_hash": "sha256:475c2c2ec0fb672530ee97f0c02e61d49d4e88299ea43849baf77c41ac6b1e16",
    "intent": "score",
    "item_id": "itm_01JB0000000000000000000005",
-   "payload_hash": "sha256:774a12aba5753a2b971dfdac9a1d1fd5fce939fad09ff14c66f1e76b24db1d21",
-   "prev_hash": "sha256:ea580af68964c2f5edb4c675cb5763aea87b9589e48b9d1a4cd12370d7b4254a",
+   "payload_hash": "sha256:fbc58d1d08e9cda2fecd1eff0abc18dcc4f8c4427ee3997e5dced5b085c822fb",
+   "prev_hash": "sha256:ccb3e53f36cb2e102fc592a11b5299c21b7dc5094b24d0cb7b57fe845098f09d",
    "provenance_ids": [
-    "prov_01M4B3R6G0M9AFFHNSDA3C45GN"
+    "prov_01M4B3R6G0R1CJPTAG9ADX2W1E"
    ],
-   "receipt_id": "rcpt_01M4CF71EVFV44X9CHB7CF1ZJB",
-   "row_hash": "sha256:84ba82677dfb8b2bda3621c5c7e649381c600149f42cee6759f7bf8070547775",
+   "receipt_id": "rcpt_01M4CFC3J0S0WFR2PMJ7QJ839D",
+   "row_hash": "sha256:85ab7e3a011f2e0bd587fa6f9c0e36ea16d9f9c4d8a682cf2aa46e0dd9edd9e4",
    "schema_version": "1.0.0",
    "seq": 39,
    "tool_name": "mbos_economics.engine",
-   "ts": "2026-10-08T00:39:35.120064Z",
+   "ts": "2026-10-08T00:42:21.112261Z",
    "type": "SCORE_RECORDED"
   },
   {
@@ -8593,7 +8593,7 @@
         "vehicle_cost_per_mile": 0.4578,
         "wasted_trip_ev": 0
        },
-       "engine_version": "0.12.0",
+       "engine_version": "0.12.1",
        "evidence": {
         "condition_verified": true,
         "demand_evidence": true,
@@ -8716,7 +8716,7 @@
         "title_ok": true
        }
       },
-      "scorecard_id": "scr_01M4B3R6G09HDRPPCDTHN3QZX0"
+      "scorecard_id": "scr_01M4B3R6G0H5WPSMAKPBX67GVE"
      }
     },
     "state": "RESEARCHING",
@@ -8731,21 +8731,21 @@
    "effect": "update",
    "entity_id": "itm_01JB0000000000000000000004",
    "entity_type": "item",
-   "idempotency_key": "score:scr_01M4B3R6G09HDRPPCDTHN3QZX0",
+   "idempotency_key": "score:scr_01M4B3R6G0H5WPSMAKPBX67GVE",
    "inputs_hash": "sha256:86bcc76a497bc87742501863babd4c785fa1b023d171ae1f997934fe93b2c0f7",
    "intent": "score",
    "item_id": "itm_01JB0000000000000000000004",
-   "payload_hash": "sha256:ed25c669facda4a90edcd651f2d7b7081185e933685a4a6d6bbdbb0e50a8b2fa",
-   "prev_hash": "sha256:c94f0632ef8664576b53786d40b5b0a9de573fbb492292649f5b5b912ef5a564",
+   "payload_hash": "sha256:d40c119c9c5158373b9bf4c54c7d5799fa6c4aed31163677454eb4cb34c1437a",
+   "prev_hash": "sha256:b6619e8d09e542c4a2e58c7ac53e42006dce68e4b2fb27a1a792f7d6c8b859a3",
    "provenance_ids": [
-    "prov_01M4B3R6G0DCXNXQEA2D4WMWY5"
+    "prov_01M4B3R6G0XQK5SXC57EK4E6NY"
    ],
-   "receipt_id": "rcpt_01M4CF71GRWJ231FK303E8P60G",
-   "row_hash": "sha256:7c0a7953a66cd03799a4ebbe3d804d703fb6a0c9bd4c1816291f4dda0b752908",
+   "receipt_id": "rcpt_01M4CFC3KBFACBXAQFCRKSZW56",
+   "row_hash": "sha256:9f25b3426fe100cf05c5c6695ea1c5e0b20236d2ac7b43cd25c7bd56ff995da8",
    "schema_version": "1.0.0",
    "seq": 45,
    "tool_name": "mbos_economics.engine",
-   "ts": "2026-10-08T00:39:35.182902Z",
+   "ts": "2026-10-08T00:42:21.153920Z",
    "type": "SCORE_RECORDED"
   },
   {
@@ -8880,7 +8880,7 @@
         "vehicle_cost_per_mile": 0.4578,
         "wasted_trip_ev": 0
        },
-       "engine_version": "0.12.0",
+       "engine_version": "0.12.1",
        "evidence": {
         "condition_verified": false,
         "demand_evidence": true,
@@ -9003,7 +9003,7 @@
         "title_ok": true
        }
       },
-      "scorecard_id": "scr_01M4B3R6G04KKJHAR74KV5RSN1"
+      "scorecard_id": "scr_01M4B3R6G03SV4PB4QH9EADFBC"
      }
     },
     "state": "RESEARCHING",
@@ -9018,21 +9018,21 @@
    "effect": "update",
    "entity_id": "itm_01JB0000000000000000000003",
    "entity_type": "item",
-   "idempotency_key": "score:scr_01M4B3R6G04KKJHAR74KV5RSN1",
+   "idempotency_key": "score:scr_01M4B3R6G03SV4PB4QH9EADFBC",
    "inputs_hash": "sha256:0f5e8bfdc97c288494e801c81d3a28b42fa82a6d373a7ef6eb1844988b46b073",
    "intent": "score",
    "item_id": "itm_01JB0000000000000000000003",
-   "payload_hash": "sha256:1e06e9af1f0d61837d524eeffa60df43b178e80568bb9a24031631a7a03190e1",
-   "prev_hash": "sha256:ae5782e27db4130747a0620c272003160361c26e7b84ee3dc97d701553195814",
+   "payload_hash": "sha256:3050918c7e0b22ef05a1c2bcf6febeae313e01e66f44a10ddcef895a7b270f03",
+   "prev_hash": "sha256:a231477c6bd4616d7ae3cd6138e9c35cca04acb9c2e1a5993cc2583fb91e8ecf",
    "provenance_ids": [
-    "prov_01M4B3R6G03TYKPZCE1HNC2QFJ"
+    "prov_01M4B3R6G0PDN6YR03TSVFWF6M"
    ],
-   "receipt_id": "rcpt_01M4CF71HZ55PSFZQJCYM0FR9R",
-   "row_hash": "sha256:c25d95c66272ea086019e33a9e68eae7dd39990d067b004b9d479a23a423fde1",
+   "receipt_id": "rcpt_01M4CFC3MHCSSS27G9C7CT7SXH",
+   "row_hash": "sha256:26db05063d56c5d03d798cd3bbd434c6718291800f740ae7d3edbbc285827d50",
    "schema_version": "1.0.0",
    "seq": 51,
    "tool_name": "mbos_economics.engine",
-   "ts": "2026-10-08T00:39:35.222094Z",
+   "ts": "2026-10-08T00:42:21.191858Z",
    "type": "SCORE_RECORDED"
   },
   {
@@ -9161,7 +9161,7 @@
         "vehicle_cost_per_mile": 0.4578,
         "wasted_trip_ev": 0
        },
-       "engine_version": "0.12.0",
+       "engine_version": "0.12.1",
        "evidence": {
         "condition_verified": true,
         "demand_evidence": true,
@@ -9240,7 +9240,7 @@
         "title_ok": true
        }
       },
-      "scorecard_id": "scr_01M4B3R6G0FGK2FMBVNT3CVT8D"
+      "scorecard_id": "scr_01M4B3R6G0NM2FP6EKNFT257KK"
      }
     },
     "state": "RESEARCHING",
@@ -9255,21 +9255,21 @@
    "effect": "update",
    "entity_id": "itm_01JB0000000000000000000006",
    "entity_type": "item",
-   "idempotency_key": "score:scr_01M4B3R6G0FGK2FMBVNT3CVT8D",
+   "idempotency_key": "score:scr_01M4B3R6G0NM2FP6EKNFT257KK",
    "inputs_hash": "sha256:de49e7e4d7a4d6b77cbb22fd504a4bf33d92d0da123af6bc5a4105c0ba1fb803",
    "intent": "score",
    "item_id": "itm_01JB0000000000000000000006",
-   "payload_hash": "sha256:fde38077bd385c1cf198b8b64819653f22a42b1b87c29217a1d2688410545116",
-   "prev_hash": "sha256:e5234b3e3207f77e97baec76cff65511ab54a8685edecca3aac9e426b3a6265e",
+   "payload_hash": "sha256:66d9c1461331b8572430a126c9c6c2df72ded9665660fee720faed86343b01a0",
+   "prev_hash": "sha256:6c7dc231025e0eb8d2a56502ab8ef32773b1ffdb0e703056db1b61fd7a4dd3ab",
    "provenance_ids": [
-    "prov_01M4B3R6G0TDMHRESB9NKG3BB4"
+    "prov_01M4B3R6G0K3DKFTFZA18FW5F7"
    ],
-   "receipt_id": "rcpt_01M4CF71KV9JH605Y4STC6S15G",
-   "row_hash": "sha256:5ada17bf0862e8da7c327048b7aaed2904f8e66f9b6ad3b1c712139aee24aa8e",
+   "receipt_id": "rcpt_01M4CFC3P0CXS0KWK6TZ4NME43",
+   "row_hash": "sha256:8b02e7a9f02eb9f669fa1dc7adc2416017c2c88bc2927a128c641772d0bde96f",
    "schema_version": "1.0.0",
    "seq": 57,
    "tool_name": "mbos_economics.engine",
-   "ts": "2026-10-08T00:39:35.282350Z",
+   "ts": "2026-10-08T00:42:21.240165Z",
    "type": "SCORE_RECORDED"
   },
   {
@@ -9398,7 +9398,7 @@
         "vehicle_cost_per_mile": 0.4578,
         "wasted_trip_ev": 0
        },
-       "engine_version": "0.12.0",
+       "engine_version": "0.12.1",
        "evidence": {
         "condition_verified": true,
         "demand_evidence": true,
@@ -9510,7 +9510,7 @@
         "title_ok": true
        }
       },
-      "scorecard_id": "scr_01M4B3R6G0QJJSYJ47JGQ214F2"
+      "scorecard_id": "scr_01M4B3R6G0SQNVJ1MC2EGTM9PK"
      }
     },
     "state": "RESEARCHING",
@@ -9525,21 +9525,21 @@
    "effect": "update",
    "entity_id": "itm_01JB0000000000000000000007",
    "entity_type": "item",
-   "idempotency_key": "score:scr_01M4B3R6G0QJJSYJ47JGQ214F2",
+   "idempotency_key": "score:scr_01M4B3R6G0SQNVJ1MC2EGTM9PK",
    "inputs_hash": "sha256:d9b798da66dbe3d8cedd6e7d3773e9c73e2286be097f094f71ed1e7bfa82a72c",
    "intent": "score",
    "item_id": "itm_01JB0000000000000000000007",
-   "payload_hash": "sha256:82b786432e7ae3ea2765051c17bf69eae04478ab44d48eba9d7744a4d3439ed5",
-   "prev_hash": "sha256:dcb7025b54142ebae26546121def246d086a79ccaaa4dd0092b592e07b7243b8",
+   "payload_hash": "sha256:d5b67e55e1d366234dd06febcbbc7dc9dbdc9c40f0dc7730dde04a890dabdc55",
+   "prev_hash": "sha256:44cfc86f2cd6358205ef113119210d545ec3baabbe3052bd04d653beb5a6517e",
    "provenance_ids": [
-    "prov_01M4B3R6G05XP6X8CJ8M4F7VT5"
+    "prov_01M4B3R6G0XGZKWJR173ZXHZMD"
    ],
-   "receipt_id": "rcpt_01M4CF71N8EPSXW8ABW0XDKT3F",
-   "row_hash": "sha256:f656129359833dc9d6df43d469c0348cf3f8506f944e7d5853376474d3f7032e",
+   "receipt_id": "rcpt_01M4CFC3Q87616V6ZGE104E54K",
+   "row_hash": "sha256:8a4db0604e2e9642cce8220f64b95f6b9ebd5c7e74799cdc545f3ee9dab17323",
    "schema_version": "1.0.0",
    "seq": 63,
    "tool_name": "mbos_economics.engine",
-   "ts": "2026-10-08T00:39:35.326360Z",
+   "ts": "2026-10-08T00:42:21.279471Z",
    "type": "SCORE_RECORDED"
   },
   {
@@ -9673,7 +9673,7 @@
         "vehicle_cost_per_mile": 0.4578,
         "wasted_trip_ev": 0
        },
-       "engine_version": "0.12.0",
+       "engine_version": "0.12.1",
        "evidence": {
         "access_and_schedule_confirmed": true,
         "customer_screened": true,
@@ -9749,7 +9749,7 @@
         "remote_verification_ok": true
        }
       },
-      "scorecard_id": "scr_01M4B3R6G0TQRK4DNAETW7TSAQ"
+      "scorecard_id": "scr_01M4B3R6G09VDJP7MJ5Y961VBX"
      }
     },
     "state": "RESEARCHING",
@@ -9764,21 +9764,21 @@
    "effect": "update",
    "entity_id": "itm_01JB0000000000000000000022",
    "entity_type": "item",
-   "idempotency_key": "score:scr_01M4B3R6G0TQRK4DNAETW7TSAQ",
+   "idempotency_key": "score:scr_01M4B3R6G09VDJP7MJ5Y961VBX",
    "inputs_hash": "sha256:961b416b0ffc150af82b46a6b6df7e5d8f28815dc1b92afa3915ef427aee6fa6",
    "intent": "score",
    "item_id": "itm_01JB0000000000000000000022",
-   "payload_hash": "sha256:c186a951834844dea3ae0ce703040a4648b8ef3e29cff492805dc3080374b7b7",
-   "prev_hash": "sha256:8d57d493c94cf64257beb0d8b5383584dbae5123b2a3ff1d00f4ef3db768e400",
+   "payload_hash": "sha256:61311df29f70391bc36e229014fe8f7364d135ef837792da6b5b68f29284c3cd",
+   "prev_hash": "sha256:be4c54513e0458d3209312791b88e8da78bf04c8afd836d4323cc763aa77b173",
    "provenance_ids": [
-    "prov_01M4B3R6G0N76Q2ZTSMFHM4VKY"
+    "prov_01M4B3R6G0S7NB358N2MAT7ZWD"
    ],
-   "receipt_id": "rcpt_01M4CF71PMJ8H9V83A7M1CESQP",
-   "row_hash": "sha256:02631791127b340f63faf8709c354e6a8dba27822c9f0ea2d222e835bbc48723",
+   "receipt_id": "rcpt_01M4CFC3RAKRGAZEA1VMHTFK5S",
+   "row_hash": "sha256:3fa55212ba43f94337e784dfef25180385c4b2b3b3e912b763e38e17c56266f5",
    "schema_version": "1.0.0",
    "seq": 69,
    "tool_name": "mbos_economics.engine",
-   "ts": "2026-10-08T00:39:35.371233Z",
+   "ts": "2026-10-08T00:42:21.314349Z",
    "type": "SCORE_RECORDED"
   },
   {
@@ -9912,7 +9912,7 @@
         "vehicle_cost_per_mile": 0.4578,
         "wasted_trip_ev": 0
        },
-       "engine_version": "0.12.0",
+       "engine_version": "0.12.1",
        "evidence": {
         "access_and_schedule_confirmed": true,
         "customer_screened": true,
@@ -10012,7 +10012,7 @@
         "remote_verification_ok": true
        }
       },
-      "scorecard_id": "scr_01M4B3R6G0MN9MW7NQ648SYF69"
+      "scorecard_id": "scr_01M4B3R6G0SBQZ6E3XP21Z2A3T"
      }
     },
     "state": "RESEARCHING",
@@ -10027,21 +10027,21 @@
    "effect": "update",
    "entity_id": "itm_01JB0000000000000000000023",
    "entity_type": "item",
-   "idempotency_key": "score:scr_01M4B3R6G0MN9MW7NQ648SYF69",
+   "idempotency_key": "score:scr_01M4B3R6G0SBQZ6E3XP21Z2A3T",
    "inputs_hash": "sha256:9aa86e9f5ab657518f0cb56eb884e1e8e379d2d4e48617a69bd2f4f6354c380b",
    "intent": "score",
    "item_id": "itm_01JB0000000000000000000023",
-   "payload_hash": "sha256:ae2ea2f41dad9c6cb553aaca89f0bb0bde9f801e240ef4c049239bfeb44f1ba1",
-   "prev_hash": "sha256:5696eefca07123a3ccd2ccfb94172452fc5ca0b2806d9b5bb8acac27be9348e8",
+   "payload_hash": "sha256:4e3642b88832a85afb11a407a64942fbe846d10b259077a7b2cbdf5884f342b8",
+   "prev_hash": "sha256:0147c1138d9797d8567a65e6e217036cf827b6f7bdbcca9d843dc0aeff39d313",
    "provenance_ids": [
-    "prov_01M4B3R6G0E6Z6BH57ZDWXVCQW"
+    "prov_01M4B3R6G0KA9SAM0DNSYS4D03"
    ],
-   "receipt_id": "rcpt_01M4CF71QX6R9CJZ2SS0CA0CFJ",
-   "row_hash": "sha256:6a74831baf031e535de385867d223c5f58348285593c8a680936a051f106fbc6",
+   "receipt_id": "rcpt_01M4CFC3SJ5GWDQ0830HJCKS32",
+   "row_hash": "sha256:e2999526e457a893e19dd84d04d5073dc17a0f2d0f52b265bd71f188f66b4bbe",
    "schema_version": "1.0.0",
    "seq": 75,
    "tool_name": "mbos_economics.engine",
-   "ts": "2026-10-08T00:39:35.412360Z",
+   "ts": "2026-10-08T00:42:21.355083Z",
    "type": "SCORE_RECORDED"
   },
   {
@@ -10177,7 +10177,7 @@
         "vehicle_cost_per_mile": 0.4578,
         "wasted_trip_ev": 0.17
        },
-       "engine_version": "0.12.0",
+       "engine_version": "0.12.1",
        "evidence": {
         "condition_verified": false,
         "demand_evidence": false,
@@ -10303,7 +10303,7 @@
         "title_ok": false
        }
       },
-      "scorecard_id": "scr_01M4B3R6G0Q1WE8NERQYBQDKED"
+      "scorecard_id": "scr_01M4B3R6G088H37TGFXADHMR6N"
      }
     },
     "state": "RESEARCHING",
@@ -10318,21 +10318,21 @@
    "effect": "update",
    "entity_id": "itm_01JB0000000000000000000008",
    "entity_type": "item",
-   "idempotency_key": "score:scr_01M4B3R6G0Q1WE8NERQYBQDKED",
+   "idempotency_key": "score:scr_01M4B3R6G088H37TGFXADHMR6N",
    "inputs_hash": "sha256:964148828e380c49c495c2d5b6f40834146df252ac77778f10e38bffd57272b8",
    "intent": "score",
    "item_id": "itm_01JB0000000000000000000008",
-   "payload_hash": "sha256:5c45b0976e2922c21daab0108096b0b9afc2c2a4a4b4abb968bc44dd0ac18cbd",
-   "prev_hash": "sha256:8656ee05efba79d7ca2a8af758dca4c16e25ad4be604c40e657f8c40a4de8037",
+   "payload_hash": "sha256:b134408c35f96d5327b6ee6b185017b8efeeb0d31b0c0fcf987b14cc7f4f16db",
+   "prev_hash": "sha256:dbe825d62d409951ac443b9edff16892dde4943aa0486662854fd625e04f26fd",
    "provenance_ids": [
-    "prov_01M4B3R6G0F7210N80PABZDMQ9"
+    "prov_01M4B3R6G05H3CKB2M3MRJQH24"
    ],
-   "receipt_id": "rcpt_01M4CF71SERZVAKQFW22XF0VXR",
-   "row_hash": "sha256:68891ec210e3300d9f47ae175a113ad5e80b251eae7400b5c7eb6850eb808742",
+   "receipt_id": "rcpt_01M4CFC3TM6N8YCQPZC0Y43FW9",
+   "row_hash": "sha256:889cd539f55f4b5561cfe5e9b93e1514cd3225d45760a0a97979297eb117f12f",
    "schema_version": "1.0.0",
    "seq": 81,
    "tool_name": "mbos_economics.engine",
-   "ts": "2026-10-08T00:39:35.460173Z",
+   "ts": "2026-10-08T00:42:21.388381Z",
    "type": "SCORE_RECORDED"
   },
   {
@@ -10467,7 +10467,7 @@
         "vehicle_cost_per_mile": 0.4578,
         "wasted_trip_ev": 0
        },
-       "engine_version": "0.12.0",
+       "engine_version": "0.12.1",
        "evidence": {
         "condition_verified": true,
         "demand_evidence": true,
@@ -10551,7 +10551,7 @@
         "title_ok": true
        }
       },
-      "scorecard_id": "scr_01M4B3R6G0WJSQQP86W1Y0BXJX"
+      "scorecard_id": "scr_01M4B3R6G0XC2Q7YGWKRQ2EDDT"
      }
     },
     "state": "RESEARCHING",
@@ -10566,21 +10566,21 @@
    "effect": "update",
    "entity_id": "itm_01JB0000000000000000000001",
    "entity_type": "item",
-   "idempotency_key": "score:scr_01M4B3R6G0WJSQQP86W1Y0BXJX",
+   "idempotency_key": "score:scr_01M4B3R6G0XC2Q7YGWKRQ2EDDT",
    "inputs_hash": "sha256:d873592128f67b69a914f9c437d1c7647f03b2ff62e9217b982fc66ab797183e",
    "intent": "score",
    "item_id": "itm_01JB0000000000000000000001",
-   "payload_hash": "sha256:d441f9406fec7444f15a13bb732d6af929417e1d41be7ed2bd48f0db119e7dc1",
-   "prev_hash": "sha256:5f5303b4996b341268c4c88e6d8168b40541658b3a6395f1516bbebc6606aa67",
+   "payload_hash": "sha256:0da9115d488caa8f6c78520cbd9da58ce7e6e32b96b5fbf0c41b1121123d0a02",
+   "prev_hash": "sha256:516abbc2b17de1a4ad4f60adc10962de793fd4198e1563388ca96a9e00c1f730",
    "provenance_ids": [
-    "prov_01M4B3R6G0J71NK74131BKZG8B"
+    "prov_01M4B3R6G0A8TH99EWBR2T74HE"
    ],
-   "receipt_id": "rcpt_01M4CF71TSA8BS73KW6JCBW1QM",
-   "row_hash": "sha256:00577b2b97de53d0fafd1eaaeaac07b38a56b71e6cf3848b29eaf77e513bee67",
+   "receipt_id": "rcpt_01M4CFC3VSJTQ5RKRPF8GYKPVB",
+   "row_hash": "sha256:dafda803d1092c5844520cef6b1f7426298cd2fdb698dfd32d38ef75d51bcae4",
    "schema_version": "1.0.0",
    "seq": 87,
    "tool_name": "mbos_economics.engine",
-   "ts": "2026-10-08T00:39:35.504657Z",
+   "ts": "2026-10-08T00:42:21.426475Z",
    "type": "SCORE_RECORDED"
   },
   {
@@ -10715,7 +10715,7 @@
         "vehicle_cost_per_mile": 0.4578,
         "wasted_trip_ev": 0
        },
-       "engine_version": "0.12.0",
+       "engine_version": "0.12.1",
        "evidence": {
         "condition_verified": true,
         "demand_evidence": true,
@@ -10795,7 +10795,7 @@
         "title_ok": true
        }
       },
-      "scorecard_id": "scr_01M4B3R6G0X929GVJNZ3YVVEQ4"
+      "scorecard_id": "scr_01M4B3R6G0EM3EEFAPNPY3CYA5"
      }
     },
     "state": "RESEARCHING",
@@ -10810,21 +10810,21 @@
    "effect": "update",
    "entity_id": "itm_01JB0000000000000000000002",
    "entity_type": "item",
-   "idempotency_key": "score:scr_01M4B3R6G0X929GVJNZ3YVVEQ4",
+   "idempotency_key": "score:scr_01M4B3R6G0EM3EEFAPNPY3CYA5",
    "inputs_hash": "sha256:657eb96fae6a0d23bdddc9c75b64125e02396ca771337c03c12a1aa9fa1503ba",
    "intent": "score",
    "item_id": "itm_01JB0000000000000000000002",
-   "payload_hash": "sha256:bb2cdd05934a76246be0bda00375e058574c0577026bcbdaba806b573c7e605a",
-   "prev_hash": "sha256:f942f0113c21a00bfa00eafc50033cc05a31fe51c28c35cbc35da0a271e2c36b",
+   "payload_hash": "sha256:b4be13d8a6470b2d16dfc0c667ea9f9d1ac78129375e69a033ff5ba934f0bdee",
+   "prev_hash": "sha256:0d4f9a3a68de17fc068aa38cb4665e178c03461e35da69411772938522dcc838",
    "provenance_ids": [
-    "prov_01M4B3R6G0C39ZF50KMV50ZDJG"
+    "prov_01M4B3R6G08MZB4ZVAPCZHHPFD"
    ],
-   "receipt_id": "rcpt_01M4CF71WCZ12Y8RTE1WYAV65J",
-   "row_hash": "sha256:2dabfce2253f60acc44d14184908c054bd5e962dbd46749c7c633faab6b2241c",
+   "receipt_id": "rcpt_01M4CFC3WRD8JDYFRJT55XN9T9",
+   "row_hash": "sha256:3adf7c2952982f6fa124e61144dbe512b03347343b3fb1e885b66ad0419d0b7a",
    "schema_version": "1.0.0",
    "seq": 93,
    "tool_name": "mbos_economics.engine",
-   "ts": "2026-10-08T00:39:35.554774Z",
+   "ts": "2026-10-08T00:42:21.456342Z",
    "type": "SCORE_RECORDED"
   },
   {
@@ -10835,7 +10835,7 @@
    "after_state": {
     "doc": {
      "scores": {
-      "inputs_hash": "sha256:8b1b32ce64003aa16b9b4e2a06279141011e1311be14f9739548b2831c7e7e73",
+      "inputs_hash": "sha256:20c07aa4fde0e3c8534524b6aa9111d3ac46cb3dc99c89343a8f34ab580c6d95",
       "scorecard": {
        "alert": false,
        "alert_checks": {
@@ -10962,7 +10962,7 @@
         "vehicle_cost_per_mile": 0.4578,
         "wasted_trip_ev": 0
        },
-       "engine_version": "0.12.0",
+       "engine_version": "0.12.1",
        "evidence": {
         "condition_verified": false,
         "demand_evidence": false,
@@ -11089,7 +11089,7 @@
         "title_ok": true
        }
       },
-      "scorecard_id": "scr_01M4B3R6G0VZX2DWX48KH5BSRG"
+      "scorecard_id": "scr_01M4B3R6G077NYGVSCHDS5RXXQ"
      }
     },
     "state": "RESEARCHING",
@@ -11104,21 +11104,21 @@
    "effect": "update",
    "entity_id": "itm_01M4BNKG0DD37NT1Q8QWCHDF93",
    "entity_type": "item",
-   "idempotency_key": "score:scr_01M4B3R6G0VZX2DWX48KH5BSRG",
-   "inputs_hash": "sha256:8b1b32ce64003aa16b9b4e2a06279141011e1311be14f9739548b2831c7e7e73",
+   "idempotency_key": "score:scr_01M4B3R6G077NYGVSCHDS5RXXQ",
+   "inputs_hash": "sha256:20c07aa4fde0e3c8534524b6aa9111d3ac46cb3dc99c89343a8f34ab580c6d95",
    "intent": "score",
    "item_id": "itm_01M4BNKG0DD37NT1Q8QWCHDF93",
-   "payload_hash": "sha256:fe6c71ac41b5dbb782d26eb5a33a43a50017bbbbf6e474ce8c18a2f8c0c3e24f",
-   "prev_hash": "sha256:5b1d7b6633fb35fae24076a2d38bd97cf5f2d50593479d3fe5677cdd8bfbbdf6",
+   "payload_hash": "sha256:4bc4169cfdb6d36dec771308d3eb447729695b0eba174570348b0d9bec518d06",
+   "prev_hash": "sha256:89467757a0e22b04efc6989e79ff1e720142f14f3f3de0ca0f58b9910391ec06",
    "provenance_ids": [
-    "prov_01M4B3R6G0B8N4CPY2G8T3W90N"
+    "prov_01M4B3R6G0DFYQRWC9TBX7Q9HW"
    ],
-   "receipt_id": "rcpt_01M4CF71XNZN9CGC94H0J19TVG",
-   "row_hash": "sha256:6f42ada2484b748d4839276e081a526dbf0642123d5e3ee7d58ff4e9ca983828",
+   "receipt_id": "rcpt_01M4CFC3XZ43AA74ZMY07X8ZEY",
+   "row_hash": "sha256:bbd964b5780bab7721aa7cbf9c3bc10ec4136f293ec419b7315adb54ef9eab2e",
    "schema_version": "1.0.0",
    "seq": 99,
    "tool_name": "mbos_economics.engine",
-   "ts": "2026-10-08T00:39:35.596219Z",
+   "ts": "2026-10-08T00:42:21.494894Z",
    "type": "SCORE_RECORDED"
   },
   {
@@ -11129,7 +11129,7 @@
    "after_state": {
     "doc": {
      "scores": {
-      "inputs_hash": "sha256:7b536530ba06cf0cfec45bdb62b90e824241fe45f014e4ef0882b871c222f812",
+      "inputs_hash": "sha256:fd54165107ccb119c7de04c4c66228cfc1f8bfe119ae5a717a4a3918c924c162",
       "scorecard": {
        "alert": false,
        "alert_checks": {
@@ -11252,7 +11252,7 @@
         "vehicle_cost_per_mile": 0.4578,
         "wasted_trip_ev": 0
        },
-       "engine_version": "0.12.0",
+       "engine_version": "0.12.1",
        "evidence": {
         "access_and_schedule_confirmed": false,
         "customer_screened": false,
@@ -11333,7 +11333,7 @@
         "remote_verification_ok": true
        }
       },
-      "scorecard_id": "scr_01M4BRBC80Q8MVKV7SG5WJC419"
+      "scorecard_id": "scr_01M4BRBC8060B3XFQBZW6MFQGM"
      }
     },
     "state": "RESEARCHING",
@@ -11348,21 +11348,21 @@
    "effect": "update",
    "entity_id": "itm_01M4BNKG2FJJBCE5MWAANEV461",
    "entity_type": "item",
-   "idempotency_key": "score:scr_01M4BRBC80Q8MVKV7SG5WJC419",
-   "inputs_hash": "sha256:7b536530ba06cf0cfec45bdb62b90e824241fe45f014e4ef0882b871c222f812",
+   "idempotency_key": "score:scr_01M4BRBC8060B3XFQBZW6MFQGM",
+   "inputs_hash": "sha256:fd54165107ccb119c7de04c4c66228cfc1f8bfe119ae5a717a4a3918c924c162",
    "intent": "score",
    "item_id": "itm_01M4BNKG2FJJBCE5MWAANEV461",
-   "payload_hash": "sha256:2df47b186966106df34ff778c27ca432cc079e37d7282615c8222d985b2f5c33",
-   "prev_hash": "sha256:f258776f0678c4e59354632f87a9b663333429be06adfe5504a0415eedfdf1af",
+   "payload_hash": "sha256:9bf37f694b8b12579266ae11f5a20e7a080e09b8be087424ebc72c8fb7e22986",
+   "prev_hash": "sha256:a10ef9aadac5123d7d72f52cab105c4683449fd6bafe60b373339df5eee7e746",
    "provenance_ids": [
-    "prov_01M4BRBC80NHPACZ1H4DMWWKGZ"
+    "prov_01M4BRBC80C7A6Z4RRRH1WHB5N"
    ],
-   "receipt_id": "rcpt_01M4CF71Z09HE1R15KM0V03FGK",
-   "row_hash": "sha256:be38fa0f553f3c6f860e0afaa20993790c1edda78080cff52d5824ce2e88cd2f",
+   "receipt_id": "rcpt_01M4CFC3Z7SXQNRKV1V8SS9732",
+   "row_hash": "sha256:bb526b67b9326b91eb85974c7989fef125d7ed955b9c4d7057b6e25c6a2ec420",
    "schema_version": "1.0.0",
    "seq": 105,
    "tool_name": "mbos_economics.engine",
-   "ts": "2026-10-08T00:39:35.639030Z",
+   "ts": "2026-10-08T00:42:21.534812Z",
    "type": "SCORE_RECORDED"
   },
   {
@@ -11373,7 +11373,7 @@
    "after_state": {
     "doc": {
      "scores": {
-      "inputs_hash": "sha256:e4023b060c64458206eab7a3a0c82bbd1f8c3d4f83583ee497f4ab3d4ed28c4a",
+      "inputs_hash": "sha256:30ad531390b83e58ad74404b86f9afcd1612704cc2edc73eb1d68fb661a8c47d",
       "scorecard": {
        "alert": false,
        "alert_checks": {
@@ -11502,7 +11502,7 @@
         "vehicle_cost_per_mile": 0.4578,
         "wasted_trip_ev": 0
        },
-       "engine_version": "0.12.0",
+       "engine_version": "0.12.1",
        "evidence": {
         "access_and_schedule_confirmed": false,
         "customer_screened": false,
@@ -11583,7 +11583,7 @@
         "remote_verification_ok": true
        }
       },
-      "scorecard_id": "scr_01M4BRBC80KFD3B3E7CKJYFVBP"
+      "scorecard_id": "scr_01M4BRBC804AZBY647YKS1JWMV"
      }
     },
     "state": "RESEARCHING",
@@ -11598,21 +11598,21 @@
    "effect": "update",
    "entity_id": "itm_01M4BNKG2FK7TC22PJJ8MD09T9",
    "entity_type": "item",
-   "idempotency_key": "score:scr_01M4BRBC80KFD3B3E7CKJYFVBP",
-   "inputs_hash": "sha256:e4023b060c64458206eab7a3a0c82bbd1f8c3d4f83583ee497f4ab3d4ed28c4a",
+   "idempotency_key": "score:scr_01M4BRBC804AZBY647YKS1JWMV",
+   "inputs_hash": "sha256:30ad531390b83e58ad74404b86f9afcd1612704cc2edc73eb1d68fb661a8c47d",
    "intent": "score",
    "item_id": "itm_01M4BNKG2FK7TC22PJJ8MD09T9",
-   "payload_hash": "sha256:f1a38472c49df2dbc51f0463432e95eb46f3f60fb2634e1eda1d2359404e3064",
-   "prev_hash": "sha256:a3356da2de3041c66a00c07ce3aff560bed7b62a31e1e6f4ec10807ac33316ab",
+   "payload_hash": "sha256:1b44dd294c49e37779253313b8e14f768e1281ef041f2f49ac495b86f303d310",
+   "prev_hash": "sha256:44edfd5da86f4e1ba7795edecafcaa5a74395429de0dd24b791e5e6afadb5d43",
    "provenance_ids": [
-    "prov_01M4BRBC80CKCEHQFZ50V32G64"
+    "prov_01M4BRBC80MN6WHCX0AND95C47"
    ],
-   "receipt_id": "rcpt_01M4CF7210ZKHXQ0X8W81PXVDF",
-   "row_hash": "sha256:4c129d05af5ca57054f45291ca0f2149d66bff68a1f191dee32a38a6c5b8bb77",
+   "receipt_id": "rcpt_01M4CFC40DY51AJJFCHBD3WBNF",
+   "row_hash": "sha256:e30936918adb83230647162f2848a46787a93e4d40c30ca39cc2a9e6754b74b4",
    "schema_version": "1.0.0",
    "seq": 111,
    "tool_name": "mbos_economics.engine",
-   "ts": "2026-10-08T00:39:35.700522Z",
+   "ts": "2026-10-08T00:42:21.574181Z",
    "type": "SCORE_RECORDED"
   },
   {
@@ -11623,7 +11623,7 @@
    "after_state": {
     "doc": {
      "scores": {
-      "inputs_hash": "sha256:40821548760bccae3a640654da7375d2d2dbbc4e0a23b063641c4c319e463298",
+      "inputs_hash": "sha256:e833f6aaa6dea93f8ae2ccc4ff1aad0cc0f509552c021dd610e475238a22887f",
       "scorecard": {
        "alert": false,
        "alert_checks": {
@@ -11753,7 +11753,7 @@
         "vehicle_cost_per_mile": 0.4578,
         "wasted_trip_ev": 0.15
        },
-       "engine_version": "0.12.0",
+       "engine_version": "0.12.1",
        "evidence": {
         "access_and_schedule_confirmed": false,
         "customer_screened": false,
@@ -11836,7 +11836,7 @@
         "remote_verification_ok": true
        }
       },
-      "scorecard_id": "scr_01M4BRBC80VRQSV17N14J3868D"
+      "scorecard_id": "scr_01M4BRBC80MMJ0CJF2JX26T5J0"
      }
     },
     "state": "RESEARCHING",
@@ -11851,21 +11851,21 @@
    "effect": "update",
    "entity_id": "itm_01M4BNKG36HGNDVW5XNMCV3WPE",
    "entity_type": "item",
-   "idempotency_key": "score:scr_01M4BRBC80VRQSV17N14J3868D",
-   "inputs_hash": "sha256:40821548760bccae3a640654da7375d2d2dbbc4e0a23b063641c4c319e463298",
+   "idempotency_key": "score:scr_01M4BRBC80MMJ0CJF2JX26T5J0",
+   "inputs_hash": "sha256:e833f6aaa6dea93f8ae2ccc4ff1aad0cc0f509552c021dd610e475238a22887f",
    "intent": "score",
    "item_id": "itm_01M4BNKG36HGNDVW5XNMCV3WPE",
-   "payload_hash": "sha256:50aa5fed4e8ca7dbc6976ef4a0f593029b05d5e9f8e8089bd618d4a01aa30294",
-   "prev_hash": "sha256:af7181a350f4d7c689a1ca5b1eb0d01b2fe58c1db4b8ee1d9003a8782ffb3263",
+   "payload_hash": "sha256:6426d9ac45d324a44fe3850dd2fa36d73678e7edd505d76625130264ba217bba",
+   "prev_hash": "sha256:542f41961211f8f620239c6b7d9840f92c895e7a3fd3e80e3d2aca449b8b3822",
    "provenance_ids": [
-    "prov_01M4BRBC80JXWJJ74EEV1QMFB0"
+    "prov_01M4BRBC80CDWA06XEJTHS07CS"
    ],
-   "receipt_id": "rcpt_01M4CF722QDBY87581XTH0RCF7",
-   "row_hash": "sha256:23e01dabb9532dda32dd818b5c0b02eb9a3c0d8ccdf68335a164394b9136bcc1",
+   "receipt_id": "rcpt_01M4CFC41K7YVTCP60C180MKAD",
+   "row_hash": "sha256:aa4e329e3717cf7fd392954d6e79e3031fcf67b2e6857ac6d80ba37bd705500a",
    "schema_version": "1.0.0",
    "seq": 117,
    "tool_name": "mbos_economics.engine",
-   "ts": "2026-10-08T00:39:35.755772Z",
+   "ts": "2026-10-08T00:42:21.612213Z",
    "type": "SCORE_RECORDED"
   },
   {
@@ -11876,7 +11876,7 @@
    "after_state": {
     "doc": {
      "scores": {
-      "inputs_hash": "sha256:c9e115593dff44b0049a82d7be73f78cf52ddcf6884cb93c5ba2e46907f40605",
+      "inputs_hash": "sha256:71fbc1d562f12e18dfcb063d1896db5a26f918d0543ebb4f268e3aeb46b457ef",
       "scorecard": {
        "alert": false,
        "alert_checks": {
@@ -12005,7 +12005,7 @@
         "vehicle_cost_per_mile": 0.4578,
         "wasted_trip_ev": 0
        },
-       "engine_version": "0.12.0",
+       "engine_version": "0.12.1",
        "evidence": {
         "access_and_schedule_confirmed": false,
         "customer_screened": false,
@@ -12086,7 +12086,7 @@
         "remote_verification_ok": true
        }
       },
-      "scorecard_id": "scr_01M4BRBC80T97XSRQ46D9K4CRS"
+      "scorecard_id": "scr_01M4BRBC80KD86DX4CJJZFXYJ5"
      }
     },
     "state": "RESEARCHING",
@@ -12101,21 +12101,21 @@
    "effect": "update",
    "entity_id": "itm_01M4BNKG2FD7DY47BX8HC9ZRSD",
    "entity_type": "item",
-   "idempotency_key": "score:scr_01M4BRBC80T97XSRQ46D9K4CRS",
-   "inputs_hash": "sha256:c9e115593dff44b0049a82d7be73f78cf52ddcf6884cb93c5ba2e46907f40605",
+   "idempotency_key": "score:scr_01M4BRBC80KD86DX4CJJZFXYJ5",
+   "inputs_hash": "sha256:71fbc1d562f12e18dfcb063d1896db5a26f918d0543ebb4f268e3aeb46b457ef",
    "intent": "score",
    "item_id": "itm_01M4BNKG2FD7DY47BX8HC9ZRSD",
-   "payload_hash": "sha256:dc17e5b1a9a9f75967839e0cb59aadb492482c3d24ff860e65e446f688bc4a99",
-   "prev_hash": "sha256:938c0ecf6dced81d70d32bea9b8cec940337ae0f78a6e2fe7326ed47d527b6a4",
+   "payload_hash": "sha256:aa7e1c2b12057962a62a182628eeae6f4b12cb47617ecbeb3255fbfffb971a78",
+   "prev_hash": "sha256:e02a84fda89093d5a2e400284c2223fdb14c7e7f24f34cc077e541f8c9172044",
    "provenance_ids": [
-    "prov_01M4BRBC80WX74CDXHFM8HQ1W2"
+    "prov_01M4BRBC80K4V486QCYM9FX06G"
    ],
-   "receipt_id": "rcpt_01M4CF7289CVMK6ANJNA6RQ3DV",
-   "row_hash": "sha256:a10c30f8b561b199fe11c3379926f80a00f22143d4915555269ea42811b1d244",
+   "receipt_id": "rcpt_01M4CFC42YJEQGBSBYMEYX92Y3",
+   "row_hash": "sha256:6d32bd91059c051db1254465b6f5f69f61add274a545a82920773f899c2739b0",
    "schema_version": "1.0.0",
    "seq": 123,
    "tool_name": "mbos_economics.engine",
-   "ts": "2026-10-08T00:39:35.934663Z",
+   "ts": "2026-10-08T00:42:21.654560Z",
    "type": "SCORE_RECORDED"
   },
   {
@@ -12126,7 +12126,7 @@
    "after_state": {
     "doc": {
      "scores": {
-      "inputs_hash": "sha256:4a65995bbdc3f2e9f1dc39bed8c900d31cd0806d53a8b74db5737f96d066b5e7",
+      "inputs_hash": "sha256:e4a5fe87a92e3df38e0272a888fc2b32b215cc098761900b6281674f3f9d3f5d",
       "scorecard": {
        "alert": false,
        "alert_checks": {
@@ -12254,7 +12254,7 @@
         "vehicle_cost_per_mile": 0.4578,
         "wasted_trip_ev": 0
        },
-       "engine_version": "0.12.0",
+       "engine_version": "0.12.1",
        "evidence": {
         "condition_verified": false,
         "demand_evidence": false,
@@ -12344,7 +12344,7 @@
         "title_ok": false
        }
       },
-      "scorecard_id": "scr_01M4BRBC807K8K5FNMS5PE33YC"
+      "scorecard_id": "scr_01M4BRBC80Y3DBG6TSG8MM2BAF"
      }
     },
     "state": "RESEARCHING",
@@ -12359,21 +12359,21 @@
    "effect": "update",
    "entity_id": "itm_01M4BNKG0C8T3VNSDBVHQC9F2J",
    "entity_type": "item",
-   "idempotency_key": "score:scr_01M4BRBC807K8K5FNMS5PE33YC",
-   "inputs_hash": "sha256:4a65995bbdc3f2e9f1dc39bed8c900d31cd0806d53a8b74db5737f96d066b5e7",
+   "idempotency_key": "score:scr_01M4BRBC80Y3DBG6TSG8MM2BAF",
+   "inputs_hash": "sha256:e4a5fe87a92e3df38e0272a888fc2b32b215cc098761900b6281674f3f9d3f5d",
    "intent": "score",
    "item_id": "itm_01M4BNKG0C8T3VNSDBVHQC9F2J",
-   "payload_hash": "sha256:ced572ca89df551f3b4b711f4d70367ff14a7794b0b2745073f32f9f897f33ad",
-   "prev_hash": "sha256:e282b59691a675b34de20365d32a5585f5c68e29d5d1a6c983ea2f3f5a77e1e1",
+   "payload_hash": "sha256:e23c42622b306c0fc561ae0d050075ed8da89d0be5467e1b5e28e433b1dc763f",
+   "prev_hash": "sha256:e8426c08a5750bd45f77fb60a8cc06ae65797ad59d0d59bf558db7b203d1398e",
    "provenance_ids": [
-    "prov_01M4BRBC80RM2FVSX3NP4T8JTY"
+    "prov_01M4BRBC80F2FMPE7YX6WHM89J"
    ],
-   "receipt_id": "rcpt_01M4CF72A8Z2KDHT7B7N1CXRXX",
-   "row_hash": "sha256:1e6ed709d016d0cc7605a3b16bc796532f1e5bcbdec30a78d2fa277453e03dae",
+   "receipt_id": "rcpt_01M4CFC44C9TDB66KWW2WQGX8B",
+   "row_hash": "sha256:bf3a941b3b385f5ee3e9db2a744befa77b4dc2465369cad45a0995993221c48a",
    "schema_version": "1.0.0",
    "seq": 129,
    "tool_name": "mbos_economics.engine",
-   "ts": "2026-10-08T00:39:35.998751Z",
+   "ts": "2026-10-08T00:42:21.700204Z",
    "type": "SCORE_RECORDED"
   }
  ]

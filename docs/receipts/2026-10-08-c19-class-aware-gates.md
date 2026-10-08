@@ -1,6 +1,6 @@
 # Receipt: C-19, class-aware gates and capital-velocity ranking (ADR-0012)
 
-Agent 03, 2026-10-08. Package `mbos_economics` 0.12.0, scoring config 2026.10.2 (2026.10.1 archived in `config/history/`). Dry-run only. Tags: FACT / INFERENCE / RECOMMENDATION / UNKNOWN.
+Agent 03, 2026-10-08. Package `mbos_economics` 0.12.1, scoring config 2026.10.2 (2026.10.1 archived in `config/history/`). Dry-run only. Tags: FACT / INFERENCE / RECOMMENDATION / UNKNOWN.
 
 ## What changed (FACT)
 - **Removed** `capital_and_risk.min_profit_flip` (150), `min_profit_service` (100), gate `min_profit_ok`, YES condition `ev_min_profit_ok`, and `alert_thresholds.ev_multiple_of_min_profit`. Neither engine code nor default config holds a constant profit floor. `tests/test_class_aware.py` asserts it.

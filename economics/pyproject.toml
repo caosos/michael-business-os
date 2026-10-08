@@ -1,6 +1,6 @@
 [project]
 name = "mbos-economics"
-version = "0.12.0"
+version = "0.12.1"
 description = "Michael Business OS — deterministic economics and scoring engine (Agent 03, lane C)"
 requires-python = ">=3.10"
 dependencies = []  # stdlib only: the arithmetic must not depend on third-party numerics

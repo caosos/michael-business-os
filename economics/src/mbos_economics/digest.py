@@ -8,7 +8,10 @@ Order (explainable, lexicographic):
   1. bucket:  YES + alert  >  YES  >  MAYBE (research)  >  PASS flagged pass_on_priors (R13: research)
   2. inside a bucket: items with a deadline (recommendation.expires_at or normalized.ends_at) inside the
      horizon (default 72 h) first, soonest first
-  3. then value of Michael's hour: EV profit/hour x confidence, highest first
+  3. then the C-19 ranking objective (ADR-0012): rank_score = risk-adjusted profit x confidence x
+     capital velocity (x seasonality x cash pressure), highest first, so a quick small flip can outrank a
+     big slow one. Every row names its components in ``reason``. A card scored before C-19 has no
+     ``ranking``; it sorts after ranked rows in its bucket and says so.
   4. then time-to-cash, shortest first; then item_id
 
 Excluded (listed with a reason, never silently dropped): archived PASS, past deadline, already decided
@@ -92,9 +95,19 @@ def _row(item: dict, as_of: str, horizon: Decimal) -> tuple[dict | None, str | N
     ev_pph, conf = D(d["ev_profit_per_hour"]), D(d["confidence"])
     value = money(ev_pph * conf)
     ttc = D(d["time_to_cash_days"])
-    parts = [verdict + (" + ALERT" if sc.get("alert") else ""),
-             f"EV {_usd(ev_pph)}/h x conf {conf} = {_usd(value)}/h",
-             f"EV {_usd(d['ev_decision'])}", f"cash in {ttc} d"]
+    rk = sc.get("ranking")
+    parts = [verdict + (" + ALERT" if sc.get("alert") else "")]
+    if rk:
+        parts.append(f"{str(d.get('deal_class', '')).replace('_', ' ').lower()}: {_usd(d['cash_at_risk'])} at risk, "
+                     f"back in {ttc} d ({d['cash_multiple']}x)")
+        parts.append(f"rank {rk['rank_score']} = risk-adjusted {_usd(rk['risk_adjusted_profit'])} x conf "
+                     f"{rk['confidence']} x velocity {rk['capital_velocity']}/day"
+                     + (f" x season {rk['seasonality_factor_applied']}" if rk["seasonality_factor"] is not None else "")
+                     + (f" x cash pressure {rk['cash_pressure_factor']}" if rk["cash_share_of_current_cash"] is not None else ""))
+        parts.append(f"EV {_usd(ev_pph)}/h, EV {_usd(d['ev_decision'])}")
+    else:
+        parts += [f"EV {_usd(ev_pph)}/h x conf {conf} = {_usd(value)}/h", f"EV {_usd(d['ev_decision'])}",
+                  f"cash in {ttc} d", "no capital-velocity ranking (scored before C-19: re-score)"]
     if hours_left is not None:
         parts.append(f"deadline in {hours_left} h")
     reason = "; ".join(parts) + f" -> {action}"
@@ -104,13 +117,17 @@ def _row(item: dict, as_of: str, horizon: Decimal) -> tuple[dict | None, str | N
         "title": (item.get("normalized") or {}).get("title"), "state": state,
         "verdict": verdict, "alert": bool(sc.get("alert")), "pass_on_priors": bool(sc.get("pass_on_priors")),
         "bucket": bucket, "action": action, "reason": reason,
-        "value_per_hour": value, "ev_profit_per_hour": ev_pph, "confidence": conf,
+        "value_per_hour": value, "rank_score": D(rk["rank_score"]) if rk else None,
+        "deal_class": d.get("deal_class"), "capital_velocity": D(rk["capital_velocity"]) if rk else None,
+        "cash_multiple": D(d["cash_multiple"]) if d.get("cash_multiple") is not None else None,
+        "ranking": rk, "ev_profit_per_hour": ev_pph, "confidence": conf,
         "ev_decision": D(d["ev_decision"]), "time_to_cash_days": ttc,
         "deadline": deadline, "hours_left": hours_left,
         "window": "<24h" if in_window and hours_left <= 24 else ("<72h" if in_window else "later"),
         "refs": {"scorecard_id": scores["scorecard_id"], "inputs_hash": scores["inputs_hash"],
                  "recommendation_id": rec.get("recommendation_id"), "provenance_id": rec.get("provenance_id")},
-        "_key": (_BUCKETS[bucket], 0 if in_window else 1, hours_left if in_window else _INF, -value, ttc, iid),
+        "_key": (_BUCKETS[bucket], 0 if in_window else 1, hours_left if in_window else _INF,
+                1 if rk is None else 0, -D(rk["rank_score"]) if rk else -value, ttc, iid),
     }
     return row, None
 
