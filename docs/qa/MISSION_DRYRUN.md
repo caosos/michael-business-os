@@ -191,7 +191,7 @@ G-21b (stages 5-8) is unblocked: there is a YES to approve (areq_01M4ENFGT9Q7EG5
 
 # G-21b: stages 5-8 on the fixed assembly
 
-Date 2026-10-08. Agent 07 QA, fresh worker. DRY-RUN only: nothing sent, bought, published or contacted; no other lane touched. Assembly: detached worktree of coordinator `fe476b0` (`/tmp/a07g21d/w`), fresh venv, `tools/bootstrap_dev.py --ui-pin g21pin` (lane pins as G-21c: 03 `3fb7502`, 05 `44a0fb2`, 02 `a2b971d`, 04 `6bdf941`, 06 `96fb674`). Worker + Operator UI (:8791) run unattended; UI driven over HTTP the way a browser posts (CSRF + nonce + PIN). Receipts are cited by chain `seq` (the CLI does not print receipt ids; F-113 candidate below).
+Date 2026-10-08. Agent 07 QA, fresh worker. DRY-RUN only: nothing sent, bought, published or contacted; no other lane touched. Assembly: detached worktree of coordinator `fe476b0` (`/tmp/a07g21d/w`), fresh venv, `tools/bootstrap_dev.py --ui-pin g21pin` (lane pins as G-21c: 03 `3fb7502`, 05 `44a0fb2`, 02 `a2b971d`, 04 `6bdf941`, 06 `96fb674`). Worker + Operator UI (:8791) run unattended; UI driven over HTTP the way a browser posts (CSRF + nonce + PIN). Receipts are cited by chain `seq` and `rcpt_` id (ids read from `mbos.receipts`; the CLI prints seq only).
 
 State carried from G-21c, rebuilt: fixture `training_examples.json` (+ two clone TV listings `TRAIN-TV-2`, `TRAIN-TV-3` in `/tmp`, same economics, different title/id/price $32-$35) so the NO and HOLD paths each get their own YES-recommended request and the real TV stays for the YES path. TV comps entered through the UI form for all three (the form refused a save with no link/note: "Give a link or a short note saying where the price came from", correct). Worker moved all three to `AWAITING_APPROVAL` by itself.
 
@@ -226,3 +226,23 @@ HOLD path (Vizio): UI HOLD preset 24h with reason -> "HOLD recorded. The workflo
 Findings:
 - **F-113 (P3, FACT; owner 01):** the worker log shows an ERROR traceback for the NO: `psycopg.DatabaseError: mbos: illegal item transition ARCHIVED -> REJECTED` from `spine_d.apply_no` (`spine_d.py:432`) after the item was already archived (`worker2.log`; DBOS "Exception encountered in background workflow"). The final state is right (ARCHIVED, receipts 138/139 present) but the NO workflow errors; it reads as a double apply of the NO consequence (UI path and worker both) or a retry. Repro: stage 5 NO on a fresh YES item with the worker running. Also P3: `mbos show` prints receipts with `seq` but no receipt id, so a human cannot cite one without SQL.
 - Observation (INFER, not filed): the CLI step-up is the flag `--step-up`, not a PIN; whoever holds `var/owner.env` can pass it. The UI path does enforce the PIN. Acceptable if the owner env is the credential, but the two doors are not equal.
+
+Receipt ids for stages 5: NO `seq 135 rcpt_01M4EPSMYB8QM7TN2A5JSDNKY9`, `138 rcpt_01M4EPTDGC4JNAK8RTFWCHMZCX`, `139 rcpt_01M4EPTDH400B6JZ0CN56RXQH8`; HOLD `seq 136 rcpt_01M4EPSP18G19CWXB0QPF3F9R7`.
+
+## Stage 6: dry-run action: PASS
+
+UI YES on TV-1 with the right step-up PIN (`g21pin`): "YES recorded. The item workflow now runs it through the gateway (dry-run)". About 20 s later the item is `ACTED`. Receipts for `areq_01M4EPF4XECGWAR3G2Z129KHT5`:
+| seq | receipt | type | intent |
+|---|---|---|---|
+| 140 | `rcpt_01M4EPWA3EYNJ0VRS7NPPGZDNR` | APPROVAL_DECIDED (human) | Michael decided YES |
+| 141 | `rcpt_01M4EPX654P3GBXNKKJC2B4BR5` | ITEM_STATE_CHANGED | Michael said YES |
+| 142 | `rcpt_01M4EPX65WPTA40KY62GDY66GN` | ITEM_STATE_CHANGED | executing comms.email.send (DRY-RUN) |
+| 143 | | BUDGET_RESERVED | reserve 0.000000 USD (dry_run) |
+| 144 | `rcpt_01M4EPX6CNTJD99SG7Q8G9RMZC` | ACTION_EXECUTING | guard passed (8/8); calling effector dry_run=True |
+| 145 | | BUDGET_COMMITTED | commit (dry_run; no real money moved) |
+| 146 | `rcpt_01M4EPX6FHJAWQKCY25FGTFT25` | ACTION_EXECUTED | comms.email.send executed (DRY-RUN) |
+| 147 | `rcpt_01M4EPX6HJM70REC0K4SSYYB3Y` | ITEM_STATE_CHANGED | dry-run action receipted by lane E gateway: all 8 guard checks passed |
+
+Effector call recorded: `mbos.effector_calls` has exactly 1 row: `seq 1`, `idempotency_key act:areq_01M4EPF4XECGWAR3G2Z129KHT5`, capability `comms.email.send`, provider `dryrun`, `provider_msg_id dryrun_01M4EPX6DSE509BRPZNFDM7NDF`, `dry_run true`, state `executed`, request `payload_hash sha256:c3a4ad9354750dd31a5e62eaa4743cee06e615bccd67cf5ecf20a232c5b95f23` (the hash Michael was shown and confirmed with `--seen`/`payload_hash_seen`).
+`live_effector_calls == 0`: `select count(*) filter (where dry_run is not true) from mbos.effector_calls` -> 0 of 1; `mbos.v_a7_live_effects` -> 0 rows. The NO (Samsung) and HOLD (Vizio) items made no effector call.
+`mbos audit`: `chain.ok true (147 receipts)`, `provenance.ok true`, `dry_run.ok true (effector_receipts 1, receipt_exceptions [], call_exceptions [])`, `conformance.ok true`. Ledger after the action (still before any outcome): protected principal $500, earned $0, deployed $0, realized $0, available $500 (an introductory email moves no capital).
