@@ -534,3 +534,7 @@ Example config: `config/discovery.example.toml` now has a profile for every sour
 - With the block name added to a test spine, the artifact round-trips and the card still validates with no errors. The card ignores the unknown block, so it does not display the tags yet.
 
 **Verified (FACT).** `tests/test_b21_tags.py`, 28 tests on 16 illustrative listing texts (`tests/fixtures/tags_listings.json`): tags appear only where the text supports them, "runs great" variants never tag, injection cases are excluded, and quotes come from the cleaned text.
+
+**A-24 follow-up (Agent 01 `9cf6f00`).** The spine now allows `category_tags` and the card renders it: tag, `INFERENCE`, lane provenance and up to 5 quoted evidence items. A tag shows only with provenance and a non-empty quote, and with none supported the card lists "category_tags … absence is not a 'no'" under UNKNOWN. `card.schema.json` is re-vendored. The test now asserts the real card output, and the older "spine without the block" case is a simulated pre-A-24 spine.
+
+**Regression found and fixed (B-15 seller rating).** The hardened card now requires `seller.rating` to be a finite **number**, so my object-valued rating silently degraded to UNKNOWN. It is now a number: eBay's positive-feedback percentage (`unit: "% positive feedback"`, with the feedback count in the note), or the feedback count (`unit: "feedback score (count)"`) when no percentage is exposed. The B-15 test asserts it on the real card.

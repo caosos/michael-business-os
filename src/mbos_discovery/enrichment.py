@@ -185,8 +185,16 @@ def build_blocks(item: dict, facts_by_listing: dict[str, dict], as_of: datetime,
         f = facts_by_listing.get(f"{s['source']}|{s.get('source_listing_id')}", {})
         if f.get("rating") and "rating" not in seller:
             r = f["rating"]
-            seller["rating"] = _datum(r, "FACT", s["provenance_id"],
-                                      f"marketplace feedback as reported by {s['source']}; not independently verified")
+            # The card (A-24+) requires a NUMERIC rating, so: the positive-feedback percentage when exposed, else the
+            # feedback count; the unit says which, and the other figure rides in the note.
+            if "feedback_percent" in r:
+                val, unit = r["feedback_percent"], "% positive feedback"
+                extra = f"; feedback score {r['feedback_score']}" if "feedback_score" in r else ""
+            else:
+                val, unit, extra = r["feedback_score"], "feedback score (count)", ""
+            seller["rating"] = {**_datum(val, "FACT", s["provenance_id"],
+                                         f"marketplace feedback as reported by {s['source']}; not independently verified{extra}"),
+                                "unit": unit}
             dims += 1
     if seller:
         # confidence = how many independent dimensions the source exposed: ≥3 high, 2 medium, 1 low

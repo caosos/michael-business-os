@@ -96,8 +96,8 @@ def _attach(spine_db, tmp_path, listing, monkeypatch, supported: bool, kw=("util
     from mbos_discovery.rawstore import FileRawStore
     from conftest import Clock
     from datetime import datetime, timezone
-    if supported:
-        monkeypatch.setattr(spine, "ENRICHMENT_BLOCKS", spine.ENRICHMENT_BLOCKS + ("category_tags",))
+    if not supported:       # simulate a spine older than A-24, which does not know the block
+        monkeypatch.setattr(spine, "ENRICHMENT_BLOCKS", tuple(b for b in spine.ENRICHMENT_BLOCKS if b != "category_tags"))
     ids = _ingest_ebay(spine_db, tmp_path, Clock(), kw)
     item_id = ids[listing]
     with spine_db.begin() as c:
@@ -112,6 +112,11 @@ def test_block_round_trips_as_an_artifact_and_the_card_still_validates(spine_db,
     card, errors, enr = _card(spine_db, spine, item_id)
     assert errors == [] and [t["tag"] for t in enr["category_tags"]["tags"]] == ["project"]
     assert enr["category_tags"]["tags"][0]["provenance_id"] == out["provenance_id"]
+    # Agent 01's card (A-24) now renders it: INFERENCE, lane provenance, quoted evidence
+    (shown,) = card["category_tags"]
+    assert shown["tag"] == "project" and shown["basis"] == "INFERENCE" and shown["provenance_id"] == out["provenance_id"]
+    assert any("needs lights" in e["quote"] for e in shown["evidence"]) and len(shown["evidence"]) <= 5
+    assert not any("category_tags" in u for u in card["unknowns"])
     with spine_db.begin() as c:                                        # idempotent: nothing re-attached
         from mbos_discovery.enrichment import attach_enrichment
         from mbos_discovery.rawstore import FileRawStore
@@ -120,7 +125,7 @@ def test_block_round_trips_as_an_artifact_and_the_card_still_validates(spine_db,
     assert again["attached"] == []
 
 
-def test_a_spine_without_the_block_is_reported_not_forced(spine_db, tmp_path, monkeypatch):
+def test_a_spine_older_than_a24_is_reported_not_forced(spine_db, tmp_path, monkeypatch):
     spine, item_id, out = _attach(spine_db, tmp_path, "v1|110000000001|0", monkeypatch, supported=False)
     assert "category_tags" not in out["attached"] and out["unsupported"] == ["category_tags"]
 
@@ -130,3 +135,4 @@ def test_injection_listing_attaches_no_tags_block(spine_db, tmp_path, monkeypatc
     assert "category_tags" not in out["attached"]
     card, errors, enr = _card(spine_db, spine, item_id)
     assert errors == [] and "category_tags" not in enr
+    assert card["category_tags"] == [] and any("category_tags" in u and "absence is not a 'no'" in u for u in card["unknowns"])

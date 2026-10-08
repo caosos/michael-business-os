@@ -64,7 +64,8 @@ def test_ebay_blocks_have_real_dates_seller_feedback_and_provenance():
     assert "listed 24 days ago" in la["stale_risk"]["note"]
     assert "Listed 24 days ago (ebay)" in la["recent_activity"]
     assert "updated_at" not in la                                         # eBay Browse exposes no edit date
-    assert sel["rating"]["value"] == {"feedback_percent": 98.6, "feedback_score": 412}
+    assert sel["rating"]["value"] == 98.6 and sel["rating"]["unit"] == "% positive feedback"      # numeric: the card requires it
+    assert "feedback score 412" in sel["rating"]["note"]
     assert sel["rating"]["basis"] == "FACT" and sel["rating"]["provenance_id"] == PROV
     assert sel["confidence"] == "low"
     for k in ("account_age", "prior_listings", "complaint_signals", "response_history", "inconsistencies"):
@@ -117,6 +118,12 @@ def test_price_movement_comes_only_from_our_observations():
             {"source": "ebay", "listing_id": "L1", "at": "2026-10-06T12:00:00Z", "price": 999.0}]
     la = build_blocks(_item("ebay", "L1"), {}, AS_OF, OWN, hist)["listing_activity"]
     assert "Price dropped 1200 → 999 (observed 1 day ago)" in la["recent_activity"]
+
+
+def test_rating_falls_back_to_the_feedback_count_when_no_percentage():
+    item = _item("ebay", "L1")
+    sel = build_blocks(item, {"ebay|L1": {"rating": {"feedback_score": 412}}}, AS_OF, OWN)["seller"]
+    assert sel["rating"]["value"] == 412 and sel["rating"]["unit"] == "feedback score (count)"
 
 
 def test_deterministic_and_json_clean():
@@ -195,13 +202,13 @@ def test_blocks_attach_and_render_on_the_card(spine_db, tmp_path):
     raw = FileRawStore(tmp_path / "raw")
     with spine_db.begin() as c:
         out = attach_enrichment(c, spine, item_id, raw, AS_OF)
-    assert sorted(out["attached"]) == ["listing_activity", "seller"]
+    assert sorted(out["attached"]) == ["category_tags", "listing_activity", "seller"]   # tags: "needs lights and floor" → project
     card, errors, enr = _card(spine_db, spine, item_id)
     assert errors == []                                                    # passes the card schema + honesty lint
     la, sel = card["listing_activity"], card["seller"]
     assert la["posted_at"]["value"] == "2026-09-12T15:04:05Z" and la["age_days"]["value"] == 24
     assert la["updated_at"]["value"] == "UNKNOWN" and la["suspected_relist"]["value"] == "UNKNOWN"
-    assert sel["rating"]["value"]["feedback_percent"] == 98.6 and sel["confidence"] == "low"
+    assert sel["rating"]["value"] == 98.6 and sel["rating"]["unit"] == "% positive feedback" and sel["confidence"] == "low"
     for k in ("account_age", "prior_listings", "complaint_signals", "response_history", "inconsistencies"):
         assert sel[k]["value"] == "UNKNOWN"
     assert "seller.account_age" in card["unknowns"] and "listing_activity.updated_at" in card["unknowns"]
