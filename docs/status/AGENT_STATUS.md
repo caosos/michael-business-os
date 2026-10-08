@@ -289,4 +289,4 @@ Done: P-03-17 @ 276ecd4 (plan_from_documents skips malformed-scorecard Items, na
 Proposed (for 01): in `src/mbos/adapters/economics.py` `_value_add`, pass `model_years=extract_model_years(title)` to `build_value_add` (coordinator-branch file), then run card lint.
 
 ## C-24
-Done: C-24 @ PENDING (caps 1500/800 -> 500/500, available_to_deploy honoured, config 2026.10.4; 359 passed, 22 skipped). State: CLOSED
+Done: C-24 @ 6b8d9d4 (caps 1500/800 -> 500/500, available_to_deploy honoured, config 2026.10.4; 359 passed, 22 skipped). State: CLOSED
