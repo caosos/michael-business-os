@@ -246,3 +246,28 @@ UI YES on TV-1 with the right step-up PIN (`g21pin`): "YES recorded. The item wo
 Effector call recorded: `mbos.effector_calls` has exactly 1 row: `seq 1`, `idempotency_key act:areq_01M4EPF4XECGWAR3G2Z129KHT5`, capability `comms.email.send`, provider `dryrun`, `provider_msg_id dryrun_01M4EPX6DSE509BRPZNFDM7NDF`, `dry_run true`, state `executed`, request `payload_hash sha256:c3a4ad9354750dd31a5e62eaa4743cee06e615bccd67cf5ecf20a232c5b95f23` (the hash Michael was shown and confirmed with `--seen`/`payload_hash_seen`).
 `live_effector_calls == 0`: `select count(*) filter (where dry_run is not true) from mbos.effector_calls` -> 0 of 1; `mbos.v_a7_live_effects` -> 0 rows. The NO (Samsung) and HOLD (Vizio) items made no effector call.
 `mbos audit`: `chain.ok true (147 receipts)`, `provenance.ok true`, `dry_run.ok true (effector_receipts 1, receipt_exceptions [], call_exceptions [])`, `conformance.ok true`. Ledger after the action (still before any outcome): protected principal $500, earned $0, deployed $0, realized $0, available $500 (an introductory email moves no capital).
+
+## Stage 7: human-entered outcome through the UI: PARTIAL (capital closes and profit becomes earned; principal return is $0 because nothing was ever deployed: F-114)
+
+Outcome entered in the UI item page "Outcome" form (no PIN on this form; human channel), on the YES'd TV (`itm_01M4EP9KFZNNTHZPQNFX23TMC2`, `ACTED`), in the order Michael would: bought, then sold.
+
+Ledger BEFORE (`mbos.v_capital_position`, same as UI `/mission` "Capital position"): protected principal $500.00, earned working capital $0.00, capital deployed $0.00, realized profit $0.00, available to deploy $500.00; `capital_ledger`: `1 fund $500`.
+
+1. `flip_acquired`, total cost $30: "Outcome flip_acquired recorded (outc_01M4EPYX5S7SAMEBSJRJNPXFVN)"; receipts `seq 148 rcpt_01M4EPYX60BS1J0ZEGTHVCS3BW` OUTCOME_RECORDED (actor human), `149 rcpt_01M4EPYX6KZGXCNVP4F60JR9CB`. Ledger unchanged (an acquisition is not a closing kind).
+2. `flip_sold`, revenue $92, total cost $32 ($30 + $2 fuel), 0.6 h, 5 days to cash: "Outcome flip_sold recorded (outc_01M4EQ0W5F3AYEQ8NQ4EQ4M7QN)"; receipt `seq 150 rcpt_01M4EQ0W5H0KJHATT88QCBJVF5` OUTCOME_RECORDED (actor human). Item -> `OUTCOME_RECORDED`.
+
+Ledger AFTER:
+| field | before | after |
+|---|---|---|
+| protected principal | $500.00 | $500.00 |
+| earned working capital | $0.00 | **$60.00** |
+| capital deployed | $0.00 | $0.00 |
+| realized profit | $0.00 | **$60.00** |
+| available to deploy | $500.00 | **$560.00** |
+| open items / unconfirmed closing outcomes | 0 / 0 | 0 / 0 |
+`capital_ledger` gained `seq 2 close itm_01M4EP9KFZNNTHZPQNFX23TMC2 amount 0.00 basis 0.00 net 60.00` (source receipt `rcpt_01M4EQ0W5H0KJHATT88QCBJVF5`). UI `/mission`: "Earned working capital $60 · Realized profit $60 · Available to deploy $560"; UI `/outcomes`: two rows (flip_acquired; flip_sold net 60). Net = revenue − cost = 92 − 32 = $60, correct. Only a HUMAN-actor outcome closed capital (the close rule requires `actor.type = human`). `mbos audit`: chain ok (150 receipts), dry_run ok (effector_receipts 1), conformance ok.
+
+What passed: capital closes (item closed in the ledger); realized profit becomes earned working capital; protected principal untouched; the UI shows it.
+What did not: **"principal returns" is not demonstrated.** The closing entry returns `basis = p_item_deployed = $0` because capital was never deployed for this item.
+- **F-114 (P1, FACT; owner 01 + 05 + 03):** no step in the mission path deploys capital. The only action Michael approves is `comms.email.send` "ask the seller" (budget effect $0). The purchase itself is never a gated `purchase`/`money` action, so `capital_deployed` stays $0 (the card said "cash tied up $36.49"), `available_to_deploy` stays $500 while Michael says he bought a $30 TV, and the deploy -> close pair (principal out, principal back + profit) is never exercised end to end. Consequences: `available_to_deploy` overstates free cash during a flip; the "cash tied up" shown on the card is never reserved against the bankroll; if cost is entered at close, only profit moves. Repro: this stage. Recommendation: add the approved acquisition (a `purchase` action with a budget effect = expected buy price, step-up required) after the seller reply, or let `flip_acquired` record a deploy of the entered cost (human, receipted); test the full fund -> deploy -> close cycle on `bootstrap_dev`.
+- **F-115 (P2, FACT; owner 04 + 06):** a second closing outcome for the same item is accepted silently. I submitted a second `flip_sold` (revenue $500, cost $1, "QA duplicate close attempt") on the already-closed TV: the UI says "Outcome flip_sold recorded (outc_01M4EQ1FDP6DN0WJ339036RF3S)", the capital ledger correctly ignores it (unique close per item; still `$60` earned), but a $499 "profit" outcome now sits in the outcome history that feeds LEARN, with no warning to Michael that capital did not move. Recommendation: refuse or flag a second closing outcome ("already closed; use a correction").
