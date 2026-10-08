@@ -471,3 +471,20 @@ The operating philosophy stays:
 > Measure everything.
 > Interrupt Michael only when necessary.
 > Preserve provenance.
+
+## 23. Continuous-progress rule
+
+Michael's standing preference is continuous useful progress.
+
+- **Never idle merely because the last task ended.** When useful approved work remains, immediately start the next highest-value bounded task.
+- **Build first, then refine.** Prefer a working, testable implementation over extended speculative design when the next safe implementation step is known.
+- **Use the most economical capable model.** Default to the cheapest model that can do the task reliably; escalate only when complexity, failure, risk, or cross-system reasoning justifies it.
+- **Optimize for output, not agent count.** Keep only enough concurrent bounded workers to improve throughput without wasting quota or creating merge/conflict overhead.
+- **When the queue runs dry, derive the next bounded task from the current acceptance gap, release gap, verified defect, missing integration, test failure, or operator-usability gap.** Do not create cosmetic busywork.
+- **Stop only for a real blocker:** explicit owner decision, unavailable external credential/resource, safety/governance boundary, provider quota, or a hard dependency that no other useful work can bypass.
+- **If a blocker affects one task, continue other compatible work in parallel.** Michael should not be required to restart momentum manually.
+- **Progress must be measurable:** each worker leaves tests, commit/artifact, receipt/provenance, telemetry, and the next-state update.
+
+Operating goal:
+
+> Maximum useful progress per dollar/token/hour, with continuous motion and reversible iteration.
