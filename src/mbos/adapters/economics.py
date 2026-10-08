@@ -150,7 +150,7 @@ class EconomicsEnricher:
                              seasonality=load_seasonality(), profile=self.profile, listing_activity=la)
         n = 0
         if e.get("blocks"):
-            pid = spine.record_lane_provenance(conn, e["provenance"])
+            pid = spine.record_lane_provenance(conn, e["provenance"], lineage_may_grow=True)
             for block, data in e["blocks"].items():
                 spine.record_enrichment(conn, item_id, block, data, pid, summary=f"lane C {block}", agent=self.AGENT)
             n += len(e["blocks"])

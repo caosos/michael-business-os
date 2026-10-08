@@ -291,11 +291,69 @@ def lane_d_e2e(fixture: str, gateway_mode: str = "reference") -> None:
     os._exit(0)
 
 
+def training_set(fixture: str) -> None:
+    """A-41: the ILLUSTRATIVE training set through the REAL assembly (`production.build_components`: lane C engine fed by the funded ledger,
+    lane E gateway) on lane D. Reports each deal's state/verdict/gate text, the attestation path and every card's validity and labels."""
+    import dataclasses
+
+    import sqlalchemy as sa
+    from dbos import DBOS as _D
+
+    from mbos import card as cardmod, spine_d, workflows
+    from mbos.db.engine import engine_for
+    from mbos.production import build_components
+    from tests.helpers.common import item_state
+
+    s = dataclasses.replace(_settings(), state_backend="lane_d", gateway_mode="lane_e")
+    owner = engine_for(os.environ["MBOS_OWNER_DATABASE_URL"])
+    with owner.begin() as c:  # Michael's side, before the worker assembly exists (the worker holds no approver login)
+        spine_d.set_kill_switch(c, "global_freeze", False, reason="test bootstrap: Michael releases the initial FROZEN state")
+        spine_d.fund_bankroll(c, 500, reason="A-41 dry-run bankroll", idempotency_key="a41-bankroll")
+    comps, report = build_components(s, dbos=_D)
+    init_runtime(s, comps)
+    engine = runtime().engine
+    runtime().components.adapters["fx"] = FixtureSourceAdapter(fixture, name="fx")
+    with SetWorkflowID("discover:fx"):
+        results = DBOS.start_workflow(workflows.discover, "fx").get_result()
+    ids = {r["item_id"] for r in results if r["created"]}
+    names = {}
+    with engine.connect() as c:
+        for i in ids:
+            names[c.execute(sa.text("SELECT doc->'sources'->0->>'source_listing_id' FROM mbos.v_item_documents WHERE item_id = :i"), {"i": i}).scalar_one()] = i
+    settled = {"AWAITING_APPROVAL", "RESEARCHING", "ARCHIVED"}
+
+    def snap(item_id: str) -> dict:
+        with engine.connect() as c:
+            item, receipts, areqs = cardmod.load_inputs(c, item_id)
+            enr = cardmod.enrichment_from_item(c, item)
+        card = cardmod.build_card(item, receipts, areqs, enr)
+        sc = item["scores"]["scorecard"]
+        return {"state": item["state"], "verdict": item["recommendation"]["verdict"], "rationale": item["recommendation"]["rationale"],
+                "cheapest": sc.get("cheapest_decisive_evidence"), "gates": sc.get("gates"), "pass_on_priors": sc.get("pass_on_priors"),
+                "card_errors": cardmod.validate_card(card), "card": card}
+
+    first = {}
+    for lid, i in names.items():
+        wait_state(engine, i, settled, timeout=60)
+        first[lid] = snap(i)
+    lead = names["TRAIN-LEAD-DRYWALL-1"]
+    with owner.begin() as c:  # D-29: attestation is the owner login's act
+        for key in ("scope_verified", "customer_screened"):
+            spine_d.record_attestation(c, lead, key, f"Michael confirmed {key} (A-41 test)", "michael")
+    workflows.recheck([lead])
+    time.sleep(1.0)
+    wait_state(engine, lead, {"AWAITING_APPROVAL", "ARCHIVED"}, timeout=60)
+    after = snap(lead)
+    cap = engine.connect().execute(sa.text("SELECT mbos.capital_position_document('dry_run')")).scalar()
+    say("RESULT", json.dumps({"report": report, "first": first, "lead_after": after, "capital": cap}, default=str))
+    os._exit(0)
+
+
 if __name__ == "__main__":
     mode, *args = sys.argv[1:]
     try:
         {"crash_mid_act": crash_mid_act, "hold_then_die": hold_then_die, "resume": resume,
-     "lane_d_e2e": lane_d_e2e}[mode](*args)
+     "lane_d_e2e": lane_d_e2e, "training_set": training_set}[mode](*args)
     except BaseException:  # DBOS threads are non-daemon: without a hard exit a failure would hang to the timeout
         import traceback
 

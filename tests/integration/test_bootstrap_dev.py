@@ -46,6 +46,7 @@ def test_bootstrap_writes_worker_and_owner_env(tmp_path, monkeypatch, capsys):
             assert c.execute("select count(*) from mbos.panic_current").fetchone() == (0,)  # F-89: born FROZEN, released: system RUNNING
         out = capsys.readouterr().out
         assert "released the initial global freeze" in out and "MBOS_OWNER_DATABASE_URL" in out
+        assert "funded the dry-run bankroll $500" in out and "training_examples.json" in out  # A-41
     finally:
         import pgserver
 

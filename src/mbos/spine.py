@@ -699,7 +699,7 @@ def record_enrichment(conn: sa.Connection, item_id: str, block: str, data: Any, 
     return entry
 
 
-def record_lane_provenance(conn: sa.Connection, doc: dict) -> str:
+def record_lane_provenance(conn: sa.Connection, doc: dict, *, lineage_may_grow: bool = False) -> str:
     """Persist a lane-supplied Provenance v1 record (e.g. lane C's `build_enrichment()["provenance"]`)."""
     from mbos.contracts.models import Provenance
 

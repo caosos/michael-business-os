@@ -58,18 +58,20 @@ def test_lane_provenance_is_idempotent_for_identical_content(db):
 
 
 def test_attestation_is_stored_with_human_provenance_and_visible_to_lane_c(db, item_id):
-    with db["app"].begin() as c:  # the worker login: 04 grants append_item_research to agent_write only (the owner login cannot)
+    with db["owner"].begin() as c:  # D-29: the OWNER login only (the workflow login is refused, see below)
         e = spine_d.record_attestation(c, item_id, "title_in_hand", "Seller has the title; I saw it Tuesday", "michael")
         again = spine_d.record_attestation(c, item_id, "title_in_hand", "Seller has the title; I saw it Tuesday", "michael")
     assert again == e
     with db["app"].connect() as c:
         item = spine_d.read_item(c, item_id)  # what lane C's research/score steps are handed
         prov = c.execute(sa.text("SELECT to_jsonb(p) FROM mbos.provenance p WHERE provenance_id = :p"), {"p": e["provenance_id"]}).scalar_one()
-    mine = [r for r in item["research"] if r["field"] == "attestation.title_in_hand"]
+    mine = [r for r in item["research"] if r["field"] == "attestation:title_in_hand"]
     assert len(mine) == 1 and mine[0]["basis"] == "FACT" and mine[0]["source_uri"] == "human:michael"
     assert prov["actor_type"] == "human" and prov["human_actor"] == "michael"
-    with db["app"].begin() as c, pytest.raises(ValueError):
+    with db["owner"].begin() as c, pytest.raises(ValueError):
         spine_d.record_attestation(c, item_id, "", "x", "michael")
+    with db["app"].begin() as c, pytest.raises(sa.exc.DBAPIError):  # the workflow login cannot attest
+        spine_d.record_attestation(c, item_id, "scope_verified", "forged", "michael")
 
 
 def test_funded_ledger_reaches_scoring_and_the_card(db):

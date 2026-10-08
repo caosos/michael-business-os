@@ -67,12 +67,35 @@ def release_initial_freeze(owner_url: str) -> str:
         eng.dispose()
 
 
+DEFAULT_FIXTURE = "fixtures/sources/training_examples.json"   # A-41: ILLUSTRATIVE deals built from Michael's training examples
+
+
+def fund_dev_bankroll(owner_url: str, amount: float) -> str:
+    """A-41: put the dry-run bankroll on the ledger as the OWNER (receipted, human provenance, dev only) so the engine's cash gates and the
+    cards use a stated figure instead of UNKNOWN. Idempotent: an already-funded ledger is left alone."""
+    import sqlalchemy as sa
+
+    from mbos import spine_d
+
+    eng = sa.create_engine(owner_url)
+    try:
+        with eng.begin() as c:
+            doc = c.execute(sa.text("SELECT mbos.capital_position_document('dry_run')")).scalar() or {}
+            if doc.get("protected_principal") or doc.get("earned_working_capital"):
+                return f"bankroll already on the ledger (available to deploy ${doc.get('available_to_deploy')}); left alone"
+            spine_d.fund_bankroll(c, amount, reason="dev bootstrap: dry-run bankroll", idempotency_key="bootstrap-dev-bankroll")
+            return f"funded the dry-run bankroll ${amount:,.0f} as the owner (receipted, dev only)"
+    finally:
+        eng.dispose()
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--skip-install", action="store_true", help="do not (re)install lane packages from pushed heads")
     ap.add_argument("--ui-pin", default="dev-pin", help="PIN printed in the Operator UI command (default: dev-pin)")
     ap.add_argument("--keep-frozen", action="store_true",
                     help="leave the initial global freeze engaged (default: release it as the owner, dev only, receipted)")
+    ap.add_argument("--bankroll", type=float, default=500.0, help="dry-run bankroll to put on the ledger (default 500; 0 = leave the ledger unfunded)")
     ap.add_argument("--var-dir", default=str(ROOT / "var"), help="where dev.env, owner.env, lanes/, policy/, raw/ go (default: ./var, gitignored)")
     a = ap.parse_args(argv)
     var = Path(a.var_dir).resolve()
@@ -130,11 +153,14 @@ def main(argv: list[str] | None = None) -> int:
     freeze = ("left FROZEN (--keep-frozen): nothing will act until the owner runs `mbos panic off`"
               if a.keep_frozen else release_initial_freeze(prov.owner_app_url))
     print(f"freeze: {freeze}")
+    if a.bankroll > 0:
+        print(f"bankroll: {fund_dev_bankroll(prov.owner_app_url, a.bankroll)}")
     print(f"lane D {state_sha} provisioned ({APP_DB}); lane E policy {gov_sha}; lane F {ui_sha}; migrations applied this run: {len(prov.migrations_applied)}")
     print(f"""
 Next (each in the repo root):
-  1. worker shell:   source var/dev.env && .venv/bin/mbos worker --fixture fixtures/sources/illustrative.json
-                     (prints the REAL/STAND-IN report; only `sources` should be STAND-IN)
+  1. worker shell:   source var/dev.env && .venv/bin/mbos worker --fixture {DEFAULT_FIXTURE}
+                     (ILLUSTRATIVE training deals: a TV YES, a Recon MAYBE, a mower PASS on the bankroll, a drywall lead MAYBE until you confirm
+                     scope and customer; prints the REAL/STAND-IN report, only `sources` should be STAND-IN)
   2. a card:         source var/dev.env && .venv/bin/mbos queue          # then: mbos card ITEM_ID
   3. operator UI:    source var/dev.env && source var/owner.env && MBOS_OPERATOR_PIN={a.ui_pin} {py} -u -m operator_ui serve --port 8765
                      (owner login variable: MBOS_OWNER_DATABASE_URL, set by var/owner.env; the only one)
