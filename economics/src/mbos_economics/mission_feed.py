@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from .mission import plan_week
+from .mission import _candidate, _period_days, plan_week
 
 LIVE_EXCLUDED = ("DONE", "CLOSED", "REJECTED", "ARCHIVED", "EXPIRED")
 _ZERO_LEDGER = {"protected_principal": 0, "earned_working_capital": 0, "capital_deployed": 0,
@@ -36,13 +36,21 @@ def plan_from_documents(mission: dict | None, ledger: dict | None, items: list[d
     if ledger is None:
         ledger = dict(_ZERO_LEDGER)
         unknowns.append("capital_ledger (none funded: nothing available to deploy)")
-    live = [i for i in items if _live_scored(i)]
+    live, skipped = [], []
+    days = _period_days(mission)
+    for i in (i for i in items if _live_scored(i)):
+        try:
+            _candidate(i, days)
+        except (KeyError, TypeError, IndexError, ValueError, ArithmeticError, AttributeError) as e:
+            skipped.append(f"item {i.get('item_id')} skipped: malformed scorecard ({type(e).__name__}: {e})")
+        else:
+            live.append(i)
     plan = plan_week(mission, ledger, live)
     if not live:
         plan["recommendation"] = "UNKNOWN" if mission.get("weekly_target_usd") is None else "DO_NOT_SPEND"
         plan["explanation"] += " No scored live Items exist: no opportunity is invented, nothing is spent."
         unknowns.append("scored_items (none live)")
-    plan["unknowns"] = plan["unknowns"] + unknowns
+    plan["unknowns"] = plan["unknowns"] + unknowns + skipped
     return plan
 
 

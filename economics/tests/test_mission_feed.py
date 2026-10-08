@@ -18,6 +18,17 @@ class TestFeed(unittest.TestCase):
         self.assertTrue(all(l["scorecard_id"].startswith("scr_") for l in p["legs"]))
         self.ok(p)
 
+    def test_malformed_scorecard_item_skipped_and_named(self):
+        import copy
+        bad = copy.deepcopy(ITEMS[0])
+        bad["item_id"] = "itm_malformed"
+        del bad["scores"]["scorecard"]["derived"]["branches"]
+        p = plan_from_documents(mission(1500), ledger(1500), ITEMS + [bad])
+        self.assertTrue(p["legs"])
+        self.assertNotIn("itm_malformed", [l["item_id"] for l in p["legs"]])
+        self.assertTrue(any("itm_malformed" in u for u in p["unknowns"]))
+        self.ok(p)
+
     def test_no_items_no_legs(self):
         p = plan_from_documents(mission(1500), ledger(1500), [])
         self.assertEqual((p["recommendation"], p["legs"]), ("DO_NOT_SPEND", []))
