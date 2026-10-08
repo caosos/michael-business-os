@@ -1,0 +1,30 @@
+{
+  "campaign_version": "1.0.0",
+  "campaign_id": "cmp_01J9Z000000000000000TRBAA1",
+  "owner": "michael",
+  "title": "5x8 utility trailer within 40 miles, max $600",
+  "criteria": {
+    "category": "trailer",
+    "keywords": [
+      "5x8",
+      "utility"
+    ],
+    "max_price_usd": 600,
+    "radius_miles": 40,
+    "origin": null,
+    "must_have": [],
+    "nice_to_have": [
+      "title"
+    ],
+    "cosmetics_matter": false
+  },
+  "autonomy": {
+    "level": "RECOMMEND"
+  },
+  "stop_conditions": {
+    "fulfilled_by": null,
+    "expires_at": null,
+    "max_matches": null
+  },
+  "status": "ACTIVE"
+}
