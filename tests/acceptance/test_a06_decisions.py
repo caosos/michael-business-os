@@ -133,3 +133,60 @@ def test_decision_on_a_payload_michael_did_not_see_is_refused(rt, run_discovery)
                 '"payload_hash_seen":"sha256:%s"}' % (areq["action_request_id"], "f" * 64))})
     workflows.record_decision(areq["action_request_id"], "NO", areq["payload_hash"], reason="cleanup")
     wait_state(rt.engine, item_id, "ARCHIVED")
+
+
+def test_hold_ping_then_yes_reaches_acted_with_receipts(rt, run_discovery):
+    """F-116: a HOLD woken by `mbos ping` can still be approved, and the YES runs."""
+    item_id = run_discovery("FIX-TRAILER-1")["FIX-TRAILER-1"]
+    wait_state(rt.engine, item_id, "AWAITING_APPROVAL")
+    areq = pending_request(rt.engine, item_id)
+    workflows.record_decision(areq["action_request_id"], "HOLD", areq["payload_hash"],
+                              hold={"hold_until": "2099-01-01T00:00:00Z", "wake_on": ["michael_ping"],
+                                    "renotify_after": "PT1H", "escalate_after": "P30D"})
+    wait_state(rt.engine, item_id, "HELD")
+    workflows.ping(item_id)
+    wait_state(rt.engine, item_id, "AWAITING_APPROVAL")
+    areq = pending_request(rt.engine, item_id)
+    # a second gate on the same request (duplicate worker / orphan recovery) replays the old HOLD from seq 0
+    from dbos import DBOS
+    twin = DBOS.start_workflow(workflows.followup_lifecycle, item_id, areq["action_request_id"])
+    time.sleep(2.0)
+    assert scalar(rt.engine, "SELECT state FROM mbos.items WHERE item_id = :i", i=item_id) == "AWAITING_APPROVAL", "stale HOLD re-applied"
+    workflows.record_decision(areq["action_request_id"], "YES", areq["payload_hash"], auth_context=STEP_UP)
+    wait_state(rt.engine, item_id, "ACTED")
+    twin.get_result()
+    assert _effector_calls(rt.engine, areq["action_request_id"]) == 1
+    assert receipts_for(rt.engine, areq=areq["action_request_id"], type="ACTION_EXECUTED")
+
+
+def test_yes_straight_from_hold_reaches_acted(rt, run_discovery):
+    """F-116: even without a ping, a YES recorded on a HELD request runs (it is re-presented first, then approved)."""
+    item_id = run_discovery("FIX-TRAILER-1")["FIX-TRAILER-1"]
+    wait_state(rt.engine, item_id, "AWAITING_APPROVAL")
+    areq = pending_request(rt.engine, item_id)
+    workflows.record_decision(areq["action_request_id"], "HOLD", areq["payload_hash"],
+                              hold={"hold_until": "2099-01-01T00:00:00Z", "wake_on": ["michael_ping"],
+                                    "renotify_after": "PT1H", "escalate_after": "P30D"})
+    wait_state(rt.engine, item_id, "HELD")
+    workflows.record_decision(areq["action_request_id"], "YES", areq["payload_hash"], auth_context=STEP_UP)
+    wait_state(rt.engine, item_id, "ACTED")
+    assert _effector_calls(rt.engine, areq["action_request_id"]) == 1
+
+
+@pytest.mark.parametrize("decision", ["NO", "YES"])
+def test_duplicate_gate_applies_a_decision_once_and_logs_no_errors(rt, run_discovery, caplog, decision):
+    """F-113/F-118: a second gate on the same request (duplicate worker, orphan recovery) is a clean no-op."""
+    from dbos import DBOS
+    item_id = run_discovery("FIX-TRAILER-1")["FIX-TRAILER-1"]
+    wait_state(rt.engine, item_id, "AWAITING_APPROVAL")
+    areq = pending_request(rt.engine, item_id)
+    twin = DBOS.start_workflow(workflows.followup_lifecycle, item_id, areq["action_request_id"])
+    time.sleep(1.0)
+    kw = {"auth_context": STEP_UP} if decision == "YES" else {"reason": "dup"}
+    with caplog.at_level("ERROR"):
+        workflows.record_decision(areq["action_request_id"], decision, areq["payload_hash"], **kw)
+        wait_state(rt.engine, item_id, "ACTED" if decision == "YES" else "ARCHIVED")
+        twin.get_result()
+        DBOS.retrieve_workflow(f"item:{item_id}").get_result()
+    assert [r.getMessage()[:200] for r in caplog.records if r.levelname == "ERROR"] == []
+    assert _effector_calls(rt.engine, areq["action_request_id"]) == (1 if decision == "YES" else 0)
