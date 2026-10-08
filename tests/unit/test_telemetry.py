@@ -92,3 +92,19 @@ def test_quota_guard_blocks_only_on_a_fresh_supported_reading_over_the_limit(tmp
     assert T.quota_guard(pol, [snap(89, 40, 5)], now=now)["allow"]
     assert T.quota_guard(pol, [snap(99, 99, 600)], now=now)["allow"]                  # stale reading never blocks
     assert T.quota_guard(pol, [snap(99, 99, 5, source="manual")], now=now)["allow"]   # manual entries are not used for gating
+
+
+def test_multiple_result_events_are_merged_and_the_report_is_found():
+    done = '{"task":"T-1","status":"DONE","commit":"abc","tests":"3 passed","notes":"x"}'
+    first = {"type": "result", "is_error": False, "num_turns": 40, "duration_ms": 600000, "duration_api_ms": 500000, "total_cost_usd": 1.1,
+             "result": "work done\n" + done, "session_id": "s", "permission_denials": [{"tool_name": "Bash", "tool_input": {"command": "x"}}]}
+    trailing = {"type": "result", "is_error": False, "num_turns": 1, "duration_ms": 2000, "duration_api_ms": 1500, "total_cost_usd": 1.3,
+                "result": "background task finished", "session_id": "s"}
+    text = "\n".join(json.dumps(e) for e in (first, trailing))
+    res, _ = T.parse_stream(text)
+    p = T.parse_result(res)
+    assert p["num_turns"] == 41 and p["duration_ms"] == 602000 and p["cost_estimate_usd"] == 1.3     # cost is cumulative: max, not sum
+    assert p["worker_report"]["status"] == "DONE" and p["permission_denials"] == 1
+    # order reversed (report arrives in the last event) behaves the same
+    res2, _ = T.parse_stream("\n".join(json.dumps(e) for e in (trailing, first)))
+    assert T.parse_result(res2)["worker_report"]["status"] == "DONE"

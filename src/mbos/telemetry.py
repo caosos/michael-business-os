@@ -76,17 +76,12 @@ def parse_result(raw: Any) -> dict[str, Any]:
 
 def parse_stream(text: str) -> tuple[dict[str, Any], Optional[dict[str, Any]]]:
     """Parse `--output-format stream-json --verbose` output (JSON lines). Returns (result_event, last rate_limit_info or None).
-    Non-JSON lines are ignored. A single JSON object (plain `--output-format json`) is also accepted."""
-    result: dict[str, Any] = {}
+    A single JSON object (plain `--output-format json`) is also accepted. A worker that starts background tasks emits SEVERAL `result`
+    events (the last may be a trivial 1-turn continuation), so they are MERGED: turns and durations are summed, cost is the maximum
+    (Claude Code reports it cumulatively), and the text/report come from the result that actually contains the worker's final report."""
+    results: list[dict[str, Any]] = []
     rl: Optional[dict[str, Any]] = None
     lines = [x for x in (text or "").splitlines() if x.strip()]
-    if len(lines) == 1:
-        try:
-            one = json.loads(lines[0])
-            if isinstance(one, dict) and one.get("type") == "result":
-                return one, None
-        except ValueError:
-            pass
     for ln in lines:
         try:
             e = json.loads(ln)
@@ -95,10 +90,26 @@ def parse_stream(text: str) -> tuple[dict[str, Any], Optional[dict[str, Any]]]:
         if not isinstance(e, dict):
             continue
         if e.get("type") == "result":
-            result = e
+            results.append(e)
         elif e.get("type") == "rate_limit_event" and isinstance(e.get("rate_limit_info"), dict):
             rl = e["rate_limit_info"]
-    return result, rl
+    if not results:
+        return {}, rl
+    if len(results) == 1:
+        return results[0], rl
+    carrier = next((r for r in reversed(results) if _worker_report(r.get("result"))), results[-1])
+    merged = dict(carrier)
+    for k in ("num_turns", "duration_ms", "duration_api_ms"):
+        vals = [r[k] for r in results if isinstance(r.get(k), (int, float)) and not isinstance(r.get(k), bool)]
+        if vals:
+            merged[k] = sum(vals)
+    costs = [r["total_cost_usd"] for r in results if isinstance(r.get("total_cost_usd"), (int, float)) and not isinstance(r.get("total_cost_usd"), bool)]
+    if costs:
+        merged["total_cost_usd"] = max(costs)
+    merged["is_error"] = any(bool(r.get("is_error")) for r in results) if all("is_error" in r for r in results) else carrier.get("is_error")
+    merged["merged_results"] = len(results)
+    merged["permission_denials"] = [d for r in results if isinstance(r.get("permission_denials"), list) for d in r["permission_denials"]]
+    return merged, rl
 
 
 def quota_from_rate_limit(info: Optional[dict[str, Any]], *, path: Optional[Path] = None) -> Optional[dict[str, Any]]:
