@@ -8,7 +8,7 @@
 DO $$
 DECLARE r text;
 BEGIN
-    FOREACH r IN ARRAY ARRAY['mbos_owner','agent_read','agent_write','gateway','approver','policy_admin','outbox_relay'] LOOP
+    FOREACH r IN ARRAY ARRAY['mbos_owner','agent_read','agent_write','gateway','approver','policy_admin','outbox_relay','owner_channel'] LOOP
         IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = r) THEN
             EXECUTE format('CREATE ROLE %I NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS', r);
         END IF;
@@ -20,6 +20,7 @@ COMMENT ON ROLE agent_read   IS 'MBOS: read-only (read tools, reporting, backups
 COMMENT ON ROLE agent_write  IS 'MBOS: State MCP server — items, proposals, outcomes, lessons. Cannot approve, execute or spend.';
 COMMENT ON ROLE gateway      IS 'MBOS: Action Gateway (05) — classify, execute, budget. Cannot approve.';
 COMMENT ON ROLE approver     IS 'MBOS: Operator UI backend — records Michael''s YES/NO/MODIFY/HOLD. Cannot execute or spend.';
+COMMENT ON ROLE owner_channel IS 'MBOS: Michael''s owner channel — mission, capital, campaigns. Granted ONLY to mbos_operator_ui; never to mbos_dbos/agent_write/gateway/readers (F-80).';
 COMMENT ON ROLE policy_admin IS 'MBOS: governance policy versions (human-initiated).';
 COMMENT ON ROLE outbox_relay IS 'MBOS: outbox delivery bookkeeping only.';
 
@@ -32,6 +33,7 @@ BEGIN
         ['mbos_state_mcp',   'agent_write'],
         ['mbos_gateway',     'gateway'],
         ['mbos_operator_ui', 'approver'],
+        ['mbos_operator_ui', 'owner_channel'],
         ['mbos_policy',      'policy_admin'],
         ['mbos_relay',       'outbox_relay']] LOOP
         IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = pair[1]) THEN

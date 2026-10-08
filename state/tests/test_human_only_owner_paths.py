@@ -48,16 +48,17 @@ def test_real_mbos_dbos_refuses_non_human_on_all_five(real_dbos, actor):
     with psycopg.connect(p.app_conninfo, autocommit=True) as c:
         assert c.execute("SELECT session_user").fetchone()[0] == "mbos_dbos"
         for sql, args in _calls(actor, pid):
-            with pytest.raises(errors.InsufficientPrivilege, match="as a human"):
+            with pytest.raises(errors.InsufficientPrivilege):
                 c.execute(sql, args)
         assert c.execute("SELECT count(*) FROM mbos.capital_ledger").fetchone()[0] == 0
         assert c.execute("SELECT count(*) FROM mbos.campaigns").fetchone()[0] == 0
 
 
-def test_real_mbos_dbos_with_human_actor_passes_the_guard(real_dbos):
-    p, pid = real_dbos
-    with psycopg.connect(p.app_conninfo, autocommit=True) as c:      # approver member: a human actor is accepted
-        c.execute("SELECT mbos.capital_fund(5::numeric,%s,'x',%s,%s)", (Jsonb({"type": "human", "id": "michael"}), [pid], key()))
+def test_real_mbos_dbos_with_forged_human_actor_is_refused_by_D25(real_dbos):
+    p, pid = real_dbos                       # superseded by D-25: a human claim is not an identity
+    with psycopg.connect(p.app_conninfo, autocommit=True) as c:
+        with pytest.raises(errors.InsufficientPrivilege):
+            c.execute("SELECT mbos.capital_fund(5::numeric,%s,'x',%s,%s)", (Jsonb({"type": "human", "id": "michael"}), [pid], key()))
 
 
 def test_ui_login_human_path_and_chain_still_ok(db):
