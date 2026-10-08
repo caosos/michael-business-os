@@ -92,7 +92,7 @@ def page(title, body, state, flash=None, error=False):
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>{ec(title)}</title><style>{CSS}</style></head>
 <body><div class="banner">DRY-RUN · nothing leaves this machine · system {e(state)}</div>
-<header><b>Operator UI</b><nav><a href="/">Queue</a><a href="/mission">Weekly mission</a><a href="/preview">Audience previews</a><a href="/digest">Morning digest</a><a href="/summary">Daily summary</a><a href="/notes">My notes</a><a href="/holds">HOLD backlog</a><a href="/outcomes">Outcomes</a><a href="/sources">Source health</a><a href="/ledger">Receipt ledger</a></nav></header>
+<header><b>Operator UI</b><nav><a href="/">Queue</a><a href="/mission">Weekly mission</a><a href="/usage">Usage</a><a href="/preview">Audience previews</a><a href="/digest">Morning digest</a><a href="/summary">Daily summary</a><a href="/notes">My notes</a><a href="/holds">HOLD backlog</a><a href="/outcomes">Outcomes</a><a href="/sources">Source health</a><a href="/ledger">Receipt ledger</a></nav></header>
 <main>{f}{body}</main></body></html>"""
 
 
@@ -445,10 +445,13 @@ def render_provenance(p, pid):
 class App:
     """Turns form posts into `spine.decide` calls through the backend. No side effects of its own."""
 
-    def __init__(self, backend, operator_pin=None, health_file=None, mission_file=None, inventory_file=None):
+    def __init__(self, backend, operator_pin=None, health_file=None, mission_file=None, inventory_file=None,
+                 telemetry_dir=None, queue_file=None):
         self.store = backend
         self.operator_pin = operator_pin
         self.inventory_file = inventory_file  # inventory JSON to preview (MBOS_INVENTORY_FILE)
+        self.telemetry_dir = telemetry_dir  # MBOS_TELEMETRY_DIR (read-only)
+        self.queue_file = queue_file  # READY_QUEUE.md copy (MBOS_READY_QUEUE_FILE)
         self.mission_file = mission_file  # mission plan JSON (MBOS_MISSION_PLAN_FILE)
         self.health_file = health_file  # lane B health.json (else MBOS_SOURCE_HEALTH_FILE)
         self.csrf = secrets.token_urlsafe(32)
@@ -655,6 +658,10 @@ def make_handler(app):
                 loaded = mission_view.load_plan(app.mission_file)
                 known = {l["item_id"] for l in (loaded["doc"] or {}).get("legs", []) if app.store.item(l["item_id"])} if loaded["kind"] == "plan" else set()
                 return self._send(200, page("Weekly mission", mission_view.render_page(loaded, known), app.state()))
+            if u.path == "/usage":
+                from . import usage_view
+
+                return self._send(200, page("Usage and agents", usage_view.render_page(usage_view.load(app.telemetry_dir), usage_view.queue_states(app.queue_file)), app.state()))
             if u.path == "/preview":
                 from . import merch_view
 

@@ -28,7 +28,7 @@ FIXTURE = Path(__file__).parent / "fixtures" / "illustrative.json"
 # which includes card.schema.json (ADR-0011) byte-identical to the coordinator's.
 os.environ.setdefault("MBOS_CONTRACTS_DIR", str(Path(__file__).resolve().parent.parent / "docs" / "research" / "contracts"))
 # Lane A's operator profile, from the pinned mbos checkout (a non-editable install cannot find it; see backend.py).
-os.environ.setdefault("MBOS_OPERATOR_PROFILE", str(Path(__file__).resolve().parent.parent / ".tools" / "mbos-51dbd51" / "config" / "operator_profile.v1.json"))
+os.environ.setdefault("MBOS_OPERATOR_PROFILE", str(Path(__file__).resolve().parent.parent / ".tools" / "mbos-727931b" / "config" / "operator_profile.v1.json"))
 PIN = "4321"
 
 
