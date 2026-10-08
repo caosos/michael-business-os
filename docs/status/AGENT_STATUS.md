@@ -4,17 +4,18 @@ Agent: 06
 Role: Communications + Operator UI / Approval UX (build lane F)
 Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
-State: WORKING
-Claimed: F-19
-Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe · F-04 @ 46c961c · F-13 @ 2415936 · F-14 @ c68a33c · F-13 hardening @ 6e47646 · F-15 @ 94130a4 · F-11 @ 20d88ee · F-17 @ 47c0621 · F-16 @ 9c2012d · F-18 @ d56f8d2
+State: CLOSED
+Claimed: none
+Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe · F-04 @ 46c961c · F-13 @ 2415936 · F-14 @ c68a33c · F-13 hardening @ 6e47646 · F-15 @ 94130a4 · F-11 @ 20d88ee · F-17 @ 47c0621 · F-16 @ 9c2012d · F-18 @ d56f8d2 · F-19 @ f038a80
 Blocked: none
 Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
-Last updated: 2026-10-07
+Last updated: 2026-10-07 (lane closed out; handoff: docs/handoff/LANE_06.md)
 
 ## Current objective
-**F-19** (READY; A-25 landed): deterministic audience-view renderer (`render_view(inventory, audience)`, templates, no LLM) shown as a dry-run draft preview, always passing `mbos.merchandising.lint`; current photos are never mixed with any AI "possible finished look". Then **F-20** (conversational intake front door, A-27).
+CLOSED (ADR-0014 / Aria 1945). Everything pushed; the lane is handed to a fresh bounded worker via `docs/handoff/LANE_06.md`. Nothing is half-applied.
 
 ## Done
+- **F-19 @ `f038a80`:** `/preview` renders four audience views of an inventory object (classified, flipper, mechanic, parts buyer) with deterministic templates (no LLM). Each is a lint-gated DRY-RUN draft: defects are verbatim, terms copied, bases and provenance carried, unknowns said. A view that fails `mbos.merchandising.lint` is refused, never softened, and "check my wording" refuses a dropped disclosure, overclaims and false verification. 154 + 31 tests. Receipt: `docs/receipts/2026-10-07-f19-audience-previews.md`.
 - **F-18 @ d56f8d2:** the Weekly Mission page (`/mission`) from a validated mission plan file. A plan failing `mbos.mission.plan_errors` is not rendered; a null target or hours shows UNKNOWN and the gap stays UNKNOWN; DO_NOT_SPEND is a red banner first; the five-field capital position; every leg links to its card (unverified ones flagged); plan order, no profit sorting. Read-only. 145 + 31 tests. Receipt: `docs/receipts/2026-10-07-f18-weekly-mission.md`.
 - **F-16 @ 9c2012d:** Edit (a new version, `supersedes`) and Retract (a reason is required) on `/notes`, with CSRF, the PIN and a server-set author; every refusal reason shown; only the head can be changed. After a retraction the next card no longer shows the risk, and the history keeps it. 133 + 31 tests. Receipt: `docs/receipts/2026-10-07-f16-edit-retract-notes.md`.
 - **F-17 @ 47c0621:** the Capital section on the card: class, cash multiple and velocity prominently with the downside beside them; parts-out floor, repair uncertainty, liquidity, skill fit and personal-use value; UNKNOWN visible, with a banner for the cash situation. Tested on Michael's three examples; a static test forbids sorting or filtering by profit. 133 + 27 tests. Receipt: `docs/receipts/2026-10-07-f17-capital-section.md`.
@@ -126,6 +127,7 @@ None. Live comms stay disabled (MICHAEL_DECISIONS #4).
 - The comms policy values in `comms_spec/data/comms_policy.v1.json` are PROPOSED (conservative). Loosening any of them is a version bump.
 
 ## Proposed tasks
+- **F-20 (P2, already READY in the queue; not started):** a UI/CLI conversational-intake draft flow on `mbos.intake` (A-27). Acceptance: "sell this mower, smokes, at least $400" yields a draft plus the ordered missing questions (safety first); every answer carries a basis; nothing is marked `verified`; it never publishes; hostile text escaped; tests on the reference and lane D suites.
 - **P-06-17 (lane A/C):** nothing produces a mission plan yet (a planner that builds legs from live cards plus a mission and capital-ledger store). The F-18 page reads a plan file (`MBOS_MISSION_PLAN_FILE`) until a producer or spine reader exists.
 - P-06-15 RESOLVED by Agent 01 (`build/` untracked; release gate compares installed lane packages byte for byte). Original note:  the coordinator repo commits `build/` (setuptools output) and `setup.py`. `git archive` ships a stale `build/lib`, and a non-editable install from that tree silently installs the old code (mine lacked `clean_text` until I removed `build/`). Remove `build/` from git and add it to `.gitignore`.
 - **P-06-16 (lane E):** the PDP's `binding_payload_keys` check is key-name based at any depth, so an innocent flag named `binding` blocks a first contact. Consider checking only top-level payload keys, or documenting the reserved names for drafting lanes. Mine are renamed.
