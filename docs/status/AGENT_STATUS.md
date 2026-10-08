@@ -4,7 +4,8 @@ Agent: 05
 Role: Governance / Action Gateway / PANIC — "controlled autonomy"
 Branch: research/agent-05-governance
 Worktree: /home/michaelos/business-os-worktrees/agent-05-governance
-State: WAITING — every queued lane-E task is DONE (E-01..E-16).
+State: WORKING
+Claimed: E-18 (P2: credential vocabulary — bare word 'verified' invalid; reputation events as receipted facts with evidence; graduated penalty ladder with appeal; payment-provider boundary spec, money.payment.* granted to nobody) — per 01 dispatch @ e20d6af
 Done: X-03 (checked 2026-10-07: `git ls-files | grep ^build/` empty; build/ and *.egg-info/ are in .gitignore)
 Done: E-16 @ 716098e (binding keys: top-level reserved names + any-depth amount names; nested binding:false allowed; top-level offer denied; binding_key_violations pin helper; RESERVED_PAYLOAD_KEYS.md; X-03 clear: no tracked build/; 458 tests)
 Done: E-15 @ 4ab56f7 (F-40 backstop: approved + non-freeze, non-transient refusal => failed with ACTION_FAILED same txn, transient (quiet hours/budget/unreadable policy) keeps approval; F-41: agent-01 grants narrowed, money.payment.send/price.change/commit.external granted to nobody, proposer_for(lane); 408 tests)
@@ -25,7 +26,7 @@ Done: E-01 @ df826c3 (interop row 05 = 10/10; vectors receipt_chain verifies; 14
 Done: E-03 @ e12caa3 (L3 DBOS cancel verified on real dbos 3.2.0; deny-all egress + LiteLLM budget generators; 157 tests)
 Current phase: ROUND TWO — wave two (foreman loop, docs/COORDINATION.md)
 Started: 2026-10-06
-Last updated: 2026-10-07 (board re-checked: no READY lane-E task; X-03 done; E-17 proposed)
+Last updated: 2026-10-07 (claimed E-18)
 
 ## Current objective
 **SUPERSEDED by ADR-0010 (E-01):** Agent 01 binding rulings for lane E
