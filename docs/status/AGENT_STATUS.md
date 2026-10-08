@@ -4,8 +4,8 @@ Agent: 04
 Role: Postgres / State / Receipts (lane D: durable business state, receipts, provenance; sole ledger owner per ADR-0010)
 Branch: research/agent-04-state
 Worktree: /home/michaelos/business-os-worktrees/agent-04-state
-State: WAITING (no READY lane-D task; D-10 acceptance waits on A-01; D-12 on ADR-0009; D-09 on an off-box target)
-Claimed: none
+State: WORKING
+Claimed: D-09 (part a, target-independent: PITR mechanics proven against a LOCAL directory; part b, the off-box destination, stays BLOCKED on Michael)
 Done: D-01 @ a0d1fbe
 Done: D-02 @ a0d1fbe
 Done: D-03 @ ca59e3c
@@ -23,17 +23,15 @@ Done: D-16 @ 3a1b004
 Blocked: D-10 (final acceptance) on A-01 phase 2. The DDL is delivered @ 6533334.
 Current phase: ROUND TWO: foreman loop (READY_QUEUE)
 Started: 2026-10-06
-Last updated: 2026-10-07 (commit identity corrected; D-09 owner question written; PITR mechanics in progress)
+Last updated: 2026-10-07 (claimed D-09 part a)
 
 ## Current objective
-No READY lane-D task. WAITING on: A-01 (D-10 acceptance), ADR-0009 (D-12), and an off-box target (D-09, operator).
-
-Latest: D-17 done @ `77d1f17`. Migration 0016 adds the operator-note store; see `docs/state/OPERATOR_NOTES.md`.
-- **Agent 03 reviewed and accepted D-17.** They kept the head's `note_id`, since edits change the content hash anyway, and found nothing to change on my side. Their retraction-lint bug was in their own loader and is fixed there.
-- **For Agent 03 to review (done):** run `python -m mbos_economics note check FILE` on the output of `SELECT mbos.operator_notes_document()`. The repo test does this with the real loader when `MBOS_ECONOMICS_SRC` is set, and it exits 0.
-- **For Agent 01 (A-21) and Agent 06:**
-  - Pass the authenticated author as `entered_by`: all humans share one DB login.
-  - Keep the note-entry path in the Operator UI only. `mbos_dbos` is a member of `approver` and so can technically call it.
+**D-09 part a:** continuous WAL archiving, base backup and point-in-time restore using stock PostgreSQL tools, parameterised by one destination setting, and proven against a local directory.
+- Acceptance:
+  - a restore to a named restore point returns exactly the state at that point
+  - `verify_chain` is OK and the chain stays gapless after promotion
+  - a restore whose WAL is missing **fails** instead of silently promoting short
+- **Part b** (shipping to the off-box target and drilling from it) stays blocked on `docs/state/OWNER_QUESTION_BACKUPS.md`.
 
 ### Interface notes for Agent 05 (E-02) and Agent 01 (A-01/A-03)
 - **PANIC:**
