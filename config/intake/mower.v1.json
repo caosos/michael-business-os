@@ -1,0 +1,91 @@
+{
+  "category": "mower",
+  "kind": "goods",
+  "photo_angles": [
+    "front",
+    "engine bay",
+    "data plate / serial",
+    "deck underside",
+    "hour meter"
+  ],
+  "fields": [
+    {
+      "key": "make_model",
+      "ask": "What make and model is it? (A photo of the data plate works.)",
+      "accepts_evidence": [
+        "photo",
+        "serial"
+      ],
+      "required": true,
+      "material": true,
+      "safety_relevant": false
+    },
+    {
+      "key": "operating_status",
+      "ask": "Does it start and run? What exactly happens?",
+      "accepts_evidence": [
+        "video",
+        "photo"
+      ],
+      "required": true,
+      "material": true,
+      "safety_relevant": false
+    },
+    {
+      "key": "known_defects",
+      "ask": "Any known problems: smoke, leaks, noises, deck or transmission trouble?",
+      "accepts_evidence": [
+        "photo",
+        "video"
+      ],
+      "required": true,
+      "material": true,
+      "safety_relevant": false
+    },
+    {
+      "key": "hours",
+      "ask": "What does the hour meter read?",
+      "accepts_evidence": [
+        "photo"
+      ],
+      "required": true,
+      "material": false,
+      "safety_relevant": false
+    },
+    {
+      "key": "ownership",
+      "ask": "Are you the owner?",
+      "accepts_evidence": [
+        "document"
+      ],
+      "required": true,
+      "material": false,
+      "safety_relevant": false
+    },
+    {
+      "key": "price_usd",
+      "ask": "What price do you want? Any minimum?",
+      "accepts_evidence": [],
+      "required": true,
+      "material": true,
+      "safety_relevant": false
+    },
+    {
+      "key": "pickup",
+      "ask": "Pickup only, or can you deliver?",
+      "accepts_evidence": [],
+      "required": true,
+      "material": false,
+      "safety_relevant": false
+    },
+    {
+      "key": "safety_features",
+      "ask": "Are the blade-stop and seat safety switches still working?",
+      "accepts_evidence": [],
+      "required": true,
+      "material": true,
+      "safety_relevant": true
+    }
+  ],
+  "spec_version": "1.0.0"
+}

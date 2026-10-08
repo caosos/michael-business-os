@@ -1,0 +1,72 @@
+{
+  "category": "trailer",
+  "kind": "goods",
+  "photo_angles": [
+    "front",
+    "rear",
+    "deck",
+    "axle and tires",
+    "coupler and VIN plate",
+    "title"
+  ],
+  "fields": [
+    {
+      "key": "size_type",
+      "ask": "What size and type is it?",
+      "accepts_evidence": [
+        "photo"
+      ],
+      "required": true,
+      "material": true,
+      "safety_relevant": false
+    },
+    {
+      "key": "title_status",
+      "ask": "Is there a title, and does the VIN match the trailer?",
+      "accepts_evidence": [
+        "title",
+        "serial"
+      ],
+      "required": true,
+      "material": true,
+      "safety_relevant": false
+    },
+    {
+      "key": "known_defects",
+      "ask": "Any rust, bent frame, bad bearings, lights or tire problems?",
+      "accepts_evidence": [
+        "photo"
+      ],
+      "required": true,
+      "material": true,
+      "safety_relevant": false
+    },
+    {
+      "key": "axle_tires",
+      "ask": "Tires and axle condition (age, wear)?",
+      "accepts_evidence": [
+        "photo"
+      ],
+      "required": true,
+      "material": true,
+      "safety_relevant": true
+    },
+    {
+      "key": "price_usd",
+      "ask": "What price do you want?",
+      "accepts_evidence": [],
+      "required": true,
+      "material": true,
+      "safety_relevant": false
+    },
+    {
+      "key": "pickup",
+      "ask": "Pickup details?",
+      "accepts_evidence": [],
+      "required": true,
+      "material": false,
+      "safety_relevant": false
+    }
+  ],
+  "spec_version": "1.0.0"
+}

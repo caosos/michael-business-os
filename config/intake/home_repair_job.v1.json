@@ -1,0 +1,72 @@
+{
+  "category": "home_repair",
+  "kind": "service_job",
+  "photo_angles": [
+    "wide shot of the area",
+    "close-up of the damage",
+    "access path"
+  ],
+  "fields": [
+    {
+      "key": "scope",
+      "ask": "What needs doing? (e.g. replace rotten section of floor)",
+      "accepts_evidence": [
+        "photo"
+      ],
+      "required": true,
+      "material": true,
+      "safety_relevant": false
+    },
+    {
+      "key": "location",
+      "ask": "Where is the work (address or area)? Needed for local rules.",
+      "accepts_evidence": [],
+      "required": true,
+      "material": true,
+      "safety_relevant": false
+    },
+    {
+      "key": "extent",
+      "ask": "How big is the affected area?",
+      "accepts_evidence": [
+        "photo"
+      ],
+      "required": true,
+      "material": true,
+      "safety_relevant": false
+    },
+    {
+      "key": "cause",
+      "ask": "Do you know why it happened (leak, rot, pests)? Is the cause fixed?",
+      "accepts_evidence": [],
+      "required": true,
+      "material": true,
+      "safety_relevant": true
+    },
+    {
+      "key": "timeline",
+      "ask": "When should it be done?",
+      "accepts_evidence": [],
+      "required": true,
+      "material": false,
+      "safety_relevant": false
+    },
+    {
+      "key": "budget",
+      "ask": "Do you have a budget in mind?",
+      "accepts_evidence": [],
+      "required": true,
+      "material": false,
+      "safety_relevant": false
+    },
+    {
+      "key": "access",
+      "ask": "Anything about access, pets or occupancy we should know?",
+      "accepts_evidence": [],
+      "required": true,
+      "material": false,
+      "safety_relevant": false
+    }
+  ],
+  "spec_version": "1.0.0"
+}
