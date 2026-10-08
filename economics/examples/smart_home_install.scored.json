@@ -69,16 +69,16 @@
       }
     },
     "scores": {
-      "scorecard_id": "scr_01M4B3R6G09VDJP7MJ5Y961VBX",
+      "scorecard_id": "scr_01M4B3R6G01QR1XZMTPTARCW2N",
       "inputs_hash": "sha256:961b416b0ffc150af82b46a6b6df7e5d8f28815dc1b92afa3915ef427aee6fa6",
       "scorecard": {
         "scoring_config_version": "2026.10.2",
         "computed_at": "2026-10-07T12:00:00Z",
-        "engine_version": "0.12.1",
+        "engine_version": "0.13.0",
         "config_hash": "sha256:ab452d208f9a0eae5bad5225ed791429d420dcec50b8f8e62b46a274f3dc50b0",
         "lane": "service",
         "derived": {
-          "deal_class": "SERVICE",
+          "deal_class": "SERVICE_JOB",
           "deal_class_basis": "RECOMMENDATION",
           "class_requirements": {
             "min_net_profit": 0,
@@ -87,8 +87,8 @@
           },
           "cash_at_risk": 65.64,
           "days_to_cash": 5,
-          "cash_multiple": 13.5055,
-          "ev_cash_multiple": 12.7552,
+          "cash_multiple": null,
+          "ev_cash_multiple": null,
           "capital_velocity": 1,
           "catastrophic_downside_probability": 0,
           "parts_out_floor": null,
@@ -265,39 +265,39 @@
           "deterministic: net $834.36, $101.20/h over 8.2444 h, cash tied up $65.64, ROI 12.7112",
           "expected: net $820.86, $99.57/h, max loss $0.00, P(loss) 0.0000, time-to-cash 5 d",
           "ALERT: strong and perishable",
-          "class SERVICE (provisional thresholds): cash at risk $65.64, 5 d to cash, cash multiple 13.5055x; rank score 697.73 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
+          "class SERVICE_JOB (provisional thresholds): cash at risk $65.64, 5 d to cash, cash multiple Nonex; rank score 697.73 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
           "minimum quote for YES: $695"
         ]
       }
     },
     "recommendation": {
-      "recommendation_id": "rec_01M4B3R6G0JZ5EC1MSG0BD48DP",
+      "recommendation_id": "rec_01M4B3R6G0ESK2E7M872YRJZHX",
       "verdict": "YES",
       "rationale": [
         "all hard gates pass; composite 77.55; confidence 0.8500; EV profit/hour $99.57 >= $75.00; EV $771.61",
         "deterministic: net $834.36, $101.20/h over 8.2444 h, cash tied up $65.64, ROI 12.7112",
         "expected: net $820.86, $99.57/h, max loss $0.00, P(loss) 0.0000, time-to-cash 5 d",
         "ALERT: strong and perishable",
-        "class SERVICE (provisional thresholds): cash at risk $65.64, 5 d to cash, cash multiple 13.5055x; rank score 697.73 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
+        "class SERVICE_JOB (provisional thresholds): cash at risk $65.64, 5 d to cash, cash multiple Nonex; rank score 697.73 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
         "minimum quote for YES: $695"
       ],
       "confidence": 0.85,
       "alert": true,
-      "provenance_id": "prov_01M4B3R6G0S7NB358N2MAT7ZWD"
+      "provenance_id": "prov_01M4B3R6G03QMN609H0GVQP1JC"
     },
     "provenance_ids": [
       "prov_01JB0000000000000000000220",
-      "prov_01M4B3R6G0S7NB358N2MAT7ZWD"
+      "prov_01M4B3R6G03QMN609H0GVQP1JC"
     ]
   },
   "provenance": {
-    "provenance_id": "prov_01M4B3R6G0S7NB358N2MAT7ZWD",
+    "provenance_id": "prov_01M4B3R6G03QMN609H0GVQP1JC",
     "created_at": "2026-10-07T12:00:00Z",
     "actor_type": "system",
     "agent_name": "agent-03-economics",
     "basis": "INFERENCE",
     "tool_name": "mbos_economics.engine",
-    "tool_version": "0.12.1",
+    "tool_version": "0.13.0",
     "config_version": "2026.10.2",
     "inputs_used": [
       {
@@ -319,26 +319,26 @@
       "type": "SCORE_RECORDED",
       "item_id": "itm_01JB0000000000000000000022",
       "entity_type": "scorecard",
-      "entity_id": "scr_01M4B3R6G09VDJP7MJ5Y961VBX",
+      "entity_id": "scr_01M4B3R6G01QR1XZMTPTARCW2N",
       "tool_name": "mbos_economics.engine",
       "inputs_hash": "sha256:961b416b0ffc150af82b46a6b6df7e5d8f28815dc1b92afa3915ef427aee6fa6",
-      "payload_hash": "sha256:61311df29f70391bc36e229014fe8f7364d135ef837792da6b5b68f29284c3cd",
-      "idempotency_key": "score:scr_01M4B3R6G09VDJP7MJ5Y961VBX",
+      "payload_hash": "sha256:b83bff90b62fc63a3d6771dcb48816e2715aaa37eb0097b282c11311db7e3e8c",
+      "idempotency_key": "score:scr_01M4B3R6G01QR1XZMTPTARCW2N",
       "provenance_ids": [
-        "prov_01M4B3R6G0S7NB358N2MAT7ZWD"
+        "prov_01M4B3R6G03QMN609H0GVQP1JC"
       ]
     },
     {
       "type": "RECOMMENDATION_RECORDED",
       "item_id": "itm_01JB0000000000000000000022",
       "entity_type": "recommendation",
-      "entity_id": "rec_01M4B3R6G0JZ5EC1MSG0BD48DP",
+      "entity_id": "rec_01M4B3R6G0ESK2E7M872YRJZHX",
       "tool_name": "mbos_economics.engine",
       "inputs_hash": "sha256:961b416b0ffc150af82b46a6b6df7e5d8f28815dc1b92afa3915ef427aee6fa6",
-      "payload_hash": "sha256:3f08d34717b269126a08da92703e3753149ba7928ec279480d6e149baae008f8",
-      "idempotency_key": "recommend:rec_01M4B3R6G0JZ5EC1MSG0BD48DP",
+      "payload_hash": "sha256:1f231bc2660886d5eb0ccd33563bf32081e28333768ee4efe4a00fec6447b571",
+      "idempotency_key": "recommend:rec_01M4B3R6G0ESK2E7M872YRJZHX",
       "provenance_ids": [
-        "prov_01M4B3R6G0S7NB358N2MAT7ZWD"
+        "prov_01M4B3R6G03QMN609H0GVQP1JC"
       ]
     }
   ]

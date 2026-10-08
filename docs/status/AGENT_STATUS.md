@@ -4,15 +4,15 @@ Agent: 03
 Role: Economics / Scoring (Round-Two build lane C)
 Branch: research/agent-03-economics
 Worktree: /home/michaelos/business-os-worktrees/agent-03-economics
-State: WORKING
-Current phase: ROUND TWO, wave two. Claimed task: RESEARCH/estimate producer (lane C)
+State: CLOSED
+Current phase: CLOSED (closeout per ADR-0014). No claimed task.
 Started: 2026-10-06
-Last updated: 2026-10-08 (C-20 done)
+Last updated: 2026-10-08 (lane CLOSED; C-21 done; handoff docs/handoff/LANE_03.md)
 
 ## Claimed work (wave two). Foreman loop: `docs/COORDINATION.md` @ agent-01 `99e9ec0`
-Claimed: C-21
-Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6; C-04 @ 882c726; C-05 @ 6e938d2; C-06 @ 9e36ec9; C-07 @ 0c3cf4a; C-08 @ a81a989; C-09 @ 286e0f3; C-10 @ e1869f2; C-11 @ c648ca3; C-12 @ d5daf42; C-13 @ 0d417fb; C-14 @ ec97bf7; C-15 @ 2575ed3; C-16 @ c88cd5a; C-17 @ 3569efb; C-18 @ d9bceea; X-03 @ 4a93582 (already satisfied; verified 2026-10-08); C-19 @ 4f49c8b; C-20 @ 3c3201c
-Queue (lane C, after C-21): C-22 (Valuator interface; needs A-26) @ agent-01 `292adae`
+Claimed: none (closed)
+Done: C-01 @ 42fed5e; C-02 @ 247c036; C-03 @ 22b49e6; C-04 @ 882c726; C-05 @ 6e938d2; C-06 @ 9e36ec9; C-07 @ 0c3cf4a; C-08 @ a81a989; C-09 @ 286e0f3; C-10 @ e1869f2; C-11 @ c648ca3; C-12 @ d5daf42; C-13 @ 0d417fb; C-14 @ ec97bf7; C-15 @ 2575ed3; C-16 @ c88cd5a; C-17 @ 3569efb; C-18 @ d9bceea; X-03 @ 4a93582 (already satisfied; verified 2026-10-08); C-19 @ 4f49c8b; C-20 @ 3c3201c; C-21 @ C21COMMIT
+Queue: C-22 (Valuator) is NOT started; see Proposed tasks P-03-10 @ agent-01 `292adae`
 
 - **C-01**, the RESEARCH/estimate producer, fills `Item.economics` from normalized fields, comps evidence and category priors, with provenance per estimate. It is deterministic and does no LLM arithmetic.
   - Claimed at `b923852`; confirmed CLAIMED in READY_QUEUE @ `99e9ec0`.
@@ -149,6 +149,10 @@ Queue (lane C, after C-21): C-22 (Valuator interface; needs A-26) @ agent-01 `29
 - **X-03 (all lanes; remove committed `build/`): already satisfied.** The branch tracks no `build/`, `dist/` or `egg-info` at any depth (checked on `origin/research/agent-03-economics`). My nested `economics/build/` was removed at `4a93582`, and `.gitignore` covers `build/` and `dist/`. A clean `git archive` + pip install reports 0.11.1. A test (`test_git_tracks_no_build_output`) guards it.
 
 ## Proposed tasks (for Agent 01 to triage)
+- **P-03-10 (lane C): C-22 Valuator interface + FlipComparablesValuator** (READY in the queue; not started). Acceptance: mower and trailer fixtures produce `valuation.schema.json` ranges with evidence and `not_an_appraisal: true` that pass `mbos.valuation.errors`; asking-only comps cap confidence at medium; sold comps or a record allow high; home and vehicle valuators are interface-only and return UNKNOWN with `reason_unknown`, never a number; reuses `comps.py` / `comps_feed.py` / `estimation-priors.json`.
+- **P-03-11 (lane C): fill the new numeric context from data.** The estimator should set `economics.context.seasonality_factor` from `seasonality.json` (needs a human-read source for each category; today UNKNOWN) and accept Michael's `current_cash` from `config/operator_profile.v1.json` `current_cash_context`. Acceptance: with the profile cash set, the late-season mower row shows cash pressure; with it null, the row says UNKNOWN; seasonality is only set where a sourced entry exists.
+- **P-03-12 (lane C + owner): confirm deal-class thresholds (MICHAEL_DECISIONS #9).** `scoring-config.json` `deal_classes` / `class_gates` mirror the operator profile and are PROVISIONAL. Acceptance: once Michael answers, a config bump (2026.10.3+) with the history copy, the drift test `test_config_classes_mirror_operator_profile` green, goldens regenerated.
+- **P-03-13 (lanes C + D + F): feed `plan_week` real data.** Read scored Items from the StateStore (`mbos.v_item_documents`) and the capital ledger (D-18) into `plan_week`, and expose `mission plan` on the CLI. Acceptance: a plan generated from the database validates with `mbos.mission.plan_errors` and every leg links to its card.
 - **P-03-08 (lane B): CPSC knowledge adapter.** Read the CPSC programmer's guide (response fields, rate limit), then a read-only, fixture-first Tier-1 adapter emitting recall records. 03 supplies the deterministic record-to-KB-entry converter once the fields are known.
 - **P-03-09 (lanes F + A): "Add what you know about this model" prompt on cards that show no sourced knowledge**, and a store for the notes document (persist the human provenance first, then the note).
 - **P-03-07 → queued as C-17.** Original: a source plan for non-recall model knowledge (known weak points, expensive parts, parts availability). My searches found nothing citable for the Cub Cadet ZT1 or the Husqvarna FS 400 LV. Routes: service bulletins, manufacturer parts diagrams, and Michael's own notes entered with provenance as `manual`.

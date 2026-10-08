@@ -170,7 +170,7 @@ def _pass_on_priors(econ: dict, lane: str, failed: list[str], composite_floor: b
 def _deal_class(lane: str, cash: Decimal, days: Decimal, cfg: ScoringConfig) -> str:
     """Class from DATA thresholds (config.deal_classes, mirrored from the operator profile)."""
     if lane == "service":
-        return "SERVICE"
+        return "SERVICE_JOB"
     if cash >= cfg.num("deal_classes.capital_intensive_min_cash") or days >= cfg.num(
             "deal_classes.capital_intensive_min_days"):
         return "CAPITAL_INTENSIVE_FLIP"
@@ -289,12 +289,13 @@ def compute(inp: dict, cfg: ScoringConfig) -> dict:
     # deal class + capital-velocity facts (C-19, ADR-0012): no universal profit floor
     cash_at_risk, days_to_cash = le.cash_tied_up, le.ttc_days
     deal_class = _deal_class(lane, cash_at_risk, days_to_cash, cfg)
-    gk = f"class_gates.{deal_class.lower()}"
+    gk = "class_gates." + ("service" if deal_class == "SERVICE_JOB" else deal_class.lower())
     min_net, min_ev, min_mult = (cfg.num(f"{gk}.min_net_profit"), cfg.num(f"{gk}.min_ev_profit"),
                                  cfg.num(f"{gk}.min_cash_multiple"))
     cash_base = max(cash_at_risk, ONE)
-    cash_multiple = fine((cash_at_risk + le.ev_net_profit) / cash_base)
-    ev_cash_multiple = fine((cash_at_risk + ev_decision) / cash_base)
+    # a cash multiple is meaningless for a service (little or no capital at risk): null, not a number
+    cash_multiple = fine((cash_at_risk + le.ev_net_profit) / cash_base) if lane == "flip" else None
+    ev_cash_multiple = fine((cash_at_risk + ev_decision) / cash_base) if lane == "flip" else None
 
     # risk score (§9.1)
     rw = cfg.group("risk_score_weights")
@@ -351,7 +352,7 @@ def compute(inp: dict, cfg: ScoringConfig) -> dict:
         "composite_ok": composite >= cfg.num("decision_thresholds.composite_yes"),
         "confidence_ok": confidence >= cfg.num("decision_thresholds.confidence_min_for_yes"),
         "ev_pph_target_ok": le.ev_pph >= w_target,
-        "class_ev_ok": ev_decision >= min_ev and ev_cash_multiple >= min_mult,
+        "class_ev_ok": ev_decision >= min_ev and (ev_cash_multiple is None or ev_cash_multiple >= min_mult),
         "remote_verification_ok": (miles <= cfg.num("distance_rules.remote_verification_required_beyond_miles"))
                                   or items["remote_verification"],
     }

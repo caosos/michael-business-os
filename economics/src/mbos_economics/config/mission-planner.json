@@ -1,0 +1,9 @@
+{
+  "mission_planner_version": "2026.10.1",
+  "_note": "C-21 planner parameters. DATA, not code. Separate from scoring-config.json so the planner can be tuned without re-versioning every scorecard. REC values; not Michael-confirmed.",
+  "max_candidates": { "value": 10, "basis": "REC", "note": "top candidates by rank_score considered for subset search (2^n subsets)" },
+  "probability_resolution": { "value": 0.05, "basis": "REC", "note": "probabilities of closing the gap that differ by less than this are treated as equal, then the plan that risks less cash wins" },
+  "include_maybe": { "value": true, "basis": "REC", "note": "MAYBE scorecards may be legs; they are flagged in replace_if_stale and cap confidence at low" },
+  "high_confidence_probability": { "value": 0.8, "basis": "REC" },
+  "medium_confidence_probability": { "value": 0.5, "basis": "REC" }
+}

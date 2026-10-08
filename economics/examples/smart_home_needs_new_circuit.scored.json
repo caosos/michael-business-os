@@ -68,16 +68,16 @@
       }
     },
     "scores": {
-      "scorecard_id": "scr_01M4B3R6G0SBQZ6E3XP21Z2A3T",
+      "scorecard_id": "scr_01M4B3R6G0DF1GWHGN2KKDTDB1",
       "inputs_hash": "sha256:9aa86e9f5ab657518f0cb56eb884e1e8e379d2d4e48617a69bd2f4f6354c380b",
       "scorecard": {
         "scoring_config_version": "2026.10.2",
         "computed_at": "2026-10-07T12:00:00Z",
-        "engine_version": "0.12.1",
+        "engine_version": "0.13.0",
         "config_hash": "sha256:ab452d208f9a0eae5bad5225ed791429d420dcec50b8f8e62b46a274f3dc50b0",
         "lane": "service",
         "derived": {
-          "deal_class": "SERVICE",
+          "deal_class": "SERVICE_JOB",
           "deal_class_basis": "RECOMMENDATION",
           "class_requirements": {
             "min_net_profit": 0,
@@ -86,8 +86,8 @@
           },
           "cash_at_risk": 65.64,
           "days_to_cash": 5,
-          "cash_multiple": 13.5055,
-          "ev_cash_multiple": 12.7552,
+          "cash_multiple": null,
+          "ev_cash_multiple": null,
           "capital_velocity": 1,
           "catastrophic_downside_probability": 0,
           "parts_out_floor": null,
@@ -288,13 +288,13 @@
           "deterministic: net $834.36, $101.20/h over 8.2444 h, cash tied up $65.64, ROI 12.7112",
           "expected: net $820.86, $99.57/h, max loss $0.00, P(loss) 0.0000, time-to-cash 5 d",
           "skills not in profile: licensed_electrical",
-          "class SERVICE (provisional thresholds): cash at risk $65.64, 5 d to cash, cash multiple 13.5055x; rank score 697.73 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
+          "class SERVICE_JOB (provisional thresholds): cash at risk $65.64, 5 d to cash, cash multiple Nonex; rank score 697.73 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
           "evidence is not the blocker: no missing evidence item changes the verdict"
         ]
       }
     },
     "recommendation": {
-      "recommendation_id": "rec_01M4B3R6G0JZZJAYCHD6745CF0",
+      "recommendation_id": "rec_01M4B3R6G07NG9K2J4JQX7M3QB",
       "verdict": "PASS",
       "rationale": [
         "GATE FAIL license_ok: requires a license Michael lacks (licensed_electrical)",
@@ -302,26 +302,26 @@
         "deterministic: net $834.36, $101.20/h over 8.2444 h, cash tied up $65.64, ROI 12.7112",
         "expected: net $820.86, $99.57/h, max loss $0.00, P(loss) 0.0000, time-to-cash 5 d",
         "skills not in profile: licensed_electrical",
-        "class SERVICE (provisional thresholds): cash at risk $65.64, 5 d to cash, cash multiple 13.5055x; rank score 697.73 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
+        "class SERVICE_JOB (provisional thresholds): cash at risk $65.64, 5 d to cash, cash multiple Nonex; rank score 697.73 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
         "evidence is not the blocker: no missing evidence item changes the verdict"
       ],
       "confidence": 0.85,
       "alert": false,
-      "provenance_id": "prov_01M4B3R6G0KA9SAM0DNSYS4D03"
+      "provenance_id": "prov_01M4B3R6G0XQTNSFSEVK356Z3K"
     },
     "provenance_ids": [
       "prov_01JB0000000000000000000220",
-      "prov_01M4B3R6G0KA9SAM0DNSYS4D03"
+      "prov_01M4B3R6G0XQTNSFSEVK356Z3K"
     ]
   },
   "provenance": {
-    "provenance_id": "prov_01M4B3R6G0KA9SAM0DNSYS4D03",
+    "provenance_id": "prov_01M4B3R6G0XQTNSFSEVK356Z3K",
     "created_at": "2026-10-07T12:00:00Z",
     "actor_type": "system",
     "agent_name": "agent-03-economics",
     "basis": "INFERENCE",
     "tool_name": "mbos_economics.engine",
-    "tool_version": "0.12.1",
+    "tool_version": "0.13.0",
     "config_version": "2026.10.2",
     "inputs_used": [
       {
@@ -343,26 +343,26 @@
       "type": "SCORE_RECORDED",
       "item_id": "itm_01JB0000000000000000000023",
       "entity_type": "scorecard",
-      "entity_id": "scr_01M4B3R6G0SBQZ6E3XP21Z2A3T",
+      "entity_id": "scr_01M4B3R6G0DF1GWHGN2KKDTDB1",
       "tool_name": "mbos_economics.engine",
       "inputs_hash": "sha256:9aa86e9f5ab657518f0cb56eb884e1e8e379d2d4e48617a69bd2f4f6354c380b",
-      "payload_hash": "sha256:4e3642b88832a85afb11a407a64942fbe846d10b259077a7b2cbdf5884f342b8",
-      "idempotency_key": "score:scr_01M4B3R6G0SBQZ6E3XP21Z2A3T",
+      "payload_hash": "sha256:6875f17d30d855b08cd2a1ab0252183b3a4905b6f8dfa697234222c3b301b691",
+      "idempotency_key": "score:scr_01M4B3R6G0DF1GWHGN2KKDTDB1",
       "provenance_ids": [
-        "prov_01M4B3R6G0KA9SAM0DNSYS4D03"
+        "prov_01M4B3R6G0XQTNSFSEVK356Z3K"
       ]
     },
     {
       "type": "RECOMMENDATION_RECORDED",
       "item_id": "itm_01JB0000000000000000000023",
       "entity_type": "recommendation",
-      "entity_id": "rec_01M4B3R6G0JZZJAYCHD6745CF0",
+      "entity_id": "rec_01M4B3R6G07NG9K2J4JQX7M3QB",
       "tool_name": "mbos_economics.engine",
       "inputs_hash": "sha256:9aa86e9f5ab657518f0cb56eb884e1e8e379d2d4e48617a69bd2f4f6354c380b",
-      "payload_hash": "sha256:5934a1df886b20a0c14c2be6dcbb022d39f97e4c46fa68b4062c2a75eac318f9",
-      "idempotency_key": "recommend:rec_01M4B3R6G0JZZJAYCHD6745CF0",
+      "payload_hash": "sha256:f71cb9cf3b0f473661fe01a0ba86797e2fb22bfdfdbab42e0be5f45040b50e1d",
+      "idempotency_key": "recommend:rec_01M4B3R6G07NG9K2J4JQX7M3QB",
       "provenance_ids": [
-        "prov_01M4B3R6G0KA9SAM0DNSYS4D03"
+        "prov_01M4B3R6G0XQTNSFSEVK356Z3K"
       ]
     }
   ]

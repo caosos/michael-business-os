@@ -115,8 +115,19 @@ class TestClassGates(unittest.TestCase):
         for lane, cash, days, want in (("flip", 100, 3, "MICRO_FLIP"), ("flip", 101, 3, "QUICK_TURN"),
                                        ("flip", 100, 4, "QUICK_TURN"), ("flip", 749, 10, "QUICK_TURN"),
                                        ("flip", 749, 11, "STANDARD_FLIP"), ("flip", 750, 1, "CAPITAL_INTENSIVE_FLIP"),
-                                       ("flip", 50, 45, "CAPITAL_INTENSIVE_FLIP"), ("service", 5, 1, "SERVICE")):
+                                       ("flip", 50, 45, "CAPITAL_INTENSIVE_FLIP"), ("service", 5, 1, "SERVICE_JOB")):
             self.assertEqual(_deal_class(lane, D(cash), D(days), CFG), want, (cash, days))
+
+
+class TestServiceJobClass(unittest.TestCase):
+    def test_service_is_service_job_without_a_flip_cash_multiple(self):
+        from worked_cases import fresh as wfresh
+        s = score_item(wfresh("drywall_basement"), CFG, SCORED_AT)["scores"]["scorecard"]
+        d = s["derived"]
+        self.assertEqual(d["deal_class"], "SERVICE_JOB")
+        self.assertIsNone(d["cash_multiple"])
+        self.assertIsNone(d["ev_cash_multiple"])
+        self.assertEqual(d["class_requirements"]["min_net_profit"], 0)       # no absolute floor for a service
 
 
 class TestUnknownContext(unittest.TestCase):

@@ -98,8 +98,9 @@ def _row(item: dict, as_of: str, horizon: Decimal) -> tuple[dict | None, str | N
     rk = sc.get("ranking")
     parts = [verdict + (" + ALERT" if sc.get("alert") else "")]
     if rk:
-        parts.append(f"{str(d.get('deal_class', '')).replace('_', ' ').lower()}: {_usd(d['cash_at_risk'])} at risk, "
-                     f"back in {ttc} d ({d['cash_multiple']}x)")
+        risk = ("no capital at risk" if D(d["cash_at_risk"]) <= 0 else f"{_usd(d['cash_at_risk'])} at risk")
+        mult = f" ({d['cash_multiple']}x)" if d.get("cash_multiple") is not None else ""
+        parts.append(f"{str(d.get('deal_class', '')).replace('_', ' ').lower()}: {risk}, back in {ttc} d{mult}")
         parts.append(f"rank {rk['rank_score']} = risk-adjusted {_usd(rk['risk_adjusted_profit'])} x conf "
                      f"{rk['confidence']} x velocity {rk['capital_velocity']}/day"
                      + (f" x season {rk['seasonality_factor_applied']}" if rk["seasonality_factor"] is not None else "")
