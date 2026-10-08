@@ -45,9 +45,10 @@ state/
   bootstrap/pg-local.sh            wave-one user-space PG16 cluster (port 55432, loopback only)
   bootstrap/bootstrap.sh           idempotent: roles, DBs, passwords, migrations, verify_chain
   bootstrap/systemd/               user units: postgres, hourly chain verify + anchor
+  bootstrap/archive-wal.sh, pitr-base-backup.sh, restore-pitr.sh   D-09a: WAL archiving, base backup, PITR restore
   bootstrap/podman/                Quadlet units for the target runtime (UNTESTED: no Podman on host yet)
   mbos_state/                      Python: migrate, StateStore facade, chain export/anchor/offline verify, CLI
-  tests/                           223 tests; vendored frozen contracts v1.0.0 in tests/contracts-v1.0.0/
+  tests/                           230 tests; vendored frozen contracts v1.0.0 in tests/contracts-v1.0.0/
 ```
 
 ## Tables

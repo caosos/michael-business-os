@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # pg-local.sh — wave-one, user-space PostgreSQL 16 cluster for the MBOS state spine (no root, no Podman).
-# usage: pg-local.sh init|start|stop|status|env
+# usage: pg-local.sh init|enable-archive|start|stop|status|env
 #
 # Isolation from anything else on the host (e.g. CAOSCare): own data dir, own port (55432), own socket dir,
 # loopback only. It never touches a system cluster or port 5432.
@@ -50,8 +50,26 @@ log_min_duration_statement = 1000
 log_line_prefix = '%m [%p] %q%u@%d '
 timezone = 'UTC'
 CONF
+    if [[ -n "${MBOS_WAL_ARCHIVE:-}" ]]; then   # continuous archiving for PITR (D-09): destination is one directory
+      cat >> "$MBOS_PGDATA/postgresql.conf" <<CONF
+archive_mode = on
+archive_timeout = 300                # force a segment at least every 5 min => bounds the loss window
+archive_command = '$HERE/archive-wal.sh $MBOS_WAL_ARCHIVE %p %f'
+CONF
+    fi
     echo "initialized $MBOS_PGDATA (port $MBOS_PGPORT, socket $MBOS_PGSOCK)"
     ;;
+  enable-archive)   # existing cluster: needs MBOS_WAL_ARCHIVE; restart required for archive_mode
+    : "${MBOS_WAL_ARCHIVE:?set MBOS_WAL_ARCHIVE (directory)}"
+    grep -q '^archive_mode = on' "$MBOS_PGDATA/postgresql.conf" && { echo "archiving already enabled"; exit 0; }
+    cat >> "$MBOS_PGDATA/postgresql.conf" <<CONF
+
+# --- continuous archiving (D-09) ---
+archive_mode = on
+archive_timeout = 300
+archive_command = '$HERE/archive-wal.sh $MBOS_WAL_ARCHIVE %p %f'
+CONF
+    echo "archiving enabled -> $MBOS_WAL_ARCHIVE (restart the cluster to apply)" ;;
   start)
     "$PG_BIN/pg_ctl" -D "$MBOS_PGDATA" -l "$MBOS_HOME/postgres.log" -w start ;;
   start-foreground)   # for systemd (Type=simple)
@@ -63,5 +81,5 @@ CONF
   env)
     echo "export PG_BIN=$PG_BIN MBOS_PGDATA=$MBOS_PGDATA MBOS_PGSOCK=$MBOS_PGSOCK MBOS_PGPORT=$MBOS_PGPORT" ;;
   *)
-    echo "usage: $0 init|start|start-foreground|stop|status|env" >&2; exit 2 ;;
+    echo "usage: $0 init|enable-archive|start|start-foreground|stop|status|env" >&2; exit 2 ;;
 esac

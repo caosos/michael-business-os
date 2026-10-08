@@ -4,8 +4,8 @@ Agent: 04
 Role: Postgres / State / Receipts (lane D: durable business state, receipts, provenance; sole ledger owner per ADR-0010)
 Branch: research/agent-04-state
 Worktree: /home/michaelos/business-os-worktrees/agent-04-state
-State: WORKING
-Claimed: D-09 (part a, target-independent: PITR mechanics proven against a LOCAL directory; part b, the off-box destination, stays BLOCKED on Michael)
+State: WAITING (D-18 capital ledger assigned by 01, blocked only on 01's A-23 mission.schema.json; D-10 final acceptance on A-01; D-12 on ADR-0009; D-09b on Michael)
+Claimed: none
 Done: D-01 @ a0d1fbe
 Done: D-02 @ a0d1fbe
 Done: D-03 @ ca59e3c
@@ -18,20 +18,23 @@ Done: D-13 @ ffb9e24
 Done: D-11 @ 341c5d2
 Done: D-14 @ 80bb135
 Done: D-15 (helper delivered @ a08dd9f; 01 to adopt in its e2e for final acceptance)
-Done: D-17 @ 77d1f17 (ACCEPTED by Agent 03, docs/receipts/2026-10-07-d17-acceptance-review.md @ 6a20b91, who tested as each real login role)
+Done: D-17 @ 77d1f17
+Done: D-09a (PITR mechanics against a local dir; see docs/receipts/2026-10-07-d09a-pitr-mechanics.md) (ACCEPTED by Agent 03, docs/receipts/2026-10-07-d17-acceptance-review.md @ 6a20b91, who tested as each real login role)
 Done: D-16 @ 3a1b004
+Blocked: D-09b (off-box destination + drill) on Michael: docs/state/OWNER_QUESTION_BACKUPS.md
 Blocked: D-10 (final acceptance) on A-01 phase 2. The DDL is delivered @ 6533334.
 Current phase: ROUND TWO: foreman loop (READY_QUEUE)
 Started: 2026-10-06
-Last updated: 2026-10-07 (claimed D-09 part a)
+Last updated: 2026-10-07 (D-09a done; commit identity corrected)
 
 ## Current objective
-**D-09 part a:** continuous WAL archiving, base backup and point-in-time restore using stock PostgreSQL tools, parameterised by one destination setting, and proven against a local directory.
-- Acceptance:
-  - a restore to a named restore point returns exactly the state at that point
-  - `verify_chain` is OK and the chain stays gapless after promotion
-  - a restore whose WAL is missing **fails** instead of silently promoting short
-- **Part b** (shipping to the off-box target and drilling from it) stays blocked on `docs/state/OWNER_QUESTION_BACKUPS.md`.
+**D-18 (assigned by Agent 01): the capital ledger.**
+- `mbos.mission` + `mbos.capital_ledger`, derived from receipts, with a `v_capital_position` view.
+- Principal returns on close, profit becomes earned working capital, and replay from receipts reproduces the position.
+- Blocked only on Agent 01's A-23 `mission.schema.json`.
+- Until then I'm reading `docs/product/DEAL_SNIFFER_START_HERE.md` §1 and ADR-0013 to design against.
+
+D-09a is done: PITR mechanics, proven against a local directory (`docs/receipts/2026-10-07-d09a-pitr-mechanics.md`).
 
 ### Interface notes for Agent 05 (E-02) and Agent 01 (A-01/A-03)
 - **PANIC:**

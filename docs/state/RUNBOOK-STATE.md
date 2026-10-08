@@ -114,8 +114,28 @@ systemctl --user enable --now mbos-postgres.service mbos-chain-check.timer
   - The fresh-cluster drill re-verifies them against the *restored* index (set `MBOS_DRILL_ARTIFACTS=<backup>/artifacts-<ts>`).
   - Routine check: `python -m mbos_state verify-artifacts`. It re-hashes every file and reports missing, modified and unindexed files.
   - **FACT (2026-10-07):** the drill passed with 5 fs + 1 inline artifacts and 183 receipts.
-- **PITR:** `wal_level=replica` is already set. pgBackRest (`archive_command`, a repo on off-box storage)
-  lands once an off-box target exists. **UNKNOWN:** the target (NAS, USB or cloud).
+- **PITR (D-09 part a, proven against a LOCAL directory; part b, the off-box destination, waits on Michael: `docs/state/OWNER_QUESTION_BACKUPS.md`):**
+  - **Continuous archiving:** `MBOS_WAL_ARCHIVE=<dir> pg-local.sh init` for a new cluster, or `pg-local.sh enable-archive` plus a restart for an existing one. PostgreSQL then runs `bootstrap/archive-wal.sh <dir> %p %f` for every WAL segment:
+    - it writes a temp file, fsyncs, renames, and makes the file read-only
+    - it is idempotent on a retry, and refuses to overwrite a *different* file of the same name
+    - `archive_timeout = 300` forces a segment at least every 5 minutes, so the loss window is about 5 minutes once the destination is reachable
+  - **Base backup:** `MBOS_BACKUP_TARGET=<dir> bootstrap/pitr-base-backup.sh` takes a self-contained physical backup (`pg_basebackup`, WAL streamed) and verifies it with `pg_verifybackup` before reporting it.
+  - **Restore:** `bootstrap/restore-pitr.sh --base <base> --archive <dir> --data <NEW dir> --port N --sock <dir> (--target-name NAME | --target-time TS | --latest)`.
+    - Before a risky change, create a marker: `SELECT pg_create_restore_point('before-x')`.
+    - It never touches the live cluster, and it refuses an existing directory.
+    - The restored cluster does not archive, so it cannot write into the archive it came from.
+    - **Fail closed:** if the WAL needed to reach the target is missing or damaged, PostgreSQL refuses to open and the script exits non-zero, rather than promoting a shorter history.
+    - After a restore, check `python -m mbos_state verify-chain` against the anchor.
+  - **FACT (2026-10-07, `state/tests/test_pitr.py`, 7 tests, run twice):**
+    - a restore to a named point returns exactly the state at that point: 10 of 15 items, with the chain head equal to the recorded one
+    - `verify_chain` is OK, the cluster accepts writes after promotion, and the chain continues gapless
+    - `--latest` replays everything archived, and gives 15 of 15
+    - an empty archive makes the restore fail
+  - **A bug that only running it found:** archived WAL files are read-only (0440), and `cp` preserved that mode, so recovery aborted with "Permission denied" on its own copy. `restore_command` now uses `cat … > %p`.
+  - **Not done / honest limits:**
+    - This uses stock PostgreSQL tools. pgBackRest would add compression, retention and built-in encryption, but it isn't installed here. It remains a later option.
+    - **Encryption is not applied.** A local directory doesn't need it. Anything copied off-box does, because the data includes raw seller contact values.
+    - Retention and pruning of old base backups and WAL is not automated yet.
 
 ## 5b. Vector index (D-08 / D3)
 - `mbos.item_embeddings` is a projection. It may be dropped at any time.
