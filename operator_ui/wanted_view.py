@@ -186,7 +186,7 @@ def render_page(records: list[dict], items: list[dict], now, csrf: str, pin_set:
             "<p class='small mut'>A campaign only watches and recommends. It never contacts a seller, bids or buys; every action still needs your YES. "
             "Origin blank = Conway.</p></div>")
     cards = []
-    for r in records:
+    def _one(r):
         d, hist = r["doc"], r["history"]
         c = d["criteria"]
         active = d["status"] == "ACTIVE"
@@ -203,8 +203,16 @@ def render_page(records: list[dict], items: list[dict], now, csrf: str, pin_set:
         spec = (f"{e(c['category'])} · max ${c['max_price_usd']:g}" + (f" · {c['radius_miles']:g} mi" if c.get("radius_miles") is not None else "") +
                 (f" · keywords {e(', '.join(c['keywords']))}" if c.get("keywords") else "") + f" · cosmetics {'matter' if c.get('cosmetics_matter') else 'ignored'}")
         last = hist[-1] if hist else {}
-        cards.append(f"<div class='card'><div class='row'><b class='grow'>{e(d['title'])}</b><span class='badge'>{e(d['status'])}</span>"
+        return (f"<div class='card'><div class='row'><b class='grow'>{e(d['title'])}</b><span class='badge'>{e(d['status'])}</span>"
                      f"<span class='badge'>{e(d['autonomy']['level'])}</span></div><p class='small mut'>{spec}<br>"
                      f"last change: {e(last.get('what'))} by {e(last.get('by'))} at {e(last.get('at'))}</p>{body}{ctl}</div>")
+
+    for r in records:  # F-82: one malformed stored campaign is one error row, never a broken page
+        try:
+            cards.append(_one(r))
+        except Exception as ex:  # noqa: BLE001
+            cid = r["doc"].get("campaign_id") if isinstance(r, dict) and isinstance(r.get("doc"), dict) else None
+            cards.append(f"<div class='card'><p class='bad'><b>Campaign {e(cid or '(unknown id)')} cannot be shown</b>: its stored record is "
+                         f"malformed ({e(type(ex).__name__)}). Other campaigns are unaffected.</p></div>")
     head = "<h1>Wanted</h1>" + (f"<p class='mut'>{len(items)} current Items checked. Dry-run: nothing is contacted.</p>")
     return err + head + form + ("".join(cards) or "<p class='mut'>No campaigns yet.</p>")

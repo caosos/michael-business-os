@@ -5,6 +5,7 @@ and store nothing; the 5x8 example still matches (02's matcher) over the stored 
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -65,3 +66,45 @@ def test_the_5x8_example_still_matches_over_the_stored_document(rtd, ui_least):
     from mbos.clock import utcnow
     got = {m["item_id"] for m in match_campaign(docs[0], ITEMS, utcnow())["matches"]}
     assert got == {"itm_%026d" % n for n in (1, 2, 4, 9, 15, 16)}
+
+
+def _stored_id(loc):
+    return re.search(r"cmp_[0-9A-HJKMNP-TV-Z]{26}", loc).group(0)
+
+
+def test_replayed_create_names_the_stored_campaign_not_a_fresh_id(rtd, ui_least):  # F-79
+    before = len(rows(rtd))
+    _, loc1, _ = post(ui_least, "/wanted/create", nonce="replayF260", **TRAILER)
+    _, loc2, _ = post(ui_least, "/wanted/create", nonce="replayF260", **TRAILER)
+    assert _stored_id(loc1) == _stored_id(loc2) and len(rows(rtd)) == before + 1
+    assert rows(rtd, _stored_id(loc2))
+
+
+def test_one_malformed_stored_campaign_is_one_error_row(rtd, ui_least, monkeypatch):  # F-82
+    post(ui_least, "/wanted/create", **TRAILER)
+    good = ui_least.store.campaign_records()
+    bad = [{"doc": {"campaign_id": "cmp_<script>", "title": 5, "criteria": {"max_price_usd": "x"}}, "history": []},
+           {"doc": {}, "history": []}]
+    monkeypatch.setattr(ui_least.store, "campaign_records", lambda: bad + good)
+    status, _, body = req(ui_least, "GET", "/wanted")
+    assert status == 200 and body.count("cannot be shown") == 2 and "<script>" not in body and TRAILER["title"] in body
+    assert post(ui_least, "/wanted/cmp_nope/pause")[0] == 200  # a refusal page, not a dropped connection
+
+
+def test_double_submit_loser_sees_already_recorded(rtd, ui_least, monkeypatch):  # F-84
+    from operator_ui.backend import AlreadyRecorded
+
+    post(ui_least, "/wanted/create", **TRAILER)
+    # capital: the winner commits between the loser's lookup and its write -> the loser's insert hits the unique key
+    p = post(ui_least, "/numbers/capital", kind="withdraw", amount="7", nonce="raceF2600")
+    assert p[0] == 303
+    real, calls = ui_least.store.capital_seen, []
+    monkeypatch.setattr(ui_least.store, "capital_seen", lambda k, key: None if not calls and not calls.append(1) else real(k, key))
+
+    def lose(*a, **k):
+        raise AlreadyRecorded()
+
+    monkeypatch.setattr(ui_least.store, "capital_move", lose)
+    s, loc, _ = post(ui_least, "/numbers/capital", kind="withdraw", amount="900", nonce="raceF2600")
+    assert s == 303 and "already" in loc and "7.00" in loc and "900" not in loc and "duplicate" not in loc.lower()
+    assert issubclass(AlreadyRecorded, Exception)

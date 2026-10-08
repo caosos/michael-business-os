@@ -1,0 +1,7 @@
+# Receipt: F-26 G-17 fixes F-79 / F-82 / F-84 (lane 06, DRY-RUN)
+
+- **F-79:** a replayed `/wanted/create` now names the campaign id the store returns (`mbos.set_campaign` returns the stored `entity_id` on an idempotent replay), not the fresh id generated for the repeat request.
+- **F-82:** `wanted_view.render_page` isolates each stored campaign: one that raises while rendering becomes an escaped error row; other campaigns and the page survive. Pause/resume/cancel no longer index missing keys on a malformed stored doc, and a revised doc is validated with `mbos.campaign.errors` before it is stored (create already was).
+- **F-84:** `_owner_write` turns a unique violation (SQLSTATE 23505) into `AlreadyRecorded`. `/numbers/capital` and `/wanted` then answer "already submitted ... (receipt <id>)" from the winner's receipt (capital: the ledger's own amount), never a raw DB error.
+- **Provenance:** FACT: new tests in `tests/lane_d/test_wanted_f25.py` (replay id equals stored id and one row; two malformed rows render as two error rows with the page and a good campaign intact, hostile id escaped; loser path reports the winner's receipt amount, not the request's). The true concurrent race is simulated by forcing the lookup miss and `AlreadyRecorded`; a live two-connection race was not run (UNKNOWN beyond that).
+- **Health:** `tools/run_tests.sh`: reference 178 passed; lane D + E 98 passed; exit 0 · exit 0. No sends, spend, publish or credential change.

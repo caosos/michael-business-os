@@ -562,15 +562,26 @@ class App:
             raise InputError("kind must be fund or withdraw")
         amt = numbers_view.parse_amount(f.get("amount"), "Amount", cap=numbers_view.MAX_USD, required=True, positive=True)
         key = f"f22:{kind}:{nonce}"
-        seen = self.store.capital_seen(kind, key)
-        if seen:  # a replay of an earlier form: report what the receipt recorded, never what this request says (F-72)
+        def replay(seen):  # report what the receipt recorded, never what this request says (F-72)
             got = self.store.capital_recorded(seen)
             return (f"This form was already submitted: it is recorded as {kind.title()} of ${got:,.2f} (receipt {seen}). "
                     "Nothing new was added.")
+
+        seen = self.store.capital_seen(kind, key)
+        if seen:
+            return replay(seen)
         if kind == "fund":
             have = ((self.store.my_numbers().get("ledger") or {}).get("protected_principal"))
             numbers_view.check_fund(amt, have, f.get("confirm"))
-        rid = self.store.capital_move(kind, format(amt, "f"), self.author, key)
+        from .backend import AlreadyRecorded
+
+        try:
+            rid = self.store.capital_move(kind, format(amt, "f"), self.author, key)
+        except AlreadyRecorded:  # F-84: lost the double-submit race; the winner's receipt is the answer
+            seen = self.store.capital_seen(kind, key)
+            if seen:
+                return replay(seen)
+            raise InputError("this form was already submitted; reload the page") from None
         got = self.store.capital_recorded(rid)
         return f"{kind.title()} of ${got:,.2f} recorded (receipt {rid})."
 
@@ -587,7 +598,7 @@ class App:
         Each is receipted in the same transaction; the database also refuses ASSISTED_DEAL/AUTOPILOT as ACTIVE (E-17 CHECK)."""
         from mbos.campaign import errors as campaign_errors
 
-        from .backend import NumbersRefused
+        from .backend import AlreadyRecorded, NumbersRefused
 
         key = f"f25:campaign:{action}:{cid or 'new'}:{nonce}"
         try:
@@ -596,13 +607,14 @@ class App:
                 errs = campaign_errors(doc)
                 if errs:
                     raise InputError("; ".join(errs[:3]))
-                self.store.set_campaign(doc, self.author, "Michael created a Wanted campaign (" + doc["autonomy"]["level"] + ")", key)
-                msg = f"Campaign created ({doc['campaign_id']}). It watches and recommends only."
+                # F-79: the store returns the STORED id (a replay returns the first submit's id, not this request's fresh one)
+                stored = self.store.set_campaign(doc, self.author, "Michael created a Wanted campaign (" + doc["autonomy"]["level"] + ")", key)
+                msg = f"Campaign created ({stored}). It watches and recommends only."
             else:
-                rec = next((r for r in self.store.campaign_records() if r["doc"]["campaign_id"] == (cid or "")), None)
+                rec = next((r for r in self.store.campaign_records() if (r.get("doc") or {}).get("campaign_id") == (cid or "")), None)
                 if rec is None:
                     raise InputError("unknown campaign")
-                st = rec["doc"]["status"]
+                st = rec["doc"].get("status")
                 new = {"pause": ("ACTIVE", "PAUSED"), "resume": ("PAUSED", "ACTIVE"), "cancel": (("ACTIVE", "PAUSED"), "CANCELLED")}.get(action)
                 if new is None or st not in ((new[0],) if isinstance(new[0], str) else new[0]):
                     raise InputError(f"cannot {action} a {st} campaign")
@@ -610,8 +622,17 @@ class App:
                 if action == "cancel":
                     self.store.cancel_campaign(cid, self.author, intent, key)
                 else:
-                    self.store.set_campaign({**rec["doc"], "status": new[1]}, self.author, intent, key)
+                    nd = {**rec["doc"], "status": new[1]}
+                    errs = campaign_errors(nd)
+                    if errs:  # a stored campaign that does not validate is never revised
+                        raise InputError("stored campaign is malformed: " + "; ".join(errs[:3]))
+                    self.store.set_campaign(nd, self.author, intent, key)
                 msg = f"Campaign {new[1].lower()}."
+        except AlreadyRecorded:  # F-84: lost the double-submit race; say so from the winner's receipt
+            rid = self.store.campaign_receipt(key)
+            if rid:
+                return f"This form was already submitted and is recorded (receipt {rid}). Nothing new was added."
+            raise InputError("this form was already submitted; reload the page") from None
         except NumbersRefused as ex:
             raise InputError(str(ex)) from None
         rid = self.store.campaign_receipt(key)

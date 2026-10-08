@@ -50,6 +50,10 @@ class FollowupRefused(Exception):
         super().__init__("; ".join(self.reasons))
 
 
+class AlreadyRecorded(Exception):
+    """F-84: a concurrent submit with the same idempotency key won; the caller reports the winner's receipt."""
+
+
 class NumbersRefused(Exception):
     """F-22: the store refused a mission or capital change; `reasons` are shown verbatim."""
 
@@ -260,6 +264,11 @@ class SpineBackend:
                 pid = c.execute(sa.text("SELECT mbos.record_provenance(CAST(:p AS jsonb))"), {"p": json.dumps(prov)}).scalar_one()
                 actor = json.dumps({"type": "human", "id": entered_by})
                 return c.execute(sa.text(sql), {**params, "a": actor, "p": [pid]}).scalar_one()
+        except sa.exc.IntegrityError as ex:
+            if getattr(getattr(ex, "orig", None), "sqlstate", None) == "23505" or "duplicate key" in str(ex.orig).lower():
+                raise AlreadyRecorded() from None  # F-84: the double-submit loser; the winner's receipt is the answer
+            msg = str(getattr(ex, "orig", ex)).strip().splitlines()[0]
+            raise NumbersRefused([f"the store refused it: {msg}"]) from None
         except sa.exc.DBAPIError as ex:
             msg = str(getattr(ex, "orig", ex)).strip().splitlines()[0]
             raise NumbersRefused([f"the store refused it: {msg}"]) from None
