@@ -7,7 +7,7 @@ workers connect as `mbos_dbos` (or another worker login) with NO superuser:
   2. the app database (owner mbos_owner) and the login's own DBOS system database (owner = login)
   3. in the app DB: pgvector in schema `mbos_ext` (D-08), schema `dbos` owned by the login (DBOS @transaction
      checkpoints live there, in the same transaction as the state write), PUBLIC stripped from `public`
-  4. optional password for the login (scram), set without putting it on any command line
+  4. optional passwords for the login and for the owner login `mbos_operator_ui` (scram), set without putting it on any command line
   5. migrations (each one receipted)
 
 Usage (Python):  p = provision(admin_dsn, app_db="mbos_e2e", sys_db="mbos_e2e_sys")
@@ -28,6 +28,7 @@ from psycopg.conninfo import conninfo_to_dict, make_conninfo
 from . import migrate
 
 ROLES_SQL = Path(__file__).resolve().parent.parent / "bootstrap" / "roles.sql"
+OWNER_LOGIN = "mbos_operator_ui"
 GROUPS = ("agent_read", "agent_write", "gateway", "approver", "policy_admin", "outbox_relay", "mbos_migrator")
 
 
@@ -39,6 +40,9 @@ class Provisioned:
     app_url: str               # postgresql:// URL for the login (SQLAlchemy / DBOS config)
     sys_url: str
     migrations_applied: list[str]
+    owner_login: str = "mbos_operator_ui"      # approver + owner_channel: Michael's decisions, notes, capital (D-26a)
+    owner_app_conninfo: str = ""
+    owner_app_url: str = ""
 
 
 def _url(conninfo: str) -> str:
@@ -58,7 +62,7 @@ def _url(conninfo: str) -> str:
 
 
 def provision(admin_dsn: str, app_db: str = "mbos", sys_db: str | None = None, login: str = "mbos_dbos",
-              password: str | None = None, run_migrations: bool = True, log=lambda *_: None) -> Provisioned:
+              password: str | None = None, owner_password: str | None = None, run_migrations: bool = True, log=lambda *_: None) -> Provisioned:
     sys_db = sys_db or f"{app_db}_sys"
     for name in (app_db, sys_db, login):
         if not name.replace("_", "").isalnum():
@@ -83,6 +87,8 @@ def provision(admin_dsn: str, app_db: str = "mbos", sys_db: str | None = None, l
         su.execute(sql.SQL("GRANT ALL ON DATABASE {} TO {}").format(sql.Identifier(sys_db), sql.Identifier(login)))
         if password is not None:
             su.execute(sql.SQL("ALTER ROLE {} PASSWORD {}").format(sql.Identifier(login), sql.Literal(password)))
+        if owner_password is not None:
+            su.execute(sql.SQL("ALTER ROLE {} PASSWORD {}").format(sql.Identifier(OWNER_LOGIN), sql.Literal(owner_password)))
 
     app_admin = make_conninfo(admin_dsn, dbname=app_db)
     with psycopg.connect(app_admin, autocommit=True) as su:
@@ -98,4 +104,6 @@ def provision(admin_dsn: str, app_db: str = "mbos", sys_db: str | None = None, l
     creds = {"user": login, **({"password": password} if password else {})}
     app_ci = make_conninfo("", **base, **creds, dbname=app_db)
     sys_ci = make_conninfo("", **base, **creds, dbname=sys_db)
-    return Provisioned(login, app_ci, sys_ci, _url(app_ci), _url(sys_ci), applied)
+    owner_ci = make_conninfo("", **base, user=OWNER_LOGIN, **({"password": owner_password} if owner_password else {}),
+                             dbname=app_db)
+    return Provisioned(login, app_ci, sys_ci, _url(app_ci), _url(sys_ci), applied, OWNER_LOGIN, owner_ci, _url(owner_ci))

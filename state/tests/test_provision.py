@@ -38,8 +38,9 @@ def test_login_runs_the_spine_without_superuser(provisioned):
             c.execute("CREATE TABLE mbos.sneaky (x int)")                             # but not the state schema
         with pytest.raises(psycopg.Error):
             c.execute("UPDATE mbos.receipts SET intent = 'x'")
-        c.execute("SELECT mbos.panic_set('L3', NULL, false, '{\"type\":\"human\",\"id\":\"michael\"}', 'release', %s, %s)",
-                  ([pid], key()))                                                      # approver membership
+        with pytest.raises(errors.InsufficientPrivilege):                              # D-26a: no approver any more
+            c.execute("SELECT mbos.panic_set('L3', NULL, false, '{\"type\":\"human\",\"id\":\"michael\"}', 'release', %s, %s)",
+                      ([pid], key()))
         assert c.execute("SELECT 1 FROM mbos_ext.vector_dims('[1,2,3]'::mbos_ext.vector)").fetchone()
     with psycopg.connect(p.sys_conninfo, autocommit=True) as c:                        # its own DBOS system DB
         c.execute("CREATE TABLE workflow_status (id text)")

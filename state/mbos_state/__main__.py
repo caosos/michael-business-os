@@ -64,6 +64,7 @@ def main(argv: list[str] | None = None) -> int:
         from .provision import provision
         p = provision(args.admin_dsn, args.app_db, args.sys_db, args.login, log=print)
         print(json.dumps({"login": p.login, "app_url": p.app_url, "sys_url": p.sys_url,
+                          "owner_login": p.owner_login, "owner_app_url": p.owner_app_url,
                           "migrations_applied": p.migrations_applied}))
         return 0
     if args.cmd == "verify-export":

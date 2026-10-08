@@ -49,9 +49,9 @@ END $$;
 --     (dbos.transaction_outputs) in the SAME transaction as the state write — this is what makes a step
 --     and its receipt exactly-once together. bootstrap.sh creates the schema.
 --   * writes state ONLY through the mbos.* API with the privileges of agent_write (ingest, items,
---     proposals, outcomes) and approver (spine.decide records Michael's decision from the Operator UI/CLI).
---     `gateway` is granted too because R4 runs 05's gateway in-process; per-edge role checks still keep
---     every LLM-facing process (mbos_state_mcp) from approving or executing.
+--     proposals, outcomes) and gateway (R4 runs 05's gateway/effector in-process, so it settles approved
+--     requests). It does NOT hold approver or owner_channel (D-26a): Michael's decisions, notes, capital,
+--     campaigns and mission come only from the owner login mbos_operator_ui (approver + owner_channel).
 --     RECOMMENDATION: once 05's gateway runs as its own process, revoke gateway from mbos_dbos.
 DO $$
 BEGIN
@@ -59,4 +59,5 @@ BEGIN
         CREATE ROLE mbos_dbos LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;
     END IF;
 END $$;
-GRANT agent_write, approver, gateway TO mbos_dbos;
+GRANT agent_write, gateway TO mbos_dbos;
+REVOKE approver, owner_channel FROM mbos_dbos;   -- idempotent: clusters provisioned before D-26a had approver

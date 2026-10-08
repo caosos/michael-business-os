@@ -9,10 +9,11 @@ from conftest import MICHAEL, key, make_areq, make_item, payload_hash, to_pendin
 
 def test_modify_with_provenance_written_before_its_approval(db):
     """spine_d.decide(MODIFY) order: provenance(approval_id=new) -> successor -> MODIFY approval, one transaction."""
-    s = db.store("dbos")                      # the spine's real login (agent_write + approver + gateway)
-    item_id, pid = make_item(s, "AWAITING_APPROVAL")
-    areq = make_areq(s, item_id, pid)
-    to_pending(s, areq, pid)
+    w = db.store("dbos")                      # the workflow login proposes (agent_write + gateway)
+    s = db.store("approver")                  # the owner login decides (D-26a: mbos_dbos no longer holds approver)
+    item_id, pid = make_item(w, "AWAITING_APPROVAL")
+    areq = make_areq(w, item_id, pid)
+    to_pending(w, areq, pid)
     appr_id = new_id("appr")
     with s.transaction():
         prov_m = s.record_provenance(actor_type="human", human_actor="michael", basis="FACT", approval_id=appr_id)

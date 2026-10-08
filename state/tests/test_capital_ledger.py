@@ -44,7 +44,7 @@ class Cap:
         self.db = db
         self.owner = db.store("approver")                  # Michael's channel
         self.gw = db.store("gateway")
-        self.dbos = db.store("dbos")                       # the spine login (agent_write + approver + gateway)
+        self.dbos = db.store("dbos")                       # the spine login (agent_write + gateway; no approver since D-26a)
         self.pid = tool_prov(db.store())
         self.human = Jsonb({"type": "human", "id": "michael"})
 
@@ -63,7 +63,7 @@ class Cap:
         return self.gw.budget_settle(res, "commit", None, GATEWAY, "commit", [self.pid], key("c"))
 
     def close(self, item_id, revenue, total_cost, kind="flip_sold", store=None, human=True):
-        s = store or self.dbos
+        s = store or (self.owner if human else self.dbos)   # human closes are the owner login's; agent closes the workflow's
         actor = Actor("human", "michael") if human else Actor("agent", "agent-x")
         return s.record_outcome({"item_id": item_id, "kind": kind, "provenance_ids": [self.pid],
                                  "realized": {"revenue": revenue, "total_cost": total_cost,

@@ -213,9 +213,9 @@ def test_dbos_role_can_run_the_spine_and_own_its_checkpoint_schema(db):
         d.conn.execute("INSERT INTO dbos.transaction_outputs VALUES ('wf1', 1, %s)", (item_id,))
     areq = make_areq(d, item_id, pid)
     to_pending(d, areq, pid)
-    d.record_approval({"action_request_id": areq, "decision": "NO", "decider": "michael", "channel": "web",
+    db.store("approver").record_approval({"action_request_id": areq, "decision": "NO", "decider": "michael", "channel": "web",
                        "payload_hash_seen": payload_hash(d, areq), "scope": "once", "reason": "no"},
-                      MICHAEL, "NO", key())
+                      MICHAEL, "NO", key())     # D-26a: the decision comes from the owner login, not mbos_dbos
     with pytest.raises(psycopg.Error):   # still cannot rewrite history
         d.conn.execute("UPDATE mbos.receipts SET intent = 'x'")
     with pytest.raises(errors.InsufficientPrivilege):
