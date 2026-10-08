@@ -72,3 +72,32 @@ def test_dbos_refused_decide_note_owner_paths_owner_allowed_gateway_settles(prov
                                 "details": {"kind": "comms"}})
     assert wf.conn.execute("SELECT status FROM mbos.action_requests WHERE action_request_id=%s", (areq,)).fetchone()[0] == "executed"
     assert wf.verify_chain().ok
+
+
+def test_item_approved_edge_needs_approval_receipt_and_role(prov):
+    wf = StateStore(psycopg.connect(prov.app_conninfo, autocommit=True))
+    owner = StateStore(psycopg.connect(prov.owner_app_url, autocommit=True))
+    item_id, pid = make_item(wf, "AWAITING_APPROVAL")
+    areq = make_areq(wf, item_id, pid)
+    to_pending(wf, areq, pid)
+    # no approval yet: the workflow login (and the owner login) are refused
+    for s in (wf, owner):
+        with pytest.raises(errors.Error) as e:
+            s.transition_item(item_id, "APPROVED", MICHAEL, "no approval", [pid], key())
+        assert getattr(e.value, "sqlstate", None) == "MB005"
+    # a NO is not an approval
+    owner.record_approval({"action_request_id": areq, "decision": "NO", "decider": "michael", "channel": "web",
+                           "payload_hash_seen": payload_hash(wf, areq), "scope": "once", "reason": "no",
+                           "auth_context": {"method": "webauthn", "step_up": True}}, MICHAEL, "NO", key())
+    with pytest.raises(errors.Error):
+        wf.transition_item(item_id, "APPROVED", MICHAEL, "after NO", [pid], key())
+    # normal YES path end to end
+    item2, pid2 = make_item(wf, "AWAITING_APPROVAL")
+    areq2 = make_areq(wf, item2, pid2)
+    to_pending(wf, areq2, pid2)
+    owner.record_approval({"action_request_id": areq2, "decision": "YES", "decider": "michael", "channel": "web",
+                           "payload_hash_seen": payload_hash(wf, areq2), "scope": "once",
+                           "auth_context": {"method": "webauthn", "step_up": True}}, MICHAEL, "YES", key())
+    wf.transition_item(item2, "APPROVED", GATEWAY, "approved by receipt", [pid2], key())
+    assert wf.conn.execute("SELECT state FROM mbos.items WHERE item_id=%s", (item2,)).fetchone()[0] == "APPROVED"
+    assert wf.verify_chain().ok
