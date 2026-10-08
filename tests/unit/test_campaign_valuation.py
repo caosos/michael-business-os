@@ -123,3 +123,9 @@ def test_a35_valuation_residuals(mut, frag):
     v = load("valuation/mower.example.json")
     mut(v)
     assert any(frag in e for e in valuation.errors(v)), valuation.errors(v)
+
+
+def test_f67_as_is_cannot_beat_the_list_range_even_without_after_repair():
+    v = load("valuation/mower.example.json")
+    v["ranges"]["as_is"] = {"low": 9000, "high": 9500}
+    assert any("as_is" in e for e in valuation.errors(v))

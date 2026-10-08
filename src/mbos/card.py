@@ -454,7 +454,9 @@ def _velocity_fields(item: dict, econ: dict, profile: dict, enr: dict) -> dict[s
     e = item.get("economics") or {}
     raw_d = ((item.get("scores") or {}).get("scorecard") or {}).get("derived") or {}
     # F-52: if any of the three velocity inputs is PRESENT but unusable (NaN, string, bool, None, absurd magnitude), do not derive from the others
-    malformed = any(k in raw_d and not (_finite(raw_d[k]) and abs(raw_d[k]) <= _MAX_MAG) for k in ("cash_tied_up", "ev_net_profit", "time_to_cash_days"))
+    malformed = bool(item.get("_velocity_malformed")) or any(
+        raw_d.get(k) is not None and not (_finite(raw_d[k]) and abs(raw_d[k]) <= _MAX_MAG) for k in ("cash_tied_up", "ev_net_profit", "time_to_cash_days"))
+    # None = just missing (F-69): only its own fields go UNKNOWN; NaN/strings/bools/absurd values blank the whole trio
     d = {k: v for k, v in raw_d.items() if _finite(v)}
     prov = (item.get("recommendation") or {}).get("provenance_id")
     rehab, resale, down = e.get("rehab") or {}, e.get("resale") or {}, e.get("downside") or {}
@@ -671,7 +673,11 @@ def build_card(item: dict, receipts: list[dict], areqs: list[dict], enrichment: 
     data degrades to UNKNOWN instead of failing (F-26)."""
     profile = profile or load_profile()
     enr = enrichment if isinstance(enrichment, dict) else {}
-    item = {**item, "economics": _sane(item.get("economics")) if isinstance(item.get("economics"), dict) else item.get("economics"),
+    _rd = ((item.get("scores") or {}).get("scorecard") or {}).get("derived") if isinstance(item.get("scores"), dict) else None
+    _rd = _rd if isinstance(_rd, dict) else {}
+    vel_malformed = any(_rd.get(k) is not None and not (_finite(_rd[k]) and abs(_rd[k]) <= _MAX_MAG)
+                        for k in ("cash_tied_up", "ev_net_profit", "time_to_cash_days"))   # judged on the RAW value, before sanitising
+    item = {**item, "_velocity_malformed": vel_malformed, "economics": _sane(item.get("economics")) if isinstance(item.get("economics"), dict) else item.get("economics"),
             "scores": _sane(item.get("scores")) if isinstance(item.get("scores"), dict) else item.get("scores")}
     n = item["normalized"]
     src0 = item["sources"][0]

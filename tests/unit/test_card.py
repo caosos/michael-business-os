@@ -555,3 +555,14 @@ def test_a35_residual_numeric_cases(ledger_db):
         for f in ("capital_velocity", "opportunity_class") + (() if "days" in kw and kw["days"] == 0 else ("cash_multiple",)):
             assert e[f]["value"] == "UNKNOWN", (kw, f, e[f])      # a multiple needs no time, so days=0 alone keeps it
     assert _scenario(base, cash=30, net=45, days=1, dom=0)["economics"]["liquidity"]["value"] == "UNKNOWN"
+
+
+def test_f69_a_missing_input_only_blanks_its_own_fields(ledger_db):
+    base = _base(ledger_db)
+    c = _scenario(base, cash=30, net=45, days=None)
+    e = c["economics"]
+    assert e["capital_velocity"]["value"] == "UNKNOWN" and e["opportunity_class"]["value"] == "UNKNOWN" and e["cash_multiple"]["value"] != "UNKNOWN"
+    c = _scenario(base, cash=None, net=45, days=1)
+    assert all(c["economics"][f]["value"] == "UNKNOWN" for f in ("cash_multiple", "capital_velocity", "opportunity_class"))
+    c = _scenario(base, cash=30, net=None, days=1)
+    assert c["economics"]["cash_multiple"]["value"] == "UNKNOWN" and c["economics"]["opportunity_class"]["value"] != "UNKNOWN"

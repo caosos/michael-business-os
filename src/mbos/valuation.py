@@ -54,6 +54,11 @@ def errors(doc: Any) -> list[str]:
     ai, ar = ranges.get("as_is"), ranges.get("after_repair")
     if ai and ar and (ai["high"] > ar["high"] or ai["low"] > ar["low"]):
         errs.append("as_is is above after_repair (repair cannot lower value in this model)")
+    _ls, _sl = ranges.get("likely_sale"), ranges.get("suggested_list")
+    if ai and _sl and ai["high"] > _sl["high"]:
+        errs.append("as_is.high exceeds suggested_list.high (an as-is value cannot beat the list range)")
+    if ai and _ls and ai["low"] > _ls["high"]:
+        errs.append("as_is.low exceeds likely_sale.high")
     if known and doc["confidence"] == "medium" and not any(e["kind"] != "prior" for e in doc["evidence"]):
         errs.append("confidence medium needs at least one non-prior evidence item (priors alone are low)")
     if known:
