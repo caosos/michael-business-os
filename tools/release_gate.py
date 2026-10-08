@@ -29,7 +29,7 @@ def run(name: str, cmd: list[str], timeout: int = 1800, env: dict | None = None)
     cp = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, timeout=timeout, env={**os.environ, **(env or {})})
     tail = (cp.stdout + cp.stderr).strip().splitlines()
     return {"name": name, "ok": cp.returncode == 0, "rc": cp.returncode, "secs": round(time.monotonic() - t, 1),
-            "summary": tail[-1] if tail else "", "stdout": cp.stdout}
+            "summary": tail[-1] if tail else "", "stdout": cp.stdout, "stderr": cp.stderr}
 
 
 def contracts_pinned() -> dict:
@@ -87,7 +87,9 @@ def pins_check() -> dict:
 
 def _runs_as_worker(res: dict | None) -> bool:
     """A-01 phase 2: the e2e must run as the real non-superuser worker login, or it proves less than production does."""
-    return bool(res and res.get("db_login") and res["db_login"][0] == "mbos_dbos" and res["db_login"][1] is False)
+    roles = (res or {}).get("roles") or {}
+    return bool(res and res.get("db_login") and res["db_login"][0] == "mbos_dbos" and res["db_login"][1] is False
+                and roles.get("worker") == [False, False] and roles.get("owner") == [True, True])   # D-26: worker holds neither approver nor owner_channel
 
 
 def action_path_verdict(run_ok: bool, res: dict | None) -> bool:
@@ -120,10 +122,10 @@ def action_path_lane_de() -> dict:
     tarfile.open(fileobj=io.BytesIO(tar)).extractall(tmp, filter="data")
     server = pgserver.get_server(str(tmp / "pg"), cleanup_mode="stop")
     try:
-        app, sysu = lane_d.build_as_worker(server, src, "mbos_gate_act")   # the real mbos_dbos login, no superuser (A-01 phase 2)
+        app, sysu, ownu = lane_d.build_as_worker(server, src, "mbos_gate_act")   # the real mbos_dbos login, no superuser (A-01 phase 2)
         fx = fixture_variant(tmp, "gate", ["FIX-TRAILER-1", "FIX-LEAD-SMARTHOME-1", "FIX-MOWER-1"])
         r = run("action path", [PY, "-m", "tests.helpers.runner", "lane_d_e2e", str(fx), "lane_e"], timeout=300,
-                env={"MBOS_DATABASE_URL": app, "MBOS_SYSTEM_DATABASE_URL": sysu,
+                env={"MBOS_DATABASE_URL": app, "MBOS_SYSTEM_DATABASE_URL": sysu, "MBOS_OWNER_DATABASE_URL": ownu,
                      "MBOS_POLICY_PATH": str(tmp / "policy" / "policy.v1.json"),
                      "MBOS_EGRESS_FILE": str(tmp / "egress.json"), "MBOS_LITELLM_FILE": str(tmp / "litellm.json")})
     finally:
@@ -153,10 +155,10 @@ def at1_lane_de() -> dict:
     tarfile.open(fileobj=io.BytesIO(tar)).extractall(tmp, filter="data")
     server = pgserver.get_server(str(tmp / "pg"), cleanup_mode="stop")
     try:
-        app, sysu = lane_d.build_as_worker(server, src, "mbos_gate")   # the real mbos_dbos login, no superuser (A-01 phase 2)
+        app, sysu, ownu = lane_d.build_as_worker(server, src, "mbos_gate")   # the real mbos_dbos login, no superuser (A-01 phase 2)
         fx = fixture_variant(tmp, "gate", ["FIX-TRAILER-1", "FIX-LEAD-SMARTHOME-1", "FIX-MOWER-1", "FIX-LEAD-DRYWALL-1"])
         r = run("lane D/E e2e + AT-1", [PY, "-m", "tests.helpers.runner", "lane_d_e2e", str(fx), "lane_e"], timeout=300,
-                env={"MBOS_DATABASE_URL": app, "MBOS_SYSTEM_DATABASE_URL": sysu,
+                env={"MBOS_DATABASE_URL": app, "MBOS_SYSTEM_DATABASE_URL": sysu, "MBOS_OWNER_DATABASE_URL": ownu,
                      "MBOS_POLICY_PATH": str(tmp / "policy" / "policy.v1.json"), "MBOS_SCORER": "engine",
                      "MBOS_EGRESS_FILE": str(tmp / "egress.json"), "MBOS_LITELLM_FILE": str(tmp / "litellm.json")})
     finally:

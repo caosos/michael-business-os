@@ -22,7 +22,7 @@ from dbos import DBOS, EnqueueOptions, SetWorkflowID
 
 from mbos import __version__, spine  # noqa: F401  (reference backend; S() selects)
 from mbos.clock import parse
-from mbos.runtime import components, item_workflow_id, runtime, spine_module as S, tx
+from mbos.runtime import components, item_workflow_id, owner_tx, runtime, spine_module as S, tx
 
 DECISION_TOPIC = "decision"
 FOLLOWUP_QUEUE = "followups"
@@ -205,7 +205,7 @@ def record_decision(action_request_id: str, decision: str, payload_hash_seen: st
     def decide(conn: Any) -> dict[str, Any]:
         return S().decide(conn, action_request_id, decision, payload_hash_seen, components(), **kw)
 
-    out = tx(decide)
+    out = owner_tx(decide)   # the Approval is written by the owner login, then the workflow is woken (D-26)
     DBOS.send(item_workflow_id(out["item_id"]), {"kind": "decision", "approval_id": out["approval"]["approval_id"]},
               topic=DECISION_TOPIC)
     return out

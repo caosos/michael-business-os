@@ -26,7 +26,8 @@ def say(*parts) -> None:
 
 def _settings() -> Settings:
     return Settings(database_url=os.environ["MBOS_DATABASE_URL"],
-                    system_database_url=os.environ["MBOS_SYSTEM_DATABASE_URL"], approval_poll_seconds=0.3)
+                    system_database_url=os.environ["MBOS_SYSTEM_DATABASE_URL"], approval_poll_seconds=0.3,
+                    owner_database_url=os.environ.get("MBOS_OWNER_DATABASE_URL") or None)
 
 
 def _discover_one(fixture: str) -> str:
@@ -135,7 +136,9 @@ def lane_d_e2e(fixture: str, gateway_mode: str = "reference") -> None:
 
         from dbos import DBOS as _D
 
-        comps, gov = lane_e_components(s.database_url, os.environ["MBOS_POLICY_PATH"], dbos=_D,
+        from mbos.adapters.governance import role_dsns
+
+        comps, gov = lane_e_components(role_dsns(s.database_url, os.environ.get("MBOS_OWNER_DATABASE_URL")), os.environ["MBOS_POLICY_PATH"], dbos=_D,
                                        egress_file=os.environ.get("MBOS_EGRESS_FILE"), litellm_file=os.environ.get("MBOS_LITELLM_FILE"))
     if os.environ.get("MBOS_SCORER") == "engine":  # lane C's real engine (release gate AT-1)
         from mbos.adapters.economics import EconomicsEngineScorer
@@ -145,7 +148,14 @@ def lane_d_e2e(fixture: str, gateway_mode: str = "reference") -> None:
     from mbos import workflows
 
     engine = runtime().engine
-    with engine.begin() as c:  # a fresh lane D DB is FROZEN; Michael (approver/owner) releases it, receipted
+    def owner_begin():  # D-26: Michael's actions use the OWNER login; the workflow login holds no approver
+        url = os.environ.get("MBOS_OWNER_DATABASE_URL")
+        if not url:
+            return engine.begin()
+        from mbos.db.engine import engine_for
+        return engine_for(url).begin()
+
+    with owner_begin() as c:  # a fresh lane D DB is FROZEN; Michael (approver/owner) releases it, receipted
         spine_d.set_kill_switch(c, "global_freeze", False, reason="test bootstrap: Michael releases the initial FROZEN state")
     sched = runtime().reconcile_schedule
     runtime().components.adapters["fx"] = FixtureSourceAdapter(fixture, name="fx")
@@ -215,7 +225,7 @@ def lane_d_e2e(fixture: str, gateway_mode: str = "reference") -> None:
         lite = json.loads(pathlib.Path(os.environ["MBOS_LITELLM_FILE"]).read_text())
         with engine.connect() as c:
             frozen_now = c.execute(sa.text("SELECT mbos.panic_blocks('agent-x', 'comms.email.send', 'email')")).scalar_one()
-        with engine.begin() as c:
+        with owner_begin() as c:
             rel = spine_d.set_kill_switch(c, "global_freeze", False, reason="A-18 drill: all clear")
         with engine.connect() as c:
             clear_now = c.execute(sa.text("SELECT mbos.panic_blocks('agent-x', 'comms.email.send', 'email')")).scalar_one()
@@ -266,10 +276,16 @@ def lane_d_e2e(fixture: str, gateway_mode: str = "reference") -> None:
     with engine.connect() as c:
         by_type = dict(c.execute(sa.text("SELECT type, count(*) FROM mbos.receipts GROUP BY type")).all())
         who = c.execute(sa.text("SELECT session_user, (SELECT rolsuper FROM pg_roles WHERE rolname = session_user)")).one()
+        wroles = list(c.execute(sa.text("SELECT pg_has_role(session_user,'approver','MEMBER'), pg_has_role(session_user,'owner_channel','MEMBER')")).one())
+    oroles = None
+    if os.environ.get("MBOS_OWNER_DATABASE_URL"):
+        from mbos.db.engine import engine_for
+        with engine_for(os.environ["MBOS_OWNER_DATABASE_URL"]).connect() as oc:
+            oroles = list(oc.execute(sa.text("SELECT pg_has_role(session_user,'approver','MEMBER'), pg_has_role(session_user,'owner_channel','MEMBER')")).one())
     id_addressable = sum(1 for r in exported if r["type"] in ("SCORE_RECORDED", "RECOMMENDATION_RECORDED")
                          and r.get("entity_type") in ("scorecard", "recommendation") and r.get("entity_id", "")[:4] in ("scr_", "rec_"))
     scored = sum(1 for r in exported if r["type"] in ("SCORE_RECORDED", "RECOMMENDATION_RECORDED"))
-    say("RESULT", json.dumps({"db_login": [who[0], bool(who[1])], "followup": followup, "id_addressable": [id_addressable, scored], "panic": panic, "reconcile_schedule": sched, "cards": card_stats, "card_errors": card_errors[:5], "at1": at1, "receipt_types": by_type, "gateway_mode": gateway_mode, "final": final, "chain": chain, "reference_chain": [ref_ok, ref_msg],
+    say("RESULT", json.dumps({"db_login": [who[0], bool(who[1])], "roles": {"worker": [bool(x) for x in wroles], "owner": oroles}, "followup": followup, "id_addressable": [id_addressable, scored], "panic": panic, "reconcile_schedule": sched, "cards": card_stats, "card_errors": card_errors[:5], "at1": at1, "receipt_types": by_type, "gateway_mode": gateway_mode, "final": final, "chain": chain, "reference_chain": [ref_ok, ref_msg],
                               "effector_calls": calls, "live_effector_calls": live, "receipts": len(exported),
                               "contract_errors": errors[:5], "executed": sum(r["type"] == "ACTION_EXECUTED" for r in exported)}))
     os._exit(0)

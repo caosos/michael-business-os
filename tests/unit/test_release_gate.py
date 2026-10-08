@@ -90,3 +90,18 @@ def test_action_path_verdict_requires_real_executions():
         mut(bad)
         assert not rg.action_path_verdict(True, bad)
     assert not rg.action_path_verdict(False, good) and not rg.action_path_verdict(True, None)
+
+
+def test_gate_goes_red_if_the_workflow_login_holds_approver_or_owner_channel():
+    """D-26 / R14: planted faults on the role probe."""
+    rg = _load("release_gate")
+    good = {"db_login": ["mbos_dbos", False], "roles": {"worker": [False, False], "owner": [True, True]}}
+    assert rg._runs_as_worker(good)
+    import copy
+    for mut in (lambda r: r["roles"].update(worker=[True, False]), lambda r: r["roles"].update(worker=[False, True]),
+                lambda r: r["roles"].update(owner=[True, False]), lambda r: r["roles"].update(owner=None),
+                lambda r: r["db_login"].__setitem__(1, True), lambda r: r["db_login"].__setitem__(0, "postgres"), lambda r: r.pop("roles")):
+        bad = copy.deepcopy(good)
+        mut(bad)
+        assert not rg._runs_as_worker(bad)
+    assert not rg._runs_as_worker(None)

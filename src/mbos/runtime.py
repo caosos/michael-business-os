@@ -180,3 +180,17 @@ def client() -> DBOSClient:
 
 def item_workflow_id(item_id: str) -> str:
     return f"item:{item_id}"
+
+
+def owner_tx(fn: Callable[..., R], *args: Any) -> R:
+    """D-26 / R14: run `fn(conn, *args)` as the OWNER login (holds `approver`; Michael's decisions) in one READ COMMITTED transaction.
+    The workflow login must not hold approver, so a human decision is written by the owner connection and only then wakes the
+    workflow. With no owner URL configured (dev, single-login reference backend) this is the ordinary worker transaction."""
+    from mbos.db.engine import engine_for
+
+    url = (_RT.settings if _RT is not None else settings()).owner_database_url   # the running runtime's settings win
+    if not url:
+        return tx(fn, *args)
+    with engine_for(url).connect().execution_options(isolation_level="READ COMMITTED") as conn:
+        with conn.begin():
+            return fn(conn, *args)
