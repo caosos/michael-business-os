@@ -235,6 +235,44 @@ def render_note_section(card: dict, csrf: str, lane_d: bool, categories: list[st
 <p class="small"><a href="/notes">All my notes</a></p></div>"""
 
 
+def render_followup_section(card: dict, item_state: str, csrf: str, lane_d: bool, has_open_request: bool,
+                            flash_reasons: list[str] | None = None, values: dict | None = None) -> str:
+    """F-11: Follow-up / Offer / Quote. Each button PROPOSES a separate request; nothing is sent until Michael's own
+    YES (binding drafts need the PIN)."""
+    v = values or {}
+    errs = ("<div class='flash err'><b>Not created.</b><ul>" + "".join(f"<li>{e(r)}</li>" for r in (flash_reasons or [])) + "</ul></div>"
+            if flash_reasons else "")
+    if has_open_request:  # a request is already waiting on Michael: decide it first (but never hide a refusal)
+        return f"<div class='card'><h2>Next step</h2>{errs}</div>" if errs else ""
+    if item_state != "ACTED":
+        return ("<div class='card'><h2>Next step</h2><p class='small mut'>Follow-ups open once the first action has been carried out "
+                f"(the item is now {e(item_state)}).</p></div>")
+    if not lane_d:
+        return f"<div class='card'><h2>Next step</h2>{errs}<p class='bad'>Follow-ups need the lane D store.</p></div>"
+    i = card["item"]
+    flip = i["type"] == "flip"
+    binding = (f"""<form method="post" action="/item/{e(card['item_id'])}/followup"><input type="hidden" name="csrf" value="{e(csrf)}">
+<input type="hidden" name="kind" value="offer"><h2 style="margin-top:10px">Draft an offer (BINDING)</h2>
+<div class="decide"><label>Cash offer $<input name="amount" inputmode="decimal" value="{e(v.get('amount'))}" required></label>
+<label>Pickup window<input name="pickup_window" value="{e(v.get('pickup_window'))}" maxlength="40"></label>
+<label>Offer open until<input name="expires" value="{e(v.get('expires'))}" maxlength="40"></label></div>
+<p class="small mut">Never above the asking price. Creates its own request that needs your YES and PIN.</p>
+<button class="b-MODIFY" style="width:auto">Draft offer</button></form>""" if flip else
+               f"""<form method="post" action="/item/{e(card['item_id'])}/followup"><input type="hidden" name="csrf" value="{e(csrf)}">
+<input type="hidden" name="kind" value="quote"><h2 style="margin-top:10px">Draft a quote (BINDING)</h2>
+<div class="decide"><label>Quote $<input name="amount" inputmode="decimal" value="{e(v.get('amount'))}" required></label>
+<label>Scope<input name="scope" value="{e(v.get('scope'))}" maxlength="120"></label>
+<label>Deposit %<input name="deposit_pct" value="{e(v.get('deposit_pct') or '25')}" maxlength="2"></label>
+<label>Quote valid until<input name="expires" value="{e(v.get('expires'))}" maxlength="40"></label></div>
+<p class="small mut">Creates its own request that needs your YES and PIN.</p>
+<button class="b-MODIFY" style="width:auto">Draft quote</button></form>""")
+    return f"""<div class="card" id="next"><h2>Next step</h2>{errs}
+<p class="small mut">Each button drafts a <b>separate</b> request for your approval. Nothing is sent until you say YES.</p>
+<form method="post" action="/item/{e(card['item_id'])}/followup"><input type="hidden" name="csrf" value="{e(csrf)}">
+<input type="hidden" name="kind" value="followup"><button class="b-HOLD" style="width:auto">Draft follow-up questions</button></form>
+{binding}</div>"""
+
+
 def render_item_card(card: dict, errors: list[str], controls_html: str, hold_html: str = "") -> str:
     """Whole page body. `controls_html` is server.render_decide(...) for the open request ('' when none)."""
     banner = ""

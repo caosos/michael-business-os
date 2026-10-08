@@ -42,6 +42,14 @@ class NoteRefused(Exception):
         super().__init__("; ".join(self.reasons))
 
 
+class FollowupRefused(Exception):
+    """The follow-up was not created. `.reasons` are shown to Michael verbatim."""
+
+    def __init__(self, reasons):
+        self.reasons = list(reasons)
+        super().__init__("; ".join(self.reasons))
+
+
 class ItemNotFound(Exception):
     """Unknown item id. Deliberately NOT a LookupError: a KeyError from the card builder must surface as a failure."""
 
@@ -196,6 +204,26 @@ class SpineBackend:
             raise ItemNotFound(item_id) from None
         card = mc.build_card(item, receipts, areqs, enr, profile=profile)
         return {"card": card, "errors": mc.validate_card(card), "areqs": areqs}
+
+    # ---- F-11: follow-up / offer / quote as their OWN step-up ActionRequests (public API A-15) -----------------
+    def asked_question_ids(self, item_id: str) -> list[str]:
+        """Q&A ids already put to the counterparty in earlier requests on this item (so a follow-up asks new ones)."""
+        out: list[str] = []
+        for a in self.action_requests_for_item(item_id):
+            out += ((a.get("payload") or {}).get("comms") or {}).get("question_ids") or []
+        return out
+
+    def propose_followup(self, item_id: str, pa: dict) -> dict:
+        """Create the request via `mbos.workflows.propose_followup` (policy path: PDP, proposer_for, step-up) and start its
+        approval gate. It only PROPOSES: Michael's YES (with PIN for binding actions) is a separate human decision."""
+        if self.lane != "lane_d":
+            raise FollowupRefused(["follow-ups need the lane D store (MBOS_STATE_BACKEND=lane_d)"])
+        from mbos import workflows
+
+        try:
+            return workflows.propose_followup(item_id, pa)
+        except self._spine.DecisionRefused as ex:
+            raise FollowupRefused([str(ex)]) from None
 
     # ---- F-14: Michael's own model knowledge (operator notes). Lane D only; HUMAN CHANNEL ONLY (R14) -----------
     def operator_notes(self) -> list[dict]:

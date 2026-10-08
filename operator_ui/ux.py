@@ -65,6 +65,49 @@ def auth_context(areq: dict, pin: str | None, configured_pin: str | None, sessio
     return {"method": "local_pin" if step_up else "localhost_csrf_session", "session_id": session_id, "step_up": step_up}
 
 
+# ---------------------------------------------------------------- F-11 follow-up / offer / quote
+FOLLOWUP_STATES = {"ACTED"}
+
+
+def build_followup(item: dict, form: dict, asked: list[str]) -> dict:
+    """Form → ONE proposed action from the comms planner (the single source of drafts). kind: followup | offer | quote.
+    Every refusal (above-ask offer, bad deposit, no contact route) is raised as InputError with its reason."""
+    from comms_spec.planner import CommsActionPlanner
+
+    p = CommsActionPlanner()
+    kind = (form.get("kind") or "").strip()
+    try:
+        if kind == "followup":
+            acts = p.plan_followup(item, asked=asked)
+        elif kind == "offer":
+            acts = p.plan_offer(item, _amount(form.get("amount"), "offer"), (form.get("pickup_window") or "").strip() or "to be agreed",
+                                (form.get("expires") or "").strip() or "in 3 days")
+        elif kind == "quote":
+            dep = (form.get("deposit_pct") or "25").strip()
+            if not dep.isdigit():
+                raise InputError("deposit must be a whole number of percent (0-50)")
+            acts = p.plan_quote(item, _amount(form.get("amount"), "quote"), (form.get("scope") or "").strip() or "the agreed work",
+                                int(dep), (form.get("expires") or "").strip() or "in 7 days")
+        else:
+            raise InputError(f"unknown follow-up kind {kind!r}")
+    except ValueError as ex:
+        if isinstance(ex, InputError):
+            raise
+        raise InputError(str(ex)) from None
+    if not acts:
+        raise InputError("nothing to draft: there is no contact route for this counterparty, or no new questions remain")
+    return acts[0]
+
+
+def _amount(raw, what: str) -> float:
+    s = (raw or "").strip().replace("$", "").replace(",", "")
+    try:
+        v = float(s)
+    except ValueError:
+        raise InputError(f"{what} amount must be a number") from None
+    return int(v) if v.is_integer() else v
+
+
 # ---------------------------------------------------------------- F-14 operator notes
 NOTE_BASIS_CHOICES = ["own experience on this model", "service manual", "parts counter / dealer", "another owner or forum",
                       "other (say in the detail box)"]

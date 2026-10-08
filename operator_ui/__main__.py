@@ -51,8 +51,16 @@ def make_backend():
     from mbos.adapters.governance import lane_e_components
     from mbos.config import settings
 
-    comps, _gov = lane_e_components(settings().database_url, os.environ.get("MBOS_POLICY_PATH") or None)
-    return SpineBackend(app_engine(), comps.with_defaults("lane_d"), lane="lane_d")
+    import dataclasses
+
+    from mbos.runtime import init_runtime
+
+    s = dataclasses.replace(settings(), state_backend="lane_d", gateway_mode="lane_e")
+    comps, _gov = lane_e_components(s.database_url, os.environ.get("MBOS_POLICY_PATH") or None)
+    # F-11: `workflows.propose_followup` needs an initialised runtime in THIS process. launch=False: the UI never runs
+    # workflows (a worker does); the request's approval gate is enqueued through a DBOS client.
+    rt = init_runtime(s, comps, launch=False)
+    return SpineBackend(app_engine(), rt.components, lane="lane_d")
 
 
 def _summary(a) -> int:

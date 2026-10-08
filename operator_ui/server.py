@@ -25,7 +25,7 @@ except ImportError:  # pragma: no cover
 
 from . import card_view, ux, views
 from .card_view import ec
-from .backend import ItemNotFound, NoteRefused, ProfileUnavailable
+from .backend import FollowupRefused, ItemNotFound, NoteRefused, ProfileUnavailable
 from .sources import load_health
 from .ux import InputError
 
@@ -492,6 +492,20 @@ class App:
         note_id = self.store.record_operator_note(bundle)
         return f"Note saved ({note_id}). It will show on this model's cards as your recommendation."
 
+    def add_followup(self, item_id, f):
+        """F-11: draft a follow-up / offer / quote as its OWN request via the public API (A-15). CSRF, human channel. It only
+        proposes: the YES (and the PIN for binding actions) is Michael's separate decision."""
+        self._check_csrf(f)
+        item = self.store.item(item_id)
+        if item is None:
+            raise InputError("unknown opportunity")
+        pa = ux.build_followup(item, f, self.store.asked_question_ids(item_id))
+        out = self.store.propose_followup(item_id, pa)
+        if out.get("policy_denied") or not out.get("action_request_id"):
+            raise FollowupRefused(["blocked by policy: no agent may propose that action, or the policy check denied it. Nothing was created."])
+        kind = {"followup": "Follow-up questions", "offer": "Offer", "quote": "Quote"}[f.get("kind")]
+        return f"{kind} drafted ({out['action_request_id']}). It is waiting for your YES below; nothing has been sent."
+
     def wake(self, areq_id, f):
         self._check_csrf(f)
         areq = self.store.action_request(areq_id)
@@ -582,6 +596,20 @@ def make_handler(app):
                 return self._send(200, json.dumps({k: v for k, v in c.items() if k != "hold_presets"}, default=str), "application/json")
             return self._send(404, page("Not found", "<p>Not found.</p>", app.state()))
 
+        def _post_followup(self, item_id):
+            n = min(int(self.headers.get("Content-Length") or 0), 65536)
+            f = {k: v[0] for k, v in parse_qs(self.rfile.read(n).decode("utf-8"), keep_blank_values=True).items()}
+            try:
+                msg = app.add_followup(item_id, f)
+            except (FollowupRefused, InputError, DecisionRefused) as ex:
+                reasons = ex.reasons if hasattr(ex, "reasons") else [str(ex)]
+                return self._item_page(item_id, utcnow(), None, False, followup_reasons=reasons,
+                                       followup_values={k: v for k, v in f.items() if k != "csrf"})
+            self.send_response(303)
+            self.send_header("Location", f"/item/{item_id}?msg={quote(msg)}")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+
         def _post_note(self, item_id):
             n = min(int(self.headers.get("Content-Length") or 0), 65536)
             f = {k: v[0] for k, v in parse_qs(self.rfile.read(n).decode("utf-8"), keep_blank_values=True).items()}
@@ -598,7 +626,8 @@ def make_handler(app):
             self.send_header("Content-Length", "0")
             self.end_headers()
 
-        def _item_page(self, item_id, now, flash, is_err, note_reasons=None, note_values=None):
+        def _item_page(self, item_id, now, flash, is_err, note_reasons=None, note_values=None, followup_reasons=None,
+                       followup_values=None):
             """F-13: the opportunity card is the primary view of an item."""
             try:
                 res = app.store.opportunity_card(item_id)
@@ -615,6 +644,9 @@ def make_handler(app):
                 controls, hold = render_decide(v, app.csrf, ret=True), render_hold_notice(v, app.csrf, ret=True)
                 controls += f"<p class='small'><a href='/areq/{e(open_areq['action_request_id'])}'>Technical view of this request (payload, hashes)</a></p>"
             body = card_view.render_item_card(card, res["errors"], controls, hold)
+            body += card_view.render_followup_section(card, (app.store.item(item_id) or {}).get("state", "?"), app.csrf,
+                                                      app.store.lane == "lane_d", open_areq is not None,
+                                                      flash_reasons=followup_reasons, values=followup_values)
             body += card_view.render_note_section(card, app.csrf, app.store.lane == "lane_d", sorted(NOTE_CATEGORIES), sorted(NOTE_KINDS),
                                                   ux.NOTE_BASIS_CHOICES, flash_reasons=note_reasons, values=note_values)
             body += render_outcome_card_section(app, item_id, open_areq, res["areqs"])
@@ -627,6 +659,8 @@ def make_handler(app):
             parts = u.path.strip("/").split("/")
             if len(parts) == 3 and parts[0] == "item" and parts[2] == "note":
                 return self._post_note(parts[1])
+            if len(parts) == 3 and parts[0] == "item" and parts[2] == "followup":
+                return self._post_followup(parts[1])
             if len(parts) != 3 or parts[0] != "areq" or parts[2] not in ("decide", "wake", "outcome"):
                 return self._send(404, "not found", "text/plain")
             n = min(int(self.headers.get("Content-Length") or 0), 65536)

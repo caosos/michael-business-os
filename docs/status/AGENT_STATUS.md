@@ -5,16 +5,17 @@ Role: Communications + Operator UI / Approval UX (build lane F)
 Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
 State: WORKING
-Claimed: F-11
-Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe · F-04 @ 46c961c · F-13 @ 2415936 · F-14 @ c68a33c · F-13 hardening @ 6e47646 · F-15 @ 94130a4
-Blocked: F-11 on A-15
+Claimed: none
+Done: F-01 @ 190bb9b (+ notify_decision follow-through @ e2e42f8) · F-02 @ fc31896 · F-03 @ cb787dd · F-05 @ acb7c52 · F-06 @ 5abf51e · F-07 @ 36ce9a4 · F-08 @ 9d75e44 · F-09 @ 317a2db · F-10 @ f955219 · F-12 @ 0e5a3fe · F-04 @ 46c961c · F-13 @ 2415936 · F-14 @ c68a33c · F-13 hardening @ 6e47646 · F-15 @ 94130a4 · F-11 @ HEADPH
+Blocked: none
 Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
 Last updated: 2026-10-07
 
 ## Current objective
-**F-11** (READY_QUEUE @ `2f7b887`, A-15 done): follow-up / offer / quote buttons on the card, calling `workflows.propose_followup` from the UI process. Each creates its own step-up ActionRequest. Next: **F-16** (edit / retract notes). The queue's F-04 row still says READY, but it was DONE at `46c961c`.
+Next, in Agent 01's order: **F-17** (ADR-0012 capital fields on the card), **F-18** (Weekly Mission page, against A-23 examples), then F-16 (edit/retract notes). F-19/F-20 are queued behind A-25/A-27.
 
 ## Done
+- **F-11 @ HEADPH:** Follow-up questions / Offer / Quote buttons on an ACTED card, each its own step-up request via `workflows.propose_followup` (drafts from the comms planner; offers never above the ask). Verified on lane D + E, including a separate UI process. 124 + 27 tests. Receipt: `docs/receipts/2026-10-07-f11-followup-buttons.md`.
 - **F-15 @ 94130a4:** every `CommsActionPlanner` action carries `lane="agent-06-communications"`. On lane D + E the ledger's `proposed_by` equals it, `lane` is absent from the frozen payload, and a capability no lane holds creates no request (the card says "policy blocked").
   - **Bug fixed:** 05's PDP denies any `comms.*` payload with a key named `binding` at any depth (even `false`). My draft flag is now `is_binding`, pinned against the real policy file.
   - 124 + 21 tests. Receipt: `docs/receipts/2026-10-07-f15-lane-tag.md`.
