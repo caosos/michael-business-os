@@ -48,7 +48,7 @@ def item(n: int, lane: str, category: str, title: str, miles: float | None, econ
 
 
 def _meta(evidence: dict, comps: list | None = None) -> dict:
-    m = {"scoring_config_version": "2026.10.1", "evidence": evidence}
+    m = {"scoring_config_version": "2026.10.2", "evidence": evidence}
     if comps is not None:
         m["comps"] = comps
     return m

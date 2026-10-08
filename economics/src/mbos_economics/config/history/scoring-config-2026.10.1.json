@@ -1,11 +1,10 @@
 {
-  "scoring_config_version": "2026.10.2",
+  "scoring_config_version": "2026.10.1",
   "config_format": 1,
-  "supersedes": "2026.10.1",
+  "supersedes": "2026.10.0",
   "effective_from": "2026-10-07",
   "_note": "Single source of truth for every constant the economics engine uses (ADR-03-001; C13: also the single source for per-mile cost). Any value change MUST bump scoring_config_version and move the previous file to config/history/ so historical scorecards replay under the config that produced them. Leaves are {value, basis, note?, source?}. basis uses Agent 03's short alias (FACT|INFER|REC|UNK), permitted inside 03 blocks by ADR-0004 ruling 7. Owner-policy values carry source=MICHAEL_DECISIONS and are coordinator defaults, NOT Michael-confirmed business truth.",
   "_changelog": [
-    "2026.10.2: C-19 / ADR-0012 (owner rule, Michael via ARIA-20261007-1840): NO universal absolute-profit floor. Removed capital_and_risk.min_profit_flip (150) and min_profit_service (100), the min_profit_ok gate, the ev_min_profit_ok YES condition and alert_thresholds.ev_multiple_of_min_profit. Replaced by class-aware gates: deal_classes (thresholds mirrored from config/operator_profile.v1.json deal_classes; PROVISIONAL, MICHAEL_DECISIONS #9) and class_gates (per-class data thresholds, the only place an absolute-profit requirement may live), plus a ranking block (risk-adjusted profit x confidence x capital velocity, every component stored). alert_thresholds.ev_cash_multiple_min and service_ev_pph_multiple_of_target re-base the alert rule. All other values unchanged from 2026.10.1.",
     "2026.10.1: engine-ready. Formula strings replaced by numeric parameters (p_waste, confidence haircut). vehicle_cost_per_mile is no longer stored; it is derived (fuel/mpg + wear) so it cannot drift from its parts (C13). Added: service confidence checklist, skill proficiency store, license-gated skill list, time-to-cash defaults, service bad-job recovery, distance-ratio-gate radius, YES evidence requirements (sold comps, scope, title, remote verification), service alert rule, evidence search order. Threshold values unchanged from 2026.10.0. C14 resolved by keeping the YES rule (EV profit/hour >= target) and correcting AT-14; see docs/decisions/ADR-03-002-round-two-engine.md."
   ],
 
@@ -25,34 +24,9 @@
   "capital_and_risk": {
     "risk_capital_per_deal_cap": { "value": 1500, "basis": "REC", "source": "MICHAEL_DECISIONS #1 coordinator default", "note": "max cash tied up in one deal; above it is a hard PASS (escalation is Agent 05's budget ledger, not the engine)" },
     "max_loss_cap": { "value": 800, "basis": "REC", "source": "MICHAEL_DECISIONS #1 coordinator default", "note": "largest single-deal loss tolerated (worst branch with non-zero probability)" },
+    "min_profit_flip": { "value": 150, "basis": "REC" },
+    "min_profit_service": { "value": 100, "basis": "REC" },
     "f_diag_parts_fraction_on_fail": { "value": 0.3, "basis": "REC", "note": "fraction of parts spent before discovering the repair fails" }
-  },
-
-  "deal_classes": {
-    "_note": "Class boundaries, mirrored from config/operator_profile.v1.json deal_classes (the data source of record; tests fail on drift). PROVISIONAL: proposed by Agent 01 from Michael's training examples; he confirms in MICHAEL_DECISIONS #9. cash at risk = cash tied up; days = expected time to cash. Order: CAPITAL_INTENSIVE_FLIP, MICRO_FLIP, QUICK_TURN, else STANDARD_FLIP.",
-    "micro_flip_max_cash": { "value": 100, "basis": "REC" },
-    "micro_flip_max_days": { "value": 3, "basis": "REC" },
-    "quick_turn_max_days": { "value": 10, "basis": "REC" },
-    "capital_intensive_min_cash": { "value": 750, "basis": "REC" },
-    "capital_intensive_min_days": { "value": 45, "basis": "REC" }
-  },
-
-  "class_gates": {
-    "_note": "Per-class DATA thresholds (ADR-0012: an absolute-profit requirement is allowed only here, per class, never universal). min_net_profit = hard gate on deterministic net profit; min_ev_profit and min_cash_multiple = YES conditions on EV after haircut. cash multiple = (cash at risk + EV) / cash at risk. A micro or quick flip needs only a positive EV and a good multiple; a capital-intensive flip must also clear a meaningful absolute profit because it traps cash. PROVISIONAL (MICHAEL_DECISIONS #9).",
-    "micro_flip": { "min_net_profit": { "value": 0, "basis": "REC" }, "min_ev_profit": { "value": 0, "basis": "REC" }, "min_cash_multiple": { "value": 1.5, "basis": "REC" } },
-    "quick_turn": { "min_net_profit": { "value": 0, "basis": "REC" }, "min_ev_profit": { "value": 0, "basis": "REC" }, "min_cash_multiple": { "value": 1.25, "basis": "REC" } },
-    "standard_flip": { "min_net_profit": { "value": 50, "basis": "REC" }, "min_ev_profit": { "value": 100, "basis": "REC" }, "min_cash_multiple": { "value": 1.2, "basis": "REC" } },
-    "capital_intensive_flip": { "min_net_profit": { "value": 150, "basis": "REC" }, "min_ev_profit": { "value": 250, "basis": "REC" }, "min_cash_multiple": { "value": 1.3, "basis": "REC" } },
-    "service": { "min_net_profit": { "value": 0, "basis": "REC" }, "min_ev_profit": { "value": 0, "basis": "REC" }, "min_cash_multiple": { "value": 0, "basis": "REC", "note": "services have little cash at risk; pph_floor_ok and the service $/h target govern" } }
-  },
-
-  "ranking": {
-    "_note": "Ranking objective (C-19/C-20): rank_score = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor; every component is stored separately. risk_adjusted_profit = EV net profit + personal_use_value - risk_aversion x P(loss) x max_loss. capital_velocity = (EV net profit / max(cash at risk, velocity_cash_floor)) / max(days to cash, velocity_min_days), i.e. return per dollar per day. A non-positive risk_adjusted_profit is never rescued by velocity: rank_score = risk_adjusted_profit x confidence. Unknown seasonality / cash context contribute factor 1 and are reported as unknown.",
-    "risk_aversion": { "value": 0.5, "basis": "REC" },
-    "velocity_cash_floor": { "value": 25, "basis": "REC", "note": "avoids an infinite velocity on a near-zero outlay" },
-    "velocity_min_days": { "value": 1, "basis": "REC" },
-    "velocity_cap_per_day": { "value": 1, "basis": "REC", "note": "cap on return per dollar per day (100%/day) so a near-free, instant job cannot outrank everything; services, whose binding constraint is hours not cash, should be ranked within their lane" },
-    "cash_pressure_weight": { "value": 0.5, "basis": "REC", "note": "factor = 1 - weight x min(1, cash at risk / current cash) when Michael has stated current cash; 1 when unknown" }
   },
 
   "time_to_cash": {
@@ -129,8 +103,7 @@
     "listing_age_hours_max": { "value": 6, "basis": "REC" },
     "auction_ends_in_hours_max": { "value": 24, "basis": "REC" },
     "supply_tightness_min": { "value": 0.7, "basis": "REC" },
-    "ev_cash_multiple_min": { "value": 1.5, "basis": "REC", "note": "flip alert: (cash at risk + EV after haircut) / cash at risk must be at least this; replaces ev_multiple_of_min_profit x universal floor" },
-    "service_ev_pph_multiple_of_target": { "value": 1.25, "basis": "REC", "note": "service alert: EV profit/hour must be at least this multiple of the service target" },
+    "ev_multiple_of_min_profit": { "value": 2, "basis": "REC" },
     "deal_discount_min": { "value": 0.35, "basis": "REC" },
     "service_lead_quality_min": { "value": 0.6, "basis": "REC" },
     "service_lead_age_hours_max": { "value": 6, "basis": "REC" }

@@ -29,7 +29,7 @@ OPEN_STATES = {"RESEARCHING", "SCORED", "RECOMMENDED", "AWAITING_APPROVAL", "HEL
 _BUCKETS = {"act_alert": 0, "act": 1, "research": 2, "research_r13": 3}
 _INF = Decimal("1e9")
 _YES_TEXT = {"composite_ok": "composite", "confidence_ok": "low confidence (evidence)", "ev_pph_target_ok": "EV $/h below target",
-             "ev_min_profit_ok": "EV below min profit", "remote_verification_ok": "remote verification",
+             "class_ev_ok": "EV or cash multiple below the deal-class requirement", "remote_verification_ok": "remote verification",
              "sold_comps_ok": "sold comps", "fault_identified_ok": "repair fault not identified", "title_ok": "title"}
 
 

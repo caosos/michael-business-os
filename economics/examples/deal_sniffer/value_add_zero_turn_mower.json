@@ -4,8 +4,8 @@
  "block": {
   "plan": {
    "basis": "INFERENCE",
-   "provenance_id": "prov_01M4BRBC80NPND2ESPPEVKARDX",
-   "value": "Budget about $80 in parts and $10 in materials plus about 3 h of your time (a category estimate; the fault is not diagnosed yet). Parts can run up to $509 before the deal drops below your $65/h flip target. The trailer run is already costed in ($27 and 1 h). Sell target is $1,950, the median of 5 sold comparables."
+   "provenance_id": "prov_01M4BRBC80TJ9K3QNQVRA198XQ",
+   "value": "Budget about $80 in parts and $10 in materials plus about 3 h of your time (a category estimate; the fault is not diagnosed yet). Parts can run up to $505 before the deal drops below your $65/h flip target. The trailer run is already costed in ($27 and 1 h). Sell target is $1,950, the median of 5 sold comparables."
   }
  },
  "item_id": "itm_01JK0000000000000000000001",
@@ -24,7 +24,7 @@
   ],
   "inputs_used": [
    {
-    "hash": "sha256:6f0adebac8a159b178afd6f73a620314064b60621a799fe1b73b758636758f38",
+    "hash": "sha256:20731f83e500fc04042adfccbc5ea4e2d8812a60056531fd8dcc81b0e84a65f6",
     "ref": "scorecard.inputs_hash"
    },
    {
@@ -32,10 +32,10 @@
     "ref": "value_add_kb@2026.10.0"
    }
   ],
-  "provenance_id": "prov_01M4BRBC80NPND2ESPPEVKARDX",
+  "provenance_id": "prov_01M4BRBC80TJ9K3QNQVRA198XQ",
   "tool_name": "mbos_economics.valueadd",
-  "tool_version": "0.11.1"
+  "tool_version": "0.12.0"
  },
  "title": "Cub Cadet 54 in zero turn mower, deck needs rebuild",
- "value_add_hash": "sha256:d56bfa59aab3e3a8490881188e3bc539368a036c849184e0c1370407c3aa7b2b"
+ "value_add_hash": "sha256:c986afcc500d47fa10594bf9a80932ce7b704076980444d29251797f9e88c35d"
 }

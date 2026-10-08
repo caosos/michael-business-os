@@ -101,8 +101,8 @@ class TestConfig(unittest.TestCase):
             load_config("2026.10.0")
 
     def test_current_version(self):
-        self.assertEqual(CFG.version, "2026.10.1")
-        self.assertEqual(load_config("2026.10.1").hash, CFG.hash)
+        self.assertEqual(CFG.version, "2026.10.2")
+        self.assertEqual(load_config("2026.10.2").hash, CFG.hash)
 
     def test_coordinator_defaults_are_config(self):
         self.assertEqual(CFG.get("capital_and_risk.risk_capital_per_deal_cap"), 1500)

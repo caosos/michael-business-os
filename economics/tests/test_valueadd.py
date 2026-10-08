@@ -154,13 +154,13 @@ class TestPlan(unittest.TestCase):
     def test_parts_ceiling_is_the_real_break_even(self):
         plan = va(MOWER)["block"]["plan"]
         self.assertEqual(plan["basis"], "INFERENCE")
-        self.assertIn("Parts can run up to $509", plan["value"])
-        for parts, expect in ((509, True), (510, False)):
+        self.assertIn("Parts can run up to $505", plan["value"])
+        for parts, expect in ((505, True), (506, False)):
             trial = copy.deepcopy(MOWER)
             trial["economics"]["rehab"]["parts_cost"] = parts
             r = compute(build_engine_input(trial), CFG)
             self.assertEqual(all(r["gates"].values()) and r["yes_conditions"]["ev_pph_target_ok"]
-                             and r["yes_conditions"]["ev_min_profit_ok"], expect, parts)
+                             and r["yes_conditions"]["class_ev_ok"], expect, parts)
         self.assertIn("The trailer run is already costed in ($27 and 1 h).", plan["value"])
         self.assertIn("Sell target is $1,950, the median of 5 sold comparables.", plan["value"])
 

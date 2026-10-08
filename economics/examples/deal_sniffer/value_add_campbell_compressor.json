@@ -6,15 +6,15 @@
    {
     "basis": "FACT",
     "kind": "failure_mode",
-    "provenance_id": "prov_01M4BRBC80CN97NGZZA8N6HTQ9",
+    "provenance_id": "prov_01M4BRBC80D4JWM0Z805ZWA342",
     "risk": "Campbell Hausfeld HU200099AV (20-gallon) recall (Jun 17, 2009): the thermal overload, which shuts the unit off when it overheats, can fail, so internal components can melt and start a fire. Sold Jan to Jun 2009 at Wal-Mart. The recall remedy was a full refund at Wal-Mart, not a repair. Whether any remedy is still open is UNKNOWN. (Model taken from the listing text; not verified against the unit.)",
     "source": "CPSC: Campbell Hausfeld Recalls Air Compressors Due to Fire Hazard; Sold Exclusively at Wal-Mart, recall date Jun 17, 2009 <https://www.cpsc.gov/Recalls/2009/Campbell-Hausfeld-Recalls-Air-Compressors-Due-to-Fire-Hazard-Sold-Exclusively-at-Wal-Mart> (retrieved 2026-10-07)"
    }
   ],
   "plan": {
    "basis": "INFERENCE",
-   "provenance_id": "prov_01M4BRBC80CN97NGZZA8N6HTQ9",
-   "value": "Budget about $60 in parts and $10 in materials plus about 2 h of your time (a category estimate; the fault is not diagnosed yet). Even with no parts spend this fails your $40/h floor and the minimum profit. Sell target is $240, the median of 3 sold comparables. The recall remedy was a refund, not a repair, so any repair cost on the overload circuit is yours."
+   "provenance_id": "prov_01M4BRBC80D4JWM0Z805ZWA342",
+   "value": "Budget about $60 in parts and $10 in materials plus about 2 h of your time (a category estimate; the fault is not diagnosed yet). Even with no parts spend this fails your $40/h floor. Sell target is $240, the median of 3 sold comparables. The recall remedy was a refund, not a repair, so any repair cost on the overload circuit is yours."
   }
  },
  "item_id": "itm_01JK0000000000000000000007",
@@ -33,7 +33,7 @@
   ],
   "inputs_used": [
    {
-    "hash": "sha256:8f34dcf280214c5a93c72d9bbcbda9d52eba7ec684329b66c0b07473c709159a",
+    "hash": "sha256:7102a7be5deff51bc1eabfdea8b2b83aaf57ba6de5edcde5cf6a20093d6f80f9",
     "ref": "scorecard.inputs_hash"
    },
    {
@@ -41,10 +41,10 @@
     "ref": "value_add_kb@2026.10.0"
    }
   ],
-  "provenance_id": "prov_01M4BRBC80CN97NGZZA8N6HTQ9",
+  "provenance_id": "prov_01M4BRBC80D4JWM0Z805ZWA342",
   "tool_name": "mbos_economics.valueadd",
-  "tool_version": "0.11.1"
+  "tool_version": "0.12.0"
  },
  "title": "Campbell Hausfeld HU200099AV 20 gallon air compressor",
- "value_add_hash": "sha256:dab5e8a6cd6cb561278200e11148263a5e2e6d10f4c4c16f80179eb5342a1275"
+ "value_add_hash": "sha256:0a1fdb4737a19c98deab550d21e819d569a492050ed500100a18c6ec7ca004bc"
 }

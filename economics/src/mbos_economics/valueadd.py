@@ -377,7 +377,7 @@ def _parts_ceiling(item: dict, cfg: ScoringConfig) -> int | None:
         trial = copy.deepcopy(inp)
         trial["economics"]["rehab"]["parts_cost"] = parts
         r = compute(trial, cfg)
-        return all(r["gates"].values()) and r["yes_conditions"]["ev_pph_target_ok"] and r["yes_conditions"]["ev_min_profit_ok"]
+        return all(r["gates"].values()) and r["yes_conditions"]["ev_pph_target_ok"] and r["yes_conditions"]["class_ev_ok"]
 
     return _bisect_int(0, cap, ok, want_max=True)
 
@@ -392,7 +392,7 @@ def _binding(item: dict, cfg: ScoringConfig) -> str:
         "cash_ok": f"your ${cap:,.0f} per-deal cash limit (it ties up ${r['derived']['cash_tied_up']:,.0f})",
         "max_loss_ok": f"your ${cfg.num('capital_and_risk.max_loss_cap'):,.0f} worst-case loss limit",
         "pph_floor_ok": f"your ${cfg.num('time_value.w_min_per_hour'):g}/h floor",
-        "min_profit_ok": "the minimum profit",
+        "class_profit_ok": "the profit this deal class must clear",
         "ev_positive": "a positive expected value",
         "skill_ok": "your skill profile", "license_ok": "a license you do not hold",
         "distance_ratio_ok": "the travel-to-profit limit at this distance",

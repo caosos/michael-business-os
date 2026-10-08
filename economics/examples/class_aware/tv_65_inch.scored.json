@@ -1,0 +1,365 @@
+{
+  "item": {
+    "item_id": "itm_01JB0000000000000000000101",
+    "schema_version": "1.0.0",
+    "type": "flip",
+    "category": "other_asset",
+    "state": "RECOMMENDED",
+    "created_at": "2026-10-07T10:00:00Z",
+    "sources": [
+      {
+        "source": "craigslist",
+        "url": "https://example.invalid/other_asset/101",
+        "ingestion_method": "rss",
+        "first_seen_at": "2026-10-07T10:00:00Z",
+        "provenance_id": "prov_01JB0000000000000000001010"
+      }
+    ],
+    "dedup_key": "other_asset|example|101",
+    "normalized": {
+      "title": "65 inch LED TV, no picture (backlight?)",
+      "condition": "used",
+      "location": {
+        "city": "Conway",
+        "state": "AR",
+        "road_miles_one_way": 4
+      }
+    },
+    "economics": {
+      "acquisition": {
+        "ask_price": 40,
+        "expected_buy_price": 30,
+        "buy_fees": 0,
+        "listing_age_hours": 1
+      },
+      "rehab": {
+        "parts_cost": 0,
+        "materials_cost": 0,
+        "labor_hours": 0.25,
+        "admin_hours": 0.25,
+        "required_skills": [
+          "electrical_diagnosis"
+        ],
+        "repair_success_prob": 0.8,
+        "repair_scope_known": true
+      },
+      "logistics": {
+        "trips": [
+          {
+            "purpose": "inspect_pickup",
+            "round_trip_miles": 8
+          }
+        ]
+      },
+      "holding": {
+        "expected_hold_days": 0.04,
+        "sell_fees_rate": 0,
+        "sell_fees_flat": 0
+      },
+      "resale": {
+        "target_sell_price": 90,
+        "comp_price_low": 75,
+        "comp_price_expected": 90,
+        "comp_price_high": 100,
+        "sale_prob": 0.9,
+        "expected_dom_days": 1,
+        "active_comparable_listings": 5
+      },
+      "downside": {
+        "salvage_if_repair_fails": 15,
+        "salvage_if_unsold": 40
+      },
+      "context": {
+        "seasonality_factor": 1
+      },
+      "estimates_meta": {
+        "scoring_config_version": "2026.10.2",
+        "evidence": {
+          "sold_comps_count": 4,
+          "condition_verified": true,
+          "title_verified": true,
+          "demand_evidence": true,
+          "seller_screened": true
+        }
+      }
+    },
+    "scores": {
+      "scorecard_id": "scr_01M4B3R6G0WH9B3KXDNPHPZ0QR",
+      "inputs_hash": "sha256:34f13c24d9316c36601a34a9f1677c6296e11abb7e7a360cfeecd9481437f27f",
+      "scorecard": {
+        "scoring_config_version": "2026.10.2",
+        "computed_at": "2026-10-07T12:00:00Z",
+        "engine_version": "0.12.0",
+        "config_hash": "sha256:ab452d208f9a0eae5bad5225ed791429d420dcec50b8f8e62b46a274f3dc50b0",
+        "lane": "flip",
+        "derived": {
+          "deal_class": "MICRO_FLIP",
+          "deal_class_basis": "RECOMMENDATION",
+          "class_requirements": {
+            "min_net_profit": 0,
+            "min_ev_profit": 0,
+            "min_cash_multiple": 1.5
+          },
+          "cash_at_risk": 33.66,
+          "days_to_cash": 1.04,
+          "cash_multiple": 2.1093,
+          "ev_cash_multiple": 2.0781,
+          "capital_velocity": 1,
+          "catastrophic_downside_probability": 0.2,
+          "parts_out_floor": 15,
+          "liquidity": {
+            "sale_prob": 0.9,
+            "expected_dom_days": 1
+          },
+          "personal_use_value": null,
+          "current_cash_context": {
+            "value": null,
+            "known": false
+          },
+          "seasonality_factor": 1,
+          "vehicle_cost_per_mile": 0.4578,
+          "road_miles_one_way": 4,
+          "trips_cash": 3.66,
+          "travel_hours": 0.1778,
+          "labor_hours": 0.25,
+          "admin_hours": 0.25,
+          "total_hours": 0.6778,
+          "cost_out": 33.66,
+          "r_net": 90,
+          "net_profit_deterministic": 56.34,
+          "profit_per_hour_deterministic": 83.12,
+          "cash_tied_up": 33.66,
+          "roi_deterministic": 1.6738,
+          "expected_revenue": 71,
+          "ev_net_profit": 37.34,
+          "ev_hours": 0.6778,
+          "ev_profit_per_hour": 55.09,
+          "ev_roi": 1.1093,
+          "p_waste": 0,
+          "evidence_quality": 0.93,
+          "wasted_trip_ev": 0,
+          "confidence_raw": 0.93,
+          "confidence_distance_penalty": 0,
+          "confidence": 0.93,
+          "confidence_haircut": 0.972,
+          "ev_decision": 36.29,
+          "max_loss": 18.66,
+          "p_loss": 0.2,
+          "coefficient_of_variation": 0.8315,
+          "risk_raw": 0.238,
+          "time_to_cash_days": 1.04,
+          "travel_burden": 10.77,
+          "travel_burden_limit": 13.07,
+          "distance_ratio_gate_applies": false,
+          "skill_fit": 0.75,
+          "skill_coverage": 1,
+          "skill_mean_proficiency": 0.75,
+          "scarcity": 0.4433,
+          "deal_discount": 0,
+          "demand_velocity": 0.9778,
+          "supply_tightness": 0.75,
+          "acquisition": 30,
+          "buy_fees": 0,
+          "parts": 0,
+          "materials": 0,
+          "storage_cost": 0,
+          "hold_days": 0.04,
+          "sell_fees": 0,
+          "trips_cash_acquisition": 3.66,
+          "cost_out_fail": 33.66,
+          "branches": [
+            {
+              "name": "repaired_and_sold",
+              "prob": 0.72,
+              "value": 56.34,
+              "revenue": 90
+            },
+            {
+              "name": "repaired_unsold",
+              "prob": 0.08,
+              "value": 6.34,
+              "revenue": 40
+            },
+            {
+              "name": "repair_failed",
+              "prob": 0.2,
+              "value": -18.66,
+              "revenue": 15
+            }
+          ],
+          "trips": [
+            {
+              "purpose": "inspect_pickup",
+              "round_trip_miles": 8,
+              "cash": 3.66,
+              "hours": 0.1778
+            }
+          ]
+        },
+        "sub_scores": {
+          "ev_score": 4.54,
+          "pph_score": 45.91,
+          "roi_score": 73.95,
+          "ttc_score": 98.27,
+          "risk_score": 76.2,
+          "conf_score": 93,
+          "skill_score": 75,
+          "scarcity_score": 44.33
+        },
+        "weights_used": {
+          "ev": 0.25,
+          "pph": 0.25,
+          "roi": 0.1,
+          "ttc": 0.1,
+          "risk": 0.1,
+          "conf": 0.05,
+          "skill": 0.1,
+          "scarcity": 0.05
+        },
+        "composite": 51.82,
+        "decision": "MAYBE",
+        "pass_on_priors": false,
+        "ranking": {
+          "rank_score": 32.99,
+          "formula": "risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
+          "risk_adjusted_profit": 35.47,
+          "ev_net_profit": 37.34,
+          "personal_use_value": null,
+          "risk_penalty": 1.87,
+          "confidence": 0.93,
+          "capital_velocity": 1,
+          "seasonality_factor": 1,
+          "seasonality_factor_applied": 1,
+          "cash_share_of_current_cash": null,
+          "cash_pressure_factor": 1
+        },
+        "alert": false,
+        "alert_checks": {
+          "is_yes": false,
+          "scarcity_ok": false,
+          "perishable": true,
+          "ev_multiple_ok": true,
+          "deal_discount_ok": false
+        },
+        "gates": {
+          "ev_positive": true,
+          "max_loss_ok": true,
+          "cash_ok": true,
+          "skill_ok": true,
+          "license_ok": true,
+          "pph_floor_ok": true,
+          "class_profit_ok": true,
+          "distance_ratio_ok": true
+        },
+        "yes_conditions": {
+          "composite_ok": false,
+          "confidence_ok": true,
+          "ev_pph_target_ok": false,
+          "class_ev_ok": true,
+          "remote_verification_ok": true,
+          "sold_comps_ok": true,
+          "fault_identified_ok": true,
+          "title_ok": true
+        },
+        "evidence": {
+          "three_sold_comps": true,
+          "condition_verified": true,
+          "fault_identified": true,
+          "title_verified": true,
+          "demand_evidence": true,
+          "seller_screened": true,
+          "skill_fit_high": false,
+          "price_distribution": true,
+          "remote_verification": false
+        },
+        "evidence_search": {
+          "target": "YES",
+          "items": [],
+          "reaches": null
+        },
+        "walk_away_price": 15,
+        "reasons": [
+          "YES blocked: composite 51.82 < 60",
+          "YES blocked: EV profit/hour $55.09 < flip target $65.00",
+          "deterministic: net $56.34, $83.12/h over 0.6778 h, cash tied up $33.66, ROI 1.6738",
+          "expected: net $37.34, $55.09/h, max loss $18.66, P(loss) 0.2000, time-to-cash 1.04 d",
+          "class MICRO_FLIP (provisional thresholds): cash at risk $33.66, 1.04 d to cash, cash multiple 2.1093x; rank score 32.99 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
+          "evidence is not the blocker: no missing evidence item changes the verdict",
+          "walk-away price (max buy for YES): $15"
+        ]
+      }
+    },
+    "recommendation": {
+      "recommendation_id": "rec_01M4B3R6G0J6XCM2Y208ZGKJFX",
+      "verdict": "MAYBE",
+      "rationale": [
+        "YES blocked: composite 51.82 < 60",
+        "YES blocked: EV profit/hour $55.09 < flip target $65.00",
+        "deterministic: net $56.34, $83.12/h over 0.6778 h, cash tied up $33.66, ROI 1.6738",
+        "expected: net $37.34, $55.09/h, max loss $18.66, P(loss) 0.2000, time-to-cash 1.04 d",
+        "class MICRO_FLIP (provisional thresholds): cash at risk $33.66, 1.04 d to cash, cash multiple 2.1093x; rank score 32.99 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
+        "evidence is not the blocker: no missing evidence item changes the verdict",
+        "walk-away price (max buy for YES): $15"
+      ],
+      "confidence": 0.93,
+      "alert": false,
+      "provenance_id": "prov_01M4B3R6G032KKARR53ZTV9EK2"
+    },
+    "provenance_ids": [
+      "prov_01JB0000000000000000001010",
+      "prov_01M4B3R6G032KKARR53ZTV9EK2"
+    ]
+  },
+  "provenance": {
+    "provenance_id": "prov_01M4B3R6G032KKARR53ZTV9EK2",
+    "created_at": "2026-10-07T12:00:00Z",
+    "actor_type": "system",
+    "agent_name": "agent-03-economics",
+    "basis": "INFERENCE",
+    "tool_name": "mbos_economics.engine",
+    "tool_version": "0.12.0",
+    "config_version": "2026.10.2",
+    "inputs_used": [
+      {
+        "ref": "engine_input",
+        "hash": "sha256:34f13c24d9316c36601a34a9f1677c6296e11abb7e7a360cfeecd9481437f27f"
+      },
+      {
+        "ref": "scoring-config@2026.10.2",
+        "hash": "sha256:ab452d208f9a0eae5bad5225ed791429d420dcec50b8f8e62b46a274f3dc50b0"
+      }
+    ],
+    "derived_from": [
+      "prov_01JB0000000000000000001010"
+    ],
+    "confidence": 0.93
+  },
+  "receipt_drafts": [
+    {
+      "type": "SCORE_RECORDED",
+      "item_id": "itm_01JB0000000000000000000101",
+      "entity_type": "scorecard",
+      "entity_id": "scr_01M4B3R6G0WH9B3KXDNPHPZ0QR",
+      "tool_name": "mbos_economics.engine",
+      "inputs_hash": "sha256:34f13c24d9316c36601a34a9f1677c6296e11abb7e7a360cfeecd9481437f27f",
+      "payload_hash": "sha256:34a3742264638973083e1a716b84d0d49b9c17fdde01bf6588dcb1847de19595",
+      "idempotency_key": "score:scr_01M4B3R6G0WH9B3KXDNPHPZ0QR",
+      "provenance_ids": [
+        "prov_01M4B3R6G032KKARR53ZTV9EK2"
+      ]
+    },
+    {
+      "type": "RECOMMENDATION_RECORDED",
+      "item_id": "itm_01JB0000000000000000000101",
+      "entity_type": "recommendation",
+      "entity_id": "rec_01M4B3R6G0J6XCM2Y208ZGKJFX",
+      "tool_name": "mbos_economics.engine",
+      "inputs_hash": "sha256:34f13c24d9316c36601a34a9f1677c6296e11abb7e7a360cfeecd9481437f27f",
+      "payload_hash": "sha256:30462811cb322dd5da16f39756430a7a6761ffa7152cf314b74ddcae72127749",
+      "idempotency_key": "recommend:rec_01M4B3R6G0J6XCM2Y208ZGKJFX",
+      "provenance_ids": [
+        "prov_01M4B3R6G032KKARR53ZTV9EK2"
+      ]
+    }
+  ]
+}

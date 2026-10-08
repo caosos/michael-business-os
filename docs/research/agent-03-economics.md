@@ -779,3 +779,6 @@ These are executable-style assertions for whoever implements the engine. Each mu
 ## 20. One-paragraph summary
 
 **[INFER]** Reduce every opportunity to a provenance-tagged ledger of cash-out, cash-in, and Michael-hours; run a decision-tree expected value over repair-success and sale/win probabilities; derive net profit, EV, profit/hour, ROI, cash-tied-up, time-to-cash, and max-loss; score risk, confidence, skill-fit, and scarcity 0–1; treat distance as a four-channel economic cost (fuel, time, wasted-trip risk, revisit friction); gate hard on ruin/skill/evidence, then rank survivors with a transparent weighted composite into YES / MAYBE / PASS, alert only when a deal is strong **and** perishable, demand ≥3 sold comps and a known fault before any YES, and feed every completed outcome back to recalibrate the priors — with every number reconstructable under a versioned config.
+
+
+> **C-19 note (2026-10-08):** the `min_profit` floors ($150 flip / $100 service) quoted in this round-one text were removed in scoring config 2026.10.2 (ADR-0012, owner rule: no universal absolute-profit floor). They survive only as per-class data thresholds in `class_gates`. See `docs/receipts/2026-10-08-c19-class-aware-gates.md`.

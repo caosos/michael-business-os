@@ -91,7 +91,7 @@ class TestPlantedDrift(unittest.TestCase):
         try:
             shutil.copytree(CONFIG_DIR, tmp / "config")
             p = tmp / "config" / "scoring-config.json"
-            p.write_text(p.read_text().replace('"min_profit_flip": { "value": 150', '"min_profit_flip": { "value": 151'))
+            p.write_text(p.read_text().replace('"risk_aversion": { "value": 0.5', '"risk_aversion": { "value": 0.6'))
             r = audit(D["items"], config_dir=tmp / "config")
             self.assertFalse(r["ok"])
             self.assertEqual(r["drift_count"], 19)

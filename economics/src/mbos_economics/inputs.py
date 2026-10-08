@@ -127,6 +127,21 @@ def _trips(v: _V, logistics: dict) -> None:
                 v.num(tr, k, "economics.logistics.transport", required=False)
 
 
+def _context(v: _V, econ: dict) -> None:
+    """Optional Michael-situation inputs (C-19). Absent or null = UNKNOWN; the engine never assumes."""
+    ctx = econ.get("context")
+    if ctx is None:
+        return
+    if not isinstance(ctx, dict):
+        v.problems.append("economics.context must be an object")
+        return
+    for k in ("personal_use_value", "current_cash"):
+        if ctx.get(k) is not None:
+            v.num(ctx, k, "economics.context", positive=(k == "current_cash"))
+    if ctx.get("seasonality_factor") is not None:
+        v.prob(ctx, "seasonality_factor", "economics.context")
+
+
 def _evidence(v: _V, meta: dict) -> None:
     ev = meta.get("evidence")
     if ev is None:
@@ -165,6 +180,7 @@ def validate_engine_input(inp: Any) -> None:
     _trips(v, logistics)
     meta = v.obj(econ, "estimates_meta", "economics")
     _evidence(v, meta)
+    _context(v, econ)
 
     if lane == "flip":
         a = v.obj(econ, "acquisition", "economics")

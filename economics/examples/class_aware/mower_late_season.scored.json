@@ -1,6 +1,6 @@
 {
   "item": {
-    "item_id": "itm_01JB0000000000000000000004",
+    "item_id": "itm_01JB0000000000000000000102",
     "schema_version": "1.0.0",
     "type": "flip",
     "category": "mower",
@@ -9,37 +9,36 @@
     "sources": [
       {
         "source": "craigslist",
-        "url": "https://example.invalid/mower/3",
+        "url": "https://example.invalid/mower/102",
         "ingestion_method": "rss",
         "first_seen_at": "2026-10-07T10:00:00Z",
-        "provenance_id": "prov_01JB0000000000000000000030"
+        "provenance_id": "prov_01JB0000000000000000001020"
       }
     ],
-    "dedup_key": "mower|example|3",
+    "dedup_key": "mower|example|102",
     "normalized": {
-      "title": "Riding mower, won't start",
+      "title": "Older riding mower, needs carburetor",
       "condition": "used",
       "location": {
         "city": "Conway",
         "state": "AR",
-        "road_miles_one_way": 35
+        "road_miles_one_way": 12
       }
     },
     "economics": {
       "acquisition": {
-        "ask_price": 150,
-        "expected_buy_price": 150,
+        "ask_price": 800,
+        "expected_buy_price": 650,
         "buy_fees": 0,
-        "market_buy_median": 250
+        "listing_age_hours": 30
       },
       "rehab": {
-        "parts_cost": 150,
-        "materials_cost": 0,
+        "parts_cost": 120,
+        "materials_cost": 20,
         "labor_hours": 4,
-        "admin_hours": 1.25,
+        "admin_hours": 1,
         "required_skills": [
-          "small_engine_repair",
-          "mechanical_diagnosis"
+          "small_engine_repair"
         ],
         "repair_success_prob": 0.9,
         "repair_scope_known": true
@@ -48,43 +47,51 @@
         "trips": [
           {
             "purpose": "inspect_pickup",
-            "round_trip_miles": 70
+            "round_trip_miles": 24
           },
           {
             "purpose": "buyer_meet",
-            "round_trip_miles": 14
+            "round_trip_miles": 16
           }
         ]
       },
       "holding": {
-        "storage_cost_per_day": 2,
-        "expected_hold_days": 14
+        "storage_cost_per_day": 0.5,
+        "expected_hold_days": 120,
+        "sell_fees_rate": 0,
+        "sell_fees_flat": 0
       },
       "resale": {
-        "target_sell_price": 650,
-        "comp_price_low": 550,
-        "comp_price_high": 750,
+        "target_sell_price": 1400,
+        "comp_price_low": 1250,
+        "comp_price_expected": 1400,
+        "comp_price_high": 1500,
         "sale_prob": 0.8,
-        "expected_dom_days": 14,
+        "expected_dom_days": 90,
         "active_comparable_listings": 9
       },
       "downside": {
-        "salvage_if_repair_fails": 90,
-        "salvage_if_unsold": 480
+        "salvage_if_repair_fails": 250,
+        "salvage_if_unsold": 900
+      },
+      "context": {
+        "seasonality_factor": 0.2,
+        "current_cash": 1200
       },
       "estimates_meta": {
         "scoring_config_version": "2026.10.2",
         "evidence": {
-          "sold_comps_count": 3,
+          "sold_comps_count": 4,
+          "condition_verified": true,
+          "title_verified": true,
           "demand_evidence": true,
-          "seller_screened": true,
-          "condition_verified": true
+          "seller_screened": true
         }
       }
     },
     "scores": {
-      "scorecard_id": "scr_01M4B3R6G09HDRPPCDTHN3QZX0",
-      "inputs_hash": "sha256:86bcc76a497bc87742501863babd4c785fa1b023d171ae1f997934fe93b2c0f7",
+      "scorecard_id": "scr_01M4B3R6G02ZE2PK8GH478F3SK",
+      "inputs_hash": "sha256:8716ca3f731c960292cca676721cb412d3bc36d88ecadd8d574d3aeeb829ab0b",
       "scorecard": {
         "scoring_config_version": "2026.10.2",
         "computed_at": "2026-10-07T12:00:00Z",
@@ -92,48 +99,48 @@
         "config_hash": "sha256:ab452d208f9a0eae5bad5225ed791429d420dcec50b8f8e62b46a274f3dc50b0",
         "lane": "flip",
         "derived": {
-          "deal_class": "STANDARD_FLIP",
+          "deal_class": "CAPITAL_INTENSIVE_FLIP",
           "deal_class_basis": "RECOMMENDATION",
           "class_requirements": {
-            "min_net_profit": 50,
-            "min_ev_profit": 100,
-            "min_cash_multiple": 1.2
+            "min_net_profit": 150,
+            "min_ev_profit": 250,
+            "min_cash_multiple": 1.3
           },
-          "cash_at_risk": 366.46,
-          "days_to_cash": 15,
-          "cash_multiple": 1.5755,
-          "ev_cash_multiple": 1.5755,
-          "capital_velocity": 0.0384,
+          "cash_at_risk": 868.31,
+          "days_to_cash": 121,
+          "cash_multiple": 1.396,
+          "ev_cash_multiple": 1.396,
+          "capital_velocity": 0.0033,
           "catastrophic_downside_probability": 0.1,
-          "parts_out_floor": 90,
+          "parts_out_floor": 250,
           "liquidity": {
             "sale_prob": 0.8,
-            "expected_dom_days": 14
+            "expected_dom_days": 90
           },
           "personal_use_value": null,
           "current_cash_context": {
-            "value": null,
-            "known": false
+            "value": 1200,
+            "known": true
           },
-          "seasonality_factor": null,
+          "seasonality_factor": 0.2,
           "vehicle_cost_per_mile": 0.4578,
-          "road_miles_one_way": 35,
-          "trips_cash": 38.46,
-          "travel_hours": 1.8667,
+          "road_miles_one_way": 12,
+          "trips_cash": 18.31,
+          "travel_hours": 0.8889,
           "labor_hours": 4,
-          "admin_hours": 1.25,
-          "total_hours": 7.1167,
-          "cost_out": 366.46,
-          "r_net": 650,
-          "net_profit_deterministic": 283.54,
-          "profit_per_hour_deterministic": 39.84,
-          "cash_tied_up": 366.46,
-          "roi_deterministic": 0.7737,
-          "expected_revenue": 563.4,
-          "ev_net_profit": 210.88,
-          "ev_hours": 7.1167,
-          "ev_profit_per_hour": 29.63,
-          "ev_roi": 0.5755,
+          "admin_hours": 1,
+          "total_hours": 5.8889,
+          "cost_out": 868.31,
+          "r_net": 1400,
+          "net_profit_deterministic": 531.69,
+          "profit_per_hour_deterministic": 90.29,
+          "cash_tied_up": 868.31,
+          "roi_deterministic": 0.6123,
+          "expected_revenue": 1195,
+          "ev_net_profit": 343.82,
+          "ev_hours": 5.8889,
+          "ev_profit_per_hour": 58.38,
+          "ev_roi": 0.396,
           "p_waste": 0,
           "evidence_quality": 1,
           "wasted_trip_ev": 0,
@@ -141,75 +148,75 @@
           "confidence_distance_penalty": 0,
           "confidence": 1,
           "confidence_haircut": 1,
-          "ev_decision": 210.88,
-          "max_loss": 137.05,
+          "ev_decision": 343.82,
+          "max_loss": 446.99,
           "p_loss": 0.1,
-          "coefficient_of_variation": 0.6293,
-          "risk_raw": 0.2415,
-          "time_to_cash_days": 15,
-          "travel_burden": 113.13,
-          "travel_burden_limit": 73.81,
+          "coefficient_of_variation": 0.9446,
+          "risk_raw": 0.4983,
+          "time_to_cash_days": 121,
+          "travel_burden": 53.87,
+          "travel_burden_limit": 120.34,
           "distance_ratio_gate_applies": false,
           "skill_fit": 0.85,
           "skill_coverage": 1,
           "skill_mean_proficiency": 0.85,
-          "scarcity": 0.5167,
-          "deal_discount": 0.4,
-          "demand_velocity": 0.6889,
+          "scarcity": 0.11,
+          "deal_discount": 0,
+          "demand_velocity": 0,
           "supply_tightness": 0.55,
-          "acquisition": 150,
+          "acquisition": 650,
           "buy_fees": 0,
-          "parts": 150,
-          "materials": 0,
-          "storage_cost": 28,
-          "hold_days": 14,
+          "parts": 120,
+          "materials": 20,
+          "storage_cost": 60,
+          "hold_days": 120,
           "sell_fees": 0,
-          "trips_cash_acquisition": 32.05,
-          "cost_out_fail": 227.05,
+          "trips_cash_acquisition": 10.99,
+          "cost_out_fail": 696.99,
           "branches": [
             {
               "name": "repaired_and_sold",
               "prob": 0.72,
-              "value": 283.54,
-              "revenue": 650
+              "value": 531.69,
+              "revenue": 1400
             },
             {
               "name": "repaired_unsold",
               "prob": 0.18,
-              "value": 113.54,
-              "revenue": 480
+              "value": 31.69,
+              "revenue": 900
             },
             {
               "name": "repair_failed",
               "prob": 0.1,
-              "value": -137.05,
-              "revenue": 90
+              "value": -446.99,
+              "revenue": 250
             }
           ],
           "trips": [
             {
               "purpose": "inspect_pickup",
-              "round_trip_miles": 70,
-              "cash": 32.05,
-              "hours": 1.5556
+              "round_trip_miles": 24,
+              "cash": 10.99,
+              "hours": 0.5333
             },
             {
               "purpose": "buyer_meet",
-              "round_trip_miles": 14,
-              "cash": 6.41,
-              "hours": 0.3111
+              "round_trip_miles": 16,
+              "cash": 7.32,
+              "hours": 0.3556
             }
           ]
         },
         "sub_scores": {
-          "ev_score": 26.36,
-          "pph_score": 24.69,
-          "roi_score": 38.37,
-          "ttc_score": 75,
-          "risk_score": 75.85,
+          "ev_score": 42.98,
+          "pph_score": 48.65,
+          "roi_score": 26.4,
+          "ttc_score": 0,
+          "risk_score": 50.17,
           "conf_score": 100,
           "skill_score": 85,
-          "scarcity_score": 51.67
+          "scarcity_score": 11
         },
         "weights_used": {
           "ev": 0.25,
@@ -221,12 +228,12 @@
           "skill": 0.1,
           "scarcity": 0.05
         },
-        "composite": 47.77,
+        "composite": 44.61,
         "decision": "PASS",
         "pass_on_priors": true,
         "pass_basis": {
           "gates": {
-            "pph_floor_ok": {
+            "composite_floor": {
               "rule": "flip economic: revenue side AND >= 1 cost-side input evidence-backed",
               "decisive_inputs": [
                 "economics.resale.target_sell_price",
@@ -264,26 +271,26 @@
           "pass_on_priors": true
         },
         "ranking": {
-          "rank_score": 7.83,
+          "rank_score": 0.14,
           "formula": "risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
-          "risk_adjusted_profit": 204.03,
-          "ev_net_profit": 210.88,
+          "risk_adjusted_profit": 321.47,
+          "ev_net_profit": 343.82,
           "personal_use_value": null,
-          "risk_penalty": 6.85,
+          "risk_penalty": 22.35,
           "confidence": 1,
-          "capital_velocity": 0.0384,
-          "seasonality_factor": null,
-          "seasonality_factor_applied": 1,
-          "cash_share_of_current_cash": null,
-          "cash_pressure_factor": 1
+          "capital_velocity": 0.0033,
+          "seasonality_factor": 0.2,
+          "seasonality_factor_applied": 0.2,
+          "cash_share_of_current_cash": 0.7236,
+          "cash_pressure_factor": 0.6382
         },
         "alert": false,
         "alert_checks": {
           "is_yes": false,
           "scarcity_ok": false,
           "perishable": false,
-          "ev_multiple_ok": true,
-          "deal_discount_ok": true
+          "ev_multiple_ok": false,
+          "deal_discount_ok": false
         },
         "gates": {
           "ev_positive": true,
@@ -291,7 +298,7 @@
           "cash_ok": true,
           "skill_ok": true,
           "license_ok": true,
-          "pph_floor_ok": false,
+          "pph_floor_ok": true,
           "class_profit_ok": true,
           "distance_ratio_ok": true
         },
@@ -321,39 +328,41 @@
           "items": [],
           "reaches": null
         },
-        "walk_away_price": null,
+        "walk_away_price": 478,
         "reasons": [
-          "GATE FAIL pph_floor_ok: deterministic profit/hour $39.84 below floor $40.00",
-          "R13: PASS is not evidence-backed (pph_floor_ok: revenue NOT backed, cost NOT backed): route to RESEARCHING, do not archive",
-          "deterministic: net $283.54, $39.84/h over 7.1167 h, cash tied up $366.46, ROI 0.7737",
-          "expected: net $210.88, $29.63/h, max loss $137.05, P(loss) 0.1000, time-to-cash 15 d",
-          "class STANDARD_FLIP (provisional thresholds): cash at risk $366.46, 15 d to cash, cash multiple 1.5755x; rank score 7.83 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
-          "evidence is not the blocker: no missing evidence item changes the verdict"
+          "composite 44.61 < pass floor 45",
+          "R13: PASS is not evidence-backed (composite_floor: revenue NOT backed, cost NOT backed): route to RESEARCHING, do not archive",
+          "deterministic: net $531.69, $90.29/h over 5.8889 h, cash tied up $868.31, ROI 0.6123",
+          "expected: net $343.82, $58.38/h, max loss $446.99, P(loss) 0.1000, time-to-cash 121 d",
+          "class CAPITAL_INTENSIVE_FLIP (provisional thresholds): cash at risk $868.31, 121 d to cash, cash multiple 1.3960x; rank score 0.14 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
+          "evidence is not the blocker: no missing evidence item changes the verdict",
+          "walk-away price (max buy for YES): $478"
         ]
       }
     },
     "recommendation": {
-      "recommendation_id": "rec_01M4B3R6G0SJ967WASTX7MWP2G",
+      "recommendation_id": "rec_01M4B3R6G07AZF9NZT3J82V2EV",
       "verdict": "PASS",
       "rationale": [
-        "GATE FAIL pph_floor_ok: deterministic profit/hour $39.84 below floor $40.00",
-        "R13: PASS is not evidence-backed (pph_floor_ok: revenue NOT backed, cost NOT backed): route to RESEARCHING, do not archive",
-        "deterministic: net $283.54, $39.84/h over 7.1167 h, cash tied up $366.46, ROI 0.7737",
-        "expected: net $210.88, $29.63/h, max loss $137.05, P(loss) 0.1000, time-to-cash 15 d",
-        "class STANDARD_FLIP (provisional thresholds): cash at risk $366.46, 15 d to cash, cash multiple 1.5755x; rank score 7.83 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
-        "evidence is not the blocker: no missing evidence item changes the verdict"
+        "composite 44.61 < pass floor 45",
+        "R13: PASS is not evidence-backed (composite_floor: revenue NOT backed, cost NOT backed): route to RESEARCHING, do not archive",
+        "deterministic: net $531.69, $90.29/h over 5.8889 h, cash tied up $868.31, ROI 0.6123",
+        "expected: net $343.82, $58.38/h, max loss $446.99, P(loss) 0.1000, time-to-cash 121 d",
+        "class CAPITAL_INTENSIVE_FLIP (provisional thresholds): cash at risk $868.31, 121 d to cash, cash multiple 1.3960x; rank score 0.14 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
+        "evidence is not the blocker: no missing evidence item changes the verdict",
+        "walk-away price (max buy for YES): $478"
       ],
       "confidence": 1,
       "alert": false,
-      "provenance_id": "prov_01M4B3R6G0DCXNXQEA2D4WMWY5"
+      "provenance_id": "prov_01M4B3R6G04BFYD51T4Q898M43"
     },
     "provenance_ids": [
-      "prov_01JB0000000000000000000030",
-      "prov_01M4B3R6G0DCXNXQEA2D4WMWY5"
+      "prov_01JB0000000000000000001020",
+      "prov_01M4B3R6G04BFYD51T4Q898M43"
     ]
   },
   "provenance": {
-    "provenance_id": "prov_01M4B3R6G0DCXNXQEA2D4WMWY5",
+    "provenance_id": "prov_01M4B3R6G04BFYD51T4Q898M43",
     "created_at": "2026-10-07T12:00:00Z",
     "actor_type": "system",
     "agent_name": "agent-03-economics",
@@ -364,7 +373,7 @@
     "inputs_used": [
       {
         "ref": "engine_input",
-        "hash": "sha256:86bcc76a497bc87742501863babd4c785fa1b023d171ae1f997934fe93b2c0f7"
+        "hash": "sha256:8716ca3f731c960292cca676721cb412d3bc36d88ecadd8d574d3aeeb829ab0b"
       },
       {
         "ref": "scoring-config@2026.10.2",
@@ -372,35 +381,35 @@
       }
     ],
     "derived_from": [
-      "prov_01JB0000000000000000000030"
+      "prov_01JB0000000000000000001020"
     ],
     "confidence": 1
   },
   "receipt_drafts": [
     {
       "type": "SCORE_RECORDED",
-      "item_id": "itm_01JB0000000000000000000004",
+      "item_id": "itm_01JB0000000000000000000102",
       "entity_type": "scorecard",
-      "entity_id": "scr_01M4B3R6G09HDRPPCDTHN3QZX0",
+      "entity_id": "scr_01M4B3R6G02ZE2PK8GH478F3SK",
       "tool_name": "mbos_economics.engine",
-      "inputs_hash": "sha256:86bcc76a497bc87742501863babd4c785fa1b023d171ae1f997934fe93b2c0f7",
-      "payload_hash": "sha256:ed25c669facda4a90edcd651f2d7b7081185e933685a4a6d6bbdbb0e50a8b2fa",
-      "idempotency_key": "score:scr_01M4B3R6G09HDRPPCDTHN3QZX0",
+      "inputs_hash": "sha256:8716ca3f731c960292cca676721cb412d3bc36d88ecadd8d574d3aeeb829ab0b",
+      "payload_hash": "sha256:0135714455321851831ed66767542fe96853be2c955c1f3aef740cf409cda38c",
+      "idempotency_key": "score:scr_01M4B3R6G02ZE2PK8GH478F3SK",
       "provenance_ids": [
-        "prov_01M4B3R6G0DCXNXQEA2D4WMWY5"
+        "prov_01M4B3R6G04BFYD51T4Q898M43"
       ]
     },
     {
       "type": "RECOMMENDATION_RECORDED",
-      "item_id": "itm_01JB0000000000000000000004",
+      "item_id": "itm_01JB0000000000000000000102",
       "entity_type": "recommendation",
-      "entity_id": "rec_01M4B3R6G0SJ967WASTX7MWP2G",
+      "entity_id": "rec_01M4B3R6G07AZF9NZT3J82V2EV",
       "tool_name": "mbos_economics.engine",
-      "inputs_hash": "sha256:86bcc76a497bc87742501863babd4c785fa1b023d171ae1f997934fe93b2c0f7",
-      "payload_hash": "sha256:b1fb010e512cd880c26267f7419d3b6078da4814f1af30ccec6a297f7d113c17",
-      "idempotency_key": "recommend:rec_01M4B3R6G0SJ967WASTX7MWP2G",
+      "inputs_hash": "sha256:8716ca3f731c960292cca676721cb412d3bc36d88ecadd8d574d3aeeb829ab0b",
+      "payload_hash": "sha256:8c1960fe3f9f2417b5830bcc394e2c703947c228573cc853d90af2d4982d078c",
+      "idempotency_key": "recommend:rec_01M4B3R6G07AZF9NZT3J82V2EV",
       "provenance_ids": [
-        "prov_01M4B3R6G0DCXNXQEA2D4WMWY5"
+        "prov_01M4B3R6G04BFYD51T4Q898M43"
       ]
     }
   ]

@@ -66,7 +66,7 @@
         "lead_quality": 0.5
       },
       "estimates_meta": {
-        "scoring_config_version": "2026.10.1",
+        "scoring_config_version": "2026.10.2",
         "evidence": {
           "scope_verified": true,
           "customer_screened": true,
@@ -77,15 +77,39 @@
       }
     },
     "scores": {
-      "scorecard_id": "scr_01M4B3R6G0K2KQFCGYRPNCB110",
-      "inputs_hash": "sha256:9c53ec57112d7f4724112ee6c5f32e88617a0bd830f012687aef83f549560142",
+      "scorecard_id": "scr_01M4B3R6G02BGQFM0D04S6SYDW",
+      "inputs_hash": "sha256:ddb08330f22559a82b8675ce5db1091121a577388303ebbacb758f017fd084b2",
       "scorecard": {
-        "scoring_config_version": "2026.10.1",
+        "scoring_config_version": "2026.10.2",
         "computed_at": "2026-10-07T12:00:00Z",
-        "engine_version": "0.11.1",
-        "config_hash": "sha256:8b7b98c7d92457d9d0049a0a2d7dd0c4e3bafa735c99c989bf156289aff58b20",
+        "engine_version": "0.12.0",
+        "config_hash": "sha256:ab452d208f9a0eae5bad5225ed791429d420dcec50b8f8e62b46a274f3dc50b0",
         "lane": "service",
         "derived": {
+          "deal_class": "SERVICE",
+          "deal_class_basis": "RECOMMENDATION",
+          "class_requirements": {
+            "min_net_profit": 0,
+            "min_ev_profit": 0,
+            "min_cash_multiple": 0
+          },
+          "cash_at_risk": 361.54,
+          "days_to_cash": 11,
+          "cash_multiple": 5.0658,
+          "ev_cash_multiple": 4.7406,
+          "capital_velocity": 0.3696,
+          "catastrophic_downside_probability": 0,
+          "parts_out_floor": null,
+          "liquidity": {
+            "win_prob": 1,
+            "expected_dom_days": null
+          },
+          "personal_use_value": null,
+          "current_cash_context": {
+            "value": null,
+            "known": false
+          },
+          "seasonality_factor": null,
           "vehicle_cost_per_mile": 0.4578,
           "road_miles_one_way": 8,
           "trips_cash": 26.54,
@@ -206,12 +230,26 @@
         "composite": 80.07,
         "decision": "YES",
         "pass_on_priors": false,
+        "ranking": {
+          "rank_score": 434.64,
+          "formula": "risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
+          "risk_adjusted_profit": 1469.96,
+          "ev_net_profit": 1469.96,
+          "personal_use_value": null,
+          "risk_penalty": 0,
+          "confidence": 0.8,
+          "capital_velocity": 0.3696,
+          "seasonality_factor": null,
+          "seasonality_factor_applied": 1,
+          "cash_share_of_current_cash": null,
+          "cash_pressure_factor": 1
+        },
         "alert": false,
         "alert_checks": {
           "is_yes": true,
           "lead_quality_ok": false,
           "perishable": false,
-          "ev_multiple_ok": true
+          "ev_multiple_ok": false
         },
         "gates": {
           "ev_positive": true,
@@ -220,14 +258,14 @@
           "skill_ok": true,
           "license_ok": true,
           "pph_floor_ok": true,
-          "min_profit_ok": true,
+          "class_profit_ok": true,
           "distance_ratio_ok": true
         },
         "yes_conditions": {
           "composite_ok": true,
           "confidence_ok": true,
           "ev_pph_target_ok": true,
-          "ev_min_profit_ok": true,
+          "class_ev_ok": true,
           "remote_verification_ok": true
         },
         "evidence": {
@@ -246,45 +284,47 @@
           "all hard gates pass; composite 80.07; confidence 0.8000; EV profit/hour $87.55 >= $75.00; EV $1,352.36",
           "deterministic: net $1,488.46, $88.66/h over 16.7890 h, cash tied up $361.54, ROI 4.1170",
           "expected: net $1,469.96, $87.55/h, max loss $0.00, P(loss) 0.0000, time-to-cash 11 d",
+          "class SERVICE (provisional thresholds): cash at risk $361.54, 11 d to cash, cash multiple 5.0658x; rank score 434.64 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
           "minimum quote for YES: $1,638"
         ]
       }
     },
     "recommendation": {
-      "recommendation_id": "rec_01M4B3R6G06HN6CH2TZPJK89A3",
+      "recommendation_id": "rec_01M4B3R6G08XFBMKBK95BJ22FY",
       "verdict": "YES",
       "rationale": [
         "all hard gates pass; composite 80.07; confidence 0.8000; EV profit/hour $87.55 >= $75.00; EV $1,352.36",
         "deterministic: net $1,488.46, $88.66/h over 16.7890 h, cash tied up $361.54, ROI 4.1170",
         "expected: net $1,469.96, $87.55/h, max loss $0.00, P(loss) 0.0000, time-to-cash 11 d",
+        "class SERVICE (provisional thresholds): cash at risk $361.54, 11 d to cash, cash multiple 5.0658x; rank score 434.64 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
         "minimum quote for YES: $1,638"
       ],
       "confidence": 0.8,
       "alert": false,
-      "provenance_id": "prov_01M4B3R6G0BJVV8K4MVEY97SXK"
+      "provenance_id": "prov_01M4B3R6G0J24ZSKEN22JD0CYX"
     },
     "provenance_ids": [
       "prov_01JB0000000000000000000200",
-      "prov_01M4B3R6G0BJVV8K4MVEY97SXK"
+      "prov_01M4B3R6G0J24ZSKEN22JD0CYX"
     ]
   },
   "provenance": {
-    "provenance_id": "prov_01M4B3R6G0BJVV8K4MVEY97SXK",
+    "provenance_id": "prov_01M4B3R6G0J24ZSKEN22JD0CYX",
     "created_at": "2026-10-07T12:00:00Z",
     "actor_type": "system",
     "agent_name": "agent-03-economics",
     "basis": "INFERENCE",
     "tool_name": "mbos_economics.engine",
-    "tool_version": "0.11.1",
-    "config_version": "2026.10.1",
+    "tool_version": "0.12.0",
+    "config_version": "2026.10.2",
     "inputs_used": [
       {
         "ref": "engine_input",
-        "hash": "sha256:9c53ec57112d7f4724112ee6c5f32e88617a0bd830f012687aef83f549560142"
+        "hash": "sha256:ddb08330f22559a82b8675ce5db1091121a577388303ebbacb758f017fd084b2"
       },
       {
-        "ref": "scoring-config@2026.10.1",
-        "hash": "sha256:8b7b98c7d92457d9d0049a0a2d7dd0c4e3bafa735c99c989bf156289aff58b20"
+        "ref": "scoring-config@2026.10.2",
+        "hash": "sha256:ab452d208f9a0eae5bad5225ed791429d420dcec50b8f8e62b46a274f3dc50b0"
       }
     ],
     "derived_from": [
@@ -297,26 +337,26 @@
       "type": "SCORE_RECORDED",
       "item_id": "itm_01JB0000000000000000000020",
       "entity_type": "scorecard",
-      "entity_id": "scr_01M4B3R6G0K2KQFCGYRPNCB110",
+      "entity_id": "scr_01M4B3R6G02BGQFM0D04S6SYDW",
       "tool_name": "mbos_economics.engine",
-      "inputs_hash": "sha256:9c53ec57112d7f4724112ee6c5f32e88617a0bd830f012687aef83f549560142",
-      "payload_hash": "sha256:c2c88ff118df3e243d96e0bd57fa50df86b4bb180ac51a1712775b33d8d4b2ee",
-      "idempotency_key": "score:scr_01M4B3R6G0K2KQFCGYRPNCB110",
+      "inputs_hash": "sha256:ddb08330f22559a82b8675ce5db1091121a577388303ebbacb758f017fd084b2",
+      "payload_hash": "sha256:d950ae9ba2a012e61660f7056a333e093f39a10069ac65c9971e1647bed785a4",
+      "idempotency_key": "score:scr_01M4B3R6G02BGQFM0D04S6SYDW",
       "provenance_ids": [
-        "prov_01M4B3R6G0BJVV8K4MVEY97SXK"
+        "prov_01M4B3R6G0J24ZSKEN22JD0CYX"
       ]
     },
     {
       "type": "RECOMMENDATION_RECORDED",
       "item_id": "itm_01JB0000000000000000000020",
       "entity_type": "recommendation",
-      "entity_id": "rec_01M4B3R6G06HN6CH2TZPJK89A3",
+      "entity_id": "rec_01M4B3R6G08XFBMKBK95BJ22FY",
       "tool_name": "mbos_economics.engine",
-      "inputs_hash": "sha256:9c53ec57112d7f4724112ee6c5f32e88617a0bd830f012687aef83f549560142",
-      "payload_hash": "sha256:7e28b87c77b45e707a7e8705d0ed2c9993a7eb0b0a8ca9ca8a8ef22b9ccc3750",
-      "idempotency_key": "recommend:rec_01M4B3R6G06HN6CH2TZPJK89A3",
+      "inputs_hash": "sha256:ddb08330f22559a82b8675ce5db1091121a577388303ebbacb758f017fd084b2",
+      "payload_hash": "sha256:7843eefe49c18ed809a499b1ac748f34d815a9e6fccc13c213505ac9da1b8d4b",
+      "idempotency_key": "recommend:rec_01M4B3R6G08XFBMKBK95BJ22FY",
       "provenance_ids": [
-        "prov_01M4B3R6G0BJVV8K4MVEY97SXK"
+        "prov_01M4B3R6G0J24ZSKEN22JD0CYX"
       ]
     }
   ]

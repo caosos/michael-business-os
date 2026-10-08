@@ -106,7 +106,7 @@ def _economic_ceiling(item: dict, cfg: ScoringConfig) -> int | None:
         trial = copy.deepcopy(inp)
         trial["economics"]["acquisition"]["expected_buy_price"] = price
         r = compute(trial, cfg)
-        return all(r["gates"].values()) and r["yes_conditions"]["ev_pph_target_ok"] and r["yes_conditions"]["ev_min_profit_ok"]
+        return all(r["gates"].values()) and r["yes_conditions"]["ev_pph_target_ok"] and r["yes_conditions"]["class_ev_ok"]
 
     return _bisect_int(0, cap, ok, want_max=True)
 
@@ -307,7 +307,7 @@ def _why_lines(item: dict, as_of: str, econ_b: dict, log_b: dict, season_b: dict
         text = {"cash_ok": f"cash tied up of {_usd(cash)} is over your {_usd(cap)} per-deal limit",
                 "max_loss_ok": f"the worst case loses {_usd(d['max_loss'])}, over your {_usd(cfg.num('capital_and_risk.max_loss_cap'))} limit",
                 "pph_floor_ok": f"it pays about ${D(d['profit_per_hour_deterministic']):,.0f}/h even when everything goes right, under your ${cfg.num('time_value.w_min_per_hour'):g}/h floor",
-                "min_profit_ok": f"the profit if it goes to plan is only {_usd(d['net_profit_deterministic'])}",
+                "class_profit_ok": f"the profit if it goes to plan ({_usd(d['net_profit_deterministic'])}) is under what a {str(d.get('deal_class', 'deal')).lower().replace('_', ' ')} must clear",
                 "ev_positive": "the expected value after risk is not positive",
                 "skill_ok": "it needs skills outside your profile", "license_ok": "it needs a license you do not hold",
                 "distance_ratio_ok": "the travel eats too much of the profit at this distance"}

@@ -128,7 +128,7 @@ _NON_ECON = {
         "skills": [_E + "job.required_skills", _E + "job.requires_license_he_lacks"],
     },
 }
-_ECON_GATES = {"ev_positive", "pph_floor_ok", "min_profit_ok", "distance_ratio_ok", "composite_floor"}
+_ECON_GATES = {"ev_positive", "pph_floor_ok", "class_profit_ok", "distance_ratio_ok", "composite_floor"}
 
 
 def _gate_basis(gate: str, lane: str, backed: set[str]) -> dict:
@@ -165,6 +165,70 @@ def _pass_on_priors(econ: dict, lane: str, failed: list[str], composite_floor: b
     }
 
 
+# --------------------------------------------------------------------------- deal class & ranking (C-19)
+
+def _deal_class(lane: str, cash: Decimal, days: Decimal, cfg: ScoringConfig) -> str:
+    """Class from DATA thresholds (config.deal_classes, mirrored from the operator profile)."""
+    if lane == "service":
+        return "SERVICE"
+    if cash >= cfg.num("deal_classes.capital_intensive_min_cash") or days >= cfg.num(
+            "deal_classes.capital_intensive_min_days"):
+        return "CAPITAL_INTENSIVE_FLIP"
+    if cash <= cfg.num("deal_classes.micro_flip_max_cash") and days <= cfg.num("deal_classes.micro_flip_max_days"):
+        return "MICRO_FLIP"
+    if days <= cfg.num("deal_classes.quick_turn_max_days"):
+        return "QUICK_TURN"
+    return "STANDARD_FLIP"
+
+
+def _ranking(lane, econ, le, confidence, cash, days, cfg):
+    """Risk-adjusted profit x confidence x capital velocity, every component visible.
+
+    Returns (ranking, extra-derived-fields). Unknown context contributes factor 1 and is reported null."""
+    ctx = econ.get("context") or {}
+    personal = D(ctx["personal_use_value"]) if ctx.get("personal_use_value") is not None else None
+    current_cash = D(ctx["current_cash"]) if ctx.get("current_cash") is not None else None
+    season = D(ctx["seasonality_factor"]) if ctx.get("seasonality_factor") is not None else None
+    risk_penalty = money(cfg.num("ranking.risk_aversion") * le.p_loss * le.max_loss)
+    ra_profit = money(le.ev_net_profit + (personal or ZERO) - risk_penalty)
+    base = max(cash, cfg.num("ranking.velocity_cash_floor"))
+    velocity = fine(min(le.ev_net_profit / base / max(days, cfg.num("ranking.velocity_min_days")),
+                        cfg.num("ranking.velocity_cap_per_day")))
+    cash_share = fine(cash / current_cash) if current_cash is not None else None
+    pressure = fine(clamp(ONE - cfg.num("ranking.cash_pressure_weight") * min(ONE, cash_share), ZERO, ONE)) \
+        if cash_share is not None else ONE
+    season_f = season if season is not None else ONE
+    if ra_profit > 0 and velocity > 0:
+        score = score2(ra_profit * confidence * velocity * season_f * pressure)
+        formula = "risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor"
+    else:
+        score = score2(ra_profit * confidence)
+        formula = "risk_adjusted_profit x confidence (non-positive profit or velocity is not rescued by speed)"
+    ranking = {
+        "rank_score": score, "formula": formula, "risk_adjusted_profit": ra_profit,
+        "ev_net_profit": le.ev_net_profit, "personal_use_value": personal, "risk_penalty": risk_penalty,
+        "confidence": confidence, "capital_velocity": velocity, "seasonality_factor": season,
+        "seasonality_factor_applied": season_f, "cash_share_of_current_cash": cash_share,
+        "cash_pressure_factor": pressure,
+    }
+    if lane == "flip":
+        sale_p = D(econ["resale"]["sale_prob"])
+        dom = econ["resale"].get("expected_dom_days")
+        cat = fine(ONE - D(econ["rehab"]["repair_success_prob"]))
+        salvage = money(D(econ["downside"]["salvage_if_repair_fails"]))
+        liquidity = {"sale_prob": sale_p, "expected_dom_days": D(dom) if dom is not None else None}
+    else:
+        cat, salvage = fine(le.p_loss), None
+        liquidity = {"win_prob": D(econ["job"]["win_prob"]), "expected_dom_days": None}
+    capital = {
+        "capital_velocity": velocity, "catastrophic_downside_probability": cat, "parts_out_floor": salvage,
+        "liquidity": liquidity, "personal_use_value": personal,
+        "current_cash_context": {"value": current_cash, "known": current_cash is not None},
+        "seasonality_factor": season,
+    }
+    return ranking, capital
+
+
 # --------------------------------------------------------------------------- compute
 
 def compute(inp: dict, cfg: ScoringConfig) -> dict:
@@ -181,7 +245,6 @@ def compute(inp: dict, cfg: ScoringConfig) -> dict:
 
     w_min = cfg.num("time_value.w_min_per_hour")
     w_target = cfg.num(f"time_value.w_target_{lane}_per_hour")
-    min_profit = cfg.num(f"capital_and_risk.min_profit_{lane}")
     block = econ["rehab"] if lane == "flip" else econ["job"]
 
     # skill-fit
@@ -223,6 +286,16 @@ def compute(inp: dict, cfg: ScoringConfig) -> dict:
         scarcity = fine(D(lq)) if lq is not None else ZERO
         sc = {"lead_quality": scarcity}
 
+    # deal class + capital-velocity facts (C-19, ADR-0012): no universal profit floor
+    cash_at_risk, days_to_cash = le.cash_tied_up, le.ttc_days
+    deal_class = _deal_class(lane, cash_at_risk, days_to_cash, cfg)
+    gk = f"class_gates.{deal_class.lower()}"
+    min_net, min_ev, min_mult = (cfg.num(f"{gk}.min_net_profit"), cfg.num(f"{gk}.min_ev_profit"),
+                                 cfg.num(f"{gk}.min_cash_multiple"))
+    cash_base = max(cash_at_risk, ONE)
+    cash_multiple = fine((cash_at_risk + le.ev_net_profit) / cash_base)
+    ev_cash_multiple = fine((cash_at_risk + ev_decision) / cash_base)
+
     # risk score (§9.1)
     rw = cfg.group("risk_score_weights")
     risk_raw = clamp(rw["max_loss"] * (le.max_loss / cfg.num("capital_and_risk.max_loss_cap"))
@@ -255,7 +328,7 @@ def compute(inp: dict, cfg: ScoringConfig) -> dict:
         "skill_ok": sk["skill_fit"] >= cfg.num("decision_thresholds.skill_fit_hard_floor"),
         "license_ok": not sk["requires_license_he_lacks"],
         "pph_floor_ok": le.pph >= w_min,
-        "min_profit_ok": le.net_profit >= min_profit,
+        "class_profit_ok": le.net_profit >= min_net,
         "distance_ratio_ok": (not ratio_applies) or (le.ev_net_profit > 0 and travel_burden <= travel_limit),
     }
     gate_text = {
@@ -267,7 +340,7 @@ def compute(inp: dict, cfg: ScoringConfig) -> dict:
         "license_ok": "requires a license Michael lacks"
                       + (f" ({', '.join(sk['license_gated_needed'])})" if sk["license_gated_needed"] else ""),
         "pph_floor_ok": f"deterministic profit/hour {_usd(le.pph)} below floor {_usd(w_min)}",
-        "min_profit_ok": f"deterministic net profit {_usd(le.net_profit)} below minimum {_usd(min_profit)}",
+        "class_profit_ok": f"deterministic net profit {_usd(le.net_profit)} below the {deal_class} requirement {_usd(min_net)}",
         "distance_ratio_ok": f"long-distance travel burden {_usd(travel_burden)} exceeds "
                              f"{cfg.num('distance_rules.travel_cost_fraction_of_ev_max')} x EV = {_usd(travel_limit)}",
     }
@@ -278,7 +351,7 @@ def compute(inp: dict, cfg: ScoringConfig) -> dict:
         "composite_ok": composite >= cfg.num("decision_thresholds.composite_yes"),
         "confidence_ok": confidence >= cfg.num("decision_thresholds.confidence_min_for_yes"),
         "ev_pph_target_ok": le.ev_pph >= w_target,
-        "ev_min_profit_ok": ev_decision >= min_profit,
+        "class_ev_ok": ev_decision >= min_ev and ev_cash_multiple >= min_mult,
         "remote_verification_ok": (miles <= cfg.num("distance_rules.remote_verification_required_beyond_miles"))
                                   or items["remote_verification"],
     }
@@ -291,7 +364,8 @@ def compute(inp: dict, cfg: ScoringConfig) -> dict:
         "composite_ok": f"composite {composite} < {cfg.num('decision_thresholds.composite_yes')}",
         "confidence_ok": f"confidence {confidence} < {cfg.num('decision_thresholds.confidence_min_for_yes')} (gather evidence)",
         "ev_pph_target_ok": f"EV profit/hour {_usd(le.ev_pph)} < {lane} target {_usd(w_target)}",
-        "ev_min_profit_ok": f"EV after haircut {_usd(ev_decision)} < minimum profit {_usd(min_profit)}",
+        "class_ev_ok": f"{deal_class}: EV after haircut {_usd(ev_decision)} / cash multiple {ev_cash_multiple} "
+                       f"below class requirement ({_usd(min_ev)}, {min_mult}x)",
         "remote_verification_ok": f"{miles} mi one-way needs remote verification before a committing trip",
         "sold_comps_ok": f"{items.get('_sold_comps_count', 0)} sold comps < {cfg.num('decision_thresholds.min_sold_comps_for_yes_flip')} required",
         "fault_identified_ok": "repair fault not identified (guessed scope caps at MAYBE)",
@@ -349,7 +423,7 @@ def compute(inp: dict, cfg: ScoringConfig) -> dict:
             "is_yes": decision == "YES",
             "scarcity_ok": scarcity >= cfg.num(f"{at}.scarcity_min"),
             "perishable": perishable,
-            "ev_multiple_ok": ev_decision >= cfg.num(f"{at}.ev_multiple_of_min_profit") * min_profit,
+            "ev_multiple_ok": ev_cash_multiple >= cfg.num(f"{at}.ev_cash_multiple_min"),
             "deal_discount_ok": sc["deal_discount"] >= cfg.num(f"{at}.deal_discount_min"),
         }
     else:
@@ -358,13 +432,26 @@ def compute(inp: dict, cfg: ScoringConfig) -> dict:
             "is_yes": decision == "YES",
             "lead_quality_ok": scarcity >= cfg.num(f"{at}.service_lead_quality_min"),
             "perishable": age is not None and D(age) < cfg.num(f"{at}.service_lead_age_hours_max"),
-            "ev_multiple_ok": ev_decision >= cfg.num(f"{at}.ev_multiple_of_min_profit") * min_profit,
+            "ev_multiple_ok": le.ev_pph >= cfg.num(f"{at}.service_ev_pph_multiple_of_target") * w_target,
         }
     alert = all(alert_checks.values())
     if alert:
         reasons.append("ALERT: strong and perishable")
 
+    ranking, capital = _ranking(lane, econ, le, confidence, cash_at_risk, days_to_cash, cfg)
+    reasons.append(f"class {deal_class} (provisional thresholds): cash at risk {_usd(cash_at_risk)}, "
+                   f"{days_to_cash} d to cash, cash multiple {cash_multiple}x; "
+                   f"rank score {ranking['rank_score']} = {ranking['formula']}")
+
     derived = {
+        "deal_class": deal_class,
+        "deal_class_basis": "RECOMMENDATION",
+        "class_requirements": {"min_net_profit": min_net, "min_ev_profit": min_ev, "min_cash_multiple": min_mult},
+        "cash_at_risk": cash_at_risk,
+        "days_to_cash": days_to_cash,
+        "cash_multiple": cash_multiple,
+        "ev_cash_multiple": ev_cash_multiple,
+        **capital,
         "vehicle_cost_per_mile": le.v_per_mile,
         "road_miles_one_way": miles,
         "trips_cash": le.trips_cash,
@@ -419,6 +506,7 @@ def compute(inp: dict, cfg: ScoringConfig) -> dict:
         "decision": decision,
         "pass_on_priors": bool(pass_basis and pass_basis["pass_on_priors"]),
         "pass_basis": pass_basis,
+        "ranking": ranking,
         "alert": alert,
         "alert_checks": alert_checks,
         "evidence": {k: v for k, v in items.items() if not k.startswith("_")},
@@ -572,6 +660,7 @@ def score(inp: dict, cfg: ScoringConfig, scored_at: str) -> dict:
         "decision": core["decision"],
         "pass_on_priors": core["pass_on_priors"],
         **({"pass_basis": core["pass_basis"]} if core["pass_basis"] else {}),
+        "ranking": core["ranking"],
         "alert": core["alert"],
         "alert_checks": core["alert_checks"],
         "gates": core["gates"],

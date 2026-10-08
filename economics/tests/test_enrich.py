@@ -165,7 +165,7 @@ class TestEconomicsBlock(unittest.TestCase):
             trial["economics"]["acquisition"]["expected_buy_price"] = price
             r = compute(build_engine_input(trial), CFG)
             self.assertEqual(all(r["gates"].values()) and r["yes_conditions"]["ev_pph_target_ok"]
-                             and r["yes_conditions"]["ev_min_profit_ok"], expect, price)
+                             and r["yes_conditions"]["class_ev_ok"], expect, price)
 
     def test_walk_away_price_used_when_scored_yes(self):
         yes = copy.deepcopy(TRAILER)

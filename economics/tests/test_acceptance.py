@@ -341,12 +341,12 @@ class AT17_LearnNeverMutatesHistory(_TempConfigDir):
         prop = propose_config_bump(CFG, {"time_value.w_target_flip_per_hour": 60},
                                    "trailers realized plan in 12/12 outcomes", ["outc_01JB0000000000000000000001"],
                                    "2026-11-01T00:00:00Z")
-        self.assertEqual(prop["to_version"], "2026.10.2")
+        self.assertEqual(prop["to_version"], "2026.10.3")
         self.assertEqual(prop["action_request_draft"]["tier"], 0)
         self.assertEqual(CFG.get("time_value.w_target_flip_per_hour"), 65)    # proposal writes nothing
         self.activate(prop)
         new_cfg = load_config(config_dir=self.dir)
-        self.assertEqual(new_cfg.version, "2026.10.2")
+        self.assertEqual(new_cfg.version, "2026.10.3")
         rescored = score_item(case("trailer_utility"), new_cfg, "2026-11-01T00:00:00Z")["scores"]["scorecard"]
         self.assertEqual(rescored["decision"], "YES")                          # new policy, new verdict
         self.assertEqual(old["scores"], frozen)                                # old scorecard untouched
@@ -361,8 +361,8 @@ class AT18_ConfigEditWithoutBumpIsDetected(_TempConfigDir):
     def test(self):
         old = scored("drywall_basement")
         p = self.dir / "scoring-config.json"
-        p.write_text(p.read_text().replace('"min_profit_service": { "value": 100',
-                                           '"min_profit_service": { "value": 90'))
+        p.write_text(p.read_text().replace('"w_min_per_hour": { "value": 40',
+                                           '"w_min_per_hour": { "value": 39'))
         r = replay_item(old, config_dir=self.dir)
         self.assertTrue(any("without a version bump" in n for n in r["notes"]))
 

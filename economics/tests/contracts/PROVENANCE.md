@@ -9,4 +9,4 @@ tests load them from `docs/research/schemas/` (this branch, v1.1.0).
 
 `action-request.schema.json` and `outcome.schema.json` are byte-identical copies from agent-01 `aa88e7a` (frozen v1.0.0), for C-07 conformance tests.
 
-`operator_profile.v1.json` is a byte-identical copy of agent-01 `config/operator_profile.v1.json` @ c4f0156 (Michael's capabilities, owner-stated). Agent 01 owns it; do not edit here.
+`operator_profile.v1.json` is a byte-identical copy of agent-01 `config/operator_profile.v1.json` @ 24c4d3d (adds deal_classes + current_cash_context, ADR-0012; Michael's capabilities, owner-stated). Agent 01 owns it; do not edit here.

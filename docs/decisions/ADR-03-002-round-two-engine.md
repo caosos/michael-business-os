@@ -41,7 +41,7 @@ Round two requires a deterministic, testable implementation for both lanes. No L
 | `skill_ok` | `skill_fit` ≥ 0.40 |
 | `license_ok` | no license-gated skill is required, and `requires_license_he_lacks` is not set |
 | `pph_floor_ok` | deterministic profit/hour ≥ $40 |
-| `min_profit_ok` | deterministic net ≥ $150 flip / $100 service |
+| `min_profit_ok` (SUPERSEDED by C-19 / ADR-0012: now `class_profit_ok`, per-class data threshold in `class_gates`; no universal floor) | deterministic net ≥ $150 flip / $100 service (historical) |
 | `distance_ratio_ok` | beyond 60 mi one-way only: (trips cash + travel h × $40 + wasted-trip EV) ≤ 0.35 × EV net |
 
 **Step 2: composite floor.** A composite below 45 gives PASS.

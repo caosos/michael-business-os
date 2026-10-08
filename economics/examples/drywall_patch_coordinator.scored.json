@@ -60,15 +60,39 @@
       }
     },
     "scores": {
-      "scorecard_id": "scr_01M4B3R6G0B834Y655GRSES0CH",
-      "inputs_hash": "sha256:c0459b98477a8cace90e35533302d84623bb6b3a68b80fe408abdbfbd84c5528",
+      "scorecard_id": "scr_01M4B3R6G0DM7WVPMN3GQGFGYN",
+      "inputs_hash": "sha256:6c8dc7284882f506e5d94112b1f5381435add0c19f61a33d36930d2a714a093a",
       "scorecard": {
-        "scoring_config_version": "2026.10.1",
+        "scoring_config_version": "2026.10.2",
         "computed_at": "2026-10-07T12:00:00Z",
-        "engine_version": "0.11.1",
-        "config_hash": "sha256:8b7b98c7d92457d9d0049a0a2d7dd0c4e3bafa735c99c989bf156289aff58b20",
+        "engine_version": "0.12.0",
+        "config_hash": "sha256:ab452d208f9a0eae5bad5225ed791429d420dcec50b8f8e62b46a274f3dc50b0",
         "lane": "service",
         "derived": {
+          "deal_class": "SERVICE",
+          "deal_class_basis": "RECOMMENDATION",
+          "class_requirements": {
+            "min_net_profit": 0,
+            "min_ev_profit": 0,
+            "min_cash_multiple": 0
+          },
+          "cash_at_risk": 0,
+          "days_to_cash": 4,
+          "cash_multiple": 224.83,
+          "ev_cash_multiple": 148.39,
+          "capital_velocity": 1,
+          "catastrophic_downside_probability": 0.4,
+          "parts_out_floor": null,
+          "liquidity": {
+            "win_prob": 0.6,
+            "expected_dom_days": null
+          },
+          "personal_use_value": null,
+          "current_cash_context": {
+            "value": null,
+            "known": false
+          },
+          "seasonality_factor": null,
           "vehicle_cost_per_mile": 0.4578,
           "road_miles_one_way": 8,
           "trips_cash": 21.96,
@@ -183,6 +207,20 @@
         "composite": 51.09,
         "decision": "MAYBE",
         "pass_on_priors": false,
+        "ranking": {
+          "rank_score": 33.51,
+          "formula": "risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
+          "risk_adjusted_profit": 223.37,
+          "ev_net_profit": 224.83,
+          "personal_use_value": null,
+          "risk_penalty": 1.46,
+          "confidence": 0.15,
+          "capital_velocity": 1,
+          "seasonality_factor": null,
+          "seasonality_factor_applied": 1,
+          "cash_share_of_current_cash": null,
+          "cash_pressure_factor": 1
+        },
         "alert": false,
         "alert_checks": {
           "is_yes": false,
@@ -197,14 +235,14 @@
           "skill_ok": true,
           "license_ok": true,
           "pph_floor_ok": true,
-          "min_profit_ok": true,
+          "class_profit_ok": true,
           "distance_ratio_ok": true
         },
         "yes_conditions": {
           "composite_ok": false,
           "confidence_ok": false,
           "ev_pph_target_ok": false,
-          "ev_min_profit_ok": true,
+          "class_ev_ok": true,
           "remote_verification_ok": true
         },
         "evidence": {
@@ -229,13 +267,14 @@
           "YES blocked: EV profit/hour $59.44 < service target $75.00",
           "deterministic: net $388.04, $63.96/h over 6.0668 h, cash tied up $0.00, ROI 388.0400",
           "expected: net $224.83, $59.44/h, max loss $7.32, P(loss) 0.4000, time-to-cash 4 d",
-          "note: estimates prepared under config 2026.10.0, scored under 2026.10.1",
+          "note: estimates prepared under config 2026.10.0, scored under 2026.10.2",
+          "class SERVICE (provisional thresholds): cash at risk $0.00, 4 d to cash, cash multiple 224.8300x; rank score 33.51 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
           "evidence is not the blocker: no missing evidence item changes the verdict"
         ]
       }
     },
     "recommendation": {
-      "recommendation_id": "rec_01M4B3R6G0PTBQJQDJ952ESYSH",
+      "recommendation_id": "rec_01M4B3R6G0XJ0TJDWXSHJGAQ31",
       "verdict": "MAYBE",
       "rationale": [
         "YES blocked: composite 51.09 < 60",
@@ -243,35 +282,36 @@
         "YES blocked: EV profit/hour $59.44 < service target $75.00",
         "deterministic: net $388.04, $63.96/h over 6.0668 h, cash tied up $0.00, ROI 388.0400",
         "expected: net $224.83, $59.44/h, max loss $7.32, P(loss) 0.4000, time-to-cash 4 d",
-        "note: estimates prepared under config 2026.10.0, scored under 2026.10.1",
+        "note: estimates prepared under config 2026.10.0, scored under 2026.10.2",
+        "class SERVICE (provisional thresholds): cash at risk $0.00, 4 d to cash, cash multiple 224.8300x; rank score 33.51 = risk_adjusted_profit x confidence x capital_velocity x seasonality_factor x cash_pressure_factor",
         "evidence is not the blocker: no missing evidence item changes the verdict"
       ],
       "confidence": 0.15,
       "alert": false,
-      "provenance_id": "prov_01M4B3R6G08PNDYCE8KPHZA0AB"
+      "provenance_id": "prov_01M4B3R6G0JNC1A8HN1Z1SV0Z2"
     },
     "provenance_ids": [
       "prov_01JB0000000000000000000210",
-      "prov_01M4B3R6G08PNDYCE8KPHZA0AB"
+      "prov_01M4B3R6G0JNC1A8HN1Z1SV0Z2"
     ]
   },
   "provenance": {
-    "provenance_id": "prov_01M4B3R6G08PNDYCE8KPHZA0AB",
+    "provenance_id": "prov_01M4B3R6G0JNC1A8HN1Z1SV0Z2",
     "created_at": "2026-10-07T12:00:00Z",
     "actor_type": "system",
     "agent_name": "agent-03-economics",
     "basis": "INFERENCE",
     "tool_name": "mbos_economics.engine",
-    "tool_version": "0.11.1",
-    "config_version": "2026.10.1",
+    "tool_version": "0.12.0",
+    "config_version": "2026.10.2",
     "inputs_used": [
       {
         "ref": "engine_input",
-        "hash": "sha256:c0459b98477a8cace90e35533302d84623bb6b3a68b80fe408abdbfbd84c5528"
+        "hash": "sha256:6c8dc7284882f506e5d94112b1f5381435add0c19f61a33d36930d2a714a093a"
       },
       {
-        "ref": "scoring-config@2026.10.1",
-        "hash": "sha256:8b7b98c7d92457d9d0049a0a2d7dd0c4e3bafa735c99c989bf156289aff58b20"
+        "ref": "scoring-config@2026.10.2",
+        "hash": "sha256:ab452d208f9a0eae5bad5225ed791429d420dcec50b8f8e62b46a274f3dc50b0"
       }
     ],
     "derived_from": [
@@ -284,26 +324,26 @@
       "type": "SCORE_RECORDED",
       "item_id": "itm_01JB0000000000000000000021",
       "entity_type": "scorecard",
-      "entity_id": "scr_01M4B3R6G0B834Y655GRSES0CH",
+      "entity_id": "scr_01M4B3R6G0DM7WVPMN3GQGFGYN",
       "tool_name": "mbos_economics.engine",
-      "inputs_hash": "sha256:c0459b98477a8cace90e35533302d84623bb6b3a68b80fe408abdbfbd84c5528",
-      "payload_hash": "sha256:ac5d48c37c67459b7364294d2cc3d4ebf58e24d4abecf8969ba59ba3d26dc29e",
-      "idempotency_key": "score:scr_01M4B3R6G0B834Y655GRSES0CH",
+      "inputs_hash": "sha256:6c8dc7284882f506e5d94112b1f5381435add0c19f61a33d36930d2a714a093a",
+      "payload_hash": "sha256:47a2c768282b6cea5c707142bf614abbd1046d8c029fb8a7c77e2e9029b2782d",
+      "idempotency_key": "score:scr_01M4B3R6G0DM7WVPMN3GQGFGYN",
       "provenance_ids": [
-        "prov_01M4B3R6G08PNDYCE8KPHZA0AB"
+        "prov_01M4B3R6G0JNC1A8HN1Z1SV0Z2"
       ]
     },
     {
       "type": "RECOMMENDATION_RECORDED",
       "item_id": "itm_01JB0000000000000000000021",
       "entity_type": "recommendation",
-      "entity_id": "rec_01M4B3R6G0PTBQJQDJ952ESYSH",
+      "entity_id": "rec_01M4B3R6G0XJ0TJDWXSHJGAQ31",
       "tool_name": "mbos_economics.engine",
-      "inputs_hash": "sha256:c0459b98477a8cace90e35533302d84623bb6b3a68b80fe408abdbfbd84c5528",
-      "payload_hash": "sha256:08d955dac204ff58fbf50d0c2845a0f09708b768ad08a091196fcb8469bb7dc8",
-      "idempotency_key": "recommend:rec_01M4B3R6G0PTBQJQDJ952ESYSH",
+      "inputs_hash": "sha256:6c8dc7284882f506e5d94112b1f5381435add0c19f61a33d36930d2a714a093a",
+      "payload_hash": "sha256:242519765f97b0a486d9aec8654a9d3a475459eaa8c58cdc7262c57e158055a3",
+      "idempotency_key": "recommend:rec_01M4B3R6G0XJ0TJDWXSHJGAQ31",
       "provenance_ids": [
-        "prov_01M4B3R6G08PNDYCE8KPHZA0AB"
+        "prov_01M4B3R6G0JNC1A8HN1Z1SV0Z2"
       ]
     }
   ]
