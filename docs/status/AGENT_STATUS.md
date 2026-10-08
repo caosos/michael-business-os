@@ -25,7 +25,7 @@ Done: D-16 @ 3a1b004
 Done: P-06-19 @ 0dbddaa (0018: UI role records human outcomes; see docs/receipts/2026-10-07-p06-19-human-outcome-ui.md)
 Done: D-23 @ 39581bd (0019: human-only capital/mission in DB; campaigns; see docs/receipts/2026-10-08-d23-campaigns-human-capital.md)
 Done: D-24 @ aa86cc6 (0020: human actor required on all five owner paths for every session incl. mbos_dbos; see docs/receipts/2026-10-08-d24-human-only-owner-paths.md)
-Done: D-28 @ COMMIT (PANIC release owner-only + human outcome needs owner channel, migration 0023; docs/receipts/2026-10-08-d28-panic-release-owner-only.md)
+Done: D-28 @ 4a0148a (PANIC release owner-only + human outcome needs owner channel, migration 0023; docs/receipts/2026-10-08-d28-panic-release-owner-only.md)
 Done: D-27 @ f6c4e15 (item APPROVED edge needs a YES/MODIFY approval receipt + approver/gateway/owner role, migration 0022; docs/receipts/2026-10-08-d27-item-approved-gate.md)
 Done: D-26a @ 40a7da2 (mbos_dbos = agent_write + gateway only; provision() returns owner_app_url for mbos_operator_ui; see docs/receipts/2026-10-08-d26a-workflow-login-no-approver.md)
 Done: D-25 @ cd52d6e (0021: owner_channel role, held only by mbos_operator_ui, gates the five owner paths; F-81 campaign validation; F-83 no resurrection; see docs/receipts/2026-10-08-d25-owner-channel.md)
