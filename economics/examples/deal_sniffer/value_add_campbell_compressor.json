@@ -6,14 +6,14 @@
    {
     "basis": "FACT",
     "kind": "failure_mode",
-    "provenance_id": "prov_01M4BRBC80KMF8JC5XK5G17XE7",
+    "provenance_id": "prov_01M4BRBC800XDQJP0PKKXTF22H",
     "risk": "Campbell Hausfeld HU200099AV (20-gallon) recall (Jun 17, 2009): the thermal overload, which shuts the unit off when it overheats, can fail, so internal components can melt and start a fire. Sold Jan to Jun 2009 at Wal-Mart. The recall remedy was a full refund at Wal-Mart, not a repair. Whether any remedy is still open is UNKNOWN. (Model taken from the listing text; not verified against the unit.)",
     "source": "CPSC: Campbell Hausfeld Recalls Air Compressors Due to Fire Hazard; Sold Exclusively at Wal-Mart, recall date Jun 17, 2009 <https://www.cpsc.gov/Recalls/2009/Campbell-Hausfeld-Recalls-Air-Compressors-Due-to-Fire-Hazard-Sold-Exclusively-at-Wal-Mart> (retrieved 2026-10-07)"
    }
   ],
   "plan": {
    "basis": "INFERENCE",
-   "provenance_id": "prov_01M4BRBC80KMF8JC5XK5G17XE7",
+   "provenance_id": "prov_01M4BRBC800XDQJP0PKKXTF22H",
    "value": "Budget about $60 in parts and $10 in materials plus about 2 h of your time (a category estimate; the fault is not diagnosed yet). Even with no parts spend this fails your $40/h floor. Sell target is $240, the median of 3 sold comparables. The recall remedy was a refund, not a repair, so any repair cost on the overload circuit is yours."
   }
  },
@@ -33,7 +33,7 @@
   ],
   "inputs_used": [
    {
-    "hash": "sha256:a8e2f92f25d84616e3dd4fbf7498a9c44447533ef9c73479331b8e999167b239",
+    "hash": "sha256:cd6fb4f82fafa82b12b8788bd0080aa5df9dc5df66f5dc50e8d844b54e27965f",
     "ref": "scorecard.inputs_hash"
    },
    {
@@ -41,10 +41,10 @@
     "ref": "value_add_kb@2026.10.0"
    }
   ],
-  "provenance_id": "prov_01M4BRBC80KMF8JC5XK5G17XE7",
+  "provenance_id": "prov_01M4BRBC800XDQJP0PKKXTF22H",
   "tool_name": "mbos_economics.valueadd",
   "tool_version": "0.14.0"
  },
  "title": "Campbell Hausfeld HU200099AV 20 gallon air compressor",
- "value_add_hash": "sha256:dd2209b5f0900b7f7299820e2cb48c42f3ff3fc53bf0eaeec4ffac6cfaf26fbe"
+ "value_add_hash": "sha256:f619f1a7d9b5cdffbe774b6f855f94ef21751c7f34b9a7d58a70c47da6774a36"
 }

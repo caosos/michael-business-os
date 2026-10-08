@@ -64,7 +64,7 @@ class TestAcceptanceC01(unittest.TestCase):
         sc = out["scores"]["scorecard"]
         self.assertNotIn("inputs missing", " ".join(sc["reasons"]).lower())
         self.assertEqual(sc["decision"], "MAYBE")                     # a real verdict: gather evidence
-        self.assertEqual(sc["derived"]["net_profit_deterministic"], 842.86)
+        self.assertEqual(sc["derived"]["net_profit_deterministic"], 722.86)
         self.assertIn("seller_screened", sc["cheapest_decisive_evidence"])
 
     def test_with_evidence_reaches_yes(self):
@@ -72,7 +72,7 @@ class TestAcceptanceC01(unittest.TestCase):
         self.assertEqual([g["code"] for g in r["gaps"]], [])
         sc = score_item(est, CFG_BIG, AS_OF)["scores"]["scorecard"]
         self.assertEqual(sc["decision"], "YES")
-        self.assertEqual(sc["walk_away_price"], 1234)
+        self.assertEqual(sc["walk_away_price"], 1242)
 
     def test_every_service_lead_gets_a_real_verdict(self):
         for it in [i for i in ITEMS if i["type"] == "service"]:

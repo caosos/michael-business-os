@@ -1,11 +1,10 @@
 {
-  "priors_version": "2026.10.5",
-  "supersedes": "2026.10.4",
+  "priors_version": "2026.10.4",
+  "supersedes": "2026.10.3",
   "priors_format": 1,
   "_note": "Category priors for the RESEARCH/estimate producer (C-RESEARCH-01). These are ESTIMATES used to fill Item.economics before evidence exists. They are not scoring policy; scoring policy lives in scoring-config.json. Every value is REC or UNK until LEARN calibrates it from outcomes. Any change bumps priors_version. Research-bundle overrides, which need provenance, always win over priors. The estimator never invents a resale price: no comps means status=insufficient.",
 
   "_changelog": [
-    "2026.10.5 (C-26): consumer_electronics and small_goods flip priors (resold as-is: handling hours, parts, sale probability, days to cash, condition-driven resale factor) resolved from an other_asset title through flip_subcategories; expected buy defaults to the ask (the negotiation_factor column is no longer used by the flip estimator). Other values unchanged.",
     "2026.10.4 (C-15): transport classification + trailer penalties + difficulty thresholds, opening-offer rule, enrichment bounds; 'concrete saw' vocabulary for mechanical_equipment. Other values unchanged.",
     "2026.10.3 (C-11): coverage. comps_query vocabularies for tool, compressor type, commercial_equipment, mechanical_equipment, project_vehicle; generic other_asset / other_service priors usable ONLY with human scope overrides (requires_scope_override). Other values unchanged.",
     "2026.10.2 (C-07): learn parameters (min outcomes per group, prior weight, minimum relative change). Other values unchanged.",
@@ -32,9 +31,7 @@
       "tool": { "default": "fits_truck" },
       "commercial_equipment": { "forklift": "requires_trailer", "pallet jack": "fits_truck" },
       "mechanical_equipment": { "pressure washer": "fits_truck", "tiller": "fits_truck", "transfer pump": "fits_truck", "water pump": "fits_truck", "log splitter": "fits_truck" },
-      "project_vehicle": { "utv": "requires_trailer" },
-      "consumer_electronics": { "default": "fits_truck" },
-      "small_goods": { "default": "fits_truck" }
+      "project_vehicle": { "utv": "requires_trailer" }
     },
     "towed_categories": { "value": ["trailer", "log splitter"], "basis": "REC", "note": "classified fits_truck because they are towed; the datum note says so" },
     "default_trailer_status": { "value": "borrowed", "basis": "FACT", "note": "operator_profile.v1.json: trailer_owned=false, borrowed_trailer_possible=true. Used only when the caller passes no profile." },
@@ -241,41 +238,7 @@
       "sale_prob": 0.70, "expected_dom_days": 30, "storage_cost_per_day": 2, "sell_fees_rate": 0, "sell_fees_flat": 0,
       "salvage_unsold_frac": 0.60, "salvage_fail_frac": 0.30, "ask_to_sold_ratio": 0.80,
       "required_skills": []
-    },
-    "consumer_electronics": {
-      "_note": "C-26. Resold as-is: test it, clean it, list it. No repair is planned, so parts are near zero and labour is minutes. Resolved from an other_asset title via flip_subcategories. resale_condition_factor scales the comps-derived target by listed condition.",
-      "negotiation_factor": 0.85, "buy_fees_flat": 0, "buy_fees_pct": 0,
-      "parts_cost": { "new": 0, "used": 0, "parts": 15, "unknown": 5 },
-      "materials_cost": 0,
-      "labor_hours": { "new": 0.1, "used": 0.25, "parts": 1, "unknown": 0.5 },
-      "admin_hours": 0.15,
-      "buyer_meet_round_trip_miles": 0,
-      "repair_success_prob": { "new": 1, "used": 0.95, "parts": 0.60, "unknown": 0.85 },
-      "resale_condition_factor": { "new": 1, "used": 1, "parts": 0.5, "unknown": 0.9 },
-      "sale_prob": 0.85, "expected_dom_days": 3, "storage_cost_per_day": 0.25, "sell_fees_rate": 0, "sell_fees_flat": 0,
-      "salvage_unsold_frac": 0.50, "salvage_fail_frac": 0.30, "ask_to_sold_ratio": 0.85,
-      "required_skills": []
-    },
-    "small_goods": {
-      "_note": "C-26. General small household/hobby goods resold as-is; slower and less certain than electronics.",
-      "negotiation_factor": 0.85, "buy_fees_flat": 0, "buy_fees_pct": 0,
-      "parts_cost": { "new": 0, "used": 5, "parts": 20, "unknown": 10 },
-      "materials_cost": 3,
-      "labor_hours": { "new": 0.15, "used": 0.5, "parts": 1.5, "unknown": 0.75 },
-      "admin_hours": 0.5,
-      "repair_success_prob": { "new": 1, "used": 0.90, "parts": 0.60, "unknown": 0.80 },
-      "resale_condition_factor": { "new": 1, "used": 1, "parts": 0.5, "unknown": 0.85 },
-      "sale_prob": 0.75, "expected_dom_days": 10, "storage_cost_per_day": 0.5, "sell_fees_rate": 0, "sell_fees_flat": 0,
-      "salvage_unsold_frac": 0.50, "salvage_fail_frac": 0.30, "ask_to_sold_ratio": 0.80,
-      "required_skills": []
     }
-  },
-
-  "flip_subcategories": {
-    "_note": "C-26. An other_asset listing is resolved to a first-class prior group when its title or subcategory matches this closed vocabulary (lower-case, word-bounded; first group in list order wins). No match stays other_asset, which needs a human scope override.",
-    "basis": "REC",
-    "consumer_electronics": ["tv", "television", "monitor", "laptop", "tablet", "soundbar", "speaker", "stereo", "receiver", "game console", "playstation", "xbox", "nintendo", "projector", "camera", "headphones"],
-    "small_goods": ["bicycle", "bike", "guitar", "vacuum", "microwave", "air fryer", "coffee maker", "stand mixer", "treadmill", "toolbox", "grill", "fan", "heater"]
   },
 
   "service_general": {

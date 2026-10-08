@@ -290,3 +290,6 @@ Proposed (for 01): in `src/mbos/adapters/economics.py` `_value_add`, pass `model
 
 ## C-24
 Done: C-24 @ 6b8d9d4 (caps 1500/800 -> 500/500, available_to_deploy honoured, config 2026.10.4; 359 passed, 22 skipped). State: CLOSED
+
+## C-26
+Done: C-26 @ PENDING (consumer_electronics/small_goods priors via other_asset vocabulary, listing facts kept, true gap text; 377 passed, 22 skipped). State: CLOSED

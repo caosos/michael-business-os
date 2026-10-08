@@ -33,6 +33,7 @@ basis tag. The caller supplies ``as_of``; the clock is never read.
 from __future__ import annotations
 
 import copy
+import re
 import json
 import math
 from decimal import Decimal
@@ -212,6 +213,76 @@ def _num(x: Decimal) -> int | float:
     return to_json_number(x)
 
 
+_RESALE_PRICE_FIELDS = {"target_sell_price", "comp_price_low", "comp_price_expected", "comp_price_high"}
+
+
+def prior_category(item: dict, pri: ScoringConfig) -> str | None:
+    """The prior group an Item is estimated with. An ``other_asset`` flip whose title or subcategory matches the
+    closed ``flip_subcategories`` vocabulary is estimated as that first-class group (a TV needs no scope
+    override); anything else keeps its own category. Free text only selects a group, it never becomes a number."""
+    cat = item.get("category")
+    if item.get("type") != "flip" or cat != "other_asset":
+        return cat
+    vocab = pri.get("flip_subcategories")
+    n = item.get("normalized") or {}
+    text = f"{n.get('title') or ''} {item.get('subcategory') or ''}".lower()
+    for group in (g for g in vocab if not g.startswith("_") and g != "basis"):
+        for token in vocab[group]:
+            if re.search(r"(?<![a-z0-9])" + re.escape(token) + r"(?![a-z0-9])", text):
+                return group
+    return cat
+
+
+def _inline_evidence(item: dict, bundle: dict) -> None:
+    """F-110: the evidence flags the listing/intake record already carries (fixtures, intake forms) are kept, with the
+    item's source provenance, unless research supplied its own; ``skill_fit_high`` is derived and never taken."""
+    econ = item.get("economics") or {}
+    ev = {k: v for k, v in ((econ.get("estimates_meta") or {}).get("evidence") or {}).items()
+          if k != "skill_fit_high" and not isinstance(v, str)}
+    if (econ.get("rehab") or {}).get("repair_scope_known") is True:
+        ev["fault_identified"] = True
+    prov = sorted(s["provenance_id"] for s in item.get("sources", []) if s.get("provenance_id"))
+    if ev and prov and not bundle.get("evidence"):
+        bundle["evidence"], bundle["evidence_provenance_id"] = ev, prov[0]
+
+
+def _inline_overrides(item: dict, bundle: dict) -> dict:
+    """F-110: inline economics the listing/intake already carries with a FACT or INFER basis are kept instead of
+    replaced by priors. Resale prices are never taken from here (comps only), a REC/UNK/UNKNOWN basis is a prior
+    in disguise and is not kept, and explicit research overrides win."""
+    econ = item.get("economics") or {}
+    assumptions = (econ.get("estimates_meta") or {}).get("assumptions") or []
+    prov = sorted(s["provenance_id"] for s in item.get("sources", []) if s.get("provenance_id"))
+    if not prov:
+        return {}
+    out: dict = {}
+    labelled = {a.get("field") for a in assumptions if isinstance(a, dict)}
+    for field in ("parts_cost", "materials_cost", "labor_hours", "admin_hours", "repair_success_prob"):
+        v = (econ.get("rehab") or {}).get(field)       # the intake's stated scope with no label: kept as UNK, never evidence
+        if (isinstance(v, (int, float)) and not isinstance(v, bool) and f"economics.rehab.{field}" not in labelled
+                and f"rehab.{field}" not in (bundle.get("overrides") or {})):
+            out[f"rehab.{field}"] = {"value": v, "basis": "UNK", "provenance_id": prov[0],
+                                     "note": "listing/intake economics (no basis stated)"}
+    for a in assumptions:
+        if not isinstance(a, dict) or a.get("basis") not in ("FACT", "INFER", "UNK", "UNKNOWN"):
+            continue
+        parts = str(a.get("field", "")).split(".")
+        if len(parts) != 3 or parts[0] != "economics" or parts[1] not in _FLIP_BLOCKS:
+            continue
+        block, field = parts[1], parts[2]
+        if (block == "resale" and field in _RESALE_PRICE_FIELDS) or field == "ask_price":
+            continue
+        v = (econ.get(block) or {}).get(field)
+        if isinstance(v, bool) or not isinstance(v, (int, float)) or v != a.get("value"):
+            continue
+        if f"{block}.{field}" in (bundle.get("overrides") or {}):
+            continue
+        out[f"{block}.{field}"] = {"value": v, "basis": "UNK" if a["basis"] == "UNKNOWN" else a["basis"],
+                                   "provenance_id": prov[0],
+                                   "note": f"listing/intake economics ({a.get('note') or 'no note'})"}
+    return out
+
+
 # --------------------------------------------------------------------------- flip
 
 def _prior_view(pri: ScoringConfig, key: str, bundle: dict, block: str, cond: str | None) -> dict:
@@ -230,7 +301,7 @@ def _prior_view(pri: ScoringConfig, key: str, bundle: dict, block: str, cond: st
 
 def _estimate_flip(item: dict, bundle: dict, pri: ScoringConfig, miles: Decimal, as_of: str,
                    led: _Ledger, scoring_cfg: ScoringConfig, profile: dict | None = None) -> tuple[dict | None, list[dict]]:
-    cat = item["category"]
+    cat = prior_category(item, pri)
     n = item.get("normalized") or {}
     cond = n.get("condition") if n.get("condition") in _CONDITIONS else "unknown"
     p = _prior_view(pri, f"flip.{cat}", bundle, "rehab", cond)
@@ -249,15 +320,23 @@ def _estimate_flip(item: dict, bundle: dict, pri: ScoringConfig, miles: Decimal,
     else:
         ask = D(price["amount"])
         acq["ask_price"] = led.note(f"{E}.acquisition.ask_price", _num(ask), "FACT", f"normalized.price ({ptype})")
-        if ptype in ("auction_current", "starting_bid"):
+        src_prov = sorted(s["provenance_id"] for s in item.get("sources", []) if s.get("provenance_id"))
+        if src_prov:
+            led.back(f"{E}.acquisition.ask_price", src_prov)
+        kept = (bundle.get("overrides") or {}).get("acquisition.expected_buy_price")
+        if kept:
+            buy = D(kept["value"])
+            led.note(f"{E}.acquisition.expected_buy_price", _num(buy), kept["basis"],
+                     f"override ({kept['provenance_id']})" + (f": {kept['note']}" if kept.get("note") else ""))
+        elif ptype in ("auction_current", "starting_bid"):
             f = pri.num("flip_general.auction_expected_over_current_bid")
             buy = money(ask * f)
             led.note(f"{E}.acquisition.expected_buy_price", _num(buy), "REC",
                      f"auction: {ptype} {ask} x {f}; the engine's walk_away_price is the real bid ceiling")
         else:
-            buy = money(ask * p["negotiation_factor"])
-            led.note(f"{E}.acquisition.expected_buy_price", _num(buy), "REC",
-                     f"ask {ask} x negotiation factor {p['negotiation_factor']} (prior)")
+            buy = ask
+            led.note(f"{E}.acquisition.expected_buy_price", _num(buy), "INFER",
+                     f"defaults to the listed ask {ask}; a lower price is upside, not assumed (the walk-away price is the ceiling)")
         acq["expected_buy_price"] = _num(buy)
     buy = D(acq["expected_buy_price"])
     premium = D(price.get("buyer_premium_pct", 0)) / 100
@@ -294,11 +373,15 @@ def _estimate_flip(item: dict, bundle: dict, pri: ScoringConfig, miles: Decimal,
     sold = [c for c in comps if c["kind"] == "sold"]
     asking = [c for c in comps if c["kind"] == "asking"]
     resale: dict = {}
+    cf = D((p.get("resale_condition_factor") or {}).get(cond, 1))
+    cf_note = f" x condition factor {cf} ({cond})" if cf != ONE else ""
     if sold:
         agg = aggregate_sold_comps([{"sold_price": c["price"]} for c in sold], scoring_cfg)
-        target = agg["comp_price_expected"]
+        target = money(agg["comp_price_expected"] * cf) if cf != ONE else agg["comp_price_expected"]
+        if cf != ONE:
+            agg = {**agg, "comp_price_low": money(agg["comp_price_low"] * cf), "comp_price_high": money(agg["comp_price_high"] * cf)}
         resale["target_sell_price"] = led.note(f"{E}.resale.target_sell_price", _num(target), "INFER",
-                                               f"trimmed median of {len(sold)} sold comps (n used {agg['n_used']})")
+                                               f"trimmed median of {len(sold)} sold comps (n used {agg['n_used']}){cf_note}")
         led.back(f"{E}.resale.target_sell_price", [c["provenance_id"] for c in sold])
         resale["comp_price_expected"] = _num(target)
         if agg["n_used"] >= 2:
@@ -311,9 +394,9 @@ def _estimate_flip(item: dict, bundle: dict, pri: ScoringConfig, miles: Decimal,
                     f"{scoring_cfg.num('decision_thresholds.min_sold_comps_for_yes_flip')}", False)
     elif asking:
         ratio = p["ask_to_sold_ratio"]
-        target = money(_median([D(c["price"]) for c in asking]) * ratio)
+        target = money(_median([D(c["price"]) for c in asking]) * ratio * cf)
         resale["target_sell_price"] = led.note(f"{E}.resale.target_sell_price", _num(target), "INFER",
-                                               f"median of {len(asking)} ASKING comps x ask-to-sold {ratio} (no sold comps)")
+                                               f"median of {len(asking)} ASKING comps x ask-to-sold {ratio}{cf_note} (no sold comps)")
         led.gap("no_sold_comps", "resale estimated from asking prices only; YES needs sold comps", False)
         research.append({"finding": f"{len(asking)} asking comps x {ratio}; est. ${target}",
                          "field": "resale.target_sell_price", "basis": "INFERENCE"})
@@ -370,9 +453,12 @@ def _estimate_flip(item: dict, bundle: dict, pri: ScoringConfig, miles: Decimal,
                                             f"expected buy x {p['salvage_fail_frac']} (prior)"),
     }
     rt = money(miles * 2)
-    trips = [{"purpose": "inspect_pickup", "round_trip_miles": _num(rt)},
-             {"purpose": "buyer_meet", "round_trip_miles": _num(pri.num("distance.buyer_meet_round_trip_miles"))}]
-    led.note(f"{E}.logistics.trips", trips, "INFER", "one combined inspect+pickup trip (2 x road miles) + buyer meet prior")
+    meet = D(p["buyer_meet_round_trip_miles"]) if "buyer_meet_round_trip_miles" in p else pri.num("distance.buyer_meet_round_trip_miles")
+    trips = [{"purpose": "inspect_pickup", "round_trip_miles": _num(rt)}]
+    if meet:
+        trips.append({"purpose": "buyer_meet", "round_trip_miles": _num(meet)})
+    led.note(f"{E}.logistics.trips", trips, "INFER",
+             "one combined inspect+pickup trip (2 x road miles)" + (" + buyer meet prior" if meet else "; the buyer collects (no meet trip)"))
     logistics: dict = {"trips": trips}
     tr = transport_input(cat, n.get("title"), trips, pri, profile)
     if tr is not None:
@@ -485,8 +571,13 @@ def estimate_item(item: dict, bundle: dict | None, as_of: str, *, priors: Scorin
                   scoring_cfg: ScoringConfig | None = None, profile: dict | None = None) -> dict:
     """Return {status, item_patch, gaps, estimate_hash, provenance, receipt_draft}. Pure."""
     bundle = copy.deepcopy(bundle or {})
-    _validate_bundle(bundle)
     pri = priors or load_priors()
+    if item.get("type") == "flip" and item.get("category") in FLIP_CATEGORIES:
+        inline = _inline_overrides(item, bundle)
+        if inline:
+            bundle["overrides"] = {**(bundle.get("overrides") or {}), **inline}
+        _inline_evidence(item, bundle)
+    _validate_bundle(bundle)
     scfg = scoring_cfg or load_config()
     led = _Ledger()
     lane, cat = item.get("type"), item.get("category")
@@ -505,8 +596,9 @@ def estimate_item(item: dict, bundle: dict | None, as_of: str, *, priors: Scorin
     research: list[dict] = []
     miles = None
     known = (lane == "flip" and cat in FLIP_CATEGORIES) or (lane == "service" and cat in SERVICE_CATEGORIES)
-    prior_key = f"{lane}.{cat}"
-    has_priors = known and cat in (pri.get(lane) or {})
+    pcat = prior_category(item, pri) if lane == "flip" else cat
+    prior_key = f"{lane}.{pcat}"
+    has_priors = known and pcat in (pri.get(lane) or {})
     if not has_priors:
         led.gap("category_unestimable", f"{lane}/{cat}: no priors for this category", True)
     else:
@@ -514,7 +606,7 @@ def estimate_item(item: dict, bundle: dict | None, as_of: str, *, priors: Scorin
                 if f not in (bundle.get("overrides") or {})]
         if need:
             led.gap("scope_override_required",
-                    f"{lane}/{cat} is uncategorized: a human must supply {', '.join(need)} "
+                    f"{lane}/{cat} is an unknown kind of item: a human must supply {', '.join(need)} "
                     "as provenance-carrying overrides (scope is never guessed)", True)
         else:
             miles = _road_miles(item, pri, led)

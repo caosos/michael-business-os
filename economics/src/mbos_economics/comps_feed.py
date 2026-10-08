@@ -147,6 +147,22 @@ def load_fixture_comps(path: Path) -> tuple[list[dict], list[dict]]:
 
 # --------------------------------------------------------------------------- the RESEARCH step
 
+def gap_text(g: dict) -> str:
+    """F-107: the true blocker for one gap code, in words a person can act on."""
+    code, detail = g.get("code"), g.get("detail") or "no reason recorded"
+    if code == "scope_override_required":
+        return f"Waiting for you: {detail}"
+    if code == "thin_comps":
+        return f"Too few sold prices: {detail}. Add sold prices you saw."
+    if code == "no_sold_comps":
+        return "Resale rests on asking prices only: add a sold price you saw."
+    if code == "repair_scope_unknown":
+        return "The fault is not identified, so repair cost and time are a category prior: confirm what is wrong (fault_identified)."
+    if code == "transport_unclassified":
+        return "Not known whether it fits your truck or needs a trailer, so no transport cost is applied: confirm how it travels."
+    return detail
+
+
 def waiting_status(gaps: list[dict], comps_selected: int) -> str:
     """Truthful one-line status for an item that could not be estimated (F-93). Nothing here is "running":
     research_step is a pure function the worker calls; between calls the item is waiting on a person or a
@@ -159,8 +175,16 @@ def waiting_status(gaps: list[dict], comps_selected: int) -> str:
         return ("Waiting for a price you saw: no usable sold comparable is on file, so resale is not guessed. "
                 "Add a sold price (manual comp) and it is re-checked.")
     blocking = [g for g in gaps if g.get("blocking")]
-    detail = "; ".join(g["detail"] for g in blocking) or "no reason recorded"
+    detail = "; ".join(gap_text(g) for g in blocking) or "no reason recorded"
     return f"Last re-check failed: {detail}"
+
+
+def scored_status(gaps: list[dict], verdict: str, evidence: str | None) -> str:
+    """Status for a scored item: the verdict plus, when it is not YES, what is still open (F-107)."""
+    open_ = [gap_text(g) for g in gaps]
+    if verdict != "YES" and evidence:                  # the scorecard's "a + b -> MAYBE"
+        open_.insert(0, "Evidence that would move it: " + evidence + ".")
+    return f"Scored {verdict}." + (" " + " ".join(open_) if open_ and verdict != "YES" else "")
 
 
 def research_step(item: dict, comp_records: list[dict], provenance_records: list[dict], as_of: str, *,
@@ -195,6 +219,8 @@ def research_step(item: dict, comp_records: list[dict], provenance_records: list
     new["provenance_ids"] = sorted(set(new.get("provenance_ids", [])) | {scored["provenance"]["provenance_id"]})
     new["state"] = "SCORED"
     out.update(proposed_next_state="SCORED", item=new,
+               status_text=scored_status(est["gaps"], new["recommendation"]["verdict"],
+                                         new["scores"]["scorecard"].get("cheapest_decisive_evidence")),
                provenance_records=used_prov + [est["provenance"], scored["provenance"]],
                receipt_drafts=[est["receipt_draft"], *scored["receipt_drafts"]])
     return out

@@ -155,8 +155,8 @@ class TestPlan(unittest.TestCase):
         mower = scored(dc.zero_turn_mower, cfg=CFG_BIG)          # pre-C-24 $1,500 / $800 caps: the arithmetic of the ceiling
         plan = va(mower, cfg=CFG_BIG)["block"]["plan"]
         self.assertEqual(plan["basis"], "INFERENCE")
-        self.assertIn("Parts can run up to $505", plan["value"])
-        for parts, expect in ((505, True), (506, False)):
+        self.assertIn("Parts can run up to $397", plan["value"])
+        for parts, expect in ((397, True), (398, False)):
             trial = copy.deepcopy(mower)
             trial["economics"]["rehab"]["parts_cost"] = parts
             r = compute(build_engine_input(trial), CFG_BIG)
@@ -170,7 +170,7 @@ class TestPlan(unittest.TestCase):
         self.assertIn("fails your $800 worst-case loss limit and your $1,500 per-deal cash limit", cub)
         self.assertIn("fails your $500 worst-case loss limit", va(CUB)["block"]["plan"]["value"])     # shipped caps
         self.assertNotIn("does not clear your $65/h", cub)                  # the wrong limit must not be blamed
-        self.assertIn("fails your $40/h floor", va(scored(dc.recalled_generac, cfg=CFG_BIG), cfg=CFG_BIG)["block"]["plan"]["value"])
+        self.assertIn("and your $40/h floor", va(scored(dc.recalled_generac, cfg=CFG_BIG), cfg=CFG_BIG)["block"]["plan"]["value"])
 
     def test_plan_hints_come_only_from_matched_sourced_entries(self):
         self.assertIn("Do not budget fuel tank parts until a Cub Cadet dealer confirms", va(CUB)["block"]["plan"]["value"])

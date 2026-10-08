@@ -151,7 +151,7 @@ class TestEconomicsBlock(unittest.TestCase):
         self.assertEqual((b["resale_likely"]["low"], b["resale_likely"]["high"]), (1900, 2000))
         self.assertTrue(b["resale_likely"]["note"].startswith("5 FACT sold comps (the highest and lowest dropped"))   # honest count
         self.assertTrue(any(x.startswith("5 sold comparables put likely resale near $1,950") for x in enrich(MOWER)["blocks"]["why"]))
-        self.assertEqual(b["max_acquisition"]["value"], 964)
+        self.assertEqual(b["max_acquisition"]["value"], 985)
         self.assertEqual(b["opening_offer"]["value"], 490)            # 70% of the $700 ask, floored to $5
         self.assertLessEqual(b["opening_offer"]["value"], b["max_acquisition"]["value"])
         self.assertEqual(b["transport_cost"]["value"], 57.21)         # trips 30.21 + 27 towing

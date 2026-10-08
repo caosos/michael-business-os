@@ -4,8 +4,8 @@
  "block": {
   "plan": {
    "basis": "INFERENCE",
-   "provenance_id": "prov_01M4BRBC80W8G5QQQSRHRTDBN3",
-   "value": "Budget about $80 in parts and $10 in materials plus about 3 h of your time (a category estimate; the fault is not diagnosed yet). Even with no parts spend this fails your $500 worst-case loss limit and your $500 per-deal cash limit (it ties up $1,257). Sell target is $3,000, the median of 4 sold comparables."
+   "provenance_id": "prov_01M4BRBC8099JNXJW42X9SYYM4",
+   "value": "Budget about $80 in parts and $10 in materials plus about 3 h of your time (a category estimate; the fault is not diagnosed yet). Even with no parts spend this fails your $500 worst-case loss limit and your $500 per-deal cash limit (it ties up $1,467). Sell target is $3,000, the median of 4 sold comparables."
   }
  },
  "item_id": "itm_01JK0000000000000000000002",
@@ -24,7 +24,7 @@
   ],
   "inputs_used": [
    {
-    "hash": "sha256:b852ed78433ae481907e2249f97a8d904570a7b0d1ba32df5e86e7d5aa61947e",
+    "hash": "sha256:c87fb5a6de169030e6e347f4cb4ae7d764d76c3caf1a2ad47aa1431edceb0b4b",
     "ref": "scorecard.inputs_hash"
    },
    {
@@ -32,10 +32,10 @@
     "ref": "value_add_kb@2026.10.0"
    }
   ],
-  "provenance_id": "prov_01M4BRBC80W8G5QQQSRHRTDBN3",
+  "provenance_id": "prov_01M4BRBC8099JNXJW42X9SYYM4",
   "tool_name": "mbos_economics.valueadd",
   "tool_version": "0.14.0"
  },
  "title": "Husqvarna FS 400 walk-behind concrete saw, blade guard cracked",
- "value_add_hash": "sha256:848a979f7f575c2b9b2272e2a9fcdf4fb6704e07e90cfbd08c4ab70067953a48"
+ "value_add_hash": "sha256:10ebf4b5b178b08fd7fcc0bce3ca353e772d1f1f20b8fa9fc7fe7e0f0e01fc90"
 }

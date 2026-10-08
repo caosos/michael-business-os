@@ -1,0 +1,374 @@
+{
+ "_comment": "Copied from agent-01 fixtures/sources/training_examples.json (A-41; illustrative, not real listings): the three flip records only.",
+ "records": {
+  "TRAIN-TV-1": {
+   "source": "facebook_marketplace_manual",
+   "url": "https://example.invalid/fbm/tv-55-inch",
+   "record": {
+    "type": "flip",
+    "category": "other_asset",
+    "subcategory": "55in LED TV, works, remote missing",
+    "opportunity_kind": "buy_item",
+    "dedup_key": "other_asset|tv|conway|train-tv-1",
+    "normalized": {
+     "title": "55 inch LED TV, works great, $30 firm, today only",
+     "condition": "used",
+     "price": {
+      "amount": 30,
+      "currency": "USD",
+      "type": "fixed"
+     },
+     "location": {
+      "city": "Conway",
+      "state": "AR",
+      "road_miles_one_way": 6,
+      "geo_tier": 1
+     },
+     "counterparty": {
+      "role": "seller",
+      "is_dealer": false,
+      "contact_method": "relay_email"
+     },
+     "listing_status": "active",
+     "flags": [
+      "underpriced"
+     ]
+    },
+    "economics": {
+     "acquisition": {
+      "ask_price": 30,
+      "expected_buy_price": 30,
+      "buy_fees": 0,
+      "listing_age_hours": 3
+     },
+     "rehab": {
+      "parts_cost": 0,
+      "materials_cost": 0,
+      "labor_hours": 0.2,
+      "admin_hours": 0.15,
+      "required_skills": [
+       "assembly"
+      ],
+      "repair_success_prob": 1.0,
+      "repair_scope_known": true
+     },
+     "logistics": {
+      "trips": [
+       {
+        "purpose": "inspect_pickup",
+        "round_trip_miles": 12
+       }
+      ],
+      "vehicle_mpg": 18,
+      "fuel_price_per_gal": 3.2,
+      "wear_per_mile": 0.28,
+      "avg_speed_mph": 40
+     },
+     "holding": {
+      "storage_cost_per_day": 0,
+      "expected_hold_days": 1,
+      "disposal_cost": 0,
+      "sell_fees_rate": 0,
+      "sell_fees_flat": 0
+     },
+     "resale": {
+      "target_sell_price": 95,
+      "comp_price_low": 80,
+      "comp_price_expected": 92,
+      "comp_price_high": 100,
+      "sale_prob": 0.95,
+      "expected_dom_days": 1
+     },
+     "downside": {
+      "salvage_if_repair_fails": 30,
+      "salvage_if_unsold": 20
+     },
+     "estimates_meta": {
+      "scoring_config_version": "2026.10.4",
+      "evidence": {
+       "sold_comps_count": 3,
+       "condition_verified": true,
+       "demand_evidence": true,
+       "seller_screened": true
+      },
+      "assumptions": [
+       {
+        "field": "economics.acquisition.expected_buy_price",
+        "value": 30,
+        "basis": "FACT",
+        "note": "the listed price; seller says firm"
+       },
+       {
+        "field": "economics.resale.target_sell_price",
+        "value": 95,
+        "basis": "INFER",
+        "note": "Michael's training example: resells for $75-100 within an hour; 3 comparable sold prices are illustrative"
+       },
+       {
+        "field": "economics.rehab.labor_hours",
+        "value": 0.2,
+        "basis": "INFER",
+        "note": "test the picture and list it"
+       },
+       {
+        "field": "economics.resale.sale_prob",
+        "value": 0.95,
+        "basis": "INFER",
+        "note": "illustrative prior for a cheap, popular size"
+       },
+       {
+        "field": "economics.rehab.repair_success_prob",
+        "value": 1.0,
+        "basis": "FACT",
+        "note": "no repair planned; it works"
+       }
+      ]
+     }
+    }
+   }
+  },
+  "TRAIN-MOWER-1": {
+   "source": "craigslist",
+   "url": "https://example.invalid/cl/riding-mower-late-season",
+   "record": {
+    "type": "flip",
+    "category": "mower",
+    "subcategory": "older 42in riding mower, late season",
+    "opportunity_kind": "buy_item",
+    "dedup_key": "mower|riding|conway|train-mower-1",
+    "normalized": {
+     "title": "Older riding mower 42in, runs, needs a belt, $480",
+     "condition": "used",
+     "price": {
+      "amount": 480,
+      "currency": "USD",
+      "type": "fixed"
+     },
+     "location": {
+      "city": "Conway",
+      "state": "AR",
+      "road_miles_one_way": 14,
+      "geo_tier": 1
+     },
+     "counterparty": {
+      "role": "seller",
+      "is_dealer": false,
+      "contact_method": "relay_email"
+     },
+     "listing_status": "active",
+     "flags": []
+    },
+    "economics": {
+     "acquisition": {
+      "ask_price": 480,
+      "expected_buy_price": 480,
+      "buy_fees": 0
+     },
+     "rehab": {
+      "parts_cost": 45,
+      "materials_cost": 10,
+      "labor_hours": 2,
+      "admin_hours": 1,
+      "required_skills": [
+       "small_engine_repair"
+      ],
+      "repair_success_prob": 0.9,
+      "repair_scope_known": true
+     },
+     "logistics": {
+      "trips": [
+       {
+        "purpose": "inspect_pickup",
+        "round_trip_miles": 28
+       },
+       {
+        "purpose": "buyer_meet",
+        "round_trip_miles": 20
+       }
+      ],
+      "vehicle_mpg": 18,
+      "fuel_price_per_gal": 3.2,
+      "wear_per_mile": 0.28,
+      "avg_speed_mph": 40
+     },
+     "holding": {
+      "storage_cost_per_day": 1,
+      "expected_hold_days": 60,
+      "disposal_cost": 0,
+      "sell_fees_rate": 0,
+      "sell_fees_flat": 0
+     },
+     "resale": {
+      "target_sell_price": 750,
+      "comp_price_low": 600,
+      "comp_price_expected": 700,
+      "comp_price_high": 800,
+      "sale_prob": 0.6,
+      "expected_dom_days": 60
+     },
+     "downside": {
+      "salvage_if_repair_fails": 250,
+      "salvage_if_unsold": 450
+     },
+     "estimates_meta": {
+      "scoring_config_version": "2026.10.4",
+      "evidence": {
+       "sold_comps_count": 3,
+       "condition_verified": true
+      },
+      "assumptions": [
+       {
+        "field": "economics.acquisition.expected_buy_price",
+        "value": 480,
+        "basis": "FACT",
+        "note": "the listed price"
+       },
+       {
+        "field": "economics.rehab.parts_cost",
+        "value": 45,
+        "basis": "FACT",
+        "note": "belt priced at a parts counter"
+       },
+       {
+        "field": "economics.rehab.materials_cost",
+        "value": 10,
+        "basis": "INFER",
+        "note": "fluids and filter"
+       },
+       {
+        "field": "economics.resale.target_sell_price",
+        "value": 750,
+        "basis": "INFER",
+        "note": "in-season comps; riding mowers sell slowly this late in the year"
+       },
+       {
+        "field": "economics.holding.expected_hold_days",
+        "value": 60,
+        "basis": "INFER",
+        "note": "late season: Michael's training example says to wait for spring"
+       }
+      ]
+     }
+    }
+   }
+  },
+  "TRAIN-RECON-1": {
+   "source": "craigslist",
+   "url": "https://example.invalid/cl/recon-250-not-running",
+   "record": {
+    "type": "flip",
+    "category": "mechanical_equipment",
+    "subcategory": "Honda Recon 250 ATV, not running",
+    "opportunity_kind": "buy_item",
+    "dedup_key": "mechanical_equipment|recon|conway|train-recon-1",
+    "normalized": {
+     "title": "Honda Recon ATV, doesn't run, $300",
+     "condition": "parts",
+     "price": {
+      "amount": 300,
+      "currency": "USD",
+      "type": "fixed"
+     },
+     "location": {
+      "city": "Conway",
+      "state": "AR",
+      "road_miles_one_way": 22,
+      "geo_tier": 1
+     },
+     "counterparty": {
+      "role": "seller",
+      "is_dealer": false,
+      "contact_method": "relay_email"
+     },
+     "listing_status": "active",
+     "flags": []
+    },
+    "economics": {
+     "acquisition": {
+      "ask_price": 300,
+      "expected_buy_price": 280,
+      "buy_fees": 0
+     },
+     "rehab": {
+      "parts_cost": 80,
+      "materials_cost": 20,
+      "labor_hours": 3,
+      "admin_hours": 0.5,
+      "required_skills": [
+       "small_engine_repair"
+      ],
+      "repair_success_prob": 0.7,
+      "repair_scope_known": false
+     },
+     "logistics": {
+      "trips": [
+       {
+        "purpose": "inspect_pickup",
+        "round_trip_miles": 44
+       },
+       {
+        "purpose": "buyer_meet",
+        "round_trip_miles": 20
+       }
+      ],
+      "vehicle_mpg": 18,
+      "fuel_price_per_gal": 3.2,
+      "wear_per_mile": 0.28,
+      "avg_speed_mph": 40
+     },
+     "holding": {
+      "storage_cost_per_day": 1,
+      "expected_hold_days": 14,
+      "disposal_cost": 0,
+      "sell_fees_rate": 0,
+      "sell_fees_flat": 0
+     },
+     "resale": {
+      "target_sell_price": 1100,
+      "comp_price_low": 900,
+      "comp_price_expected": 1050,
+      "comp_price_high": 1200,
+      "sale_prob": 0.9,
+      "expected_dom_days": 14
+     },
+     "downside": {
+      "salvage_if_repair_fails": 250,
+      "salvage_if_unsold": 600
+     },
+     "estimates_meta": {
+      "scoring_config_version": "2026.10.4",
+      "evidence": {
+       "sold_comps_count": 3
+      },
+      "assumptions": [
+       {
+        "field": "economics.acquisition.expected_buy_price",
+        "value": 280,
+        "basis": "INFER",
+        "note": "offer under the $300 ask"
+       },
+       {
+        "field": "economics.rehab.parts_cost",
+        "value": 80,
+        "basis": "UNKNOWN",
+        "note": "the fault is not identified: a carburetor/ignition prior, not a quote"
+       },
+       {
+        "field": "economics.rehab.repair_success_prob",
+        "value": 0.7,
+        "basis": "INFER",
+        "note": "illustrative prior for a non-running ATV"
+       },
+       {
+        "field": "economics.resale.target_sell_price",
+        "value": 1100,
+        "basis": "INFER",
+        "note": "running comps are illustrative"
+       }
+      ]
+     }
+    }
+   }
+  }
+ }
+}

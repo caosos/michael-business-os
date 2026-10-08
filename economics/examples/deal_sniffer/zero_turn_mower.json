@@ -8,28 +8,28 @@
     "high": 22,
     "low": 10,
     "note": "lead + repair + expected days on market (range from the comps' days on market)",
-    "provenance_id": "prov_01M4BRBC80XHQAEE6KKMAY57E5",
+    "provenance_id": "prov_01M4BRBC80ZDN42991GAJJS9ZE",
     "unit": "days",
     "value": 16
    },
    "max_acquisition": {
     "basis": "INFERENCE",
     "note": "highest buy price that clears your $65/h flip target and every hard limit, provided the evidence still outstanding checks out (not a YES yet)",
-    "provenance_id": "prov_01M4BRBC80XHQAEE6KKMAY57E5",
+    "provenance_id": "prov_01M4BRBC80ZDN42991GAJJS9ZE",
     "unit": "USD",
     "value": 322
    },
    "opening_offer": {
     "basis": "RECOMMENDATION",
     "note": "70% of the ask, never above the price ceiling",
-    "provenance_id": "prov_01M4BRBC80XHQAEE6KKMAY57E5",
+    "provenance_id": "prov_01M4BRBC80ZDN42991GAJJS9ZE",
     "unit": "USD",
     "value": 320
    },
    "resale_conservative": {
     "basis": "INFERENCE",
     "note": "5 FACT sold comps (the highest and lowest dropped as outliers; middle 3 used): 25th percentile / median / 75th percentile",
-    "provenance_id": "prov_01M4BRBC80XHQAEE6KKMAY57E5",
+    "provenance_id": "prov_01M4BRBC80ZDN42991GAJJS9ZE",
     "unit": "USD",
     "value": 1900
    },
@@ -38,21 +38,21 @@
     "high": 2000,
     "low": 1900,
     "note": "5 FACT sold comps (the highest and lowest dropped as outliers; middle 3 used): 25th percentile / median / 75th percentile",
-    "provenance_id": "prov_01M4BRBC80XHQAEE6KKMAY57E5",
+    "provenance_id": "prov_01M4BRBC80ZDN42991GAJJS9ZE",
     "unit": "USD",
     "value": 1950
    },
    "resale_optimistic": {
     "basis": "INFERENCE",
     "note": "5 FACT sold comps (the highest and lowest dropped as outliers; middle 3 used): 25th percentile / median / 75th percentile",
-    "provenance_id": "prov_01M4BRBC80XHQAEE6KKMAY57E5",
+    "provenance_id": "prov_01M4BRBC80ZDN42991GAJJS9ZE",
     "unit": "USD",
     "value": 2000
    },
    "transport_cost": {
     "basis": "INFERENCE",
     "note": "fuel and wear for the trips, plus $27 for towing a trailer",
-    "provenance_id": "prov_01M4BRBC80XHQAEE6KKMAY57E5",
+    "provenance_id": "prov_01M4BRBC80ZDN42991GAJJS9ZE",
     "unit": "USD",
     "value": 57.21
    }
@@ -61,33 +61,33 @@
    "difficulty": {
     "basis": "INFERENCE",
     "note": "needs a trailer, within normal range. An economic input (already in the score), never a rejection",
-    "provenance_id": "prov_01M4BRBC80XHQAEE6KKMAY57E5",
+    "provenance_id": "prov_01M4BRBC80ZDN42991GAJJS9ZE",
     "value": "moderate"
    },
    "fuel_cost": {
     "basis": "INFERENCE",
     "note": "fuel at the truck's normal mileage; the towing premium is inside transport_cost",
-    "provenance_id": "prov_01M4BRBC80XHQAEE6KKMAY57E5",
+    "provenance_id": "prov_01M4BRBC80ZDN42991GAJJS9ZE",
     "unit": "USD",
     "value": 8.89
    },
    "transport_mode": {
     "basis": "INFERENCE",
     "note": "classified when the economics were estimated; borrowed trailer: the score already includes $27 and 1 h for it. Cost, not a rejection",
-    "provenance_id": "prov_01M4BRBC80XHQAEE6KKMAY57E5",
+    "provenance_id": "prov_01M4BRBC80ZDN42991GAJJS9ZE",
     "value": "requires_trailer"
    },
    "trip_hours": {
     "basis": "INFERENCE",
     "note": "driving time plus fetching, hooking up and loading the trailer",
-    "provenance_id": "prov_01M4BRBC80XHQAEE6KKMAY57E5",
+    "provenance_id": "prov_01M4BRBC80ZDN42991GAJJS9ZE",
     "unit": "hours",
     "value": 2.11
    },
    "trip_miles_round_trip": {
     "basis": "INFERENCE",
     "note": "pickup trip only (inspect and collect); the buyer meeting is a separate local trip",
-    "provenance_id": "prov_01M4BRBC80XHQAEE6KKMAY57E5",
+    "provenance_id": "prov_01M4BRBC80ZDN42991GAJJS9ZE",
     "unit": "miles",
     "value": 50
    }
@@ -96,17 +96,17 @@
    "demand_now": {
     "basis": "INFERENCE",
     "note": "October: in the slow months",
-    "provenance_id": "prov_01M4BRBC80XHQAEE6KKMAY57E5",
+    "provenance_id": "prov_01M4BRBC80ZDN42991GAJJS9ZE",
     "value": "weak"
    },
    "hold_likely": {
     "basis": "INFERENCE",
-    "provenance_id": "prov_01M4BRBC80XHQAEE6KKMAY57E5",
+    "provenance_id": "prov_01M4BRBC80ZDN42991GAJJS9ZE",
     "value": "long: likely to hold until March when demand picks up"
    },
    "note": {
     "basis": "INFERENCE",
-    "provenance_id": "prov_01M4BRBC80XHQAEE6KKMAY57E5",
+    "provenance_id": "prov_01M4BRBC80ZDN42991GAJJS9ZE",
     "value": "Strong spring demand; dealers clear riding mowers in early fall (first week of October) and rarely discount May-September, so October resale is weaker. Dealer new-mower pricing is used as evidence for used-mower demand by inference. [source: Consumer Reports: How to Find the Best Deals on a Riding Lawn Mower; Bob Vila: Best Time to Buy a Lawn Mower]"
    },
    "peak_months": [
@@ -117,7 +117,7 @@
    ]
   },
   "why": [
-   "Passed because cash tied up of $772 is over your $500 per-deal limit.",
+   "Passed because cash tied up of $877 is over your $500 per-deal limit.",
    "That rejection rests on estimates rather than evidence, so it is held for research instead of being discarded.",
    "Economically it works up to $322, once the missing evidence checks out.",
    "5 sold comparables put likely resale near $1,950 (range $1,900 to $2,000).",
@@ -126,14 +126,14 @@
    "October is a weak-demand month for this category; expect a longer hold."
   ]
  },
- "enrichment_hash": "sha256:8e9bc901ac4a3edae768a97f74634cb5998e82d562a5e073e3bcfd5e6e71f898",
+ "enrichment_hash": "sha256:1414173f6f34e89b0503d9da328e35addfbb4c5d73d8075539c99cc4ce52d53f",
  "item_id": "itm_01JK0000000000000000000001",
  "omitted": {},
  "provenance": {
   "actor_type": "system",
   "agent_name": "agent-03-economics",
   "basis": "INFERENCE",
-  "config_version": "2026.10.4",
+  "config_version": "2026.10.5",
   "created_at": "2026-10-07T18:00:00Z",
   "derived_from": [
    "prov_01JK0000000000000000000010",
@@ -142,24 +142,24 @@
    "prov_01JK0000000000000000000013",
    "prov_01JK0000000000000000000014",
    "prov_01JK0000000000000000000100",
-   "prov_01M4BRBC80D2AN4S96HNG4KBXE",
-   "prov_01M4BRBC80Q794JW7ZWJAHBMVT"
+   "prov_01M4BRBC8039FJ6T30Q3Z9JAPD",
+   "prov_01M4BRBC80R1PEVVYCAHVF8TFZ"
   ],
   "inputs_used": [
    {
-    "hash": "sha256:a5b1df366b91c49aa51d00219e07b23e529650de836cda8d634a4a3afb4f2fad",
+    "hash": "sha256:d2fd9aa63a521e76af602135c2756aaad96d222c6649b5ebace65185de142548",
     "ref": "scorecard.inputs_hash"
    },
    {
-    "hash": "sha256:be7e0b9e903ab4e2e313d71280e94bb2dbbb6c7ade9ff5261717ed856fc7c065",
-    "ref": "estimation-priors@2026.10.4"
+    "hash": "sha256:a83ce67fb385ceda691dd6697c0f5fba4e72fb66a51cc77edbbdca9f848a5b83",
+    "ref": "estimation-priors@2026.10.5"
    },
    {
     "hash": "sha256:f45d7da08211c068ad4880b716549dd8f65d512c9d69a1da50077a5a5cbd8c7e",
     "ref": "seasonality@2026.10.0"
    }
   ],
-  "provenance_id": "prov_01M4BRBC80XHQAEE6KKMAY57E5",
+  "provenance_id": "prov_01M4BRBC80ZDN42991GAJJS9ZE",
   "tool_name": "mbos_economics.enrich",
   "tool_version": "0.14.0"
  },

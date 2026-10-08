@@ -8,28 +8,28 @@
     "high": 16,
     "low": 10,
     "note": "lead + repair + expected days on market (range from the comps' days on market)",
-    "provenance_id": "prov_01M4BRBC805CD1DD8991948CBG",
+    "provenance_id": "prov_01M4BRBC80XNE106WVX24G3S9R",
     "unit": "days",
     "value": 13
    },
    "max_acquisition": {
     "basis": "INFERENCE",
     "note": "highest buy price that clears your $65/h flip target and every hard limit, provided the evidence still outstanding checks out (not a YES yet)",
-    "provenance_id": "prov_01M4BRBC805CD1DD8991948CBG",
+    "provenance_id": "prov_01M4BRBC80XNE106WVX24G3S9R",
     "unit": "USD",
     "value": 263
    },
    "opening_offer": {
     "basis": "RECOMMENDATION",
     "note": "70% of the ask, never above the price ceiling",
-    "provenance_id": "prov_01M4BRBC805CD1DD8991948CBG",
+    "provenance_id": "prov_01M4BRBC80XNE106WVX24G3S9R",
     "unit": "USD",
     "value": 260
    },
    "resale_conservative": {
     "basis": "INFERENCE",
     "note": "3 FACT sold comps: 25th percentile / median / 75th percentile",
-    "provenance_id": "prov_01M4BRBC805CD1DD8991948CBG",
+    "provenance_id": "prov_01M4BRBC80XNE106WVX24G3S9R",
     "unit": "USD",
     "value": 1950
    },
@@ -38,21 +38,21 @@
     "high": 2050,
     "low": 1950,
     "note": "3 FACT sold comps: 25th percentile / median / 75th percentile",
-    "provenance_id": "prov_01M4BRBC805CD1DD8991948CBG",
+    "provenance_id": "prov_01M4BRBC80XNE106WVX24G3S9R",
     "unit": "USD",
     "value": 2000
    },
    "resale_optimistic": {
     "basis": "INFERENCE",
     "note": "3 FACT sold comps: 25th percentile / median / 75th percentile",
-    "provenance_id": "prov_01M4BRBC805CD1DD8991948CBG",
+    "provenance_id": "prov_01M4BRBC80XNE106WVX24G3S9R",
     "unit": "USD",
     "value": 2050
    },
    "transport_cost": {
     "basis": "INFERENCE",
     "note": "fuel and wear for the trips",
-    "provenance_id": "prov_01M4BRBC805CD1DD8991948CBG",
+    "provenance_id": "prov_01M4BRBC80XNE106WVX24G3S9R",
     "unit": "USD",
     "value": 25.63
    }
@@ -61,33 +61,33 @@
    "difficulty": {
     "basis": "INFERENCE",
     "note": "fits the truck and is close. An economic input (already in the score), never a rejection",
-    "provenance_id": "prov_01M4BRBC805CD1DD8991948CBG",
+    "provenance_id": "prov_01M4BRBC80XNE106WVX24G3S9R",
     "value": "easy"
    },
    "fuel_cost": {
     "basis": "INFERENCE",
     "note": "fuel at the truck's normal mileage; the towing premium is inside transport_cost",
-    "provenance_id": "prov_01M4BRBC805CD1DD8991948CBG",
+    "provenance_id": "prov_01M4BRBC80XNE106WVX24G3S9R",
     "unit": "USD",
     "value": 7.11
    },
    "transport_mode": {
     "basis": "INFERENCE",
     "note": "classified when the economics were estimated; towed behind the truck (tow rating and hitch are not on file)",
-    "provenance_id": "prov_01M4BRBC805CD1DD8991948CBG",
+    "provenance_id": "prov_01M4BRBC80XNE106WVX24G3S9R",
     "value": "fits_truck"
    },
    "trip_hours": {
     "basis": "INFERENCE",
     "note": "driving time",
-    "provenance_id": "prov_01M4BRBC805CD1DD8991948CBG",
+    "provenance_id": "prov_01M4BRBC80XNE106WVX24G3S9R",
     "unit": "hours",
     "value": 0.89
    },
    "trip_miles_round_trip": {
     "basis": "INFERENCE",
     "note": "pickup trip only (inspect and collect); the buyer meeting is a separate local trip",
-    "provenance_id": "prov_01M4BRBC805CD1DD8991948CBG",
+    "provenance_id": "prov_01M4BRBC80XNE106WVX24G3S9R",
     "unit": "miles",
     "value": 40
    }
@@ -96,17 +96,17 @@
    "demand_now": {
     "basis": "INFERENCE",
     "note": "October: neither peak nor slow",
-    "provenance_id": "prov_01M4BRBC805CD1DD8991948CBG",
+    "provenance_id": "prov_01M4BRBC80XNE106WVX24G3S9R",
     "value": "normal"
    },
    "hold_likely": {
     "basis": "INFERENCE",
-    "provenance_id": "prov_01M4BRBC805CD1DD8991948CBG",
+    "provenance_id": "prov_01M4BRBC80XNE106WVX24G3S9R",
     "value": "typical for the category"
    },
    "note": {
     "basis": "INFERENCE",
-    "provenance_id": "prov_01M4BRBC805CD1DD8991948CBG",
+    "provenance_id": "prov_01M4BRBC80XNE106WVX24G3S9R",
     "value": "Utility-trailer demand is low in winter, builds from March, peaks May-August (moves, landscaping, construction). Sun Belt markets show a shallower curve than northern ones. [source: BigRentals: How to Keep Your Utility Trailer Rental Busy Year-Round (rental-marketplace guidance; used as evidence for resale demand by inference)]"
    },
    "peak_months": [
@@ -117,7 +117,7 @@
    ]
   },
   "why": [
-   "Passed because cash tied up of $867 is over your $500 per-deal limit.",
+   "Passed because cash tied up of $937 is over your $500 per-deal limit.",
    "That rejection rests on estimates rather than evidence, so it is held for research instead of being discarded.",
    "Economically it works up to $263, once the missing evidence checks out.",
    "3 sold comparables put likely resale near $2,000 (range $1,950 to $2,050).",
@@ -125,38 +125,38 @@
    "Towed behind the truck; its tow rating and hitch are not on file."
   ]
  },
- "enrichment_hash": "sha256:0fe8e0ca5bc2285709ad5fa7c96bb95c78f7904da58388e0d3db3553e4071854",
+ "enrichment_hash": "sha256:112cbcf5096f88852a527aca8e9adbcdc4036a0355dc256a07a7709fc5f8ac57",
  "item_id": "itm_01JK0000000000000000000003",
  "omitted": {},
  "provenance": {
   "actor_type": "system",
   "agent_name": "agent-03-economics",
   "basis": "INFERENCE",
-  "config_version": "2026.10.4",
+  "config_version": "2026.10.5",
   "created_at": "2026-10-07T18:00:00Z",
   "derived_from": [
    "prov_01JK0000000000000000000050",
    "prov_01JK0000000000000000000051",
    "prov_01JK0000000000000000000052",
    "prov_01JK0000000000000000000300",
-   "prov_01M4BRBC80R1D266HXX445GCVK",
-   "prov_01M4BRBC80V5PWMHPFDPW3M0EE"
+   "prov_01M4BRBC8022FHCR3HA09GCWJ1",
+   "prov_01M4BRBC80E226YYQCYFD12ZPA"
   ],
   "inputs_used": [
    {
-    "hash": "sha256:594057716fd666fd5584976ceb195e25e971937d6159d50d41bb4e541b63e44c",
+    "hash": "sha256:8cc5d2af09dcb5598350b5c77637bcc496af67d6e0c9e7385d824ba4ec8e9b14",
     "ref": "scorecard.inputs_hash"
    },
    {
-    "hash": "sha256:be7e0b9e903ab4e2e313d71280e94bb2dbbb6c7ade9ff5261717ed856fc7c065",
-    "ref": "estimation-priors@2026.10.4"
+    "hash": "sha256:a83ce67fb385ceda691dd6697c0f5fba4e72fb66a51cc77edbbdca9f848a5b83",
+    "ref": "estimation-priors@2026.10.5"
    },
    {
     "hash": "sha256:f45d7da08211c068ad4880b716549dd8f65d512c9d69a1da50077a5a5cbd8c7e",
     "ref": "seasonality@2026.10.0"
    }
   ],
-  "provenance_id": "prov_01M4BRBC805CD1DD8991948CBG",
+  "provenance_id": "prov_01M4BRBC80XNE106WVX24G3S9R",
   "tool_name": "mbos_economics.enrich",
   "tool_version": "0.14.0"
  },
