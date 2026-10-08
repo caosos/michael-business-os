@@ -186,3 +186,43 @@ Audit after all stages: `mbos audit` -> `chain.ok true (136 receipts)`, `provena
 
 Fixed since G-21a, re-verified: F-102, F-103 (report printed at start), F-104 (`var/raw` populated, card activity "from retained raw payloads"), F-106 (TV), F-108, F-109, F-110 (TV, mower, Recon). Not exercised: F-107's UI wording for `scope_override_required` (no such item now). Still seen: for the Recon, the page status line still says "parked ... until it has a price to compare with" although a comp is on file (UI text keyed off the state, F-107-like; part of F-112 candidate scope).
 G-21b (stages 5-8) is unblocked: there is a YES to approve (areq_01M4ENFGT9Q7EG5Y6BVRRWPHSV on a throwaway cluster; re-bootstrap per G-21b).
+
+---
+
+# G-21b: stages 5-8 on the fixed assembly
+
+Date 2026-10-08. Agent 07 QA, fresh worker. DRY-RUN only: nothing sent, bought, published or contacted; no other lane touched. Assembly: detached worktree of coordinator `fe476b0` (`/tmp/a07g21d/w`), fresh venv, `tools/bootstrap_dev.py --ui-pin g21pin` (lane pins as G-21c: 03 `3fb7502`, 05 `44a0fb2`, 02 `a2b971d`, 04 `6bdf941`, 06 `96fb674`). Worker + Operator UI (:8791) run unattended; UI driven over HTTP the way a browser posts (CSRF + nonce + PIN). Receipts are cited by chain `seq` (the CLI does not print receipt ids; F-113 candidate below).
+
+State carried from G-21c, rebuilt: fixture `training_examples.json` (+ two clone TV listings `TRAIN-TV-2`, `TRAIN-TV-3` in `/tmp`, same economics, different title/id/price $32-$35) so the NO and HOLD paths each get their own YES-recommended request and the real TV stays for the YES path. TV comps entered through the UI form for all three (the form refused a save with no link/note: "Give a link or a short note saying where the price came from", correct). Worker moved all three to `AWAITING_APPROVAL` by itself.
+
+| Item | Request | Role |
+|---|---|---|
+| `itm_01M4EP9KFZNNTHZPQNFX23TMC2` 55 inch LED TV $30 | `areq_01M4EPF4XECGWAR3G2Z129KHT5` | YES path (stage 6) |
+| `itm_01M4EPK1NF16ZTGK2XNRD5549P` Samsung 55 inch $35 | `areq_01M4EPMY3H9GFBCDH01SMYA7Q1` | NO path |
+| `itm_01M4EPK1SVDEWSBB3WG84KCR0C` Vizio 55 inch $32 | `areq_01M4EPMYQFK2CKPY2GQKGAK662` | HOLD path |
+
+Ledger BEFORE (UI `/mission`, "Capital position"): protected principal $500, earned working capital $0, capital deployed $0, realized profit $0, available to deploy $500.
+Audit BEFORE any decision: `chain.ok true (134 receipts)`, `provenance.ok true`, `dry_run.ok true (effector_receipts 0)`, `conformance.ok true`.
+
+## Stage 5: Michael's approval boundary: PASS (one P3 worker-log error, F-113)
+
+Nothing executes without a decision: three requests sat `AWAITING_APPROVAL` for the whole setup (several minutes, worker running, rechecks firing); `effector_receipts 0` throughout.
+
+Refusals on the YES request (TV-1), each followed by an `items` and `audit` check that nothing moved:
+| Attempt | Result |
+|---|---|
+| UI YES, PIN field empty | refused: "this action is irreversible or moves money: step-up PIN required (4 tries left before a 5-minute lock.)" |
+| UI YES, wrong PIN `0000` | refused, same text, "3 tries left" (attempt counter + lockout works) |
+| UI YES, forged CSRF token | refused: "invalid form token; reload the page" |
+| UI YES, stale/forged payload hash | refused: "payload_hash_seen does not match the request — re-read the request before deciding" |
+| CLI `mbos decide ... YES --seen <hash>` without `--step-up` | refused: `DecisionRefused: YES on an irreversible / money ... request needs step-up` |
+| CLI YES with wrong `--seen` | refused: "--seen does not match the request's payload hash" |
+After all six: TV-1 still `AWAITING_APPROVAL`, `effector_receipts 0`, chain ok.
+
+NO path (Samsung): UI NO with required reason "QA: NO path - seller too far this week", no PIN needed -> "NO recorded; the opportunity is archived." Receipts: seq 135 `APPROVAL_DECIDED` (actor human), 138 `ITEM_STATE_CHANGED` "Michael said NO", 139 "archived after NO (reason feeds LEARN)". Item `ARCHIVED` (settles about 20 s after the click, via the worker). No effector call.
+
+HOLD path (Vizio): UI HOLD preset 24h with reason -> "HOLD recorded. The workflow re-notifies and re-presents it; it never executes on its own." Receipts: seq 136 `APPROVAL_DECIDED` (human), 137 "Michael said HOLD (parked; never auto-executes)". Item `HELD`; no effector call; it is out of `mbos queue` (1 PENDING left: the TV).
+
+Findings:
+- **F-113 (P3, FACT; owner 01):** the worker log shows an ERROR traceback for the NO: `psycopg.DatabaseError: mbos: illegal item transition ARCHIVED -> REJECTED` from `spine_d.apply_no` (`spine_d.py:432`) after the item was already archived (`worker2.log`; DBOS "Exception encountered in background workflow"). The final state is right (ARCHIVED, receipts 138/139 present) but the NO workflow errors; it reads as a double apply of the NO consequence (UI path and worker both) or a retry. Repro: stage 5 NO on a fresh YES item with the worker running. Also P3: `mbos show` prints receipts with `seq` but no receipt id, so a human cannot cite one without SQL.
+- Observation (INFER, not filed): the CLI step-up is the flag `--step-up`, not a PIN; whoever holds `var/owner.env` can pass it. The UI path does enforce the PIN. Acceptable if the owner env is the credential, but the two doors are not equal.
