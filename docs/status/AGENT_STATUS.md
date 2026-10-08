@@ -154,3 +154,8 @@ Verdict: RC READY 105/0 (3 skipped) at mbos 71d5cdb + 04 23060eb; card 671/0. F-
 Done: G-19 @ 7d76281
 State: CLOSED
 Verdict: RC READY 105/0 (3 skipped) with 04 4a11f1b + 06 3090e51; card 671/0; owner_channel+numbers 231/0. F-85, F-86, F-84 FIXED (strict xfails flipped). Split e2e harness race fixed. F-87 not re-attacked. Receipt: docs/receipts/2026-10-08-G-19-panic-release-and-outcome-reverify.md
+
+## G-20 (2026-10-08)
+Done: G-20 @ COMMIT
+State: CLOSED
+Verdict: Michael can NOT use it today. Jobs: 4 PASS (after F-88 workaround), 1/3/5/7 PARTIAL, 2/6 FAIL. New F-88 (P0: UI reads MBOS_APPROVER_DATABASE_URL, bootstrap writes MBOS_OWNER_DATABASE_URL -> set_mission/capital_fund denied), F-90 (P0: no item reaches a decision; no input for customer_screened/scope_verified), F-89/F-91/F-92/F-94 (P1), F-93/F-95..F-100 (P2), F-101 (P3). RC READY 105/0 (3 skipped); card 671/0. Receipt: docs/receipts/2026-10-08-G-20-operator-audit.md
