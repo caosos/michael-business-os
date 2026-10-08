@@ -149,3 +149,8 @@ Verdict: RC READY 105/0 (3 skipped); card 657/0. F-72..F-78 FIXED. New: F-80 (04
 Done: G-18 @ 43f41dd
 State: CLOSED
 Verdict: RC READY 105/0 (3 skipped) at mbos 71d5cdb + 04 23060eb; card 671/0. F-79/F-80/F-81/F-82/F-83 FIXED; F-84 PARTIAL (/wanted create race). New: F-85 (04, P1: mbos_dbos releases PANIC via direct panic_state INSERT + forged receipt), F-86 (04: forged human outcome), F-87 (01, INFER: R14 needs two processes). Receipt: docs/receipts/2026-10-08-G-18-r14-in-the-database.md
+
+## G-19 (2026-10-08)
+Done: G-19 @ PENDING
+State: CLOSED
+Verdict: RC READY 105/0 (3 skipped) with 04 4a11f1b + 06 3090e51; card 671/0; owner_channel+numbers 231/0. F-85, F-86, F-84 FIXED (strict xfails flipped). Split e2e harness race fixed. F-87 not re-attacked. Receipt: docs/receipts/2026-10-08-G-19-panic-release-and-outcome-reverify.md

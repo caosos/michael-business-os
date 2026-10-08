@@ -1,10 +1,10 @@
 {
- "note": "G-14: 01 mbos 944f8e4 (F-67/F-69 fix); 05 716098e; 04 c97ba6b; 03 engine 3eb358f (C-23) checked via git archive only. G-16: 04 819b5c7 (capital ledger 0017/0018) and 06 operator_ui 6bc8a54 (F-22) for tests/numbers via git archive only. G-17: 04 aa86cc6 (0019/0020) and 06 fdacf36 (F-24 944093e + F-25) for tests/numbers and tests/wanted.",
+ "note": "G-14: 01 mbos 944f8e4 (F-67/F-69 fix); 05 716098e; 04 c97ba6b; 03 engine 3eb358f (C-23) checked via git archive only. G-16: 04 819b5c7 (capital ledger 0017/0018) and 06 operator_ui 6bc8a54 (F-22) for tests/numbers via git archive only. G-17: 04 aa86cc6 (0019/0020) and 06 fdacf36 (F-24 944093e + F-25) for tests/numbers and tests/wanted. G-19: 04 4a11f1b (0023 PANIC release owner-only, human outcome owner channel) and 06 3090e51 (F-27).",
  "mbos_01": "71d5cdb92f1e5eebd93eb93564c17eca18a7b4be",
- "lane_d_04": "23060eb717cdb0935d551ad7893e476a65b06b38",
+ "lane_d_04": "4a11f1b570c5851c80b0b20d0fc664c762432442",
  "lane_e_05": "716098eb1b592e0f96a109606b753650e9e655d5",
  "lane_c_03_not_installed": "3d6212c3b1b5441ee4de4e63486f5e28a8e02a7e",
  "lane_c_03_engine": "3eb358f84bf62e2969ec4cb8cc4a62638a1229c0",
- "lane_d_04_numbers": "23060eb717cdb0935d551ad7893e476a65b06b38",
- "lane_f_06_numbers": "a1267d9933caf5e5ab955225a2f6f51c1164b579"
+ "lane_d_04_numbers": "4a11f1b570c5851c80b0b20d0fc664c762432442",
+ "lane_f_06_numbers": "3090e5138c01c1b06d16545c7c483b72cf5abfed"
 }

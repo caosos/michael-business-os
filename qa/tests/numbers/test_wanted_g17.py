@@ -325,9 +325,6 @@ def test_same_nonce_reused_across_create_and_cancel_does_not_swallow_the_second(
     assert rows(db[1], cid)[-1][1] == "CANCELLED"
 
 
-@pytest.mark.xfail(strict=False, reason="F-84 PARTIAL (G-18, race; fails ~50% of runs, XPASS = no loser this run): /numbers/capital is fixed, but "
-                   "/wanted losers of a concurrent create still get 'Not saved. the store refused it: no receipt for {CONFIG_VERSION_BUMPED} ... in this "
-                   "transaction' (200) for a request that succeeded; data is correct (one row, one receipt)")
 def test_parallel_double_create_writes_once(ui, db):
     import threading
 

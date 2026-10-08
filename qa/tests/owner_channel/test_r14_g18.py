@@ -229,8 +229,6 @@ def test_agent_write_only_login_cannot_approve_an_item_even_with_a_valid_approva
 
 
 # ---- PANIC and outcomes ------------------------------------------------------------------------------------------------------------
-@pytest.mark.xfail(strict=True, reason="F-85: mbos_dbos (gateway) releases PANIC with a human-claimed append_receipt + a direct INSERT of a sealed RUNNING panic_state row; "
-                   "panic_set's approver check is bypassed because panic_state only needs a receipt-presence constraint")
 def test_dbos_can_engage_panic_but_cannot_release_it(lane, S):
     _, store = lane
     wf, owner = S("mbos_dbos"), S("mbos_operator_ui")
@@ -267,7 +265,6 @@ def test_dbos_can_engage_panic_but_cannot_release_it(lane, S):
     owner.conn.execute("SELECT mbos.panic_set('L3',NULL,false,%s,'Michael releases',%s,%s)", (Jsonb(HUMAN), [pid], key()))
 
 
-@pytest.mark.xfail(strict=True, reason="F-86: record_outcome accepts actor {type:human} from the agent_write/gateway login mbos_dbos (0018 only gates non-agent claims for other paths)")
 def test_outcome_with_a_forged_human_claim_by_the_workflow_login(lane, S):
     """record_outcome keeps its own rule (0018: agent_write sessions may record AGENT outcomes). A HUMAN-claimed outcome from the workflow login
     must be refused (a human claim is not an identity, F-80). If it is accepted that is a finding: realized figures feed the scorecard."""
@@ -282,6 +279,24 @@ def test_outcome_with_a_forged_human_claim_by_the_workflow_login(lane, S):
         assert n_receipts(S) == before
         return
     pytest.fail("record_outcome ACCEPTED actor {type:human,id:michael} from mbos_dbos: a forged human outcome with net_profit_usd 9999 was recorded")
+
+
+def test_dbos_direct_panic_state_insert_and_panic_receipt_are_refused_separately(lane, S):
+    """G-19 (F-85 fix, 0023): each half of the bypass alone is refused for the workflow login; the engage path still works."""
+    _, store = lane
+    wf = S("mbos_dbos")
+    pid = make_item(S, store)[1]
+    wf.conn.execute("SELECT mbos.panic_set('L3',NULL,true,%s,'workflow engages',%s,%s)", (Jsonb({"type": "system", "id": "action-gateway"}), [pid], key()))
+    st = lambda: wf.conn.execute("SELECT (body->'global'->>'state') FROM mbos.panic_state ORDER BY revision DESC LIMIT 1").fetchone()[0]  # noqa: E731
+    assert st() == "FROZEN"
+    rev, body = wf.conn.execute("SELECT revision, body FROM mbos.panic_state ORDER BY revision DESC LIMIT 1").fetchone()
+    with pytest.raises(errors.Error):
+        wf.conn.execute("INSERT INTO mbos.panic_state (revision, global_state, body) VALUES (%s,'RUNNING',%s)", (rev + 1, Jsonb(body)))
+    with pytest.raises(errors.Error):
+        wf.conn.execute("SELECT mbos.append_receipt(%s)", (Jsonb({"type": "KILL_SWITCH_CHANGED", "actor": HUMAN, "intent": "forged", "entity_type": "panic_state",
+                        "entity_id": f"panic:{rev + 1}", "effect": "update", "idempotency_key": key(), "provenance_ids": [pid]}),))
+    assert st() == "FROZEN"
+    S("mbos_operator_ui").conn.execute("SELECT mbos.panic_set('L3',NULL,false,%s,'Michael releases',%s,%s)", (Jsonb(HUMAN), [pid], key()))
 
 
 def test_owner_login_can_record_a_human_outcome_and_the_chain_still_verifies(lane, S):

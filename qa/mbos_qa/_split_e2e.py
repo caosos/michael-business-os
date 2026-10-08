@@ -77,6 +77,9 @@ import time
 end = time.monotonic() + 60
 while time.monotonic() < end and q.areq(areq["action_request_id"])["status"] not in ("executed", "outcome_recorded"):
     time.sleep(0.2)
+# the workflow moves the item ACTING -> ACTED after the request settles: poll for it (G-19: reading once raced, ACTING seen ~50%)
+while time.monotonic() < end and q.item(item)["state"] != "ACTED":
+    time.sleep(0.2)
 out["final_item_state"] = q.item(item)["state"]
 out["areq_status"] = q.areq(areq["action_request_id"])["status"]
 out["approval_written_by_owner"] = len(q.approvals(areq["action_request_id"]))

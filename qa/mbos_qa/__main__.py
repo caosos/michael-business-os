@@ -736,7 +736,7 @@ FINDING_STATUS = {  # verified by the suites at the pins in qa/impl_lane_pins.js
     "F-72": "FIXED (G-17, 06 944093e)", "F-73": "FIXED (G-17, 06 944093e)", "F-74": "FIXED (G-17, 06 944093e)", "F-75": "FIXED (G-17, 06 944093e)",
     "F-76": "FIXED (G-17, 06 944093e: $5,000 cumulative as data + typed confirm above $2,000)", "F-77": "FIXED (G-17, 06 944093e: 5 tries, 5-minute lock)",
     "F-78": "FIXED (G-17, 04 0019/0020 for non-human claims; the forged-human claim by mbos_dbos is F-80)",
-    "F-79": "FIXED (G-18, 06 23af990)", "F-80": "FIXED (G-18, 04 0021 owner_channel + D-26a split login)", "F-81": "FIXED (G-18, 04 0021)", "F-82": "FIXED (G-18, 06 23af990)", "F-83": "FIXED (G-18, 04 0021)", "F-85": "OPEN (P1)", "F-86": "OPEN", "F-87": "OPEN (INFER)", "F-84": "PARTIAL (G-18: /numbers/capital fixed; /wanted concurrent create losers still see a raw no-receipt refusal)",
+    "F-79": "FIXED (G-18, 06 23af990)", "F-80": "FIXED (G-18, 04 0021 owner_channel + D-26a split login)", "F-81": "FIXED (G-18, 04 0021)", "F-82": "FIXED (G-18, 06 23af990)", "F-83": "FIXED (G-18, 04 0021)", "F-85": "FIXED (G-19, 04 0023 at 4a11f1b)", "F-86": "FIXED (G-19, 04 0023 at 4a11f1b)", "F-87": "OPEN (INFER)", "F-84": "FIXED (G-19, 06 7756448 F-27)",
 }
 
 
