@@ -4,7 +4,7 @@ Agent: 04
 Role: Postgres / State / Receipts (lane D: durable business state, receipts, provenance; sole ledger owner per ADR-0010)
 Branch: research/agent-04-state
 Worktree: /home/michaelos/business-os-worktrees/agent-04-state
-State: WAITING (no READY lane-D task: D-10 final acceptance on A-01; D-12 on ADR-0009; D-09b on Michael, MICHAEL_DECISIONS #11)
+State: CLOSED (lane closed out for a fresh bounded worker; handoff: docs/handoff/LANE_04.md)
 Claimed: none
 Done: D-01 @ a0d1fbe
 Done: D-02 @ a0d1fbe
@@ -19,21 +19,26 @@ Done: D-11 @ 341c5d2
 Done: D-14 @ 80bb135
 Done: D-15 (helper delivered @ a08dd9f; 01 to adopt in its e2e for final acceptance)
 Done: D-17 @ 77d1f17
-Done: D-18 (capital ledger; see docs/receipts/2026-10-07-d18-capital-ledger.md)
+Done: D-18 @ e2c3f1b (capital ledger; see docs/receipts/2026-10-07-d18-capital-ledger.md)
 Done: D-09a (PITR mechanics against a local dir; see docs/receipts/2026-10-07-d09a-pitr-mechanics.md) (ACCEPTED by Agent 03, docs/receipts/2026-10-07-d17-acceptance-review.md @ 6a20b91, who tested as each real login role)
 Done: D-16 @ 3a1b004
 Blocked: D-09b (off-box destination + drill) on Michael: docs/state/OWNER_QUESTION_BACKUPS.md
 Blocked: D-10 (final acceptance) on A-01 phase 2. The DDL is delivered @ 6533334.
 Current phase: ROUND TWO: foreman loop (READY_QUEUE)
 Started: 2026-10-06
-Last updated: 2026-10-07 (D-18 done)
+Last updated: 2026-10-07 (closeout; last code head e2c3f1b)
 
 ## Current objective
-No READY lane-D task. WAITING on: A-01 (D-10 final acceptance), ADR-0009 (D-12), and Michael for the off-box destination (D-09b).
-
-Latest: D-18 done. The capital ledger is migration 0017, and `docs/state/CAPITAL_LEDGER_DESIGN.md` is the as-built design.
-- **For Agent 01 to confirm:** profit after an impairment repairs it first, because the invariant leaves it nowhere else to go.
-- **Capital moves only on human-confirmed outcomes.** Agent-reported ones are counted in `unconfirmed_closing_outcomes`.
+**CLOSED.** A fresh bounded worker takes this lane from `docs/handoff/LANE_04.md`.
+- **Outstanding:**
+  - D-10 final acceptance waits on Agent 01's A-01.
+  - D-12 waits on ADR-0009.
+  - D-09b waits on Michael (`MICHAEL_DECISIONS` #11).
+- **Agent 01 accepted my D-18 design points:**
+  1. Impairment is repaired first.
+  2. Capital movement is approver-only.
+  3. The ledger stays inactive until funded.
+  4. The entry points I listed are the ones the UI/CLI port will use.
 
 ### Interface notes for Agent 05 (E-02) and Agent 01 (A-01/A-03)
 - **PANIC:**
@@ -52,9 +57,10 @@ Latest: D-18 done. The capital ledger is migration 0017, and `docs/state/CAPITAL
 ## Proposed tasks (for Agent 01 to triage into READY_QUEUE)
 | Proposed ID | Pri | Task | Deps | Acceptance |
 |---|---|---|---|---|
-| (queued as D-11) | P2 | `caps.velocity_actions_per_hour` in `budget_reserve_caps`: a count of unreleased bucket reservations in the last hour, zero-amount rows included. Requested by 05 after E-02, so lane E's 3-money-actions/h rule lives in one place | none | 05 switches from its own count; a parallel test never exceeds N actions/h |
-| (withdrawn: 01 fixed it caller-side) D-18 | P2 | `mbos.attach_card_block(...)`: an atomic upsert for a card-enrichment block, a no-op if the latest entry for that block already cites the same artifact, so A, B, A is correct for every lane (fixes R1 of the read-through lane-side) | none | `v_item_card_inputs` shows the true latest after A, B, A |
-| D-12 | P2 | Contract v1.1.0 (ADR-0009) DDL follow-up: ITEM_UPDATED, ACTION_EXPIRED, GUARD_REFUSED, `superseded` | ADR-0009 accepted | Migration + tests; old receipts still verify |
+| D-19 | P2 | Retention and pruning of old base backups and archived WAL (keep N bases plus the WAL they need), driven by one setting | D-09b destination | A prune never removes WAL needed by a retained base; a restore from the oldest retained base still passes `verify_chain` |
+| D-20 | P1 | Encrypt everything that leaves the machine (dumps, chain exports, WAL, artifacts), with the key kept off the host | D-09b destination | A decrypted off-box restore passes `verify_chain`; the archive on the destination contains no plaintext contact values |
+| D-21 | P2 | Outbox relay worker, plus the optional Twenty projection (acceptance D4), only if Michael wants a CRM UI | Michael's CRM decision | The projection rebuilds from the outbox with zero drift |
+| D-22 | P2 | Reboot test D2 and the Quadlet cut-over | `loginctl enable-linger`; Podman installed | After a reboot everything is up with no manual steps and `verify_chain` is OK |
 
 ### Read-through of 01's spine_d (@ f4c6529): see `docs/receipts/2026-10-07-spine-d-readthrough-2.md`
 - **R1, bug (reproduced):** `record_enrichment` loses a block that returns to an earlier value (A, B, A leaves the card showing B), because its idempotency key repeats.

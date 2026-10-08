@@ -1,0 +1,73 @@
+# Lane 04 handoff (State / Postgres / Receipts)
+- **Branch / head (pushed):** `research/agent-04-state` at the commit that adds this file (see `git log -1`).
+  Last code commit: `e2c3f1b` (D-18). All DRY-RUN.
+- **Role and boundaries:**
+  - **Owns:** the authoritative Postgres state spine. That is all DDL and the `mbos.*` SQL API: items, action requests, approvals, receipts (MBOS-RH-1 hash chain), provenance, outcomes, lessons, policy, budget ledger, PANIC state, effector claims, artifacts, operator notes, the capital ledger, the mission, and the consent/DNC ledger (adopted from 06). It also owns the least-privilege roles, bootstrap/provisioning, backups and PITR, the State MCP server, and the vector index.
+  - **Never touches:** another lane's branch or worktree, `main`, CAOSCare, or anything live. It never contacts, spends, publishes or deploys.
+  - **Does not own workflow durability.** DBOS does, in its own database (`mbos_dbos`). There are deliberately no resume or step tables in the spine.
+- **Completed:** D-01..D-08, D-09a, D-10 (DDL), D-11, D-13..D-18. Receipts are in `docs/receipts/2026-10-07-*`. Commit hashes are in `AGENT_STATUS.md` (`Done:` lines).
+  - **Migrations `0000`–`0017`, in `state/migrations/`:**
+    - `0000` ADR-0010 canonical JSON
+    - `0001`–`0004` foundation, domain, API, views and grants
+    - `0005` R1 tables, `0006` R12 strict item edges, `0007` Lane E requirements
+    - `0008` MCP audit, `0009` fs artifacts, `0010` pgvector, `0011` comms ledger
+    - `0012` deferred provenance FK, `0013` action-count velocity, `0014` doc-entity, `0015` card inputs
+    - `0016` operator notes, `0017` capital ledger
+  - **Round one:** `docs/research/agent-04-state.md`, plus `docs/research/agent-04-round-two.md`.
+- **Outstanding:**
+  - **D-10 final acceptance:** 06's F-07 suite running on lane D's schema. Acceptance: it passes. Blocked on Agent 01's A-01 (the spine on lane D). The DDL is delivered.
+  - **D-12:** ADR-0009 v1.1.0 DDL (`ITEM_UPDATED`, `ACTION_EXPIRED`, `GUARD_REFUSED`, `OPERATOR_NOTE_RECORDED`, ActionRequest `superseded`). Acceptance: migration plus tests, and old receipts still verify. Blocked on ADR-0009 being accepted.
+  - **D-09b:** the off-box backup destination, and a restore drill from it. Acceptance: a PITR restore from the off-box copy passes `verify_chain`. Blocked on Michael.
+  - Proposed follow-ups (see AGENT_STATUS `## Proposed tasks`): D-19, D-20, D-21, D-22.
+- **Blockers:**
+  - **Michael (`MICHAEL_DECISIONS` #11):** where the off-box backups go. Question and options in `docs/state/OWNER_QUESTION_BACKUPS.md`. The backups contain raw seller contact values, so they must be encrypted off-box.
+  - **Operator, one command:** `sudo loginctl enable-linger michaelos`. Without it the database does not start after a reboot (`Linger=no` today).
+  - **Operator:** Podman is not installed. The Quadlet units in `state/bootstrap/podman/` are written but **untested**.
+  - **Agent 01:** A-01 for D-10. ADR-0009 for D-12.
+- **Key files and entry points:**
+  - DDL: `state/migrations/`. Python: `state/mbos_state/`.
+    - `migrate.py`: checksummed, receipted migrations. `provision.py`: superuser-only setup for the real `mbos_dbos` login.
+    - `store.py`: `StateStore`. `mcp_server.py` / `mcp_tools.py`: the State MCP server.
+    - `chain.py`: export, anchor and offline verify. `artifacts.py`, `vector_index.py`.
+    - `mbos_canonical.py`: the ADR-0010 reference. Never edit it.
+  - Ops: `state/bootstrap/` (`bootstrap.sh`, `pg-local.sh`, `roles.sql`, backup, restore and PITR scripts, systemd units).
+  - Docs: `docs/state/RUNBOOK-STATE.md` (start here for operations), `OPERATOR_NOTES.md`, `CAPITAL_LEDGER_DESIGN.md`, `CARD_INPUTS.md`, `REPORTING_VIEWS.md`.
+- **Run commands:**
+  - **Setup:** `python3 -m venv state/.venv && state/.venv/bin/pip install "psycopg[binary]>=3.1" "mcp>=2.3,<3" pytest jsonschema pgserver`
+  - **Health (the one command):** `cd state && .venv/bin/python -m pytest`
+    - Expect `240 passed, 1 skipped` in about 4 minutes.
+    - The 1 skip needs `MBOS_ECONOMICS_SRC=<Agent 03's economics/src>`. With it, 241 pass.
+    - Each test gets a throwaway PG16 database from the `pgserver` wheel. Nothing persistent is created.
+  - **Bring up a real cluster:** `./state/bootstrap/pg-local.sh init && ./state/bootstrap/pg-local.sh start && ./state/bootstrap/bootstrap.sh`.
+    - It is idempotent and prints `OK: N receipts checked`.
+    - Port 55432 (loopback only).
+  - **Chain check:** `MBOS_DSN=... python -m mbos_state verify-chain`.
+  - **Backup + restore drill:** `bootstrap/backup-dump.sh`, then `bootstrap/restore-drill.sh --fresh-cluster <dump>`.
+- **Interfaces with other lanes:**
+  - **Provides:**
+    - The SQL API (`mbos.create_item`, `transition_item`, `update_item_doc`, `append_item_research`, `propose_action`, `set_action_status`, `record_approval`, `record_outcome`, `budget_*`, `panic_set`, `effector_claim`/`finish`, `record_operator_note`, `capital_*`, `set_mission`).
+    - Contract-shaped views (`v_*_documents`).
+    - Reports (`REPORTING_VIEWS.md`).
+    - Consumed by 01 (`Pg04Ledger` / `spine_d`), 05 (vendors my migrations, pinned by sha), 06 (`mbos_comms`), 03 (operator notes), and the Operator UI.
+  - **Consumes, vendored read-only (re-vendor with `git show origin/research/agent-01-coordinator:<path>`):**
+    - `docs/research/contracts/*` into `state/tests/contracts-v1.0.0/`
+    - `docs/research/contracts/canonical/*` into `migrations/0000_mbos_canonical.sql`, `mbos_state/mbos_canonical.py` and `tests/canonical/vectors.json`
+    - `mission.schema.json` and its examples into `state/tests/contracts-additive/`
+    - The blob ids are in each folder's `README.md`. Compare them with `git hash-object`.
+  - **Agent 03's loader** (not vendored): used only via `MBOS_ECONOMICS_SRC` for the operator-note acceptance test.
+- **Known pitfalls:**
+  - **Applied migrations are checksum-locked.** Editing one gives `MigrationDrift`. Add a new numbered file. (I amended 0001/0004 once, before anything was deployed, for ADR-0010; dev databases from before `a0d1fbe` must be recreated.)
+  - **pgvector is not a trusted extension.** `CREATE EXTENSION vector WITH SCHEMA mbos_ext` needs a superuser. `provision()` and `bootstrap.sh` do it, and migration 0010 refuses to run without it.
+  - **Unix socket paths must be ≤107 bytes.** Keep socket dirs short, and keep cluster data out of `/run/user/1001` (a 1.5 GB tmpfs that once filled up and blocked everyone's Postgres). The repo's tests already follow this.
+  - **State changes need their receipt in the same transaction**, or COMMIT is refused (MB003). Call the `mbos.*` API functions, not raw INSERTs.
+  - **Receipts are insert-only even for the owner and superuser.** Tamper tests use `SET LOCAL session_replication_role = replica`.
+  - **`mbos_dbos` is a member of `approver`**, so it can approve, record notes and fund capital. Keep those paths in the Operator UI and out of workflows and LLM-reachable tools (ruling R14). The database cannot tell two humans apart: the UI must pass the authenticated author.
+  - **Archived WAL files are read-only**, so `restore_command` must use `cat … > %p`, not `cp`. (This broke recovery once.)
+  - **Host Python is 3.10**, not the 3.12 in ADR-0008. The code is 3.10-compatible.
+  - **Commit identity:** set it per commit (`docs/COORDINATION.md`). All commits before `8ad1b9b` read "Agent 07 Marketing"; the correction is `docs/receipts/2026-10-07-provenance-correction-agent-04-commit-authorship.md`.
+  - **HNSW ties:** orthogonal items share a distance, so compare results as sets, not by position.
+- **Open questions (UNKNOWN):**
+  - Where do the off-box backups go, and what RPO/RTO does Michael accept? Michael #11. Today's real recovery point for losing the machine is **24 h**. Crashes lose nothing.
+  - Event and status names for ADR-0009: Agent 01.
+  - Retention of old base backups and WAL is not automated, and nothing is encrypted off-box yet: the owner decides the destination first.
+  - Volume per day, which would decide receipt partitioning: Agent 02. It is not needed at solo scale.
