@@ -1,7 +1,9 @@
 """Install lanes 02 (mbos-discovery), 03 (mbos-economics) and 05 (mbos-governance) from their PUSHED heads into .venv, so the gate's
 "installed == pushed" check compares like with like. Never uses a lane's working tree or a stale build/ directory.
 
-    .venv/bin/python -I tools/sync_lanes.py
+    .venv/bin/python -I tools/sync_lanes.py [--venv /path/to/other/.venv]
+
+`--venv` installs the same pushed lane heads into another worktree's venv (an operator step: it writes into that worktree's .venv only).
 """
 
 import shutil
@@ -36,6 +38,12 @@ def find_uv() -> list[str]:
 
 
 def main() -> int:
+    global PY
+    if "--venv" in sys.argv:
+        PY = Path(sys.argv[sys.argv.index("--venv") + 1]).resolve() / "bin" / "python"
+        if not PY.is_file():
+            print(f"no python at {PY}")
+            return 2
     uv = find_uv()
     subprocess.run(["git", "fetch", "-q", "origin"], cwd=ROOT, check=True)
     for pkg, ref, sub in LANES:
