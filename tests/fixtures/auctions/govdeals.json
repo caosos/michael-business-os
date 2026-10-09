@@ -1,0 +1,97 @@
+{
+ "_note": "hand-built; real shapes UNKNOWN until B-12",
+ "lots": [
+  {
+   "lot_id": "A1",
+   "title": "John Deere zero turn mower",
+   "current_bid": 450,
+   "bid_count": 3,
+   "closes_at": "2026-10-12T20:00:00Z",
+   "buyer_premium_pct": 10,
+   "pickup": "Pickup Sat 9-12 at yard; bring loader",
+   "rules_url": "https://example.invalid/rules",
+   "observed_at": "2026-10-09T12:00:00Z",
+   "location": {
+    "city": "Conway",
+    "state": "AR"
+   },
+   "sales_tax_pct": 6.5
+  },
+  {
+   "lot_id": "A2",
+   "title": "2012 Ford F-150 pickup truck",
+   "current_bid": 3200,
+   "bid_count": 7,
+   "closes_at": "2026-10-12T20:00:00Z",
+   "buyer_premium_pct": 10,
+   "pickup": "Pickup Sat 9-12 at yard; bring loader",
+   "rules_url": "https://example.invalid/rules",
+   "observed_at": "2026-10-09T12:00:00Z",
+   "location": {
+    "city": "Little Rock",
+    "state": "AR"
+   },
+   "kind": "vehicle"
+  },
+  {
+   "lot_id": "A3",
+   "title": "Lincoln MIG welder",
+   "current_bid": 0,
+   "bid_count": 0,
+   "closes_at": "2026-10-12T20:00:00Z",
+   "buyer_premium_pct": 10,
+   "pickup": "Pickup Sat 9-12 at yard; bring loader",
+   "rules_url": "https://example.invalid/rules",
+   "observed_at": "2026-10-09T01:00:00Z",
+   "location": {
+    "city": "Searcy",
+    "state": "AR"
+   }
+  },
+  {
+   "lot_id": "A4",
+   "title": "Kubota tractor",
+   "current_bid": 9000,
+   "bid_count": 3,
+   "closes_at": "2026-10-12T20:00:00Z",
+   "buyer_premium_pct": 10,
+   "pickup": "Pickup Sat 9-12 at yard; bring loader",
+   "rules_url": "https://example.invalid/rules",
+   "observed_at": "2026-10-09T12:00:00Z",
+   "location": {
+    "city": "Fayetteville",
+    "state": "AR"
+   }
+  },
+  {
+   "lot_id": "A5",
+   "title": "Dump trailer 14ft",
+   "current_bid": 100,
+   "bid_count": 3,
+   "closes_at": "2026-10-12T20:00:00Z",
+   "buyer_premium_pct": 10,
+   "pickup": "Pickup Sat 9-12 at yard; bring loader",
+   "rules_url": "https://example.invalid/rules",
+   "observed_at": "2026-10-09T12:00:00Z",
+   "location": {
+    "city": "Jonesboro",
+    "state": "AR"
+   }
+  },
+  {
+   "lot_id": "A6",
+   "title": "Pallet of misc",
+   "current_bid": 100,
+   "bid_count": 3,
+   "closes_at": "2026-10-12T20:00:00Z",
+   "buyer_premium_pct": 10,
+   "pickup": "Pickup Sat 9-12 at yard; bring loader",
+   "rules_url": "https://example.invalid/rules",
+   "observed_at": "2026-10-09T12:00:00Z",
+   "location": {
+    "city": "Memphis",
+    "state": "TN"
+   }
+  }
+ ]
+}
