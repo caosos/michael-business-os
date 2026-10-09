@@ -33,6 +33,12 @@ class Stub:
     def __init__(self):
         self.state, self.attested = "RUNNING", []
 
+    def capital_for(self, item_id):
+        return {"deployed": 0.0, "closed": False, "net": None}
+
+    def open_acquisitions(self):
+        return []
+
     def item(self, i):
         return SVC if i == SVC["item_id"] else None
 

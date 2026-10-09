@@ -24,10 +24,10 @@ try:  # lane C's package is optional: without it the notes form is simply unavai
 except ImportError:  # pragma: no cover
     NOTE_CATEGORIES, NOTE_KINDS = frozenset(), frozenset()
 
-from . import attest_view, card_view, comps_view, inputs_view, ux, views, wanted_view
+from . import attest_view, bought_view, card_view, comps_view, inputs_view, ux, views, wanted_view
 from .digest import figures as digest_figures, dollars as _dollars
 from .card_view import ec
-from .backend import FollowupRefused, ItemNotFound, NoteRefused, NumbersRefused, ProfileUnavailable
+from .backend import AlreadyClosed, FollowupRefused, ItemNotFound, NoteRefused, NumbersRefused, ProfileUnavailable
 from .sources import load_health
 from .ux import InputError
 
@@ -558,7 +558,10 @@ class App:
         if item["state"] not in ux.OUTCOME_STATES:
             raise InputError(f"the item is {item['state']}; record outcomes once it has settled")
         kind, kw = ux.parse_outcome(item, f)
-        o = self.store.record_outcome(item["item_id"], kind, **kw)
+        try:
+            o = self.store.record_outcome(item["item_id"], kind, **kw)
+        except AlreadyClosed as ex:
+            raise InputError(str(ex)) from None
         return f"Outcome {o['kind']} recorded ({o['outcome_id']})."
 
     author = "michael"  # the authenticated operator: set HERE, never taken from a form (F-14; all humans share one DB login)
@@ -798,6 +801,21 @@ class App:
         self.store.record_human_inputs(item_id, inputs, note, self.author)
         return inputs_view.saved_message(f"what you know about the job ({len(inputs)} figures)", item_id)
 
+    def record_bought(self, item_id, f):
+        """F-33: "I bought it" -> D-31 `record_acquisition` (owner channel; capital deploys when HE records it)."""
+        nonce = self._numbers_gate(f)
+        item = self.store.item(item_id)
+        if item is None:
+            raise InputError("unknown opportunity")
+        if item.get("type") != "flip" or item.get("state") not in bought_view.BUY_STATES:
+            raise InputError("a purchase is recorded on a flip you have said YES to (approved or acted), not on this item")
+        amount, note = bought_view.parse_bought(f)
+        try:
+            self.store.record_acquisition(item_id, amount, note, self.author, f"{item_id}:bought:{nonce}")
+        except NumbersRefused as ex:
+            raise InputError("; ".join(ex.reasons)) from None
+        return bought_view.saved_message(amount, self.store.capital_for(item_id))
+
     def add_followup(self, item_id, f):
         """F-11: draft a follow-up / offer / quote as its OWN request via the public API (A-15). CSRF, human channel. It only
         proposes: the YES (and the PIN for binding actions) is Michael's separate decision."""
@@ -935,7 +953,8 @@ def make_handler(app):
                 known = {l["item_id"] for l in (loaded["doc"] or {}).get("legs", []) if app.store.item(l["item_id"])} if loaded["kind"] == "plan" else set()
                 ids = {l["item_id"] for l in (loaded["doc"] or {}).get("legs", [])} | set((loaded["doc"] or {}).get("replace_if_stale") or []) if loaded["kind"] == "plan" else set()
                 titles = {i: ((app.store.item(i) or {}).get("normalized") or {}).get("title") for i in ids}
-                return self._send(200, page("Weekly mission", mission_view.render_page(loaded, known, {k: v for k, v in titles.items() if v}), app.state()))
+                return self._send(200, page("Weekly mission", mission_view.render_page(loaded, known, {k: v for k, v in titles.items() if v})
+                                                                + bought_view.render_open_flips(app.store.open_acquisitions()), app.state()))
             if u.path == "/wanted":
                 return self._wanted_page(flash or err, bool(err))
             if u.path == "/numbers":
@@ -1178,6 +1197,19 @@ def make_handler(app):
             self.send_header("Content-Length", "0")
             self.end_headers()
 
+        def _post_bought(self, item_id):
+            n = min(int(self.headers.get("Content-Length") or 0), 65536)
+            f = {k: v[0] for k, v in parse_qs(self.rfile.read(n).decode("utf-8", "replace"), keep_blank_values=True).items()}
+            try:
+                msg = app.record_bought(item_id, f)
+            except (InputError, NumbersRefused) as ex:
+                return self._item_page(item_id, utcnow(), None, False, bought_reasons=getattr(ex, "reasons", None) or [str(ex)],
+                                       bought_values={k: v for k, v in f.items() if k not in ("pin", "csrf")})
+            self.send_response(303)
+            self.send_header("Location", f"/item/{item_id}?msg={quote(msg)}#bought")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+
         def _post_note(self, item_id):
             n = min(int(self.headers.get("Content-Length") or 0), 65536)
             f = {k: v[0] for k, v in parse_qs(self.rfile.read(n).decode("utf-8"), keep_blank_values=True).items()}
@@ -1195,7 +1227,8 @@ def make_handler(app):
             self.end_headers()
 
         def _item_page(self, item_id, now, flash, is_err, note_reasons=None, note_values=None, followup_reasons=None,
-                       followup_values=None, comp_reasons=None, comp_values=None, attest_reasons=None, input_reasons=None, input_which=None, input_values=None):
+                       followup_values=None, comp_reasons=None, comp_values=None, attest_reasons=None, input_reasons=None, input_which=None, input_values=None,
+                       bought_reasons=None, bought_values=None):
             """F-13: the opportunity card is the primary view of an item."""
             try:
                 res = app.store.opportunity_card(item_id)
@@ -1218,6 +1251,8 @@ def make_handler(app):
                                            lane=store_item.get("type")) + body
             body = attest_view.render_confirm(store_item, app.csrf, bool(app.operator_pin), app.store.lane == "lane_d",
                                               secrets.token_hex(6), attest_reasons) + body
+            body = bought_view.render_bought(store_item, app.store.capital_for(item_id), app.csrf, bool(app.operator_pin),
+                                             app.store.lane == "lane_d", secrets.token_hex(6), bought_reasons, bought_values) + body
             body = inputs_view.render_inputs(store_item, card, app.csrf, bool(app.operator_pin), app.store.lane == "lane_d",
                                              secrets.token_hex(6), input_reasons, input_which, input_values) + body
             body += card_view.render_followup_section(card, (app.store.item(item_id) or {}).get("state", "?"), app.csrf,
@@ -1253,6 +1288,8 @@ def make_handler(app):
                 return self._post_attest(parts[1])
             if len(parts) == 3 and parts[0] == "item" and parts[2] in ("quote", "scope"):
                 return self._post_input(parts[1], parts[2])
+            if len(parts) == 3 and parts[0] == "item" and parts[2] == "bought":
+                return self._post_bought(parts[1])
             if len(parts) == 3 and parts[0] == "item" and parts[2] == "note":
                 return self._post_note(parts[1])
             if len(parts) == 3 and parts[0] == "item" and parts[2] == "followup":

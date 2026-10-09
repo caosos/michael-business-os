@@ -27,6 +27,12 @@ class Stub:
         self.saved = []
         self.items = {SVC["item_id"]: SVC, FLIP["item_id"]: FLIP}
 
+    def capital_for(self, item_id):
+        return {"deployed": 0.0, "closed": False, "net": None}
+
+    def open_acquisitions(self):
+        return []
+
     def item(self, i):
         return self.items.get(i)
 

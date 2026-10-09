@@ -32,6 +32,12 @@ class StubStore:
         self.calls.append(tuple(states))
         return ITEMS
 
+    def capital_for(self, item_id):
+        return {"deployed": 0.0, "closed": False, "net": None}
+
+    def open_acquisitions(self):
+        return []
+
     def system_state(self):
         return "NORMAL"
 

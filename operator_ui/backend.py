@@ -54,6 +54,10 @@ class AlreadyRecorded(Exception):
     """F-84: a concurrent submit with the same idempotency key won; the caller reports the winner's receipt."""
 
 
+class AlreadyClosed(Exception):
+    """F-33: the store refused a second closing outcome for an item whose capital already came back."""
+
+
 class NumbersRefused(Exception):
     """F-22: the store refused a mission or capital change; `reasons` are shown verbatim."""
 
@@ -366,6 +370,54 @@ class SpineBackend:
             msg = str(getattr(ex, "orig", ex)).strip().splitlines()[0]
             raise NumbersRefused([f"the store refused it: {msg}"]) from None
 
+    # ---- F-33: "I bought it" (D-31 `mbos.record_acquisition`) and the capital an item holds. HUMAN CHANNEL ONLY (R14) ------
+    def capital_for(self, item_id: str) -> dict:
+        """{'deployed': $ recorded as bought, 'closed': bool, 'net': realized net or None} from the capital ledger (read-only)."""
+        if self.lane != "lane_d":
+            return {"deployed": 0.0, "closed": False, "net": None}
+        with self.engine.connect() as c:
+            rows = c.execute(sa.text("SELECT kind, amount, net FROM mbos.capital_ledger WHERE item_id = :i AND mode = 'dry_run'"), {"i": item_id}).all()
+        close = next((r for r in rows if r[0] == "close"), None)
+        return {"deployed": float(sum(r[1] for r in rows if r[0] == "deploy")), "closed": close is not None,
+                "net": None if close is None else float(close[2])}
+
+    def open_acquisitions(self) -> list[dict]:
+        """Items with capital deployed and not yet closed (a flip in flight): [{'item_id','title','amount'}]. Read-only."""
+        if self.lane != "lane_d":
+            return []
+        with self.engine.connect() as c:
+            rows = c.execute(sa.text(
+                "SELECT l.item_id, sum(l.amount) FROM mbos.capital_ledger l WHERE l.kind = 'deploy' AND l.mode = 'dry_run' AND NOT EXISTS "
+                "(SELECT 1 FROM mbos.capital_ledger x WHERE x.kind = 'close' AND x.item_id = l.item_id AND x.mode = 'dry_run') "
+                "GROUP BY l.item_id ORDER BY min(l.seq)")).all()
+        out = []
+        for iid, amt in rows:
+            it = self.item(iid) or {}
+            out.append({"item_id": iid, "title": ((it.get("normalized") or {}).get("title")) or iid, "amount": float(amt)})
+        return out
+
+    def record_acquisition(self, item_id: str, amount: Any, note: str, entered_by: str, idem: str) -> str:
+        """Michael bought it off-system: D-31 `mbos.record_acquisition` (owner channel, human actor, dry-run BUDGET_COMMITTED -> capital
+        deploy; refused above available or when unfunded). No 01 wrapper exists yet, so this mirrors `spine_d.record_human_input`
+        (human provenance first). HUMAN CHANNEL ONLY (R14): the single caller is `App.record_bought` (CSRF + PIN, server-set author)."""
+        import json
+
+        from mbos.clock import iso, utcnow
+
+        if self.lane != "lane_d":
+            raise NumbersRefused(["recording a purchase needs the lane D store (MBOS_STATE_BACKEND=lane_d)"])
+        prov = {"actor_type": "human", "human_actor": entered_by, "basis": "FACT", "created_at": iso(utcnow()),
+                "tool_name": "operator_ui.bought_it", "tool_version": "F-33", "inputs_used": [{"ref": item_id}]}
+        try:
+            with self.engine.begin() as c:
+                pid = c.execute(sa.text("SELECT mbos.record_provenance(CAST(:d AS jsonb))"), {"d": json.dumps(prov)}).scalar_one()
+                return c.execute(sa.text("SELECT mbos.record_acquisition(:i, CAST(:n AS numeric), :t, CAST(:a AS jsonb), ARRAY[CAST(:p AS text)], :k)"),
+                                 {"i": item_id, "n": str(amount), "t": note, "a": json.dumps({"type": "human", "id": entered_by}),
+                                  "p": pid, "k": idem}).scalar_one()
+        except sa.exc.DBAPIError as ex:
+            msg = str(getattr(ex, "orig", ex)).strip().splitlines()[0]
+            raise NumbersRefused([f"the store refused it: {msg}"]) from None
+
     # ---- F-14: Michael's own model knowledge (operator notes). Lane D only; HUMAN CHANNEL ONLY (R14) -----------
     def operator_notes(self, include_retracted: bool = False) -> list[dict]:
         """Current head of every note chain, from lane D's folded document (read-only SQL function)."""
@@ -425,8 +477,15 @@ class SpineBackend:
 
     def record_outcome(self, item_id: str, kind: str, **kw: Any) -> dict:
         """Second (and last) write path: Michael records what actually happened (feeds LEARN, lane C)."""
-        with self.engine.begin() as c:
-            return self._spine.record_outcome(c, item_id, kind, recorded_by="michael", channel="web", **kw)  # → mbos.web.outcome
+        try:
+            with self.engine.begin() as c:
+                return self._spine.record_outcome(c, item_id, kind, recorded_by="michael", channel="web", **kw)  # → mbos.web.outcome
+        except sa.exc.DBAPIError as ex:
+            msg = str(getattr(ex, "orig", ex)).strip().splitlines()[0]
+            if "already closed" in msg:  # F-115 / D-31: a closing outcome already returned this item's capital
+                raise AlreadyClosed(f"This item is already closed: its capital was returned when the first closing outcome was recorded, "
+                                    f"so a second '{kind}' is refused and nothing moved. ({msg})") from None
+            raise
 
     # ---- the one write path -----------------------------------------------------------------
     def decide(self, areq_id: str, decision: str, payload_hash_seen: str, **kw: Any) -> dict:

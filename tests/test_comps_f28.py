@@ -30,6 +30,12 @@ class StubStore:
     def item(self, item_id):
         return self.item_doc if item_id == ITEM["item_id"] else None
 
+    def capital_for(self, item_id):
+        return {"deployed": 0.0, "closed": False, "net": None}
+
+    def open_acquisitions(self):
+        return []
+
     def items_in_states(self, states):
         return [self.item_doc] if self.item_doc["state"] in states else []
 
