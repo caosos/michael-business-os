@@ -225,7 +225,10 @@ def main() -> int:
                                capture_output=True, text=True).stdout.strip() for l in LANES}
     heads["01-coordinator (local HEAD)"] = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT,
                                                           capture_output=True, text=True).stdout.strip()
-    pytest_check = run("full test suite (pytest)", [PY, "-m", "pytest", "-q"])
+    pytest_check = run("full test suite (pytest)", [PY, "-m", "pytest", "-q", "-rf"])
+    failed = [ln[len("FAILED "):].split(" - ")[0] for ln in pytest_check["stdout"].splitlines() if ln.startswith("FAILED ")]
+    if failed:  # name the failing tests in the gate report (a failure under load must be identifiable, not a bare count)
+        pytest_check["summary"] += " | FAILED: " + ", ".join(failed[:6])
     checks = ([fetch_check] if fetch_check else []) + [
         run("frozen contracts (validate_contracts.py)", [PY, "-I", "docs/research/contracts/validate_contracts.py", "docs/research/contracts"]),
         contracts_pinned(),
