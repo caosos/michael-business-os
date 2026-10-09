@@ -310,3 +310,6 @@ Done: C-29 @ 6f978de (LEARN groups other_asset TVs/small goods by prior class so
 
 ## C-31
 Done: C-31 @ 6a826aa (readers accept value/author from `finding` JSON as well as old extra fields; $700 YES / $500 MAYBE from new shape; 402 passed, 22 skipped). State: CLOSED
+
+## C-32
+Done: C-32 @ c0e98d2 (auction cost model: premium/tax/pickup/transport all-in, time to cash, turns, $/labor-hour, 24/48h and slow flags, asking-only never YES; additive auction-model.json; 410 passed, 22 skipped). State: CLOSED
