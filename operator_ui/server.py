@@ -24,7 +24,7 @@ try:  # lane C's package is optional: without it the notes form is simply unavai
 except ImportError:  # pragma: no cover
     NOTE_CATEGORIES, NOTE_KINDS = frozenset(), frozenset()
 
-from . import attest_view, bought_view, card_view, comps_view, inputs_view, ux, views, wanted_view
+from . import attest_view, bought_view, card_view, comps_view, glance_view, inputs_view, ux, views, wanted_view
 from .digest import figures as digest_figures, dollars as _dollars
 from .card_view import ec
 from .backend import AlreadyClosed, FollowupRefused, ItemNotFound, NoteRefused, NumbersRefused, ProfileUnavailable
@@ -938,8 +938,14 @@ def make_handler(app):
                     head = mission_view.today_header(lv, None, self._leg_states(lv))
                 except Exception as ex:  # noqa: BLE001 - Today must still render; say the header is unavailable
                     head = f"<div class='card'><p class='bad'>Today's header is unavailable ({e(type(ex).__name__)}).</p></div>"
-                return self._send(200, page("Operator queue", head + comps_view.render_today(self._parked()) + render_queue(views.queue(app.store, now)),
-                                            app.state(), flash or err, bool(err)))
+                st = app.state()
+                try:  # F-38: the glanceable top; the full queue below is unchanged
+                    glance = glance_view.render(glance_view.build(app.store, now, self._parked(), st), app.csrf)
+                except Exception as ex:  # noqa: BLE001 - Today must still render
+                    glance = f"<div class='card'><p class='bad'>At-a-glance cards are unavailable ({e(type(ex).__name__)}).</p></div>"
+                return self._send(200, page("Operator queue", glance + head + comps_view.render_today(self._parked())
+                                            + f"<details><summary><b>Full queue</b></summary>{render_queue(views.queue(app.store, now))}</details>",
+                                            st, flash or err, bool(err)))
             if u.path == "/digest":
                 from . import digest as digest_view
 
