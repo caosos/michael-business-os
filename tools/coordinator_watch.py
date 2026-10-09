@@ -164,6 +164,10 @@ def my_session() -> Optional[dict]:
 
 
 def send_wake(session: dict, text: str) -> bool:
+    """Types one line into the coordinator's tmux pane. DISABLED unless MBOS_ALLOW_TMUX_WAKE=1: the permission classifier denied agent self-driving
+    through tmux (2026-10-09), so this needs explicit owner approval. The sanctioned wake path is the central bridge's Claude peer-message relay."""
+    if os.environ.get("MBOS_ALLOW_TMUX_WAKE") != "1":
+        return False
     target = (session.get("tmux") or "").split(".")[-1] or None   # pane id, e.g. %0
     if not target:
         return False
@@ -294,7 +298,7 @@ def cycle(inbox_refs, do_wake: bool, probe: bool = True) -> dict:
             st["wakes"].append({"ids": ids, "at": t, "state": "DELIVERED", "delivered_at": t})
             receipt("wake_delivered", {"ids": ids, "session": sess.get("name"), "pane": sess.get("tmux")}, [f"{inbox_ref}:docs/messages/inbox"])
         else:
-            why = "tmux send failed"
+            why = "tmux wake is disabled (needs owner approval: MBOS_ALLOW_TMUX_WAKE=1); the central bridge's peer relay is the sanctioned wake"
     elif ok and not do_wake:
         why = "would wake (--no-wake)"
     # approved work waiting while the dispatcher is down; stalled workers

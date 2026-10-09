@@ -60,6 +60,7 @@ def test_wake_text_carries_ids_not_bodies(tmp_path, monkeypatch):
     sent = []
     monkeypatch.setattr(cw, "WD", tmp_path)
     monkeypatch.setattr(cw, "send_wake", lambda s, t: sent.append(t) or True)
+    monkeypatch.setattr(cw, "WD", tmp_path)
     monkeypatch.setattr(cw, "my_session", lambda: IDLE)
     monkeypatch.setattr(cw, "quota_ok", lambda: True)
     monkeypatch.setattr(cw, "git", lambda *a: type("R", (), {"returncode": 0, "stdout": "abc1234\n"})())
@@ -108,3 +109,10 @@ def test_probe_and_state_contract_shape(tmp_path, monkeypatch):
     s = cs.state()
     assert {"project", "last_received", "last_ack", "open_items", "heartbeat", "event_wake", "periodic_wake", "accepts_messages"} <= set(s)
     assert s["event_wake"]["status"] == "UNVERIFIED" and "no wake has been acknowledged" in s["event_wake"]["evidence"]
+
+
+def test_tmux_wake_is_off_by_default(monkeypatch):
+    calls = []
+    monkeypatch.delenv("MBOS_ALLOW_TMUX_WAKE", raising=False)
+    monkeypatch.setattr(cw.subprocess, "run", lambda *a, **k: calls.append(a) or type("R", (), {"returncode": 0})())
+    assert cw.send_wake({"tmux": "s:@0.%0"}, "x") is False and calls == []            # nothing is typed into any pane

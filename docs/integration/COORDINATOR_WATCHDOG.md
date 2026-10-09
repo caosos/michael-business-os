@@ -5,7 +5,7 @@ Owner command (2026-10-09): activate watchdogs for the three coordinators withou
 ## Michael Business OS (this project)
 | Piece | What it is | State |
 |---|---|---|
-| `tools/coordinator_watch.py` (tmux `mbos-watchdog`, every 120 s, no model) | fetches origin, lists `origin/liaison/aria-to-agent-01:docs/messages/inbox` vs `docs/messages/acks/` on the coordinator branch; decides NEED; reads Claude's own session registry (`~/.claude/sessions/*.json`: `status` busy/idle, `tmux` pane) and wakes the session ONLY when idle, quota allows a turn, and limits allow (>= 10 min apart, <= 3 wakes per message). The wake line carries message ids, never bodies | running |
+| `tools/coordinator_watch.py` (tmux `mbos-watchdog`, every 120 s, no model) | fetches origin, lists `origin/liaison/aria-to-agent-01:docs/messages/inbox` vs `docs/messages/acks/` on the coordinator branch; decides NEED; reads Claude's own session registry (`~/.claude/sessions/*.json`: `status` busy/idle, `tmux` pane) and decides whether to wake and (ONLY if an owner enables it, see below) wakes the session when idle, quota allows a turn, and limits allow (>= 10 min apart, <= 3 wakes per message). The wake line carries message ids, never bodies | running |
 | Verification ladder | DELIVERED (typed into the pane) -> INGESTED (session went busy after the wake) -> ACKNOWLEDGED (ack file on the coordinator branch). Delivery is never reported as acknowledgement; no ingestion in 90 s or no ack in 15 min = STALE; 3 tries = OWNER_ACTION | tested (unit) + live test below |
 | Approved work / workers | restarts `mbos-dispatcher` only when specialist READY rows exist and it is down (a deliberate stop on an empty queue is left alone); flags workers older than their 3500 s timeout (never kills) | running |
 | Status feed for the panel | `http://127.0.0.1:8479/health.json` (read-only, local); `tools/coordinator_state.py` prints the same fields CAOSCare's `coordinator_state.py` does; `tools/heartbeat_probe.py` returns `{"verdict": "WAKE"|"IDLE"}` | running |
@@ -23,3 +23,7 @@ Owner command (2026-10-09): activate watchdogs for the three coordinators withou
 
 ## Switch for the central bridge
 When the Desktop-Agent bridge adds the liaison inbox and schedules `heartbeat_probe.py`, set `var/watchdog/mode.json` to `{"wake": false}` so only one component wakes the session; this daemon then keeps checking, verifying and reporting.
+
+
+## Wake path decision (2026-10-09): tmux self-wake is OFF
+The Claude Code permission classifier denied arming a watcher that types into the coordinator's own tmux pane ("Tmux Self Drive"). I did not work around it: `send_wake` returns False unless `MBOS_ALLOW_TMUX_WAKE=1`, and `var/watchdog/mode.json` is `{"wake": false}`. The watchdog still checks, verifies, reports and restarts the dispatcher; it just does not type into a session. The sanctioned wake is the central bridge's Claude peer-message relay (Desktop-Agent `intake_delivery.claude_peer`, ~$0.001 per delivery), which finds this session through Claude's own registry. That needs the Desktop-Agent coordinator to add the liaison inbox as a source (W-3). Owner decision if you want the faster local path anyway: set `MBOS_ALLOW_TMUX_WAKE=1` for the `mbos-watchdog` session and `{"wake": true}` in `var/watchdog/mode.json`.
