@@ -227,6 +227,43 @@ def _act(item_id: str, areq_id: str, approval: dict[str, Any]) -> dict[str, Any]
 
 
 # ---------------------------------------------------------------- entry points used by the CLI / UI
+def gate_workflow_ids(item_id: str) -> list[str]:
+    """A-48 (F-120): the workflow(s) that can be parked at this item's approval gate. The gate runs inside the original
+    `item:<id>` workflow OR, for an item that parked at RESEARCHING, inside a `recheck:<id>:<ms>` workflow (its child `<recheck id>-1`, the one that waits). Decisions, pings
+    and events must reach whichever is still active; if none is (or the lookup fails) fall back to the item's own id."""
+    kw: dict[str, Any] = dict(status=["PENDING", "ENQUEUED", "DELAYED"], load_input=False, load_output=False,
+                              workflow_id_prefix=[item_workflow_id(item_id), f"recheck:{item_id}:"])
+    try:
+        rows = DBOS.list_workflows(**kw)
+    except Exception:  # not inside a launched runtime (UI/CLI process): ask through the client
+        from mbos.runtime import client
+
+        c = client()
+        try:
+            rows = c.list_workflows(**kw)
+        finally:
+            c.destroy()
+    ids = [r.workflow_id for r in rows if r.workflow_id == item_workflow_id(item_id) or r.workflow_id.startswith(f"recheck:{item_id}:")]
+    leaves = [i for i in ids if not any(o != i and o.startswith(f"{i}-") for o in ids)]  # a recheck runs the lifecycle as child `<id>-1`
+    return leaves or [item_workflow_id(item_id)]
+
+
+def _send_gate(item_id: str, message: dict[str, Any]) -> None:
+    ids = gate_workflow_ids(item_id)
+    try:
+        for wf in ids:
+            DBOS.send(wf, message, topic=DECISION_TOPIC)
+    except Exception:
+        from mbos.runtime import client
+
+        c = client()
+        try:
+            for wf in ids:
+                c.send(wf, message, topic=DECISION_TOPIC)
+        finally:
+            c.destroy()
+
+
 def record_decision(action_request_id: str, decision: str, payload_hash_seen: str, **kw: Any) -> dict[str, Any]:
     """Record Michael's decision (one transaction), then wake the item workflow."""
 
@@ -234,13 +271,12 @@ def record_decision(action_request_id: str, decision: str, payload_hash_seen: st
         return S().decide(conn, action_request_id, decision, payload_hash_seen, components(), **kw)
 
     out = owner_tx(decide)   # the Approval is written by the owner login, then the workflow is woken (D-26)
-    DBOS.send(item_workflow_id(out["item_id"]), {"kind": "decision", "approval_id": out["approval"]["approval_id"]},
-              topic=DECISION_TOPIC)
+    _send_gate(out["item_id"], {"kind": "decision", "approval_id": out["approval"]["approval_id"]})
     return out
 
 
 def ping(item_id: str) -> None:
-    DBOS.send(item_workflow_id(item_id), {"kind": "ping"}, topic=DECISION_TOPIC)
+    _send_gate(item_id, {"kind": "ping"})
 
 
 def notify_decision(item_id: str, approval_id: str) -> None:
@@ -248,16 +284,7 @@ def notify_decision(item_id: str, approval_id: str) -> None:
     (Operator UI, CLI). Works from any process: uses DBOS inside a launched runtime, else a DBOSClient.
     The approval row is the truth; this message is only a wake-up (the workflow re-polls on its own)."""
     message = {"kind": "decision", "approval_id": approval_id}
-    try:
-        DBOS.send(item_workflow_id(item_id), message, topic=DECISION_TOPIC)
-    except Exception:
-        from mbos.runtime import client
-
-        c = client()
-        try:
-            c.send(item_workflow_id(item_id), message, topic=DECISION_TOPIC)
-        finally:
-            c.destroy()
+    _send_gate(item_id, message)
 
 
 def notify_event(item_id: str, event: str, summary: str = "", evidence_provenance_id: str | None = None) -> None:
@@ -269,16 +296,7 @@ def notify_event(item_id: str, event: str, summary: str = "", evidence_provenanc
     if event not in WAKE_EVENTS:
         raise ValueError(f"event must be one of {WAKE_EVENTS}")
     message = {"kind": "event", "event": event, "summary": summary, "evidence_provenance_id": evidence_provenance_id}
-    try:
-        DBOS.send(item_workflow_id(item_id), message, topic=DECISION_TOPIC)
-    except Exception:
-        from mbos.runtime import client
-
-        c = client()
-        try:
-            c.send(item_workflow_id(item_id), message, topic=DECISION_TOPIC)
-        finally:
-            c.destroy()
+    _send_gate(item_id, message)
 
 
 # ---------------------------------------------------------------- follow-up actions on an Item that already acted (A-15)

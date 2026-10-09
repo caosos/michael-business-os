@@ -21,7 +21,7 @@ from mbos.adapters.comps import ProductionCompsSource  # noqa: E402
 from mbos.adapters.economics import EconomicsResearcher  # noqa: E402
 from mbos.config import configure  # noqa: E402
 from mbos.reference.fixture_adapter import FixtureSourceAdapter  # noqa: E402
-from mbos.runtime import components, item_workflow_id  # noqa: E402
+from mbos.runtime import components, item_workflow_id, owner_tx, spine_module as S  # noqa: E402
 from tests.helpers.common import ROOT, wait_state  # noqa: E402
 
 FIXTURE = ROOT / "fixtures" / "sources" / "no_economics.json"
@@ -34,9 +34,11 @@ def _comp(inbox, n: int, price: float, days_ago: int) -> None:
         "url": f"https://example.invalid/seen/{n}", "condition": "used", "city": "Conway", "state": "AR", "entered_by": "michael"}))
 
 
-def _discover(rt, tmp_path, tag: str) -> str:
+def _discover(rt, tmp_path, tag: str, price: int | None = None) -> str:
     doc = json.loads(FIXTURE.read_text())
     for l in doc["listings"]:
+        if price is not None:
+            l["record"]["normalized"]["price"]["amount"] = price
         l["source_listing_id"] += f"-{tag}"
         l["record"]["dedup_key"] += f"|{tag}"
     f = tmp_path / f"noecon-{tag}.json"
@@ -132,5 +134,62 @@ def test_worker_inbox_watcher_moves_a_parked_item_without_a_command(rt, tmp_path
         (wf,) = w.tick()
         assert DBOS.retrieve_workflow(wf).get_result()["status"] != "researching"
         assert w.tick() == []
+    finally:
+        comps_.researcher = old
+
+
+class _ParkThenYes:
+    """Stand-in for lane C: no comps in the inbox -> park at RESEARCHING with a gap; once a comp exists, score the item with the
+    placeholder scorer over the illustrative trailer economics (which reaches YES). The test is about the gate, not the economics."""
+
+    def __init__(self, inbox):
+        self.inbox = inbox
+
+    def research(self, item):
+        from mbos.interfaces import ResearchResult
+        from mbos.reference.placeholder_scorer import PlaceholderScorer
+
+        if not any(self.inbox.glob("comp-*.json")):
+            return ResearchResult("RESEARCHING", None, [], [], None, ["need comparable sold prices"])
+        econ = json.loads((ROOT / "fixtures" / "sources" / "illustrative.json").read_text())["listings"][0]["record"]["economics"]
+        return ResearchResult("SCORED", econ, [], [], PlaceholderScorer().score({**item, "economics": econ}))
+
+
+def test_a48_hold_wake_yes_reaches_acted_through_a_recheck_gate(rt, tmp_path):
+    """F-120: the approval gate lives in the `recheck:<item>:<ms>` workflow; ping / decision must reach it (not the spent
+    `item:<id>` id), with no orphan gate workflow left behind."""
+    from datetime import timedelta
+
+    from mbos.clock import iso, utcnow
+    from tests.helpers.common import STEP_UP, pending_request, receipts_for
+
+    inbox = tmp_path / "inbox"
+    inbox.mkdir()
+    comps_ = components()
+    old = comps_.researcher
+    comps_.researcher = _ParkThenYes(inbox)
+    try:
+        item_id = _discover(rt, tmp_path, "g" + uuid.uuid4().hex[:7], )
+        assert wait_state(rt.engine, item_id, {"RESEARCHING"}) == "RESEARCHING"
+        for n, (price, ago) in enumerate([(1500, 5), (1650, 12), (1400, 20), (1550, 30)]):
+            _comp(inbox, n, price, ago)
+        wf = workflows.recheck([item_id])[0]
+        assert wait_state(rt.engine, item_id, "AWAITING_APPROVAL") == "AWAITING_APPROVAL"
+        
+        assert workflows.gate_workflow_ids(item_id) == [f"{wf}-1"]  # the child that waits, not the spent item id or the recheck parent
+        areq = pending_request(rt.engine, item_id)
+        workflows.record_decision(areq["action_request_id"], "HOLD", areq["payload_hash"],
+                                  hold={"hold_until": iso(utcnow() + timedelta(hours=6)), "wake_on": ["michael_ping"],
+                                        "renotify_after": "PT6H"})
+        wait_state(rt.engine, item_id, "HELD")
+        workflows.ping(item_id)
+        wait_state(rt.engine, item_id, "AWAITING_APPROVAL")
+        workflows.record_decision(areq["action_request_id"], "YES", areq["payload_hash"], auth_context=STEP_UP)
+        assert wait_state(rt.engine, item_id, "ACTED") == "ACTED"
+        assert DBOS.retrieve_workflow(wf).get_result()["status"] != "rejected"
+        assert receipts_for(rt.engine, areq=areq["action_request_id"], type="ACTION_EXECUTING")
+        active = DBOS.list_workflows(status=["PENDING", "ENQUEUED", "DELAYED"], load_input=False, load_output=False,
+                                     workflow_id_prefix=[f"item:{item_id}", f"recheck:{item_id}:", "followup:"])
+        assert not [w for w in active if item_id in w.workflow_id], "no orphan gate workflows"
     finally:
         comps_.researcher = old
