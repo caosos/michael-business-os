@@ -17,6 +17,7 @@ so anything that can change a number is inside the hash and nothing else is.
 from __future__ import annotations
 
 import copy
+import json
 from decimal import Decimal
 from typing import Any
 
@@ -73,6 +74,24 @@ SCOPE_FIELDS = {"rehab": {"parts_cost", "labor_hours", "admin_hours", "required_
                 "job": {"labor_hours", "materials_cost", "admin_hours", "required_skills"}}
 
 
+def _human_entry(r: dict) -> tuple:
+    """(value, author) of a human-input research entry. F-127/D-32 shape: ``finding`` is a JSON string
+    ``{"value": ..., "entered_by": ...}`` (author also in ``source_uri`` as ``human:<id>``); the older shape put
+    ``value`` and ``entered_by`` as extra fields and is still read."""
+    f = r.get("finding")
+    if isinstance(f, str) and f.lstrip().startswith("{"):
+        try:
+            d = json.loads(f)
+        except ValueError:
+            d = None
+        if isinstance(d, dict) and "value" in d:
+            by = d.get("entered_by")
+            if not by and str(r.get("source_uri", "")).startswith("human:"):
+                by = r["source_uri"][len("human:"):]
+            return d["value"], by
+    return r.get("value"), r.get("entered_by")
+
+
 def scope_overrides(item: dict) -> dict:
     """Valid human scope overrides on this Item as estimator bundle overrides (last entry per field wins).
     Needs a named author (``entered_by``), a provenance id and a basis other than UNKNOWN; a bad value is skipped."""
@@ -83,10 +102,10 @@ def scope_overrides(item: dict) -> dict:
             continue
         path = f[len(SCOPE_PREFIX):]
         block, _, field = path.partition(".")
-        v, basis = r.get("value"), r.get("basis")
+        (v, by), basis = _human_entry(r), r.get("basis")
         if field not in SCOPE_FIELDS.get(block, ()) or basis not in ("FACT", "INFER", "REC", "UNK"):
             continue
-        if not (r.get("entered_by") and str(r.get("provenance_id", "")).startswith("prov_")):
+        if not (by and str(r.get("provenance_id", "")).startswith("prov_")):
             continue
         if field == "required_skills":
             ok = isinstance(v, list) and bool(v) and all(isinstance(x, str) and x for x in v)
@@ -94,7 +113,7 @@ def scope_overrides(item: dict) -> dict:
             ok = isinstance(v, (int, float)) and not isinstance(v, bool) and v >= 0
         if ok:
             out[path] = {"value": v, "basis": basis, "provenance_id": r["provenance_id"], "human_attested": True,
-                         "note": f"stated by {r['entered_by']}"}
+                         "note": f"stated by {by}"}
     return out
 
 
@@ -110,12 +129,12 @@ def quote_override(item: dict) -> dict:
     if item.get("type") != "service":
         return out
     for r in item.get("research") or []:
-        v = r.get("value")
-        if (r.get("field") == QUOTE_FIELD and r.get("basis") in ("FACT", "INFER", "REC", "UNK") and r.get("entered_by")
+        v, by = _human_entry(r)
+        if (r.get("field") == QUOTE_FIELD and r.get("basis") in ("FACT", "INFER", "REC", "UNK") and by
                 and str(r.get("provenance_id", "")).startswith("prov_")
                 and isinstance(v, (int, float)) and not isinstance(v, bool) and 0 < v < 1e7):
             out = {"job.quoted_revenue": {"value": v, "basis": r["basis"], "provenance_id": r["provenance_id"],
-                                          "human_attested": True, "note": f"quote set by {r['entered_by']}"}}
+                                          "human_attested": True, "note": f"quote set by {by}"}}
     return out
 
 
