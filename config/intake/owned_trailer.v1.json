@@ -1,0 +1,179 @@
+{
+  "spec_version": "1.0.0",
+  "category": "trailer",
+  "kind": "goods",
+  "owned_asset": true,
+  "note": "OWNED inventory (ARIA-20261007-2253): the historical purchase price is SUNK basis and is recorded but never decides a rehab/sell/keep choice; decisions use incremental cash from today. A past tow proves the trailer ran once, not that it is roadworthy now: the tow is seller_stated until inspected.",
+  "photo_angles": [
+    "left side",
+    "right side",
+    "front",
+    "rear",
+    "tongue and coupler",
+    "axle springs and shocks",
+    "hubs and bearings",
+    "underside frame and welds",
+    "lights and wiring",
+    "deck and floor",
+    "burners and cooking surface",
+    "tire sidewall"
+  ],
+  "fields": [
+    {
+      "key": "historical_basis_usd",
+      "ask": "What did you pay for it, roughly, and when? (Recorded as sunk history; it will not drive the decision.)",
+      "accepts_evidence": [],
+      "required": true,
+      "material": false,
+      "safety_relevant": false
+    },
+    {
+      "key": "past_tow",
+      "ask": "Describe the last tow you made with it (route, distance, how it tracked). I record it as what you said, not as proof it is roadworthy now.",
+      "accepts_evidence": [],
+      "required": true,
+      "material": true,
+      "safety_relevant": true
+    },
+    {
+      "key": "tires",
+      "ask": "Tire size, date code and condition?",
+      "accepts_evidence": [
+        "photo"
+      ],
+      "required": true,
+      "material": true,
+      "safety_relevant": true
+    },
+    {
+      "key": "burners_work",
+      "ask": "Do both burners light and hold a flame? Anything leaking?",
+      "accepts_evidence": [
+        "photo",
+        "video"
+      ],
+      "required": true,
+      "material": true,
+      "safety_relevant": true
+    },
+    {
+      "key": "structure",
+      "ask": "Any cracks, bent members, rust-through or weak welds on frame, tongue or deck? Where?",
+      "accepts_evidence": [
+        "photo"
+      ],
+      "required": true,
+      "material": true,
+      "safety_relevant": true
+    },
+    {
+      "key": "suspension",
+      "ask": "What is wrong with the shocks or springs, and does it sit level and track straight?",
+      "accepts_evidence": [
+        "photo"
+      ],
+      "required": true,
+      "material": true,
+      "safety_relevant": true
+    },
+    {
+      "key": "hubs_bearings",
+      "ask": "Bearings: when last repacked or replaced? Any heat, noise or play?",
+      "accepts_evidence": [
+        "photo"
+      ],
+      "required": true,
+      "material": true,
+      "safety_relevant": true
+    },
+    {
+      "key": "lights_wiring",
+      "ask": "Do all lights work? Plug type?",
+      "accepts_evidence": [
+        "photo",
+        "video"
+      ],
+      "required": true,
+      "material": true,
+      "safety_relevant": true
+    },
+    {
+      "key": "title_registration",
+      "ask": "Do you have a title, registration or bill of sale, and does the VIN or tag match?",
+      "accepts_evidence": [
+        "title",
+        "document",
+        "serial"
+      ],
+      "required": true,
+      "material": true,
+      "safety_relevant": false
+    },
+    {
+      "key": "dimensions",
+      "ask": "Overall length, width and weight if known?",
+      "accepts_evidence": [],
+      "required": false,
+      "material": false,
+      "safety_relevant": false
+    },
+    {
+      "key": "rework_needed",
+      "ask": "What welding or rework do you already know it needs?",
+      "accepts_evidence": [
+        "photo"
+      ],
+      "required": true,
+      "material": true,
+      "safety_relevant": false
+    },
+    {
+      "key": "planned_theme",
+      "ask": "Theme or cosmetic ideas (colors, chrome bumper, accessories)?",
+      "accepts_evidence": [],
+      "required": false,
+      "material": false,
+      "safety_relevant": false
+    },
+    {
+      "key": "minimal_rehab_cash",
+      "ask": "If you only did the necessary repairs, what outside parts or materials would you buy? Rough range.",
+      "accepts_evidence": [],
+      "required": true,
+      "material": true,
+      "safety_relevant": false
+    },
+    {
+      "key": "themed_rehab_cash",
+      "ask": "For the themed build, what extra parts, paint or chrome would you buy? Rough range.",
+      "accepts_evidence": [],
+      "required": false,
+      "material": false,
+      "safety_relevant": false
+    },
+    {
+      "key": "your_hours",
+      "ask": "Roughly how many of your own hours for the minimal path and for the themed path?",
+      "accepts_evidence": [],
+      "required": true,
+      "material": true,
+      "safety_relevant": false
+    },
+    {
+      "key": "personal_use",
+      "ask": "Would you keep and use it yourself? How much is that worth to you?",
+      "accepts_evidence": [],
+      "required": false,
+      "material": false,
+      "safety_relevant": false
+    },
+    {
+      "key": "target_timing",
+      "ask": "When do you want it sold or in use (tailgate season dates)?",
+      "accepts_evidence": [],
+      "required": false,
+      "material": false,
+      "safety_relevant": false
+    }
+  ]
+}

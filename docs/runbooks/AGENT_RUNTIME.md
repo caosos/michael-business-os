@@ -29,3 +29,14 @@ Fresh worker by default. Keep context under about 150k tokens. `/compact` to con
 
 ## Permission mode (learned from the first real runs)
 Pattern allowlists cannot cover real shell work (`for` loops, process substitution, redirects, `cd x && ...`): under `acceptEdits` the first two F-21 attempts and two C-23 attempts were blocked or no-ops. Workers therefore default to `--permission-mode auto` (Claude Code's classifier decides) **with the deny-list still in force** (network tools, sudo, force-push, `reset --hard`, `rm -rf`). `bypassPermissions` is refused by the launcher. A clean exit is not a completed task: telemetry's `task_completed` needs the worker's DONE report AND a new commit; permission denials never trigger model escalation.
+
+
+## Automatic dispatch (Aria 2145; blueprint section 19)
+```bash
+tmux new-session -d -s mbos-dispatcher "cd ~/business-os-worktrees/agent-01-coordinator && .venv/bin/python -I tools/dispatcher.py"
+tail -f var/dispatcher.jsonl        # every launch / exit / idle reason
+```
+It starts one worker per idle specialist lane for the highest-priority dependency-ready READY row, at most 2 in parallel, 12 launches per hour, 3 attempts per task, and only while the supported quota reading is under 90%. It stops after 3 idle rounds with nothing READY. It never touches lane 01 (Agent 01 merges). Hand-started workers are detected in the process table, so nothing is launched twice.
+
+## Starting the dry-run stack for Michael (no terminals)
+`tools/run_dev_stack.sh start` (worker + Operator UI in tmux; UI on http://127.0.0.1:8766/, PIN in `var/ui.pin`, mode 0600). Stop: `tools/run_dev_stack.sh stop`.

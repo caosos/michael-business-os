@@ -271,7 +271,8 @@ Only Agent 01 is a persistent session. Lanes 02-07 are **fresh bounded workers**
 ## Before doing anything
 A new agent must read:
 1. START_HERE.md
-2. docs/product/DEAL_SNIFFER_START_HERE.md (owner product direction; required before touching scoring, discovery, cards/UI, inventory, campaigns, offers, services, valuation, payments, reputation, jurisdiction or merchandising)
+2. docs/operations/AI_PROJECT_OPERATING_BLUEPRINT.md (how agents operate here: one control plane, disposable workers, cheapest capable model, receipts, owner-interrupt rule; with this project's overrides at the end)
+2b. docs/product/DEAL_SNIFFER_START_HERE.md (owner product direction; required before touching scoring, discovery, cards/UI, inventory, campaigns, offers, services, valuation, payments, reputation, jurisdiction or merchandising)
 3. docs/COORDINATION.md
 3b. docs/handoff/LANE_<your lane>.md (cold-start handoff, if present)
 3c. docs/AGENT_HANDOFF.md

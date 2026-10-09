@@ -2,9 +2,12 @@
 
 Michael Business OS agents coordinate through GitHub. Michael is not the messenger. This loop applies to every agent, including newly started or restarted ones.
 
+> **Operating blueprint:** `docs/operations/AI_PROJECT_OPERATING_BLUEPRINT.md` is the standing pattern for this and future projects; its last section lists this project's overrides. This file keeps the repo-specific mechanics (claims, queue, identities).
+
 ## Runtime model (ADR-0014; supersedes "every agent is a standing session")
 - **Agent 01 is the only persistent session.** Lanes 02-07 are fresh bounded workers launched per task with `tools/worker.py`; they inherit no chat, only repo truth.
 - A worker does: read -> claim -> implement/test -> receipt -> commit (lane identity) -> push lane branch -> final JSON line -> exit. The loop below still defines claims and DONE; "continue automatically" now means **Agent 01 launches the next worker**, not that a session idles.
+- **Automatic launching:** `tools/dispatcher.py` runs as a daemon (tmux session `mbos-dispatcher`) and starts bounded workers for dependency-ready READY rows of idle specialist lanes within the quota/parallelism limits; nobody opens terminals for ordinary work.
 - Closing a session requires a pushed closeout and Agent 01's verification (`docs/handoff/CLOSEOUT_CHECKLIST.md`). Idle detection: `tools/foreman.py`.
 - Model routing (Sonnet default; Opus for hard planning/integration; Fable only for long-horizon hard work) is policy data: `config/model_router.v1.json`.
 

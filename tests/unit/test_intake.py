@@ -53,3 +53,15 @@ def test_facts_carry_basis_unchanged():
     d = intake.answer(intake.new_draft("mower"), "operating_status", "runs but smokes")
     f = intake.to_inventory_facts(d)[0]
     assert f["basis"] == "seller_stated" and f["material"] is True
+
+
+def test_owned_trailer_spec_keeps_sunk_basis_out_of_the_decision_and_the_tow_unverified():
+    spec = intake.load_spec("owned_trailer")
+    assert spec["owned_asset"] is True and "SUNK" in spec["note"] and "roadworthy" in spec["note"]
+    keys = [f["key"] for f in spec["fields"]]
+    assert {"historical_basis_usd", "past_tow", "minimal_rehab_cash", "themed_rehab_cash", "your_hours", "personal_use"} <= set(keys)
+    d = intake.answer(intake.new_draft("owned_trailer"), "past_tow", "Towed Little Rock to Conway after new tires", basis="seller_stated")
+    assert d["answers"]["past_tow"]["basis"] == "seller_stated"                 # never upgraded to verified
+    qs = intake.missing(d)
+    assert qs[0]["safety_relevant"] and "past_tow" not in [q["key"] for q in qs]
+    assert "historical_basis_usd" in [q["key"] for q in qs]
