@@ -24,7 +24,7 @@ try:  # lane C's package is optional: without it the notes form is simply unavai
 except ImportError:  # pragma: no cover
     NOTE_CATEGORIES, NOTE_KINDS = frozenset(), frozenset()
 
-from . import attest_view, card_view, comps_view, ux, views, wanted_view
+from . import attest_view, card_view, comps_view, inputs_view, ux, views, wanted_view
 from .digest import figures as digest_figures, dollars as _dollars
 from .card_view import ec
 from .backend import FollowupRefused, ItemNotFound, NoteRefused, NumbersRefused, ProfileUnavailable
@@ -769,6 +769,35 @@ class App:
                 f"The worker will re-check this item with it (about a minute); reload to see the result. "
                 f"If no worker is running, run `mbos recheck {item_id}` on the server.")
 
+    def _human_input(self, item_id, f, which):
+        """F-32: shared gate for "Set my quote" / "Tell me about the job": CSRF + PIN, the item must exist and the form must apply to it."""
+        self._numbers_gate(f)
+        item = self.store.item(item_id)
+        if item is None:
+            raise InputError("unknown opportunity")
+        if item.get("state") in inputs_view.DONE_STATES:
+            raise InputError("this item is finished; nothing more can be recorded on it")
+        if which == "quote":
+            if item.get("type") != "service":
+                raise InputError("a quote applies to a service lead only")
+            return item, inputs_view.parse_quote(f)
+        card = self.store.opportunity_card(item_id)["card"]
+        if not inputs_view.needs_scope(card):
+            raise InputError("the system is not waiting on a scope for this item")
+        return item, inputs_view.parse_scope(f, item)
+
+    def set_quote(self, item_id, f):
+        """F-32: "Set my quote" -> `record_human_input(kind=quote)` (owner channel)."""
+        _, (inputs, note) = self._human_input(item_id, f, "quote")
+        self.store.record_human_inputs(item_id, inputs, note, self.author)
+        return inputs_view.saved_message(f"your quote of ${inputs[0][2]:,}", item_id)
+
+    def set_scope(self, item_id, f):
+        """F-32: "Tell me about the job" -> `record_human_input(kind=scope_override)` per field (owner channel, one transaction)."""
+        _, (inputs, note) = self._human_input(item_id, f, "scope")
+        self.store.record_human_inputs(item_id, inputs, note, self.author)
+        return inputs_view.saved_message(f"what you know about the job ({len(inputs)} figures)", item_id)
+
     def add_followup(self, item_id, f):
         """F-11: draft a follow-up / offer / quote as its OWN request via the public API (A-15). CSRF, human channel. It only
         proposes: the YES (and the PIN for binding actions) is Michael's separate decision."""
@@ -1136,6 +1165,19 @@ def make_handler(app):
             self.send_header("Content-Length", "0")
             self.end_headers()
 
+        def _post_input(self, item_id, which):
+            n = min(int(self.headers.get("Content-Length") or 0), 65536)
+            f = {k: v[0] for k, v in parse_qs(self.rfile.read(n).decode("utf-8", "replace"), keep_blank_values=True).items()}
+            try:
+                msg = (app.set_quote if which == "quote" else app.set_scope)(item_id, f)
+            except (InputError, NumbersRefused) as ex:
+                return self._item_page(item_id, utcnow(), None, False, input_reasons=getattr(ex, "reasons", None) or [str(ex)],
+                                       input_which=which, input_values={k: v for k, v in f.items() if k not in ("pin", "csrf")})
+            self.send_response(303)
+            self.send_header("Location", f"/item/{item_id}?msg={quote(msg)}#{which}")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+
         def _post_note(self, item_id):
             n = min(int(self.headers.get("Content-Length") or 0), 65536)
             f = {k: v[0] for k, v in parse_qs(self.rfile.read(n).decode("utf-8"), keep_blank_values=True).items()}
@@ -1153,7 +1195,7 @@ def make_handler(app):
             self.end_headers()
 
         def _item_page(self, item_id, now, flash, is_err, note_reasons=None, note_values=None, followup_reasons=None,
-                       followup_values=None, comp_reasons=None, comp_values=None, attest_reasons=None):
+                       followup_values=None, comp_reasons=None, comp_values=None, attest_reasons=None, input_reasons=None, input_which=None, input_values=None):
             """F-13: the opportunity card is the primary view of an item."""
             try:
                 res = app.store.opportunity_card(item_id)
@@ -1176,6 +1218,8 @@ def make_handler(app):
                                            lane=store_item.get("type")) + body
             body = attest_view.render_confirm(store_item, app.csrf, bool(app.operator_pin), app.store.lane == "lane_d",
                                               secrets.token_hex(6), attest_reasons) + body
+            body = inputs_view.render_inputs(store_item, card, app.csrf, bool(app.operator_pin), app.store.lane == "lane_d",
+                                             secrets.token_hex(6), input_reasons, input_which, input_values) + body
             body += card_view.render_followup_section(card, (app.store.item(item_id) or {}).get("state", "?"), app.csrf,
                                                       app.store.lane == "lane_d", open_areq is not None,
                                                       flash_reasons=followup_reasons, values=followup_values)
@@ -1207,6 +1251,8 @@ def make_handler(app):
                 return self._post_comp(parts[1])
             if len(parts) == 3 and parts[0] == "item" and parts[2] == "attest":
                 return self._post_attest(parts[1])
+            if len(parts) == 3 and parts[0] == "item" and parts[2] in ("quote", "scope"):
+                return self._post_input(parts[1], parts[2])
             if len(parts) == 3 and parts[0] == "item" and parts[2] == "note":
                 return self._post_note(parts[1])
             if len(parts) == 3 and parts[0] == "item" and parts[2] == "followup":

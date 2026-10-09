@@ -354,6 +354,18 @@ class SpineBackend:
             msg = str(getattr(ex, "orig", ex)).strip().splitlines()[0]
             raise NumbersRefused([f"the store refused it: {msg}"]) from None
 
+    def record_human_inputs(self, item_id: str, inputs: list, note: str, entered_by: str) -> list:
+        """F-32: Michael's typed inputs (A-43 `spine_d.record_human_input` over D-30: owner channel, human actor, receipted), all in one
+        transaction. HUMAN CHANNEL ONLY (R14): the callers are `App.set_quote` / `App.set_scope` (CSRF + PIN, server-set author)."""
+        if self.lane != "lane_d":
+            raise NumbersRefused(["saving this needs the lane D store (MBOS_STATE_BACKEND=lane_d)"])
+        try:
+            with self.engine.begin() as c:
+                return [self._spine.record_human_input(c, item_id, kind, key, value, note, entered_by) for kind, key, value in inputs]
+        except (sa.exc.DBAPIError, ValueError) as ex:
+            msg = str(getattr(ex, "orig", ex)).strip().splitlines()[0]
+            raise NumbersRefused([f"the store refused it: {msg}"]) from None
+
     # ---- F-14: Michael's own model knowledge (operator notes). Lane D only; HUMAN CHANNEL ONLY (R14) -----------
     def operator_notes(self, include_retracted: bool = False) -> list[dict]:
         """Current head of every note chain, from lane D's folded document (read-only SQL function)."""
