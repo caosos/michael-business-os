@@ -27,6 +27,7 @@ from mbos.runtime import components, item_workflow_id, owner_tx, runtime, spine_
 DECISION_TOPIC = "decision"
 FOLLOWUP_QUEUE = "followups"
 RECHECK_QUEUE = "rechecks"
+RECHECK_TOPIC = "recheck"
 WAKE_EVENTS = ("price_change", "auction_ending", "new_info")
 
 
@@ -133,26 +134,48 @@ def item_lifecycle(item_id: str) -> dict[str, Any]:
 @DBOS.workflow()
 def recheck_lifecycle(item_id: str) -> dict[str, Any]:
     """A-39: re-run the lifecycle for an Item parked at RESEARCHING (a comp was added since). The original per-item workflow id
-    is spent, so this is its own workflow; `item_lifecycle` itself skips anything not NORMALIZED/RESEARCHING."""
-    return item_lifecycle(item_id)
+    is spent, so this is its own workflow; `item_lifecycle` itself skips anything not NORMALIZED/RESEARCHING.
+    F-129: one recheck per item at a time; a request that arrives while this one runs asks it for ONE more pass (RECHECK_TOPIC)."""
+    while True:
+        out = item_lifecycle(item_id)
+        again = False
+        while DBOS.recv(RECHECK_TOPIC, timeout_seconds=0) is not None:  # drain: any number of requests is one more pass
+            again = True
+        if not again or out.get("status") != "researching":
+            return out
 
 
 def recheck(item_ids: list[str]) -> list[str]:
-    """Public API (CLI, UI): enqueue `recheck_lifecycle` per Item on the `rechecks` queue (a running worker executes it)."""
+    """Public API (CLI, UI, worker watchers): re-check each Item on the `rechecks` queue (a running worker executes it).
+    F-129: coalesced per item. If a recheck of the item is already queued or running, it is asked for one more pass and its id is
+    returned; a new workflow is enqueued only when none is active (or the active one finished before it could see the request)."""
     import time
 
     from mbos.runtime import client
 
-    ids = []
+    ids: list[str] = []
     c = client()
     try:
-        for iid in item_ids:
+        for iid in dict.fromkeys(item_ids):
+            wf = _active_recheck(c, iid)
+            if wf is not None:
+                c.send(wf, {"kind": "recheck"}, topic=RECHECK_TOPIC)
+                if _active_recheck(c, iid) == wf:  # still running after the send: it will drain the request before it returns
+                    ids.append(wf)
+                    continue
             wf = f"recheck:{iid}:{int(time.time() * 1000)}"
             c.enqueue({"queue_name": RECHECK_QUEUE, "workflow_name": "recheck_lifecycle", "workflow_id": wf}, iid)
             ids.append(wf)
     finally:
         c.destroy()
     return ids
+
+
+def _active_recheck(c: Any, item_id: str) -> Optional[str]:
+    """The queued or running top-level `recheck:<item>:<ms>` workflow, if any (its `-n` children are the lifecycle runs)."""
+    rows = c.list_workflows(status=["PENDING", "ENQUEUED"], workflow_id_prefix=f"recheck:{item_id}:", load_input=False, load_output=False)
+    top = sorted(r.workflow_id for r in rows if "-" not in r.workflow_id[len(f"recheck:{item_id}:"):])
+    return top[-1] if top else None
 
 
 def _approval_gate(item_id: str, areq_id: str) -> dict[str, Any]:

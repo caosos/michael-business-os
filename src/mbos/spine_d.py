@@ -229,7 +229,7 @@ def record_research(conn: sa.Connection, item_id: str, rr: dict, components: Any
                                 {"ids": [p["provenance_id"] for p in rr["provenance_records"]]}).scalars())
     for doc in rr["provenance_records"]:
         if doc["provenance_id"] not in existing:
-            L.record_provenance(conn, **doc)
+            _insert_provenance_once(conn, doc)
             existing.add(doc["provenance_id"])
     prov = [p["provenance_id"] for p in rr["provenance_records"]] or [_prov(conn, "mbos.spine_d.record_research")]
     if read_item(conn, item_id)["state"] == "NORMALIZED":
@@ -398,6 +398,13 @@ def decide(conn: sa.Connection, action_request_id: str, decision: str, payload_h
         Approval.from_doc(doc)  # frozen contract: MODIFY ⇒ modifications, HOLD ⇒ hold, NO ⇒ reason
     except ContractViolation as e:  # one exception type for UIs/CLI (07 F-18)
         raise DecisionRefused(f"decision not valid under the contract: {'; '.join(e.errors[:3])}") from None
+    if decision == "YES" and areq["status"] == "held" and read_item(conn, areq["item_id"])["state"] == "HELD":
+        # F-126: a YES straight from the HOLD list re-presents the item first (HELD -> AWAITING_APPROVAL) in this same owner transaction, so
+        # lane D's gate (D-27) finds the YES receipt AFTER the item re-entered AWAITING_APPROVAL. The request itself moves held -> approved
+        # in `record_approval` (the owner login may not call `set_action_status`).
+        prov_r = L.record_provenance(conn, actor_type="human", human_actor=decider, basis="FACT", tool_name=f"mbos.{channel}.decide",
+                                     tool_version="0.1.0", inputs_used=[{"ref": action_request_id, "hash": areq["payload_hash"]}])
+        _to(conn, areq["item_id"], "AWAITING_APPROVAL", "re-presented: Michael decided YES on a held request", [prov_r], MICHAEL)
     L.record_approval(conn, doc, {"type": "human", "id": decider}, f"Michael decided {decision}" + (f": {reason}" if reason else ""),
                       f"{approval_id}:decide")
     return {"approval": doc, "item_id": areq["item_id"], "new_action_request_id": new_areq_id}
@@ -649,7 +656,22 @@ def record_lane_provenance(conn: sa.Connection, doc: dict, *, lineage_may_grow: 
         if not same:
             raise ValueError(f"provenance {doc['provenance_id']} already exists with different content")
         return doc["provenance_id"]
-    return L.record_provenance(conn, **doc)
+    if _insert_provenance_once(conn, doc):
+        return doc["provenance_id"]
+    return record_lane_provenance(conn, doc, lineage_may_grow=lineage_may_grow)  # a concurrent writer stored it first: compare
+
+
+def _insert_provenance_once(conn: sa.Connection, doc: dict) -> bool:
+    """F-129: insert a provenance record; False (and nothing written) when another transaction committed the same id first (two
+    rechecks of one item racing). Runs in a SAVEPOINT so the caller's transaction survives the unique violation."""
+    try:
+        with conn.begin_nested():
+            L.record_provenance(conn, **doc)
+        return True
+    except sa.exc.IntegrityError as e:
+        if getattr(e.orig, "sqlstate", None) != "23505":
+            raise
+        return False
 
 
 def record_attestation(conn: sa.Connection, item_id: str, evidence_key: str, note: str, entered_by: str) -> dict:

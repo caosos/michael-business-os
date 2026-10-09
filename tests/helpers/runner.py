@@ -349,11 +349,170 @@ def training_set(fixture: str) -> None:
     os._exit(0)
 
 
+def ui_act(action: str, *args: str) -> None:
+    """A-49: one Operator UI action in its OWN process (no DBOS runtime), exactly as `operator_ui.backend` does it: the owner login writes in
+    one transaction, then `mbos.workflows` wakes the gate through a DBOSClient. Michael's side only."""
+    import sqlalchemy as sa
+
+    from mbos import spine_d, workflows
+    from mbos.config import configure, settings
+    from mbos.db.engine import engine_for
+
+    configure(settings())  # env: MBOS_DATABASE_URL / MBOS_SYSTEM_DATABASE_URL / MBOS_OWNER_DATABASE_URL
+    owner = engine_for(os.environ["MBOS_OWNER_DATABASE_URL"])
+    if action in ("HOLD", "YES"):
+        (item_id,) = args
+        with owner.connect() as c:
+            a = c.execute(sa.text("SELECT action_request_id, payload_hash FROM mbos.action_requests WHERE item_id = :i "
+                                  "AND status IN ('pending_approval', 'held') ORDER BY created_at DESC LIMIT 1"), {"i": item_id}).one()
+        kw = {"hold": {"hold_until": "2099-01-01T00:00:00Z", "wake_on": ["michael_ping"], "renotify_after": "PT6H"}} if action == "HOLD" \
+            else {"auth_context": STEP_UP}
+        with owner.begin() as c:  # backend.decide: spine.decide in ONE transaction, then the wake-up
+            out = spine_d.decide(c, a.action_request_id, action, a.payload_hash, None, channel="web", **kw)
+        workflows.notify_decision(out["item_id"], out["approval"]["approval_id"])
+    elif action == "ping":  # backend.ping ("Wake now")
+        workflows.ping(args[0])
+    elif action == "attest":
+        with owner.begin() as c:
+            spine_d.record_attestation(c, args[0], args[1], f"Michael confirmed {args[1]} (A-49)", "michael")
+    elif action == "quote":
+        with owner.begin() as c:
+            spine_d.record_human_input(c, args[0], "quote", "amount_usd", float(args[1]), "quoted by phone (A-49)", "michael")
+    say("UI_OK", action)
+    sys.stdout.flush()
+    os._exit(0)
+
+
+def hold_paths(fixture: str) -> None:
+    """A-49 (F-126, F-129): the real assembly on lane D with split logins; every Michael action runs in a separate UI process (`ui_act`).
+    TV: HOLD, then YES straight from the HOLD list (no wake). Drywall lead: a quote (both worker watchers fire on it), two attestations,
+    then HOLD -> Wake now -> YES. Reports states, receipts, the rechecks started and every ERROR log record / ERROR workflow."""
+    import dataclasses
+    import logging
+    import subprocess
+
+    import sqlalchemy as sa
+    from dbos import DBOS as _D
+
+    from mbos import cli, spine_d, workflows
+    from mbos.adapters.state04 import Pg04Ledger
+    from mbos.db.engine import engine_for
+    from mbos.inbox import HumanInputWatcher, ResearchWatcher
+    from mbos.production import build_components
+    from tests.helpers.common import ROOT, receipts_for
+
+    errors: list[str] = []
+
+    class _Errors(logging.Handler):
+        def emit(self, record):
+            errors.append(f"{record.name}: {record.getMessage()[:300]}")
+
+    logging.getLogger().addHandler(_Errors(level=logging.ERROR))
+    logging.getLogger("dbos").addHandler(_Errors(level=logging.ERROR))
+
+    def ui(*a: str) -> None:
+        cp = subprocess.run([sys.executable, "-m", "tests.helpers.runner", "ui_act", *a], cwd=ROOT, env=os.environ.copy(),
+                            capture_output=True, text=True, timeout=60)
+        if cp.returncode != 0 or "UI_OK" not in cp.stdout:
+            raise RuntimeError(f"ui_act {a} failed:\n{cp.stdout[-2000:]}\n{cp.stderr[-4000:]}")
+
+    s = dataclasses.replace(_settings(), state_backend="lane_d", gateway_mode="lane_e")
+    os.environ.update(MBOS_STATE_BACKEND="lane_d", MBOS_GATEWAY_MODE="lane_e")  # inherited by the UI processes
+    owner = engine_for(os.environ["MBOS_OWNER_DATABASE_URL"])
+    with owner.begin() as c:
+        spine_d.set_kill_switch(c, "global_freeze", False, reason="test bootstrap: Michael releases the initial FROZEN state")
+        spine_d.fund_bankroll(c, 500, reason="A-49 dry-run bankroll", idempotency_key="a49-bankroll")
+    comps, _ = build_components(s, dbos=_D)
+    init_runtime(s, comps)
+    engine = runtime().engine
+    runtime().components.adapters["fx"] = FixtureSourceAdapter(fixture, name="fx")
+    with SetWorkflowID("discover:fx"):
+        results = DBOS.start_workflow(workflows.discover, "fx").get_result()
+    names = {}
+    with engine.connect() as c:
+        for r in results:
+            if r["created"]:
+                names[c.execute(sa.text("SELECT doc->'sources'->0->>'source_listing_id' FROM mbos.v_item_documents WHERE item_id = :i"),
+                                {"i": r["item_id"]}).scalar_one()] = r["item_id"]
+    tv, lead = names["TRAIN-TV-1"], names["TRAIN-LEAD-DRYWALL-1"]
+    out: dict = {"first": {"tv": wait_state(engine, tv, {"AWAITING_APPROVAL", "RESEARCHING", "ARCHIVED"}, timeout=60),
+                           "lead": wait_state(engine, lead, {"AWAITING_APPROVAL", "RESEARCHING", "ARCHIVED"}, timeout=60)}}
+
+    # (a) HOLD, then YES directly from the HOLD list
+    ui("HOLD", tv)
+    out["tv_held"] = wait_state(engine, tv, "HELD")
+    ui("YES", tv)
+    out["tv_final"] = wait_state(engine, tv, {"ACTED", "FAILED"}, timeout=60)
+    out["tv_executed"] = len(receipts_for(engine, item_id=tv, type="ACTION_EXECUTED"))
+
+    # F-129: the worker loop's watchers, as `mbos worker` runs them (each tick queues through `workflows.recheck`)
+    rw = ResearchWatcher(cli._parked_research_lengths, workflows.recheck)
+    hw = HumanInputWatcher(cli._parked_human_input_counts, workflows.recheck)
+    rw.tick(), hw.tick()  # baseline
+    queued: list[list[str]] = []
+    ui("quote", lead, "700")
+    queued.append(rw.tick() + hw.tick())  # ONE input that both watchers see in the same loop round
+    time.sleep(1.0)
+    ui("attest", lead, "scope_verified")
+    queued.append(rw.tick() + hw.tick())
+    ui("attest", lead, "customer_screened")
+    queued.append(rw.tick() + hw.tick())
+    out["lead_after_inputs"] = wait_state(engine, lead, {"AWAITING_APPROVAL", "ARCHIVED"}, timeout=90)
+    out["queued"] = queued
+
+    # (b) HOLD -> Wake now (from the UI process) -> YES
+    ui("HOLD", lead)
+    out["lead_held"] = wait_state(engine, lead, "HELD")
+    ui("ping", lead)
+    out["lead_woken"] = wait_state(engine, lead, "AWAITING_APPROVAL")
+    ui("YES", lead)
+    out["lead_final"] = wait_state(engine, lead, {"ACTED", "FAILED"}, timeout=60)
+    out["lead_executed"] = len(receipts_for(engine, item_id=lead, type="ACTION_EXECUTED"))
+
+    # F-129: two writers of the same provenance record at once (two rechecks racing): the second waits, then finds it stored, no error
+    import threading
+
+    from mbos.clock import now_iso
+    from mbos.ids import new_id
+
+    doc = {"provenance_id": new_id("prov"), "created_at": now_iso(), "actor_type": "system", "agent_name": "a49-race", "basis": "FACT",
+           "tool_name": "a49.race", "tool_version": "0.1.0"}
+    race: dict = {}
+
+    def second():
+        try:
+            with engine.begin() as cb:
+                race["second"] = spine_d.record_lane_provenance(cb, doc)
+        except Exception as e:  # noqa: BLE001
+            race["second"] = f"{type(e).__name__}: {e}"[:300]
+
+    with engine.connect() as ca:
+        first = ca.begin()
+        spine_d.L.record_provenance(ca, **doc)
+        t = threading.Thread(target=second)
+        t.start()
+        time.sleep(0.5)  # the second insert is now blocked on the first's uncommitted row
+        first.commit()
+        t.join(10)
+    out["provenance_race"] = race.get("second") == doc["provenance_id"] or race.get("second")
+
+    time.sleep(1.0)
+    rechecks = DBOS.list_workflows(workflow_id_prefix=f"recheck:{lead}:", load_input=False, load_output=False)
+    out["rechecks"] = sorted({w.workflow_id.split("-")[0] for w in rechecks})
+    out["error_workflows"] = [(w.workflow_id, w.status, str(w.error)[:300]) for w in
+                              DBOS.list_workflows(status="ERROR", load_input=False, load_output=False)]
+    with engine.connect() as c:
+        out["chain"] = Pg04Ledger().verify_chain(c)
+    out["error_logs"] = errors
+    say("RESULT", json.dumps(out, default=str))
+    os._exit(0)
+
+
 if __name__ == "__main__":
     mode, *args = sys.argv[1:]
     try:
         {"crash_mid_act": crash_mid_act, "hold_then_die": hold_then_die, "resume": resume,
-     "lane_d_e2e": lane_d_e2e, "training_set": training_set}[mode](*args)
+     "lane_d_e2e": lane_d_e2e, "training_set": training_set, "hold_paths": hold_paths, "ui_act": ui_act}[mode](*args)
     except BaseException:  # DBOS threads are non-daemon: without a hard exit a failure would hang to the timeout
         import traceback
 
