@@ -50,6 +50,10 @@ class EconomicsEngineScorer:
                 verdict="MAYBE", rationale=[reason], confidence=0.0, scoring_config_version=self.cfg.version,
                 tool_name="mbos_economics.engine", tool_version=self.engine_version,
                 cheapest_decisive_evidence=card["cheapest_decisive_evidence"])
+        from mbos import auction_lot
+
+        if auction_lot.is_auction(item):  # A-51: C-32/C-33 auction model; asking comps never count as sales, HOLD maps to MAYBE
+            return self._score_auction(item, auction_lot)
         try:
             out = score_item(with_context(item, self.context_source), self.cfg, scored_at)
         except InputError as e:
@@ -72,6 +76,33 @@ class EconomicsEngineScorer:
             cheapest_decisive_evidence=rec.get("cheapest_decisive_evidence"), alert=bool(rec.get("alert")),
             scorecard_id=scores["scorecard_id"], recommendation_id=rec["recommendation_id"],
         )
+
+    def _score_auction(self, item: dict[str, Any], auction_lot) -> ScoreResult:
+        from mbos_economics.asset_deal import ASSET_VERSION
+        from mbos_economics.auction import load_auction_config
+
+        from mbos.hashing import sha256_of
+
+        out = auction_lot.evaluate(item)
+        verdict = "MAYBE" if out["verdict"] == "HOLD" else out["verdict"]
+        reasons = ([f"HOLD: {r}" for r in out["reasons"]] if out["verdict"] == "HOLD" else list(out["reasons"])) or ["auction model: no blocking reason"]
+        ev = out["evidence"]
+        cheapest = ("the missing inputs: " + ", ".join(out["unknowns"])) if out.get("unknowns") else (
+            "more SOLD comps (asking prices never count)" if verdict != "YES" else "an inspection of the lot before Michael bids")
+        mb = auction_lot.max_bid(out)
+        card = {"scoring_config_version": self.cfg.version, "derived": auction_lot.derived(out), "sub_scores": {}, "composite": 0,
+                "decision": verdict, "gates": {"cash_cap": not (out.get("cash_cap") or {}).get("over_cap", False),
+                                               "sold_evidence": ev["sold_comps_count"] > 0, "inputs_complete": bool(out.get("computable"))},
+                "reasons": reasons, "cheapest_decisive_evidence": cheapest, "auction": auction_lot.summary(item, out)}
+        if mb is not None:
+            card["walk_away_price"] = mb
+        inputs = auction_lot.engine_input(item)
+        return ScoreResult(
+            scorecard=card, inputs_hash=sha256_of({"item_id": item.get("item_id"), "auction": inputs, "scoring_config_version": self.cfg.version,
+                                                   "asset_deal_model_version": out["asset_deal_model_version"]}),
+            verdict=verdict, rationale=reasons, confidence=min(1.0, ev["sold_comps_used"] / int(load_auction_config()["min_sold_comps_for_yes"])) if out.get("computable") else 0.0,
+            scoring_config_version=self.cfg.version, tool_name="mbos_economics.asset_deal", tool_version=f"{self.engine_version}/{ASSET_VERSION}",
+            cheapest_decisive_evidence=cheapest)
 
 
 class EconomicsResearcher:
@@ -160,6 +191,15 @@ class EconomicsEnricher:
             v = owned_asset.value_add_block(item, item["created_at"])
             pid = spine.record_lane_provenance(conn, v["provenance"])
             spine.record_enrichment(conn, item_id, "value_add", v["block"], pid, summary="owned-asset five-path comparison", agent="agent-03-economics")
+            return 1
+        from mbos import auction_lot
+
+        if auction_lot.is_auction(item):  # A-51: the auction decision block (all-in, net, days to cash, max bid, labelled forecast)
+            v = auction_lot.value_add_block(item)
+            if v is None:
+                return 0
+            pid = spine.record_lane_provenance(conn, v["provenance"])
+            spine.record_enrichment(conn, item_id, "value_add", v["block"], pid, summary="auction lot economics", agent="agent-03-economics")
             return 1
         card_ = (item.get("scores") or {}).get("scorecard")
         if not card_ or "engine_version" not in card_:  # lane C enriches only what lane C's own engine scored

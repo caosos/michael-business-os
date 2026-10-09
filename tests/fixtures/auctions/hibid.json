@@ -1,0 +1,18 @@
+{
+ "_note": "A-51 hand-built lot in the B-23 fixture shape (mbos_discovery.auctions); real HiBid shapes UNKNOWN until B-12. Bid 450 / 24 bids are Michael's 2026-10-09 figures; premium, tax, pickup, times are illustrative.",
+ "lots": [
+  {
+   "lot_id": "CL32-1",
+   "title": "CountyLine 32 ton log splitter",
+   "current_bid": 450,
+   "bid_count": 24,
+   "closes_at": "2026-10-10T23:00:00Z",
+   "buyer_premium_pct": 10,
+   "sales_tax_pct": 9.5,
+   "pickup": "Pickup Mon-Tue 9-4 at the sale yard; buyer loads",
+   "rules_url": "https://example.invalid/hibid/rules",
+   "observed_at": "2026-10-09T23:00:00Z",
+   "location": {"city": "Conway", "state": "AR"}
+  }
+ ]
+}
