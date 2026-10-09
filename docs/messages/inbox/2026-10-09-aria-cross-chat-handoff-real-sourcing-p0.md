@@ -1,0 +1,41 @@
+
+# OWNER CROSS-CHAT HANDOFF — REAL DEAL SNIFFER NOW (2026-10-09 CDT)
+Purpose: the ChatGPT conversation has grown too large; the next ChatGPT Aria or Claude coordinator must resume from DURABLE GitHub context, not make the owner re-explain the system.
+
+## TOP OWNER INTENT
+The current local Deal Sniffer dashboard at http://127.0.0.1:8766 contains invented Craigslist/Facebook fixtures shown in the normal money-hunt queue. Owner urgently wants real advertisements and real auctions searched and presented in ONE place, with seller photos, original clickable source URLs, actual asking/bid price, make/model/year, realistic evidence-based sold comps and profit estimates. The owner should not have to jump through 10 sites or provide sold comps that the product is supposed to find. Prioritize TODAY'S USABLE REAL SOURCE INGESTION over a new UI, architecture or more simulated features. The user wants to earn money quickly (approx. $500/week) buying/fixing/reselling trailers and equipment near Conway, Arkansas, typically within 100 miles. He is a capable mechanic/welder. Real cash availability must be verified; "$500 available" in current demo is SIMULATED.
+
+## PAUSE STATUS AND COST RULES
+CAOSCare development PAUSED_BY_OWNER and confirmed checkpoint DONE on caosos/CAOSCARE.COM issue #117 comment 6091176535; do not change live Room 214 listener, page or services. Unfixed LIVE issue: Goodbye/End-call can be refused; code fix integration cf7ece2 not deployed; no deployment authorized.
+Desktop-Agent / Ask Aria development PAUSED_BY_OWNER and user service disabled+stopped, dashboard :8477 offline, verified caosos/Desktop-Agent issue #3 comment 6091192703. Its GitHub cross-account delivery/wake is OFF. Do not restart unless owner explicitly asks.
+Deal Sniffer remains available for MANUAL coordinator launch and operator UI use. Model usage was ~96% all-model weekly (Oct 9 screenshot), Fable 58% of its separate weekly bar, resets Monday Oct 12 04:59 America/Chicago. Conserve remaining quota; no unapproved paid API services; max 2 heavy workers and 90% quota guard; never assume Fable is extra free quota. All purchases/bids/seller contact/outbound actions remain forbidden without separate owner approval. No action without a receipt; no receipt without provenance.
+
+## VERIFIED ROOT OF FAKE ADS
+caosos/michael-business-os, branch research/agent-01-coordinator, fixtures/sources/training_examples.json states in its header: NOT real listings; URLs example.invalid; invented names/prices. Current screenshots show these normal-queue items:
+- TRAIN-RECON-1: Honda Recon ATV "$300", not running; fake link https://example.invalid/cl/recon-250-not-running; year UNKNOWN; 22-mile field invented; speculative resale estimates $900/$1050/$1200. NOT a real Craigslist ad.
+- TRAIN-MOWER-1: 42-inch riding mower "$480", needs belt; fake link https://example.invalid/cl/riding-mower-late-season.
+- TRAIN-TV-1: 55-inch TV "$30" firm; fake Facebook link https://example.invalid/fbm/tv-55-inch.
+- Demo drywall service lead.
+Owner saw "Craigslist: listing", fake dollars marked FACT, NEEDS FROM YOU no comparable sold price, and an approval prompt. He spent time trying to open Craigslist ad/photos that do not exist. This is a TRUST/REALITY bug, not just styling. Never call any fixture a real opportunity. Training mode must be conspicuously labeled and separated from live money hunt.
+
+## IMMEDIATE DEVELOPMENT / PRODUCT PRIORITY
+1. Identify why the LIVE :8766 is serving the fixture worker! Existing tools/run_dev_stack.sh on coordinator branch starts mbos.cli worker --fixture fixtures/sources/training_examples.json. Establish exact runtime source and deployed version; F-39/F-45 DONE in queue do NOT prove owner live UI shows real ads. Fix default normal mode to exclude training fixtures; provide an explicitly labeled DEMO switch, not misleading "Needs your decision" cards.
+2. Validate which legal read-only public sources can be connected NOW for local listings and Arkansas auctions. B-12 live adapter currently BLOCKED on owner #8/credentials; B-23 auction adapter DONE for fixtures ONLY; A-51 scored auction fixtures DONE. Identify existing permitted sources, actual blockers and first practical legitimate pipeline. DO NOT fake Craigslist URLs or bypass platform terms or automatically enable login/API spending. If full live search is unavailable, offer immediate manual URL/photo intake with actual source evidence, and ask for ONE bounded essential approval if needed.
+3. Make first screen CLASSIFIEDS-LIKE: seller's original photo/gallery, real View Original Ad button, original description, title, year/make/model if known, condition, asking/current bid, distance/location, auction fee/pickup terms, short realistic margin and why it might be worth buying. Missing data should not flood default display with UNKNOWN. Keep audit/provenance tables collapsed.
+4. Research SOLD comps from allowed real sources where available; never force Michael to enter comparable sold prices just to look at an item. Distinguish actual sold listings from asking prices, model estimates and simulated examples. "No sold evidence" = RESEARCH NEEDED / DON'T BUY, not forced PIN form.
+5. Separate simulated $500 bankroll from real user cash; no real buying recommendation based on demo balances.
+6. Preserve broad selectable Deal Sniffer categories; trailers are current owner search preference, NOT hardcoded platform restriction. Include heavy/gooseneck trailers via editable tow/transport filter with costs; general-purpose product.
+7. Preserve restart/resume: starting Agent 01 manually reads GitHub current HEAD, START_HERE, COORDINATION, queue, receipts, latest inbox and acks, status and existing active workers/quotas, then continues eligible work WITHOUT owner re-explaining. Local uncommitted changes must be inspected; do not blindly overwrite work. Checkpoint work and keep bounded workers inexpensive.
+
+## TECHNICAL ACCESS AND COORDINATION
+Repo: https://github.com/caosos/michael-business-os
+Linux owner: michaelos, remote HP EliteDesk; coordinator checkout /home/michaelos/business-os-worktrees/agent-01-coordinator; coordinator branch research/agent-01-coordinator. Persistent Agent 01 only; lanes 02 Discovery, 03 Economics, 04 State, 05 Governance, 06 Operator UI, 07 QA launched as bounded workers. Manual coordinator command from michaelos shell: /home/michaelos/bin/mbos-agent 1. Browser port :8766 on Lenovo SSH tunnel:
+ssh -N -L 8766:127.0.0.1:8766 michaelos@caoscare1-hp-elitedesk.local
+GitHub liaison branch liaison/aria-to-agent-01; directives live under docs/messages/inbox/; verify ACK files under docs/messages/acks/ on coordinator branch. Current owner correction just before this handoff: docs/messages/inbox/2026-10-09-aria-owner-real-listings-not-fixtures-resume-manual.md, ACK not yet found at last check. Manual sync needed; Desktop-Agent relay is OFF.
+Existing queue F-39 rich cards DONE, F-45 photo/source/filter UX DONE as lane report, B-23 fixture auction ingest DONE, C-32/33 economics DONE, A-51 fixture-to-valuation DONE. B-12 actual live source BLOCKED; W-4 automatic coordinator self-wake not enabled. Keep no permission bypass, bids or seller messages.
+CAOSCare repo: https://github.com/caosos/CAOSCARE.COM; coordinator issue #117 PAUSED (live room running). Desktop-Agent: https://github.com/caosos/Desktop-Agent; issue #3 PAUSED and runtime stopped.
+
+## ACCEPTANCE TO REPORT BACK TO OWNER
+Present one genuine, clickable, traceable listing or auction lot (or clearly state REAL SOURCE BLOCKER and demonstrate verified manual URL intake), source photos, real ad, actual auction terms/price, truthful comp evidence vs inferred prices, and a short BUY/WATCH/PASS rationale. Show the real :8766 interface with DEMO separate, and verify manual coordinator restart detects GitHub handoff without resetting progress. Don't claim real opportunity success merely because fixture unit tests pass. Keep the owner report short and useful, with screenshot and receipt.
+
+Owner's exact current message: "I want it to work right now ... search deals and search auctions ... without having to go to this website and that website." Next ChatGPT Aria should act as dispatcher and verifier, not architect another silo.
