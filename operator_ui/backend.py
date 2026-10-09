@@ -20,8 +20,8 @@ from typing import Any, Optional
 import sqlalchemy as sa
 
 from mbos.ledger import load_receipts, verify_chain
-from mbos.runtime import Components, client, item_workflow_id
-from mbos.workflows import DECISION_TOPIC, notify_decision
+from mbos.runtime import Components
+from mbos.workflows import notify_decision, ping as _ping
 
 from . import mbos_canonical
 
@@ -497,13 +497,4 @@ class SpineBackend:
 
     def ping(self, item_id: str) -> None:
         """'Wake now' for a HOLD whose wake_on includes michael_ping (re-presents; never executes)."""
-        _client_send(item_id, {"kind": "ping"})
-
-
-def _client_send(item_id: str, message: dict) -> None:
-    """The spine's `workflows.ping` needs a launched DBOS runtime; the UI process uses a DBOSClient."""
-    c = client()
-    try:
-        c.send(item_workflow_id(item_id), message, topic=DECISION_TOPIC)
-    finally:
-        c.destroy()
+        _ping(item_id)  # resolves the active gate workflow (item or recheck), from any process

@@ -55,3 +55,20 @@ def test_f125_parts_comp_is_explained(tmp_path):
     assert cv.parts_only(str(tmp_path), "other") == 0
     assert "condition parts" in cv.saved_message("itm_m", True, "parts")
     assert "condition parts" not in cv.saved_message("itm_m", True, "used")
+
+
+# ---- F-37 (G-23: F-130, F-135) ----
+def test_f130_true_status_when_evidence_is_not_the_blocker():
+    from operator_ui import comps_view
+
+    card = {"activity_trail": [{"why": "gaps: no_comp"}], "reasons": ["evidence is not the blocker: no missing evidence item changes the verdict",
+                                                                 "walk-away price (max buy for YES): $202"]}
+    t = comps_view.gap_text(card)
+    assert "$202" in t and "more evidence would not change" in t
+    assert "not the blocker" not in comps_view.gap_text({"activity_trail": [{"why": "gaps: no_comp"}]})
+
+
+def test_f135_outcome_form_states_pin_rule():
+    from operator_ui import server
+
+    assert "No PIN is needed here" in open(server.__file__).read()

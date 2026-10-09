@@ -234,5 +234,6 @@ def render_page(records: list[dict], items: list[dict], now, csrf: str, pin_set:
             cid = r["doc"].get("campaign_id") if isinstance(r, dict) and isinstance(r.get("doc"), dict) else None
             cards.append(f"<div class='card'><p class='bad'><b>Campaign {e(cid or '(unknown id)')} cannot be shown</b>: its stored record is "
                          f"malformed ({e(type(ex).__name__)}). Other campaigns are unaffected.</p></div>")
-    head = "<h1>Wanted</h1>" + (f"<p class='mut'>{len(items)} current Items checked. Dry-run: nothing is contacted.</p>")
+    head = "<h1>Wanted</h1>" + (f"<p class='mut'>{len(items)} current Items checked. Dry-run: nothing is contacted.</p>"
+        "<p><b>No source is hunting for this yet.</b> A campaign only filters Items already in the store.</p>")
     return err + head + form + ("".join(cards) or "<p class='mut'>No campaigns yet.</p>")

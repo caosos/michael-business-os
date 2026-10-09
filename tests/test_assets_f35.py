@@ -66,3 +66,29 @@ def test_months_validated_and_pin_csrf_required(ui):
     assert req(ui, "POST", path + "/answer", {**form(ui), "pin": "0000"})[0] == 200
     assert req(ui, "POST", path + "/answer", {**form(ui), "csrf": "x"})[0] == 200
     assert not ui.assets[path.split("/")[-1]].get("figures")
+
+
+# ---- F-37 (G-23: F-128, F-133, F-134) ----
+def test_f128_amount_and_date_boxes_a_year_is_not_money(ui):
+    r = req(ui, "POST", "/assets/add", {"csrf": ui.csrf, "pin": PIN, "title": "BBQ trailer", "paid_amount": "1800", "paid_date": "2023-05-01"})
+    assert r[0] == 303
+    d = next(iter(ui.assets.values()))
+    assert d["answers"]["historical_basis_usd"]["value"] == "1800" and d["paid_date"] == "2023-05-01"
+    assert "1,800-" not in req(ui, "GET", r[1].split("?")[0])[2]
+    for bad in ({"paid_amount": "1800 paid in 2023"}, {"paid_amount": "1800", "paid_date": "last spring"}):
+        r = req(ui, "POST", "/assets/add", {"csrf": ui.csrf, "pin": PIN, "title": "x", **bad})
+        assert r[0] == 200 and "aria-invalid" in r[2]
+
+
+def test_f134_typed_values_kept_and_bad_box_marked(ui):
+    path = add(ui)
+    r = req(ui, "POST", path + "/answer", form(ui, f_tailgate_months="Sep-Nov"))
+    assert r[0] == 200 and "value='Sep-Nov'" in r[2] and "value='150'" in r[2]
+    assert r[2].count("aria-invalid") == 1
+
+
+def test_f133_per_hour_and_per_dollar_columns(ui):
+    path = add(ui)
+    req(ui, "POST", path + "/answer", form(ui))
+    body = req(ui, "GET", path)[2]
+    assert "Profit per hour" in body and "Profit per incremental $" in body

@@ -371,6 +371,7 @@ def render_outcome_section(c, csrf, ret=False):
 <label>Revenue $<input name="revenue" inputmode="decimal"></label><label>Total cost $<input name="total_cost" inputmode="decimal"></label>
 <label>Hours spent<input name="hours" inputmode="decimal"></label><label>Days to cash<input name="days_to_cash" inputmode="decimal"></label></div>
 <label>Notes<input name="notes" maxlength="1000"></label>
+<p class="small mut">No PIN is needed here: recording what happened is receipted and cannot approve, spend or contact anyone. A sale does move your ledger (principal back, profit earned), and a second close of the same item is refused.</p>
 <button class="b-HOLD" style="width:auto">Record outcome (receipted; feeds LEARN)</button></form>"""
     else:
         form = f"<p class='small mut'>Outcome entry opens once the item has settled (now {e(item['state'])}).</p>"
@@ -1011,14 +1012,14 @@ def make_handler(app):
                 return self._send(200, json.dumps({k: v for k, v in c.items() if k != "hold_presets"}, default=str), "application/json")
             return self._send(404, page("Not found", "<p>Not found.</p>", app.state()))
 
-        def _assets_page(self, aid, flash=None, is_err=False):
+        def _assets_page(self, aid, flash=None, is_err=False, vals=None, bad=None):
             from . import assets_view
 
             if aid is None:
-                body = assets_view.render_list(app.assets, app.csrf, bool(app.operator_pin))
+                body = assets_view.render_list(app.assets, app.csrf, bool(app.operator_pin), vals=vals, bad=bad)
                 return self._send(200, page("My assets", body, app.state(), flash, is_err))
             d = app.assets[aid]
-            body = assets_view.render_card(aid, d, assets_view.compare(aid, d, app.author), app.csrf, bool(app.operator_pin))
+            body = assets_view.render_card(aid, d, assets_view.compare(aid, d, app.author), app.csrf, bool(app.operator_pin), vals=vals, bad=bad)
             return self._send(200, page(d.get("title") or "Asset", body, app.state(), flash, is_err))
 
         def _post_assets(self, parts):
@@ -1036,7 +1037,8 @@ def make_handler(app):
                 else:
                     d = assets_view.apply_answers(app.assets[aid], f)
             except Exception as ex:  # InputError, ValueError, ContractViolation: shown, nothing recorded
-                return self._assets_page(None if len(parts) == 2 else aid, str(ex), True)
+                kept = {k: v for k, v in f.items() if k not in ("pin", "csrf")}  # F-134: keep what he typed, mark the bad box
+                return self._assets_page(None if len(parts) == 2 else aid, str(ex), True, kept, getattr(ex, "fields", None))
             app.assets[aid] = d
             self.send_response(303)
             self.send_header("Location", f"/assets/{aid}?msg={quote('Saved (DRY-RUN). Nothing is marked verified.')}")

@@ -127,6 +127,10 @@ def render_legs(legs: list[dict], known_items: set[str], titles: Optional[dict] 
         waits = ("<ul>" + "".join(f"<li>{e(w)}</li>" for w in wait) + "</ul>") if wait else (
             "<span class='ok'>ready for your decision</span>" if l.get("verdict") == "YES" else "<span class='mut'>not stated</span>")
         st = leg_state(l, states)
+        risk_html = money(l['cash_at_risk'])
+        if st in DONE_STATES:  # F-132: executed cash is in "Capital deployed" (or back in the ledger), not cash still at risk
+            risk_html = ("<span class='mut'>already deployed (counted in Capital deployed above)</span>" if st == "ACTED"
+                         else "<span class='mut'>none: closed, principal returned</span>")
         if st == "ACTED":
             verdict_html, waits = "<b class='ok'>DONE</b>", "<span class='ok'>executed; awaiting the outcome (record it on the card)</span>"
         elif st in ("OUTCOME_RECORDED", "LEARNED"):
@@ -137,11 +141,11 @@ def render_legs(legs: list[dict], known_items: set[str], titles: Optional[dict] 
             verdict_html = e(l.get("verdict") or "UNKNOWN")
         rows.append(
             f"<tr><td><b>{e(leg_title(l, titles))}</b><br><span class='small mut'>{e(l['opportunity_class'])}</span></td>"
-            f"<td>{verdict_html}</td><td>{waits}</td><td class='num'>{money(l['cash_at_risk'])}</td>"
+            f"<td>{verdict_html}</td><td>{waits}</td><td class='num'>{risk_html}</td>"
             f"<td class='num'>{money(n['low'])} / <b>{money(n['likely'])}</b> / {money(n['high'])}</td>"
             f"<td class='num'>{_num(l['days_to_cash'], ' d')}</td><td class='num'>{_num(l['success_probability'])}</td>"
             f"<td class='num'>{_num(l['hours'], ' h')}</td><td>{e(l.get('why'))}</td><td>{link}</td></tr>")
-    body = ("<div style='overflow-x:auto'><table><tr><th>Job</th><th>System says</th><th>Waiting on</th><th>Cash at risk</th><th>Net profit if it works (low / likely / high; not weighted by chance)</th>"
+    body = ("<div style='overflow-x:auto'><table><tr><th>Job</th><th>System says</th><th>Waiting on</th><th>Cash still at risk (not yet deployed)</th><th>Net profit if it works (low / likely / high; not weighted by chance)</th>"
             "<th>Days to cash</th><th>Chance</th><th>Hours</th><th>Why</th><th>Card</th></tr>" + "".join(rows) + "</table></div>") if rows else "<p class='mut'>No legs.</p>"
     return f"<div class='card'><h2>Best next opportunities ({len(legs)})</h2>{body}<p class='small mut'>Plan order, not sorted by profit (ADR-0012).</p></div>"
 

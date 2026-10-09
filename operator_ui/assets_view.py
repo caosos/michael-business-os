@@ -36,6 +36,14 @@ FIGURES = (
 FIGURE_KEYS = {k for k, _, _ in FIGURES}
 
 
+class FieldError(ValueError):
+    """F-134: a refusal that names the box(es) to mark."""
+
+    def __init__(self, msg: str, *fields: str):
+        super().__init__(msg)
+        self.fields = set(fields)
+
+
 def _parse_range(key: str, lo: str, hi: str):
     """Blank low and high clears the figure (UNKNOWN). One side blank means a single number. Finite, 0 <= low <= high < 1e7."""
     lo, hi = (lo or "").strip().replace(",", "").lstrip("$"), (hi or "").strip().replace(",", "").lstrip("$")
@@ -44,9 +52,9 @@ def _parse_range(key: str, lo: str, hi: str):
     try:
         a, b = float(lo or hi), float(hi or lo)
     except ValueError:
-        raise ValueError(f"{key}: type plain numbers (for example 150 and 250), or clear both boxes") from None
+        raise FieldError(f"{key}: type plain numbers (for example 150 and 250), or clear both boxes", f"f_{key}_lo", f"f_{key}_hi") from None
     if not (0 <= a <= b < 1e7):
-        raise ValueError(f"{key}: use 0 or more, low not above high, under 10,000,000")
+        raise FieldError(f"{key}: use 0 or more, low not above high, under 10,000,000", f"f_{key}_lo", f"f_{key}_hi")
     return {"low": a, "high": b}
 
 
@@ -60,7 +68,7 @@ def apply_figures(d: dict, form: dict) -> dict:
     if "f_tailgate_months" in form:
         raw = [x for x in re.split(r"[,\s]+", form["f_tailgate_months"].strip()) if x]
         if not all(x.isdigit() and 1 <= int(x) <= 12 for x in raw):
-            raise ValueError("tailgate months: type month numbers 1-12 separated by commas (for example 9,10,11,12,1)")
+            raise FieldError("tailgate months: type month numbers 1-12 separated by commas (for example 9,10,11,12,1)", "f_tailgate_months")
         figs.pop("tailgate_months", None) if not raw else figs.__setitem__("tailgate_months", sorted({int(x) for x in raw}))
     return dict(d, figures=figs)
 
@@ -79,8 +87,32 @@ def add(title: str, form: dict) -> dict:
     return apply_answers(d, form)
 
 
+def _paid(form: dict) -> tuple:
+    """F-128: what he paid is a typed amount and a typed date, never parsed out of a sentence (a year must not become money)."""
+    amt = (form.get("paid_amount") or "").strip().replace(",", "").lstrip("$")
+    when = (form.get("paid_date") or "").strip()
+    if amt:
+        try:
+            v = float(amt)
+        except ValueError:
+            raise FieldError("What you paid: type a plain amount such as 1800 (no words)", "paid_amount") from None
+        if not (0 <= v < 1e7) or v != v:
+            raise FieldError("What you paid: use 0 or more, under 10,000,000", "paid_amount")
+    if when:
+        try:
+            datetime.strptime(when, "%Y-%m-%d")
+        except ValueError:
+            raise FieldError("When you paid: type the date as YYYY-MM-DD, or leave it empty", "paid_date") from None
+    return (amt or None), (when or None)
+
+
 def apply_answers(d: dict, form: dict) -> dict:
+    amt, when = _paid(form)
     d = apply_figures(d, form)
+    if amt:
+        d = intake.answer(d, "historical_basis_usd", format(float(amt), "g") if float(amt) != int(float(amt)) else str(int(float(amt))), "seller_stated")
+    if when:
+        d = dict(d, paid_date=when)
     """`a_<key>` text with `b_<key>` basis (stated | inferred | unknown); `p_photo` adds photo references (one per line).
     A basis of `verified` (or anything else) is refused by intake."""
     for k, v in form.items():
@@ -144,25 +176,52 @@ def _csrf_pin(csrf, pin_on):
     return h + p
 
 
-def render_list(assets: dict, csrf: str, pin_on: bool, flash: str = "") -> str:
+def _box(name: str, vals: dict, bad: set, default="", attrs: str = "") -> str:
+    """F-134: an input that keeps what was typed after a refusal and marks the bad box."""
+    v = vals[name] if name in vals else default
+    mark = " style='border:2px solid #b00020;background:#fff0f0' aria-invalid='true'" if name in bad else ""
+    return f"<input name='{e(name)}' value='{e(v)}'{mark} {attrs}>"
+
+
+def render_list(assets: dict, csrf: str, pin_on: bool, flash: str = "", vals: dict | None = None, bad: set | None = None) -> str:
+    vals, bad = vals or {}, bad or set()
     rows = "".join(f"<li><a href='/assets/{e(i)}'>{e(d.get('title'))}</a> <span class='tag inf'>owned</span></li>" for i, d in assets.items())
     spec = intake.load_spec(SPEC)
     return (f"{flash}<div class='card'><h2>My assets (DRY-RUN)</h2><p class='small mut'>Things you already own. Decisions use cash from today; what you "
             f"paid is recorded as sunk history. Your answers are kept as what you said; nothing here can mark anything verified.</p>"
             f"<ul>{rows or '<li class=mut>none yet</li>'}</ul></div>"
             f"<div class='card'><h3>Add an asset</h3><form method='post' action='/assets/add'>{_csrf_pin(csrf, pin_on)}"
-            f"<label>Name <input name='title' value='BBQ trailer' required></label>"
-            + "".join(f"<p><label>{e(f['ask'])}<br><input name='a_{e(f['key'])}' size='80'></label></p>" for f in spec["fields"] if f["key"] in ("historical_basis_usd", "past_tow"))
+            f"<label>Name {_box('title', vals, bad, 'BBQ trailer', 'required')}</label>"
+            + f"<p><label>What you paid, if you remember ($, a number only) {_box('paid_amount', vals, bad, attrs='size=12 inputmode=decimal')}</label> "
+              f"<label>Date you paid (YYYY-MM-DD) {_box('paid_date', vals, bad, attrs='size=12 placeholder=YYYY-MM-DD')}</label></p>"
+            + "".join(f"<p><label>{e(f['ask'])}<br>{_box('a_' + f['key'], vals, bad, attrs='size=80')}</label></p>" for f in spec["fields"] if f["key"] == "past_tow")
             + "<button>Add asset</button></form></div>")
 
 
-def render_card(aid: str, d: dict, cmp: dict, csrf: str, pin_on: bool, flash: str = "") -> str:
+def _pph(p: dict):
+    """F-133: profit per hour and per incremental dollar from the path's own ranges (INFERENCE); None when an input is UNKNOWN or zero."""
+    n, h, c = p.get("net_incremental"), p.get("operator_hours"), p.get("incremental_cash")
+    pph = {"low": n["low"] / h["high"], "high": n["high"] / h["low"]} if n and h and h["low"] > 0 else None
+    pd = {"low": n["low"] / c["high"], "high": n["high"] / c["low"]} if n and c and c["low"] > 0 else None
+    return pph, pd
+
+
+def _ratio(v, unit, none_text):
+    if v is None:
+        return f"<span class=mut>{none_text}</span>"
+    lo, hi = v["low"], v["high"]
+    return f"{unit}{lo:,.2f}" if abs(lo - hi) < 0.005 else f"{unit}{lo:,.2f} to {unit}{hi:,.2f}"
+
+
+def render_card(aid: str, d: dict, cmp: dict, csrf: str, pin_on: bool, flash: str = "", vals: dict | None = None, bad: set | None = None) -> str:
+    vals, bad = vals or {}, bad or set()
     got = "".join(f"<tr><td>{e(k)}</td><td>{'<b class=unk>UNKNOWN</b>' if a['basis'] == 'UNKNOWN' else e(a['value'])}</td>"
                   f"<td><span class='tag inf'>{e(a['basis'])}</span></td></tr>" for k, a in d["answers"].items())
     rw, rec, sb = cmp["roadworthiness"], cmp["recommendation"], cmp["sunk_basis"]["historical_basis_usd"]
     paths = "".join(
         f"<tr><td><b>{e(p['path'])}</b></td><td>{_r(p['incremental_cash'], '$')}</td><td>{_r(p['operator_hours'])}</td><td>{_r(p['days_to_cash'])}</td>"
         f"<td>{_r(p['personal_use_value'] if p['path'] == 'KEEP' else p['finished_resale_range'], '$')}</td><td>{_r(p['net_incremental'], '$')}</td>"
+        f"<td>{_ratio(_pph(p)[0], '$', 'UNKNOWN (needs net and hours)')}</td><td>{_ratio(_pph(p)[1], '$', 'n/a (no cash needed) or UNKNOWN')}</td>"
         f"<td>{e(p['risk']['structural'])}</td><td>{e((p['seasonality'] or {}).get('status', 'n/a'))}</td>"
         f"<td>{e(', '.join(p['unknowns'])) or 'none'}</td></tr>" for p in cmp["paths"])
     pick = (f"System leans {e(rec['path'])} ({e(rec['caveat'])}). Based on your own estimates (INFERENCE, not verified)." if rec["path"] != "UNKNOWN"
@@ -176,18 +235,18 @@ def render_card(aid: str, d: dict, cmp: dict, csrf: str, pin_on: bool, flash: st
     photos = "".join(f"<li>{e(x['ref'])} <span class='tag inf'>photo ref, unverified</span></li>" for x in d["evidence"] if x.get("kind") == "photo")
     figs = d.get("figures") or {}
     frows = "".join(
-        f"<tr><td>{e(label)} ({unit})</td><td><input name='f_{e(k)}_lo' size='8' value='{e(figs.get(k, {}).get('low', ''))}' placeholder='low'> to "
-        f"<input name='f_{e(k)}_hi' size='8' value='{e(figs.get(k, {}).get('high', ''))}' placeholder='high'></td></tr>" for k, label, unit in FIGURES)
+        f"<tr><td>{e(label)} ({unit})</td><td>{_box(f'f_{k}_lo', vals, bad, figs.get(k, {}).get('low', ''), 'size=8 placeholder=low')} to "
+        f"{_box(f'f_{k}_hi', vals, bad, figs.get(k, {}).get('high', ''), 'size=8 placeholder=high')}</td></tr>" for k, label, unit in FIGURES)
     fcard = (f"<div class='card'><h3>Your rough figures</h3><p class='small mut'>These are your estimates (a guess, attested by you), not facts and not verified. "
              f"Clear both boxes to take a figure back to UNKNOWN. Leave the sell-as-is cash empty: selling as-is needs no outlay.</p>"
              f"<form method='post' action='/assets/{e(aid)}/answer'>{_csrf_pin(csrf, pin_on)}<table>{frows}"
-             f"<tr><td>Tailgate months (1-12, comma separated)</td><td><input name='f_tailgate_months' size='24' value='{e(', '.join(map(str, figs.get('tailgate_months', []))))}'></td></tr>"
+             f"<tr><td>Tailgate months (1-12, comma separated)</td><td>{_box('f_tailgate_months', vals, bad, ', '.join(map(str, figs.get('tailgate_months', []))), 'size=24')}</td></tr>"
              f"</table><button>Save figures</button></form></div>")
     return (f"{flash}<div class='card'><h2>{e(d.get('title'))} <span class='tag inf'>OWNED</span> <span class='tag inf'>DRY-RUN</span></h2>"
             f"<p class='small mut'>Verified facts: 0. Nothing is published, sent or spent. Decision basis: {e(cmp['decision_basis'])}. "
             f"Sunk basis (history only, excluded from net, ROI and ranking): {_r(sb, '$')}.</p>"
             f"<p>Roadworthiness: <b>{e(rw['confidence'])}</b>: {e(rw['why'])}.</p><p>{pick}</p>"
-            f"<table><tr><th>Path</th><th>Cash from today</th><th>Your hours</th><th>Days to cash</th><th>Resale / own use</th><th>Net</th><th>Structural risk</th><th>Season</th><th>UNKNOWN inputs</th></tr>{paths}</table></div>"
+            f"<table><tr><th>Path</th><th>Cash from today</th><th>Your hours</th><th>Days to cash</th><th>Resale / own use</th><th>Net</th><th>Profit per hour (INFER)</th><th>Profit per incremental $ (INFER)</th><th>Structural risk</th><th>Season</th><th>UNKNOWN inputs</th></tr>{paths}</table></div>"
             + fcard +
             f"<div class='card'><h3>What you've told me</h3><table><tr><th>Fact</th><th>Value</th><th>Basis</th></tr>{got or '<tr><td colspan=3 class=mut>nothing yet</td></tr>'}</table></div>"
             f"<div class='card'><h3>Inspection checklist and open questions ({len(qs) - len(angles)})</h3>"

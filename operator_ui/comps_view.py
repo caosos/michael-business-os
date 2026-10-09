@@ -63,9 +63,26 @@ def _engine_gap_text(raw: str) -> str:
     return " ".join(x if x.endswith((".", ")")) else x + "." for x in out)
 
 
+_NOT_BLOCKER = "evidence is not the blocker"
+
+
+def not_blocker_text(card: dict) -> Optional[str]:
+    """F-130: when the engine says no missing evidence changes the verdict, the true status is the verdict's own condition."""
+    blob = json.dumps(card, default=str)
+    if _NOT_BLOCKER not in blob:
+        return None
+    m = re.search(r"walk-away price \(max buy for YES\): \$([\d,]+)", blob)
+    m2 = re.search(r"minimum quote for YES: \$([\d,]+)", blob)
+    cond = (f" It would be a YES at ${m.group(1)} or less." if m else f" It would be a YES at a quote of ${m2.group(1)} or more." if m2 else "")
+    return f"Not a YES yet, and more evidence would not change that.{cond}"
+
+
 def gap_text(card: dict) -> str:
     """The research gap in the system's own words: the latest 'gaps: ...' or 'needs ...' reason on the card's trail,
     re-worded per gap code by the engine (F-107)."""
+    nb = not_blocker_text(card)
+    if nb:
+        return nb
     for t in reversed(card.get("activity_trail") or []):
         why = str(t.get("why") or "")
         for key in ("gaps:", "needs "):
@@ -205,8 +222,10 @@ def render_needs(card: dict, item_state: str, csrf: str, pin_set: bool, inbox_se
                 "<p>This is a service job: the system is waiting on things only you can confirm (see <a href='#confirm'>Confirm what you know</a>), "
                 f"not on a sold price. A price you saw is optional.</p>{errs}<details{' open' if errs else ''}><summary>Add a price I saw</summary>{form}</details></div>")
     return (f"<div class='card rec' id='needs'><h2>Needs from you</h2><p style='font-size:18px'><b>{e(gap_text(card))}</b></p>"
-            "<p>This item is parked: the system cannot recommend it until it has a price to compare with. "
-            f"A price you actually saw is enough.</p>{errs}<h3>Add a price I saw</h3>{form}</div>")
+            + ("<p>The system has what it needs to judge this; the verdict above is its answer. A price you saw is optional.</p>"
+               if not_blocker_text(card) else
+               "<p>This item is parked: the system cannot recommend it until it has a price to compare with. A price you actually saw is enough.</p>")
+            + f"{errs}<h3>Add a price I saw</h3>{form}</div>")
 
 
 def saved_message(item_id: str, created: bool, condition: Optional[str] = None) -> str:
