@@ -116,7 +116,7 @@ def render_economics(card: dict) -> str:
              ("Transport cost", "transport_cost"), ("Total cash at risk", "total_cash_at_risk"),
              ("Resale, conservative", "resale_conservative"), ("Resale, likely", "resale_likely"),
              ("Resale, optimistic", "resale_optimistic"), ("Expected gross profit", "expected_gross_profit"),
-             ("Expected net profit", "expected_net_profit"), ("Expected profit per hour", "expected_profit_per_hour")]
+             ("Net profit if it goes as planned (not weighted by chance)", "expected_net_profit"), ("Expected profit per hour", "expected_profit_per_hour")]
     rows = "".join(_row(label, x[k], True) for label, k in lines) + _row("Expected days to cash", x["expected_days_to_cash"])
     return f"<div class='card'><h2>Estimated numbers</h2><table>{rows}</table></div>"
 

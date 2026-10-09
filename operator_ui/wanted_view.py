@@ -199,7 +199,7 @@ def render_page(records: list[dict], items: list[dict], now, csrf: str, pin_set:
         elif res["matches"]:
             body = f"<ul>{''.join(_match_row(m, titles) for m in res['matches'])}</ul>"
         else:
-            body = f"<p class='mut'>No current Item matches ({res.get('evaluated', 0)} checked). Recommendation only; nothing was contacted.</p>"
+            body = f"<p class='mut'>No current Item matches ({res.get('evaluated', 0)} checked). Recommendation only; nothing was contacted. <b>No source is hunting for this yet</b>: this list only filters Items already in the store.</p>"
         btn = lambda act, label: (f"<form method='post' action='/wanted/{e(d['campaign_id'])}/{act}' style='display:inline'>{tok()}{pin} <button>{label}</button></form>")  # noqa: E731
         ctl = (btn("pause", "Pause") if active else btn("resume", "Resume") if d["status"] == "PAUSED" else "") + \
               (btn("cancel", "Cancel") if d["status"] in ("ACTIVE", "PAUSED") else "")

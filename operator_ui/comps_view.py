@@ -26,6 +26,22 @@ MAX_PRICE, MAX_AGE_DAYS = Decimal("1000000"), 730
 CONDITIONS = ("used", "new", "parts", "unknown")  # == mbos_discovery.comps.CONDITIONS
 DATE_RE = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", re.ASCII)
 DEFAULT_GAP = "no comparable sold price"
+PARTS_NOTE = ("<div class='flash err'><b>Your saved price was not used.</b> You saved {n} price{s} with condition <b>parts</b>. The system "
+              "files a parts price as an as-is (for parts) figure, not as a resale comparable for a working item, so it cannot clear "
+              "&quot;no comparable sold price&quot;. Add a price for the same kind of item in <b>used</b> condition.</div>")
+
+
+def parts_only(inbox: Optional[str], item_id: str) -> int:
+    """F-125: how many prices saved for this Item are condition 'parts' while none is another condition. Read-only; 0 if unreadable."""
+    conds = []
+    try:
+        for p in (Path(inbox).glob("*.json") if inbox else []):
+            d = json.loads(p.read_text(encoding="utf-8"))
+            if isinstance(d, dict) and d.get("for_item_id") == item_id:
+                conds.append(d.get("condition"))
+    except (OSError, ValueError):
+        return 0
+    return conds.count("parts") if conds and all(c == "parts" for c in conds) else 0
 
 
 GAP_CODES = ("scope_override_required", "category_unestimable", "thin_comps", "no_sold_comps", "repair_scope_unknown",
@@ -151,13 +167,18 @@ def write_comp(inbox: Optional[str], doc: dict) -> tuple[Path, bool]:
         os.unlink(tmp)
 
 
-def render_needs(card: dict, item_state: str, csrf: str, pin_set: bool, inbox_set: bool, reasons=None, values=None, nonce: str = "", lane: Optional[str] = None) -> str:
+def render_needs(card: dict, item_state: str, csrf: str, pin_set: bool, inbox_set: bool, reasons=None, values=None, nonce: str = "", lane: Optional[str] = None,
+                 parts_only: int = 0) -> str:
     """The "Needs from you" section + the "Add a price I saw" form. Shown only while the item is parked in RESEARCHING."""
     if item_state != "RESEARCHING":
         return ""
     v = values or {}
     i = card["item"]
+    if parts_only:  # F-125: say why a saved price changed nothing
+        errs = PARTS_NOTE.format(n=parts_only, s="" if parts_only == 1 else "s") + (errs if 'errs' in dir() else "")
     errs = ("<div class='flash err'><b>Price not saved.</b><ul>" + "".join(f"<li>{e(r)}</li>" for r in reasons) + "</ul></div>") if reasons else ""
+    if parts_only:  # F-125: say why a saved price changed nothing
+        errs = PARTS_NOTE.format(n=parts_only, s="" if parts_only == 1 else "s") + errs
     mm = i["make_model"]
     make_model = mm.get("value") if isinstance(mm, dict) and isinstance(mm.get("value"), str) else ""
     cond = v.get("condition") or "used"
@@ -188,10 +209,12 @@ def render_needs(card: dict, item_state: str, csrf: str, pin_set: bool, inbox_se
             f"A price you actually saw is enough.</p>{errs}<h3>Add a price I saw</h3>{form}</div>")
 
 
-def saved_message(item_id: str, created: bool) -> str:
+def saved_message(item_id: str, created: bool, condition: Optional[str] = None) -> str:
     """F-92: truthful. The worker (A-40) watches the comps inbox about every 60 s and re-checks parked items itself; this page cannot."""
     head = "Price saved." if created else "That price was already recorded; nothing changed."
-    return (f"{head} The worker checks the inbox about once a minute and will re-check this item with your price; reload this page in a "
+    parts = (" Note: you saved it with condition parts, which is filed as an as-is price and will not count as a resale comparable; "
+             "add a used price if you have one.") if condition == "parts" else ""
+    return (f"{head}{parts} The worker checks the inbox about once a minute and will re-check this item with your price; reload this page in a "
             f"minute to see the result. If no worker is running, run `mbos recheck {item_id}` on the server.")
 
 

@@ -117,7 +117,7 @@ def leg_title(l: dict, titles: Optional[dict] = None) -> str:
     return l.get("title") or (titles or {}).get(l.get("item_id")) or l.get("item_id") or "(unnamed)"
 
 
-def render_legs(legs: list[dict], known_items: set[str], titles: Optional[dict] = None) -> str:
+def render_legs(legs: list[dict], known_items: set[str], titles: Optional[dict] = None, states: Optional[dict] = None) -> str:
     rows = []
     for l in legs:
         n = l["expected_net"]
@@ -126,28 +126,55 @@ def render_legs(legs: list[dict], known_items: set[str], titles: Optional[dict] 
         wait = l.get("waiting_on") or []
         waits = ("<ul>" + "".join(f"<li>{e(w)}</li>" for w in wait) + "</ul>") if wait else (
             "<span class='ok'>ready for your decision</span>" if l.get("verdict") == "YES" else "<span class='mut'>not stated</span>")
+        st = leg_state(l, states)
+        if st == "ACTED":
+            verdict_html, waits = "<b class='ok'>DONE</b>", "<span class='ok'>executed; awaiting the outcome (record it on the card)</span>"
+        elif st in ("OUTCOME_RECORDED", "LEARNED"):
+            verdict_html, waits = "<b class='ok'>DONE</b>", "<span class='mut'>executed; outcome recorded</span>"
+        elif st == "HELD":
+            verdict_html, waits = "<b>ON HOLD</b>", "<span class='mut'>you put this on hold; nothing to decide until it wakes</span>"
+        else:
+            verdict_html = e(l.get("verdict") or "UNKNOWN")
         rows.append(
             f"<tr><td><b>{e(leg_title(l, titles))}</b><br><span class='small mut'>{e(l['opportunity_class'])}</span></td>"
-            f"<td>{e(l.get('verdict') or 'UNKNOWN')}</td><td>{waits}</td><td class='num'>{money(l['cash_at_risk'])}</td>"
+            f"<td>{verdict_html}</td><td>{waits}</td><td class='num'>{money(l['cash_at_risk'])}</td>"
             f"<td class='num'>{money(n['low'])} / <b>{money(n['likely'])}</b> / {money(n['high'])}</td>"
             f"<td class='num'>{_num(l['days_to_cash'], ' d')}</td><td class='num'>{_num(l['success_probability'])}</td>"
             f"<td class='num'>{_num(l['hours'], ' h')}</td><td>{e(l.get('why'))}</td><td>{link}</td></tr>")
-    body = ("<div style='overflow-x:auto'><table><tr><th>Job</th><th>System says</th><th>Waiting on</th><th>Cash at risk</th><th>Expected net (low / likely / high)</th>"
+    body = ("<div style='overflow-x:auto'><table><tr><th>Job</th><th>System says</th><th>Waiting on</th><th>Cash at risk</th><th>Net profit if it works (low / likely / high; not weighted by chance)</th>"
             "<th>Days to cash</th><th>Chance</th><th>Hours</th><th>Why</th><th>Card</th></tr>" + "".join(rows) + "</table></div>") if rows else "<p class='mut'>No legs.</p>"
     return f"<div class='card'><h2>Best next opportunities ({len(legs)})</h2>{body}<p class='small mut'>Plan order, not sorted by profit (ADR-0012).</p></div>"
 
 
-def decidable(doc: dict) -> list[dict]:
-    """Legs Michael can decide today: the system's own verdict is YES. Nothing else can be deployed (F-94)."""
-    return [l for l in doc.get("legs") or [] if l.get("verdict") == "YES"]
+DONE_STATES = ("ACTED", "OUTCOME_RECORDED", "LEARNED")  # F-122: executed; ACTED still awaits its outcome
+PAUSED_STATES = ("HELD",)  # F-121: parked on a HOLD, nothing to decide until it wakes
 
 
-def render_plan(doc: dict, known_items: set[str], titles: Optional[dict] = None) -> str:
+def leg_state(l: dict, states: Optional[dict] = None) -> Optional[str]:
+    return (states or {}).get(l.get("item_id"))
+
+
+def decidable(doc: dict, states: Optional[dict] = None) -> list[dict]:
+    """Legs Michael can decide today: the system's own verdict is YES and the item is still open (not held, not executed).
+    Nothing else can be deployed (F-94, F-121, F-122)."""
+    return [l for l in doc.get("legs") or [] if l.get("verdict") == "YES" and leg_state(l, states) not in DONE_STATES + PAUSED_STATES]
+
+
+def executed(doc: dict, states: Optional[dict] = None) -> list[dict]:
+    return [l for l in doc.get("legs") or [] if leg_state(l, states) in DONE_STATES]
+
+
+def render_plan(doc: dict, known_items: set[str], titles: Optional[dict] = None, states: Optional[dict] = None) -> str:
     rec = doc["recommendation"]
     legs = doc.get("legs") or []
-    if rec == "DEPLOY" and legs and not decidable(doc) and any("verdict" in l for l in legs):
-        rec = "HOLD"  # defensive: never say DEPLOY when no leg can be approved
-    if rec == "HOLD":
+    done = executed(doc, states)
+    if rec == "DEPLOY" and legs and not decidable(doc, states) and (states or any("verdict" in l for l in legs)):
+        rec = "AFTER_EXEC" if done else "HOLD"  # never say DEPLOY when no leg can be approved (F-122: recompute after execution)
+    if rec == "AFTER_EXEC":
+        k = len(done)
+        banner = (f"<div class='card'><h2>Recommendation</h2><p style='font-size:22px;margin:4px 0'><b>DONE for now.</b> {k} job{'' if k == 1 else 's'} executed, "
+                  "awaiting the outcome. Record what happened on the card; nothing else is ready to approve.</p></div>")
+    elif rec == "HOLD":
         n = len([l for l in legs if l.get("verdict") != "YES"])
         banner = ("<div class='card'><h2>Recommendation</h2><p style='font-size:22px;margin:4px 0'><b>HOLD.</b> Nothing is ready to approve"
                   f"{'; ' + str(n) + ' job' + ('' if n == 1 else 's') + ' still need' + ('s' if n == 1 else '') + ' something from you or the system (see Waiting on below)' if n else ''}. "
@@ -156,7 +183,7 @@ def render_plan(doc: dict, known_items: set[str], titles: Optional[dict] = None)
         banner = ("<div class='flash err' style='font-size:20px'><b>DO NOT SPEND.</b> The plan recommends committing no cash this week. "
                   "Service or other low-cash work is the better route to the target.</div>")
     elif rec == "DEPLOY":
-        k = len(decidable(doc)) if any("verdict" in l for l in legs) else len(legs)
+        k = len(decidable(doc, states)) if any("verdict" in l for l in legs) else len(legs)
         banner = (f"<div class='card'><h2>Recommendation</h2><p style='font-size:22px;margin:4px 0'><b>DEPLOY</b> capital to the {k} job{'' if k == 1 else 's'} marked "
                   "YES below. Each still needs your own YES.</p></div>")
     else:
@@ -175,10 +202,10 @@ def render_plan(doc: dict, known_items: set[str], titles: Optional[dict] = None)
     unknowns = doc.get("unknowns") or []
     extra = ((f"<div class='card'><h2>Replace if stale</h2><ul>{''.join(f'<li><a href=/item/{e(i)}>{e((titles or {}).get(i) or i)}</a></li>' for i in stale)}</ul></div>" if stale else "")
              + (f"<div class='card'><h2>UNKNOWN ({len(unknowns)})</h2><ul>{''.join(f'<li>{e(u)}</li>' for u in unknowns)}</ul></div>" if unknowns else ""))
-    return (banner + render_mission_header(doc["mission"]) + proj + render_ledger(doc["ledger"]) + render_legs(doc["legs"], known_items, titles) + extra)
+    return (banner + render_mission_header(doc["mission"]) + proj + render_ledger(doc["ledger"]) + render_legs(doc["legs"], known_items, titles, states) + extra)
 
 
-def render_page(loaded: dict, known_items: set[str], titles: Optional[dict] = None) -> str:
+def render_page(loaded: dict, known_items: set[str], titles: Optional[dict] = None, states: Optional[dict] = None) -> str:
     src = f" Source: {e(loaded['source'])}." if loaded.get("source") else ""
     head = ("<div class='card'><h2>Weekly mission</h2><p class='small mut'>Read-only. Built from live Items on lane D, else from a mission plan "
             f"file; nothing here spends, contacts or commits.{src}</p></div>")
@@ -191,10 +218,10 @@ def render_page(loaded: dict, known_items: set[str], titles: Optional[dict] = No
         gap = ("<div class='card'><p class='unk'><b>No plan yet.</b> There is a mission but no plan built for it, so the remaining gap is "
                "<b class='unk'>UNKNOWN</b>.</p></div>")
         return head + render_mission_header(loaded["doc"]) + (render_ledger(loaded["ledger"]) if loaded.get("ledger") else "") + gap
-    return head + render_plan(loaded["doc"], known_items, titles)
+    return head + render_plan(loaded["doc"], known_items, titles, states)
 
 
-def today_header(loaded: dict, titles: Optional[dict] = None) -> str:
+def today_header(loaded: dict, titles: Optional[dict] = None, states: Optional[dict] = None) -> str:
     """F-98: three lines at the top of Today: the gap to the weekly target, cash available to deploy, and the best next move. Every
     figure comes from the plan or ledger; a missing one says UNKNOWN and what to do about it. Never invents a number."""
     doc, kind = loaded.get("doc"), loaded.get("kind")
@@ -210,13 +237,20 @@ def today_header(loaded: dict, titles: Optional[dict] = None) -> str:
     avail_html = (f"<b>{money(avail)}</b> <span class='small mut'>available to deploy</span>" if avail is not None else
                   "<b class='unk'>UNKNOWN</b> <span class='small mut'>fund your bankroll on <a href='/numbers'>My numbers</a></span>")
     legs = (doc or {}).get("legs") or [] if kind == "plan" else []
-    yes = [l for l in legs if l.get("verdict") == "YES"]
-    wait = [l for l in legs if l.get("verdict") != "YES" and l.get("waiting_on")]
+    plan_doc = {"legs": legs}
+    yes = decidable(plan_doc, states)  # F-121: open requests only; a held or executed leg is not "ready for your YES"
+    done = [l for l in executed(plan_doc, states) if leg_state(l, states) == "ACTED"]
+    held = [l for l in legs if leg_state(l, states) in PAUSED_STATES]
+    wait = [l for l in legs if l.get("verdict") != "YES" and l.get("waiting_on") and leg_state(l, states) not in DONE_STATES + PAUSED_STATES]
     link = lambda l: f"<a href='/item/{e(l['item_id'])}'>{e(leg_title(l, titles))}</a>"  # noqa: E731
     if yes:
         move = f"Decide: {link(yes[0])} is ready for your YES or NO."
+    elif done:
+        move = f"Record the outcome of {link(done[0])}: it was executed and is waiting to hear what happened."
     elif wait:
         move = f"Give the system what it is waiting for on {link(wait[0])}: {e(wait[0]['waiting_on'][0])}."
+    elif held:
+        move = f"Nothing to decide: {link(held[0])} is on hold. Wake it when you are ready, or look at the next best job below."
     elif kind == "plan":
         move = "Nothing to approve yet. Nothing is being committed."
     else:

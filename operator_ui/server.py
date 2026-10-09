@@ -467,7 +467,7 @@ def render_digest(view):
             f"ranking by lane C (<code>{e(p['tool_name'])} {e(p['tool_version'])}</code>, basis {e(p['basis'])}) · "
             f"digest hash <code>{e(d['digest_hash'][:23])}</code></p><p>{counts}</p></div>"
             f"<div class='card'><table><tr><th>#</th><th>Bucket</th><th>Opportunity</th><th>Next step · why</th><th>Deadline</th>"
-            f"<th title='Lane C rank score: orders this list; it is not dollars'>Priority score</th><th>Expected profit<br><span class='small mut'>and per hour</span></th><th>Refs</th></tr>{''.join(rows) or '<tr><td colspan=8 class=mut>Nothing open to rank.</td></tr>'}</table></div>"
+            f"<th title='Lane C rank score: orders this list; it is not dollars'>Priority score</th><th>Expected profit, weighted by chance<br><span class='small mut'>and per hour</span></th><th>Refs</th></tr>{''.join(rows) or '<tr><td colspan=8 class=mut>Nothing open to rank.</td></tr>'}</table></div>"
             f"<div class='card'><h2>Not ranked ({len(excl)})</h2>{'<ul>' + ex + '</ul>' if ex else '<p class=mut>None.</p>'}</div>")
 
 
@@ -755,7 +755,7 @@ class App:
             raise InputError("this item is not waiting for a price")
         doc = comps_view.parse_comp({**f, "nonce": nonce}, item, self.author, utcnow())
         _, created = comps_view.write_comp(self.comps_inbox, doc)
-        return comps_view.saved_message(item_id, created)
+        return comps_view.saved_message(item_id, created, doc.get("condition"))
 
     def add_attestation(self, item_id, f):
         """F-90: "Confirm" one requested evidence key -> `record_attestation` (owner channel). CSRF + PIN; the author is server-set;
@@ -933,7 +933,8 @@ def make_handler(app):
                 from . import mission_view
 
                 try:
-                    head = mission_view.today_header(mission_view.load_live(app.store, now, app.mission_file))
+                    lv = mission_view.load_live(app.store, now, app.mission_file)
+                    head = mission_view.today_header(lv, None, self._leg_states(lv))
                 except Exception as ex:  # noqa: BLE001 - Today must still render; say the header is unavailable
                     head = f"<div class='card'><p class='bad'>Today's header is unavailable ({e(type(ex).__name__)}).</p></div>"
                 return self._send(200, page("Operator queue", head + comps_view.render_today(self._parked()) + render_queue(views.queue(app.store, now)),
@@ -953,7 +954,7 @@ def make_handler(app):
                 known = {l["item_id"] for l in (loaded["doc"] or {}).get("legs", []) if app.store.item(l["item_id"])} if loaded["kind"] == "plan" else set()
                 ids = {l["item_id"] for l in (loaded["doc"] or {}).get("legs", [])} | set((loaded["doc"] or {}).get("replace_if_stale") or []) if loaded["kind"] == "plan" else set()
                 titles = {i: ((app.store.item(i) or {}).get("normalized") or {}).get("title") for i in ids}
-                return self._send(200, page("Weekly mission", mission_view.render_page(loaded, known, {k: v for k, v in titles.items() if v})
+                return self._send(200, page("Weekly mission", mission_view.render_page(loaded, known, {k: v for k, v in titles.items() if v}, self._leg_states(loaded))
                                                                 + bought_view.render_open_flips(app.store.open_acquisitions()), app.state()))
             if u.path == "/wanted":
                 return self._wanted_page(flash or err, bool(err))
@@ -1148,6 +1149,18 @@ def make_handler(app):
             self.send_header("Content-Length", "0")
             self.end_headers()
 
+        def _leg_states(self, loaded):
+            """F-121/F-122: the live state of each plan leg's item, so the page never calls a held or executed job 'ready for your YES'."""
+            if loaded.get("kind") != "plan":
+                return {}
+            out = {}
+            for l in (loaded.get("doc") or {}).get("legs") or []:
+                try:
+                    out[l["item_id"]] = (app.store.item(l["item_id"]) or {}).get("state")
+                except Exception:  # noqa: BLE001 - a missing state just leaves the plan's own verdict in force
+                    pass
+            return out
+
         def _parked(self):
             """F-28: [(item, gap text)] for Items in RESEARCHING, for the "Needs from you" block on the queue."""
             out = []
@@ -1248,7 +1261,7 @@ def make_handler(app):
             store_item = app.store.item(item_id) or {}
             body = comps_view.render_needs(card, store_item.get("state", "?"), app.csrf, bool(app.operator_pin),
                                            bool(app.comps_inbox), comp_reasons, comp_values, secrets.token_hex(8),
-                                           lane=store_item.get("type")) + body
+                                           lane=store_item.get("type"), parts_only=comps_view.parts_only(app.comps_inbox, item_id)) + body
             body = attest_view.render_confirm(store_item, app.csrf, bool(app.operator_pin), app.store.lane == "lane_d",
                                               secrets.token_hex(6), attest_reasons) + body
             body = bought_view.render_bought(store_item, app.store.capital_for(item_id), app.csrf, bool(app.operator_pin),

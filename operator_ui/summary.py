@@ -132,7 +132,7 @@ def render_markdown(s: dict) -> str:
     elif not d["rows"]:
         L += ["Nothing open to rank.", ""]
     else:
-        L += ["| # | Bucket | Lane | Opportunity | Next step | Window | Priority score | Expected profit |", "|---|---|---|---|---|---|---|---|"]
+        L += ["| # | Bucket | Lane | Opportunity | Next step | Window | Priority score | Expected profit (weighted by chance) |", "|---|---|---|---|---|---|---|---|"]
         L += [f"| {r['rank']} | {md(r['bucket'])} | {md(r['lane'])} | {md(r['title'])} | {md(r['action'])} | "
               f"{md(r['window'])} | {_fig(r)['priority']} | {_fig(r)['ev']} |" for r in d["rows"]]
         L += ["", f"Lane C digest hash `{d['digest_hash']}`; {d['not_ranked']} item(s) not ranked (see the UI).", ""]
@@ -178,7 +178,7 @@ def render_html_body(s: dict) -> str:
                        f"<td>{e(r['action'])}</td><td>{e(r['window'])}</td><td>{e(_fig(r)['priority'])}</td><td>{e(_fig(r)['ev'])}</td></tr>"
                        for r in d["rows"])
         parts.append("<table><tr><th>#</th><th>Bucket</th><th>Lane</th><th>Opportunity</th><th>Next step</th><th>Window</th>"
-                     f"<th title='Lane C rank score: orders the list; not dollars'>Priority score</th><th>Expected profit</th></tr>{rows or '<tr><td colspan=8>Nothing open to rank.</td></tr>'}</table>")
+                     f"<th title='Lane C rank score: orders the list; not dollars'>Priority score</th><th>Expected profit<br><span class='small mut'>weighted by chance</span></th></tr>{rows or '<tr><td colspan=8>Nothing open to rank.</td></tr>'}</table>")
     over = sum(h["overdue"] for h in s["holds"])
     rows = "".join(f"<tr><td>{ec(h['title'])}</td><td>{e(h['capability'])}</td><td>{e(h['hold_until'])}</td>"
                    f"<td class='{'bad' if h['overdue'] else ''}'>{'OVERDUE' if h['overdue'] else 'waiting'}</td><td>{e(h['reason'])}</td></tr>"
