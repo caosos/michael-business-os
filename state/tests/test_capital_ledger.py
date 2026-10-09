@@ -188,7 +188,8 @@ def test_agent_reported_outcomes_do_not_move_capital_but_are_counted(cap):
 def test_one_close_per_item_and_non_capital_receipts_are_ignored(cap):
     cap.fund(500)
     item = cap.item(); cap.deploy(item, 40); cap.close(item, 100, 40)
-    cap.close(item, 999, 40)                                 # a second closing outcome for the same item: ignored
+    with pytest.raises(psycopg.DatabaseError, match="already closed"):   # F-115 (D-31): a second closing outcome is refused
+        cap.close(item, 999, 40)
     n = cap.db.connect("reader").execute("SELECT count(*) FROM mbos.capital_ledger WHERE kind='close'").fetchone()[0]
     assert n == 1 and cap.pos()[3] == 60
     cap.close(cap.item(), 10, 1, kind="message_replied")     # not a closing kind
