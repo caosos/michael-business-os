@@ -672,6 +672,33 @@ def record_attestation(conn: sa.Connection, item_id: str, evidence_key: str, not
     return {"finding": note, "field": field, "basis": "FACT", "source_uri": f"human:{who}", "provenance_id": prov}
 
 
+def record_human_input(conn: sa.Connection, item_id: str, kind: str, key: str, value: Any, note: str, entered_by: str) -> dict:
+    """Michael's typed input (A-43): a service QUOTE (`quote`, key `amount_usd`) or a scope override for an unknown category (`scope_override`,
+    key `<rehab|job>.<field>`) as an Item research entry with HUMAN provenance (inserted first, like `record_attestation`). Runs
+    `mbos.record_human_input` (D-30): OWNER login only; the workflow login is refused. Fields `quote:amount_usd` / `scope_override:<key>` are what
+    lane C reads. The same input again is a no-op; a changed value is a new entry (the latest wins). The running worker re-checks the item itself."""
+    kind, key, note, who = (kind or "").strip(), (key or "").strip(), (note or "").strip(), (entered_by or "").strip()
+    if not kind or not key or not note or not who:
+        raise ValueError("kind, key, note and entered_by are all required")
+    if kind not in ("quote", "scope_override"):
+        raise ValueError("kind must be 'quote' or 'scope_override'")
+    skills = isinstance(value, list) and bool(value) and all(isinstance(v, str) for v in value)
+    if not skills and (isinstance(value, bool) or not isinstance(value, (int, float)) or value != value or value in (float("inf"), float("-inf"))):
+        raise ValueError("value must be a finite number (or a list of skill names for required_skills)")
+    field = ("quote:" if kind == "quote" else "scope_override:") + key
+    vjson = canonical_json(value).decode()
+    mine = [r for r in (read_item(conn, item_id).get("research") or []) if r.get("field") == field]
+    if mine and mine[-1].get("value") == value and mine[-1].get("finding") == note and mine[-1].get("source_uri") == f"human:{who}":
+        return mine[-1]
+    prov = conn.execute(sa.text("SELECT mbos.record_provenance(CAST(:d AS jsonb))"), {"d": canonical_json({
+        "provenance_id": new_id("prov"), "created_at": now_iso(), "actor_type": "human", "human_actor": who, "basis": "FACT",
+        "tool_name": "mbos.human_input", "tool_version": "0.1.0"}).decode()}).scalar_one()
+    conn.execute(sa.text("SELECT mbos.record_human_input(:i, :kd, :k, CAST(:v AS jsonb), :n, CAST(:a AS jsonb), :p, :ik)"),
+                 {"i": item_id, "kd": kind, "k": key, "v": vjson, "n": note, "a": canonical_json({"type": "human", "id": who}).decode(), "p": [prov],
+                  "ik": f"{item_id}:input:{field}:{len(mine) + 1}:{sha256_of(vjson + note)[7:19]}"})
+    return {"finding": note, "field": field, "value": value, "basis": "FACT" if kind == "quote" else "INFER", "source_uri": f"human:{who}", "provenance_id": prov, "entered_by": who}
+
+
 def fund_bankroll(conn: sa.Connection, amount: float, *, reason: str, idempotency_key: str, who: str = "michael") -> None:
     """DRY-RUN ledger: Michael's protected principal (04 `capital_fund`, receipted, human provenance). OWNER login only. The same
     idempotency key again is a no-op. This is the figure the scorer reads as `available_to_deploy` (F-96)."""
