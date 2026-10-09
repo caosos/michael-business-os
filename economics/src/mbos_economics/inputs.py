@@ -98,6 +98,27 @@ def scope_overrides(item: dict) -> dict:
     return out
 
 
+# C-28 / F-32. Michael's QUOTE for a service lead: Item.research entry ``quote:amount_usd`` (human provenance, written by
+# the D-30 owner function). It replaces the estimator's default quote as ``job.quoted_revenue``. A quote below cost
+# is accepted as stated; the verdict follows the numbers.
+QUOTE_FIELD = "quote:amount_usd"
+
+
+def quote_override(item: dict) -> dict:
+    """The last valid human quote on a service Item as a bundle override (same trust rules as scope overrides)."""
+    out: dict = {}
+    if item.get("type") != "service":
+        return out
+    for r in item.get("research") or []:
+        v = r.get("value")
+        if (r.get("field") == QUOTE_FIELD and r.get("basis") in ("FACT", "INFER", "REC", "UNK") and r.get("entered_by")
+                and str(r.get("provenance_id", "")).startswith("prov_")
+                and isinstance(v, (int, float)) and not isinstance(v, bool) and 0 < v < 1e7):
+            out = {"job.quoted_revenue": {"value": v, "basis": r["basis"], "provenance_id": r["provenance_id"],
+                                          "human_attested": True, "note": f"quote set by {r['entered_by']}"}}
+    return out
+
+
 def build_engine_input(item: dict) -> dict:
     """Project an Item v1 onto the engine input. Pure; does not mutate ``item``."""
     loc = (item.get("normalized") or {}).get("location") or {}

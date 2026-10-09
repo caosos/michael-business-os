@@ -44,7 +44,7 @@ from . import __version__ as ESTIMATOR_VERSION
 from .canonical import CanonicalError, content_hash, derived_ulid, parse_ts
 from .comps import aggregate_sold_comps
 from .config import CONFIG_DIR, ScoringConfig, load_config
-from .inputs import FLIP_CATEGORIES, SERVICE_CATEGORIES, scope_overrides
+from .inputs import FLIP_CATEGORIES, SERVICE_CATEGORIES, quote_override, scope_overrides
 from .logistics import classify_transport, transport_input
 from .numeric import D, ONE, ZERO, fine, money, to_json_number
 
@@ -578,7 +578,7 @@ def estimate_item(item: dict, bundle: dict | None, as_of: str, *, priors: Scorin
         if inline:
             bundle["overrides"] = {**(bundle.get("overrides") or {}), **inline}
         _inline_evidence(item, bundle)
-    human = scope_overrides(item)
+    human = {**scope_overrides(item), **quote_override(item)}
     if human:
         bundle["overrides"] = {**(bundle.get("overrides") or {}), **human}   # C-27: Michael's stated scope wins
     _validate_bundle(bundle)
