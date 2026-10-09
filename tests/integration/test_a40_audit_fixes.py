@@ -159,3 +159,67 @@ def test_a42_research_watcher_wakes_on_new_evidence_once():
     assert w.tick() == ["wf"] and calls[-1] == ["itm_2"]
     del lens["itm_2"]                              # unparked
     assert w.tick() == [] and len(calls) == 2
+
+
+def test_human_input_is_stored_with_human_provenance_and_the_workflow_login_cannot_forge_it(db, item_id):
+    """A-43 over D-30: quote + scope override through the owner login; idempotent; a changed value is a new entry; bad values refused."""
+    with db["owner"].begin() as c:
+        q = spine_d.record_human_input(c, item_id, "quote", "amount_usd", 700, "Quoted the customer $700", "michael")
+        assert spine_d.record_human_input(c, item_id, "quote", "amount_usd", 700, "Quoted the customer $700", "michael") == q
+        s = spine_d.record_human_input(c, item_id, "scope_override", "job.labor_hours", 6.5, "Two days of taping", "michael")
+        sk = spine_d.record_human_input(c, item_id, "scope_override", "job.required_skills", ["drywall"], "Needs a finisher", "michael")
+        spine_d.record_human_input(c, item_id, "quote", "amount_usd", 650, "Dropped it to $650", "michael")
+    with db["app"].connect() as c:
+        research = spine_d.read_item(c, item_id)["research"]
+        prov = c.execute(sa.text("SELECT to_jsonb(p) FROM mbos.provenance p WHERE provenance_id = :p"), {"p": q["provenance_id"]}).scalar_one()
+    quotes = [r for r in research if r["field"] == "quote:amount_usd"]
+    assert [r["value"] for r in quotes] == [700, 650] and quotes[0]["source_uri"] == "human:michael"
+    assert [r["value"] for r in research if r["field"] == "scope_override:job.labor_hours"] == [6.5]
+    assert sk["value"] == ["drywall"] and s["field"] == "scope_override:job.labor_hours"
+    assert prov["actor_type"] == "human" and prov["human_actor"] == "michael"
+    with db["owner"].begin() as c:
+        for kind, key, value in [("quote", "amount_usd", float("nan")), ("quote", "amount_usd", float("inf")), ("quote", "amount_usd", True),
+                                 ("quote", "amount_usd", "700"), ("rumor", "x", 1), ("", "amount_usd", 1)]:
+            with pytest.raises(ValueError):
+                spine_d.record_human_input(c, item_id, kind, key, value, "n", "michael")
+    for kind, key, value in [("quote", "amount_usd", -5), ("quote", "amount_usd", 0), ("scope_override", "job.nonsense", 1)]:
+        with db["owner"].connect() as c, pytest.raises(sa.exc.DBAPIError):  # D-30's own range / shape checks
+            spine_d.record_human_input(c, item_id, kind, key, value, "n", "michael")
+    with db["app"].begin() as c, pytest.raises(sa.exc.DBAPIError):  # the workflow login cannot write a human input
+        spine_d.record_human_input(c, item_id, "quote", "amount_usd", 1, "forged", "michael")
+
+
+def test_worker_rechecks_a_parked_item_when_michael_enters_a_quote(db, monkeypatch):
+    """A-43: the production counter (not a stub) sees the new entry on a RESEARCHING item and HumanInputWatcher queues the re-check once."""
+    from mbos import cli
+    from mbos.inbox import HumanInputWatcher
+
+    comps = Components().with_defaults("lane_d")
+    raw = next(r for r in FixtureSourceAdapter(FIXTURE, name="fixture").fetch() if r.source_listing_id == "FIX-TRAILER-1")
+    with db["app"].begin() as c:
+        iid = spine_d.ingest(c, {**asdict(raw), "source_listing_id": "A43-PARKED"}, asdict(comps.normalizer.normalize(raw)), "fixture", "0.1.0", comps)["item_id"]
+        pid = spine_d.record_lane_provenance(c, {"provenance_id": new_id("prov"), "created_at": "2026-10-08T12:00:00Z", "actor_type": "system",
+                                                 "agent_name": "a43-test", "basis": "INFERENCE", "tool_name": "t", "tool_version": "1"})
+        spine_d._to(c, iid, "RESEARCHING", "A-43 test: parked for lack of comps", [pid])
+    calls = []
+    monkeypatch.setattr(cli, "_engine", lambda e=db["app"]: e)  # the worker's own engine factory, pointed at the test DB
+    w = HumanInputWatcher(cli._parked_human_input_counts, lambda ids: calls.append(ids) or ["wf"])
+    assert w.tick() == [] and not calls
+    with db["owner"].begin() as c:
+        spine_d.record_human_input(c, iid, "quote", "amount_usd", 700, "Quoted $700", "michael")
+    assert w.tick() == ["wf"] and calls == [[iid]]
+    assert w.tick() == [] and len(calls) == 1
+
+
+def test_human_input_watcher_ignores_unrelated_growth_and_baselines_first_sight():
+    from mbos.inbox import HumanInputWatcher
+
+    counts, calls = {"a": 0}, []
+    w = HumanInputWatcher(lambda: dict(counts), lambda ids: calls.append(ids) or ["wf"])
+    assert w.tick() == []                  # baseline
+    counts["b"] = 1                        # first sight of a new parked item
+    assert w.tick() == [] and not calls
+    counts["a"] = 1
+    assert w.tick() == ["wf"] and calls == [["a"]]
+    del counts["a"]                        # unparked
+    assert w.tick() == [] and len(calls) == 1

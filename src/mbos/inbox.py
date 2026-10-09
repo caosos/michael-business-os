@@ -59,3 +59,18 @@ class ResearchWatcher:
             return []
         self.pending = set(grown)
         return self.recheck(grown)
+
+
+class HumanInputWatcher:
+    """A-43: re-check a parked item when Michael enters a new `quote:` / `scope_override:` entry. Counts ONLY those human entries, which a
+    re-check never writes, so (unlike ResearchWatcher) nothing of its own has to be absorbed and an input made during a re-check is not lost.
+    `counts() -> {item_id: n}` for the parked (RESEARCHING) items; an item seen for the first time is only baselined."""
+
+    def __init__(self, counts: Callable[[], dict[str, int]], recheck: Callable[[list[str]], list[str]]):
+        self.counts, self.recheck, self.seen = counts, recheck, {}
+
+    def tick(self) -> list[str]:
+        now = self.counts()
+        grown = [iid for iid, n in now.items() if iid in self.seen and n > self.seen[iid]]
+        self.seen = dict(now)
+        return self.recheck(grown) if grown else []

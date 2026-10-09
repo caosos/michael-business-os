@@ -183,11 +183,12 @@ def cmd_worker(a: argparse.Namespace) -> int:
         if a.once:
             time.sleep(a.settle)
         else:
-            from mbos.inbox import INTERVAL_SECONDS, InboxWatcher, ResearchWatcher
+            from mbos.inbox import INTERVAL_SECONDS, HumanInputWatcher, InboxWatcher, ResearchWatcher
             from mbos.workflows import recover_orphan_gates
 
             watcher = InboxWatcher(os.environ.get("MBOS_COMPS_INBOX"), _parked_ids, workflows.recheck)
             research_watcher = ResearchWatcher(_parked_research_lengths if s.state_backend == "lane_d" else dict, workflows.recheck)  # F-109: attestations / UI comps
+            input_watcher = HumanInputWatcher(_parked_human_input_counts if s.state_backend == "lane_d" else dict, workflows.recheck)  # A-43
             while True:
                 try:
                     for wf in watcher.tick():  # F-92: a comp dropped in the inbox re-checks the parked items by itself
@@ -199,6 +200,11 @@ def cmd_worker(a: argparse.Namespace) -> int:
                         print(f"new evidence on a parked item: queued {wf}", flush=True)
                 except Exception as e:  # noqa: BLE001
                     print(f"research watch failed: {e}", file=sys.stderr)
+                try:
+                    for wf in input_watcher.tick():
+                        print(f"Michael's quote / job details on a parked item: queued {wf}", flush=True)
+                except Exception as e:  # noqa: BLE001
+                    print(f"human input watch failed: {e}", file=sys.stderr)
                 time.sleep(INTERVAL_SECONDS)
                 recover_orphan_gates()  # F-42: periodic safety net for follow-up gates
     except KeyboardInterrupt:
@@ -335,6 +341,14 @@ def _parked_research_lengths() -> dict[str, int]:
     with _engine().connect() as c:
         return {r[0]: r[1] for r in c.execute(sa.text(
             "SELECT item_id, coalesce(jsonb_array_length(doc->'research'), 0) FROM mbos.items WHERE state = 'RESEARCHING'"))}
+
+
+def _parked_human_input_counts() -> dict[str, int]:
+    with _engine().connect() as c:  # A-43: Michael's typed quote / scope-override entries on the parked items
+        return {r[0]: r[1] for r in c.execute(sa.text(
+            "SELECT i.item_id, (SELECT count(*) FROM jsonb_array_elements(CASE WHEN jsonb_typeof(i.doc->'research') = 'array' THEN i.doc->'research' "
+            "ELSE '[]'::jsonb END) e WHERE e->>'field' LIKE 'quote:%' OR e->>'field' LIKE 'scope\\_override:%') "
+            "FROM mbos.items i WHERE i.state = 'RESEARCHING'"))}
 
 
 def _parked_ids() -> list[str]:
