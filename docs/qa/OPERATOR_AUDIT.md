@@ -3,7 +3,7 @@
 Date 2026-10-08. Fresh worker, DRY-RUN only (nothing was sent, bought or published). Coordinator head `edda153` (A-39 merged, F-28 on 06 `3a30680`). Lane D `4a11f1b`, lane E policy `44a0fb2`, lane 03 `44e1beb`, lane 02 `55a7e19`.
 Method: a detached worktree of the coordinator head, `tools/bootstrap_dev.py --ui-pin audit-pin`, `mbos worker --fixture fixtures/sources/illustrative.json` (long-running), Operator UI started as the RUNBOOK says, then every action done over HTTP exactly as the browser forms post (CSRF + nonce + PIN, redirects followed by hand). Pages below are HTML rendered to text (screenshots-as-text), trimmed. FACT = observed; INFER = reasoned.
 
-## Verdict: can Michael use this today? NO
+## Verdict (G-20, superseded by the G-22 re-audit at the end of this file): can Michael use this today? NO
 
 He can read a lot, and the money-numbers, Wanted and comp forms work **once the UI is started with a workaround** (F-88). But on the real assembly **no item can reach a decision**: all four fixture listings park, the two promising ones ask for evidence there is no way to enter (F-90), so "approve / decline / hold" (job 6) cannot even be attempted, and every re-check needs a terminal (F-92) and breaks on the second try (F-91). Two of seven jobs fail (2, 6), four pass only partially (1, 3, 5, 7), one passes (4, after the F-88 workaround).
 
@@ -125,3 +125,62 @@ Not ranked (1): the mower: RESEARCHING: not scored yet (research gaps outstandin
 ## Reproduction notes
 - Everything ran in `/tmp/a07audit/w` (a detached worktree of the coordinator head; no other lane touched). Helper scripts (HTTP + HTML-to-text) are in `/tmp/a07audit/tools` and are not part of the repo.
 - Do not `pkill -f "operator_ui serve"` from the same shell (it matches the shell's own command line).
+
+---
+
+# Re-audit as Michael after wave 2 (G-22)
+
+Date 2026-10-08. Fresh worker, DRY-RUN only. Coordinator head `24e630f`; lane pins at bootstrap: 04 `1ad83f7`, 05 `44a0fb2`, 03 `3dc8a49`, 02 `a2b971d`, 06 `96fb674` (assembly A) and `1a3d928` (assembly B, bootstrapped later; lane 06 pushed in between). Method as G-20: detached worktree, `tools/bootstrap_dev.py --ui-pin`, `mbos worker --fixture fixtures/sources/training_examples.json` (A-41 set), Operator UI as the RUNBOOK prints it (`MBOS_OWNER_DATABASE_URL`, no workaround), every action over HTTP exactly as the browser forms post. Assembly A drove jobs 1-5 and the HOLD path; assembly B (fresh) drove the straight YES. FACT = observed.
+
+## Verdict (G-22): can Michael use this today? YES for the flip path, NOT YET for a held deal or a service lead
+
+Out of the box: no env workaround, system RUNNING, $500 funded, three-line Today header, the $30 TV reaches "Needs your decision" after one comp typed in the UI, and a YES with the PIN runs to `ACTED` (dry-run, audit chain ok). What still blocks a full week of use: a HOLD cannot be turned into a later YES (F-120, P1), and the service lead cannot reach YES because there is nowhere to enter a quote (F-111, known, F-32 is blocked on A-43).
+
+| # | Job | G-20 | G-22 | Ranked reason / evidence |
+|---|---|---|---|---|
+| 1 | See what matters today | PARTIAL | **PASS** (P2 stale label, F-121) | `/` opens with "Gap to target $1,181 still to earn this week / Cash $500 available to deploy / Best next move". Caveat: "Best next move: Decide: 55 inch LED TV ... ready for your YES or NO" stays after the TV is HELD or EXECUTED, while the same page says "Needs your decision (0)" |
+| 2 | Understand the best money opportunity | FAIL | **PASS** (P2 F-122) | `/mission` names legs and what each waits on ("scope_verified: photos or a visit ...") and says HOLD "Nothing is ready to approve" until a YES exists; after the TV is YES it lists TV $36 at risk, net $10/$53/$56, 5 d, chance 0.95. Caveat: after the TV was executed the headline still says "DEPLOY capital to the 1 job marked YES below" with no YES job listed |
+| 3 | Create / update / pause a Wanted campaign | PARTIAL | **PASS** (P3 F-124 remains) | create `5x8 utility trailer` (RECOMMEND, receipt `rcpt_01M4F336...`), Edit keeps must-have "clean title" and nice-to-have, saves as revision 2 (max $750, nice "lights, ramp"), Pause -> revision 3 PAUSED, Resume/Cancel offered. Still: "No current Item matches (4 checked)"; nothing is hunting for it (F-97 tail) |
+| 4 | See bankroll / cash and set his numbers | PASS w/ P0 | **PASS** | UI worked with the bootstrap's own variable; target $1,500, hours 30, "about 500 free" saved; Today and `/mission` show gap $1,181; ledger Protected $500 / Available $500 / Deployed $0; the card now reads "Cash situation: 500.0" (F-96 fixed) |
+| 5 | Understand WHY a deal is worth pursuing | PARTIAL | **PASS** for flips; service lead see job 7 | TV: "Meets your bar: about $86/h against your $65/h flip target, $36 at risk (limit $500). 1 sold comparable puts resale near $92. Asking $30 is $5 below the most you should pay ($35)". Recon: "Not a YES yet ... works up to $277 once the missing evidence checks out ... Asking $300 is $23 above the most you should pay". Mower: archived, PASS on bankroll. Numbers are labelled FACT / INFERENCE / UNKNOWN. Residual: F-123 (same deal, different dollar figures on card vs digest) |
+| 6 | Approve / decline / hold one | FAIL | **PARTIAL**: YES and HOLD work, HOLD -> YES is broken (P1 F-120) | Straight YES (assembly B): UI YES with PIN -> `ACTED`, receipts "guard passed (8/8); calling effector dry_run=True", "comms.email.send executed (DRY-RUN)", `mbos audit` ok, no tracebacks. HOLD (assembly A): "HOLD recorded", item listed under On hold and `/holds`. NO not re-run (one pending request only, and a decision is single-use); NO was verified in G-21b (stage 5) on a slightly older head |
+| 7 | Know what needs his decision vs input | PARTIAL | **PARTIAL** | Split works and now truthful for flips ("no comparable sold price" + a form). Gap: drywall lead says "Needs from you: more evidence" even after Michael attested scope_verified and customer_screened (worker rechecked by itself, F-109 fixed); the card then says "evidence is not the blocker ... minimum quote for YES $651" and there is no field to enter a quote (F-111). A comp saved with condition "parts" for the mower and the Recon left both on "no comparable sold price" with no message that the price was not usable (F-125) |
+
+G-20 repros now passing: F-88 (UI starts on the owner DSN, no workaround), F-89 (born RUNNING, bootstrap says so), F-90 (items reach a decision; attestation forms per evidence key: scope_verified, materials_priced, customer_screened, repeat_or_referral, remote_verification, price_agreed_in_writing, access_and_schedule_confirmed), F-91/F-92 (worker re-checks by itself within about a minute after a comp or an attestation; no `mbos recheck` run), F-93, F-94, F-95 (partly, see F-123), F-96, F-97 (edit keeps must-have), F-98, F-100 (nav hides unconfigured tabs; `/sources` `/usage` `/preview` are gone from the tab bar), F-101. **$1,500 / $3,000 / stale values:** none on screen; the only $1,500 is the target typed in step 4.
+
+## New findings (continue after F-119)
+
+| ID | Sev | Owner | Tag | Finding | Repro | Recommendation |
+|---|---|---|---|---|---|---|
+| F-120 | **P1** | 01 (+04) | FACT (symptom, workflow ids); INFER (cause) | **F-116 is not fixed for the real path.** A HOLD on an item whose approval workflow was started by a recheck (every item that needed a comp or an attestation) can neither be woken nor approved. `mbos ping` ("pinged") x3, the UI "Wake now" ("Wake sent. The workflow re-presents the request") and a worker restart changed nothing: item stays `HELD`, no wake receipt. Then UI YES with the PIN says "YES recorded. The item workflow now runs it through the gateway" but the item stays `HELD`, the item page says "No open request is waiting for a decision", and the worker logs `mbos: item ... cannot be APPROVED without a YES/MODIFY approval receipt since it entered AWAITING_APPROVAL` (3 tracebacks). INFER: `ping`/wake send to `item_workflow_id(item)` but the pending workflow is `recheck:<item>:<epoch>-1` (`item_lifecycle`), so the message never arrives (the system DB shows exactly that id PENDING). The decision path survives only because it re-polls. | Assembly A: add TV comp in the UI, wait for YES, UI HOLD (preset), `mbos ping <item>` or UI Wake, then UI YES. | Send ping/wake to the workflow that is actually parked (look it up), or make the hold loop poll the item state like the decision path; refuse to say "YES recorded ... runs it" when the request is not approvable; add a test that holds an item whose workflow came from a recheck. |
+| F-121 | P2 | 06 | FACT | Today "Best next move" is stale: it says "Decide: <TV> is ready for your YES or NO" while the TV is HELD (Needs your decision 0, On hold 1) and again after it is EXECUTED (Closed 1). | After HOLD or after YES, open `/`. | Compute the next move from open requests only; after an execution say what is next (record the outcome, or the next best item). |
+| F-122 | P2 | 01 mission / 06 | FACT | After the only YES leg was executed, `/mission` still says "DEPLOY capital to the 1 job marked YES below. Each still needs your own YES" and lists no YES job; cash at risk $36 still shown. | Assembly B: YES the TV, open `/mission`. | Recompute from open requests; show executed legs as "done, awaiting outcome". |
+| F-123 | P2 | 01 digest / 03 | FACT | F-95 only partly fixed: names are consistent now, but one deal still has two dollar figures. Drywall lead: card/`/mission` net $266 vs `/digest` and `/summary` "Expected profit $175.57". Recon: card net about $311 vs `/summary` $239.03. | Compare `/item/<id>`, `/mission`, `/digest`, `/summary`. | Say on each page what the figure is (net vs probability-weighted EV) or show one. |
+| F-124 | P3 | 06 / 02 | FACT | Wanted still only filters Items already in the database ("No current Item matches (4 checked)"); the page does not say nothing is searching. (F-97 tail.) | Create a campaign, open `/wanted`. | One line: "no source is hunting for this yet". |
+| F-125 | P2 | 06 / 03 | FACT (symptom); INFER (cause) | A comp saved with Condition "parts" for the mower ($250) and the Recon ($450) produced the "Price saved" banner and a recheck, yet both stayed "no comparable sold price" with the same form and no explanation; the same items resolved when the same form was filled with condition "used" ($700 / $1,050). INFER: condition-mismatched comps are discarded silently. | Assembly B: `/item/<mower>` comp with condition parts, wait two minutes. | After the recheck say "your price was not used because ..." or accept it with a haircut. |
+
+Carried open (not re-filed): F-111 (P1, service lead needs a quote; C-28 landed in the engine, F-32/A-43 are the UI half), F-112, F-114, F-115, F-117, F-119.
+
+## Screenshots-as-text (G-22)
+
+### `/` on a fresh bootstrap (assembly A)
+```
+DRY-RUN · nothing leaves this machine · system RUNNING
+Gap to target UNKNOWN set your weekly target on My numbers      Cash $500 available to deploy
+Best next move  Give the system what it is waiting for on Patch two drywall holes and a ceiling stain : scope_verified: photos or a visit to size the job.
+Needs from you (4)  TV: no comparable sold price | mower: no comparable sold price | Recon: no comparable sold price | drywall lead: more evidence
+Needs your decision (0)   On hold (0)   Closed / executed (0)
+```
+### `/` after the TV comp, target $1,500 and a worker re-check (no terminal command)
+```
+Gap to target $1,181 still to earn this week     Cash $500 available to deploy
+Best next move  Decide: 55 inch LED TV, works great, $30 firm, today only is ready for your YES or NO.
+Needs your decision (1)  FLIP other_asset  System says YES  pending_approval · expires in 72.0h
+   EV $53  $86/h  confidence 0.95  irreversible   Proposed: Ask the seller about the 55 inch LED TV ... comms.email.send
+```
+### `/item/<TV>` after HOLD, Wake, then YES (F-120)
+```
+Recommendation HOLD   Parked at Michael's request; it wakes on the condition he set and never acts on its own.
+Your decision  No open request is waiting for a decision on this item.
+(banner after YES) "YES recorded. The item workflow now runs it through the gateway (dry-run); watch the receipts below."
+```

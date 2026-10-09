@@ -1,0 +1,7 @@
+# Receipt: G-22 re-audit as Michael after wave 2
+
+- Action: re-ran the G-20 audit on the real dev assembly from detached worktrees of coordinator `24e630f` (`/tmp/a07g22/w` jobs 1-5 and the HOLD path; `/tmp/a07g22/w2` fresh straight YES), `tools/bootstrap_dev.py --ui-pin`, `mbos worker --fixture fixtures/sources/training_examples.json`, Operator UI on :8792/:8793, every action posted over HTTP like the browser forms (CSRF + nonce + PIN). DRY-RUN only: nothing sent, bought, published or contacted; no other lane touched; CAOSCare untouched; both throwaway clusters stopped (`mbos devdb down`).
+- Provenance: lane pins at bootstrap 04 `1ad83f7`, 05 `44a0fb2`, 03 `3dc8a49`, 02 `a2b971d`, 06 `96fb674` / `1a3d928`; worker and UI logs, `mbos items/queue/show/audit`, UI pages as text. Full evidence: `docs/qa/OPERATOR_AUDIT.md` (section "Re-audit as Michael after wave 2 (G-22)").
+- Result: jobs 1-5 PASS, 6 PARTIAL (YES and HOLD work; HOLD -> later YES leaves the item stuck HELD: F-120 P1), 7 PARTIAL (service lead needs a quote form: F-111 known; unexplained discarded comp: F-125). Verdict: usable for the flip path (TV reaches YES with one comp and runs to ACTED, audit ok), not yet for held deals or service leads.
+- New findings: F-120 (P1), F-121, F-122, F-123, F-125 (P2), F-124 (P3).
+- Health: `mbos_qa spine --rc` 105 passed / 0 failed (3 skipped); `mbos_qa card` 671 passed / 0 failed (mbos pin 71d5cdb).
