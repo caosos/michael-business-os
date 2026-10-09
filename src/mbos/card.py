@@ -757,6 +757,9 @@ def build_card(item: dict, receipts: list[dict], areqs: list[dict], enrichment: 
         card["why_provenance"] = why_prov
     unk: list[str] = []
     _collect_unknowns("", {k: v for k, v in card.items() if k not in ("activity_trail", "status", "why", "unknowns", "why_provenance")}, unk)
+    pv = card["value_add_plan"]["plan"].get("value")
+    if isinstance(pv, dict) and pv.get("kind") == "owned_asset_five_paths":  # A-47: each missing owned-asset input, by exact name
+        unk += [f"owned_asset: {u}" for u in pv.get("unknowns") or [] if isinstance(u, str)]
     if not tags:
         unk.append("category_tags (no evidence-based tag; absence is not a 'no')")
     if dropped:

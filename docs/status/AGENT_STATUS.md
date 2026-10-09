@@ -5,7 +5,7 @@
 - **Branch:** `research/agent-01-coordinator`
 - **Worktree:** `/home/michaelos/business-os-worktrees/agent-01-coordinator`
 - **State:** CLOSED
-- **Done:** A-48 @ 8abbfa0; A-43 @ da6cf4a; A-44 @ 6440be3; A-42 @ 69402d9; A-41 @ 281cc74; A-40 @ 1160310; A-39 @ 6185927; A-38 @ 2198a74; A-37 @ b92683d
+- **Done:** A-47 @ 6e6aa84; A-48 @ 8abbfa0; A-43 @ da6cf4a; A-44 @ 6440be3; A-42 @ 69402d9; A-41 @ 281cc74; A-40 @ 1160310; A-39 @ 6185927; A-38 @ 2198a74; A-37 @ b92683d
 - **Claimed:** A-31 (first bounded worker end to end), A-28 (07's F-50), A-29 (foreman --launch)
 - **Done (this wave, runtime migration):** ADR-0014; lanes 02-06 closed out and sessions closed after verification; `tools/worker.py`, `mbos.router`, `mbos.telemetry`; quota from `rate_limit_event` verified; Aria 1945 ack
 - **Done (this wave):** A-24, A-25, A-26, A-27, A-12; Aria 1840 ack (ADR-0012, card capital-velocity fields) @ 292adae; Aria 1905 ack (ADR-0013, 20 tasks queued) @ e20d6af; A-23 mission schema @ a704e84 (+ principal_impairment @ 7b42c05); A-22 `tools/foreman.py`; release gate 285 passed (stale lane installs refreshed)
