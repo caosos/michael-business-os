@@ -1,0 +1,32 @@
+{
+  "auction_model_version": "2026.10.1",
+  "computable": false,
+  "cost": null,
+  "dry_run": true,
+  "evidence": {
+    "asking_comps_count": 4,
+    "asking_counted_as_sold": false,
+    "asking_prices": [
+      300,
+      320,
+      340,
+      360
+    ],
+    "sold_comps_count": 0,
+    "sold_comps_used": 0
+  },
+  "flags": {
+    "fast_24h": false,
+    "fast_48h": false,
+    "slow_inventory": false
+  },
+  "item_id": "itm_01JH8888888888888888888888",
+  "module_version": "1.0.0",
+  "reasons": [
+    "missing inputs: auction:sold_comps"
+  ],
+  "unknowns": [
+    "auction:sold_comps"
+  ],
+  "verdict": "HOLD"
+}

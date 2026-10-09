@@ -1,0 +1,30 @@
+{
+  "item_id": "itm_01JH8888888888888888888888",
+  "hammer_price": 80,
+  "buyer_premium_pct": 0.15,
+  "sales_tax_rate": 0.0925,
+  "pickup_cost": 10,
+  "transport_cost": 15,
+  "labor_hours": 2,
+  "days_to_sell": 3,
+  "pickup_wait_hours": 24,
+  "resale_fee_pct": 0.1,
+  "comps": [
+    {
+      "asking_price": 300,
+      "kind": "asking"
+    },
+    {
+      "asking_price": 320,
+      "kind": "asking"
+    },
+    {
+      "asking_price": 340,
+      "kind": "asking"
+    },
+    {
+      "asking_price": 360,
+      "kind": "asking"
+    }
+  ]
+}

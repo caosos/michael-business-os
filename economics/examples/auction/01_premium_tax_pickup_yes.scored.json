@@ -1,0 +1,46 @@
+{
+  "auction_model_version": "2026.10.1",
+  "capital_turns_per_30d": 5,
+  "computable": true,
+  "cost": {
+    "all_in": 125.51,
+    "buyer_premium": 12,
+    "hammer": 80,
+    "pickup_and_transport": 25,
+    "sales_tax": 8.51
+  },
+  "dry_run": true,
+  "evidence": {
+    "asking_comps_count": 0,
+    "asking_counted_as_sold": false,
+    "asking_prices": [],
+    "sold_comps_count": 3,
+    "sold_comps_used": 3
+  },
+  "flags": {
+    "fast_24h": false,
+    "fast_48h": false,
+    "slow_inventory": false
+  },
+  "item_id": "itm_01JH8888888888888888888888",
+  "module_version": "1.0.0",
+  "net": {
+    "expected": 54.49,
+    "high": 63.49,
+    "low": 45.49
+  },
+  "profit_per_labor_hour": 27.245,
+  "reasons": [],
+  "resale": {
+    "basis": "sold comps only",
+    "comp_price_expected": 200,
+    "comp_price_high": 210,
+    "comp_price_low": 190,
+    "n_used": 3,
+    "resale_fee_pct": 0.1
+  },
+  "time_to_cash_hours": 144,
+  "unknowns": [],
+  "verdict": "YES",
+  "walk_away_hammer": 91.53
+}

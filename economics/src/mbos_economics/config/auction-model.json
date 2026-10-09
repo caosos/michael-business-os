@@ -1,0 +1,10 @@
+{
+  "auction_model_version": "2026.10.1",
+  "_note": "C-32 auction cost model parameters. DATA, not code. Additive and separate from scoring-config.json, so no scorecard is re-versioned. REC values; not Michael-confirmed.",
+  "min_sold_comps_for_yes": { "value": 3, "basis": "REC", "note": "mirrors decision_thresholds.min_sold_comps_for_yes_flip; asking prices never count" },
+  "min_net_usd_for_yes": { "value": 40, "basis": "REC", "note": "no universal profit floor (ADR-0012); small fast auction flips may qualify" },
+  "min_profit_per_labor_hour_for_yes": { "value": 20, "basis": "REC" },
+  "fast_turn_hours": { "value": [24, 48], "basis": "REC", "note": "time to cash at or under each bound sets fast_24h / fast_48h" },
+  "slow_inventory_days": { "value": 30, "basis": "REC", "note": "expected days to sell above this sets slow_inventory, separately from the fast flags" },
+  "payout_lag_days": { "value": 2, "basis": "REC", "note": "days from sale to cash in hand when the input does not give one" }
+}
