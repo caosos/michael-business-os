@@ -1,0 +1,38 @@
+# OWNER DIRECTION — DEAL SNIFFER ASSET-RESALE PIVOT (OCT 9)
+
+Source: Michael's written 18-section handoff supplied directly today, titled "DEAL SNIFFER — OWNER DIRECTION UPDATE" (2026-10-09). This is an owner instruction, not a verified market listing, purchase approval, or a new-product rewrite.
+
+## Highest-priority decision
+
+**Deal Sniffer is an AI-operated acquisition and resale system for undervalued / repairable physical assets, not primarily a labor/service lead generator.** The business loop is DISCOVER -> VALUE -> ACQUIRE (owner-controlled) -> REPAIR/CONVERT -> RESELL -> RECOVER & REDEPLOY CAPITAL -> RECEIPTED REALIZED PROFIT. Target approximately **$2,000 cash in the next two weeks**; do not count an expected paycheck, fictional flipping gains, or software simulation as cash earned. The cash target is a goal, not an assurance or delegated authority.
+
+Prioritize low-capital, quick-turn, high-sale-confidence opportunities, and capital velocity. Owner is willing to tie up as much as $1,000 to earn $400 when rapid resale is genuinely probable, but this is an example of business preference, **NOT** a changed $500 present cash cap or purchase permission. Surface actual capital policy as one batched owner decision if the current cap prevents a proposed deal. Report net profit, days-to-cash, profit/day, profit/hour, confidence, capital-at-risk and capital-tied-up.
+
+## Sourcing / scoring pivot
+
+1. **Primary lane: trailers, donor towable chassis, and towable machinery.** Utility, boat, jet-ski, equipment, landscape, enclosed/single/tandem-axle trailers, damaged/unfinished/rusty repairable trailers; stripped old campers/junk RVs as DONOR FRAME + axles + springs/hubs + running gear + steel, for conversions. A junk camper must be evaluated for salvageable chassis and converted-asset profit, not only camping value.
+2. **Second lane: log splitters and towable machines.** Missing/broken engine or starter is not automatic PASS if pump, cylinder, control valve, beam, wedge, hydraulic components and towable running gear are valuable/repairable. Component-level diagnosis, parts-out floor and upgrade cost; apply owner's welding, fabrication, mechanical, small-engine, electrical and hydraulic skills to economics.
+3. **Secondary categories retained:** generators, welders, compressors, ATVs, mowers, pressure washers, commercial machinery, mobility equipment where appropriate. Specialization is a priority, **not an exclusion**.
+4. **Acquisition preference: auctions ahead of Marketplace/private sellers.** Search Arkansas auction houses/estate/equipment auctions, within approximately 100 miles of Conway by default (longer only for exceptional margins). Track auction time, current bid, bid count, premium, taxes, payment/card fees, hauling, travel, repairs, condition, inspection, pickup, soft-close and final bid ceilings. Offer read-only WATCH, closing alerts and capital-efficient suggested MAX BID backed by assumptions. Only place bids when the platform supports it, authority expressly permits it, and verifiable approval exists. Do not evade blocks or terms.
+5. **Paperwork-discount opportunity class** for no-title/bill-of-sale/missing-registration trailer deals; capture ownership and VIN provenance, legal title/registration path, cost, delay, as-is resale vs resolved resale, and clear disclosure. *Never* assume legal transfer/title eligibility, bypass proof of ownership, or obscure title status. Eventual DMV/PAPERWORK queue to batch legitimate procedures.
+6. **Private-seller messages** secondary; evaluate condition questions/negotiation workflows but all live seller contact and external commitments remain owner/authority gated. No autonomous bids, purchases, outbound messages, payments or live deploy implied by this direction.
+7. **Deal cards are decisions**: item, source, geolocation, current ask/bid, all-in acquisition, paperwork, repair/transport, resale basis, expected net, days to cash, profit/day/hour, demand/sellability, confidence/risk, max bid, bidder activity, next action, BUY/WATCH/PASS. Show expected vs realized; asking comps ≠ sold comps. Show a concise high-contrast control plane with capital available/tied up, inventory, expected/realized profit, auction closes, approvals, watchlist, active bids, pickups, paperwork, receipts. **Do not stop to redesign the UI**; implement useful operational density in the existing live interface.
+8. **Concrete examples NOT guaranteed deals**: local $50 Craftsman wheeled string trimmer (unknown condition), ~$500 non-running Polaris 4x4 ATV (broken recoil/electric starter, seller may not respond), and active CountyLine 32-ton splitter auction. Examples illustrate scoring, not permissions or verified resale.
+
+## Mandatory reconcile-before-building step
+
+Agent 01: FIRST fetch your current coordinator branch, recent worker heads, queue, receipts, and the two existing Aria inbound directives about (a) glanceable clickable UI and (b) batch owner approvals. Do not redo completed work or step on claimed tasks.
+
+I checked the coordinator queue from GitHub today; its *current recorded plan already contains partial owner asset pivot*: B-20 auction discovery, C-32 auction economics, D-33 bid watch/alerts, F-39 resale workflow; F-38 is the readable operator UI; C-31 service-quote work is PARKED. **Keep and deepen those tasks; don't generate duplicates.** Determine whether the recently recorded owner asset pivot came from another chat/handoff already and which requirements from this 18-part handoff remain missing (especially donor chassis, towable splitters, paperwork class, $2k/2-week cash objective, valuation of Michael's strengths, legitimate path to actual cash).
+
+Give the ACTIVE BUILD AGENT / appropriate existing bounded lane(s) a **specific, narrow, receipt-backed implementation direction from actual current gaps**—ideally enhance the existing highest-value B-20/C-32 discovery/scoring tasks before starting new UI features. Preserve normal task dependencies, protected cash/purchase limits, quota limits, and no cross-branch edits. Move general labor/service acquisition out of ACTIVE priority while retaining existing useful code/history.
+
+## Automation and owner experience
+
+Michael wants **Deal Sniffer = autonomous operator; Michael = supervisor/capital authority**. Use existing dispatcher and receipt model. Proposed future rules may delegate bounded buying based on verified confidence/margins and exposure, but those are examples for later explicit decisions—not current authority. Package all required owner decisions into ONE YES/NO/DEFER packet, not one screenshot/prompt at a time. Continue safe work while watchdog W-4's agent self-wake remains blocked by Claude's permission classifier; do not bypass or broad-enable self-control.
+
+## Deliverable to Michael
+
+In one readable concise message, report: what existing systems already cover; what priorities are changing vs preserved; exactly which existing lane/build agent was assigned which task (ID, scope, acceptance); what code/tests/receipts were actually pushed; what's blocked by owner; and the single next owner decision. Give GitHub ACK at `docs/messages/acks/2026-10-09-aria-owner-trailers-auctions-capital-velocity-pivot.md` and update canonical queue/decisions with evidence. Do not claim runtime dispatch merely because a task was recorded.
+
+No action without a receipt. No receipt without provenance.
