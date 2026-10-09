@@ -173,8 +173,8 @@ def test_human_input_is_stored_with_human_provenance_and_the_workflow_login_cann
         research = spine_d.read_item(c, item_id)["research"]
         prov = c.execute(sa.text("SELECT to_jsonb(p) FROM mbos.provenance p WHERE provenance_id = :p"), {"p": q["provenance_id"]}).scalar_one()
     quotes = [r for r in research if r["field"] == "quote:amount_usd"]
-    assert [r["value"] for r in quotes] == [700, 650] and quotes[0]["source_uri"] == "human:michael"
-    assert [r["value"] for r in research if r["field"] == "scope_override:job.labor_hours"] == [6.5]
+    assert [spine_d._human_input_view(r)["value"] for r in quotes] == [700, 650] and quotes[0]["source_uri"] == "human:michael"
+    assert [spine_d._human_input_view(r)["value"] for r in research if r["field"] == "scope_override:job.labor_hours"] == [6.5]
     assert sk["value"] == ["drywall"] and s["field"] == "scope_override:job.labor_hours"
     assert prov["actor_type"] == "human" and prov["human_actor"] == "michael"
     with db["owner"].begin() as c:

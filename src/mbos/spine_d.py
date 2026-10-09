@@ -710,15 +710,32 @@ def record_human_input(conn: sa.Connection, item_id: str, kind: str, key: str, v
     field = ("quote:" if kind == "quote" else "scope_override:") + key
     vjson = canonical_json(value).decode()
     mine = [r for r in (read_item(conn, item_id).get("research") or []) if r.get("field") == field]
-    if mine and mine[-1].get("value") == value and mine[-1].get("finding") == note and mine[-1].get("source_uri") == f"human:{who}":
-        return mine[-1]
+    if mine and (_human_input_view(mine[-1]) or {}).get("value") == value and mine[-1].get("source_uri") == f"human:{who}":
+        return _human_input_view(mine[-1])   # same value from the same person again: a no-op (the note lives in the receipt, F-127)
     prov = conn.execute(sa.text("SELECT mbos.record_provenance(CAST(:d AS jsonb))"), {"d": canonical_json({
         "provenance_id": new_id("prov"), "created_at": now_iso(), "actor_type": "human", "human_actor": who, "basis": "FACT",
         "tool_name": "mbos.human_input", "tool_version": "0.1.0"}).decode()}).scalar_one()
     conn.execute(sa.text("SELECT mbos.record_human_input(:i, :kd, :k, CAST(:v AS jsonb), :n, CAST(:a AS jsonb), :p, :ik)"),
                  {"i": item_id, "kd": kind, "k": key, "v": vjson, "n": note, "a": canonical_json({"type": "human", "id": who}).decode(), "p": [prov],
                   "ik": f"{item_id}:input:{field}:{len(mine) + 1}:{sha256_of(vjson + note)[7:19]}"})
-    return {"finding": note, "field": field, "value": value, "basis": "FACT" if kind == "quote" else "INFER", "source_uri": f"human:{who}", "provenance_id": prov, "entered_by": who}
+    return {"field": field, "value": value, "entered_by": who, "basis": "FACT" if kind == "quote" else "INFERENCE", "source_uri": f"human:{who}", "provenance_id": prov}
+
+
+def _human_input_view(entry: dict) -> Optional[dict]:
+    """A human-input research entry as {field, value, entered_by, basis, source_uri, provenance_id}. D-32/F-127: the frozen Item schema allows only
+    `finding`, so the value and author live inside `finding` as canonical JSON; entries written before that carry them as extra properties."""
+    try:
+        d = json.loads(entry.get("finding") or "")
+    except (TypeError, ValueError):
+        d = None
+    if isinstance(d, dict) and "value" in d:
+        value, who = d["value"], d.get("entered_by")
+    elif "value" in entry:
+        value, who = entry["value"], entry.get("entered_by")
+    else:
+        return None
+    return {"field": entry["field"], "value": value, "entered_by": who or str(entry.get("source_uri", "")).removeprefix("human:"),
+            "basis": entry.get("basis"), "source_uri": entry.get("source_uri"), "provenance_id": entry.get("provenance_id")}
 
 
 def fund_bankroll(conn: sa.Connection, amount: float, *, reason: str, idempotency_key: str, who: str = "michael") -> None:
