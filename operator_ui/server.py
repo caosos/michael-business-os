@@ -24,7 +24,7 @@ try:  # lane C's package is optional: without it the notes form is simply unavai
 except ImportError:  # pragma: no cover
     NOTE_CATEGORIES, NOTE_KINDS = frozenset(), frozenset()
 
-from . import attest_view, bought_view, card_view, comps_view, glance_view, inputs_view, ux, views, wanted_view
+from . import resale_view, attest_view, bought_view, card_view, comps_view, glance_view, inputs_view, ux, views, wanted_view
 from .digest import figures as digest_figures, dollars as _dollars
 from .card_view import ec
 from .backend import AlreadyClosed, FollowupRefused, ItemNotFound, NoteRefused, NumbersRefused, ProfileUnavailable
@@ -90,7 +90,7 @@ def _verdict(v):
 
 
 NAV = [("/", "Queue", None), ("/mission", "Weekly mission", None), ("/numbers", "My numbers", None), ("/wanted", "Wanted", None),
-       ("/usage", "Usage", "usage"), ("/intake", "Intake", None), ("/assets", "My assets", None), ("/preview", "Audience previews", "preview"),
+       ("/usage", "Usage", "usage"), ("/intake", "Intake", None), ("/assets", "My assets", None), ("/resale", "Resale", None), ("/preview", "Audience previews", "preview"),
        ("/digest", "Morning digest", None), ("/summary", "Daily summary", None), ("/notes", "My notes", None),
        ("/holds", "HOLD backlog", None), ("/outcomes", "Outcomes", None), ("/sources", "Source health", "sources"),
        ("/ledger", "Receipt ledger", None)]
@@ -495,6 +495,8 @@ class App:
         self.queue_file = queue_file  # READY_QUEUE.md copy (MBOS_READY_QUEUE_FILE)
         self.mission_file = mission_file  # mission plan JSON (MBOS_MISSION_PLAN_FILE)
         self.health_file = health_file  # lane B health.json (else MBOS_SOURCE_HEALTH_FILE)
+        self.resale = resale_view.Book()  # F-39: in-memory DRY-RUN resale ledger
+        self.deals = dict(resale_view.DEMO_DEALS)  # F-39: labelled DEMO lots until a feed provides them
         self.assets = {}  # F-34: in-memory DRY-RUN owned-asset drafts
         self.intake_drafts = {}  # F-20: in-memory DRY-RUN drafts, never published
         self.csrf = secrets.token_urlsafe(32)
@@ -943,7 +945,13 @@ def make_handler(app):
                     glance = glance_view.render(glance_view.build(app.store, now, self._parked(), st), app.csrf)
                 except Exception as ex:  # noqa: BLE001 - Today must still render
                     glance = f"<div class='card'><p class='bad'>At-a-glance cards are unavailable ({e(type(ex).__name__)}).</p></div>"
-                return self._send(200, page("Operator queue", glance + head + comps_view.render_today(self._parked())
+                try:  # F-39: asset deals first
+                    cards = [resale_view.decide(d) for d in app.deals.values()]
+                    deals = (resale_view.control_strip(app.resale, cards, len(views.queue(app.store, now))) +
+                             resale_view.render_hunt(cards, resale_view.changes(app.resale, cards), full=False))
+                except Exception as ex:  # noqa: BLE001 - Today must still render
+                    deals = f"<div class='card'><p class='bad'>Asset deals are unavailable ({e(type(ex).__name__)}).</p></div>"
+                return self._send(200, page("Operator queue", deals + glance + head + comps_view.render_today(self._parked())
                                             + f"<details><summary><b>Full queue</b></summary>{render_queue(views.queue(app.store, now))}</details>",
                                             st, flash or err, bool(err)))
             if u.path == "/digest":
@@ -973,6 +981,8 @@ def make_handler(app):
                 return self._send(200, page("Usage and agents", usage_view.render_page(usage_view.load(app.telemetry_dir), usage_view.queue_states(app.queue_file)), app.state()))
             if u.path == "/assets" or (u.path.startswith("/assets/") and u.path.split("/")[2] in app.assets):
                 return self._assets_page(u.path.split("/")[2] if u.path != "/assets" else None, flash or err, bool(err))
+            if u.path == "/resale":
+                return self._resale_page(now, flash or err, bool(err))
             if u.path == "/intake":
                 from . import intake_view
 
@@ -1017,6 +1027,35 @@ def make_handler(app):
                     return self._send(404, "{}", "application/json")
                 return self._send(200, json.dumps({k: v for k, v in c.items() if k != "hold_presets"}, default=str), "application/json")
             return self._send(404, page("Not found", "<p>Not found.</p>", app.state()))
+
+        def _resale_page(self, now, flash=None, is_err=False):
+            cards = [resale_view.decide(d) for d in app.deals.values()]
+            realized = {}
+            for it in app.resale.items.values():
+                if it["stage"] == "sold" and it["deal_id"]:
+                    realized[it["deal_id"]] = {"net": it["sale"]["net"], "label": resale_view.sale_label(it)}
+            body = (resale_view.control_strip(app.resale, cards, len(views.queue(app.store, now))) + resale_view.render_hunt(cards, resale_view.changes(app.resale, cards))
+                    + "".join(resale_view.render_deal_card(c, realized.get(c["id"])) for c in resale_view.rank(cards))
+                    + resale_view.render_workflow(app.resale, cards, app.csrf, bool(app.operator_pin)))
+            return self._send(200, page("Resale", body, app.state(), flash, is_err))
+
+        def _post_resale(self, parts):
+            n = min(int(self.headers.get("Content-Length") or 0), 65536)
+            f = {k: v[0] for k, v in parse_qs(self.rfile.read(n).decode("utf-8"), keep_blank_values=True).items()}
+            try:
+                app.asset_gate(f)
+                if parts[1] == "add":
+                    deal = f.get("deal") or None
+                    net = next((c["net"] for c in map(resale_view.decide, app.deals.values()) if c["id"] == deal), None)
+                    app.resale.intake(f, app.author, deal, net)
+                else:
+                    app.resale.advance(parts[1], f, app.author)
+            except Exception as ex:  # InputError, ResaleError: shown, nothing recorded
+                return self._resale_page(utcnow(), str(ex), True)
+            self.send_response(303)
+            self.send_header("Location", f"/resale?msg={quote('Recorded with a receipt (DRY-RUN). Nothing was published, sent or spent.')}")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
 
         def _assets_page(self, aid, flash=None, is_err=False, vals=None, bad=None):
             from . import assets_view
@@ -1289,6 +1328,8 @@ def make_handler(app):
                 return
             u = urlparse(self.path)
             parts = u.path.strip("/").split("/")
+            if parts == ["resale", "add"] or (len(parts) == 3 and parts[0] == "resale" and parts[2] == "advance"):
+                return self._post_resale(parts[:2] if parts[1] == "add" else [parts[0], parts[1]])
             if parts == ["assets", "add"] or (len(parts) == 3 and parts[0] == "assets" and parts[2] == "answer"):
                 return self._post_assets(parts)
             if parts == ["intake", "start"] or (len(parts) == 3 and parts[0] == "intake" and parts[2] == "answer"):

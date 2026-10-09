@@ -1,0 +1,12 @@
+# F-39 receipt: deal card as a decision, control strip, resale workflow, Morning Money Hunt (DRY-RUN)
+
+- **Task:** F-39 (P1). Lane 06, branch `research/agent-06-communications`. Unblocked by the owner's `sync_lanes --venv` (C-32/C-33 import from the lane venv).
+- **What changed:** new `operator_ui/resale_view.py` and `tests/test_resale_f39.py`; `operator_ui/server.py` gets a `/resale` page (GET) and `POST /resale/add`, `/resale/<id>/advance`, a "Resale" nav tab, and a control strip plus compact Morning Money Hunt at the top of Today (asset deals first). No redesign; existing views are unchanged below them.
+- **Provenance (FACT, from the code):**
+  - Deal figures come only from `mbos_economics.asset_deal.evaluate` (C-33 on C-32 `all_in_cost`). The card shows source, location, ask/bid, all-in, paperwork, repair/transport, resale basis (owner target and system estimate both, owner target labelled human-attested), net, days to cash, profit per day/hour, demand, confidence, max bid and its binding limit, bid count, the labelled FORECAST, capital tied up/at risk, sold vs asking comps, expected vs realized. A missing input shows UNKNOWN; an uncomputable lot is WATCH with the unknowns named.
+  - Action: engine PASS -> PASS, YES -> BUY, anything else -> WATCH. BUY is a recommendation only ("BUY and bids stay owner-gated"); no bid, purchase, contact or publish path exists.
+  - The only lot is a labelled DEMO fixture (CountyLine splitter, owner target 1500, asking-only comp): no live link; the engine returns MAYBE (owner target is not market evidence, 0 sold comps, cash over the $500 cap), so it shows WATCH.
+  - Resale workflow: intake -> photos -> listing -> listed -> sold, in order only; each step writes a receipt (`rcpt_NNNN`) with an owner-gated PIN + CSRF write (author server-set). Realized profit is "earned" only for a sale ticked as real; the default is SIMULATED, which is shown as "SIMULATED, not earned" and counted separately. Photos are unverified references.
+  - Control strip: capital available (principal $500 + earned - tied up), tied up, inventory, expected (open non-PASS deals) and realized profit, simulated profit (separate), auctions closing <=48h, approvals (queue length), watchlist, pickups, paperwork, receipts.
+  - Ledger is in-memory (DRY-RUN); nothing persists across a restart. UNKNOWN: persistence on the spine, a live lot feed (A-51/B-23), demand data, per-photo upload.
+- **Tests:** `tests/test_resale_f39.py` (see AGENT_STATUS for the full-suite numbers).
