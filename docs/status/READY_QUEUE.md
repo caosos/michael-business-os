@@ -1,7 +1,7 @@
 # READY QUEUE: Michael Business OS, Round Two
 
 - **Owner:** Agent 01 (coordinator / dispatcher). **Protocol:** `docs/COORDINATION.md`. Read it before claiming.
-- **Last synced:** reconciled by tools/foreman.py against heads 02 `55a7e19` · 03 `0de7fa5` · 04 `4a11f1b` · 05 `4f12ab7` · 06 `3090e51` · 07 `0f3b183`.
+- **Last synced:** reconciled by tools/foreman.py against heads 02 `a2b971d` · 03 `3dc8a49` · 04 `1ad83f7` · 05 `44a0fb2` · 06 `6173c74` · 07 `96e4c68`.
 - **Read it from any worktree:** `git fetch -q origin && git show origin/research/agent-01-coordinator:docs/status/READY_QUEUE.md`
 - **Status values:** READY · CLAIMED · BLOCKED · DONE.
 - **Priority:** P0 = critical path · P1 = next-up · P2 = useful parallel work.
@@ -333,7 +333,7 @@ Proposed by closed lanes and accepted here:
 | A-46 | P1 | (01) Blueprint adoption (Aria 2000): blueprint copied to `docs/operations/` with project overrides, START_HERE/COORDINATION/worker prompt updated, automatic dispatcher `tools/dispatcher.py` (tmux `mbos-dispatcher`) and `tools/run_dev_stack.sh` | none | **DONE** (this push; 6 + 14 tests) | 01 | Dispatcher launches idle lanes within limits and never duplicates a running worker |
 | O-1 | P1 (operator) | Host scheduler: a systemd user unit or cron `@reboot` that restarts `tmux mbos-dispatcher`, `mbos-dev-worker`, `mbos-dev-ui` after a reboot (`loginctl enable-linger michaelos` first). One command for Michael or the operator; Agent 01 cannot install host services | none | NEEDS OPERATOR | owner | After a reboot the three tmux sessions are back with no action |
 | A-47 | P2 | (01) Wire `owned_asset.compare_paths` into the production assembly: an owned-asset Item type or flag accepted by the spine and card, the five-path comparison on the card, and the owned-trailer intake answers mapped to its inputs | C-30, A-45 | **DONE** @ `6e47646` (side worktree, Sonnet, 40 turns, est. $1.21, merged: owned asset = flip Item from source owned-intake, five paths in the card, named UNKNOWNs; the F-34 page not yet switched to mbos.owned_asset -> F-35) | 01 | The BBQ trailer fixture (only Michael's stated facts) renders a card with five paths and named UNKNOWNs through the real assembly |
-| F-35 | P1 | (06) `/assets` figures form: Michael's rough ranges (minimal and themed rehab cash, own hours, finished resale range, as-is value, personal-use value, timing) feed C-30's `compare_paths` through a typed-input record so the five paths compute instead of all UNKNOWN; wording keeps ranges as Michael's estimates (INFERENCE, human-attested) | A-47 | **READY** (A-47 DONE) | worker:lane-06 | With example ranges the card recommends a path and shows the others; clearing a range returns it to UNKNOWN |
+| F-35 | P1 | (06) `/assets` figures form: Michael's rough ranges (minimal and themed rehab cash, own hours, finished resale range, as-is value, personal-use value, timing) feed C-30's `compare_paths` through a typed-input record so the five paths compute instead of all UNKNOWN; wording keeps ranges as Michael's estimates (INFERENCE, human-attested) | A-47 | **DONE** (reconciled from lane 06 AGENT_STATUS Done) | worker:lane-06 | With example ranges the card recommends a path and shows the others; clearing a range returns it to UNKNOWN |
 
 ## Re-audit (G-22) findings
 | ID | Pri | Task | Deps | Status | Agent | Acceptance |

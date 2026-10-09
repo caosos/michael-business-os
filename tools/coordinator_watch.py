@@ -280,6 +280,7 @@ def cycle(inbox_refs, do_wake: bool, probe: bool = True) -> dict:
                     [f"{inbox_ref}:docs/messages/inbox", f"{COORD_BRANCH}@{head}:docs/messages/acks", "~/.claude/sessions registry"])
     for i in need:
         st["per_msg"].setdefault(i, {"first_seen": t, "wakes": 0})
+    allow_actions = do_wake   # restarting our own dispatcher is NOT a session wake and must not depend on the wake switch
     try:  # a central bridge that takes over waking sets {"wake": false}; this daemon then only checks, verifies and reports
         do_wake = do_wake and json.loads((WD / "mode.json").read_text()).get("wake", True)
     except (OSError, ValueError):
@@ -305,7 +306,7 @@ def cycle(inbox_refs, do_wake: bool, probe: bool = True) -> dict:
     ready = ready_rows()
     alive = dispatcher_alive()
     act = dispatcher_action(ready=ready, alive=alive, quota_ok=q, last_start=st.get("dispatcher_started", 0), t=t)
-    if act == "START" and do_wake and start_dispatcher():
+    if act == "START" and allow_actions and start_dispatcher():
         st["dispatcher_started"] = t
         receipt("dispatcher_restarted", {"ready_rows": ready}, ["tools/foreman.py survey of origin READY_QUEUE", "tmux has-session mbos-dispatcher"])
     ps = subprocess.run(["ps", "-eo", "etimes,args"], capture_output=True, text=True).stdout.splitlines()

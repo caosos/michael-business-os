@@ -116,3 +116,20 @@ def test_tmux_wake_is_off_by_default(monkeypatch):
     monkeypatch.delenv("MBOS_ALLOW_TMUX_WAKE", raising=False)
     monkeypatch.setattr(cw.subprocess, "run", lambda *a, **k: calls.append(a) or type("R", (), {"returncode": 0})())
     assert cw.send_wake({"tmux": "s:@0.%0"}, "x") is False and calls == []            # nothing is typed into any pane
+
+
+def test_dispatcher_restart_does_not_depend_on_the_wake_switch(tmp_path, monkeypatch):
+    started, sent = [], []
+    (tmp_path / "mode.json").write_text('{"wake": false}')                       # tmux wake OFF
+    monkeypatch.setattr(cw, "WD", tmp_path)
+    monkeypatch.setattr(cw, "send_wake", lambda s, t: sent.append(t) or True)
+    monkeypatch.setattr(cw, "my_session", lambda: IDLE)
+    monkeypatch.setattr(cw, "quota_ok", lambda: True)
+    monkeypatch.setattr(cw, "git", lambda *a: type("R", (), {"returncode": 0, "stdout": "abc\n"})())
+    monkeypatch.setattr(cw, "list_ids", lambda ref, path: ["MSG-1"] if "inbox" in path else [])
+    monkeypatch.setattr(cw, "panel_health", lambda: {"reachable": False})
+    monkeypatch.setattr(cw, "ready_rows", lambda: 3)
+    monkeypatch.setattr(cw, "dispatcher_alive", lambda: False)
+    monkeypatch.setattr(cw, "start_dispatcher", lambda: started.append(1) or True)
+    cw.cycle("origin/liaison/x", True, probe=False)
+    assert started == [1] and sent == []                                          # workers resume; nothing typed into any session
