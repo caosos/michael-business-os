@@ -1,4 +1,10 @@
-# State of play (Agent 01, 2026-10-08 ~17:05Z)
+# State of play (Agent 01, 2026-10-09 ~02:05Z)
+
+**Live now (DRY-RUN):** Operator UI http://127.0.0.1:8766/ (PIN in `var/ui.pin`), worker and dispatcher running in tmux (`mbos-dev-ui`, `mbos-dev-worker`, `mbos-dispatcher`). Release gate GREEN: 489 passed, 8/8 checks. The re-audit as Michael (G-22) says **YES for the flip path**; the $30 TV is a YES waiting for his decision on Today (EV $53, cash tied up $36, within the $500 bankroll) on one clearly labelled illustrative demo comp. Held deals (A-48), service quotes (C-28/D-30/A-43/F-32), "I bought it" capital deploy (D-31/F-33), "My assets" for the owned BBQ trailer (C-30/A-47/F-34) and the G-22 wording fixes (F-36) have since landed; the re-audit predates some of them.
+**Automatic:** the dispatcher launches bounded workers for idle lanes (max 2 parallel, quota guard 90%, 3 attempts per task). It has launched C-30, C-29, F-34, G-22, F-32, F-33, F-36 on its own. Remaining READY: F-35 (My assets figures form). After that the useful queue is exhausted except owner/host-gated items.
+
+---
+Earlier checkpoint (kept for the record):
 
 Run paused again on the **5-hour usage window (94%, guard 90%, resets 2026-10-09T00:20Z)**. Weekly ~65%. Release gate last run GREEN (467 tests, 8/8 checks; re-run after A-44 merges). Everything is DRY-RUN.
 
