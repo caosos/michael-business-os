@@ -5,7 +5,7 @@
 - **Branch:** `research/agent-01-coordinator`
 - **Worktree:** `/home/michaelos/business-os-worktrees/agent-01-coordinator`
 - **State:** CLOSED
-- **Done:** A-47 @ 6e6aa84; A-48 @ 8abbfa0; A-43 @ da6cf4a; A-44 @ 6440be3; A-42 @ 69402d9; A-41 @ 281cc74; A-40 @ 1160310; A-39 @ 6185927; A-38 @ 2198a74; A-37 @ b92683d
+- **Done:** A-49 @ b2b3399; A-47 @ 6e6aa84; A-48 @ 8abbfa0; A-43 @ da6cf4a; A-44 @ 6440be3; A-42 @ 69402d9; A-41 @ 281cc74; A-40 @ 1160310; A-39 @ 6185927; A-38 @ 2198a74; A-37 @ b92683d
 - **Claimed:** A-31 (first bounded worker end to end), A-28 (07's F-50), A-29 (foreman --launch)
 - **Done (this wave, runtime migration):** ADR-0014; lanes 02-06 closed out and sessions closed after verification; `tools/worker.py`, `mbos.router`, `mbos.telemetry`; quota from `rate_limit_event` verified; Aria 1945 ack
 - **Done (this wave):** A-24, A-25, A-26, A-27, A-12; Aria 1840 ack (ADR-0012, card capital-velocity fields) @ 292adae; Aria 1905 ack (ADR-0013, 20 tasks queued) @ e20d6af; A-23 mission schema @ a704e84 (+ principal_impairment @ 7b42c05); A-22 `tools/foreman.py`; release gate 285 passed (stale lane installs refreshed)
@@ -13,7 +13,7 @@
 - **Current phase:** ROUND TWO. The Lane A spine is built and tested. Integration rulings R1–R11 are issued.
 - **Role:** foreman/dispatcher. I own `docs/status/READY_QUEUE.md` and `ACTIVE_WORK.md` (`docs/COORDINATION.md`).
 - **Started:** 2026-10-06
-- **Last updated:** 2026-10-08
+- **Last updated:** 2026-10-09
 
 ## Current objective
 Build the durable application spine DISCOVER → NORMALIZE → SCORE → RECOMMEND → APPROVE → DRY-RUN ACT → RECEIPT and integrate the specialist lanes. All external actions are DRY-RUN only.
@@ -194,3 +194,12 @@ None new. MICHAEL_DECISIONS #1–#5 are unchanged; none blocks the dry-run MVP.
 1. On 04's `0005`: port `ledger.py`/`spine.py` onto `mbos_state.StateStore` (R1/R2), with A1–A10 passing unchanged.
 2. Wire 05's ActionGateway, PanicState and PDP adapters (R4–R7), with A5/A9 passing on the real gateway.
 3. Ship `mbos.qa_adapter:build` for 07 (R11). Then build the B adapter and Deduper with 02.
+
+## A-49 (2026-10-09): CLOSED
+- Done: A-49 @ b2b3399. State: CLOSED. Receipt: docs/receipts/2026-10-09-A-49-held-yes-and-recheck-coalescing.md
+- Both paths reach ACTED with receipts on real PG16 (lane D split logins, real assembly, UI actions from a separate process); 0 ERROR workflows, 0 ERROR log records, 0 tracebacks.
+- Health (FACT): full suite `PYTHONPATH=$PWD/src pytest tests`: 504 passed, 1 failed, 1 skipped. The failure, `test_a40_audit_fixes::test_human_input_is_stored_with_human_provenance_and_the_workflow_login_cannot_forge_it`, fails the same way on the base commit e1f73bd (it predates A-49).
+
+## Proposed tasks
+- (01/04) `spine_d.record_human_input`'s "same input again is a no-op" check no longer matches the entry stored after lane D 0027 (D-32), so a repeated quote writes a new entry (test_a40 human-input test red on base e1f73bd). Compare against the stored shape.
+- (01) ResearchWatcher can absorb a real input as "its own re-check's growth" when the input lands in the round after a re-check (seen in A-49: round 2 queued nothing; round 3 caught up). Absorb only entries written by the re-check (e.g. count non-human entries).
