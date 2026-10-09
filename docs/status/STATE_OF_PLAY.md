@@ -1,4 +1,13 @@
-# State of play (Agent 01, 2026-10-09 ~02:05Z)
+# State of play (Agent 01, 2026-10-09 ~04:20Z)
+
+**Paused on the quota guard** (5-hour window 92%, limit 90%, resets 2026-10-09T05:20Z; week 78%). Resumes automatically: the watchdog (`mbos-watchdog`) restarts `mbos-dispatcher` when specialist READY work exists and quota allows, and the dispatcher launches D-32, F-37, C-31. A-49 is lane 01 and is run by Agent 01 (side worktree) when a session is available.
+
+**Third audit as Michael (G-23): YES for a flip from comp to closed profit.** Full loop verified on the TV with matching ledger: YES with PIN, dry-run action, "I bought it" $30 deploys, sold $92, principal back and +$62 earned, duplicate close refused. The drywall lead reaches YES from a typed $700 quote. The BBQ trailer's five-path card computes. Gate GREEN (500 tests, 8/8). Live UI http://127.0.0.1:8766/ refreshed.
+**Two P1 left (tasked):** F-126 a HOLD that is later approved does not run (cause found: the UI's Wake now addresses the wrong workflow, and a YES recorded while HELD predates the item's re-entry to the approval state; A-49 + F-37); F-127 saving a quote makes the schema-conformance audit red (D-32 + C-31).
+**Watchdogs:** MBOS detection, probe, ack verification, status feed (:8479) work; the central Desktop-Agent monitor now reads this inbox and acks (shown on :8477). Automatic WAKE of Agent 01 is an owner decision (W-4; the peer relay cannot cross Linux users; tmux self-wake denied by the permission classifier).
+
+---
+Earlier checkpoint (kept for the record):
 
 **Live now (DRY-RUN):** Operator UI http://127.0.0.1:8766/ (PIN in `var/ui.pin`), worker and dispatcher running in tmux (`mbos-dev-ui`, `mbos-dev-worker`, `mbos-dispatcher`). Release gate GREEN: 489 passed, 8/8 checks. The re-audit as Michael (G-22) says **YES for the flip path**; the $30 TV is a YES waiting for his decision on Today (EV $53, cash tied up $36, within the $500 bankroll) on one clearly labelled illustrative demo comp. Held deals (A-48), service quotes (C-28/D-30/A-43/F-32), "I bought it" capital deploy (D-31/F-33), "My assets" for the owned BBQ trailer (C-30/A-47/F-34) and the G-22 wording fixes (F-36) have since landed; the re-audit predates some of them.
 **Automatic:** the dispatcher launches bounded workers for idle lanes (max 2 parallel, quota guard 90%, 3 attempts per task). It has launched C-30, C-29, F-34, G-22, F-32, F-33, F-36 on its own. Remaining READY: F-35 (My assets figures form). After that the useful queue is exhausted except owner/host-gated items.
