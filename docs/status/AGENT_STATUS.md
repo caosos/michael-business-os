@@ -29,7 +29,7 @@ Done: D-28 @ 4a0148a (PANIC release owner-only + human outcome needs owner chann
 Done: D-29 @ fb6f36c (record_attestation for the owner UI login + agent_write attestation guard, migration 0024; docs/receipts/2026-10-08-d29-record-attestation.md)
 Done: D-30 @ 01e4e5f (mbos.record_human_input for scope_override/quote + guard on those entry prefixes, migration 0025; docs/receipts/2026-10-08-d30-record-human-input.md)
 Done: D-31 @ ba7fb89 (mbos.record_acquisition: owner UI login records an off-system purchase -> dry-run BUDGET_COMMITTED -> capital deploy; duplicate closing outcome refused, migration 0026; docs/receipts/2026-10-08-d31-record-acquisition.md)
-Done: D-33 @ PENDING (auction watchlist, alerts once, bid ceiling storage, no bid path; migration 0028; docs/receipts/2026-10-09-d33-auction-watch.md)
+Done: D-33 @ fd922e5 (auction watchlist, alerts once, bid ceiling storage, no bid path; migration 0028; docs/receipts/2026-10-09-d33-auction-watch.md)
 Done: D-32 @ 1a777f4 (record_human_input entries conform: value/author inside canonical-JSON finding, basis INFERENCE, migration 0027; docs/receipts/2026-10-09-d32-human-input-conform.md)
 Done: D-27 @ f6c4e15 (item APPROVED edge needs a YES/MODIFY approval receipt + approver/gateway/owner role, migration 0022; docs/receipts/2026-10-08-d27-item-approved-gate.md)
 Done: D-26a @ 40a7da2 (mbos_dbos = agent_write + gateway only; provision() returns owner_app_url for mbos_operator_ui; see docs/receipts/2026-10-08-d26a-workflow-login-no-approver.md)
