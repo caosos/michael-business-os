@@ -299,4 +299,4 @@ Done: C-27 @ f63011e (part b: human scope overrides read from Item.research `sco
 Partial: part (a) service quote input not built (needs where the quote lands + MICHAEL_DECISIONS #6). Proposed for 01/04: a `record_scope_override` spine helper writing the research entry shape in the receipt; then 06 adds the form.
 
 ## C-28
-Done: C-28 @ PENDING (service quote: Item.research `quote:amount_usd` -> `job.quoted_revenue` human-attested; drywall lead with attested scope+customer: $700 YES, $500 MAYBE; 387 passed, 22 skipped). State: CLOSED
+Done: C-28 @ 96cb704 (service quote: Item.research `quote:amount_usd` -> `job.quoted_revenue` human-attested; drywall lead with attested scope+customer: $700 YES, $500 MAYBE; 387 passed, 22 skipped). State: CLOSED
