@@ -169,5 +169,5 @@ GSA Auctions API → Trash Nothing API → IMAP alert ingestor → SAM.gov.
 - Proposed: B-12 owner step should read each house's terms page to fill `HOUSES` UNKNOWN terms and re-record fixtures.
 
 ## B-24
-- Done: B-24 @ COMMIT
+- Done: B-24 @ 875dcb5
 - State: CLOSED
