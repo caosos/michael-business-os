@@ -12,6 +12,7 @@ import html
 import json
 import os
 import secrets
+import threading
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, quote, urlparse
@@ -24,7 +25,7 @@ try:  # lane C's package is optional: without it the notes form is simply unavai
 except ImportError:  # pragma: no cover
     NOTE_CATEGORIES, NOTE_KINDS = frozenset(), frozenset()
 
-from . import resale_view, attest_view, bought_view, card_view, comps_view, glance_view, inputs_view, ux, views, wanted_view
+from . import deal_ui, resale_view, attest_view, bought_view, card_view, comps_view, glance_view, inputs_view, ux, views, wanted_view
 from .digest import figures as digest_figures, dollars as _dollars
 from .card_view import ec
 from .backend import AlreadyClosed, FollowupRefused, ItemNotFound, NoteRefused, NumbersRefused, ProfileUnavailable
@@ -62,6 +63,16 @@ input[type=checkbox],input[type=radio]{width:auto;margin-right:6px}textarea{min-
 .cap-row{gap:18px;align-items:flex-start}.cap-big{min-width:150px}.cap-val{font-size:22px;font-weight:700}
 .unk{color:var(--mod)}.tag{display:inline-block;padding:0 6px;border-radius:99px;font-size:11px;font-weight:700;border:1px solid currentColor}
 .tag.fact{color:var(--yes)}.tag.inf{color:var(--hold)}.tag.rec{color:var(--mod)}.rec{border-color:var(--acc)}
+nav a.active{font-weight:700;text-decoration:none;color:var(--ink);border-bottom:2px solid var(--acc)}h1.pagehead{font-size:22px;margin:0 0 12px}
+.lbl{display:inline-block;padding:0 6px;border-radius:4px;font-size:11px;font-weight:700;background:var(--warn);color:var(--warnink)}
+.ph{position:relative;width:132px;height:99px;flex:none;border:1px solid var(--line);border-radius:8px;background:var(--bg);overflow:hidden;display:flex;align-items:center;justify-content:center;text-align:center;font-size:12px;color:var(--mut);padding:4px}
+.ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:var(--bg)}.ph.big{width:min(100%,480px);height:auto;aspect-ratio:4/3}
+.gallery{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}.gtxt{flex:1 1 180px}.enl figure,.mock figure{margin:8px 0}
+.dealtop{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}.dt{text-transform:none;letter-spacing:0;font-size:17px;color:var(--ink)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:10px 0}.kpi{border:1px solid var(--line);border-radius:8px;padding:6px 8px}.kpi b{display:block;font-size:15px}
+.next{background:var(--bg);border-left:4px solid var(--acc);padding:6px 10px;border-radius:4px}.ad{white-space:pre-wrap;word-break:break-word;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px;font-size:14px}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:6px 12px}.chip{display:inline-block;margin:0 6px 4px 0;padding:2px 10px;border:1px solid var(--line);border-radius:99px;text-decoration:none}.chip.on{border-color:var(--acc);font-weight:700}
+.proof pre{max-height:320px}details>summary{cursor:pointer}
 .q a.rowlink{display:block;text-decoration:none;color:inherit}.bad{color:var(--no);font-weight:600}.ok{color:var(--yes);font-weight:600}
 """
 
@@ -107,9 +118,21 @@ class UiState(str):
     owner_login_missing: bool = False
 
 
+_CUR = threading.local()  # the path of the request being served, so the page chrome can mark the active tab (F-45)
+NAV_ALIAS = {"/areq": "/", "/item": "/", "/provenance": "/ledger"}
+
+
+def _active(path):
+    path = path or ""
+    first = "/" + path.strip("/").split("/")[0] if path.strip("/") else "/"
+    first = NAV_ALIAS.get(first, first)
+    return first
+
+
 def _nav(state):
     hidden = getattr(state, "hidden", frozenset())
-    return "".join(f'<a href="{h}">{t}</a>' for h, t, k in NAV if k not in hidden)
+    cur = _active(getattr(_CUR, "path", ""))
+    return "".join(f'<a href="{h}"{" class=active aria-current=page" if h == cur else ""}>{t}</a>' for h, t, k in NAV if k not in hidden)
 
 
 def _notices(state):
@@ -129,7 +152,7 @@ def page(title, body, state, flash=None, error=False):
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>{ec(title)}</title><style>{CSS}</style></head>
 <body><div class="banner">DRY-RUN · nothing leaves this machine · system {e(state)}</div>
 <header><b>Operator UI</b><nav>{_nav(state)}</nav></header>{_notices(state)}
-<main>{f}{body}</main></body></html>"""
+<main>{f}{'' if '<h1' in body else f'<h1 class="pagehead">{ec(title)}</h1>'}{body}</main></body></html>"""
 
 
 def render_queue(q):
@@ -329,6 +352,14 @@ def render_notes(notes, lane, csrf="", reasons=None, flash_note=None):
                 f"<label>Reason (required)<input name='reason' maxlength='300' required></label>{pin}"
                 "<button class='b-NO' style='width:auto'>Retract this note</button></form></details>")
 
+    pin = '<label>PIN<input name="pin" type="password" autocomplete="off" required></label>'
+    add = (f"<details id='add-note' open><summary><b>Add note</b></summary><form method='post' action='/notes/add'><input type='hidden' name='csrf' value='{e(csrf)}'>"
+           f"<label>Category<select name='category'>{opts(cats, None)}</select></label><label>Make(s)<input name='makes' required></label>"
+           f"<label>Model(s)<input name='models' required></label><label>Kind<select name='kind'>{opts(kinds, None)}</select></label>"
+           "<label>Statement<textarea name='statement' maxlength='600' required></textarea></label><label>Plan hint<input name='plan_hint' maxlength='600'></label>"
+           f"<label>How do you know?<select name='basis_of_knowledge'>{opts(ux.NOTE_BASIS_CHOICES, None)}</select></label>"
+           f"<label>Detail<input name='basis_detail' maxlength='200'></label><label>Reference (https)<input name='reference_url'></label>{pin}"
+           "<button class='b-HOLD' style='width:auto'>Add note</button></form></details>")
     rows = "".join(
         f"<tr><td>{e(n.get('entered_at'))}</td><td>{e(n.get('category'))}</td>"
         f"<td>{e(', '.join(g.get('makes', [])))} / {e(', '.join(g.get('models', [])))}</td><td>{e(n.get('kind'))}</td>"
@@ -340,7 +371,7 @@ def render_notes(notes, lane, csrf="", reasons=None, flash_note=None):
         for n in notes for g in [((n.get('match') or [{}])[0])])
     return (f"<div class='card'><h2>My notes (your own model knowledge)</h2>{errs}<p class='small mut'>Append-only and receipted. They show on cards as "
             "<b>RECOMMENDATION</b>, behind sourced recalls. An edit saves a <b>new version</b>; a retraction is a new row. Nothing is overwritten.</p>"
-            "<div style='overflow-x:auto'><table><tr><th>Entered</th><th>Category</th><th>Make / model</th><th>Kind</th><th>Statement</th><th>How I know</th>"
+            f"{add}<div style='overflow-x:auto'><table><tr><th>Entered</th><th>Category</th><th>Make / model</th><th>Kind</th><th>Statement</th><th>How I know</th>"
             f"<th>By</th><th>Provenance</th><th>Change</th></tr>{rows or '<tr><td colspan=9 class=mut>No notes yet.</td></tr>'}</table></div></div>")
 
 
@@ -496,6 +527,8 @@ class App:
         self.mission_file = mission_file  # mission plan JSON (MBOS_MISSION_PLAN_FILE)
         self.health_file = health_file  # lane B health.json (else MBOS_SOURCE_HEALTH_FILE)
         self.resale = resale_view.Book()  # F-39: in-memory DRY-RUN resale ledger
+        self.tow: dict = {}  # F-45: the owner's own tow vehicle and limits (editable; nothing is hard-coded)
+        self.presets: dict = {}  # F-45: saved filter presets, in memory
         self.deals = dict(resale_view.DEMO_DEALS)  # F-39: labelled DEMO lots until a feed provides them
         self.assets = {}  # F-34: in-memory DRY-RUN owned-asset drafts
         self.intake_drafts = {}  # F-20: in-memory DRY-RUN drafts, never published
@@ -577,7 +610,8 @@ class App:
             raise InputError("step-up not configured (MBOS_OPERATOR_PIN unset); notes are refused (fail-closed)")
         self.pin_gate.check(f.get("pin"), self.operator_pin, "a PIN is required to enter a note (it identifies you as the author).")
         try:
-            self.store.opportunity_card(item_id)
+            if item_id is not None:  # None = added from My notes, not from a card (F-45)
+                self.store.opportunity_card(item_id)
         except ItemNotFound:
             raise InputError("unknown opportunity") from None
         if not NOTE_CATEGORIES:
@@ -585,6 +619,21 @@ class App:
         bundle = ux.parse_note(f, self.author, iso(utcnow()))
         note_id = self.store.record_operator_note(bundle)
         return f"Note saved ({note_id}). It will show on this model's cards as your recommendation."
+
+    def set_tow(self, f):
+        self.asset_gate(f)
+        self.tow = deal_ui.parse_tow(f)
+
+    def save_preset(self, f):
+        self._check_csrf(f)
+        name = " ".join(str(f.get("name") or "").split())[:40]
+        if not name:
+            raise InputError("a preset needs a name")
+        flt, _ = deal_ui.parse_filters(f)
+        if name not in self.presets and len(self.presets) >= 20:
+            raise InputError("at most 20 presets; reuse a name to replace one")
+        self.presets[name] = flt
+        return name
 
     def asset_gate(self, f):
         """F-34: CSRF + step-up PIN for any owned-asset change; the author is the server-set operator (R14)."""
@@ -907,7 +956,7 @@ def make_handler(app):
             self.send_header("Content-Type", ctype)
             self.send_header("Content-Length", str(len(data)))
             self.send_header("Content-Security-Policy",
-                             "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'")
+                             "default-src 'none'; style-src 'unsafe-inline'; img-src https: http:; form-action 'self'; frame-ancestors 'none'; base-uri 'none'")
             self.send_header("X-Content-Type-Options", "nosniff")
             self.send_header("Referrer-Policy", "no-referrer")
             self.send_header("Cache-Control", "no-store")
@@ -928,6 +977,7 @@ def make_handler(app):
             if not self._host_ok():
                 return
             u = urlparse(self.path)
+            _CUR.path = u.path
             qs = parse_qs(u.query)
             now = utcnow()
             flash = (qs.get("msg") or [None])[0]
@@ -982,7 +1032,7 @@ def make_handler(app):
             if u.path == "/assets" or (u.path.startswith("/assets/") and u.path.split("/")[2] in app.assets):
                 return self._assets_page(u.path.split("/")[2] if u.path != "/assets" else None, flash or err, bool(err))
             if u.path == "/resale":
-                return self._resale_page(now, flash or err, bool(err))
+                return self._resale_page(now, flash or err, bool(err), qs)
             if u.path == "/intake":
                 from . import intake_view
 
@@ -1028,16 +1078,41 @@ def make_handler(app):
                 return self._send(200, json.dumps({k: v for k, v in c.items() if k != "hold_presets"}, default=str), "application/json")
             return self._send(404, page("Not found", "<p>Not found.</p>", app.state()))
 
-        def _resale_page(self, now, flash=None, is_err=False):
+        def _resale_page(self, now, flash=None, is_err=False, qs=None):
+            qs = qs or {}
             cards = [resale_view.decide(d) for d in app.deals.values()]
             realized = {}
             for it in app.resale.items.values():
                 if it["stage"] == "sold" and it["deal_id"]:
                     realized[it["deal_id"]] = {"net": it["sale"]["net"], "label": resale_view.sale_label(it)}
-            body = (resale_view.control_strip(app.resale, cards, len(views.queue(app.store, now))) + resale_view.render_hunt(cards, resale_view.changes(app.resale, cards))
-                    + "".join(resale_view.render_deal_card(c, realized.get(c["id"])) for c in resale_view.rank(cards))
+            preset = (qs.get("preset") or [None])[0]
+            flt, warn = (dict(app.presets[preset]), []) if preset in app.presets else deal_ui.parse_filters(qs)
+            kept, out = deal_ui.apply_filters(cards, flt, app.tow)
+            body = (resale_view.control_strip(app.resale, cards, len(views.queue(app.store, now))) + deal_ui.render_milestones()
+                    + deal_ui.render_filters(flt, app.presets, app.csrf, preset if preset in app.presets else None, warn, len(cards), len(kept), bool(qs.get("find")))
+                    + deal_ui.render_tow(app.tow, app.csrf, bool(app.operator_pin)) + deal_ui.render_filtered_out(out)
+                    + resale_view.render_hunt(kept, resale_view.changes(app.resale, cards), full=False)
+                    + "".join(deal_ui.render_deal(c, resale_view.proof_html(c, realized.get(c["id"])), app.tow) for c in resale_view.rank(kept))
+                    + "".join(f"<div id='out-{e(c['id'])}'></div>" for c, _ in out)
                     + resale_view.render_workflow(app.resale, cards, app.csrf, bool(app.operator_pin)))
             return self._send(200, page("Resale", body, app.state(), flash, is_err))
+
+        def _post_deal_settings(self, which):
+            n = min(int(self.headers.get("Content-Length") or 0), 65536)
+            f = {k: v[0] for k, v in parse_qs(self.rfile.read(n).decode("utf-8"), keep_blank_values=True).items()}
+            try:
+                if which == "tow":
+                    app.set_tow(f)
+                    msg, loc = "Tow vehicle and limits saved.", "/resale?msg="
+                else:
+                    name = app.save_preset(f)
+                    msg, loc = f"Preset '{name}' saved (kept in memory).", f"/resale?preset={quote(name)}&msg="
+            except (InputError, ValueError) as ex:
+                return self._resale_page(utcnow(), str(ex), True)
+            self.send_response(303)
+            self.send_header("Location", loc + quote(msg))
+            self.send_header("Content-Length", "0")
+            self.end_headers()
 
         def _post_resale(self, parts):
             n = min(int(self.headers.get("Content-Length") or 0), 65536)
@@ -1172,7 +1247,7 @@ def make_handler(app):
             n = min(int(self.headers.get("Content-Length") or 0), 65536)
             f = {k: v[0] for k, v in parse_qs(self.rfile.read(n).decode("utf-8"), keep_blank_values=True).items()}
             try:
-                msg = app.edit_note(note_id, f) if action == "edit" else app.retract_note(note_id, f)
+                msg = app.add_note(None, f) if action == "add" else app.edit_note(note_id, f) if action == "edit" else app.retract_note(note_id, f)
             except (ux.NoteInputError, NoteRefused) as ex:
                 return self._notes_page(reasons=ex.reasons)
             except InputError as ex:
@@ -1328,6 +1403,11 @@ def make_handler(app):
                 return
             u = urlparse(self.path)
             parts = u.path.strip("/").split("/")
+            _CUR.path = u.path
+            if parts in (["resale", "tow"], ["resale", "preset"]):
+                return self._post_deal_settings(parts[1])
+            if parts == ["notes", "add"]:
+                return self._post_note_change(None, "add")
             if parts == ["resale", "add"] or (len(parts) == 3 and parts[0] == "resale" and parts[2] == "advance"):
                 return self._post_resale(parts[:2] if parts[1] == "add" else [parts[0], parts[1]])
             if parts == ["assets", "add"] or (len(parts) == 3 and parts[0] == "assets" and parts[2] == "answer"):

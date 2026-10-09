@@ -31,7 +31,23 @@ DEMO_DEALS = {  # DEMO fixture, never a live listing (hosts reserved). Owner tar
                       "days_to_sell": 14, "pickup_wait_hours": 48, "current_bid": 450, "bid_count": 24, "hours_left": 6,
                       "owner_resale_target": {"value": 1500, "source": "Michael", "note": "DEMO owner target"},
                       "repair": {"skills_cover_repair": True, "parts_cost": 60, "michael_hours": 3, "repair_days": 2},
-                      "comps": [{"asking_price": 1800}], "demand": "UNKNOWN", "demo": True}}
+                      "comps": [{"asking_price": 1800}], "demand": "UNKNOWN", "demo": True,
+                      "url": "https://listings.example.invalid/lot/splitter-32t", "condition": "no engine, hydraulics unknown", "category": "component_machine",
+                      "sale_type": "auction", "title_status": "no title", "weight_lb": 900, "length_ft": 8,
+                      "description": "DEMO ad text.\nNo engine. Sold as is.\nCall <b>Bob</b> after 5.\nPickup only.\nCash.\nNo returns.\nHydraulics not tested.",
+                      "photos": [{"url": "https://img.example.invalid/splitter-1.jpg", "source": "DEMO fixture", "captured_at": "2026-10-09"},
+                                 {"url": "https://img.example.invalid/mock.jpg", "kind": "mockup", "source": "DEMO mockup"}]},
+               "demo-utility-trailer": {"item_id": "demo-utility-trailer", "title": "DEMO 14 ft tandem-axle utility trailer", "source": "DEMO fixture (no live link)",
+                      "location": "Little Rock, AR (DEMO)", "distance_mi": 32, "asset_class": "towable", "paperwork": {"class": "titled"}, "hammer_price": 1400, "buyer_premium_pct": 0,
+                      "sales_tax_rate": 0.065, "pickup_cost": 0, "transport_cost": 0, "labor_hours": 2, "days_to_sell": 10, "pickup_wait_hours": 24,
+                      "comps": [{"sold_price": 2100}, {"sold_price": 2300}, {"sold_price": 2200}, {"asking_price": 2600}], "demand": "UNKNOWN", "demo": True,
+                      "url": "https://listings.example.invalid/ad/utility-14", "condition": "good, new tires", "category": "towable", "trailer_subtype": "utility",
+                      "sale_type": "fixed", "title_status": "clean title", "weight_lb": 2800, "length_ft": 14,
+                      "description": "DEMO ad: 14' tandem axle, new tires, clean title.", "photos": []}}
+
+
+UI_KEYS = ("title", "source", "location", "distance_mi", "demo", "demand", "url", "photos", "description", "condition", "category", "trailer_subtype",
+           "title_status", "sale_type", "weight_lb", "length_ft", "transport_required")  # shown on the card, never fed to the engine
 
 
 def _d(v):
@@ -44,7 +60,7 @@ def money(v) -> str:
 
 def decide(deal: dict) -> dict:
     """Card fields from the economics engine. Never raises on a bad lot: an uncomputable lot is WATCH with UNKNOWNs named."""
-    inp = {k: v for k, v in deal.items() if k not in ("title", "source", "location", "distance_mi", "demo", "demand")}
+    inp = {k: v for k, v in deal.items() if k not in UI_KEYS}
     try:
         r = asset_deal.evaluate(inp)
     except Exception as ex:  # noqa: BLE001 - one bad lot must not break the page
@@ -68,15 +84,15 @@ def decide(deal: dict) -> dict:
             "pph": r.get("profit_per_labor_hour"), "tied_up": r.get("capital_tied_up"), "at_risk": r.get("capital_at_risk"),
             "max_bid": mb.get("max_bid"), "max_bid_binding": mb.get("binding"), "forecast": fc, "confidence": conf,
             "demand": deal.get("demand") or "UNKNOWN", "sold_comps": ev.get("sold_comps_count", 0), "asking_comps": ev.get("asking_comps_count", 0),
-            "flags": r.get("flags") or {}, "verdict": verdict}
+            "flags": r.get("flags") or {}, "verdict": verdict, "deal": deal}
 
 
 def _row(label, val):
     return f"<dt>{e(label)}</dt><dd>{e(val)}</dd>"
 
 
-def render_deal_card(c: dict, realized: dict | None = None) -> str:
-    """One deal as a decision. DEMO lots carry a DEMO label and no link."""
+def proof_html(c: dict, realized: dict | None = None) -> str:
+    """The evidence behind a deal: every figure, the reasons and the UNKNOWNs (shown under "View proof")."""
     r = c["resale"]
     basis = ("owner target " + money(r.get("owner_target")) + " (human-attested) vs system " + money(r.get("system_estimate"))
              if r.get("owner_target") is not None else "system " + money(r.get("system_estimate")))
@@ -93,9 +109,14 @@ def render_deal_card(c: dict, realized: dict | None = None) -> str:
             ("Capital tied up / at risk", f"{money(c['tied_up'])} / {money(c['at_risk'])}"),
             ("Comps", f"{c['sold_comps']} sold, {c['asking_comps']} asking-only (asking never counts as sold)"), ("Expected vs realized", f"expected {exp}; {rl}")]
     why = "".join(f"<li>{e(x)}</li>" for x in c["reasons"] + [f"UNKNOWN input: {u}" for u in c["unknowns"]])
+    return (f"<p class='small'>{e(c['note'])}. BUY and bids stay owner-gated. DRY-RUN.</p><dl>{''.join(_row(*x) for x in rows)}</dl>"
+            f"{'<ul class=small>' + why + '</ul>' if why else ''}")
+
+
+def render_deal_card(c: dict, realized: dict | None = None) -> str:
+    """One deal as a decision (full detail). DEMO lots carry a DEMO label and no link."""
     return (f"<div class='card deal' id='deal-{e(c['id'])}'><h2>{e(c['title'])} <span class='badge v-{'YES' if c['action']=='BUY' else 'NO' if c['action']=='PASS' else 'MAYBE'}'>{e(c['action'])}</span></h2>"
-            f"<p class='small'>{e(c['note'])}. BUY and bids stay owner-gated. DRY-RUN.</p><dl>{''.join(_row(*x) for x in rows)}</dl>"
-            f"{'<ul class=small>' + why + '</ul>' if why else ''}</div>")
+            f"{proof_html(c, realized)}</div>")
 
 
 # ---------------------------------------------------------------- the ledger
