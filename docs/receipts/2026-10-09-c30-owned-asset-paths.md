@@ -1,0 +1,11 @@
+# Receipt: C-30 owned-asset five-path economics (BBQ trailer)
+Tags: FACT / INFERENCE / UNKNOWN. DRY-RUN; nothing sent, spent, listed or published.
+
+- FACT: new `economics/src/mbos_economics/owned_asset.py` `compare_paths(item, as_of, cfg=None)`; pure, no clock. For an `owned_asset` Item it computes SELL_AS_IS_OR_PART_OUT, MINIMAL_REHAB_FLIP, THEMED_VALUE_ADD_FLIP, CONVERT, KEEP with the same fields: incremental cash, operator hours, risk (structural + roadworthiness confidence), seasonality (tailgate months vs `as_of`), days to cash, profit per incremental dollar, profit per hour, finished-resale range (KEEP: personal-use value, not cash).
+- FACT: inputs are human-attested `Item.research` entries `owned:<path>:cash|hours|resale|days`, `owned:keep:value`, `owned:tailgate_months`, `owned:past_tow`, inspection answers (same trust rules as C-27/C-28: named `entered_by`, `prov_` id). Anything missing is listed in `unknowns` by exact field name and the dependent figure is null. No rehab cost, hours or resale value is invented. Only structural zero: selling as-is needs no outlay (fees not modelled, noted).
+- FACT: `owned:historical_basis_usd` is reported under `sunk_basis` and excluded from net, ROI and ranking (test: $300 vs $5000 gives identical paths and recommendation).
+- FACT: roadworthiness: a past tow alone yields `INFERENCE` (running gear moved once); inspection answers at most `STATED_NOT_VERIFIED`; never verified.
+- FACT: recommendation = highest net incremental value minus operator hours at `time_value.w_min_per_hour` ($40, coordinator default REC, not Michael-confirmed) among fully computable paths; with none computable, `UNKNOWN` plus the missing inputs. Others stay listed.
+- FACT: tests `tests/test_c30_owned_asset.py` (7): BBQ with stated facts only -> all five UNKNOWN with exact inputs; example ranges (clearly labelled examples, not estimates) -> themed recommended, and a pricier themed range flips it to minimal. Suite: 394 passed, 22 skipped (was 387).
+- INFERENCE: example ranges in tests are illustrative only; real ranges come from Michael via F-34.
+- UNKNOWN: CONVERT inputs/definition (what it converts to) entirely owner-supplied; wiring into `score_item`/Item contract (type enum) not done, no frozen contract touched. No engine/config version change, goldens unaffected.

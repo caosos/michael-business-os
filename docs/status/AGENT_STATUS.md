@@ -300,3 +300,7 @@ Partial: part (a) service quote input not built (needs where the quote lands + M
 
 ## C-28
 Done: C-28 @ 96cb704 (service quote: Item.research `quote:amount_usd` -> `job.quoted_revenue` human-attested; drywall lead with attested scope+customer: $700 YES, $500 MAYBE; 387 passed, 22 skipped). State: CLOSED
+
+## C-30
+Done: C-30 @ COMMIT (owned_asset five-path comparison on incremental cash, sunk basis excluded, UNKNOWNs named, past tow stays INFERENCE; 394 passed, 22 skipped). State: CLOSED
+Proposed for 01/06: F-34 calls `mbos_economics.owned_asset.compare_paths(item, as_of)`; Item type enum may need `owned_asset` (contract, ADR) if it should pass schema validation.
