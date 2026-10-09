@@ -306,4 +306,4 @@ Done: C-30 @ 9792ca7 (owned_asset five-path comparison on incremental cash, sunk
 Proposed for 01/06: F-34 calls `mbos_economics.owned_asset.compare_paths(item, as_of)`; Item type enum may need `owned_asset` (contract, ADR) if it should pass schema validation.
 
 ## C-29
-Done: C-29 @ PENDING (LEARN groups other_asset TVs/small goods by prior class so non-zero consumer_electronics priors calibrate; proposal stays tier-0 drafted; 396 passed, 22 skipped). State: CLOSED
+Done: C-29 @ 6f978de (LEARN groups other_asset TVs/small goods by prior class so non-zero consumer_electronics priors calibrate; proposal stays tier-0 drafted; 396 passed, 22 skipped). State: CLOSED
