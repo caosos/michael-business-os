@@ -1,5 +1,8 @@
 """D-30: Michael's typed inputs (scope overrides, quote) through the owner UI login; the workflow login cannot forge them."""
 
+import json
+from pathlib import Path
+
 import psycopg
 import pytest
 from psycopg import errors
@@ -10,6 +13,15 @@ from test_human_only_owner_paths import real_dbos  # noqa: F401
 
 AGENT = {"type": "agent", "id": "agent-03-economics"}
 HUMAN = {"type": "human", "id": "michael"}
+
+
+def _item_validator():
+    from jsonschema import Draft202012Validator
+    from referencing import Registry, Resource
+    d = Path(__file__).parent / "contracts-v1.0.0"
+    schemas = [json.loads(p.read_text()) for p in list(d.glob("*.schema.json")) + list(d.glob("vendor/agent-03/*.schema.json"))]
+    reg = Registry().with_resources([(s["$id"], Resource.from_contents(s)) for s in schemas])
+    return Draft202012Validator(next(s for s in schemas if s["$id"].endswith("item.schema.json")), registry=reg)
 
 
 def _human_prov(conn):
@@ -34,10 +46,13 @@ def test_owner_ui_login_records_both_kinds_receipted_and_idempotent(db):
     _input(ui.conn, item_id, hp, "quote", "amount_usd", 250.5)
     research = db.connect("reader").execute("SELECT doc->'research' FROM mbos.items WHERE item_id=%s", (item_id,)).fetchone()[0]
     by = {r["field"]: r for r in research if r["field"].startswith(("scope_override:", "quote:"))}
-    assert by["scope_override:rehab.parts_cost"] == {"finding": "Michael said so", "field": "scope_override:rehab.parts_cost", "value": 120,
-                                                     "basis": "INFER", "source_uri": "human:michael", "provenance_id": hp, "entered_by": "michael"}
-    assert by["scope_override:job.required_skills"]["value"] == ["repair", "wiring"]
-    assert by["quote:amount_usd"]["value"] == 250.5 and by["quote:amount_usd"]["basis"] == "FACT"
+    assert by["scope_override:rehab.parts_cost"] == {"finding": '{"entered_by":"michael","value":120}', "field": "scope_override:rehab.parts_cost",
+                                                     "basis": "INFERENCE", "source_uri": "human:michael", "provenance_id": hp}
+    assert json.loads(by["scope_override:job.required_skills"]["finding"])["value"] == ["repair", "wiring"]
+    assert json.loads(by["quote:amount_usd"]["finding"]) == {"value": 250.5, "entered_by": "michael"}
+    assert by["quote:amount_usd"]["basis"] == "FACT"
+    item = ui.item_document(item_id)
+    assert not list(_item_validator().iter_errors(item))
     r = ui.conn.execute("SELECT type, actor->>'type', actor->>'id', item_id FROM mbos.receipts WHERE receipt_id=%s", (rid,)).fetchone()
     assert r == ("ITEM_STATE_CHANGED", "human", "michael", item_id)
     assert ui.verify_chain().ok
@@ -90,3 +105,16 @@ def test_real_mbos_dbos_refused_and_cannot_forge_entries(real_dbos):
                           (item_id, Jsonb({"research": [entry]}), Jsonb(AGENT), [hp], key()))
         ok = {"finding": "enrich", "field": "card.comps", "basis": "FACT", "source_uri": "human:michael", "provenance_id": hp}
         c.execute("SELECT mbos.append_item_research(%s,%s,%s,'x',%s,%s)", (item_id, Jsonb([ok]), Jsonb(AGENT), [hp], key()))
+
+
+def test_quote_override_and_attestation_keep_item_conformant(db):
+    """D-32 / F-127: every human-written research entry stays inside the frozen schema; chain verifies."""
+    item_id, _ = make_item(db.store(), "RESEARCHING")
+    ui = db.store("approver")
+    hp = _human_prov(ui.conn)
+    _input(ui.conn, item_id, hp, "quote", "amount_usd", 99)
+    _input(ui.conn, item_id, hp, "scope_override", "rehab.parts_cost", 5)
+    ui.conn.execute("SELECT mbos.record_attestation(%s,'title_in_hand','Seen it',%s,%s,%s)", (item_id, Jsonb(HUMAN), [hp], key("att")))
+    errs = [e.message[:120] for e in _item_validator().iter_errors(ui.item_document(item_id))]
+    assert not errs, errs
+    assert ui.verify_chain().ok
