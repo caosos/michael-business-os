@@ -309,4 +309,4 @@ Proposed for 01/06: F-34 calls `mbos_economics.owned_asset.compare_paths(item, a
 Done: C-29 @ 6f978de (LEARN groups other_asset TVs/small goods by prior class so non-zero consumer_electronics priors calibrate; proposal stays tier-0 drafted; 396 passed, 22 skipped). State: CLOSED
 
 ## C-31
-Done: C-31 @ COMMIT (readers accept value/author from `finding` JSON as well as old extra fields; $700 YES / $500 MAYBE from new shape; 402 passed, 22 skipped). State: CLOSED
+Done: C-31 @ 6a826aa (readers accept value/author from `finding` JSON as well as old extra fields; $700 YES / $500 MAYBE from new shape; 402 passed, 22 skipped). State: CLOSED
