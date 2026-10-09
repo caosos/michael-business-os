@@ -172,6 +172,6 @@ State: CLOSED
 Verdict: stage 3 PASS; stage 4 3/4: TV YES in queue/Today, Recon MAYBE naming fault_identified, mower ARCHIVED, worker rechecks itself (F-102/103/104/106/108/109/110 fixed). New F-111 (P1: drywall lead never reaches YES, \$/h gate 72.99<75, no quote input), F-112 candidate (P3 wording). RC READY 105/0 (3 skipped); card 671/0. G-21b unblocked. Receipt: docs/receipts/2026-10-08-G-21c-mission-dryrun-rerun-stages-3-4.md
 
 ## G-22 (2026-10-08)
-Done: G-22 @ PENDING_SHA
+Done: G-22 @ ebc9d44
 State: CLOSED
 Verdict: Michael can use the flip path today (jobs 1-5 PASS; TV YES -> ACTED dry-run, audit ok); job 6 PARTIAL, job 7 PARTIAL. New F-120 (P1: HOLD cannot be woken or approved when the workflow came from a recheck; UI says "YES recorded" but item stays HELD; F-116 not fixed on the real path), F-121/F-122/F-123/F-125 (P2), F-124 (P3). F-111 still open. RC READY 105/0 (3 skipped); card 671/0. Receipt: docs/receipts/2026-10-08-G-22-operator-reaudit.md
