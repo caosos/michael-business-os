@@ -3,6 +3,8 @@
 Everything else is being built and tested by the agents, DRY-RUN only. This is the single list of things that need a human.
 Last updated: 2026-10-08 by Agent 01. Short-form packets with recommendations: `docs/status/OWNER_DECISION_PACKETS.md`. Nothing here blocks the dry-run MVP; each item unlocks something.
 
+**One packet now covers everything: `docs/status/OWNER_APPROVAL_PACKET.md`.**
+
 ## A. Decisions (details in `docs/status/MICHAEL_DECISIONS.md`)
 | # | Decision | Unlocks | Default until decided |
 |---|---|---|---|
