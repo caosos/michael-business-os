@@ -115,6 +115,8 @@ def attempts_so_far() -> dict[str, int]:
                 e = json.loads(ln)
                 if e.get("event") == "launch":
                     out[e["task"]] = out.get(e["task"], 0) + 1
+                elif e.get("event") == "reset":   # supported recovery: the real prerequisite was fixed, the count starts again
+                    out.pop(e["task"], None)
             except (ValueError, KeyError):
                 pass
     return out
@@ -126,7 +128,14 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--max-parallel", type=int, default=2)
     ap.add_argument("--interval", type=int, default=90)
     ap.add_argument("--dry", action="store_true", help="decide and log, launch nothing")
+    ap.add_argument("--reset-task", metavar="ID", help="record a receipt that the task's blocker was fixed and zero its attempt count, then exit")
+    ap.add_argument("--why", default="", help="with --reset-task: the verified prerequisite (required)")
     a = ap.parse_args(argv)
+    if a.reset_task:
+        if not a.why.strip():
+            ap.error("--reset-task needs --why (the verified prerequisite)")
+        log({"event": "reset", "task": a.reset_task, "why": a.why.strip(), "was": attempts_so_far().get(a.reset_task, 0)})
+        return 0
     procs: dict[str, tuple[subprocess.Popen, str]] = {}   # lane -> (process, task)
     idle_rounds = 0
     while True:

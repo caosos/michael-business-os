@@ -53,3 +53,17 @@ def test_workers_started_by_hand_count_as_running():
     assert d.lanes_running_in_os(ps) == {"03", "04"}
     plan, _ = d.plan_launches(REPORT, d.lanes_running_in_os(ps), {}, 0, True, 4)
     assert [l for l, _ in plan] == ["02", "07"]                              # 03 and 04 are busy: no duplicates
+
+
+def test_reset_receipt_zeroes_only_that_tasks_attempts(tmp_path, monkeypatch):
+    import json
+    log_file = tmp_path / "d.jsonl"
+    log_file.write_text("\n".join(json.dumps(e) for e in [
+        {"event": "launch", "task": "F-39"}, {"event": "launch", "task": "F-39"}, {"event": "launch", "task": "X-1"},
+        {"event": "reset", "task": "F-39", "why": "venv synced"}, {"event": "launch", "task": "F-39"}]) + "\n")
+    monkeypatch.setattr(d, "LOG", log_file)
+    assert d.attempts_so_far() == {"F-39": 1, "X-1": 1}
+    assert d.main(["--reset-task", "F-39", "--why", "lane-06 venv verified"]) == 0
+    assert d.attempts_so_far() == {"X-1": 1}
+    last = json.loads(log_file.read_text().splitlines()[-1])
+    assert last["event"] == "reset" and last["was"] == 1
