@@ -38,6 +38,18 @@ class EconomicsEngineScorer:
         from mbos.adapters.ledger import with_context
 
         scored_at = item.get("updated_at") or item["created_at"]
+        from mbos import owned_asset
+
+        if owned_asset.is_owned(item):  # A-47: decided by the five-path comparison on the card, never by the flip gates
+            reason = "Owned asset: compared across five paths on cash from today (see the card); the flip gates do not apply"
+            card = {"scoring_config_version": self.cfg.version, "derived": {}, "sub_scores": {}, "composite": 0, "decision": "MAYBE",
+                    "gates": {}, "reasons": [reason], "cheapest_decisive_evidence": "Michael's rough figures for the UNKNOWN inputs on the card"}
+            from mbos.hashing import sha256_of
+            return ScoreResult(
+                scorecard=card, inputs_hash=sha256_of({"item_id": item.get("item_id"), "owned": owned_asset.engine_inputs(item)}),
+                verdict="MAYBE", rationale=[reason], confidence=0.0, scoring_config_version=self.cfg.version,
+                tool_name="mbos_economics.engine", tool_version=self.engine_version,
+                cheapest_decisive_evidence=card["cheapest_decisive_evidence"])
         try:
             out = score_item(with_context(item, self.context_source), self.cfg, scored_at)
         except InputError as e:
@@ -142,6 +154,13 @@ class EconomicsEnricher:
         item = spine.read_item(conn, item_id)
         if item["state"] in ("ARCHIVED", "FAILED"):
             return 0
+        from mbos import owned_asset
+
+        if owned_asset.is_owned(item):  # A-47: the five-path comparison is the card's value-add plan
+            v = owned_asset.value_add_block(item, item["created_at"])
+            pid = spine.record_lane_provenance(conn, v["provenance"])
+            spine.record_enrichment(conn, item_id, "value_add", v["block"], pid, summary="owned-asset five-path comparison", agent="agent-03-economics")
+            return 1
         card_ = (item.get("scores") or {}).get("scorecard")
         if not card_ or "engine_version" not in card_:  # lane C enriches only what lane C's own engine scored
             return 0
