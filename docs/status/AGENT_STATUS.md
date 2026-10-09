@@ -304,3 +304,6 @@ Done: C-28 @ 96cb704 (service quote: Item.research `quote:amount_usd` -> `job.qu
 ## C-30
 Done: C-30 @ 9792ca7 (owned_asset five-path comparison on incremental cash, sunk basis excluded, UNKNOWNs named, past tow stays INFERENCE; 394 passed, 22 skipped). State: CLOSED
 Proposed for 01/06: F-34 calls `mbos_economics.owned_asset.compare_paths(item, as_of)`; Item type enum may need `owned_asset` (contract, ADR) if it should pass schema validation.
+
+## C-29
+Done: C-29 @ PENDING (LEARN groups other_asset TVs/small goods by prior class so non-zero consumer_electronics priors calibrate; proposal stays tier-0 drafted; 396 passed, 22 skipped). State: CLOSED

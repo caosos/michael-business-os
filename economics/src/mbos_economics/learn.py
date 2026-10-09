@@ -70,12 +70,15 @@ def shrink_toward_base_rate(prior: float, successes: int, n: int, prior_weight: 
 
 # --------------------------------------------------------------------------- inputs
 
-def item_meta_from_docs(item_docs: Iterable[dict]) -> dict[str, dict]:
-    """item_id -> {type, category, condition, source}; only structured fields."""
+def item_meta_from_docs(item_docs: Iterable[dict], priors: ScoringConfig | None = None) -> dict[str, dict]:
+    """item_id -> {type, category, condition, source}; only structured fields. ``category`` is the PRIOR group
+    (F-117: an ``other_asset`` TV is ``consumer_electronics``, whose priors are non-zero and can calibrate)."""
+    from .estimate import load_priors, prior_category
+    priors = priors or load_priors()
     meta = {}
     for d in item_docs:
         n = d.get("normalized") or {}
-        meta[d["item_id"]] = {"type": d.get("type"), "category": d.get("category"),
+        meta[d["item_id"]] = {"type": d.get("type"), "category": prior_category(d, priors) or d.get("category"),
                               "condition": n.get("condition") if n.get("condition") in ("new", "used", "parts") else "unknown",
                               "source": (d.get("sources") or [{}])[0].get("source")}
     return meta
