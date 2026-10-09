@@ -79,6 +79,53 @@ RULES: dict[str, list[tuple[re.Pattern, str]]] = {
     ]],
 }
 
+# B-24 pivot classification (trailers, donor RVs, towable machines, ATVs; paperwork; condition words). Same evidence
+# rules as above: quoted, INFERENCE, negation-aware, sanitized text only. Reported under block["pivot"], NOT as card tags
+# (the frozen card enum is unchanged). PAPERWORK is evidence only: a status exists only where the text states it, a
+# missing statement is never "no title" and never "clean title"; the system never decides title/legality from it.
+_RV = r"(?:camper|rv|travel\s+trailer|pop[\s-]?up|fifth\s+wheel|5th\s+wheel|motorhome|toy\s+hauler)"
+_DONOR = r"(?:for\s+parts|donor|junk|salvage|scrap|gutted|frame\s+only|parts\s+only|rotted|water\s+damage[d]?|totaled)"
+PIVOT_SUBTYPES: dict[str, list[tuple[re.Pattern, str]]] = {k: [(re.compile(p, re.I), l) for p, l in v] for k, v in {
+    "utility_trailer": [(r"\butility\s+trailer\b|\bdump\s+trailer\b|\bflat\s*bed\s+trailer\b", "utility trailer")],
+    "boat_trailer": [(r"\bboat\s+trailer\b|\btrailer\s+for\s+(?:a\s+)?boat\b|\bbunk\s+trailer\b", "boat trailer")],
+    "jet_ski_trailer": [(r"\bjet[\s-]?ski\s+trailer\b|\bpwc\s+trailer\b|\bsea[\s-]?doo\s+trailer\b|\bwave\s*runner\s+trailer\b", "jet-ski trailer")],
+    "equipment_trailer": [(r"\bequipment\s+trailer\b|\bcar\s+hauler\b|\bskid\s*steer\s+trailer\b|\bbobcat\s+trailer\b|\bdeckover\b|\bgooseneck\s+trailer\b", "equipment trailer")],
+    "landscape_trailer": [(r"\blandscap(?:e|ing)\s+trailer\b|\blawn\s+(?:care\s+)?trailer\b|\bmower\s+trailer\b", "landscape trailer")],
+    "enclosed_trailer": [(r"\benclosed\s+(?:cargo\s+)?trailer\b|\bcargo\s+trailer\b|\bv[\s-]?nose\b", "enclosed trailer")],
+    "single_axle": [(r"\bsingle[\s-]+axle\b|\b1[\s-]+axle\b|\bone[\s-]+axle\b", "single axle")],
+    "tandem_axle": [(r"\btandem[\s-]+axle\b|\bdual[\s-]+axle\b|\b2[\s-]+axle\b|\btwo[\s-]+axle\b|\btandem\s+trailer\b", "tandem axle")],
+    "log_splitter": [(r"\blog\s+splitter\b|\bwood\s+splitter\b|\bfirewood\s+processor\b", "log splitter")],
+    "towable_machine": [(r"\btow[\s-]+behind\b|\btowable\b|\bwood\s+chipper\b|\bbrush\s+chipper\b|\blight\s+tower\b|\bpull[\s-]+behind\b|"
+                         r"\btrailer[\s-]+mounted\b|\btow\s+(?:able\s+)?(?:boom|lift|compressor|welder)\b", "towable machine")],
+    "atv": [(r"\batv\b|\bquad\b|\bfour[\s-]?wheeler\b|\b4[\s-]?wheeler\b|\butv\b|\bside[\s-]by[\s-]side\b", "ATV / quad")],
+}.items()}
+PIVOT_PAPERWORK: dict[str, list[tuple[re.Pattern, str]]] = {k: [(re.compile(p, re.I), l) for p, l in v] for k, v in {
+    "title_stated_present": [(r"\b(?:clean|clear|free\s+and\s+clear|good|salvage|rebuilt)\s+title\b|\btitle\s+(?:in\s+hand|in\s+my\s+name|available|included|is\s+clean)\b|\bhave\s+(?:the\s+|a\s+)?title\b|\bwith\s+title\b|\btitled\b(?!\s+to\b)", "title stated present")],
+    "title_stated_missing": [(r"\b(?:no|missing|lost|without(?:\s+a)?|don'?t\s+have(?:\s+a)?|doesn'?t\s+have(?:\s+a)?)\s+title\b|\btitle\s+(?:is\s+)?(?:missing|lost|not\s+available)\b|\buntitled\b", "title stated missing")],
+    "bill_of_sale": [(r"\bbill\s+of\s+sale\b|\bbos\s+only\b", "bill of sale")],
+    "registration_stated_missing": [(r"\b(?:no|missing|expired|lost)\s+registration\b|\bunregistered\b|\bregistration\s+(?:is\s+)?(?:missing|expired|lost)\b|\bnot\s+registered\b", "registration stated missing")],
+    "vin_present": [(r"\bvin\s*(?:#|no\.?|number)?\s*[:\-]?\s*[A-HJ-NPR-Z0-9]{17}\b", "VIN quoted"), (r"\bvin\s+(?:plate\s+)?(?:is\s+)?(?:present|available|on\s+hand|visible|intact)\b|\bhas\s+(?:a\s+)?vin\b", "VIN stated present")],
+}.items()}
+PIVOT_CONDITION: dict[str, list[tuple[re.Pattern, str]]] = {k: [(re.compile(p, re.I), l) for p, l in v] for k, v in {
+    "non_running": [(r"\bnon[\s-]?running\b|\bnot\s+running\b|\bdoesn'?t\s+run\b|\bwon'?t\s+(?:start|run)\b|\bdoes\s+not\s+(?:start|run)\b", "non-running")],
+    "needs_starter": [(r"\bneeds?\s+(?:a\s+|an\s+|the\s+|new\s+)?(?:starter|battery|carb(?:uretor)?|spark\s+plug|pull\s+cord)\b", "needs starter/battery/carb")],
+    "rust": [(r"\brust(?:y|ed|ing)?\b|\bcorro(?:ded|sion)\b", "rust")],
+    "damage": [(r"\bflat\s+tires?\b|\bdry[\s-]?rot(?:ted)?\b|\bbent\s+(?:frame|axle|tongue)\b|\brotted\b|\bcracked\s+frame\b|\bdamaged?\b", "damage / wear")],
+}.items()}
+
+
+def build_pivot(fields: dict[str, str]) -> dict:
+    """Pure. Per category -> [{class, evidence:[{field,label,quote,offset}]}]. Reuses _scan (sanitized text, quotes)."""
+    def run(group: dict, negation: bool = True) -> list[dict]:
+        return [{"class": k, "evidence": ev[:5]} for k in group if (ev := _scan(k, fields, group, negation))]
+    sub = run(PIVOT_SUBTYPES)
+    rv = _scan("rv", fields, {"rv": [(re.compile(rf"\b{_RV}\b", re.I), "RV/camper")]})
+    dn = _scan("dn", fields, {"dn": [(re.compile(rf"\b{_DONOR}\b", re.I), "donor / junk wording")]})
+    if rv and dn:                                                  # both are needed: "camper" alone is not a donor
+        sub.append({"class": "donor_camper_rv", "evidence": (rv + dn)[:5]})
+    return {"subtypes": sub, "paperwork": run(PIVOT_PAPERWORK, negation=False), "condition": run(PIVOT_CONDITION)}
+
+
 _MARKUP = re.compile(r"<[^>]{0,200}>|https?://\S+|&[a-z]{2,8};|\[[^\]]{0,80}\]\([^)]{0,200}\)")
 _SENT = re.compile(r"(?<=[.!?;])\s+|\s{2,}|\n+|\s[|•·]\s")
 
@@ -104,15 +151,16 @@ def _quote(text: str, a: int, b: int) -> tuple[str, int]:
     return (q if len(q) <= QUOTE_MAX else q[:QUOTE_MAX].rstrip() + "…"), lo
 
 
-def _scan(tag: str, fields: dict[str, str]) -> list[dict]:
+def _scan(tag: str, fields: dict[str, str], rules: Optional[dict] = None, negation: bool = True) -> list[dict]:
     """Every rule match is quoted once per (field, label). A match preceded by a negation within three words
-    ("no", "not", "doesn't need", "without", …) is discarded for EVERY tag."""
+    ("no", "not", "doesn't need", "without", …) is discarded for EVERY tag (`negation=False` only for the paperwork
+    rules, whose labels already encode "no title" / "missing registration" as explicit statements)."""
     found, seen = [], set()
     for field, text in fields.items():
-        for rx, label in RULES[tag]:
+        for rx, label in (rules or RULES)[tag]:
             for m in rx.finditer(text):
                 q, off = _quote(text, m.start(), m.end())
-                if _negated(text, m.start()) or (field, label) in seen or (field, q) in seen:
+                if (negation and _negated(text, m.start())) or (field, label) in seen or (field, q) in seen:
                     continue
                 seen.add((field, label))
                 seen.add((field, q))
@@ -161,9 +209,12 @@ def build_category_tags(item: dict, own_prov: str) -> dict:
             continue
         out.append({"tag": tag, "basis": "INFERENCE", "provenance_id": own_prov, "evidence": ev,
                     "note": "inferred from the quoted evidence only; not verified against the item"})
+    pivot = build_pivot(fields)
     block = {"tags": out, "evaluated": list(TAGS), "text_checked": sorted(fields),
              "rules_version": RULES_VERSION,
              "note": "a missing tag means no evidence was found, not that it does not apply"}
+    if any(pivot.values()):
+        block["pivot"] = pivot
     if excluded:
         block["excluded_fields"] = excluded
         block["excluded_note"] = "fields containing instruction-like text were excluded entirely before matching"

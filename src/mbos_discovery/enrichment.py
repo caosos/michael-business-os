@@ -221,7 +221,8 @@ def attach_enrichment(conn, spine, item_id: str, raw_store, as_of: datetime,
     # does not look like new content; the key is recorded in the research entry's finding.
     placeholder = "prov_" + "0" * 26
     draft = build_blocks(item, facts, as_of, placeholder, history)
-    wants_tags = bool(build_category_tags(item, placeholder)["tags"])
+    _blk = build_category_tags(item, placeholder)
+    wants_tags = bool(_blk["tags"] or _blk.get("pivot"))
     tags_supported = "category_tags" in getattr(spine, "ENRICHMENT_BLOCKS", ())
     if wants_tags and tags_supported:                    # B-21: only when the spine knows the block (else reported)
         draft["category_tags"] = build_category_tags(item, placeholder)
