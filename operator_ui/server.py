@@ -90,7 +90,7 @@ def _verdict(v):
 
 
 NAV = [("/", "Queue", None), ("/mission", "Weekly mission", None), ("/numbers", "My numbers", None), ("/wanted", "Wanted", None),
-       ("/usage", "Usage", "usage"), ("/intake", "Intake", None), ("/preview", "Audience previews", "preview"),
+       ("/usage", "Usage", "usage"), ("/intake", "Intake", None), ("/assets", "My assets", None), ("/preview", "Audience previews", "preview"),
        ("/digest", "Morning digest", None), ("/summary", "Daily summary", None), ("/notes", "My notes", None),
        ("/holds", "HOLD backlog", None), ("/outcomes", "Outcomes", None), ("/sources", "Source health", "sources"),
        ("/ledger", "Receipt ledger", None)]
@@ -494,6 +494,7 @@ class App:
         self.queue_file = queue_file  # READY_QUEUE.md copy (MBOS_READY_QUEUE_FILE)
         self.mission_file = mission_file  # mission plan JSON (MBOS_MISSION_PLAN_FILE)
         self.health_file = health_file  # lane B health.json (else MBOS_SOURCE_HEALTH_FILE)
+        self.assets = {}  # F-34: in-memory DRY-RUN owned-asset drafts
         self.intake_drafts = {}  # F-20: in-memory DRY-RUN drafts, never published
         self.csrf = secrets.token_urlsafe(32)
         self.session_id = "web-" + secrets.token_hex(4)
@@ -578,6 +579,13 @@ class App:
         bundle = ux.parse_note(f, self.author, iso(utcnow()))
         note_id = self.store.record_operator_note(bundle)
         return f"Note saved ({note_id}). It will show on this model's cards as your recommendation."
+
+    def asset_gate(self, f):
+        """F-34: CSRF + step-up PIN for any owned-asset change; the author is the server-set operator (R14)."""
+        self._check_csrf(f)
+        if not self.operator_pin:
+            raise InputError("step-up not configured (MBOS_OPERATOR_PIN unset); changes are refused (fail-closed)")
+        self.pin_gate.check(f.get("pin"), self.operator_pin, "a PIN is required to change your assets (it identifies you as the owner).")
 
     def _numbers_gate(self, f):
         """CSRF + step-up PIN for any mission/capital change; the author is ALWAYS the server-set operator (R14)."""
@@ -907,6 +915,8 @@ def make_handler(app):
                 from . import usage_view
 
                 return self._send(200, page("Usage and agents", usage_view.render_page(usage_view.load(app.telemetry_dir), usage_view.queue_states(app.queue_file)), app.state()))
+            if u.path == "/assets" or (u.path.startswith("/assets/") and u.path.split("/")[2] in app.assets):
+                return self._assets_page(u.path.split("/")[2] if u.path != "/assets" else None, flash or err, bool(err))
             if u.path == "/intake":
                 from . import intake_view
 
@@ -951,6 +961,38 @@ def make_handler(app):
                     return self._send(404, "{}", "application/json")
                 return self._send(200, json.dumps({k: v for k, v in c.items() if k != "hold_presets"}, default=str), "application/json")
             return self._send(404, page("Not found", "<p>Not found.</p>", app.state()))
+
+        def _assets_page(self, aid, flash=None, is_err=False):
+            from . import assets_view
+
+            if aid is None:
+                body = assets_view.render_list(app.assets, app.csrf, bool(app.operator_pin))
+                return self._send(200, page("My assets", body, app.state(), flash, is_err))
+            d = app.assets[aid]
+            body = assets_view.render_card(aid, d, assets_view.compare(aid, d, app.author), app.csrf, bool(app.operator_pin))
+            return self._send(200, page(d.get("title") or "Asset", body, app.state(), flash, is_err))
+
+        def _post_assets(self, parts):
+            from . import assets_view
+
+            n = min(int(self.headers.get("Content-Length") or 0), 65536)
+            f = {k: v[0] for k, v in parse_qs(self.rfile.read(n).decode("utf-8"), keep_blank_values=True).items()}
+            aid = parts[1] if len(parts) == 3 else None
+            if aid is not None and aid not in app.assets:
+                return self._send(404, page("Not found", "<p>No such asset.</p>", app.state()))
+            try:
+                app.asset_gate(f)
+                if aid is None:
+                    aid, d = assets_view.new_id(), assets_view.add(f.get("title", ""), f)
+                else:
+                    d = assets_view.apply_answers(app.assets[aid], f)
+            except Exception as ex:  # InputError, ValueError, ContractViolation: shown, nothing recorded
+                return self._assets_page(None if len(parts) == 2 else aid, str(ex), True)
+            app.assets[aid] = d
+            self.send_response(303)
+            self.send_header("Location", f"/assets/{aid}?msg={quote('Saved (DRY-RUN). Nothing is marked verified.')}")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
 
         def _post_intake(self, parts):
             from . import intake_view
@@ -1147,6 +1189,8 @@ def make_handler(app):
                 return
             u = urlparse(self.path)
             parts = u.path.strip("/").split("/")
+            if parts == ["assets", "add"] or (len(parts) == 3 and parts[0] == "assets" and parts[2] == "answer"):
+                return self._post_assets(parts)
             if parts == ["intake", "start"] or (len(parts) == 3 and parts[0] == "intake" and parts[2] == "answer"):
                 return self._post_intake(parts)
             if len(parts) == 2 and parts[0] == "numbers" and parts[1] in ("mission", "capital"):
