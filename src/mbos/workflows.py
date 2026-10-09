@@ -178,7 +178,8 @@ def _approval_gate(item_id: str, areq_id: str) -> dict[str, Any]:
                 continue
             if d == "HOLD":
                 out = tx(S().apply_hold, item_id, appr)
-                hold, hold_started, last_notice = appr["hold"], parse(appr["decided_at"]), parse(out["now"])
+                if out.get("applied", True):  # a stale HOLD (already woken or decided) must not re-park the request
+                    hold, hold_started, last_notice = appr["hold"], parse(appr["decided_at"]), parse(out["now"])
                 continue
 
         now = parse(st["now"])
@@ -218,7 +219,8 @@ def _approval_gate(item_id: str, areq_id: str) -> dict[str, Any]:
 
 
 def _act(item_id: str, areq_id: str, approval: dict[str, Any]) -> dict[str, Any]:
-    tx(S().begin_act, item_id, areq_id, approval)
+    if not tx(S().begin_act, item_id, areq_id, approval):  # F-118: already applied by another gate or a retry
+        return {"status": "already_applied", "action_request_id": areq_id, "approval_id": approval["approval_id"]}
     guard = gateway_step(areq_id, approval["approval_id"])
     result = tx(S().finish_act, item_id, areq_id, approval, guard)
     return {**result, "action_request_id": areq_id, "approval_id": approval["approval_id"]}

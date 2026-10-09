@@ -428,16 +428,28 @@ def _approval_prov(conn: sa.Connection, approval: dict) -> str:
 
 
 def apply_no(conn: sa.Connection, item_id: str, approval: dict) -> None:
+    """Idempotent: a second gate (or a retry) finding the NO already applied is a clean no-op (F-113)."""
+    _version(conn, item_id)  # row lock: concurrent gates serialise (F-113)
+    state = read_item(conn, item_id)["state"]
+    if state not in ("AWAITING_APPROVAL", "HELD", "REJECTED"):
+        return
     prov = _approval_prov(conn, approval)
-    _to(conn, item_id, "REJECTED", f"Michael said NO: {approval.get('reason', '')}", [prov])
+    if state != "REJECTED":
+        _to(conn, item_id, "REJECTED", f"Michael said NO: {approval.get('reason', '')}", [prov])
     _to(conn, item_id, "ARCHIVED", "archived after NO (reason feeds LEARN)", [prov])
 
 
 def apply_hold(conn: sa.Connection, item_id: str, approval: dict) -> dict:
-    prov = _approval_prov(conn, approval)
-    if read_item(conn, item_id)["state"] != "HELD":
-        _to(conn, item_id, "HELD", "Michael said HOLD (parked; never auto-executes)", [prov])
-    return {"now": now_iso()}
+    """Returns `applied=False` for a stale HOLD (the request was already woken or decided): replaying an old approval
+    must not park the item again (F-116)."""
+    out = {"now": now_iso(), "applied": False}
+    areq = _areq(conn, approval["action_request_id"], lock=True)
+    state = read_item(conn, item_id)["state"]
+    if areq["status"] != "held" or state not in ("AWAITING_APPROVAL", "HELD"):
+        return out
+    if state != "HELD":
+        _to(conn, item_id, "HELD", "Michael said HOLD (parked; never auto-executes)", [_approval_prov(conn, approval)])
+    return {**out, "applied": True}
 
 
 def apply_modify(conn: sa.Connection, item_id: str, approval: dict) -> str:
@@ -478,17 +490,21 @@ def expire(conn: sa.Connection, item_id: str, action_request_id: str) -> None:
 
 
 # ---------------------------------------------------------------- DRY-RUN ACT + RECEIPT
-def begin_act(conn: sa.Connection, item_id: str, action_request_id: str, approval: dict) -> None:
+def begin_act(conn: sa.Connection, item_id: str, action_request_id: str, approval: dict) -> bool:
+    """Returns False (and does nothing) when this YES was already applied by another gate or a retry (F-118)."""
+    areq = _areq(conn, action_request_id, lock=True)  # concurrent gates serialise here (F-118)
+    if areq["status"] != "approved" or read_item(conn, item_id)["state"] not in ("AWAITING_APPROVAL", "HELD"):
+        return False
     prov = _approval_prov(conn, approval)
     if read_item(conn, item_id)["state"] == "HELD":
         _to(conn, item_id, "AWAITING_APPROVAL", "re-presented: Michael decided YES on a held request", [prov])
     _to(conn, item_id, "APPROVED", "Michael said YES", [prov], MICHAEL)
-    areq = _areq(conn, action_request_id)
     _to(conn, item_id, "ACTING", f"executing {areq['capability']} (DRY-RUN)", [prov])
     if settings().gateway_mode == "lane_e":
-        return  # R4: lane E's gateway moves approved→executing and writes ACTION_EXECUTING itself
+        return True  # R4: lane E's gateway moves approved→executing and writes ACTION_EXECUTING itself
     _status(conn, areq, "executing", "ACTION_EXECUTING", "handing the frozen payload to the action gateway (DRY-RUN)", [prov],
             extra={"approval_id": approval["approval_id"]})
+    return True
 
 
 def finish_act(conn: sa.Connection, item_id: str, action_request_id: str, approval: dict, guard: dict) -> dict:

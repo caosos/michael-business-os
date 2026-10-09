@@ -505,16 +505,23 @@ def _approval_prov(conn: sa.Connection, approval: dict) -> str:
 
 
 def apply_no(conn: sa.Connection, item_id: str, approval: dict) -> None:
+    item = load_item(conn, item_id, for_update=True)
+    if item["state"] not in ("AWAITING_APPROVAL", "HELD", "REJECTED"):  # already applied: clean no-op (F-113)
+        return
     prov = _approval_prov(conn, approval)
-    item = load_item(conn, item_id)
     update_item(conn, item_id, to_state="REJECTED", patch={"approval_ids": (item.get("approval_ids") or []) + [approval["approval_id"]]},
                 intent=f"Michael said NO: {approval.get('reason', '')}", provenance_ids=[prov])
     update_item(conn, item_id, to_state="ARCHIVED", intent="archived after NO (reason feeds LEARN)", provenance_ids=[prov])
 
 
 def apply_hold(conn: sa.Connection, item_id: str, approval: dict) -> dict:
+    """`applied=False` for a stale HOLD (request already woken or decided): replaying it must not re-park the item (F-116)."""
+    item = load_item(conn, item_id, for_update=True)
+    areq_status = conn.execute(sa.text("SELECT body->>'status' FROM mbos.action_requests WHERE action_request_id = :a"),
+                               {"a": approval["action_request_id"]}).scalar_one_or_none()
+    if areq_status != "held" or item["state"] not in ("AWAITING_APPROVAL", "HELD"):
+        return {"now": now_iso(), "applied": False}
     prov = _approval_prov(conn, approval)
-    item = load_item(conn, item_id)
     patch = {"approval_ids": (item.get("approval_ids") or []) + [approval["approval_id"]]}
     if item["state"] == "HELD":
         update_item(conn, item_id, patch=patch, intent="HOLD renewed", provenance_ids=[prov])
@@ -573,9 +580,12 @@ def expire(conn: sa.Connection, item_id: str, action_request_id: str) -> None:
 
 
 # ---------------------------------------------------------------- DRY-RUN ACT + RECEIPT
-def begin_act(conn: sa.Connection, item_id: str, action_request_id: str, approval: dict) -> None:
+def begin_act(conn: sa.Connection, item_id: str, action_request_id: str, approval: dict) -> bool:
+    """False (nothing done) when this YES was already applied by another gate or a retry (F-118)."""
+    item = load_item(conn, item_id, for_update=True)
+    if item["state"] not in ("AWAITING_APPROVAL", "HELD"):
+        return False
     prov = _approval_prov(conn, approval)
-    item = load_item(conn, item_id)
     if item["state"] == "HELD":  # R12: re-present before approving; HOLD itself never executes
         update_item(conn, item_id, to_state="AWAITING_APPROVAL", intent="re-presented: Michael decided YES on a held request",
                     provenance_ids=[prov])
@@ -586,6 +596,7 @@ def begin_act(conn: sa.Connection, item_id: str, action_request_id: str, approva
     update_item(conn, item_id, to_state="ACTING", intent=f"executing {areq['capability']} (DRY-RUN)", provenance_ids=[prov])
     _areq_receipt(conn, areq, "ACTION_EXECUTING", "handing the frozen payload to the action gateway (DRY-RUN)", [prov],
                   approval_id=approval["approval_id"])
+    return True
 
 
 def finish_act(conn: sa.Connection, item_id: str, action_request_id: str, approval: dict, guard: dict) -> dict:
