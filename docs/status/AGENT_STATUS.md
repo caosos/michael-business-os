@@ -175,3 +175,8 @@ Verdict: stage 3 PASS; stage 4 3/4: TV YES in queue/Today, Recon MAYBE naming fa
 Done: G-22 @ ebc9d44
 State: CLOSED
 Verdict: Michael can use the flip path today (jobs 1-5 PASS; TV YES -> ACTED dry-run, audit ok); job 6 PARTIAL, job 7 PARTIAL. New F-120 (P1: HOLD cannot be woken or approved when the workflow came from a recheck; UI says "YES recorded" but item stays HELD; F-116 not fixed on the real path), F-121/F-122/F-123/F-125 (P2), F-124 (P3). F-111 still open. RC READY 105/0 (3 skipped); card 671/0. Receipt: docs/receipts/2026-10-08-G-22-operator-reaudit.md
+
+## G-23 (2026-10-08)
+Done: G-23 @ PENDING
+State: CLOSED
+Verdict: money loop on the TV PASS end to end (YES+PIN -> ACTED dry-run -> I bought it $30 -> sold $92; ledger available $500 -> $470 -> $562, profit $62; duplicate close refused). Jobs 1-5, 7 PASS; job 6 PARTIAL: HOLD -> wake -> YES FAILS (F-126 P1, A-48 not effective on the UI path, 2/2). Drywall $700 quote -> YES PASS; Recon attestation, mower archived, BBQ trailer five-path card PASS. New F-126/F-127 (P1: audit conformance red after a quote), F-128/F-129/F-130/F-133 (P2), F-131/F-132/F-134/F-135 (P3). RC READY 105/0 (3 skipped); card 671/0. Receipt: docs/receipts/2026-10-08-G-23-operator-audit-money-loop.md
