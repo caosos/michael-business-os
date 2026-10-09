@@ -1,0 +1,22 @@
+{
+  "asset_class": "towable",
+  "asset_deal_model_version": "2026.10.1",
+  "computable": false,
+  "dry_run": true,
+  "evidence": {
+    "asking_comps_count": 3,
+    "asking_counted_as_sold": false,
+    "camping_value_used": false,
+    "sold_comps_count": 0,
+    "sold_comps_used": 0
+  },
+  "item_id": "itm_01JH6666666666666666666666",
+  "module_version": "1.0.0",
+  "reasons": [
+    "missing inputs: asset:sold_comps_or_parts"
+  ],
+  "unknowns": [
+    "asset:sold_comps_or_parts"
+  ],
+  "verdict": "HOLD"
+}

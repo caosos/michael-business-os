@@ -1,0 +1,65 @@
+{
+  "buyer_premium_pct": 0.1,
+  "sales_tax_rate": 0.08,
+  "pickup_cost": 0,
+  "transport_cost": 20,
+  "labor_hours": 3,
+  "days_to_sell": 5,
+  "pickup_wait_hours": 24,
+  "resale_fee_pct": 0,
+  "payout_lag_days": 1,
+  "item_id": "itm_01JH1111111111111111111111",
+  "asset_class": "donor_chassis",
+  "hammer_price": 150,
+  "teardown_cost": 20,
+  "teardown_hours": 4,
+  "paperwork": {
+    "class": "bill_of_sale",
+    "title_path": "bonded title via state DMV (UNKNOWN until confirmed)",
+    "title_cost": 100,
+    "title_delay_days": 21
+  },
+  "parts": [
+    {
+      "name": "frame",
+      "value": 150,
+      "basis": "sold"
+    },
+    {
+      "name": "axles",
+      "value": 160,
+      "basis": "sold"
+    },
+    {
+      "name": "springs",
+      "value": 40,
+      "basis": "sold"
+    },
+    {
+      "name": "hubs",
+      "value": 60,
+      "basis": "sold"
+    },
+    {
+      "name": "steel scrap",
+      "value": 80,
+      "basis": "scrap"
+    },
+    {
+      "name": "cabinets",
+      "value": 60,
+      "basis": "estimate"
+    }
+  ],
+  "comps": [
+    {
+      "sold_price": 4000
+    },
+    {
+      "sold_price": 4000
+    },
+    {
+      "sold_price": 4000
+    }
+  ]
+}

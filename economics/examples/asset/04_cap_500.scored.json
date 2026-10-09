@@ -1,0 +1,109 @@
+{
+  "asset_class": "towable",
+  "asset_deal_model_version": "2026.10.1",
+  "bid_forecast": {
+    "bid_count": 6,
+    "current_bid": 450,
+    "final_hammer": {
+      "expected": 625.5,
+      "high": 801,
+      "low": 450
+    },
+    "hours_left": 36,
+    "label": "FORECAST (heuristic, REC; not observed)",
+    "likely_exceeds_max_bid": true,
+    "uplift_pct": 0.39
+  },
+  "capital_at_risk": 554.6,
+  "capital_tied_up": 554.6,
+  "cash_cap": {
+    "cap": 500,
+    "over_cap": true
+  },
+  "computable": true,
+  "cost": {
+    "all_in": 554.6,
+    "buyer_premium": 45,
+    "hammer": 450,
+    "pickup_and_transport": 20,
+    "sales_tax": 39.6
+  },
+  "days_to_cash": 7,
+  "dry_run": true,
+  "evidence": {
+    "asking_comps_count": 0,
+    "asking_counted_as_sold": false,
+    "camping_value_used": false,
+    "sold_comps_count": 3,
+    "sold_comps_used": 3
+  },
+  "extras": {
+    "repair_cost": 0,
+    "repair_hours_michael": 0,
+    "teardown_cost": 0,
+    "title_cost": 0
+  },
+  "flags": {
+    "fast_24h": false,
+    "fast_48h": false,
+    "slow_inventory": false
+  },
+  "headline_basis": "resolved",
+  "headline_path": "resale",
+  "item_id": "itm_01JH4444444444444444444444",
+  "module_version": "1.0.0",
+  "net": {
+    "expected": 545.4,
+    "floor": 495.4,
+    "high": 595.4
+  },
+  "paperwork": {
+    "class": "titled",
+    "days_to_cash_resolved": 7,
+    "legal_transfer_assumed": false,
+    "net_as_is_expected": 545.4,
+    "net_resolved_expected": 545.4,
+    "title_delay_days": 0,
+    "title_path": null
+  },
+  "paths": {
+    "resale": {
+      "net_as_is": {
+        "expected": 545.4,
+        "floor": 495.4,
+        "high": 595.4
+      },
+      "net_resolved": {
+        "expected": 545.4,
+        "floor": 495.4,
+        "high": 595.4
+      },
+      "value_expected_as_is": 1100,
+      "value_expected_resolved": 1100
+    }
+  },
+  "profit_per_day": 77.9143,
+  "profit_per_labor_hour": 272.7,
+  "reasons": [
+    "cash needed 554.6 exceeds cap 500"
+  ],
+  "resale": {
+    "owner_target": null,
+    "system_estimate": 1100,
+    "used": "system"
+  },
+  "suggested_max_bid": {
+    "assumptions": [
+      "path=resale",
+      "value basis=sold/parts evidence",
+      "expected value 1100 (resolved) after 0 resale fee",
+      "buyer premium 0.1, tax 0.08 on hammer+premium",
+      "fixed+repair+teardown+title extras 20",
+      "min net 40, cash cap 500"
+    ],
+    "binding": "cash_cap",
+    "max_bid": 404.04
+  },
+  "unknowns": [],
+  "verdict": "MAYBE"
+}

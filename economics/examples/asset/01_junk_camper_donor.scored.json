@@ -1,0 +1,96 @@
+{
+  "asset_class": "donor_chassis",
+  "asset_deal_model_version": "2026.10.1",
+  "capital_at_risk": 0,
+  "capital_tied_up": 218.2,
+  "cash_cap": {
+    "cap": 500,
+    "over_cap": false
+  },
+  "computable": true,
+  "cost": {
+    "all_in": 198.2,
+    "buyer_premium": 15,
+    "hammer": 150,
+    "pickup_and_transport": 20,
+    "sales_tax": 13.2
+  },
+  "days_to_cash": 7,
+  "dry_run": true,
+  "evidence": {
+    "asking_comps_count": 0,
+    "asking_counted_as_sold": false,
+    "camping_value_used": false,
+    "sold_comps_count": 3,
+    "sold_comps_used": 0
+  },
+  "extras": {
+    "repair_cost": 0,
+    "repair_hours_michael": 0,
+    "teardown_cost": 20,
+    "title_cost": 100
+  },
+  "flags": {
+    "fast_24h": false,
+    "fast_48h": false,
+    "slow_inventory": false
+  },
+  "headline_basis": "as_is",
+  "headline_path": "parts_out",
+  "item_id": "itm_01JH1111111111111111111111",
+  "module_version": "1.0.0",
+  "net": {
+    "expected": 301.8,
+    "floor": 271.8,
+    "high": 331.8
+  },
+  "paperwork": {
+    "class": "bill_of_sale",
+    "days_to_cash_resolved": 28,
+    "legal_transfer_assumed": false,
+    "net_as_is_expected": 301.8,
+    "net_resolved_expected": 201.8,
+    "title_delay_days": 21,
+    "title_path": "bonded title via state DMV (UNKNOWN until confirmed)"
+  },
+  "paths": {
+    "parts_out": {
+      "net_as_is": {
+        "expected": 301.8,
+        "floor": 271.8,
+        "high": 331.8
+      },
+      "net_resolved": {
+        "expected": 201.8,
+        "floor": 171.8,
+        "high": 231.8
+      },
+      "value_expected_as_is": 520,
+      "value_expected_resolved": 520
+    }
+  },
+  "profit_per_day": 43.1143,
+  "profit_per_labor_hour": 43.1143,
+  "reasons": [
+    "bill_of_sale: legal transfer not assumed; no YES until title is in hand (path: bonded title via state DMV (UNKNOWN until confirmed), 21 days, cost 100)"
+  ],
+  "resale": {
+    "owner_target": null,
+    "system_estimate": null,
+    "used": null
+  },
+  "suggested_max_bid": {
+    "assumptions": [
+      "path=parts_out",
+      "value basis=sold/parts evidence",
+      "expected value 520 (resolved) after 0 resale fee",
+      "buyer premium 0.1, tax 0.08 on hammer+premium",
+      "fixed+repair+teardown+title extras 40",
+      "min net 40, cash cap 500"
+    ],
+    "binding": "min_net",
+    "max_bid": 370.37
+  },
+  "unknowns": [],
+  "verdict": "MAYBE"
+}

@@ -1,0 +1,96 @@
+{
+  "asset_class": "towable",
+  "asset_deal_model_version": "2026.10.1",
+  "capital_at_risk": 376.4,
+  "capital_tied_up": 376.4,
+  "cash_cap": {
+    "cap": 500,
+    "over_cap": false
+  },
+  "computable": true,
+  "cost": {
+    "all_in": 376.4,
+    "buyer_premium": 30,
+    "hammer": 300,
+    "pickup_and_transport": 20,
+    "sales_tax": 26.4
+  },
+  "days_to_cash": 7,
+  "dry_run": true,
+  "evidence": {
+    "asking_comps_count": 0,
+    "asking_counted_as_sold": false,
+    "camping_value_used": false,
+    "sold_comps_count": 3,
+    "sold_comps_used": 3
+  },
+  "extras": {
+    "repair_cost": 0,
+    "repair_hours_michael": 0,
+    "teardown_cost": 0,
+    "title_cost": 150
+  },
+  "flags": {
+    "fast_24h": false,
+    "fast_48h": false,
+    "slow_inventory": false
+  },
+  "headline_basis": "as_is",
+  "headline_path": "resale",
+  "item_id": "itm_01JH3333333333333333333333",
+  "module_version": "1.0.0",
+  "net": {
+    "expected": 373.6,
+    "floor": 348.6,
+    "high": 398.6
+  },
+  "paperwork": {
+    "class": "no_title",
+    "days_to_cash_resolved": 37,
+    "legal_transfer_assumed": false,
+    "net_as_is_expected": 373.6,
+    "net_resolved_expected": 973.6,
+    "title_delay_days": 30,
+    "title_path": "bonded title"
+  },
+  "paths": {
+    "resale": {
+      "net_as_is": {
+        "expected": 373.6,
+        "floor": 348.6,
+        "high": 398.6
+      },
+      "net_resolved": {
+        "expected": 973.6,
+        "floor": 923.6,
+        "high": 1023.6
+      },
+      "value_expected_as_is": 750,
+      "value_expected_resolved": 1500
+    }
+  },
+  "profit_per_day": 53.3714,
+  "profit_per_labor_hour": 186.8,
+  "reasons": [
+    "no_title: legal transfer not assumed; no YES until title is in hand (path: bonded title, 30 days, cost 150)"
+  ],
+  "resale": {
+    "owner_target": null,
+    "system_estimate": 1500,
+    "used": "system"
+  },
+  "suggested_max_bid": {
+    "assumptions": [
+      "path=resale",
+      "value basis=sold/parts evidence",
+      "expected value 750 (as-is) after 0 resale fee",
+      "buyer premium 0.1, tax 0.08 on hammer+premium",
+      "fixed+repair+teardown+title extras 20",
+      "min net 40, cash cap 500"
+    ],
+    "binding": "cash_cap",
+    "max_bid": 404.04
+  },
+  "unknowns": [],
+  "verdict": "MAYBE"
+}

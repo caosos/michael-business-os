@@ -1,0 +1,12 @@
+{
+  "asset_deal_model_version": "2026.10.1",
+  "_note": "C-33 trailer / donor chassis / machine parameters. DATA, not code. Additive; separate from scoring-config.json and auction-model.json. REC values; not Michael-confirmed.",
+  "cash_cap_per_buy": { "value": 500, "basis": "REC", "note": "owner cap per buy (C-24 / C-32 intake); over-cap deals cannot be YES" },
+  "estimate_haircut": { "value": 0.5, "basis": "REC", "note": "parts valued by estimate (not sold/scrap evidence) count at this share in the expected case and never in the floor" },
+  "as_is_resale_factor": { "value": 0.5, "basis": "REC", "note": "as-is resale of a no-title or bill-of-sale trailer as a share of the resolved resale, unless the input gives its own" },
+  "forecast": {
+    "basis": "REC",
+    "note": "heuristic, not observed: uplift = time_coeff * min(hours_left, horizon)/horizon * (1 + bid_coeff * min(bid_count, bid_cap))",
+    "value": { "time_coeff": 0.6, "horizon_hours": 72, "bid_coeff": 0.05, "bid_cap": 20 }
+  }
+}

@@ -313,3 +313,6 @@ Done: C-31 @ 6a826aa (readers accept value/author from `finding` JSON as well as
 
 ## C-32
 Done: C-32 @ c0e98d2 (auction cost model: premium/tax/pickup/transport all-in, time to cash, turns, $/labor-hour, 24/48h and slow flags, asking-only never YES; additive auction-model.json; 410 passed, 22 skipped). State: CLOSED
+
+## C-33
+Done: C-33 @ PENDING (asset_deal module: parts-out donor value, component machine paths, untitled-trailer paperwork, profit/day, capital tied/at risk, max bid, labelled bid forecast, owner override with provenance; 422 passed, 22 skipped). State: CLOSED

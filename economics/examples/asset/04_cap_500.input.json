@@ -1,0 +1,31 @@
+{
+  "buyer_premium_pct": 0.1,
+  "sales_tax_rate": 0.08,
+  "pickup_cost": 0,
+  "transport_cost": 20,
+  "labor_hours": 2,
+  "days_to_sell": 5,
+  "pickup_wait_hours": 24,
+  "resale_fee_pct": 0,
+  "payout_lag_days": 1,
+  "item_id": "itm_01JH4444444444444444444444",
+  "asset_class": "towable",
+  "hammer_price": 450,
+  "paperwork": {
+    "class": "titled"
+  },
+  "current_bid": 450,
+  "bid_count": 6,
+  "hours_left": 36,
+  "comps": [
+    {
+      "sold_price": 1000
+    },
+    {
+      "sold_price": 1100
+    },
+    {
+      "sold_price": 1200
+    }
+  ]
+}
