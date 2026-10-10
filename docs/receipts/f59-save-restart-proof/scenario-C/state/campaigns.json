@@ -1,0 +1,40 @@
+{
+ "campaigns": {
+  "cmp_AA9R026MSHC229T3XPANYVT4XG": {
+   "doc": {
+    "autonomy": {
+     "level": "RECOMMEND"
+    },
+    "campaign_id": "cmp_AA9R026MSHC229T3XPANYVT4XG",
+    "campaign_version": "1.0.0",
+    "criteria": {
+     "category": "marketplace",
+     "cosmetics_matter": false,
+     "keywords": [],
+     "max_price_usd": 5000.0,
+     "must_have": [],
+     "nice_to_have": [
+      "any:utility"
+     ],
+     "origin": "Conway AR",
+     "radius_miles": 150.0
+    },
+    "owner": "michael",
+    "status": "ACTIVE",
+    "stop_conditions": {
+     "expires_at": null,
+     "fulfilled_by": null,
+     "max_matches": null
+    },
+    "title": "Acceptance scenario C"
+   },
+   "history": [
+    {
+     "at": "2026-10-10T07:43:27.808639Z",
+     "by": "michael",
+     "what": "created (RECOMMEND)"
+    }
+   ]
+  }
+ }
+}

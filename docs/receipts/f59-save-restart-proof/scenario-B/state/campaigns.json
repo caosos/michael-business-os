@@ -1,0 +1,42 @@
+{
+ "campaigns": {
+  "cmp_F7GD65B7YRFGFK0RKTDBT8ZHPM": {
+   "doc": {
+    "autonomy": {
+     "level": "RECOMMEND"
+    },
+    "campaign_id": "cmp_F7GD65B7YRFGFK0RKTDBT8ZHPM",
+    "campaign_version": "1.0.0",
+    "criteria": {
+     "category": "marketplace",
+     "cosmetics_matter": false,
+     "keywords": [],
+     "max_price_usd": 5000.0,
+     "must_have": [],
+     "nice_to_have": [
+      "rows:vehicles>trailers>tools>electronics",
+      "any:trailer>equipment",
+      "cond:trailer"
+     ],
+     "origin": "Conway AR",
+     "radius_miles": 150.0
+    },
+    "owner": "michael",
+    "status": "ACTIVE",
+    "stop_conditions": {
+     "expires_at": null,
+     "fulfilled_by": null,
+     "max_matches": null
+    },
+    "title": "Acceptance scenario B"
+   },
+   "history": [
+    {
+     "at": "2026-10-10T07:42:43.814303Z",
+     "by": "michael",
+     "what": "created (RECOMMEND)"
+    }
+   ]
+  }
+ }
+}
