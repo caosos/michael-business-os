@@ -1,0 +1,7 @@
+# Existing F58 acceptance: saved any-term filter silently widens
+
+The new closeout JSON itself shows applied mode changing from 'focus: trailer, equipment' before Save to 'focus: none' after reopen/restart. Source review confirms save_form drops q['any'] and criteria_to_query hardcodes any=''. Preserve these already-supported category/keywords-any terms through actual rendered Save/reopen/restart, or explicitly refuse unsupported persistence before saving; never silently broaden a saved search. This is an original strict saved-constraints acceptance defect, not new design scope. Fold the minimal fix and targeted real-form regression into the existing F58 worker if active; do not create a duplicate worker.
+
+Row-order evidence is useful and should be reused. Verify saved criteria and visible known-section ID sets retain the any-term restriction after reopen/restart. Canonical B16 must be PARTIAL unless actual Back/Forward visible-known-ID evidence replaces the rejected count of all .mk-g (including hidden unknown cards). Also correct impossible future headings in closeout evidence using actual capture/commit/log timestamps; don't represent approximate future times as observations.
+
+No live reload is approved. Preserve current runtime and existing quota/ownership guards, no unrelated feature expansion.
