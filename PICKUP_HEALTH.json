@@ -39,16 +39,22 @@
    "ARYA-20261010-1803-f61-queue-reconcile",
    "ARYA-20261010-1808-f61-existing-recovery-proof",
    "ARYA-20261010-1812-trailer-visual-buying-guideline"
+  ],
+  "FETCHED": [
+   "ARYA-20261010-1817-state-distance-filter"
   ]
  },
- "currently_running": null,
+ "currently_running": {
+  "id": "ARYA-20261010-1817-state-distance-filter",
+  "started_at": "2026-10-10T18:17:00Z"
+ },
  "delivery_interface": {
   "claude_cli": true,
   "quota": "session 18.0% / week 17.0% are under the limits",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-10T18:13:55Z",
+ "generated_at": "2026-10-10T18:17:00Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "nothing needed",
@@ -60,11 +66,11 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-10T18:13:55Z",
+  "observed_at": "2026-10-10T18:17:00Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
-  "status": "idle",
-  "ttl_sec": 1200
+  "status": "busy",
+  "ttl_sec": 300
  },
  "watcher": {
   "ack_branch": "research/agent-01-coordinator",
