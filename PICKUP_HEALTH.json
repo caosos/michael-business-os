@@ -29,17 +29,14 @@
    "ARYA-20261010-0512-f52-acceptance-gaps"
   ]
  },
- "currently_running": {
-  "id": "ARYA-20261010-0514-pickup-base-race",
-  "started_at": "2026-10-10T05:16:08Z"
- },
+ "currently_running": null,
  "delivery_interface": {
   "claude_cli": true,
   "quota": "session 4.0% / week 8.0% are under the limits",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-10T05:17:40Z",
+ "generated_at": "2026-10-10T05:17:42Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "no live Claude session (awaiting connection)",
@@ -51,11 +48,11 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-10T05:17:40Z",
+  "observed_at": "2026-10-10T05:17:42Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
-  "status": "busy",
-  "ttl_sec": 300
+  "status": "idle",
+  "ttl_sec": 1200
  },
  "watcher": {
   "ack_branch": "research/agent-01-coordinator",
