@@ -7,7 +7,7 @@
 #   tools/reload_ui.sh --verify-only <port>           read-only semantic checks of a running UI (e.g. a staging port); changes nothing
 #
 # Test seams (never touch live): MBOS_RELOAD_PORT, MBOS_RELOAD_SLEEP_STOP, MBOS_RELOAD_SLEEP_START; tmux and curl are looked up on PATH (tests shim them).
-set -euo pipefail
+set -eEuo pipefail
 cd "$(dirname "$0")/.."
 PORT="${MBOS_RELOAD_PORT:-8766}"; SLEEP_STOP="${MBOS_RELOAD_SLEEP_STOP:-2}"; SLEEP_START="${MBOS_RELOAD_SLEEP_START:-9}"
 BASE="http://127.0.0.1"
@@ -63,17 +63,32 @@ printf 'sha=%s\ntree_sha256=%s\nexported_utc=%s\n' "$SHA" "$EXPECT_TREE" "$STAMP
 echo "prerequisites OK: export $SHA tree $EXPECT_TREE; verified backup $B"
 if ps -eo args | grep -E '[t]ools/worker.py|[c]laude -p You are a fresh' | grep -v 'bash -c' >/dev/null; then echo "note: a worker is running (the reload does not stop it)"; fi
 
+# Baseline of the UI that is serving NOW (read-only GETs), so a rollback can be judged against what "healthy" meant before the change.
+BASE_CODE=$(curl -s -m 10 -o /dev/null -w '%{http_code}' "$BASE:$PORT/market" 2>/dev/null || echo 000)
+BASE_MARK=0; case "$(curl -s -m 20 "$BASE:$PORT/market" 2>/dev/null || true)" in *"Michael's Marketplace"*) BASE_MARK=1;; esac
+echo "baseline of the current UI: /market HTTP $BASE_CODE, marketplace marker $BASE_MARK"
+
 # ---- point of no return ----
 start_ui() { tmux new-session -d -s mbos-dev-ui "cd $PWD && set -a && . var/dev.env && . var/owner.env && set +a && MBOS_OPERATOR_PIN=\$(cat var/ui.pin) exec .venv/bin/python -u -m operator_ui serve --port $PORT 2>&1 | tee -a var/ui.log"; }
+rollback_ok() {  # the old UI must give the SAME healthy answer it gave before (a 500, a 000 or a missing marker is NOT recovery)
+  local code body; code=$(curl -s -m 10 -o /dev/null -w '%{http_code}' "$BASE:$PORT/market" 2>/dev/null || echo 000)
+  [ "$code" != "000" ] && [ "$code" -lt 500 ] 2>/dev/null || return 1
+  [ "$BASE_CODE" = "200" ] && { [ "$code" = "200" ] || return 1; } || { [ "$code" = "$BASE_CODE" ] || return 1; }
+  if [ "$BASE_MARK" = "1" ]; then body=$(curl -s -m 20 "$BASE:$PORT/market" 2>/dev/null || true); case "$body" in *"Michael's Marketplace"*) ;; *) return 1;; esac; fi
+  return 0
+}
 rollback() {
+  trap - ERR
   echo "ROLLBACK to $B ($1)"
-  tmux kill-session -t mbos-dev-ui 2>/dev/null || true
-  rm -rf "$LIVE" && cp -a "$B" "$LIVE" && start_ui && sleep "$SLEEP_START" \
-    && [ "$(curl -s -m 10 -o /dev/null -w '%{http_code}' "$BASE:$PORT/")" != "000" ] \
-    && { echo "rollback done: the previous UI answers; backup kept at $B"; exit 1; }
-  echo "ROLLBACK FAILED: restore by hand: rm -rf $LIVE; cp -a $B $LIVE; then start mbos-dev-ui as in tools/run_dev_stack.sh. Backup kept at $B"; exit 3
+  set +e
+  tmux kill-session -t mbos-dev-ui 2>/dev/null
+  rm -rf "$LIVE" && cp -a "$B" "$LIVE" && start_ui && sleep "$SLEEP_START" && rollback_ok
+  rc=$?
+  if [ "$rc" = "0" ]; then echo "rollback done and verified: the previous UI gives its baseline healthy answer; backup kept at $B"; exit 1; fi
+  echo "ROLLBACK FAILED OR UNVERIFIED (the previous UI did not return its baseline healthy /market answer): restore by hand: rm -rf $LIVE; cp -a $B $LIVE; start mbos-dev-ui as in tools/run_dev_stack.sh. Backup kept at $B"; exit 3
 }
 date -u +"stop %FT%TZ"
+trap 'rollback "a command failed after the UI was stopped (line $LINENO)"' ERR
 tmux kill-session -t mbos-dev-ui 2>/dev/null || true; sleep "$SLEEP_STOP"
 rm -rf "$LIVE/operator_ui" "$LIVE/comms_spec"
 cp -a "$NEW/operator_ui" "$NEW/comms_spec" "$LIVE/" || rollback "copying the artifact into place failed"
@@ -88,4 +103,5 @@ grep -q "^sha=$SHA\$" "$LIVE/ARTIFACT" || rollback "the artifact marker does not
 tmux has-session -t mbos-dev-ui 2>/dev/null || rollback "the mbos-dev-ui session is not running"
 reason=$(verify_pages "$PORT") || rollback "semantic check failed: $reason"
 rm -rf "$NEW"
-date -u +"done %FT%TZ: serving $SHA (tree $GOT_TREE); rollback copy kept at $B"
+trap - ERR
+date -u +"done %FT%TZ: serving $SHA. Identity = the files on disk hash to the artifact + the session was restarted after the swap + the route markers above. LIMITATION: this is not a SHA returned by the running process; no process-level version endpoint exists. Rollback copy kept at $B"

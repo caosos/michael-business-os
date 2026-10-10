@@ -28,6 +28,11 @@ case "$*" in *redirect_url*) cat {pages}/root_redirect; exit 0;; esac
 case "$url" in
   */market?go=1*) f=market_validation;; */market) f=market;; */mission) f=mission;; */queue) f=queue;; *) f=other;;
 esac
+n=$(grep -c '^tmux new-session' {log})
+if [ "$n" -ge 2 ] && [ -f {pages}/after_rollback_code ]; then   # the rollback restart has happened: serve what the test configured
+  case "$*" in *http_code*) cat {pages}/after_rollback_code; exit 0;; esac
+  cat {pages}/after_rollback_body 2>/dev/null; exit 0
+fi
 case "$*" in *http_code*) echo 200; exit 0;; esac
 cat {pages}/$f 2>/dev/null; exit 0
 ''')
@@ -175,3 +180,45 @@ def test_verify_only_never_stops_or_changes_anything(env):
     (env.pages / "market").write_text("old page")
     r = env.run("--verify-only", "8767")
     assert r.returncode == 1 and "missing the marker" in r.stdout and not [c for c in env.calls() if c.startswith("tmux")]
+
+
+def test_rollback_that_only_gets_http_500_is_reported_as_failed_not_recovered(env):
+    (env.pages / "market").write_text("<html>new UI is broken</html>")             # the new UI fails the semantic check -> rollback
+    (env.pages / "after_rollback_code").write_text("500")                           # ...and the 'restored' UI answers HTTP 500
+    (env.pages / "after_rollback_body").write_text("Internal Server Error")
+    r = env.run(env.good_sha)
+    assert r.returncode == 3 and "ROLLBACK FAILED OR UNVERIFIED" in r.stdout and "rollback done and verified" not in r.stdout
+    assert (env.live / "operator_ui/server.py").read_text() == "OLD server\n"          # the files were still restored, the backup is kept and named
+    assert list((env.root / "var/lanes").glob("agent-06.prev-*"))
+
+
+def test_rollback_to_a_200_page_that_lost_the_baseline_marker_is_not_recovery(env):
+    (env.pages / "market").write_text("Michael's Marketplace but missing the F-57 fields")          # baseline had the marker; the new UI fails the checks
+    (env.pages / "after_rollback_code").write_text("200")
+    (env.pages / "after_rollback_body").write_text("<html>some other page</html>")                  # 200, but not the old UI's healthy page
+    r = env.run(env.good_sha)
+    assert r.returncode == 3 and "ROLLBACK FAILED OR UNVERIFIED" in r.stdout
+
+
+def test_a_failing_rm_after_the_stop_triggers_recovery_not_a_dead_ui(env):
+    real_rm = shutil.which("rm")
+    shim = env.tmp / "shims" / "rm"                                                 # the post-stop removal of the live files fails; everything else works
+    shim.write_text(f'''#!/bin/sh
+case "$*" in *agent-06/operator_ui*) echo "rm: injected failure" >&2; exit 1;; esac
+exec {real_rm} "$@"
+''')
+    shim.chmod(0o755)
+    before = env.live_snapshot()
+    r = env.run(env.good_sha)
+    assert r.returncode == 1 and "ROLLBACK to" in r.stdout and "a command failed after the UI was stopped" in r.stdout and "rollback done and verified" in r.stdout
+    assert env.live_snapshot() == before                                            # restored byte for byte
+    calls = env.calls()
+    assert len([c for c in calls if c.startswith("tmux kill-session")]) == 2 and len([c for c in calls if c.startswith("tmux new-session")]) == 1   # stop, then ONE restart (the rollback's); the new UI never started
+
+
+def test_a_rollback_that_is_verified_requires_the_baseline_answer(env):
+    (env.pages / "market").write_text("<html>new UI is broken</html>")
+    (env.pages / "after_rollback_code").write_text("200")
+    (env.pages / "after_rollback_body").write_text("Michael's Marketplace (old UI healthy)")
+    r = env.run(env.good_sha)
+    assert r.returncode == 1 and "rollback done and verified" in r.stdout            # the same healthy answer as before: recovery accepted
