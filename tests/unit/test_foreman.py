@@ -117,3 +117,36 @@ def test_reconcile_marks_only_what_the_owning_lane_reports_done():
 def test_done_line_with_many_ids_is_fully_parsed():
     st = foreman.parse_status("State: CLOSED\nDone: F-01 @ 190bb9b (+ x) · F-02 @ fc31896 · F-18 @ d56f8d2 · X-03 (checked)\n")
     assert st["done"] == {"F-01", "F-02", "F-18", "X-03"}
+
+
+def _load_foreman():
+    import importlib.util, sys
+    from pathlib import Path
+    spec = importlib.util.spec_from_file_location("foreman_t", Path(__file__).resolve().parents[2] / "tools" / "foreman.py")
+    m = importlib.util.module_from_spec(spec)
+    sys.modules["foreman_t"] = m
+    spec.loader.exec_module(m)
+    return m
+
+
+QUEUE_F = """
+| ID | Pri | Task | Deps | Status | Agent | Acceptance |
+|---|---|---|---|---|---|---|
+| F-10 | **P0** | first task | none | **READY** | worker:lane-06 (sonnet) | ok |
+| F-11 | P1 | depends on F-10 | F-10 | READY | worker:lane-06 (sonnet) | ok |
+| F-12 | **P0** **ADDED BY 01: merged pri and title, one column short** | F-10, F-9 | **READY** | worker:lane-06 (sonnet) | ok |
+| F-13 | P0 | title with a pipe | x | none | **READY** | worker:lane-06 (sonnet) | ok |
+| F-9 | P1 | done earlier | none | **DONE** | worker:lane-06 (sonnet) | ok |
+"""
+
+
+def test_short_or_pipe_rows_are_still_ready_and_dependencies_are_honoured():
+    f = _load_foreman()
+    rows = {r["id"]: r for r in f.parse_queue(QUEUE_F)}
+    assert rows["F-12"]["status"] == "READY" and rows["F-12"]["pri"] == "P0" and rows["F-12"]["agent"].startswith("worker:lane-06")   # one column short
+    assert rows["F-13"]["status"] == "READY"                                                                                         # a pipe inside the title
+    ready = [r["id"] for r in f.ready_for(f.parse_queue(QUEUE_F), "06", set())]
+    assert "F-11" not in ready                       # F-10 is not DONE yet: dispatching F-11 first would be out of order (it was, live)
+    assert set(ready) == {"F-10", "F-13"}   # F-12 (a one-column-short row) is parsed as READY but depends on F-10 (not DONE yet), so it must wait
+    q2 = QUEUE_F.replace("| F-10 | **P0** | first task | none | **READY**", "| F-10 | **P0** | first task | none | **DONE**")
+    assert {"F-11", "F-12"} <= {r["id"] for r in f.ready_for(f.parse_queue(q2), "06", set())}  # once F-10 is DONE the dependents become ready

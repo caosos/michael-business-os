@@ -48,18 +48,29 @@ def parse_status(text: str | None) -> dict:
 
 
 def parse_queue(text: str | None) -> list[dict]:
+    """Rows of the queue. Status, agent and deps are read from the RIGHT-hand end of the row (a row with a missing or extra column, or a pipe inside the
+    title, must not make a READY task invisible: found when an executor wrote F-56 one column short)."""
     rows = []
     for line in (text or "").splitlines():
         c = [x.strip() for x in line.split("|")]
         if len(c) >= 8 and re.fullmatch(r"[A-GX]-\d+", c[1]):
-            status = re.sub(r"[*`]", "", c[5]).strip()
-            rows.append({"id": c[1], "pri": re.sub(r"[*]", "", c[2]), "status": status, "agent": re.sub(r"[*]", "", c[6]).strip(),
-                         "title": c[3][:90]})
+            pri = re.search(r"P\d", c[2])
+            rows.append({"id": c[1], "pri": pri.group(0) if pri else "P9", "status": re.sub(r"[*`]", "", c[-4]).strip(),
+                         "agent": re.sub(r"[*]", "", c[-3]).strip(), "deps": c[-5], "title": (c[3] if len(c) >= 9 else c[2])[:90]})
     return rows
 
 
+def deps_met(row: dict, rows: list[dict], done: set[str]) -> bool:
+    """Every task id named in the row's deps must be DONE (lane's word or the queue row). Ids not in the queue at all count as met; text without ids ('none') too."""
+    status = {r["id"]: r["status"] for r in rows}
+    for d in re.findall(r"[A-GX]-\d+", row.get("deps") or ""):
+        if d in status and d not in done and not status[d].upper().startswith("DONE"):
+            return False
+    return True
+
+
 def ready_for(rows: list[dict], lane: str, done: set[str]) -> list[dict]:
-    mine = [r for r in rows if lane in re.findall(r"\d\d", r["agent"]) and re.match(r"READY", r["status"]) and r["id"] not in done]
+    mine = [r for r in rows if lane in re.findall(r"\d\d", r["agent"]) and re.match(r"READY", r["status"]) and r["id"] not in done and deps_met(r, rows, done)]
     return sorted(mine, key=lambda r: (not r["pri"].startswith("P0"), r["pri"], r["id"]))
 
 
