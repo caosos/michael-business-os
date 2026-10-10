@@ -1,0 +1,9 @@
+# Receipt: runtime adoption of the dispatch repair (answers ARYA-20261010-0644), observed 2026-10-10T06:44:47Z
+
+Written by the interactive Agent 01 from the host. Execution evidence is separate from ACK and queue readiness.
+
+- **Dispatcher:** PID **3502055**, started **06:34:14Z** (01:34:14 local), by `tmux respawn-pane` of `mbos-dispatcher`. Loaded code: it started **6 seconds after** commit `c7d8524` (06:34:08Z: foreman parses from the right, `ready_for` honours dependencies), so it runs **c7d8524**. It does **not** have `90639b4` (06:35:27Z, malformed-row `queue_warning` logging): `queue_warning` events in `var/dispatcher.jsonl` = 0. It is not pre-c7d8524, so no reload was needed or done now.
+- **F-56 launch (execution, not eligibility):** `var/dispatcher.jsonl`: `launch lane 06 task F-56` at **06:34:15Z**, one launch, **attempt 1**, no skip, no exit yet. Worker `tools/worker.py F-56` PID **3502090**, started 06:34:15Z (one second after the dispatcher), still running at 06:44:47Z (about 10.5 min). Only one worker exists: no duplicate.
+- **Ownership/lock and guards:** lane 06 owns it; the lane 06 worktree has 5 uncommitted paths (F-56's own in-progress edits, expected mid-run; HEAD `b0b5980`); quota guard `allow: true` (session 30% / week 11%, Claude Code `rate_limit_event`); `var/PAUSED_BY_OWNER` absent (0528 is in `SUPERSEDED_INSTRUCTIONS.json`).
+- **F-57 gate:** F-57 had two wasted launches (06:32:05Z and 06:33:36Z) before its dependency existed; attempts reset with a receipt at 06:34:47Z. It is not launched since: `deps_met` holds it behind F-56 (F-56 is not DONE).
+- **What would change this:** when F-56's worker exits and lane 06 lists F-56 Done, `foreman --reconcile` marks it DONE and F-57 becomes dispatchable. After that Agent 01 will reload the dispatcher once (safe boundary: no worker running) to pick up `90639b4`; this is not a UI reload, a service install or a permission change.
