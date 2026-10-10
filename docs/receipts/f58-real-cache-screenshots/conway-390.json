@@ -1,0 +1,121 @@
+{
+ "label": "Same Conway search on a phone",
+ "code_sha": "3a28c64",
+ "url": "http://127.0.0.1:8767/market?go=1&source=gsa&base=Conway%2C+AR&radius=150",
+ "port": 8767,
+ "viewport": "390x844",
+ "active_filters": {
+  "go": 1,
+  "source": "gsa",
+  "base": "Conway, AR",
+  "radius": 150
+ },
+ "captured_at_utc": "2026-10-10T07:06:39+00:00",
+ "source_cache": {
+  "path": "/home/michaelos/business-os-worktrees/agent-01-coordinator/var/cache/gsa-active-auctions.json",
+  "bytes": 3606527,
+  "sha256": "d02f3acc4a6eef4b7abd4065c2dc5d4370dd6064fe0bba1b385ec6a8fa154ba7",
+  "fetched_as_of": "2026-10-10T00:19:23.772932+00:00",
+  "lots_in_file": 1179
+ },
+ "page_states_cache_time": true,
+ "page_says_cached_not_fresh": true,
+ "first_card_top_px": 768,
+ "cards_across_in_first_viewport": 1,
+ "horizontal_overflow": false,
+ "b19_comparison_with_cache": {
+  "checked_cards": 12,
+  "checked_all_match_cache": true,
+  "checked_mismatches": [],
+  "optional_section_links": 81,
+  "optional_all_in_cache": true,
+  "optional_mismatches": [],
+  "listings": [
+   {
+    "id": "378501",
+    "title": "Trailer, Utility",
+    "link_and_title_match_cache": true,
+    "photo_img": false,
+    "login_tile": true
+   },
+   {
+    "id": "379672",
+    "title": "1967 Striker M5000 Tank Trailer",
+    "link_and_title_match_cache": true,
+    "photo_img": false,
+    "login_tile": true
+   },
+   {
+    "id": "379673",
+    "title": "1981 Monark 16' Boat w/ Trailer and 2005 Mercury Outboard M\u2026",
+    "link_and_title_match_cache": true,
+    "photo_img": false,
+    "login_tile": true
+   },
+   {
+    "id": "379668",
+    "title": "1968 Kaiser M51A2 5 ton 6x6 Truck",
+    "link_and_title_match_cache": true,
+    "photo_img": false,
+    "login_tile": true
+   },
+   {
+    "id": "379670",
+    "title": "1977 Dodge W20 Pickup 2 door Truck",
+    "link_and_title_match_cache": true,
+    "photo_img": false,
+    "login_tile": true
+   },
+   {
+    "id": "379667",
+    "title": "1978 Seagrave MB23098 Fire Truck",
+    "link_and_title_match_cache": true,
+    "photo_img": false,
+    "login_tile": true
+   },
+   {
+    "id": "379666",
+    "title": "1983 International F1954 2.5 ton 6x4 Truck",
+    "link_and_title_match_cache": true,
+    "photo_img": false,
+    "login_tile": true
+   },
+   {
+    "id": "379669",
+    "title": "1984 Chevrolet CD30903 Pickup 2 Door Truck",
+    "link_and_title_match_cache": true,
+    "photo_img": false,
+    "login_tile": true
+   },
+   {
+    "id": "379665",
+    "title": "1984 International 1654 Crew Cab Truck",
+    "link_and_title_match_cache": true,
+    "photo_img": false,
+    "login_tile": true
+   },
+   {
+    "id": "379664",
+    "title": "1985 Chevrolet CD30903 pickup 2 door Truck",
+    "link_and_title_match_cache": true,
+    "photo_img": false,
+    "login_tile": true
+   },
+   {
+    "id": "379671",
+    "title": "1987 Chevrolet CD30903 Pickup 2 door Truck",
+    "link_and_title_match_cache": true,
+    "photo_img": false,
+    "login_tile": true
+   },
+   {
+    "id": "379280",
+    "title": "Traulsen Double Refrigerator",
+    "link_and_title_match_cache": true,
+    "photo_img": false,
+    "login_tile": true
+   }
+  ]
+ },
+ "fixture": "inventory: REAL cached GSA file, no fixture; decision store: STUB (serve_market_staging.py uses StubStore), so no real-persistence claim from these runs"
+}
