@@ -20,16 +20,22 @@
    "ARYA-20261010-0528-owner-pause-compute",
    "ARYA-20261010-0530-owner-resume-included-quota",
    "ARYA-20261010-0532-quota-observation"
+  ],
+  "FETCHED": [
+   "ARYA-20261010-0551-f53-staging-acceptance"
   ]
  },
- "currently_running": null,
+ "currently_running": {
+  "id": "ARYA-20261010-0551-f53-staging-acceptance",
+  "started_at": "2026-10-10T05:51:45Z"
+ },
  "delivery_interface": {
   "claude_cli": true,
-  "quota": "session 8.0% / week 9.0% are under the limits",
+  "quota": "session 14.0% / week 10.0% are under the limits",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-10T05:48:40Z",
+ "generated_at": "2026-10-10T05:51:45Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "nothing needed",
@@ -41,11 +47,11 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-10T05:48:40Z",
+  "observed_at": "2026-10-10T05:51:45Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
-  "status": "idle",
-  "ttl_sec": 1200
+  "status": "busy",
+  "ttl_sec": 300
  },
  "watcher": {
   "ack_branch": "research/agent-01-coordinator",
