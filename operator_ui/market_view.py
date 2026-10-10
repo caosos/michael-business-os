@@ -158,7 +158,7 @@ def location_panel(q: dict) -> str:
             f"<div role='radiogroup' aria-label='Location mode'>{mode('distance', 'By Distance')}{mode('state', 'By State')}</div>"
             f"<label>ZIP or city <input form='mkform' name='base' size='12' value='{v('base')}'></label>"
             f"<label>Radius (mi) <input form='mkform' name='radius' size='5' inputmode='decimal' value='{v('radius')}'></label>"
-            f"<details id='state-picker'{' open' if by_state else ''}><summary>States <span class='small'>({len(sel)} selected)</span></summary>"
+            f"<details id='state-picker'{' open' if find else ''}><summary>States <span class='small'>({len(sel)} selected)</span></summary>"
             f"<label>Find a state <input form='mkform' name='state_find' size='10' value='{e(q.get('state_find') or '')}'></label>"
             f"<div class='st-list' style='max-height:130px;overflow:auto'>{boxes}</div>{hide}"
             f"<label><input form='mkform' type='checkbox' name='also_radius' value='1'{' checked' if q.get('also_radius') else ''}> In By State mode, also keep the radius</label></details>"

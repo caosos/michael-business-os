@@ -24,6 +24,7 @@ httpd = ThreadingHTTPServer(("127.0.0.1", 0), make_handler(app)); threading.Thre
 base = f"http://127.0.0.1:{httpd.server_address[1]}"
 SCEN = [("by-distance-default", "/market?go=1&base=Conway+AR&broad=1&radius=150"),
         ("by-state-AR-TX-price", "/market?go=1&base=Conway+AR&broad=1&radius=150&max_price=500&loc_mode=state&state=AR&state=TX"),
+        ("by-state-pick-open", "/market?go=1&base=Conway+AR&broad=1&loc_mode=state&state=AR&state_find=a"),
         ("by-state-AR-TX-also-radius", "/market?go=1&base=Conway+AR&broad=1&radius=150&loc_mode=state&state=AR&state=TX&also_radius=1"),
         ("by-state-find-ok", "/market?go=1&base=Conway+AR&broad=1&loc_mode=state&state=OK&state_find=ark")]
 KNOWN = "()=>[...document.querySelectorAll('.mk-g')].filter(c=>!c.closest('#unchecked-section')).map(c=>c.dataset.lot)"
@@ -34,7 +35,7 @@ with sync_playwright() as p:
     for vname, w, h in (("desktop-1648x1000", 1648, 1000), ("mobile-390x844", 390, 844)):
         for name, path in SCEN:
             pg = br.new_page(viewport={"width": w, "height": h}); pg.goto(base + path); pg.wait_for_load_state()
-            if "state_find" in path:
+            if "state_find" in path:  # picker open
                 pg.evaluate("()=>document.querySelector('#state-picker').scrollIntoView()")
             ids = pg.evaluate(KNOWN)
             meta = {"scenario": name, "url": pg.url, "viewport": f"{w}x{h}", "port": httpd.server_address[1], "filters_chips": pg.inner_text("#applied-filters"),
