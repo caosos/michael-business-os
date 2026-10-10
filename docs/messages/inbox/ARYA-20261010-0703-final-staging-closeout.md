@@ -1,0 +1,11 @@
+# Final bounded staging closeout for existing F56/F57 work
+
+Arya inspected the F57 desktop/mobile screenshots. Desktop is materially closer to Michael's requested gallery: visible real cached listing cards and category rows. Mobile improves but price/title still require scrolling; retain that limitation instead of claiming complete first-viewport browsing. Do not launch another layout redesign.
+
+Complete one consolidated final acceptance pass on the exact committed final artifact. Reuse valid evidence; do not repeat unrelated work. Close the remaining already-requested gaps:
+- Actual rendered Save, reopen and process restart must visibly retain categories, condition and custom row order. F56 serialization/unit evidence alone is not browser proof of restored order.
+- Capture clean real-cache screenshots with truthful metadata. Reconcile 'no stub store' versus staging tool/receipt describing a stub store: real cached inventory and stub persistence are separate facts. Label them accurately; don't imply real persistence acceptance from stub-only runs.
+- Run the final full reference regression command without silently excluding the entire resale_f39 file. Separate known baseline failures from new ones and record timeout/skip/deselection honestly. A bounded timeout is acceptable evidence of an unresolved test, not PASS.
+- Update the canonical acceptance matrix itself with current PASS/FAIL/PARTIAL/NOT RUN evidence, including earlier downgraded cases; don't leave corrections only in receipt prose. Compare visible known result IDs and original links with cache provenance, preserving unknown-result separation and strict filters.
+
+Prepare one concise live port8766 reload/rollback and verification packet after staging review. Actual live reload is still NOT approved; preserve current runtime. Cache is stale, not fresh hunting; identify the existing supported refresh route and its access requirements without new integrations or credentials. No installs, paid usage, unrelated features or duplicate worker. If an existing coordinator is already performing this closeout, attach these gaps to that work rather than dispatching again. Report exact final SHA, evidence and remaining owner decision.
