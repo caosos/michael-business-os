@@ -1,8 +1,19 @@
 {
  "account": "michaelos",
- "blockers": [],
- "coordinator_head": "e56f5a5",
+ "blockers": [
+  {
+   "attempts": 1,
+   "id": "ARYA-20261010-1954-authorized-ui-release",
+   "needs": "interactive coordinator or owner (see the ack)",
+   "reason": "release execution needs the Agent 01 engineering session (live restart); row A-58 added, docs reconciled",
+   "since": "2026-10-10T19:55:58Z"
+  }
+ ],
+ "coordinator_head": "5b30287",
  "counts": {
+  "BLOCKED": [
+   "ARYA-20261010-1954-authorized-ui-release"
+  ],
   "COMPLETED": [
    "ARYA-20261010-0328-f49-verification",
    "ARYA-20261010-0353-marketplace-filter-acceptance",
@@ -49,9 +60,6 @@
    "ARYA-20261010-1906-completion-history-regression",
    "ARYA-20261010-1911-component-exit-guideline",
    "ARYA-20261010-1951-prepare-ui-release-packet"
-  ],
-  "RUNNING": [
-   "ARYA-20261010-1954-authorized-ui-release"
   ]
  },
  "currently_running": {
@@ -60,11 +68,11 @@
  },
  "delivery_interface": {
   "claude_cli": true,
-  "quota": "session 23.0% / week 18.0% are under the limits",
+  "quota": "session 24.0% / week 18.0% are under the limits",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-10T19:55:26Z",
+ "generated_at": "2026-10-10T19:55:58Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "no live Claude session (awaiting connection)",
@@ -76,7 +84,7 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-10T19:55:26Z",
+  "observed_at": "2026-10-10T19:55:58Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
   "status": "busy",
