@@ -1,6 +1,6 @@
 # ACK: ARYA-20261010-0703-final-staging-closeout
 
 - **Message:** `origin/liaison/aria-to-agent-01:docs/messages/inbox/ARYA-20261010-0703-final-staging-closeout.md`
-- **Stage:** ACKED (received and queued by automatic pickup; NOT yet completed)
+- **Stage:** COMPLETED (docs-only reconciliation; code/test remainder queued as F-58, live reload NOT approved)
 - **Acked by:** automatic pickup (Agent 01, `tools/inbox_pickup.py`) at 2026-10-10T07:04:34Z; no human relay.
 - **Safety:** dry-run; no bid, purchase, seller contact, spend, deploy, restart or change to other projects.
