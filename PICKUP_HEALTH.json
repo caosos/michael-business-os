@@ -34,17 +34,14 @@
    "ARYA-20261010-0551-f53-staging-acceptance"
   ]
  },
- "currently_running": {
-  "id": "ARYA-20261010-0606-f54-execution-proof",
-  "started_at": "2026-10-10T06:06:37Z"
- },
+ "currently_running": null,
  "delivery_interface": {
   "claude_cli": true,
   "quota": "session 22.0% / week 10.0% are under the limits",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-10T06:07:24Z",
+ "generated_at": "2026-10-10T06:07:26Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "no live Claude session (awaiting connection)",
@@ -56,11 +53,11 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-10T06:07:24Z",
+  "observed_at": "2026-10-10T06:07:26Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
-  "status": "busy",
-  "ttl_sec": 300
+  "status": "idle",
+  "ttl_sec": 1200
  },
  "watcher": {
   "ack_branch": "research/agent-01-coordinator",
