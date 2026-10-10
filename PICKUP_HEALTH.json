@@ -25,7 +25,7 @@
    "ARYA-20261010-0610-f54-visual-provenance",
    "ARYA-20261010-0611-save-form-defect"
   ],
-  "FETCHED": [
+  "DELIVERED": [
    "ARYA-20261010-0633-f56-dispatch-recovery"
   ]
  },
@@ -39,7 +39,7 @@
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-10T06:34:36Z",
+ "generated_at": "2026-10-10T06:34:39Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "no live Claude session (awaiting connection)",
@@ -51,7 +51,7 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-10T06:34:36Z",
+  "observed_at": "2026-10-10T06:34:39Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
   "status": "busy",
