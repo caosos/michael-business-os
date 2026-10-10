@@ -127,14 +127,52 @@ def render_status(d: dict) -> str:
             f"not connected: {e(', '.join(ms.NOT_CONNECTED))}</p>")
 
 
+def chip_url(q: dict, drop: str | None = None) -> str:
+    """F-136: a GET link that re-runs the current filters without one state (the chip's remove button). No script, no write."""
+    j = lambda k: ", ".join(q[k]) if isinstance(q.get(k), list) else q.get(k)  # noqa: E731
+    pairs = [(k, j(k)) for k in ("keywords", "base", "radius", "min_price", "max_price", "any", "condition", "required", "preferred", "exclude", "source", "kind", "closing_by", "sort", "view")]
+    pairs += [("broad", "1")] * bool(q.get("broad")) + [("cat", c) for c in q.get("cats") or []] + [(f"row{i}", r) for i, r in enumerate(q.get("rows") or [], 1) if i <= 4]
+    pairs += [("loc_mode", q.get("loc_mode", "distance"))] + [("also_radius", "1")] * bool(q.get("also_radius")) + [("state", s) for s in q.get("states") or [] if s != drop]
+    return "/market?go=1&amp;" + "&amp;".join(f"{k}={quote(str(v))}" for k, v in pairs if v not in (None, ""))
+
+
+def scope_text(q: dict) -> str:
+    """F-136: the location scope actually applied to this run, in words (the mode is never implicit)."""
+    if q.get("loc_mode") == "state":
+        st = ", ".join(q.get("states") or []) or "none selected"
+        return f"By State: {st}" + (f" AND within {q['radius']:g} mi of {q['base']}" if q.get("also_radius") and q["radius"] is not None else "; the radius is NOT applied")
+    return f"By Distance: " + (f"within {q['radius']:g} mi of {q['base']} (known distances only)" if q["radius"] is not None else "no radius") + "; states are NOT applied"
+
+
+def location_panel(q: dict) -> str:
+    """F-136: compact Location panel: By State / By Distance modes, searchable state list, multi-select checkboxes, removable chips (all inside the search form, no script)."""
+    v = lambda k: e(q.get(k) if q.get(k) is not None else "")  # noqa: E731
+    by_state, sel, find = q.get("loc_mode") == "state", q.get("states") or [], (q.get("state_find") or "").strip().lower()
+    mode = lambda val, lbl: f"<label><input form='mkform' type='radio' name='loc_mode' value='{val}'{' checked' if (val == 'state') == by_state else ''}> {lbl}</label> "  # noqa: E731
+    shown = [(c, n) for c, n in ms.US_STATES.items() if c in sel or not find or find in n.lower() or find == c.lower()]
+    boxes = "".join(f"<label class='st'><input form='mkform' type='checkbox' name='state' value='{c}'{' checked' if c in sel else ''}> {c} {e(n)}</label>" for c, n in shown) \
+        or "<span class='small mut'>No state matches that search.</span>"
+    hide = "".join(f"<input form='mkform' type='hidden' name='state' value='{c}'>" for c in sel if c not in {c2 for c2, _ in shown})
+    chip = "".join(f"<span class='chip'>{c} <a href='{chip_url(q, c)}' aria-label='Remove {c}' title='Remove {c}'>×</a></span>" for c in sel) or "<span class='small mut'>No states selected</span>"
+    return ("<fieldset id='location-panel' style='border:1px solid var(--line);border-radius:8px;margin:0 0 8px'><legend>Location</legend>"
+            f"<div role='radiogroup' aria-label='Location mode'>{mode('distance', 'By Distance')}{mode('state', 'By State')}</div>"
+            f"<label>ZIP or city <input form='mkform' name='base' size='12' value='{v('base')}'></label>"
+            f"<label>Radius (mi) <input form='mkform' name='radius' size='5' inputmode='decimal' value='{v('radius')}'></label>"
+            f"<details id='state-picker'{' open' if by_state else ''}><summary>States <span class='small'>({len(sel)} selected)</span></summary>"
+            f"<label>Find a state <input form='mkform' name='state_find' size='10' value='{e(q.get('state_find') or '')}'></label>"
+            f"<div class='st-list' style='max-height:130px;overflow:auto'>{boxes}</div>{hide}"
+            f"<label><input form='mkform' type='checkbox' name='also_radius' value='1'{' checked' if q.get('also_radius') else ''}> In By State mode, also keep the radius</label></details>"
+            f"<div id='state-chips' aria-label='Selected states'>{chip}</div>"
+            f"<p class='small mut' id='location-scope'>{e(scope_text(q))}. A lot with no known state or distance is never counted as local; it is listed as not checked.</p></fieldset>")
+
+
 def _side_filters(q: dict) -> str:
     """F-52 (B): origin/ZIP, radius, price and category checkboxes live in the narrow left sidebar; they belong to the search form (form='mkform')."""
     v = lambda k: e(q.get(k) if q.get(k) is not None else "")  # noqa: E731
     cats = "".join(f"<label><input type='checkbox' form='mkform' name='cat' value='{e(k)}'{' checked' if k in q.get('cats', []) else ''}> {e(k.title())}</label>" for k in ms.ROW_CATS)
     return ("<div class='card' id='mkfilters'><b>Filters</b>"
-            f"<label>ZIP or city <input form='mkform' name='base' size='12' value='{v('base')}'></label>"
-            f"<label>Radius (mi) <input form='mkform' name='radius' size='5' inputmode='decimal' value='{v('radius')}'></label>"
-            f"{_slider(q, 'mkform')}<button class='mk-go' type='submit' form='mkform'>Search Now</button>"
+            f"{location_panel(q)}"
+            f"<button class='mk-go' type='submit' form='mkform'>Search Now</button>{_slider(q, 'mkform')}"
             f"<b>Categories</b>{cats}<p class='small mut'>None checked = your rows below (default trailers and equipment).</p></div>")
 
 
@@ -174,7 +212,7 @@ def chips(q: dict) -> str:
     """The filters actually applied to this run, as plain chips (also shown when nothing is limited)."""
     c = []
     c.append(f"Origin: {q['base']}" + (" (ZIP 72032)" if q["base"].strip().lower() in ("", "conway", "conway ar", "conway, ar") else ""))
-    c.append(f"Radius: {q['radius']:g} mi (known distances only)" if q["radius"] is not None else "Radius: none")
+    c.append("Location: " + scope_text(q)) if q.get("loc_mode") == "state" else c.append((f"Radius: {q['radius']:g} mi (known distances only)" if q["radius"] is not None else "Radius: none") + "; Location mode: By Distance (states not applied)")
     c.append("Mode: BROAD inventory (all categories)" if q.get("broad") else "Mode: repairable trailers/equipment focus: " + (", ".join(q["any"]) or "none"))
     if q.get("min_price") is not None:
         c.append(f"Min price: ${q['min_price']:,.0f}")
@@ -194,6 +232,8 @@ def chips(q: dict) -> str:
 def _save(q: dict, cid: str | None, tok, pin_html: str) -> str:
     v = lambda k: e(", ".join(q[k]) if isinstance(q.get(k), list) else q.get(k) if q.get(k) is not None else "")  # noqa: E731
     keep = "".join(f"<input type='hidden' name='{k}' value='{v(k)}'>" for k in ("keywords", "base", "radius", "min_price", "max_price", "any", "required", "preferred", "exclude", "condition"))
+    keep += f"<input type='hidden' name='loc_mode' value='{q.get('loc_mode', 'distance')}'>" + (f"<input type='hidden' name='state' value='{e(','.join(q['states']))}'>" if q.get("states") else "") \
+        + ("<input type='hidden' name='also_radius' value='1'>" if q.get("also_radius") else "")      # F-136
     keep += f"<input type='hidden' name='cat' value='{e(','.join(q.get('cats') or []))}'>" if q.get("cats") else ""        # F-56: these were dropped, so a real Save lost them
     keep += "".join(f"<input type='hidden' name='row{i}' value='{e(r)}'>" for i, r in enumerate(q.get("rows") or [], 1) if i <= 4)
     keep += "<input type='hidden' name='broad' value='1'>" if q.get("broad") else ""
@@ -201,7 +241,7 @@ def _save(q: dict, cid: str | None, tok, pin_html: str) -> str:
             f"<form method='post' action='/market/{'%s/edit' % e(cid) if cid else 'save'}' class='mk-form'>{tok()}{keep}"
             f"<label>Name this search <input name='title' maxlength='120' value='{v('keywords')}'></label> {pin_html} "
             f"<button name='do' value='save'>{'Save changes' if cid else 'Save this search'}</button></form>"
-            "<p class='small mut'>Saved with a search: keywords, origin, radius, min and max price, must/nice/exclude terms, category focus, row order, broad mode and condition. Sort, view and closing date are not saved (they apply to this run and are remembered, even after a restart). A saved search needs a max price. "
+            "<p class='small mut'>Saved with a search: keywords, origin, radius, location mode and selected states, min and max price, must/nice/exclude terms, category focus, row order, broad mode and condition. Sort, view and closing date are not saved (they apply to this run and are remembered, even after a restart). A saved search needs a max price. "
             "A search never contacts anyone.</p></details>")
 
 
@@ -266,13 +306,13 @@ def render_page(q: dict, d: dict, results: list[dict], hidden: dict, saved: list
     else:
         hid = ", ".join(f"{n} by {k}" for k, n in hidden.items() if n)
         unchecked = unchecked or []
-        scope = f" within {q['radius']:g} mi of {e(q['base'])}" if q["radius"] is not None else ""
+        scope = (f" within {q['radius']:g} mi of {e(q['base'])}" if q["radius"] is not None else "") if q.get("loc_mode") != "state" else f" in {e(', '.join(q['states']))}" + (f" and within {q['radius']:g} mi of {e(q['base'])}" if q.get("also_radius") and q["radius"] is not None else "")
         zero = ("<p class='mut' id='zero-results'><b>0 results</b> match every filter" + scope + ". Nothing is padded in"
                 + (f"; {len(unchecked)} lot(s) could not be checked and are listed below, not counted" if unchecked else "") + ". Loosen a filter or widen the radius.</p>")
         render = (lambda c: gallery_card(c, tok)) if q.get("view") != "list" else (lambda c: render_card(c, tok))
         wrap = (lambda cs: f"<div class='mk-gal'>{''.join(map(render, cs))}</div>") if q.get("view") != "list" else (lambda cs: "".join(map(render, cs)))
         opt = ((f"<details class='mk-sec' id='unchecked-section'><summary><b>Optional: {len(unchecked)} lot(s) that could not be checked (not counted as local or in range). Click to open.</b></summary>"
-                "<p class='small mut'>Their location was not found or they have no bid yet, so the radius or price range cannot be tested. They are shown only so nothing is hidden; "
+                "<p class='small mut'>Their location or state was not found or they have no bid yet, so the location scope or price range cannot be tested. They are shown only so nothing is hidden; "
                 "verify on the original listing.</p>" + wrap(unchecked) + "</details>") if unchecked else "")
         body = (chips(q) + f"<h2>{len(results)} result{'s' if len(results) != 1 else ''}{scope}</h2>" + "<p class='small mut' style='margin:2px 0'>Cached copy of the GSA list, not a fresh fetch (GSA surplus only). Price = current bid, not a sold price or final cost; all-in cost UNKNOWN."
                 + (f" Hidden: {e(hid)}." if hid else "") + "</p>"
@@ -284,10 +324,10 @@ def render_page(q: dict, d: dict, results: list[dict], hidden: dict, saved: list
 
 def save_form(f: dict) -> dict:
     """Marketplace form -> the Wanted campaign form fields (exclude terms ride in nice_to_have as `exclude:word`)."""
-    q = ms.parse_query({k: ([c for c in v.split(",") if c.strip()] if k == "cat" else [v]) for k, v in f.items()})   # F-56: `cat` is posted comma-joined (a form keeps one value per name)
+    q = ms.parse_query({k: ([c for c in v.split(",") if c.strip()] if k in ("cat", "state") else [v]) for k, v in f.items()})   # F-56: `cat` is posted comma-joined (a form keeps one value per name)
     nice = list(q["preferred"]) + [ms.EXCLUDE_PREFIX + t for t in q["exclude"]]
     nice += ([f"min:{q['min_price']:g}"] if q["min_price"] is not None else []) + ([f"cat:{'>'.join(q['cats'])}"] if q["cats"] else []) \
-        + ([f"rows:{'>'.join(q['rows'])}"] if q["rows"] != list(ms.DEFAULT_ROWS) else []) + ([f"any:{'>'.join(t.replace('>', ' ') for t in q['any'])}"] if q["any"] else []) + (["broad:1"] if q["broad"] else []) + ([f"cond:{q['condition']}"] if q["condition"] else [])
+        + ([f"rows:{'>'.join(q['rows'])}"] if q["rows"] != list(ms.DEFAULT_ROWS) else []) + ([f"any:{'>'.join(t.replace('>', ' ') for t in q['any'])}"] if q["any"] else []) + (["broad:1"] if q["broad"] else []) + ([f"locmode:state"] if q["loc_mode"] == "state" else []) + ([f"states:{'>'.join(q['states'])}"] if q["states"] else []) + (["alsorad:1"] if q["also_radius"] else []) + ([f"cond:{q['condition']}"] if q["condition"] else [])
     return {**{k: f[k] for k in ("csrf", "pin", "nonce") if k in f}, "title": (f.get("title") or q["keywords"]).strip() or "Marketplace search",
             "category": CATEGORY, "keywords": q["keywords"].replace(" ", ", "), "max_price_usd": "" if q["max_price"] is None else str(q["max_price"]),
             "radius_miles": "" if q["radius"] is None else str(q["radius"]), "origin": q["base"],

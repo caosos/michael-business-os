@@ -23,7 +23,7 @@ def _saved(app) -> list[dict]:
 
 
 FILTER_KEYS = ("keywords", "base", "radius", "min_price", "max_price", "min_r", "max_r", "prev_min", "prev_max", "any", "broad", "condition", "required", "preferred", "exclude", "source",
-               "kind", "closing_by", "sort", "cat", "row1", "row2", "row3", "row4", "view")
+               "kind", "closing_by", "sort", "cat", "row1", "row2", "row3", "row4", "view", "state", "loc_mode", "also_radius", "state_find")
 
 
 def _remembered(app, qs: dict) -> dict:
@@ -66,7 +66,7 @@ def page_body(app, qs: dict, now, errors=None, values=None) -> str:
     if prefs["enabled"]:                              # dismissed lots are hidden and saved/why shown always; the ORDER follows the sort the owner chose
         results, gone = mp.rank(results, prefs, lambda c: (c["closes"] or "9999", c["title"]), q["sort"] == "suggested")
         hidden = {**hidden, "dismissed (reset suggestions to restore)": gone} if hidden or gone else hidden
-    note = landing_fix.origin_note(q["base"], ms._origin(q["base"]) is not None, q["radius"]) if ran else ""
+    note = landing_fix.origin_note(q["base"], ms._origin(q["base"]) is not None, q["radius"] if q["loc_mode"] != "state" or q["also_radius"] else None) if ran else ""
     return note + mv.render_page(q, data, results, hidden, saved, app.csrf, bool(app.operator_pin), edit if edit in ids else None, ran, errors, unchecked, prefs)
 
 
