@@ -119,7 +119,8 @@ def should_escalate(row: dict) -> bool:
 
 def run_one(task_id: str, lane: str, profile: router.TaskProfile, *, worktree: Path, dry: bool, model: Optional[str],
             escalate: bool = True, allow_dirty: bool = False, permission_mode: str = "auto", ignore_quota: bool = False, branch_override: Optional[str] = None, max_turns: Optional[int] = None, runner: Optional[Callable[..., Any]] = None, tpath: Optional[Path] = None,
-            skip_session_check: bool = False, queue_text: Optional[str] = None, timeout_s: int = 3600) -> dict[str, Any]:
+            skip_session_check: bool = False, queue_text: Optional[str] = None, timeout_s: int = 3600,
+            prompt_override: Optional[str] = None) -> dict[str, Any]:
     name, _, branch, _ = LANES[lane]
     branch = branch_override or branch
     if queue_text is None:
@@ -149,7 +150,7 @@ def run_one(task_id: str, lane: str, profile: router.TaskProfile, *, worktree: P
     if model:
         override, route = route.model, router.Route(model=model, tier="override", rule_id="OVERRIDE", reason=f"explicit --model (router chose {route.model})",
                                                     max_turns=route.max_turns)
-    prompt = build_prompt(lane, task, branch)
+    prompt = prompt_override or build_prompt(lane, task, branch)
     if allow_dirty:
         prompt += ("\nNOTE: the worktree has UNCOMMITTED changes from a previous attempt at this same task. Review them with `git status` and "
                    "`git diff`, keep what is correct, finish the task, and commit them. Do not discard work you have not read.\n")
