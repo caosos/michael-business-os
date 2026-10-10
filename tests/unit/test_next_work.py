@@ -37,31 +37,31 @@ def step(inbox, q, seen, eng, now):
 
 
 def test_first_notification_unhandled_then_a_bounded_retry_then_quiet_until_the_next_interval():
-    lines, seen = step({"M1": WAIT}, Q, {}, {}, 1000)
-    assert "NEW INSTRUCTION M1" in lines and ids(lines) == ["A-1", "A-5"] and len(lines) == 3
-    assert step({"M1": WAIT}, Q, seen, {}, 1300)[0] == []                       # inside the interval: nothing
-    again, seen = step({"M1": WAIT}, Q, seen, {}, 1700)                          # notification was missed: bounded retry
+    lines, seen = step({"ARYA-20261010-2001-m1": WAIT}, Q, {}, {}, 1000)
+    assert "NEW INSTRUCTION ARYA-20261010-2001-m1" in lines and ids(lines) == ["A-1", "A-5"] and len(lines) == 3
+    assert step({"ARYA-20261010-2001-m1": WAIT}, Q, seen, {}, 1300)[0] == []                       # inside the interval: nothing
+    again, seen = step({"ARYA-20261010-2001-m1": WAIT}, Q, seen, {}, 1700)                          # notification was missed: bounded retry
     assert len(again) == 3 and all(l.startswith("REMINDER #2") for l in again)
-    assert step({"M1": WAIT}, Q, seen, {}, 1800)[0] == []
-    third, _ = step({"M1": WAIT}, Q, seen, {}, 2400)
+    assert step({"ARYA-20261010-2001-m1": WAIT}, Q, seen, {}, 1800)[0] == []
+    third, _ = step({"ARYA-20261010-2001-m1": WAIT}, Q, seen, {}, 2400)
     assert third[0].startswith("REMINDER #3")
 
 
 def test_an_active_claim_suppresses_announcements_and_done_stops_retries_for_good():
-    _, seen = step({"M1": WAIT}, Q, {}, {}, 1000)
-    claim = {"M1": {"state": "STARTED"}, "A-1": {"state": "STARTED"}}
-    lines, seen = step({"M1": WAIT}, Q, seen, claim, 9999)
+    _, seen = step({"ARYA-20261010-2001-m1": WAIT}, Q, {}, {}, 1000)
+    claim = {"ARYA-20261010-2001-m1": {"state": "STARTED"}, "A-1": {"state": "STARTED"}}
+    lines, seen = step({"ARYA-20261010-2001-m1": WAIT}, Q, seen, claim, 9999)
     assert ids(lines) == ["A-5"]                              # claimed items are silent, the unclaimed A-5 is still reminded
-    done = {"M1": {"state": "DONE"}, "A-1": {"state": "DONE"}, "A-5": {"state": "DONE"}}
-    assert step({"M1": WAIT}, Q, seen, done, 99999)[0] == []
+    done = {"ARYA-20261010-2001-m1": {"state": "DONE"}, "A-1": {"state": "DONE"}, "A-5": {"state": "DONE"}}
+    assert step({"ARYA-20261010-2001-m1": WAIT}, Q, seen, done, 99999)[0] == []
 
 
 def test_completed_pickup_acks_and_other_lanes_are_never_announced_and_ineligible_items_are_forgotten():
-    lines, seen = step({"OLD": "COMPLETED (done)", "NOACK": None}, Q, {}, {}, 0)
-    assert "NEW INSTRUCTION NOACK" in lines and not any("OLD" in l for l in lines)
-    _, seen = step({"NOACK": None}, Q.replace("| A-1 | P1 | mine ready | none | READY", "| A-1 | P1 | mine ready | none | DONE"), seen, {}, 10)
+    lines, seen = step({"ARYA-20261010-2004-old": "COMPLETED (done)", "ARYA-20261010-2003-noack": None}, Q, {}, {}, 0)
+    assert "NEW INSTRUCTION ARYA-20261010-2003-noack" in lines and not any("ARYA-20261010-2004-old" in l for l in lines)
+    _, seen = step({"ARYA-20261010-2003-noack": None}, Q.replace("| A-1 | P1 | mine ready | none | READY", "| A-1 | P1 | mine ready | none | DONE"), seen, {}, 10)
     assert "A-1" not in seen
-    back, _ = step({"NOACK": None}, Q, seen, {}, 20)                              # READY again after leaving READY: announced as new
+    back, _ = step({"ARYA-20261010-2003-noack": None}, Q, seen, {}, 20)                              # READY again after leaving READY: announced as new
     assert any(l.startswith("NEW READY ROW A-1") for l in back)
 
 
@@ -88,8 +88,8 @@ def test_the_earlier_one_shot_state_format_is_discarded_and_a_baseline_closes_hi
     monkeypatch.setattr(nw, "STATE", tmp_path / "seen.json")
     nw.STATE.write_text('{"inbox": ["x"], "rows": ["A-1"]}')
     assert nw.read_state() == {}
-    lines, _ = step({"OLD": WAIT}, Q, {"OLD": {"first": 0, "last": 0, "count": 0, "closed": True}}, {}, 99999)
-    assert not any("OLD" in l for l in lines)
+    lines, _ = step({"ARYA-20261010-2004-old": WAIT}, Q, {"ARYA-20261010-2004-old": {"first": 0, "last": 0, "count": 0, "closed": True}}, {}, 99999)
+    assert not any("ARYA-20261010-2004-old" in l for l in lines)
 
 
 def test_history_ids_before_the_pickup_cutoff_or_oddly_named_are_never_announced():
