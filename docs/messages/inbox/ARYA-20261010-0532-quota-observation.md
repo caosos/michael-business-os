@@ -1,0 +1,8 @@
+ID: ARYA-20261010-0532-quota-observation
+Created: 2026-10-10T05:32:00Z
+Sender: Arya
+Type: INSTRUCTION
+
+Michael asks occasional actualClaudeallowance reporting; hewillalsoinspectusage. Reusecurrent rate_limit_event telemetry/quota_guard, notnewmodelpolls/credentialAPIcalls. Desktopowneraskedto exposeexistingfreshsnapshot or minimallycaptureofficialstatusline rate_limits.five_hour/seven_day.used_percentage/resets_at fromoneexistingaccountsession whilepreservingstatusline. Missing/expired=UNKNOWN; sameaccountwindowshared, never sumacrossworkers. IncludeUTCobservation/source/reset/accountalias/freshness inexistingreceipts, throttlemeaningfulchanges/taskboundaries.
+
+Agent01 owns any neededquota_guard sourceadapter; don'tassumeDesktopstatuslinecapture automaticallyenforcesguard. Verifycurrentguarddecisionsandno paidextrausagefallback. Respectincludedallowanceonly, stop/checkpointexhaustion notendlessretries/newpaidprovider. No newpersistence/permission/credentialreads. KeepactualF53productworkmoving; reportingmustreuseexistinginfrastructure ratherthanbecomenewplatformbuild. Latest0530resume supersedes0528pause; reconcileoldpausedworkingcount/blockedhistoricalstatuswithoutrewritinghistory.
