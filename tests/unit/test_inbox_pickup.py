@@ -48,6 +48,8 @@ def world(tmp_path, monkeypatch):
     monkeypatch.setattr(pg, "SIDE", tmp_path / "side")
     monkeypatch.setattr(ip, "DIR", tmp_path / "pickup")
     monkeypatch.setattr(ip.shutil, "which", lambda n: "/usr/bin/claude")
+    import pause as _pz
+    monkeypatch.setattr(_pz, "FLAG", tmp_path / "NO_PAUSE_FLAG")        # tests never see the real owner pause flag
     monkeypatch.setattr(ip, "run_work", lambda *a: (_ for _ in ()).throw(AssertionError("test reached the REAL claude executor")))
 
     def send(mid, body):  # a DISTINCT sender clone publishes to the liaison branch
