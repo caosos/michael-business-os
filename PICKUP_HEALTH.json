@@ -41,11 +41,11 @@
  "currently_running": null,
  "delivery_interface": {
   "claude_cli": true,
-  "quota": "session 10.0% / week 16.0% are under the limits",
+  "quota": "session 17.0% / week 17.0% are under the limits",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-10T17:45:02Z",
+ "generated_at": "2026-10-10T17:55:12Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "nothing needed",
@@ -57,7 +57,7 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-10T17:45:02Z",
+  "observed_at": "2026-10-10T17:55:12Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
   "status": "idle",
