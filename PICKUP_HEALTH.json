@@ -65,17 +65,14 @@
    "ARYA-20261010-2104-a60-hide-versus-learning"
   ]
  },
- "currently_running": {
-  "id": "ARYA-20261010-2104-a60-hide-versus-learning",
-  "started_at": "2026-10-10T21:05:30Z"
- },
+ "currently_running": null,
  "delivery_interface": {
   "claude_cli": true,
   "quota": "session 38.0% / week 20.0% are under the limits",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-10T21:05:59Z",
+ "generated_at": "2026-10-10T21:06:01Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "no live Claude session (awaiting connection)",
@@ -87,11 +84,11 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-10T21:05:59Z",
+  "observed_at": "2026-10-10T21:06:01Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
-  "status": "busy",
-  "ttl_sec": 300
+  "status": "idle",
+  "ttl_sec": 1200
  },
  "watcher": {
   "ack_branch": "research/agent-01-coordinator",
