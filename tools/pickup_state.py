@@ -94,6 +94,8 @@ class Store:
         rec = {**data.get(mid, {}), **fields, "state": state, f"{state.lower()}_at": now(), "corrected_from": old}
         if state != "BLOCKED":
             rec.pop("blocked", None)
+        else:
+            rec["blocked"] = reason
         data[mid] = rec
         self._save(data)
         self.receipt(mid, "state corrected", f"{old} -> {state}: {reason}", evidence=fields.get("evidence"))
