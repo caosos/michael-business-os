@@ -19,7 +19,7 @@ def load(name):
 
 import pytest  # noqa: E402
 
-pickup_state, pg, ip = load("pickup_state"), load("pickup_git"), load("inbox_pickup")
+pickup_state, pg, ph, ip = load("pickup_state"), load("pickup_git"), load("pickup_health"), load("inbox_pickup")
 
 
 def g(cwd, *a):
@@ -48,6 +48,7 @@ def world(tmp_path, monkeypatch):
     monkeypatch.setattr(pg, "SIDE", tmp_path / "side")
     monkeypatch.setattr(ip, "DIR", tmp_path / "pickup")
     monkeypatch.setattr(ip.shutil, "which", lambda n: "/usr/bin/claude")
+    monkeypatch.setattr(ip, "run_work", lambda *a: (_ for _ in ()).throw(AssertionError("test reached the REAL claude executor")))
 
     def send(mid, body):  # a DISTINCT sender clone publishes to the liaison branch
         sender = tmp_path / ("sender-" + mid)
@@ -58,12 +59,15 @@ def world(tmp_path, monkeypatch):
     def remote_files(branch, folder):
         return subprocess.run(["git", "ls-tree", "--name-only", "-r", branch, folder], cwd=origin, capture_output=True, text=True).stdout.split()
 
-    return type("W", (), {"send": staticmethod(send), "origin": origin, "files": staticmethod(remote_files), "dir": tmp_path / "pickup"})
+    def set_exec(fn):
+        monkeypatch.setattr(ip, "run_work", fn)
+
+    return type("W", (), {"set_exec": staticmethod(set_exec), "send": staticmethod(send), "origin": origin, "files": staticmethod(remote_files), "dir": tmp_path / "pickup"})
 
 
 def run_cycle(world, dry=True):
     store = pickup_state.Store(world.dir)
-    ip.cycle(store, dry, {}, 60, "t0")
+    ip.cycle(store, dry, ph.Beat(store, world.dir, 60, "t0"))
     return store
 
 
@@ -161,6 +165,8 @@ def test_work_executor_success_completes_and_unauthorized_sender_is_ignored(worl
     def good(m, wt, dry):
         (wt / "docs/receipts/pickup").mkdir(parents=True, exist_ok=True)
         (wt / f"docs/receipts/pickup/{m}.md").write_text("did the work")
+        a = wt / f"docs/messages/acks/{m}.md"
+        a.write_text(a.read_text().replace("**Stage:** ACKED", "**Stage:** COMPLETED"))
         return {"ok": True, "process_ok": True}
 
     store = pickup_state.Store(world.dir)
@@ -178,9 +184,70 @@ def test_message_acked_by_someone_else_is_recorded_not_executed(world):
     (sender / "docs/messages/acks" / f"{mid}.md").write_text("# manual ack")
     g(sender, "add", "-A"); g(sender, "commit", "-qm", "manual ack"); g(sender, "push", "-q", "origin", "research/agent-01-coordinator")
     calls = []
-    ip.run_work = lambda *a: calls.append(a) or {"ok": True, "process_ok": True}
+    world.set_exec(lambda *a: calls.append(a) or {"ok": True, "process_ok": True})
     store = run_cycle(world, dry=False)
     r = store.get(mid)
     assert r["state"] == "COMPLETED" and r["completed_at"] and not r.get("delivered_at") and calls == []
     run_cycle(world, dry=False)
     assert calls == []
+
+
+def _hb(world):
+    return json.loads((world.dir / "heartbeat.json").read_text())
+
+
+def test_executor_that_leaves_the_ack_blocked_is_blocked_not_completed(world):          # A-52(d): the 0433 bug
+    mid = "ARYA-20261010-0908-blockedack"
+    world.send(mid, "Type: TASK_REQUEST\nneeds the interactive coordinator\n")
+
+    def blocked(m, wt, dry):
+        (wt / "docs/receipts/pickup").mkdir(parents=True, exist_ok=True)
+        (wt / f"docs/receipts/pickup/{m}.md").write_text("could not do it")
+        a = wt / f"docs/messages/acks/{m}.md"
+        a.write_text(a.read_text().replace("**Stage:** ACKED", "**Stage:** BLOCKED: queue row needs an interactive edit").split("(received")[0] + "\n")
+        return {"ok": True, "process_ok": True}
+
+    world.set_exec(blocked)
+    store = run_cycle(world, dry=False)
+    r = store.get(mid)
+    assert r["state"] == "BLOCKED" and "interactive edit" in r["blocked"] and r["needs"]
+    assert _hb(world)["counts"].get("COMPLETED", []).count(mid) == 0 and _hb(world)["blockers"][0]["id"] == mid
+    run_cycle(world, dry=False)
+    assert pickup_state.Store(world.dir).get(mid)["attempts"] == 1          # a blocked-by-executor message is not replayed
+
+
+def test_heartbeat_shows_the_task_during_delivery_and_clears_it_only_after(world):        # A-52(a)(b)
+    mid = "ARYA-20261010-0909-live"
+    world.send(mid, "Type: TASK_REQUEST\nlong job\n")
+    seen = {}
+
+    def slow(m, wt, dry):
+        hb = _hb(world)
+        seen["during_file"] = hb["currently_running"], hb["session"]["status"]
+        pub = subprocess.run(["git", "show", "status/agent-01-pickup:PICKUP_HEALTH.json"], cwd=world.origin, capture_output=True, text=True).stdout
+        seen["during_remote"] = json.loads(pub)["currently_running"]
+        (wt / "docs/receipts/pickup").mkdir(parents=True, exist_ok=True)
+        (wt / f"docs/receipts/pickup/{m}.md").write_text("done")
+        a = wt / f"docs/messages/acks/{m}.md"
+        a.write_text(a.read_text().replace("ACKED (received", "COMPLETED (received"))
+        return {"ok": True, "process_ok": True}
+
+    world.set_exec(slow)
+    run_cycle(world, dry=False)
+    assert seen["during_file"][0]["id"] == mid and seen["during_file"][0]["started_at"] and seen["during_file"][1] == "busy"
+    assert seen["during_remote"]["id"] == mid
+    after = _hb(world)
+    assert after["currently_running"] is None and after["session"]["status"] == "idle" and after["counts"]["COMPLETED"] == [mid]
+
+
+def test_stale_or_null_reading_is_unknown_with_age_never_idle():                          # A-52(c)
+    from datetime import datetime, timedelta, timezone
+    t = datetime(2026, 10, 10, 5, 0, tzinfo=timezone.utc)
+    fresh = {"session": {"status": "idle", "observed_at": "2026-10-10T04:59:30Z", "ttl_sec": 300}}
+    stale = {"session": {"status": "idle", "observed_at": "2026-10-10T04:30:16Z", "ttl_sec": 300}}
+    assert ph.session_status(fresh, t) == {"status": "idle", "age_s": 30}
+    s = ph.session_status(stale, t)
+    assert s["status"] == "UNKNOWN" and s["age_s"] > 1700 and s["reason"] == "stale reading"
+    assert ph.session_status({"session": {"status": None, "observed_at": "2026-10-10T04:59:59Z"}}, t)["status"] == "UNKNOWN"
+    assert ph.session_status({}, t)["status"] == "UNKNOWN"
+    assert ph.TTL_IDLE >= 2 * ph.IDLE_PUBLISH_S and ph.TTL_BUSY >= 2 * ph.BUSY_PUBLISH_S
