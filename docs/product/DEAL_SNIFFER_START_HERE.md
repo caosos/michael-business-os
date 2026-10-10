@@ -437,6 +437,7 @@ Rules:
 - Verify capacity from manufacturer documentation and the VIN/certification label (GVWR/GAWR). Never infer safe capacity from wheel size, apparent construction or dimensions.
 - Compare construction, verified capacity, condition, gate/ramp, paperwork and all-in cost. A generic 5x8 listing is not automatically comparable.
 - Insufficient photos or capacity evidence means the verdict is **needs photographs/inspection**; do not label it a good buy.
+- Light-duty trailers are **not categorically excluded** (ARYA-20261010-1819). They may be appropriate when condition, verified capacity, total cost and supported repair/resale margin fit the intended use. The rule is to visually inspect and compare like-for-like, not to require heavy-duty construction. No private purchase ceilings, budgets or resale estimates belong in this document.
 
 Minimum photo evidence: front, rear and both sides; underside rails and crossmembers; full tongue and its connections; axle, springs and hubs; both sides of the deck; tire date and load markings; VIN/capacity label; gate/ramp, coupler, chains and lights.
 
