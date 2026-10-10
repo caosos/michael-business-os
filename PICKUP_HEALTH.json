@@ -61,16 +61,22 @@
    "ARYA-20261010-1911-component-exit-guideline",
    "ARYA-20261010-1951-prepare-ui-release-packet",
    "ARYA-20261010-2100-a57-acceptance-correction"
+  ],
+  "FETCHED": [
+   "ARYA-20261010-2101-dismiss-and-owner-watch"
   ]
  },
- "currently_running": null,
+ "currently_running": {
+  "id": "ARYA-20261010-2101-dismiss-and-owner-watch",
+  "started_at": "2026-10-10T21:02:45Z"
+ },
  "delivery_interface": {
   "claude_cli": true,
   "quota": "session 37.0% / week 20.0% are under the limits",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-10T21:01:42Z",
+ "generated_at": "2026-10-10T21:02:45Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "nothing needed",
@@ -82,11 +88,11 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-10T21:01:42Z",
+  "observed_at": "2026-10-10T21:02:45Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
-  "status": "idle",
-  "ttl_sec": 1200
+  "status": "busy",
+  "ttl_sec": 300
  },
  "watcher": {
   "ack_branch": "research/agent-01-coordinator",
