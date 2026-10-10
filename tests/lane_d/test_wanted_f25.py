@@ -92,11 +92,15 @@ def test_one_malformed_stored_campaign_is_one_error_row(rtd, ui_least, monkeypat
 
 
 def test_double_submit_loser_sees_already_recorded(rtd, ui_least, monkeypatch):  # F-84
+    from operator_ui import numbers_view
     from operator_ui.backend import AlreadyRecorded
 
+    # F-50: a withdraw needs earned capital that only earlier tests leave, and fund needs cap headroom: make the test order-independent
+    real_limits = numbers_view.limits
+    monkeypatch.setattr(numbers_view, "limits", lambda: {**real_limits(), "max_total_funded_usd": 10**9})
     post(ui_least, "/wanted/create", **TRAILER)
     # capital: the winner commits between the loser's lookup and its write -> the loser's insert hits the unique key
-    p = post(ui_least, "/numbers/capital", kind="withdraw", amount="7", nonce="raceF2600")
+    p = post(ui_least, "/numbers/capital", kind="fund", amount="7", nonce="raceF2600")
     assert p[0] == 303
     real, calls = ui_least.store.capital_seen, []
     monkeypatch.setattr(ui_least.store, "capital_seen", lambda k, key: None if not calls and not calls.append(1) else real(k, key))
@@ -105,7 +109,7 @@ def test_double_submit_loser_sees_already_recorded(rtd, ui_least, monkeypatch): 
         raise AlreadyRecorded()
 
     monkeypatch.setattr(ui_least.store, "capital_move", lose)
-    s, loc, _ = post(ui_least, "/numbers/capital", kind="withdraw", amount="900", nonce="raceF2600")
+    s, loc, _ = post(ui_least, "/numbers/capital", kind="fund", amount="900", nonce="raceF2600")
     assert s == 303 and "already" in loc and "7.00" in loc and "900" not in loc and "duplicate" not in loc.lower()
     assert issubclass(AlreadyRecorded, Exception)
 

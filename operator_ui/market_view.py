@@ -41,7 +41,7 @@ def _money(v) -> str:
 def render_card(c: dict) -> str:
     verdict, why = ms.decision(c)
     tags = "".join(f"<span class='mk-tag'>{e(k)}: {e(t)} ({e(tag)})</span>" for k in ("required", "preferred") for t, tag in (c.get("tags") or {}).get(k, []))
-    where = e(c["city"] or "UNKNOWN") + (f" · {c['distance']:g} mi from your base" if c["distance"] is not None else " · distance UNKNOWN (place not located)")
+    where = e(c["city"] or "UNKNOWN") + (f" · {c['distance']:g} mi from your base" if c["distance"] is not None else " · distance UNKNOWN (place not in our small local gazetteer; see the note above)")
     stale = " <b class='bad'>STALE: bid may have moved</b>" if c["stale"] else ""
     return (f"<div class='card mk-res'>{_photo(c['image'], c['url'])}<div style='min-width:0'><h3 style='margin:0 0 4px'>{e(c['title'])} "
             f"<span class='badge'>{verdict}</span> <span class='lbl'>RESEARCH NEEDED</span></h3>"
@@ -52,6 +52,37 @@ def render_card(c: dict) -> str:
             f"= all-in cost UNKNOWN · sold comp: none on file</p>{('<p>' + tags + '</p>') if tags else ''}"
             f"<p>Original listing: {link_html(c['url'])}</p>"
             f"<p class='small mut'>{e(why)}<br>Source {e(c['source'])} · fetched {e(c['fetched_at'])} · {e(c['kind'])}{stale}</p></div></div>")
+
+
+def distance_caveat(q: dict, results: list[dict]) -> str:
+    """F-50: distances come from approximate town centroids in a small local gazetteer; say what was and was not located."""
+    if not results:
+        return ""
+    base = (q.get("base") or "").strip() or ms.DEFAULT_BASE
+    towns = lambda sel: sorted({c["city"] or "no town given" for c in results if sel(c)})  # noqa: E731
+    got, miss = towns(lambda c: c["distance"] is not None), towns(lambda c: c["distance"] is None)
+    origin = (f"Your base '{e(base)}' is located." if ms._origin(base) else f"Your base '{e(base)}' is NOT located, so no distance can be shown.")
+    lots = (f"Lot towns located: {e(', '.join(got)) or 'none'}. Lot towns NOT located (distance UNKNOWN, not 'far away'): {e(', '.join(miss)) or 'none'}."
+            if miss or got else "")
+    return ("<div class='card small' id='distance-caveat'><b>About distances.</b> Place coordinates are approximate town centroids from a small local "
+            "gazetteer with limited coverage (mostly Arkansas and a few nearby cities). Distances are rough straight-line miles, good to a few miles at best. "
+            f"A town missing from the gazetteer shows 'distance UNKNOWN' because we cannot place it, not because it is far; out-of-state lots are often in that group. "
+            f"{origin} {lots} No online lookup is made.</div>")
+
+
+def distance_caveat(q: dict, results: list[dict]) -> str:
+    """F-50: distances come from approximate town centroids in small local gazetteers; say what was and was not located."""
+    if not results:
+        return ""
+    base = (q.get("base") or "").strip() or ms.DEFAULT_BASE
+    towns = lambda sel: sorted({c["city"] or "no town given" for c in results if sel(c)})  # noqa: E731
+    got, miss = towns(lambda c: c["distance"] is not None), towns(lambda c: c["distance"] is None)
+    origin = f"Your base '{e(base)}' is located." if ms._origin(base) else f"Your base '{e(base)}' is NOT located, so no distance can be shown."
+    lots = f"Lot towns located: {e(', '.join(got)) or 'none'}. Lot towns NOT located (distance UNKNOWN, not 'far away'): {e(', '.join(miss)) or 'none'}."
+    return ("<div class='card small' id='distance-caveat'><b>About distances.</b> Place coordinates are approximate town centroids from a small local "
+            "gazetteer with limited coverage (mostly Arkansas and a few nearby cities). Distances are rough straight-line miles, good to a few miles at best. "
+            "A town missing from the gazetteer shows 'distance UNKNOWN' because we cannot place it, not because it is far; out-of-state lots are often in that group. "
+            f"{origin} {lots} No online lookup is made.</div>")
 
 
 def render_status(d: dict) -> str:
@@ -124,7 +155,7 @@ def render_page(q: dict, d: dict, results: list[dict], hidden: dict, saved: list
     else:
         hid = ", ".join(f"{n} by {k}" for k, n in hidden.items() if n)
         body = (f"<h2>{len(results)} result{'s' if len(results) != 1 else ''}</h2>" + (f"<p class='small mut'>Hidden: {e(hid)}.</p>" if hid else "")
-                + ("".join(render_card(c) for c in results) or "<p class='mut'>Nothing matches. Loosen a filter.</p>"))
+                + distance_caveat(q, results) + distance_caveat(q, results) + ("".join(render_card(c) for c in results) or "<p class='mut'>Nothing matches. Loosen a filter.</p>"))
     return (CSS + "<h1 class='pagehead'>Michael's Marketplace</h1><div class='mk'>" + _sidebar(saved, csrf, pin_html, tok)
             + f"<section class='mk-main'>{err}{_form(q, edit_id, tok, pin_html)}{render_status(d)}{body}</section></div>")
 

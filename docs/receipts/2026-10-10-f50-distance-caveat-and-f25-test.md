@@ -1,0 +1,10 @@
+# Receipt F-50: distance caveat on /market + F-25 test cause (lane 06, DRY-RUN)
+
+Provenance: queue row F-50 (01's F-49 verification); code at this branch; test runs below. Nothing sent, spent or published.
+
+1. **Distance caveat** (`operator_ui/market_view.py: distance_caveat`, shown above the results): plain text that coordinates are approximate town centroids from a small local gazetteer with limited coverage; says whether the base is located; lists lot towns located and NOT located; says a missing town reads "distance UNKNOWN" because it cannot be placed, not because it is far (out-of-state lots). The per-card text now points to it. Test: `tests/test_market_f47.py::test_distance_caveat_is_plain_and_names_located_and_unlocated_places`.
+2. **`test_double_submit_loser_sees_already_recorded` (FACT, test fix, not code):** the first call was a capital *withdraw*; the store refuses a withdraw above earned working capital ("withdrawal 7 exceeds earned working capital 0"). Earned capital only exists when earlier tests in the same session (e.g. `test_bought_f33`, which sells a flip) leave it in the shared DB. The test therefore passed in a full run and when ordering put those first, and failed run alone or on a subset. Not date/time dependent. Fix: use `kind="fund"` and raise the cumulative fund cap in the test (as F-27 does; otherwise earlier tests exhaust the $5,000 cap), so the test is order-independent; the race it pins (unique-key loser reads "already recorded") is unchanged. Code unchanged.
+
+## Results
+Lane D+E (`MBOS_UI_LANE_D=1`): 105 passed / 2 failed (the two known F-32 tests). `tests/lane_d/test_wanted_f25.py` alone: 9 passed.
+Reference suite run ungrouped via `tools/run_tests.sh`: 315 passed / 1 failed, `tests/test_resale_f39.py::test_item_moves_intake_to_sold...` (TimeoutError only in the full ordering; passes alone and in subsets). FACT: the same single failure occurs on the unmodified HEAD `b1a3d16` (314 passed / 1 failed), so it is pre-existing and not from F-50. Cause not investigated (UNK; likely order/load dependent). Proposed as follow-up.

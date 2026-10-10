@@ -180,3 +180,13 @@ def test_price_radius_sort_filters(cache):
     assert close and max(close) <= "2026-10-12"
     assert not [c for c in ms.search(cards, ms.parse_query({"radius": "1"}))[0] if c["distance"] is not None]
     assert ms.parse_query({"max_price": ["abc"], "radius": ["-5"]})["max_price"] is None
+
+
+def test_distance_caveat_is_plain_and_names_located_and_unlocated_places(ui):  # F-50
+    h = get(ui, go=1, keywords="trailer", base="Conway AR")
+    assert "id='distance-caveat'" in h and "approximate town centroids" in h and "small local gazetteer with limited coverage" in h
+    assert "Your base &#x27;Conway AR&#x27; is located." in h or "Your base 'Conway AR' is located." in h
+    assert "Lot towns located:" in h and "Marianna, AR" in h and "Lot towns NOT located" in h
+    h = get(ui, go=1, keywords="trailer", base="Atlantis")
+    assert "is NOT located, so no distance can be shown" in h and "not because it is far" in h
+    assert "distance UNKNOWN (place not in our small local gazetteer" in h or "mi from your base" in h
