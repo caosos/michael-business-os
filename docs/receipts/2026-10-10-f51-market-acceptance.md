@@ -1,6 +1,6 @@
 # Receipt F-51: /market income-first acceptance (staging, DRY-RUN)
 
-Lane 06. Builds on F-47/F-48/F-49/F-50. No new dashboard; no network, no contact, no spend. Code state only: **LIVE :8766 is NOT reloaded**; one consolidated owner-gated reload (F-49 + F-50 + F-51) is still needed.
+Lane 06. Commit e327469. Builds on F-47/F-48/F-49/F-50. No new dashboard; no network, no contact, no spend. Code state only: **LIVE :8766 is NOT reloaded**; one consolidated owner-gated reload (F-49 + F-50 + F-51) is still needed.
 
 ## What changed (code)
 1. **Min AND max price**: number boxes plus two accessible range sliders (labelled, keyboard operable). The page's CSP forbids scripts, so there is no JS: the slider wins only if moved from the rendered value (`prev_min/prev_max`), else the typed number. Slider range $1 to $20,000 is a control scale only, stated on the page as not a budget. Applied filters are plain chips (`#applied-filters`). Filters persist across navigation (`app.market_last`, in memory; `?new=1` clears).
