@@ -442,6 +442,7 @@ Rules:
 Minimum photo evidence: front, rear and both sides; underside rails and crossmembers; full tongue and its connections; axle, springs and hubs; both sides of the deck; tire date and load markings; VIN/capacity label; gate/ramp, coupler, chains and lights.
 
 Reviewed public example: HiBid item 323080435 sold for $575. Photos show a mesh deck, low rails, small wheels, a central tongue and rust/discoloration. Likely light-duty is provisional; capacity and hidden frame condition remain unknown. The sold price is a valid historical sale datapoint, not a recommendation or like-for-like valuation.
+
 ### 13b. Component and exit-path assessment guideline (owner core objective; ARYA-20261010-1911)
 
 Michael described this as Deal Sniffer's absolute objective: "I want to look at these things and piece them out." The assessment must reflect his practical mechanical and welding capability; a nonrunning asset is not automatically worthless or unsuitable. This is a **guideline**, not a claim that automated component assessment exists.
