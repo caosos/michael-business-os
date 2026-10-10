@@ -275,3 +275,35 @@ def test_docs_guard_ignores_code_pushed_by_others_after_the_run_started(world, t
     r = ip.deliver(mid, store, False, executor=good_while_origin_moves)
     assert r == "COMPLETED", store.get(mid).get("blocked")
     assert "tools/new_code.py" in world.files("research/agent-01-coordinator", "tools")        # their code survived the rebase and our docs landed
+
+
+# ---- owner pause (ARYA-0528): no model work may start while var/PAUSED_BY_OWNER exists ----
+def test_pause_blocks_work_executor_but_ping_still_answers(world, monkeypatch, tmp_path):
+    import pause as pz
+    monkeypatch.setattr(pz, "FLAG", tmp_path / "PAUSED_BY_OWNER")
+    pz.FLAG.write_text("owner pause test")
+    called = []
+    world.set_exec(lambda *a: called.append(a) or {"ok": True, "process_ok": True})
+    work, ping = "ARYA-20261010-0911-work", "ARYA-20261010-0912-ping"
+    world.send(work, "Type: TASK_REQUEST\ndo model work\n")
+    world.send(ping, "Type: PING\nNonce: p\n")
+    store = run_cycle(world, dry=False)
+    assert called == [] and store.get(work)["state"] == "BLOCKED" and "PAUSED_BY_OWNER" in store.get(work)["blocked"]
+    assert store.get(work).get("attempts", 0) == 0 and store.get(ping)["state"] == "COMPLETED"        # acknowledged, not executed; ping unaffected
+    pz.FLAG.unlink()                                                                                   # resume: the hourly retry runs it
+    st = pickup_state.Store(world.dir)
+    st.block(work, "x", retry_after=0, attempts=0)
+    run_cycle(world, dry=False)
+    assert len(called) == 1
+
+
+def test_pause_stops_dispatcher_and_worker_launcher(monkeypatch, tmp_path):
+    import pause as pz
+    monkeypatch.setattr(pz, "FLAG", tmp_path / "PAUSED_BY_OWNER")
+    pz.FLAG.write_text("owner pause test")
+    disp, wk = load("dispatcher"), load("worker")
+    monkeypatch.setattr(disp, "LOG", tmp_path / "d.jsonl")
+    assert disp.main(["--once"]) == 0 and "paused" in (tmp_path / "d.jsonl").read_text()
+    out = wk.run_one("F-99", "06", wk.router.TaskProfile(task_id="F-99", lane="06", kind="implement", risk="low", cross_lane=False, long_horizon=False),
+                     worktree=tmp_path, dry=False, model=None, queue_text="| F-99 | P0 | t | none | READY | 06 | x |")
+    assert out["ok"] is False and "PAUSED_BY_OWNER" in out["error"]

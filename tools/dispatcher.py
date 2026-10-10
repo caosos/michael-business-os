@@ -24,6 +24,7 @@ sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import foreman  # noqa: E402
+import pause  # noqa: E402
 from mbos import router, telemetry  # noqa: E402
 
 LOG = ROOT / "var" / "dispatcher.jsonl"
@@ -139,6 +140,9 @@ def main(argv: list[str] | None = None) -> int:
     procs: dict[str, tuple[subprocess.Popen, str]] = {}   # lane -> (process, task)
     idle_rounds = 0
     while True:
+        if pause.reason():                                   # owner pause: no model dispatch, ever, until the flag is removed
+            log({"event": "paused", "why": pause.reason()[:200]})
+            return 0
         subprocess.run(["git", "fetch", "-q", "origin"], cwd=ROOT)
         for lane, (p, task) in list(procs.items()):
             if p.poll() is not None:

@@ -29,6 +29,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from mbos import router, telemetry  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import pause  # noqa: E402
 
 LANES = {
     "01": ("Agent 01 Coordinator", "agent-01-coordinator", "research/agent-01-coordinator", "agent-01-coordinator"),
@@ -123,6 +125,8 @@ def run_one(task_id: str, lane: str, profile: router.TaskProfile, *, worktree: P
             prompt_override: Optional[str] = None) -> dict[str, Any]:
     name, _, branch, _ = LANES[lane]
     branch = branch_override or branch
+    if not dry and pause.reason():
+        return {"ok": False, "error": "PAUSED_BY_OWNER: " + pause.reason()[:160]}
     if queue_text is None:
         sh(["git", "fetch", "-q", "origin"], ROOT)
         queue_text = sh(["git", "show", "origin/research/agent-01-coordinator:docs/status/READY_QUEUE.md"], ROOT).stdout
@@ -163,6 +167,8 @@ def run_one(task_id: str, lane: str, profile: router.TaskProfile, *, worktree: P
     attempts, retry, escalated_from, rows = [route], 0, None, []
     while True:
         cur = attempts[-1]
+        if pause.reason() and retry > 0:   # owner pause also stops an escalation / retry that would start another model run
+            break
         head_before = sh(["git", "rev-parse", "--short", "HEAD"], worktree).stdout.strip() or None
         t0, started = time.time(), now()
         try:

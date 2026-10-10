@@ -29,6 +29,7 @@ from typing import Any, Optional
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import pickup_git as pg  # noqa: E402
 import pickup_health as ph  # noqa: E402
+import pause  # noqa: E402
 from pickup_state import Store, now, summary  # noqa: E402
 
 ROOT = pg.ROOT
@@ -155,6 +156,10 @@ def deliver(mid: str, store: Store, dry: bool, executor=None) -> str:
             store.block(mid, "ack not published: " + detail, attempts=attempts, retry_after=time.time() + RETRY_S)
             return "BLOCKED"
         store.move(mid, "ACKED", operation="ack pushed", evidence=[f"origin/{pg.COORD}:docs/messages/acks/{mid}.md"], branch=pg.COORD, sha=detail)
+    if ping is None and pause.reason():                # owner pause: acknowledged, but no model executor may start
+        store.block(mid, "PAUSED_BY_OWNER: model work disabled; acknowledged only (resume = delete var/PAUSED_BY_OWNER)", attempts=max(attempts - 1, 0),
+                    retry_after=time.time() + 3600, needs="owner resume")
+        return "BLOCKED"
     store.move(mid, "RUNNING", operation="execute", pid=os.getpid())
     if ping is not None:
         write_file(wt, f"docs/receipts/pickup/{mid}.md", f"# Pickup receipt: {mid}\n\n- Operation: PING echo (deterministic, zero model tokens)\n- Nonce echoed: `{ping}`\n"
