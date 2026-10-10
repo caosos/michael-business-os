@@ -25,7 +25,7 @@ try:  # lane C's package is optional: without it the notes form is simply unavai
 except ImportError:  # pragma: no cover
     NOTE_CATEGORIES, NOTE_KINDS = frozenset(), frozenset()
 
-from . import deal_ui, live_demo, resale_view, attest_view, bought_view, card_view, comps_view, glance_view, inputs_view, ux, views, wanted_view
+from . import deal_ui, live_demo, market_routes, resale_view, attest_view, bought_view, card_view, comps_view, glance_view, inputs_view, ux, views, wanted_view
 from .digest import figures as digest_figures, dollars as _dollars
 from .card_view import ec
 from .backend import AlreadyClosed, FollowupRefused, ItemNotFound, NoteRefused, NumbersRefused, ProfileUnavailable
@@ -100,7 +100,7 @@ def _verdict(v):
     return f'<span class="badge v-{e(v)}">System says {e(v)}</span>' if v else ""
 
 
-NAV = [("/", "Queue", None), ("/mission", "Weekly mission", None), ("/numbers", "My numbers", None), ("/wanted", "Wanted", None),
+NAV = [("/", "Queue", None), ("/market", "Marketplace", None), ("/mission", "Weekly mission", None), ("/numbers", "My numbers", None), ("/wanted", "Wanted", None),
        ("/usage", "Usage", "usage"), ("/intake", "Intake", None), ("/assets", "My assets", None), ("/resale", "Resale", None), ("/owner-listing", "Add a listing", None), ("/gsa", "GSA lots", None), ("/preview", "Audience previews", "preview"),
        ("/digest", "Morning digest", None), ("/summary", "Daily summary", None), ("/notes", "My notes", None),
        ("/holds", "HOLD backlog", None), ("/outcomes", "Outcomes", None), ("/sources", "Source health", "sources"),
@@ -1045,6 +1045,8 @@ def make_handler(app):
                 titles = {i: ((app.store.item(i) or {}).get("normalized") or {}).get("title") for i in ids}
                 return self._send(200, page("Weekly mission", mission_view.render_page(loaded, known, {k: v for k, v in titles.items() if v}, self._leg_states(loaded))
                                                                 + bought_view.render_open_flips(app.store.open_acquisitions()), app.state()))
+            if u.path == "/market":
+                return self._send(200, page("Michael's Marketplace", market_routes.page_body(app, qs, now), app.state(), flash))
             if u.path == "/wanted":
                 return self._wanted_page(flash or err, bool(err))
             if u.path == "/numbers":
@@ -1462,6 +1464,17 @@ def make_handler(app):
                 return self._post_intake(parts)
             if len(parts) == 2 and parts[0] == "numbers" and parts[1] in ("mission", "capital"):
                 return self._post_numbers(parts[1])
+            if parts[0] == "market" and len(parts) in (2, 3):
+                n = min(int(self.headers.get("Content-Length") or 0), 65536)
+                f = {k: v[0] for k, v in parse_qs(self.rfile.read(n).decode("utf-8", "replace"), keep_blank_values=True).items()}
+                loc, errs = market_routes.post(app, parts, f)
+                if errs:
+                    return self._send(200, page("Michael's Marketplace", market_routes.page_body(app, {}, utcnow(), errs, {k: v for k, v in f.items() if k not in ("pin", "csrf")}), app.state()))
+                self.send_response(303)
+                self.send_header("Location", loc)
+                self.send_header("Content-Length", "0")
+                self.end_headers()
+                return
             if parts == ["wanted", "create"]:
                 return self._post_wanted(None, "create")
             if len(parts) == 3 and parts[0] == "wanted" and parts[2] in ("pause", "resume", "cancel", "edit"):
