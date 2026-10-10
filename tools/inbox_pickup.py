@@ -28,6 +28,7 @@ from typing import Any, Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import pickup_git as pg  # noqa: E402
+import pickup_health as ph  # noqa: E402
 from pickup_state import Store, now, summary  # noqa: E402
 
 ROOT = pg.ROOT
@@ -119,7 +120,16 @@ def run_work(mid: str, wt: Path, dry: bool) -> dict[str, Any]:
                           skip_session_check=True, queue_text=row, timeout_s=1500, prompt_override=work_prompt(mid, pg.INBOX_REF))
 
 
-def deliver(mid: str, store: Store, dry: bool, executor=run_work) -> str:
+def ack_stage(wt: Path, mid: str) -> str:
+    """The final stage the executor recorded in the ack file: COMPLETED | BLOCKED | ACKED | UNKNOWN. The heartbeat must follow this, not the exit code."""
+    try:
+        m = re.search(r"\*\*Stage:\*\*\s*(COMPLETED|BLOCKED|ACKED)\b([^\n]*)", (wt / f"docs/messages/acks/{mid}.md").read_text())
+    except OSError:
+        return "UNKNOWN"
+    return m.group(1) + (":" + m.group(2).strip(" :")[:200] if m and m.group(1) == "BLOCKED" else "")
+
+
+def deliver(mid: str, store: Store, dry: bool, executor=None) -> str:
     """One pickup, start to finish. Returns the final state name."""
     body = pg.read_message(mid)
     attempts = store.get(mid).get("attempts", 0) + 1
@@ -153,7 +163,7 @@ def deliver(mid: str, store: Store, dry: bool, executor=run_work) -> str:
         pg.commit_all(wt, f"agent 01 pickup: COMPLETED {mid}")
         outcome, code = "ping answered", 0
     else:
-        res = executor(mid, wt, dry)
+        res = (executor or run_work)(mid, wt, dry)
         pg.commit_all(wt, f"agent 01 pickup: executor changes for {mid}")
         bad = [f for f in pg.changed_files(wt) if not f.startswith("docs/")]
         if bad:
@@ -167,40 +177,20 @@ def deliver(mid: str, store: Store, dry: bool, executor=run_work) -> str:
     if not ok:
         store.block(mid, "receipt not published: " + detail, attempts=attempts, exit_status=code)
         return "BLOCKED"
+    stage = ack_stage(wt, mid)
+    if not stage.startswith("COMPLETED"):          # the ack file is the truth: never report COMPLETED over a BLOCKED / unfinished ack
+        why = stage.split(":", 1)[1] if stage.startswith("BLOCKED:") else ("executor left the ack at " + stage)
+        store.block(mid, why or "executor reported BLOCKED", attempts=attempts, exit_status=code, retry_after=9e12, needs="interactive coordinator or owner (see the ack)",
+                    branch=pg.COORD, sha=detail, evidence=[f"origin/{pg.COORD}:docs/messages/acks/{mid}.md"])
+        return "BLOCKED"
     store.move(mid, "COMPLETED", operation="completed", outcome=outcome, exit_status=code, receipt_file_pushed=True, branch=pg.COORD, sha=detail,
                evidence=[f"origin/{pg.COORD}:docs/receipts/pickup/{mid}.md"])
     return "COMPLETED"
 
 
-def build_heartbeat(store: Store, git_ok: bool, interval: int, started: str, busy: Optional[str]) -> dict[str, Any]:
-    data = store.all()
-    try:
-        wd = json.loads((ROOT / "var" / "watchdog" / "status.json").read_text())["projects"]["michael_business_os"]
-    except (OSError, ValueError, KeyError):
-        wd = {}
-    try:
-        sys.path.insert(0, str(ROOT / "src"))
-        from mbos import router, telemetry
-        g = telemetry.quota_guard(router.load_policy())
-    except Exception as e:  # noqa: BLE001
-        g = {"allow": None, "reason": f"quota reading unavailable: {e}"}
-    blockers = [{"id": k, "reason": v.get("blocked"), "attempts": v.get("attempts"), "since": v.get("blocked_at")} for k, v in data.items() if v.get("state") == "BLOCKED"]
-    if not git_ok:
-        blockers.append({"id": "-", "reason": "git fetch failed: no network or no GitHub access for this account", "since": now()})
-    return {"schema": "mbos.pickup_health/1", "generated_at": now(), "host": socket.gethostname(), "account": os.environ.get("USER", "?"), "pid": os.getpid(),
-            "watcher": {"status": "running" if git_ok else "DEGRADED", "interval_s": interval, "started_at": started, "inbox_ref": pg.INBOX_REF, "ack_branch": pg.COORD,
-                        "eligible_ids": "ARIA|ARYA|DA-YYYYMMDD-HHMM-* at or after " + CUTOFF},
-            "session": {"name": "mbos-pickup", "status": "busy" if busy else "idle", "pid": os.getpid(), "observed_at": now(), "source": "inbox_pickup process", "ttl_sec": 300},
-            "interactive_coordinator": {"state": wd.get("state", "UNKNOWN"), "decision": wd.get("decision"), "note": "pickup does not need the interactive session"},
-            "delivery_interface": {"claude_cli": bool(shutil.which("claude")), "quota_allows_a_run": g.get("allow"), "quota": g.get("reason"), "side_worktree": str(pg.SIDE)},
-            "counts": summary(data), "blockers": blockers, "currently_running": busy, "coordinator_head": pg.head(),
-            "receipts": "var/pickup/receipts.jsonl (hash-chained, local) and docs/receipts/pickup/<id>.md on the coordinator branch"}
-
-
-def cycle(store: Store, dry: bool, hb_state: dict, interval: int, started: str) -> dict[str, Any]:
-    git_ok = pg.fetch()
-    busy = None
-    if git_ok:
+def cycle(store: Store, dry: bool, beat: "ph.Beat") -> dict[str, Any]:
+    beat.git_ok = pg.fetch()
+    if beat.git_ok:
         inbox, acked = pg.inbox_ids(), pg.acked_ids()
         for mid in inbox:
             if not eligible(mid) or store.get(mid):
@@ -211,18 +201,12 @@ def cycle(store: Store, dry: bool, hb_state: dict, interval: int, started: str) 
                 store.move(mid, "FETCHED", operation="fetched", evidence=[f"{pg.INBOX_REF}:docs/messages/inbox/{mid}.md"], attempts=0)
         recover(store, acked, alive)
         for mid in pending(inbox, acked, store.all(), time.time())[:2]:
-            busy = mid
-            deliver(mid, store, dry)
-            busy = None
-    hb = build_heartbeat(store, git_ok, interval, started, busy)
-    text = json.dumps(hb, indent=1, sort_keys=True)
-    (DIR / "heartbeat.json").write_text(text)
-    key = json.dumps({k: hb[k] for k in ("counts", "blockers", "watcher")}, sort_keys=True)
-    if git_ok and (key != hb_state.get("key") or time.time() - hb_state.get("at", 0) > HEARTBEAT_S):
-        ok, detail = pg.publish_heartbeat(text)
-        hb_state.update(key=key, at=time.time(), published=ok, detail=detail)
-        store.receipt("heartbeat", "publish heartbeat", "ok" if ok else "failed: " + detail, evidence=[f"origin/{pg.STATUS_BRANCH}:PICKUP_HEALTH.json"], branch=pg.STATUS_BRANCH, sha=detail if ok else None)
-    return hb
+            beat.start_delivery(mid)                 # task id + start time are published BEFORE the long synchronous delivery
+            try:
+                deliver(mid, store, dry)
+            finally:
+                beat.end_delivery()                  # completion beat first, then currently_running is cleared
+    return beat.beat()
 
 
 def code_stamp() -> tuple:
@@ -247,13 +231,17 @@ def main(argv: Optional[list[str]] = None) -> int:
     except OSError:
         print("another inbox_pickup is already running (lock held)", file=sys.stderr)
         return 3
-    started, hb_state, stamp0 = now(), {}, code_stamp()
+    started, stamp0 = now(), code_stamp()
+    beat = ph.Beat(store, DIR, a.interval, started)
+    beat.thread()                                    # keeps beating while a long delivery blocks the loop
     store.receipt("watcher", "watcher started", "ok", evidence=[f"pid {os.getpid()}"])
     while True:
         try:
-            hb = cycle(store, a.dry, hb_state, a.interval, started)
+            beat.cycle_ok = True
+            hb = cycle(store, a.dry, beat)
             print(f"{now()} cycle ok: {hb['counts']} blockers={len(hb['blockers'])}", flush=True)
         except Exception as e:  # noqa: BLE001  (a bad cycle must not kill the watcher; it is recorded and visible)
+            beat.cycle_ok = False
             store.receipt("watcher", "cycle error", f"{type(e).__name__}: {str(e)[:160]}", exit_status=1)
             print(f"{now()} cycle error {e}", file=sys.stderr, flush=True)
         if a.once:
