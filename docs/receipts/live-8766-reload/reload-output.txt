@@ -1,0 +1,6 @@
+reload command starts 2026-10-10T16:47:52Z
+prerequisites OK: export 28973742511834201175010c6521a678a7519da6 tree cc444c29581c70a61740fc050715cb397599fe5ec4457d13213afb39679a753e; verified backup var/lanes/agent-06.prev-20261010T164752Z
+baseline of the current UI: /market HTTP 200, marketplace marker 1
+stop 2026-10-10T16:47:53Z
+done 2026-10-10T16:48:05Z: serving 28973742511834201175010c6521a678a7519da6. Identity = the files on disk hash to the artifact + the session was restarted after the swap + the route markers above. LIMITATION: this is not a SHA returned by the running process; no process-level version endpoint exists. Rollback copy kept at var/lanes/agent-06.prev-20261010T164752Z
+script exit=0

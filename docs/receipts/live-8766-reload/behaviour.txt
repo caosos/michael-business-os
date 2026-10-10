@@ -1,0 +1,34 @@
+## live behaviour checks 2026-10-10T16:49:24Z on http://127.0.0.1:8766
+VERIFY OK on port 8766
+verify-only exit=0
+-- route walk (live):
+/               HTTP 200 fiction hits 0
+/market         HTTP 200 fiction hits 0
+/queue          HTTP 200 fiction hits 0
+/mission        HTTP 200 fiction hits 0
+/digest         HTTP 200 fiction hits 0
+/summary        HTTP 200 fiction hits 0
+/holds          HTTP 200 fiction hits 0
+/outcomes       HTTP 200 fiction hits 0
+/ledger         HTTP 200 fiction hits 0
+/numbers        HTTP 200 fiction hits 0
+/wanted         HTTP 200 fiction hits 0
+/notes          HTTP 200 fiction hits 0
+/assets         HTTP 200 fiction hits 0
+/resale         HTTP 200 fiction hits 0
+/intake         HTTP 200 fiction hits 0
+/gsa            HTTP 200 fiction hits 0
+/owner-listing  HTTP 200 fiction hits 0
+-- strict filters (live):
+max $1000 / 150 mi: checked cards 2 max bid 45.0 | any >1000: False | optional section closed: True
+radius 10.36: Greenbrier Chevrolet lot (exact 10.350017 mi) in checked results: True
+radius 10.35: Greenbrier Chevrolet lot (exact 10.350017 mi) in checked results: False
+radius 10.34: Greenbrier Chevrolet lot (exact 10.350017 mi) in checked results: False
+min>max    refused with message: True | results: 0
+max=abc    refused with message: True | results: 0
+min=-5     refused with message: True | results: 0
+radius=-3  refused with message: True | results: 0
+radius=x   refused with message: True | results: 0
+unlocated origin says so: True
+ZIP 72032 gives distances: True
+save form fields present: True

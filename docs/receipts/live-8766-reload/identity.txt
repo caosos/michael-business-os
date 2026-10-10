@@ -1,0 +1,22 @@
+## independent verification 2026-10-10T16:48:45Z
+-- new live process:
+3887153 Sat Oct 10 11:47:55 2026       00:50 .venv/bin/python -u -m operator_ui serve --port 8766
+-- ARTIFACT marker:
+sha=28973742511834201175010c6521a678a7519da6
+tree_sha256=cc444c29581c70a61740fc050715cb397599fe5ec4457d13213afb39679a753e
+exported_utc=20261010T164752Z
+-- tree hash computed independently now:
+cc444c29581c70a61740fc050715cb397599fe5ec4457d13213afb39679a753e
+-- tree hash of a fresh git export of the artifact:
+cc444c29581c70a61740fc050715cb397599fe5ec4457d13213afb39679a753e
+-- backup kept:
+var/lanes/agent-06.prev-20261010T020431Z
+var/lanes/agent-06.prev-20261010T164752Z
+-- other services (not touched):
+2470415 Thu Oct  8 22:44:59 2026 .venv/bin/python -u -m mbos.cli worker --fixture fixtures/sources/training_ex
+2491363 Thu Oct  8 23:16:35 2026 .venv/bin/python -u -I tools/coordinator_watch.py --serve-port 8479 --interva
+3355056 Fri Oct  9 23:39:46 2026 /home/michaelos/business-os-worktrees/agent-01-coordinator/.venv/bin/python -
+mbos-dev-ui: 1 windows (created Sa
+mbos-dev-worker: 1 windows (create
+mbos-pickup: 1 windows (created Fr
+mbos-watchdog: 1 windows (created 
