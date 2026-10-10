@@ -146,6 +146,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     procs: dict[str, tuple[subprocess.Popen, str]] = {}   # lane -> (process, task)
     idle_rounds = 0
+    last_warn: list = []
     while True:
         if pause.reason():                                   # owner pause: no model dispatch, ever, until the flag is removed
             log({"event": "paused", "why": pause.reason()[:200]})
@@ -156,6 +157,9 @@ def main(argv: list[str] | None = None) -> int:
                 log({"event": "exit", "lane": lane, "task": task, "rc": p.returncode})
                 del procs[lane]
         report, warnings = foreman.survey(ROOT)
+        if warnings != last_warn:                       # malformed queue rows are surfaced (once per change), never silently skipped
+            log({"event": "queue_warning", "problems": warnings[:12]})
+            last_warn = warnings
         guard = telemetry.quota_guard(router.load_policy())
         plan, why = plan_launches(report, set(procs) | lanes_running_in_os(), attempts_so_far(), launched_recent(), guard["allow"], a.max_parallel)
         for lane, t in plan:

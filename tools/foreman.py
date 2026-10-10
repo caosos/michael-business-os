@@ -60,6 +60,27 @@ def parse_queue(text: str | None) -> list[dict]:
     return rows
 
 
+STATUS_WORDS = ("READY", "CLAIMED", "BLOCKED", "DONE", "HOLD", "PARKED", "RESUMING", "RESUMED", "NEEDS", "PAUSED", "SUPERSEDED", "OWNER", "SPLIT", "PARTIAL")
+
+
+def schema_problems(text: str | None) -> list[str]:
+    """Rows that look like tasks (`| X-nn |`) but break the 7-column schema (ID | Pri | Task | Deps | Status | Agent | Acceptance): reported, never silently skipped."""
+    out = []
+    for line in (text or "").splitlines():
+        if not re.match(r"\|\s*[A-GX]-\d+\s*\|", line):
+            continue
+        c = [x.strip() for x in line.split("|")]
+        tid = c[1]
+        status = re.sub(r"[*`]", "", c[-4]).strip()
+        if len(c) < 9:
+            out.append(f"{tid}: {len(c) - 2} columns, expected 7 (a cell is missing or fused; status may be read from the wrong cell)")
+        elif not re.search(r"P\d", c[2]):
+            out.append(f"{tid}: priority cell {c[2][:20]!r} has no P0..P3")
+        elif not any(status.upper().startswith(w) for w in STATUS_WORDS):
+            out.append(f"{tid}: status cell {status[:30]!r} is not a known status")
+    return out
+
+
 def deps_met(row: dict, rows: list[dict], done: set[str]) -> bool:
     """Every task id named in the row's deps must be DONE (lane's word or the queue row). Ids not in the queue at all count as met; text without ids ('none') too."""
     status = {r["id"]: r["status"] for r in rows}
@@ -106,7 +127,7 @@ def reconcile(queue_text: str, done: dict[str, set[str]], heads: dict[str, str])
 def survey(repo: Path) -> tuple[list[dict], list[str]]:
     queue_text = show(repo, COORD, "docs/status/READY_QUEUE.md")
     rows = parse_queue(queue_text)
-    warnings = []
+    warnings = [f"queue schema: {p}" for p in schema_problems(queue_text)]
     if queue_text is None:
         warnings.append("cannot read READY_QUEUE from origin/" + COORD)
     m = re.search(r"Last synced:.*", queue_text or "")

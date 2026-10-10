@@ -150,3 +150,11 @@ def test_short_or_pipe_rows_are_still_ready_and_dependencies_are_honoured():
     assert set(ready) == {"F-10", "F-13"}   # F-12 (a one-column-short row) is parsed as READY but depends on F-10 (not DONE yet), so it must wait
     q2 = QUEUE_F.replace("| F-10 | **P0** | first task | none | **READY**", "| F-10 | **P0** | first task | none | **DONE**")
     assert {"F-11", "F-12"} <= {r["id"] for r in f.ready_for(f.parse_queue(q2), "06", set())}  # once F-10 is DONE the dependents become ready
+
+
+def test_malformed_rows_are_reported_not_skipped_and_known_odd_statuses_are_not():
+    f = _load_foreman()
+    probs = f.schema_problems(QUEUE_F)
+    assert any(p.startswith("F-12:") and "columns" in p for p in probs) and not any(p.startswith("F-10:") for p in probs)
+    assert f.schema_problems("| F-20 | P1 | t | none | PARTIAL @ abc | worker:lane-06 | ok |\n| G-21 | P1 | t | none | SPLIT (x) | 07 | ok |") == []
+    assert f.schema_problems("| F-21 | none | t | none | whatever | 06 | ok |")[0].startswith("F-21: priority")
