@@ -1,0 +1,10 @@
+# A-64: decision-case store corrections (Agent 01, interactive engineering session pid 2937731; START receipt docs/receipts/engineering/ARYA-20261010-2129-a61-integrity-provenance.md)
+
+Source review of 83098fc confirmed and fixed, synthetic data only:
+1. **Estimate provenance:** `propose()` now lists every `owner_estimate` evidence entry under `owner_estimates_not_facts` with `provenance: owner_estimate` and "an owner ESTIMATE ... not a fact"; no duplication into `owner_estimates` needed. Test: text and label survive retrieval and never appear under verified/unverified.
+2. **Integrity:** all reads/writes go through `good_rows()` (full chain verification). Tampered reason, tampered evidence and malformed records (non-JSON line, non-object JSON) give `IntegrityError` ("INTEGRITY FAILURE", CLI exit 3); `propose` returns `INTEGRITY_FAILURE` with no matches; `diagnose` reports per row without case text; the file is never rewritten (history kept; restoring the bytes revalidates).
+3. **Identity:** unambiguous source + listing_id through import, readback, correction, outcome, reset and proposal; rows carry `source`; bare ids accepted only when unique else `AmbiguousListing`; duplicate (source, id) inside one import batch or against history rejected before any write; same id from two sources isolated (correct/outcome/reset/propose each touch only their own).
+- Tests: `tests/unit/test_decision_cases.py` 16 pass (11 earlier + 5 new A-64 regressions). Files split to stay under 400 lines (`decision_case_schema.py` 90, `decision_cases.py` 357).
+- Compatibility: rows written by 83098fc without a `source` field are treated as belonging to the case's own source (no real case existed, so nothing to migrate).
+- Updated value-free instructions: docs/operations/DECISION_CASES.md (identity/integrity/estimates section, `--source`, `diagnose`) and the template (unchanged keys).
+- Separate facts: capability tested = yes; real private case imported/readback = NO; application on a real similar candidate = NO. Nothing is "learned". Waiting on Michael's local import.

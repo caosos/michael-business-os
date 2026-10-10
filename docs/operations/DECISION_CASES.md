@@ -9,10 +9,15 @@
 1. `cd ~/business-os-worktrees/agent-01-coordinator && PYTHONPATH=src .venv/bin/python -m mbos.decision_cases template > ~/trailer-case.json` (the template has no values; keep the file OUTSIDE the repo, e.g. in your home folder).
 2. Fill it in: stable `listing_id` (the GSA lot id) and `source`, `decided_at`, `decision` (pass/watch/pursue), `reason_summary` (a summary of the reasoning, not a transcript), `evidence` entries each marked `verified`, `owner_estimate` or `unverified` (condition, photos, dimensions/capacity, paperwork, costs, sold comparables, repair work), `owner_estimates` (always labelled as estimates), `alternatives_considered`, `uncertainty`, `missing_evidence`, `owner_skills`, `category_tags` (words used to find similar candidates). Dollar amounts are allowed here and stay on this machine.
 3. `PYTHONPATH=src .venv/bin/python -m mbos.decision_cases import ~/trailer-case.json`. It validates everything first, writes nothing on any error, and prints only the listing id, row number and hash.
-4. Read it back: `... show <listing_id>` (effective case + history), `... verify` (chain).
+4. Read it back: `... show <listing_id> --source <source>` (effective case + history), `... verify` (chain), `... diagnose` (per-row integrity).
 5. Later: `... outcome <listing_id> "what actually happened"` (owner-reported, kept apart from estimates). Delete `~/trailer-case.json` when done.
 
 Michael can also have Agent 01 run steps 3 and 4 against the file once it is on this machine; the case text never needs to appear in GitHub or a message.
+
+## Identity, integrity and estimates (A-64 corrections)
+- A case is identified by **source + listing_id**. Importing the same pair twice, or twice inside one file, is refused before anything is written. `show`, `correct`, `outcome` and `reset` take `--source S`; a bare listing id works only if exactly one source has it, otherwise it is refused as ambiguous. Corrections can never change a case's source.
+- **Integrity:** every read and write verifies the whole hash chain first. If any row was altered or is malformed, `show`, `propose`, `correct`, `reset` and `import` return an explicit INTEGRITY FAILURE (exit 3) and apply nothing; no proposal is generated. `diagnose` prints per row ok/problem with ids and hashes only (no case text); the file itself is never rewritten or discarded, so the owner can inspect it. Restoring the exact original bytes makes it valid again.
+- **Estimates:** an evidence entry marked `owner_estimate` is shown in a proposal under `owner_estimates_not_facts`, labelled as an owner ESTIMATE (never under verified facts), with no need to repeat it in `owner_estimates`.
 
 ## Owner control
 `correct <listing_id> PATCH.json --why "..."` appends a correction (history kept, original row untouched). `reset <listing_id> --why` stops learned use of that case (rows stay for audit). `disable` / `enable --why` switch all learned use off/on. Every change is a row with who, when and why.

@@ -153,3 +153,82 @@ def test_the_default_owner_local_location_is_git_ignored_and_checked_before_any_
     p = dc.store_dir()
     assert p == dc.ROOT / "var" / "private" / "decision_cases" and not p.exists() or p.exists()
     dc._must_be_private(p, "the case store")                                  # var/ is git-ignored in this repo: must not raise
+
+
+# ---------------------------------------------------------------- A-64 corrections (synthetic data only)
+def test_a64_owner_estimate_evidence_survives_retrieval_without_duplication(store):
+    only_ev = {**CASE, "owner_estimates": [], "evidence": [{"kind": "cost", "text": "synthetic repair estimate text", "provenance": "owner_estimate"},
+                                                           {"kind": "condition", "text": "synthetic verified condition", "provenance": "verified"}]}
+    dc.import_cases(write(store, "in.json", only_ev))
+    m = dc.propose(CAND)["matches"][0]
+    est = m["owner_estimates_not_facts"]
+    assert [e["text"] for e in est] == ["synthetic repair estimate text"] and est[0]["provenance"] == "owner_estimate" and "ESTIMATE" in est[0]["presented_as"]
+    assert all(e["text"] != "synthetic repair estimate text" for e in m["verified_facts"] + m["unverified_evidence"])      # never presented as a fact
+
+
+def _tamper(old, new):
+    p = dc._log()
+    p.write_text(p.read_text().replace(old, new))
+
+
+def test_a64_corrupted_history_is_refused_everywhere_and_diagnosable(store, capsys):
+    dc.import_cases(write(store, "in.json", CASE))
+    _tamper("synthetic reason", "edited reason")
+    for call in (lambda: dc.effective("SYN-1001"), lambda: dc.learning_enabled(), lambda: dc.correct("SYN-1001", {"decision": "watch"}, "why"),
+                 lambda: dc.reset("SYN-1001", "why"), lambda: dc.import_cases(write(store, "n.json", {**CASE, "listing_id": "SYN-7"}))):
+        with pytest.raises(dc.IntegrityError, match="INTEGRITY FAILURE"):
+            call()
+    out = dc.propose(CAND)
+    assert out["status"] == "INTEGRITY_FAILURE" and out["matches"] == []
+    assert dc.main(["show", "SYN-1001"]) == 3 and "INTEGRITY FAILURE" in capsys.readouterr().out
+    assert dc.main(["propose", str(write(store, "c.json", CAND))]) == 3
+    d = dc.diagnose()
+    assert d[0]["ok"] is False and d[0]["listing_id"] == "SYN-1001" and "edited reason" not in json.dumps(d)      # inspectable, no case text
+    assert "edited reason" in dc._log().read_text()                                                                   # history kept, not discarded
+
+
+def test_a64_tampered_evidence_and_malformed_records_generate_no_proposal(store):
+    dc.import_cases(write(store, "in.json", CASE))
+    _tamper("synthetic condition note", "forged condition note")
+    assert dc.propose(CAND)["status"] == "INTEGRITY_FAILURE"
+    _tamper("forged condition note", "synthetic condition note")
+    assert dc.verify()[0] and dc.propose(CAND)["matches"]                       # restoring the exact bytes restores validity
+    with open(dc._log(), "a") as fh:
+        fh.write("this is not json\n[1, 2]\n")
+    assert dc.verify()[0] is False and dc.propose(CAND)["matches"] == []
+    bad = [x for x in dc.diagnose() if not x["ok"]]
+    assert len(bad) == 2 and all("malformed" in x["problem"] for x in bad)
+
+
+def test_a64_same_listing_id_from_two_sources_stays_isolated(store):
+    a = {**CASE, "source": "provider-a"}
+    b = {**CASE, "source": "provider-b", "decision": "pursue", "reason_summary": "synthetic reason B", "title": "Synthetic dump trailer tandem axle B"}
+    dc.import_cases(write(store, "a.json", a))
+    dc.import_cases(write(store, "b.json", b))
+    with pytest.raises(dc.AmbiguousListing):
+        dc.effective("SYN-1001")                                                  # a bare id shared by two sources is rejected
+    for call in (lambda: dc.correct("SYN-1001", {"decision": "watch"}, "why"), lambda: dc.reset("SYN-1001", "why"), lambda: dc.outcome("SYN-1001", "x")):
+        with pytest.raises(dc.AmbiguousListing):
+            call()
+    dc.correct("SYN-1001", {"decision": "watch"}, "fix A only", source="provider-a")
+    dc.outcome("SYN-1001", "synthetic outcome A", source="provider-a")
+    dc.reset("SYN-1001", "reset B only", source="provider-b")
+    ea, eb = dc.effective("SYN-1001", "provider-a"), dc.effective("SYN-1001", "provider-b")
+    assert ea["case"]["decision"] == "watch" and ea["active"] and len(ea["outcomes"]) == 1 and [h["kind"] for h in ea["history"]] == ["correction", "outcome"]
+    assert eb["case"]["decision"] == "pursue" and not eb["active"] and eb["outcomes"] == [] and [h["kind"] for h in eb["history"]] == ["reset"]
+    out = dc.propose({"listing_id": "SYN-5", "title": "Synthetic tandem dump trailer"})
+    assert [m["source_case"]["source"] for m in out["matches"]] == ["provider-a"]  # B is reset; A alone, with A's corrected decision
+    assert out["matches"][0]["precedent_decision"] == "watch"
+    assert dc.propose({"listing_id": "SYN-1001", "source": "provider-a", "title": CASE["title"]})["matches"] == []         # not itself; B is reset
+
+
+def test_a64_duplicate_in_one_batch_or_existing_is_rejected_before_any_write(store):
+    with pytest.raises(dc.CaseError, match="twice"):
+        dc.import_cases(write(store, "d.json", [CASE, {**CASE, "reason_summary": "again"}, {**CASE, "listing_id": "SYN-2", "source": "x"}]))
+    assert dc.rows() == []
+    dc.import_cases(write(store, "ok.json", CASE))
+    with pytest.raises(dc.CaseError, match="already exists"):
+        dc.import_cases(write(store, "d2.json", [{**CASE, "listing_id": "SYN-3"}, CASE]))
+    assert len(dc.rows()) == 1
+    dc.import_cases(write(store, "other.json", {**CASE, "source": "other"}))                  # same id, other source: allowed
+    assert len(dc.rows()) == 2 and dc.verify()[0]
