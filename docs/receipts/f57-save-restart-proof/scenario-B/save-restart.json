@@ -1,0 +1,101 @@
+{
+ "scenario": "B",
+ "code_sha": "026058e",
+ "captured_at_utc": "2026-10-10T07:12:18+00:00",
+ "wanted": {
+  "cats": [],
+  "rows": [
+   "vehicles",
+   "trailers",
+   "tools",
+   "electronics"
+  ],
+  "condition": "trailer"
+ },
+ "what_is_real": "operator_ui code at the SHA, real cached GSA file, real Chrome, real Save click with CSRF+PIN, real OS-process restart",
+ "what_is_not_real": "decision-queue database: STUB store, isolated campaigns+prefs files (database persistence NOT proven by this run)",
+ "after_search": {
+  "cats": [],
+  "rows": [
+   "vehicles",
+   "trailers",
+   "tools",
+   "electronics"
+  ],
+  "condition": "trailer",
+  "row_sections_in_dom_order": [
+   "vehicles",
+   "trailers",
+   "tools",
+   "electronics"
+  ],
+  "chips": "Applied filters: Origin: Conway AR (ZIP 72032)Radius: 150 mi (known distances only)Mode: repairable trailers/equipment focus: trailer, equipmentMax price: $5,000Condition: trailer"
+ },
+ "save_message": "",
+ "saved_link": "/market?run=cmp_QHTABFHJJE0RPG1NMWQ2WGSSV5",
+ "after_reopen": {
+  "cats": [],
+  "rows": [
+   "vehicles",
+   "trailers",
+   "tools",
+   "electronics"
+  ],
+  "condition": "trailer",
+  "row_sections_in_dom_order": [
+   "vehicles",
+   "trailers",
+   "tools",
+   "electronics"
+  ],
+  "chips": "Applied filters: Origin: Conway AR (ZIP 72032)Radius: 150 mi (known distances only)Mode: repairable trailers/equipment focus: noneMax price: $5,000Condition: trailer"
+ },
+ "server_killed_pid": 3569926,
+ "server_restarted_pid": 3570204,
+ "after_process_restart": {
+  "cats": [],
+  "rows": [
+   "vehicles",
+   "trailers",
+   "tools",
+   "electronics"
+  ],
+  "condition": "trailer",
+  "row_sections_in_dom_order": [
+   "vehicles",
+   "trailers",
+   "tools",
+   "electronics"
+  ],
+  "chips": "Applied filters: Origin: Conway AR (ZIP 72032)Radius: 150 mi (known distances only)Mode: repairable trailers/equipment focus: noneMax price: $5,000Condition: trailer"
+ },
+ "plain_load_after_restart": {
+  "cats": [],
+  "rows": [
+   "vehicles",
+   "trailers",
+   "tools",
+   "electronics"
+  ],
+  "condition": "trailer",
+  "row_sections_in_dom_order": [
+   "vehicles",
+   "trailers",
+   "tools",
+   "electronics"
+  ],
+  "chips": "Applied filters: Origin: Conway AR (ZIP 72032)Radius: 150 mi (known distances only)Mode: repairable trailers/equipment focus: trailer, equipmentMax price: $5,000Condition: trailer"
+ },
+ "verdict": {
+  "scenario": "B",
+  "reopen_retains_categories_rows_condition": true,
+  "restart_retains_categories_rows_condition": true,
+  "displayed_section_order_after_restart": [
+   "vehicles",
+   "trailers",
+   "tools",
+   "electronics"
+  ],
+  "displayed_order_equals_chosen_rows": true
+ }
+}

@@ -1,0 +1,19 @@
+# Receipt: final staging closeout (answers ARYA-20261010-0703), Agent 01, 2026-10-10 ~07:30Z
+
+**Final artifact: lane 06 `026058e` (F-57), clean, pushed.** Staging only; live :8766 untouched (still the F-48 export). Live reload NOT approved.
+
+| Ask | Result | Evidence |
+|---|---|---|
+| Browser proof: Save, reopen, process restart retain categories, condition and custom row order | **PASS in both modes, on a STUB store** | `docs/receipts/f57-save-restart-proof/scenario-A` (categories trailers+vehicles, condition, Row 1-4 retained) and `scenario-B` (no category checked: row order vehicles>trailers>tools>electronics retained AND displayed in that order after a real OS-process kill and restart). Real Chrome, real Save click with CSRF+PIN, real code, real cache. **Not database persistence** (isolated campaigns/prefs files, own PIN). With categories checked the Row selects are kept but ignored for display by design. |
+| Clean real-cache screenshots with truthful metadata; reconcile "no stub store" vs a stub-store tool | **Done and relabelled** | `docs/receipts/f57-real-cache-screenshots/` (first viewport + full page, 1648x1000 and 390x844, plus a labelled broader example) with sidecars: SHA, URL/port, viewport, filters, cache sha256 + as-of, capture time, `"fixture": "NONE"`. Two separate facts: **inventory = the real cached GSA file; persistence in lane 06's `f5x_browser.py` runs = a STUB store**. My `capture_market.py` runs against the real server code and the real DB-backed dev instance (no stub); my save/restart proof uses the stub store and says so. |
+| Final full reference regression, resale_f39 not excluded | **380 passed / 1 failed** | Run 07:05-07:11Z, `pytest tests --ignore=tests/lane_d`, 333 s, exit 1: the failure is `test_resale_f39` (socket `TimeoutError` in the full run). It passes alone (4 of 4, 07:13Z). Recorded as an **unresolved test, not a pass**. Lane D+E: 105 passed / 2 failed (the known F-32 `test_inputs_f32` pair), exit 1. |
+| Update the canonical matrix itself | **Done** | `docs/handoff/F-51-F-52-acceptance-matrix.md`: 46 rows, **41 PASS / 5 PARTIAL (A19, B01, B03, B12, C08) / 0 NOT RUN**, Status and "Current evidence (who ran it)" per row; Agent 01's own checks are bold, everything else is labelled lane 06 evidence not re-run. Earlier downgrades kept. |
+| Compare visible known IDs and links with cache provenance | **Done, computed** | Conway search: 12 checked cards all match the cache (link and title); 81 optional-section links all in the cache; broader example 19/19 and 268. Strict filters and the unknown/optional separation unchanged. |
+| One live reload/rollback packet | **Done** | `docs/handoff/LIVE_RELOAD_PACKET_8766.md` + `tools/reload_ui.sh 026058e` (backup, exact-commit export, health check, automatic rollback; not run). |
+| Stale cache: the supported refresh route and its access needs | **Identified, not run** | Packet section "Cache refresh": `GsaLiveAdapter(live=True)`, one fetch/hour, public `DEMO_KEY` (10 per window); a personal key is an owner decision; no one-command wrapper exists. |
+
+## Dispatch note
+The pickup executor queued **F-58** for this same closeout and the dispatcher launched a lane 06 worker (PID 3555660, about 07:16Z) before this receipt existed. Per the standing "preserve an active worker" rule it was not stopped; it can reuse the evidence above (`docs/receipts/f57-*`, the matrix, the packet). Agent 01 did no duplicate dispatch.
+
+## Remaining owner decision
+Approve (or not) one UI-only reload of `mbos-dev-ui` to `026058e` using `tools/reload_ui.sh`. Live acceptance, and saved-search persistence on the live database (needs the owner's PIN), stay NOT RUN until then.
