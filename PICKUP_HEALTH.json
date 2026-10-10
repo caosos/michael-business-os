@@ -66,16 +66,22 @@
    "ARYA-20261010-2106-photo-access-evidence",
    "ARYA-20261010-2109-opening-bid-evidence",
    "ARYA-20261010-2113-heavy-scrap-evidence-gate"
+  ],
+  "FETCHED": [
+   "ARYA-20261010-2116-decision-learning-criteria"
   ]
  },
- "currently_running": null,
+ "currently_running": {
+  "id": "ARYA-20261010-2116-decision-learning-criteria",
+  "started_at": "2026-10-10T21:16:10Z"
+ },
  "delivery_interface": {
   "claude_cli": true,
   "quota": "session 39.0% / week 20.0% are under the limits",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-10T21:15:07Z",
+ "generated_at": "2026-10-10T21:16:10Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "nothing needed",
@@ -87,11 +93,11 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-10T21:15:07Z",
+  "observed_at": "2026-10-10T21:16:10Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
-  "status": "idle",
-  "ttl_sec": 1200
+  "status": "busy",
+  "ttl_sec": 300
  },
  "watcher": {
   "ack_branch": "research/agent-01-coordinator",
