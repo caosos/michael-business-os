@@ -67,3 +67,13 @@ def test_reset_receipt_zeroes_only_that_tasks_attempts(tmp_path, monkeypatch):
     assert d.attempts_so_far() == {"X-1": 1}
     last = json.loads(log_file.read_text().splitlines()[-1])
     assert last["event"] == "reset" and last["was"] == 1
+
+
+def test_dirty_lane_worktree_is_continued_with_allow_dirty(monkeypatch, tmp_path):
+    import subprocess
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    monkeypatch.setattr(d.worker, "WORKTREES", tmp_path.parent)
+    monkeypatch.setitem(d.worker.LANES, "06", ("n", tmp_path.name, "b", tmp_path.name))
+    assert d.lane_dirty("06") is False
+    (tmp_path / "wip.py").write_text("x")
+    assert d.lane_dirty("06") is True

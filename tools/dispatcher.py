@@ -25,6 +25,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import foreman  # noqa: E402
 import pause  # noqa: E402
+import worker  # noqa: E402
 from mbos import router, telemetry  # noqa: E402
 
 LOG = ROOT / "var" / "dispatcher.jsonl"
@@ -123,6 +124,12 @@ def attempts_so_far() -> dict[str, int]:
     return out
 
 
+def lane_dirty(lane: str) -> bool:
+    wt = worker.WORKTREES / worker.LANES[lane][3]
+    r = subprocess.run(["git", "status", "--porcelain"], cwd=wt, capture_output=True, text=True)
+    return bool(r.stdout.strip())
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--once", action="store_true")
@@ -155,6 +162,8 @@ def main(argv: list[str] | None = None) -> int:
             prof = profile_for(t)
             cmd = [sys.executable, "-I", "tools/worker.py", t["id"], "--lane", lane, "--kind", prof["kind"], "--risk", prof["risk"],
                    "--max-turns", str(prof["max_turns"]), "--timeout", "3500"] + (["--model", prof["model"]] if prof["model"] else [])
+            if lane_dirty(lane):          # an interrupted run left uncommitted work: continue it (the worker prompt says to review and keep it), never discard
+                cmd.append("--allow-dirty")
             log({"event": "launch", "lane": lane, "task": t["id"], "cmd": " ".join(cmd[2:]), "dry": a.dry})
             if not a.dry:
                 out = open(ROOT / "var" / f"worker-{t['id']}.out", "w")
