@@ -489,6 +489,14 @@ Owner goal: every decision made together is learned by the system so it can even
 - **Storage honesty.** Do not force the case into a purchase/acquisition record, a narrow attestation or a false verification field. A real private case counts as learned only after an authorised local write AND retrieval verification under the correct listingID; until then, no "learned" claim. Parent retains the actual private case; none goes in GitHub or test fixtures.
 
 
+### 13d. Auction capital reservations and waiting-time criteria (owner requirement; ARYA-20261010-2154)
+Requirements adoption only; reservation accounting is NOT implemented. Part of the existing A-61 owner-ledger backlog (no new queue item).
+- An active owner-reported auction bid reserves its potential maximum all-in cost until confirmed outbid/released, withdrawn where actually supported, or won and paid. An unverified stale auction status is never treated as released funds.
+- Cash balance, reserved bid capacity, committed purchase cost, repair allowance and protected bill buffers are kept separate. The same available cash is never reused for multiple simultaneous bid commitments.
+- Show owner-reported versus verified status, as-of time, uncertainty, and expected auction/payment/pickup timing. Waiting time and alternative opportunities belong in the proposal.
+- Owner-configurable private values and corrections need a supported owner-local path; report that path when ledger scope reaches implementation. No balances, bids, budgets or amounts in GitHub, fixtures, receipts or public docs.
+- These records and proposals confer no authority to debit an account, place/change/withdraw a bid, buy, contact a seller, or connect banking/auction accounts.
+
 ## 14. Inventory merchandising
 
 The system should actively make inventory interesting and engaging.
