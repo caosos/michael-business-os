@@ -87,7 +87,7 @@ Do exactly this task, then stop:
 6. Commit with identity `git -c user.name="{name}" -c user.email="michaelos+{LANES[lane][1]}@users.noreply.github.com"`. End the message with `Co-Authored-By: Claude <noreply@anthropic.com>`. Then `git push origin HEAD` (never force).
 7. Print a final JSON line: {{"task":"{task['id']}","status":"DONE|BLOCKED|FAILED","commit":"<sha or null>","tests":"<n passed/n failed>","notes":"<one line>"}} and exit.
 
-Hard rules: everything is DRY-RUN. Do not send messages, contact sellers or customers, spend money, publish, deploy, change credentials, or touch CAOSCare. Do not change frozen contracts (docs/research/contracts v1.0.0) without an accepted ADR. If blocked by a genuine owner decision, a missing credential, or a dependency, say so in the final JSON and in AGENT_STATUS (`Blocked:`), then stop. Keep context small: avoid reading large files you do not need.
+Hard rules: never wait on a process with `pgrep -f <text>` or `pkill -f <text>` where <text> also appears in your own shell command (it matches itself and hangs forever; a stuck wait loop blocked lane 06 for 6 minutes): use a pid, a status file, or `timeout`. Everything is DRY-RUN. Do not send messages, contact sellers or customers, spend money, publish, deploy, change credentials, or touch CAOSCare. Do not change frozen contracts (docs/research/contracts v1.0.0) without an accepted ADR. If blocked by a genuine owner decision, a missing credential, or a dependency, say so in the final JSON and in AGENT_STATUS (`Blocked:`), then stop. Keep context small: avoid reading large files you do not need.
 """
 
 
