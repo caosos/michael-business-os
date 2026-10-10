@@ -141,6 +141,30 @@ def _short(s: str, n=280) -> str:
     return s if len(s) <= n else s[: n - 1].rstrip() + "…"
 
 
+def _amt(v):
+    return float(v) if isinstance(v, (int, float)) and not isinstance(v, bool) and v == v and v >= 0 else None
+
+
+def auction_labels(p: dict) -> dict:
+    """F-61: current bid, next minimum bid and reserve, only from GSA fields in the cache (`highBidAmount`, `aucIncrement`, `reserve`).
+    Next minimum = current bid + `aucIncrement`, only when both are present (no bid: UNKNOWN, the opening minimum is not in the cache).
+    Reserve is Yes / No / Unknown from the `reserve` flag; the cache has no reserve-amount field, so Yes reads 'reserve amount undisclosed'.
+    Never a floor from retail price or the next minimum bid."""
+    bid, inc, r = _amt(p.get("highBidAmount")), _amt(p.get("aucIncrement")), p.get("reserve")
+    r = r.strip().lower() if isinstance(r, str) else r
+    reserve = "Yes" if r is True or r in ("yes", "true", "y") else "No" if r is False or r in ("no", "false", "n") else "Unknown"
+    nxt = bid + inc if bid is not None and inc is not None else None
+    if nxt is not None:
+        nxt_txt = f"${nxt:,.2f} (current bid + ${inc:,.2f} increment)"
+    elif bid is None:
+        nxt_txt = "UNKNOWN (no bid yet; the opening minimum is not in the GSA cache" + (f"; bid increment ${inc:,.2f}" if inc is not None else "") + ")"
+    else:
+        nxt_txt = "UNKNOWN (the GSA cache has no bid increment for this lot: field aucIncrement)"
+    res_txt = {"Yes": "Yes, reserve amount undisclosed (the GSA cache has no reserve amount field)", "No": "No",
+               "Unknown": "UNKNOWN (the GSA cache has no usable reserve field for this lot: field reserve)"}[reserve]
+    return {"current_bid": bid, "next_min_bid": nxt, "next_min_text": nxt_txt, "reserve": reserve, "reserve_text": res_txt}
+
+
 def _card(adapter, rec, now, asof, origin) -> dict:
     lot = adapter.lot(rec.payload, now)
     p = rec.payload
@@ -153,7 +177,7 @@ def _card(adapter, rec, now, asof, origin) -> dict:
             "url": lot.get("rules_url") if lot.get("rules_url") != UNKNOWN else None, "image": p.get("imageURL") or None,
             "bid": bid if isinstance(bid, float) else None, "bidders": lot.get("bid_count"), "closes": str(p.get("aucEndDt") or "")[:10] or None,
             "city": f"{loc.get('city')}, {loc.get('state')}" if loc.get("city") else None, "distance": dist, "category": lot.get("category"),
-            "condition": None, "source": "GSA Auctions", "fetched_at": asof, "kind": "auction", "stale": _age_h(asof, now) > STALE_H}
+            "condition": None, "labels": auction_labels(p), "source": "GSA Auctions", "fetched_at": asof, "kind": "auction", "stale": _age_h(asof, now) > STALE_H}
 
 
 def _age_h(asof, now) -> float:
