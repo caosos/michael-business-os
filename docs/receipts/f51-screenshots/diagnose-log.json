@@ -1,0 +1,12 @@
+{
+ "search_button": {
+  "disabled": false,
+  "opacity": "1",
+  "color": "rgb(255, 255, 255)",
+  "bg": "rgb(239, 239, 239)",
+  "pe": "auto",
+  "cursor": "pointer",
+  "ratio": null,
+  "text": "Search"
+ }
+}

@@ -21,7 +21,25 @@ def _saved(app) -> list[dict]:
     return out
 
 
+FILTER_KEYS = ("keywords", "base", "radius", "min_price", "max_price", "min_r", "max_r", "prev_min", "prev_max", "any", "broad", "condition", "required", "preferred", "exclude", "source",
+               "kind", "closing_by", "sort")
+
+
+def _remembered(app, qs: dict) -> dict:
+    """Entered filters persist across navigation (single owner, in memory on this app): a visit with no filters restores the last
+    search; `new` clears it. Saving as a campaign is separate (Wanted)."""
+    given = {k: qs[k] for k in FILTER_KEYS if k in qs}
+    if qs.get("new"):
+        app.market_last = {}
+    elif given:
+        app.market_last = given
+    elif not (qs.get("run") or qs.get("edit")) and getattr(app, "market_last", None):
+        return {**qs, **app.market_last}
+    return qs
+
+
 def page_body(app, qs: dict, now, errors=None, values=None) -> str:
+    qs = _remembered(app, qs) if values is None else qs
     saved = _saved(app)
     ids = {r["doc"]["campaign_id"]: r["doc"] for r in saved}
     pick = (qs.get("run") or qs.get("edit") or [None])[0]
@@ -32,12 +50,12 @@ def page_body(app, qs: dict, now, errors=None, values=None) -> str:
     else:
         q = ms.parse_query(qs)
     edit = (qs.get("edit") or [None])[0]
-    ran = bool(qs.get("go") or qs.get("run")) and not qs.get("new")
+    ran = not qs.get("new") and not qs.get("edit")
     data = ms.load_gsa(os.environ.get("MBOS_GSA_CACHE") or None, now, ms._origin(q["base"])) if q["source"] == "gsa" or not ran else \
         {"status": "connected", "as_of": None, "age_h": 0, "stale": False, "in_scope": 0, "in_file": 0, "cards": [], "message": ""}
-    results, hidden = ms.search(data["cards"], q) if ran and data["status"] == "connected" else ([], {})
+    results, unchecked, hidden = ms.partition(data["cards"], q) if ran and data["status"] == "connected" else ([], [], {})
     note = landing_fix.origin_note(q["base"], ms._origin(q["base"]) is not None, q["radius"]) if ran else ""
-    return note + mv.render_page(q, data, results, hidden, saved, app.csrf, bool(app.operator_pin), edit if edit in ids else None, ran, errors)
+    return note + mv.render_page(q, data, results, hidden, saved, app.csrf, bool(app.operator_pin), edit if edit in ids else None, ran, errors, unchecked)
 
 
 def post(app, parts: list[str], f: dict) -> tuple[str | None, list[str] | None]:

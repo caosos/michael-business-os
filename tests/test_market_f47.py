@@ -113,7 +113,7 @@ def test_save_needs_pin_and_a_price(ui):
 def test_demo_isolation_no_train_or_example_invalid_in_live_results(ui):
     h = get(ui, go=1)
     assert "TRAIN-" not in h and "example.invalid" not in h and "DEMO / TRAINING" not in h
-    assert "href='/queue?demo=1'" in h                                 # demo lives behind a separate sidebar area only
+    assert "demo=1" not in h and "DEMO / training" not in h            # F-51: demo is reachable only from /demo, never from /market
 
 
 def test_unsupported_source_is_not_connected_never_mock(ui):

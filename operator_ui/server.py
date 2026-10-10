@@ -1055,6 +1055,8 @@ def make_handler(app):
                 titles = {i: ((app.store.item(i) or {}).get("normalized") or {}).get("title") for i in ids}
                 return self._send(200, page("Weekly mission", mission_view.render_page(loaded, known, {k: v for k, v in titles.items() if v}, self._leg_states(loaded))
                                                                 + bought_view.render_open_flips(app.store.open_acquisitions()), app.state()))
+            if u.path == "/demo":  # F-51: the only door to demo/training data, deliberately not in NAV
+                return self._send(200, page("Demo / training data", live_demo.DEMO_PAGE, app.state()))
             if u.path == "/market":
                 return self._send(200, page("Michael's Marketplace", market_routes.page_body(app, qs, now), app.state(), flash))
             if u.path == "/wanted":

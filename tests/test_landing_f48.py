@@ -46,7 +46,7 @@ def test_best_next_move_ignores_training_items_everywhere():
 def test_http_pages_have_no_train_no_55_inch_no_unlabelled_500(ui):
     h = req(ui, "GET", "/market")[2]
     assert "TRAIN-" not in h and "55 inch" not in h and "Marketplace" in h
-    assert not re.search(r"\$\s?500(\.00)?\b", re.sub(r"<[^>]+>", " ", h))
+    assert not re.search(r"\$\s?500(\.00)?\b", re.sub(r"<[^>]+>", " ", re.sub(r"<div class='card small' id='working-capital'>.*?</div>", "", h, flags=re.S)))  # F-51: the labelled SETTING is allowed
 
 
 def test_bankroll_is_labelled_with_source_and_asof_and_recommends_nothing():

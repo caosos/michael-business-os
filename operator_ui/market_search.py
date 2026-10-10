@@ -24,6 +24,15 @@ CONDITIONS = ("", "new", "used", "salvage", "parts", "for parts", "not working",
 STALE_H = 6
 EXCLUDE_PREFIX = "exclude:"            # saved inside the campaign's nice_to_have, the only free-text list the frozen schema allows
 DEFAULT_BASE = "Conway AR"
+DEFAULT_RADIUS = 150.0                 # an editable starting radius around the base, not a budget
+DEFAULT_ANY = "trailer, equipment"     # the default view: trailers/equipment; "broad" mode (explicit, off by default) drops this focus
+PRICE_RANGE = (1, 20000)               # the price slider's range only: a control scale, NOT a budget or a spend authorization
+
+
+def working_capital() -> float:
+    """The documented working-capital planning setting (owner capital model: $500 protected principal). A setting, not verified cash."""
+    v = _num(os.environ.get("MBOS_WORKING_CAPITAL_USD"))
+    return 500.0 if v is None else v
 
 
 def cache_path() -> str:
@@ -42,6 +51,14 @@ def _terms(raw) -> list[str]:
     return [w.strip().lower() for w in re.split(r"[,\n]", raw or "") if w.strip()][:12]
 
 
+def _slider_price(g, box: str, slider: str, prev: str):
+    """No scripts run on this page (CSP), so the slider and the number box are two form fields. The slider wins only when the user moved it
+    (its value differs from the value the page rendered, `prev`); otherwise the typed number is used."""
+    lo, hi = PRICE_RANGE
+    moved = g(slider) != "" and g(slider) != g(prev)
+    return _num(g(slider)) if moved else _num(g(box)) if g(box) != "" else None
+
+
 def parse_query(qs: dict) -> dict:
     """Query string / saved form -> a clean filter dict. Bad numbers become None (ignored), never an exception."""
     g = lambda k: (qs.get(k) or [""])[0].strip() if isinstance(qs.get(k), list) else str(qs.get(k) or "").strip()  # noqa: E731
@@ -49,8 +66,11 @@ def parse_query(qs: dict) -> dict:
     closing = g("closing_by")
     if closing == "soon":
         closing = (datetime.now(timezone.utc) + timedelta(days=7)).strftime("%Y-%m-%d")
-    return {"keywords": g("keywords")[:120], "base": (g("base") or DEFAULT_BASE)[:60], "radius": _num(g("radius"), landing_fix.MAX_RADIUS),
-            "max_price": _num(g("max_price")), "condition": g("condition").lower()[:30], "required": _terms(g("required")),
+    fresh = not any(k in qs for k in ("keywords", "base", "radius", "max_price", "min_price", "any", "run", "edit"))
+    return {"keywords": g("keywords")[:120], "base": (g("base") or DEFAULT_BASE)[:60],
+            "radius": DEFAULT_RADIUS if fresh else _num(g("radius"), landing_fix.MAX_RADIUS),
+            "min_price": _slider_price(g, "min_price", "min_r", "prev_min"), "max_price": _slider_price(g, "max_price", "max_r", "prev_max"),
+            "any": _terms(DEFAULT_ANY if ("any" not in qs and not g("broad")) else g("any")), "broad": g("broad") == "1", "condition": g("condition").lower()[:30], "required": _terms(g("required")),
             "preferred": _terms(g("preferred")), "exclude": _terms(g("exclude")), "source": g("source") or "gsa",
             "kind": g("kind") or "any", "closing_by": closing if re.fullmatch(r"\d{4}-\d{2}-\d{2}", closing) else "",
             "sort": sort if sort in SORTS else "closing"}
@@ -61,7 +81,7 @@ def criteria_to_query(doc: dict) -> dict:
     c = doc.get("criteria") or {}
     nice = c.get("nice_to_have") or []
     return {"keywords": ", ".join(c.get("keywords") or []), "base": c.get("origin") or DEFAULT_BASE,
-            "radius": "" if c.get("radius_miles") is None else f"{c['radius_miles']:g}", "max_price": f"{c['max_price_usd']:g}" if "max_price_usd" in c else "",
+            "radius": "" if c.get("radius_miles") is None else f"{c['radius_miles']:g}", "any": "", "max_price": f"{c['max_price_usd']:g}" if "max_price_usd" in c else "",
             "required": ", ".join(c.get("must_have") or []),
             "preferred": ", ".join(t for t in nice if not t.startswith(EXCLUDE_PREFIX)),
             "exclude": ", ".join(t[len(EXCLUDE_PREFIX):] for t in nice if t.startswith(EXCLUDE_PREFIX))}
@@ -144,19 +164,37 @@ def tag_terms(card: dict, q: dict) -> dict | None:
     return tags
 
 
+def _price_ok(c: dict, q: dict):
+    """True / False against the min/max range, or None when the lot has no bid yet (price unknown: cannot be tested)."""
+    if q.get("min_price") is None and q.get("max_price") is None:
+        return True
+    if c["bid"] is None:
+        return None
+    return (q.get("min_price") is None or c["bid"] >= q["min_price"]) and (q["max_price"] is None or c["bid"] <= q["max_price"])
+
+
 def search(lots: list[dict], q: dict) -> tuple[list[dict], dict]:
-    """Filter + sort. A lot with no bid keeps its place (bid UNKNOWN); distance unknown is kept and labelled. -> (cards, hidden counts)."""
+    """The checked results and the hidden counts (see `partition` for the lots that could not be checked)."""
+    res, _, hidden = partition(lots, q)
+    return res, hidden
+
+
+def partition(lots: list[dict], q: dict) -> tuple[list[dict], list[dict], dict]:
+    """Filter + sort -> (checked results, unchecked, hidden counts). A lot whose distance (radius set) or price (price range set) is
+    unknown cannot be tested, so it goes to `unchecked` with its reasons and is never counted as local or in range."""
     hidden = {"price": 0, "radius": 0, "terms": 0, "condition": 0, "closing": 0}
-    out = []
+    out, unchecked = [], []
     words = [w for w in re.split(r"\s+|,", q["keywords"].lower()) if w]
     for c in lots:
         if any(w not in c["text"] for w in words):
             hidden["terms"] += 1
             continue
         tags = tag_terms(c, q)
-        if tags is None:
+        focus = q.get("any") and not q.get("broad") and not any(t in c["text"] or t in (c.get("category") or "").lower().replace("_", " ") for t in q["any"])
+        pok = _price_ok(c, q)
+        if tags is None or focus:
             hidden["terms"] += 1
-        elif q["max_price"] is not None and c["bid"] is not None and c["bid"] > q["max_price"]:
+        elif pok is False:
             hidden["price"] += 1
         elif q["radius"] is not None and c["distance"] is not None and c["distance"] > q["radius"]:
             hidden["radius"] += 1
@@ -165,10 +203,11 @@ def search(lots: list[dict], q: dict) -> tuple[list[dict], dict]:
         elif q["closing_by"] and c["closes"] and c["closes"] > q["closing_by"]:
             hidden["closing"] += 1
         else:
-            out.append({**c, "tags": tags})
+            why = (["location not found (distance unknown)"] if q["radius"] is not None and c["distance"] is None else []) + (["no bid yet (price unknown)"] if pok is None else [])
+            (unchecked if why else out).append({**c, "tags": tags, "unchecked": why})
     key = {"closing": lambda c: (c["closes"] or "9999", c["title"]), "bid": lambda c: (c["bid"] is None, c["bid"] or 0, c["title"]),
            "distance": lambda c: (c["distance"] is None, c["distance"] or 0, c["title"]), "title": lambda c: c["title"].lower()}[q["sort"]]
-    return sorted(out, key=key), hidden
+    return sorted(out, key=key), sorted(unchecked, key=key), hidden
 
 
 def decision(card: dict, comp: dict | None = None) -> tuple[str, str]:

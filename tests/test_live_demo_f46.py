@@ -80,7 +80,7 @@ def test_research_needed_replaces_the_sold_price_prompt():
 def test_http_demo_switch_banner_and_no_link(rt, ui, discover):
     iid, _ = ready(rt, discover)
     normal = req(ui, "GET", "/queue")[2]
-    assert iid not in normal and "TRAIN-" not in normal and "DEMO / TRAINING DATA" not in normal and "Show demo data" in normal
+    assert iid not in normal and "TRAIN-" not in normal and "DEMO / TRAINING DATA" not in normal and "Show demo data" not in normal
     assert not re.search(r"href=['\"][^'\"]*example\.invalid", normal)
     demo = req(ui, "GET", "/queue?demo=1")[2]
     assert iid in demo and "DEMO / TRAINING DATA, NOT REAL LISTINGS, DO NOT BUY" in demo and "Demo / training examples" in demo

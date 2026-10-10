@@ -52,11 +52,16 @@ def is_demo(item: dict | None) -> bool:
     return is_training(item) or not has_verified_source(item)
 
 
+DEMO_PAGE = ("<h1 class='pagehead'>Demo / training data</h1><div class='flash err'><b>This is a separate area.</b> Everything reachable from here is fictional "
+             "or training data, never real listings or real money. It is not part of the owner workflow, and nothing here is saved to your history.</div>"
+             "<div class='card'><ul><li><a href='/queue?demo=1'>Demo decision queue</a></li><li><a href='/?demo=1'>Demo Today view</a></li>"
+             "<li><a href='/resale?demo=1'>Demo resale lots</a></li></ul><p class='small'><a href='/market'>Back to the Marketplace</a></p></div>")
+
+
 def hidden_note(n: int, demo: bool) -> str:
     if demo:
         return "<p class='small'><a href='/'>Hide demo / training data</a></p>"
-    return (f"<p class='small mut'>Demo / training data is hidden ({n} item{'s' if n != 1 else ''}). "
-            "<a href='/?demo=1'>Show demo data</a> (never real listings).</p>")
+    return ""  # F-51: no demo/training pointer on normal routes; the explicit area is /demo
 
 
 def split_queue(store, q: dict) -> tuple[dict, dict]:
