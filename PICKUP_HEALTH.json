@@ -1,19 +1,8 @@
 {
  "account": "michaelos",
- "blockers": [
-  {
-   "attempts": 1,
-   "id": "ARYA-20261010-0514-pickup-base-race",
-   "needs": null,
-   "reason": "receipt not published: push rejected and rebase failed: error: could not apply c7ca90b... agent 01 pickup: COMPLETED ARYA-20261010-0512-f52-acceptance-gaps (F-53 queued)\nhint: Resolve all conflicts manually, mark them as resolved with\nhint: \"git add/rm <co",
-   "since": "2026-10-10T05:17:40Z"
-  }
- ],
- "coordinator_head": "6f54b16",
+ "blockers": [],
+ "coordinator_head": "6db5b1c",
  "counts": {
-  "BLOCKED": [
-   "ARYA-20261010-0514-pickup-base-race"
-  ],
   "COMPLETED": [
    "ARYA-20261010-0328-f49-verification",
    "ARYA-20261010-0353-marketplace-filter-acceptance",
@@ -26,7 +15,8 @@
    "ARYA-20261010-0447-blueprint-troubleshooting",
    "ARYA-20261010-0450-f52-acceptance-review",
    "ARYA-20261010-0453-f52-runtime-observation",
-   "ARYA-20261010-0512-f52-acceptance-gaps"
+   "ARYA-20261010-0512-f52-acceptance-gaps",
+   "ARYA-20261010-0514-pickup-base-race"
   ]
  },
  "currently_running": {
@@ -39,7 +29,7 @@
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-10T05:18:45Z",
+ "generated_at": "2026-10-10T05:19:10Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "nothing needed",
@@ -51,7 +41,7 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-10T05:18:45Z",
+  "observed_at": "2026-10-10T05:19:10Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
   "status": "busy",
