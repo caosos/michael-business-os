@@ -90,3 +90,10 @@ def test_the_earlier_one_shot_state_format_is_discarded_and_a_baseline_closes_hi
     assert nw.read_state() == {}
     lines, _ = step({"OLD": WAIT}, Q, {"OLD": {"first": 0, "last": 0, "count": 0, "closed": True}}, {}, 99999)
     assert not any("OLD" in l for l in lines)
+
+
+def test_history_ids_before_the_pickup_cutoff_or_oddly_named_are_never_announced():
+    inbox = {"2026-10-09-aria-owner-x": None, "ARIA-20261009-2100-old": None, "ARYA-20261010-2301-new": None}
+    lines, seen = step(inbox, Q, {}, {}, 0)
+    assert [l for l in lines if "INSTRUCTION" in l] == ["NEW INSTRUCTION ARYA-20261010-2301-new"]
+    assert "ARIA-20261009-2100-old" not in seen

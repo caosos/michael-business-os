@@ -28,6 +28,8 @@ INBOX = "origin/liaison/aria-to-agent-01"
 STATE = ROOT / "var" / "next_work_seen.json"
 RETRY_S = 600                                   # an unclaimed, still-eligible item is announced again after this long (A-65); polling stays 120 s
 AWAITING = "AWAITING the interactive engineering session"
+ID_RE = re.compile(r"^(ARIA|ARYA|DA)-(\d{8})-(\d{4})-")
+CUTOFF = "20261010-0000"                         # same history cutoff as pickup: older or oddly named ids are never announced
 
 
 def mine(row: dict) -> bool:
@@ -47,7 +49,11 @@ def new_items(inbox: dict, queue_text: str, seen: dict, eng: dict, now: float, r
     rows = foreman.parse_queue(queue_text)
     ready = {r["id"]: r for r in rows if re.match(r"READY", r["status"]) and mine(r) and foreman.deps_met(r, rows, set())}
     want = {}
-    for mid, ack in inbox.items():                # actionable: no ack yet, or pickup acked it as waiting for the engineering session
+    for mid, ack in inbox.items():
+        m = ID_RE.match(mid)
+        if not m or f"{m.group(2)}-{m.group(3)}" < CUTOFF:
+            continue                              # history, never actionable (the first A-65 run announced 26 of these: fixed)
+        # actionable: no ack yet, or pickup acked it as waiting for the engineering session
         if ack is None or AWAITING in ack:
             want[mid] = f"INSTRUCTION {mid}"
     for tid, r in ready.items():
