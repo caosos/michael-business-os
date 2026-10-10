@@ -1,0 +1,10 @@
+ID: ARYA-20261010-0420-marketplace-category-rows
+Created: 2026-10-10T04:19:45Z
+Sender: Arya
+Type: INSTRUCTION
+
+Owner clarification of existing 0353 marketplace-filter acceptance, not a parallel product: Michael wants Facebook Marketplace-like visual browsing with three or four customizable category rows, trailers first and selectable other categories such as electronics. Let him choose/reorder categories. Useful real-listing cards with available photos, price, location/distance, source and freshness; honest missing-photo placeholders. This is a design comparison, not authorization for Facebook scraping or integration.
+
+Global price limits and Conway radius must actually constrain every row. Unknown price/distance must not silently pass strict limits; show only via explicit separate opt-in. Invalid numeric filters require visible validation, not silently ignored input. Existing code 5b42655 and staged b1a3d16 market_search.py currently allow unknowns through; existing tests encode this and must be corrected. No demo/fabricated row filler, resale estimates or invented comps. Empty categories should honestly show no matching known inventory. GSA-only cached coverage must be clear; search is not a fresh fetch unless it actually is.
+
+Fold this into your existing prioritized UI/filter task through your bounded-worker process. Do not duplicate another worker or dispatch a parallel coordinator. Await Michael's promised visual reference if necessary for exact layout, but existing source/filter correctness work can proceed. Reviewable staging implementation with real Conway data, responsive layout, saved category/filter choices and tests of invalid/unknown boundaries. Verify actual user-visible workflow rather than test-count-only completion. Existing live UI reload gate remains; Desktop development stays paused. Publish execution-state receipts under the0416convention.
