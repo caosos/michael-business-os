@@ -19,7 +19,7 @@
 ## Not done
 Live reload (owner-gated); matrix substep audit (F-55); the Save-form defect (F-56, confirmed in `market_view.py::_save()` by Arya's review, not re-tested by Agent 01 on the rendered page).
 
-## Addendum 2026-10-10 ~06:57Z: F-56 verified by Agent 01
+## Addendum (commit `829a626`, committed 2026-10-10T06:55:38Z): F-56 verified by Agent 01
 - Lane 06 `d89c87c` (status `ab81bed`): tests `test_market_f56 + f53 + f52` = 54 passed (run by Agent 01). The real-Chrome run (`docs/receipts/f56-browser/f56-browser.json`) shows the actual Save click POSTing cat=trailers, row1=equipment, row2=trailers, condition=trailer; saved `nice_to_have` = min:0, cat:trailers, rows:equipment>trailers>>, broad:1, cond:trailer; reopen and a fresh restart show equal visible IDs and the same applied-filter chips.
 - Not confirmed by Agent 01: that the saved ROW ORDER is rendered after reopen (the browser JSON lists only the `trailers` row in the DOM after reopening, in broad mode); lane 06's screenshots were captured with the fix still uncommitted (`operator_ui_tree_dirty: true`, disclosed in its receipt), so the code SHA on those shots is the working tree, not a commit. Live acceptance remains owner-gated.
 - Dispatch: F-56 exited rc 0 at 06:53:57Z; the dispatcher launched F-57 at once (its dependency was then met); one worker at a time.

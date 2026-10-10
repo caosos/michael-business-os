@@ -1,12 +1,12 @@
 # Live :8766 reload and rollback packet (PREPARED, NOT APPROVED, NOT RUN)
 
-Prepared by Agent 01, 2026-10-10 ~07:25Z. **No live reload has been approved.** The F-48 reload authorization (02:04Z) was used once. This packet is the one narrow decision the owner would make.
+Prepared by Agent 01 in commit `206e484` (committed 2026-10-10T07:15:50Z). **No live reload has been approved.** The F-48 reload authorization (02:04Z) was used once. This packet is the one narrow decision the owner would make.
 
 ## What is live now (observed)
 - :8766 runs `mbos-dev-ui` PID 3235972, started 2026-10-10T02:04:45Z, loading the **F-48** export from `var/lanes/agent-06` (F-49 to F-57 are NOT live). Landing redirects to `/market`; `/mission` `/summary` `/digest` `/ledger` still show the fictional TV; no min/max price, no browse-first gallery, rounded radius.
 
 ## The artifact
-- Lane 06 `research/agent-06-communications` @ **`026058e`** (F-57 `85c416d`/`ebdb158`; includes F-49 to F-57). Final evidence: `docs/handoff/F-51-F-52-acceptance-matrix.md` (41 PASS / 5 PARTIAL / 0 NOT RUN on this artifact, with who ran what), screenshots `docs/receipts/f57-real-cache-screenshots/`, `docs/receipts/f57-save-restart-proof/`.
+- Lane 06 `research/agent-06-communications` @ **`026058e`** (F-57 `85c416d`/`ebdb158`; includes F-49 to F-57). Final evidence: `docs/handoff/F-51-F-52-acceptance-matrix.md` (39 PASS / 6 PARTIAL / 1 FAIL / 0 NOT RUN on this artifact, with who ran what; A17 FAILS: a saved search drops its 'any of' focus terms, fix queued as F-59), screenshots `docs/receipts/f57-real-cache-screenshots/`, `docs/receipts/f57-save-restart-proof/`.
 - Gates on `026058e`: reference 380 passed / 1 failed (`test_resale_f39` socket TimeoutError in the full run, passes alone 4/4: unresolved, not a pass); lane D+E 105 passed / 2 failed (known F-32 pair). Not all green.
 
 ## The change (one command, after approval)
@@ -23,6 +23,7 @@ Prepared by Agent 01, 2026-10-10 ~07:25Z. **No live reload has been approved.** 
 4. Saved-search persistence on the LIVE database needs the owner's PIN: this is the part Agent 01 cannot do; the owner clicks Save, reopens, and (optionally) the UI is restarted. Until then persistence is proven only on an isolated stub store.
 
 ## Known limits that remain after the reload
+- **Saved searches silently drop their 'any of' focus terms (matrix A17 FAIL, ARYA-0717)**: reopening a saved search can broaden it. Recommended: do not rely on saved searches until F-59 lands; this is a reason to wait for F-59 before the reload if the owner wants saved searches.
 - GSA photos need a GSA login: cards show a tile, never an image. Desktop is denser but not five-across everywhere (matrix B01 PARTIAL); on a phone the first card's price and title need scrolling (B03 PARTIAL). With categories checked, the Row 1-4 selectors are retained but not used for display (rows apply when none is checked). The cache is stale (fetched 2026-10-10T00:19Z) and the page says so.
 
 ## Cache refresh (existing supported route, nothing new)

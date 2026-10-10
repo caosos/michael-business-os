@@ -1,11 +1,11 @@
 {
  "campaigns": {
-  "cmp_QHTABFHJJE0RPG1NMWQ2WGSSV5": {
+  "cmp_MNRB6PHVXX50SKZWKS0SPP3VSG": {
    "doc": {
     "autonomy": {
      "level": "RECOMMEND"
     },
-    "campaign_id": "cmp_QHTABFHJJE0RPG1NMWQ2WGSSV5",
+    "campaign_id": "cmp_MNRB6PHVXX50SKZWKS0SPP3VSG",
     "campaign_version": "1.0.0",
     "criteria": {
      "category": "marketplace",
@@ -31,7 +31,7 @@
    },
    "history": [
     {
-     "at": "2026-10-10T07:12:23.417274Z",
+     "at": "2026-10-10T07:19:32.031856Z",
      "by": "michael",
      "what": "created (RECOMMEND)"
     }

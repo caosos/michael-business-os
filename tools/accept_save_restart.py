@@ -45,7 +45,8 @@ def read_state(pg) -> dict:
         rows:[1,2,3,4].map(n=>{const s=document.querySelector("select[name=row"+n+"]");return s?s.value:null}),
         condition:(document.querySelector("input[name=condition][size]")||{}).value||'',
         row_sections_in_dom_order:[...document.querySelectorAll('.mk-row')].map(r=>r.dataset.row),
-        chips:(document.querySelector('.mk-chips')||{innerText:''}).innerText.replace(/\\s+/g,' ')})""")
+        chips:(document.querySelector('.mk-chips')||{innerText:''}).innerText.replace(/\\s+/g,' '),
+        visible_known_ids:[...document.querySelectorAll('.mk-g')].filter(g=>!g.closest('#unchecked-section')).map(g=>{const a=g.querySelector('a.listing-link');const m=a&&a.href.match(/preview\\/(\\d+)/);return m?m[1]:null}).filter(Boolean).sort()})""")
 
 
 def main() -> int:
@@ -120,7 +121,14 @@ def main() -> int:
         s = log[k]
         ok[k] = sorted(s["cats"]) == sorted(WANT["cats"]) and s["rows"] == WANT["rows"] and s["condition"] == WANT["condition"]
     dom = [r for r in log["after_process_restart"]["row_sections_in_dom_order"] if r != "other"]
-    log["verdict"] = {"scenario": a.scenario, "reopen_retains_categories_rows_condition": ok["after_reopen"], "restart_retains_categories_rows_condition": ok["after_process_restart"],
+    mode = lambda st: (re.search(r"Mode:.*?(?=Max price|Min price|Condition|$)", st["chips"]) or [""])[0].strip()
+    same_mode = {k: mode(log[k]) == mode(log["after_search"]) for k in ("after_reopen", "after_process_restart")}
+    same_ids = {k: log[k]["visible_known_ids"] == log["after_search"]["visible_known_ids"] for k in ("after_reopen", "after_process_restart")}
+    ok["applied_focus_unchanged"] = all(same_mode.values())
+    ok["visible_known_ids_unchanged"] = all(same_ids.values())
+    log["verdict"] = {"applied_mode_before_save": mode(log["after_search"]), "applied_mode_after_reopen": mode(log["after_reopen"]), "applied_mode_after_restart": mode(log["after_process_restart"]),
+                      "applied_focus_unchanged_after_reopen_and_restart": ok["applied_focus_unchanged"], "visible_known_ids_unchanged_after_reopen_and_restart": ok["visible_known_ids_unchanged"],
+                      "scenario": a.scenario, "reopen_retains_categories_rows_condition": ok["after_reopen"], "restart_retains_categories_rows_condition": ok["after_process_restart"],
                       "displayed_section_order_after_restart": dom,
                       "displayed_order_equals_chosen_rows": dom == [r for r in WANT["rows"] if r] if not WANT["cats"] else "n/a (checked categories replace the row slots by design)"}
     if not WANT["cats"]:
