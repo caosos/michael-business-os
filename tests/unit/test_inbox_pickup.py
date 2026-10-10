@@ -251,3 +251,27 @@ def test_stale_or_null_reading_is_unknown_with_age_never_idle():                
     assert ph.session_status({"session": {"status": None, "observed_at": "2026-10-10T04:59:59Z"}}, t)["status"] == "UNKNOWN"
     assert ph.session_status({}, t)["status"] == "UNKNOWN"
     assert ph.TTL_IDLE >= 2 * ph.IDLE_PUBLISH_S and ph.TTL_BUSY >= 2 * ph.BUSY_PUBLISH_S
+
+
+def test_docs_guard_ignores_code_pushed_by_others_after_the_run_started(world, tmp_path):
+    mid = "ARYA-20261010-0910-moved"
+    world.send(mid, "Type: TASK_REQUEST\nwork\n")
+
+    def good_while_origin_moves(m, wt, dry):
+        other = tmp_path / "other"                      # someone pushes CODE to the coordinator branch while the executor runs
+        subprocess.run(["git", "clone", "-q", "-b", "research/agent-01-coordinator", str(world.origin), str(other)], check=True, capture_output=True)
+        (other / "tools").mkdir(exist_ok=True)
+        (other / "tools/new_code.py").write_text("x = 1")
+        g(other, "add", "-A"); g(other, "commit", "-qm", "code"); g(other, "push", "-q", "origin", "research/agent-01-coordinator")
+        ip.pg.fetch()
+        (wt / "docs/receipts/pickup").mkdir(parents=True, exist_ok=True)
+        (wt / f"docs/receipts/pickup/{m}.md").write_text("done")
+        a = wt / f"docs/messages/acks/{m}.md"
+        a.write_text(a.read_text().replace("**Stage:** ACKED", "**Stage:** COMPLETED"))
+        return {"ok": True, "process_ok": True}
+
+    store = pickup_state.Store(world.dir)
+    ip.pg.fetch()
+    r = ip.deliver(mid, store, False, executor=good_while_origin_moves)
+    assert r == "COMPLETED", store.get(mid).get("blocked")
+    assert "tools/new_code.py" in world.files("research/agent-01-coordinator", "tools")        # their code survived the rebase and our docs landed

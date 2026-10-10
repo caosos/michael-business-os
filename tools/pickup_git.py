@@ -76,15 +76,18 @@ def publish(wt: Path) -> tuple[bool, str]:
         if r.returncode == 0:
             return True, git("rev-parse", "--short", "HEAD", cwd=wt).stdout.strip()
         git("fetch", "-q", "origin", cwd=wt)
-        if git("rebase", "-q", "origin/" + COORD, cwd=wt).returncode != 0:
+        rb = git(*IDENT, "rebase", "-q", "origin/" + COORD, cwd=wt)
+        if rb.returncode != 0:
             git("rebase", "--abort", cwd=wt)
-            return False, "push rejected and rebase conflicted: " + r.stderr.strip()[:140]
+            return False, "push rejected and rebase failed: " + (rb.stderr.strip() or rb.stdout.strip())[:200]
     return False, "push rejected twice"
 
 
 def changed_files(wt: Path) -> list[str]:
-    """Files this run changed versus the coordinator head (committed + uncommitted + untracked)."""
-    a = git("diff", "--name-only", "origin/" + COORD, cwd=wt).stdout.split()
+    """Files THIS run changed: committed since the fork point (merge-base with the coordinator branch, so commits others pushed meanwhile are not
+    counted), plus uncommitted and untracked files."""
+    base = git("merge-base", "HEAD", "origin/" + COORD, cwd=wt).stdout.strip() or "origin/" + COORD
+    a = git("diff", "--name-only", base, cwd=wt).stdout.split()
     b = git("ls-files", "--others", "--exclude-standard", cwd=wt).stdout.split()
     return sorted(set(a + b))
 
