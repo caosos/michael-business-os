@@ -108,7 +108,7 @@ The ACK file docs/messages/acks/{mid}.md already exists: if its Stage says COMPL
 2. Anything that needs code, a live restart, spending, bids, contact, or other projects: do NOT do it; add a READY_QUEUE row for the right lane or state the exact owner decision needed.
 3. Write docs/receipts/pickup/{mid}.md (what you did, evidence links, tests with numbers, remaining blockers) and replace the ack's Stage line with `COMPLETED` or `BLOCKED: <reason>`.
 4. `git add docs`, commit, `git push origin HEAD`. Print a final JSON line {{"task":"{mid}","status":"DONE|BLOCKED","commit":"<sha>","notes":"<one line>"}}.
-Hard rules: dry-run only; never touch other branches or projects; no secrets in files."""
+Hard rules: dry-run only; stay on the branch you are on (do not create, switch or reset branches, do not rebase; the watcher publishes for you); never touch other branches or projects; no secrets in files."""
 
 
 def run_work(mid: str, wt: Path, dry: bool) -> dict[str, Any]:
