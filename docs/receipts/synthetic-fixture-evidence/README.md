@@ -1,0 +1,3 @@
+# SYNTHETIC security-test evidence — NOT marketplace acceptance
+
+`SYNTHETIC-f54-B01-adversarial-fixture-1648x1000.png` was captured by `tools/f54_browser.py` from the nine-item adversarial fixture (`tests/fixtures/gsa_live/active-auctions.json` with a planted `<script>`/`onerror` title) at a 25,000-mile radius in broad mode. It proves HTML escaping and layout robustness only. It is not real inventory and must not be used to judge the listings-first layout. Real-cache evidence: `docs/receipts/f55-real-cache-screenshots/`. (`tools/f54_browser.py` still writes B01 to its OUTDIR; move the file here when re-running.)
