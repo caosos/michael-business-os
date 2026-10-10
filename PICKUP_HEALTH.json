@@ -1,7 +1,7 @@
 {
  "account": "michaelos",
  "blockers": [],
- "coordinator_head": "44bda63",
+ "coordinator_head": "bab7c23",
  "counts": {
   "COMPLETED": [
    "ARYA-20261010-0328-f49-verification",
@@ -21,7 +21,7 @@
    "ARYA-20261010-0530-owner-resume-included-quota",
    "ARYA-20261010-0532-quota-observation"
   ],
-  "FETCHED": [
+  "RUNNING": [
    "ARYA-20261010-0551-f53-staging-acceptance"
   ]
  },
@@ -35,7 +35,7 @@
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-10T05:51:45Z",
+ "generated_at": "2026-10-10T05:51:59Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "nothing needed",
@@ -47,7 +47,7 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-10T05:51:45Z",
+  "observed_at": "2026-10-10T05:51:59Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
   "status": "busy",
