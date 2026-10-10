@@ -309,3 +309,15 @@ def test_pause_stops_dispatcher_and_worker_launcher(monkeypatch, tmp_path):
     out = wk.run_one("F-99", "06", wk.router.TaskProfile(task_id="F-99", lane="06", kind="implement", risk="low", cross_lane=False, long_horizon=False),
                      worktree=tmp_path, dry=False, model=None, queue_text="| F-99 | P0 | t | none | READY | 06 | x |")
     assert out["ok"] is False and "PAUSED_BY_OWNER" in out["error"]
+
+
+def test_a_pause_citing_a_cancelled_instruction_is_ignored_and_never_reexecuted(world, monkeypatch, tmp_path):
+    import pause as pz
+    flag, ledger = tmp_path / "PAUSED_BY_OWNER", tmp_path / "SUPERSEDED.json"
+    ledger.write_text(json.dumps({"_note": "x", "ARYA-20261010-0528-owner-pause-compute": {"superseded_by": "ARYA-20261010-0530-owner-resume"}}))
+    monkeypatch.setattr(pz, "FLAG", flag); monkeypatch.setattr(pz, "SUPERSEDED", ledger)
+    flag.write_text("PAUSED_BY_OWNER (owner via ARYA-20261010-0528-owner-pause-compute)")
+    assert pz.reason() is None                                                # stale flag: ignored
+    flag.write_text("PAUSED_BY_OWNER (owner via ARYA-20261010-0600-new-pause)")
+    assert "0600" in pz.reason()                                              # a genuinely new pause still works
+    assert not ip.eligible("ARYA-20261010-0528-owner-pause-compute") and ip.eligible("ARYA-20261010-0600-new-pause")

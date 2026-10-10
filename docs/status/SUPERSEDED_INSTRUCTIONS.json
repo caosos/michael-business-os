@@ -1,0 +1,9 @@
+{
+  "_note": "Instructions the owner has cancelled. tools/pause.py ignores a pause flag that cites one of these ids, and tools/inbox_pickup.py never executes them. Append-only; history is not rewritten.",
+  "ARYA-20261010-0528-owner-pause-compute": {
+    "superseded_by": "ARYA-20261010-0530-owner-resume-included-quota",
+    "owner_cancelled_at": "2026-10-10T05:30:00Z",
+    "recorded_by": "Agent 01",
+    "recorded_at": "2026-10-10T05:38Z"
+  }
+}

@@ -42,7 +42,7 @@ MAX_ATTEMPTS, RETRY_S, HEARTBEAT_S = 3, 600, 600
 
 def eligible(mid: str, cutoff: str = CUTOFF) -> bool:
     m = ID_RE.match(mid)
-    return bool(m) and m.group(1) in SENDERS and f"{m.group(2)}-{m.group(3)}" >= cutoff
+    return bool(m) and m.group(1) in SENDERS and f"{m.group(2)}-{m.group(3)}" >= cutoff and mid not in pause.superseded_ids()
 
 
 def is_ping(body: str) -> Optional[str]:
