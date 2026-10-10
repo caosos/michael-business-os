@@ -1,7 +1,7 @@
 {
  "account": "michaelos",
  "blockers": [],
- "coordinator_head": "dd5e199",
+ "coordinator_head": "206e484",
  "counts": {
   "COMPLETED": [
    "ARYA-20261010-0328-f49-verification",
@@ -28,16 +28,22 @@
    "ARYA-20261010-0644-verify-dispatcher-adoption",
    "ARYA-20261010-0703-final-staging-closeout",
    "ARYA-20261010-0706-f58-row-order-proof"
+  ],
+  "FETCHED": [
+   "ARYA-20261010-0717-saved-any-filter"
   ]
  },
- "currently_running": null,
+ "currently_running": {
+  "id": "ARYA-20261010-0717-saved-any-filter",
+  "started_at": "2026-10-10T07:17:48Z"
+ },
  "delivery_interface": {
   "claude_cli": true,
   "quota": "session 47.0% / week 14.0% are under the limits",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-10T07:07:37Z",
+ "generated_at": "2026-10-10T07:17:48Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "nothing needed",
@@ -49,11 +55,11 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-10T07:07:37Z",
+  "observed_at": "2026-10-10T07:17:48Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
-  "status": "idle",
-  "ttl_sec": 1200
+  "status": "busy",
+  "ttl_sec": 300
  },
  "watcher": {
   "ack_branch": "research/agent-01-coordinator",
