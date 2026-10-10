@@ -1,8 +1,19 @@
 {
  "account": "michaelos",
- "blockers": [],
- "coordinator_head": "45bd2a4",
+ "blockers": [
+  {
+   "attempts": 1,
+   "id": "ARYA-20261010-0528-owner-pause-compute",
+   "needs": "interactive coordinator or owner (see the ack)",
+   "reason": "queue hold + PAUSED_BY_OWNER recorded, but F-53 worker (pid 3399484), dispatcher and pickup daemon are still running and need a host/owner stop; see receipt",
+   "since": "2026-10-10T05:29:31Z"
+  }
+ ],
+ "coordinator_head": "fedc397",
  "counts": {
+  "BLOCKED": [
+   "ARYA-20261010-0528-owner-pause-compute"
+  ],
   "COMPLETED": [
    "ARYA-20261010-0328-f49-verification",
    "ARYA-20261010-0353-marketplace-filter-acceptance",
@@ -17,9 +28,6 @@
    "ARYA-20261010-0453-f52-runtime-observation",
    "ARYA-20261010-0512-f52-acceptance-gaps",
    "ARYA-20261010-0514-pickup-base-race"
-  ],
-  "RUNNING": [
-   "ARYA-20261010-0528-owner-pause-compute"
   ]
  },
  "currently_running": {
@@ -28,11 +36,11 @@
  },
  "delivery_interface": {
   "claude_cli": true,
-  "quota": "session 6.0% / week 8.0% are under the limits",
+  "quota": "session 7.0% / week 9.0% are under the limits",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-10T05:29:13Z",
+ "generated_at": "2026-10-10T05:29:31Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "nothing needed",
@@ -44,7 +52,7 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-10T05:29:13Z",
+  "observed_at": "2026-10-10T05:29:31Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
   "status": "busy",
