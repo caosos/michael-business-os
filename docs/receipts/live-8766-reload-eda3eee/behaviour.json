@@ -1,0 +1,52 @@
+{
+ "searchnow_in_filter_card": {
+  "text": "Search Now",
+  "inForm": false,
+  "inFilterCard": true,
+  "parent": "card",
+  "form": null
+ },
+ "state_controls": "52 state inputs (checkbox list + state_find)",
+ "conway150": {
+  "n": 12,
+  "chips": "Applied filters: Origin: Conway, AR (ZIP 72032)Radius: 150 mi (known distances only); Location mode: By Distance (states not applied)Mode: repairable trailers/equipment focus: trailer, equipment",
+  "err": "",
+  "maxbid": 0
+ },
+ "price1000": {
+  "n": 2,
+  "chips": "Applied filters: Origin: Conway, AR (ZIP 72032)Radius: 150 mi (known distances only); Location mode: By Distance (states not applied)Mode: repairable trailers/equipment focus: trailer, equipmentMax price: $1,000",
+  "err": "",
+  "maxbid": 0
+ },
+ "radius_neg": {
+  "n": 0,
+  "chips": "",
+  "err": "",
+  "maxbid": 0
+ },
+ "state_AR": {
+  "n": 53,
+  "chips": "Applied filters: Origin: Conway, AR (ZIP 72032)Radius: none; Location mode: By Distance (states not applied)Mode: repairable trailers/equipment focus: trailer, equipment",
+  "err": "",
+  "maxbid": 0
+ },
+ "state_AR_150": {
+  "n": 12,
+  "chips": "Applied filters: Origin: Conway, AR (ZIP 72032)Radius: 150 mi (known distances only); Location mode: By Distance (states not applied)Mode: repairable trailers/equipment focus: trailer, equipment",
+  "err": "",
+  "maxbid": 0
+ },
+ "radius10_36": {
+  "n": 10,
+  "chips": "Applied filters: Origin: Conway, AR (ZIP 72032)Radius: 10.36 mi (known distances only); Location mode: By Distance (states not applied)Mode: repairable trailers/equipment focus: trailer, equipment",
+  "err": "",
+  "maxbid": 0
+ },
+ "radius10_34": {
+  "n": 0,
+  "chips": "Applied filters: Origin: Conway, AR (ZIP 72032)Radius: 10.34 mi (known distances only); Location mode: By Distance (states not applied)Mode: repairable trailers/equipment focus: trailer, equipment",
+  "err": "",
+  "maxbid": 0
+ }
+}

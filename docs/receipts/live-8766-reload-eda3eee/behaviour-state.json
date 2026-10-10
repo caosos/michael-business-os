@@ -1,0 +1,22 @@
+{
+ "state_AR": {
+  "n": 12,
+  "chips": "Applied filters: Origin: Conway, AR (ZIP 72032)Location: By State: AR; the radius is NOT appliedMode: repairable trailers/equipment focus: trailer, equipment",
+  "err": ""
+ },
+ "state_AR_TX": {
+  "n": 31,
+  "chips": "Applied filters: Origin: Conway, AR (ZIP 72032)Location: By State: AR, TX; the radius is NOT appliedMode: repairable trailers/equipment focus: trailer, equipment",
+  "err": ""
+ },
+ "state_none": {
+  "n": 0,
+  "chips": "",
+  "err": ""
+ },
+ "state_AR_radius_kept": {
+  "n": 12,
+  "chips": "Applied filters: Origin: Conway, AR (ZIP 72032)Location: By State: AR; the radius is NOT appliedMode: repairable trailers/equipment focus: trailer, equipment",
+  "err": ""
+ }
+}

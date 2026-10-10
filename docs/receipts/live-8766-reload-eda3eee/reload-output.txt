@@ -1,0 +1,4 @@
+prerequisites OK: export eda3eee6d303ab6ee1df419b66d54c831d7d8b1d tree 6e1acdeba53aa954fc3443acc77a6cf6308bc4aa0b23dfcd0395cee51e875587; verified backup var/lanes/agent-06.prev-20261010T205417Z
+baseline of the current UI: /market HTTP 200, marketplace marker 1
+stop 2026-10-10T20:54:18Z
+done 2026-10-10T20:54:30Z: serving eda3eee6d303ab6ee1df419b66d54c831d7d8b1d. Identity = the files on disk hash to the artifact + the session was restarted after the swap + the route markers above. LIMITATION: this is not a SHA returned by the running process; no process-level version endpoint exists. Rollback copy kept at var/lanes/agent-06.prev-20261010T205417Z
