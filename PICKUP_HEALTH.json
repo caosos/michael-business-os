@@ -22,16 +22,22 @@
    "ARYA-20261010-0416-status-and-progression",
    "ARYA-20261010-0420-marketplace-category-rows",
    "ARYA-20261010-0431-execution-handoff-proof"
+  ],
+  "FETCHED": [
+   "ARYA-20261010-0447-blueprint-troubleshooting"
   ]
  },
- "currently_running": null,
+ "currently_running": {
+  "id": "ARYA-20261010-0447-blueprint-troubleshooting",
+  "started_at": "2026-10-10T04:48:06Z"
+ },
  "delivery_interface": {
   "claude_cli": true,
   "quota": "session 55.0% / week 7.0% are under the limits",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-10T04:44:00Z",
+ "generated_at": "2026-10-10T04:48:06Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "nothing needed",
@@ -43,11 +49,11 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-10T04:44:00Z",
+  "observed_at": "2026-10-10T04:48:06Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
-  "status": "idle",
-  "ttl_sec": 1200
+  "status": "busy",
+  "ttl_sec": 300
  },
  "watcher": {
   "ack_branch": "research/agent-01-coordinator",
