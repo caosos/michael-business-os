@@ -1,0 +1,43 @@
+{
+ "verdict": "PASS (fidelity)",
+ "scope": "every displayed lot ID exists in the cache copy, appears once, its original link equals the cache itemDescURL, and its title matches the cache itemName. Completeness of the filtered set is covered by F-54's set-equality run, not recomputed here.",
+ "cache_sha256": "d02f3acc4a6eef4b7abd4065c2dc5d4370dd6064fe0bba1b385ec6a8fa154ba7",
+ "cache_as_of_utc": "2026-10-10T00:19:23.772932+00:00",
+ "code": {
+  "sha": "b0b598095eaffdf0c3bf6dd89ee38080760b9697",
+  "tree_dirty": true,
+  "branch": "research/agent-06-communications"
+ },
+ "scenarios": {
+  "s1-conway-trailer": {
+   "query": "go=1&base=Conway+AR&keywords=trailer&radius=150&max_price=5000",
+   "displayed": 6,
+   "unique": 6,
+   "unknown_ids": [],
+   "duplicate_ids": [],
+   "link_mismatch": [],
+   "title_mismatch": [],
+   "pass_fidelity": true
+  },
+  "s2-conway-tight": {
+   "query": "go=1&base=Conway+AR&keywords=trailer&radius=25&max_price=1000",
+   "displayed": 4,
+   "unique": 4,
+   "unknown_ids": [],
+   "duplicate_ids": [],
+   "link_mismatch": [],
+   "title_mismatch": [],
+   "pass_fidelity": true
+  },
+  "s3-broad-browse": {
+   "query": "go=1&base=Conway+AR&broad=1&radius=150",
+   "displayed": 154,
+   "unique": 154,
+   "unknown_ids": [],
+   "duplicate_ids": [],
+   "link_mismatch": [],
+   "title_mismatch": [],
+   "pass_fidelity": true
+  }
+ }
+}

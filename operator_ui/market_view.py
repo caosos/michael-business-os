@@ -190,7 +190,9 @@ def chips(q: dict) -> str:
 
 def _save(q: dict, cid: str | None, tok, pin_html: str) -> str:
     v = lambda k: e(", ".join(q[k]) if isinstance(q.get(k), list) else q.get(k) if q.get(k) is not None else "")  # noqa: E731
-    keep = "".join(f"<input type='hidden' name='{k}' value='{v(k)}'>" for k in ("keywords", "base", "radius", "min_price", "max_price", "any", "required", "preferred", "exclude"))
+    keep = "".join(f"<input type='hidden' name='{k}' value='{v(k)}'>" for k in ("keywords", "base", "radius", "min_price", "max_price", "any", "required", "preferred", "exclude", "condition"))
+    keep += f"<input type='hidden' name='cat' value='{e(','.join(q.get('cats') or []))}'>" if q.get("cats") else ""        # F-56: these were dropped, so a real Save lost them
+    keep += "".join(f"<input type='hidden' name='row{i}' value='{e(r)}'>" for i, r in enumerate(q.get("rows") or [], 1) if i <= 4)
     keep += "<input type='hidden' name='broad' value='1'>" if q.get("broad") else ""
     return (f"<details id='save-search'{' open' if cid else ''}><summary>{'Edit saved search' if cid else 'Save this search'}</summary>"
             f"<form method='post' action='/market/{'%s/edit' % e(cid) if cid else 'save'}' class='mk-form'>{tok()}{keep}"
@@ -280,7 +282,7 @@ def render_page(q: dict, d: dict, results: list[dict], hidden: dict, saved: list
 
 def save_form(f: dict) -> dict:
     """Marketplace form -> the Wanted campaign form fields (exclude terms ride in nice_to_have as `exclude:word`)."""
-    q = ms.parse_query({k: [v] for k, v in f.items()})
+    q = ms.parse_query({k: ([c for c in v.split(",") if c.strip()] if k == "cat" else [v]) for k, v in f.items()})   # F-56: `cat` is posted comma-joined (a form keeps one value per name)
     nice = list(q["preferred"]) + [ms.EXCLUDE_PREFIX + t for t in q["exclude"]]
     nice += ([f"min:{q['min_price']:g}"] if q["min_price"] is not None else []) + ([f"cat:{'>'.join(q['cats'])}"] if q["cats"] else []) \
         + ([f"rows:{'>'.join(q['rows'])}"] if q["rows"] != list(ms.DEFAULT_ROWS) else []) + (["broad:1"] if q["broad"] else []) + ([f"cond:{q['condition']}"] if q["condition"] else [])

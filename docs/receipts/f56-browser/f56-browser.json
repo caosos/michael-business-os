@@ -1,0 +1,34 @@
+{
+ "checks": {
+  "post_fields_from_real_click": {
+   "cat": "trailers",
+   "row1": "equipment",
+   "row2": "trailers",
+   "row3": "",
+   "row4": "",
+   "condition": "trailer"
+  },
+  "saved_nice_to_have": [
+   "min:0",
+   "cat:trailers",
+   "rows:equipment>trailers>>",
+   "broad:1",
+   "cond:trailer"
+  ],
+  "reopen": {
+   "visible_known_ids": 1,
+   "expected": 1,
+   "ids_equal": true,
+   "chips": "Applied filters: Origin: Conway AR (ZIP 72032)Radius: 300 mi (known distances only)Mode: BROAD inventory (all categories)Min price: $0Max price: $50,000Condition: trailer",
+   "rows_in_dom_order": [
+    "trailers"
+   ]
+  },
+  "restart": {
+   "ids_equal": true,
+   "visible_known_ids": 1,
+   "chips": "Applied filters: Origin: Conway AR (ZIP 72032)Radius: 300 mi (known distances only)Mode: BROAD inventory (all categories)Min price: $0Max price: $50,000Condition: trailer"
+  }
+ },
+ "verdict": "PASS"
+}
