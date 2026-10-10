@@ -7,12 +7,20 @@
    "needs": "interactive coordinator or owner (see the ack)",
    "reason": "release execution needs the Agent 01 engineering session (live restart); row A-58 added, docs reconciled",
    "since": "2026-10-10T19:55:58Z"
+  },
+  {
+   "attempts": 0,
+   "id": "ARYA-20261010-2133-engineering-proof",
+   "needs": "interactive engineering session",
+   "reason": "awaiting the interactive engineering session (pickup acked only, never executes or completes it)",
+   "since": "2026-10-10T21:34:18Z"
   }
  ],
- "coordinator_head": "16c61e3",
+ "coordinator_head": "93f7802",
  "counts": {
   "BLOCKED": [
-   "ARYA-20261010-1954-authorized-ui-release"
+   "ARYA-20261010-1954-authorized-ui-release",
+   "ARYA-20261010-2133-engineering-proof"
   ],
   "COMPLETED": [
    "ARYA-20261010-0328-f49-verification",
@@ -72,9 +80,6 @@
    "ARYA-20261010-2125-clean-route-acceptance",
    "ARYA-20261010-2127-a63-dependency-reconcile",
    "ARYA-20261010-2129-a61-integrity-provenance"
-  ],
-  "FETCHED": [
-   "ARYA-20261010-2133-engineering-proof"
   ]
  },
  "currently_running": {
@@ -87,7 +92,7 @@
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-10T21:34:15Z",
+ "generated_at": "2026-10-10T21:34:18Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "nothing needed",
@@ -99,7 +104,7 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-10T21:34:15Z",
+  "observed_at": "2026-10-10T21:34:18Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
   "status": "busy",
