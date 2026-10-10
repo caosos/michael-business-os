@@ -563,3 +563,6 @@ Any new Business OS / Deal Sniffer agent should read this document after START_H
 - marketing/merchandising
 
 If this document conflicts with a later explicit Michael decision or accepted ADR, the later explicit decision wins and this document should be amended with provenance.
+
+## Current /market status pointer (ARYA-0447; 2026-10-10)
+Strict price/distance filtering and the gallery are in flight as **F-51** (amended scope: `docs/handoff/F-51-amendment.md`), with **F-52** as follow-on. Code complete: no. Staging acceptance: no. Live acceptance: no (owner-gated reload). Known defect and history: `docs/operations/AI_PROJECT_OPERATING_BLUEPRINT.md`, "Troubleshooting history".
