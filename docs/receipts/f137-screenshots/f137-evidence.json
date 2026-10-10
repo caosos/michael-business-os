@@ -1,11 +1,11 @@
 {
- "code_sha": "1182e8a74902c1f73b988cc511b5c3d7d7c9e65e",
- "dirty": true,
+ "code_sha": "eda3eee6d303ab6ee1df419b66d54c831d7d8b1d",
+ "dirty": false,
  "cache_sha256": "d02f3acc4a6eef4b7abd4065c2dc5d4370dd6064fe0bba1b385ec6a8fa154ba7",
  "cache_as_of": "2026-10-10T00:19:23.772932+00:00",
  "store": "STUB",
- "pid_before": 3977706,
- "pid_after": 3978100,
+ "pid_before": 3993613,
+ "pid_after": 3994028,
  "shots": [
   {
    "file": "desktop-1648x1000-labels-gallery.png",
@@ -71,7 +71,7 @@
    "3-1-QSC-I-27-017-016"
   ],
   "reopen": {
-   "url": "http://127.0.0.1:36675/market?run=cmp_5H0429A2JJS2E268CYVSDFF69W",
+   "url": "http://127.0.0.1:39619/market?run=cmp_0SDSB4TCRMXXPX7HMCZVQEX5HT",
    "controls": {
     "mode": "state",
     "states": [
@@ -90,7 +90,7 @@
    "scope": "By State: AR, TX AND within 150 mi of Conway AR. A lot with no known state or distance is never counted as local; it is listed as not checked."
   },
   "restart": {
-   "url": "http://127.0.0.1:43921/market?run=cmp_5H0429A2JJS2E268CYVSDFF69W",
+   "url": "http://127.0.0.1:51029/market?run=cmp_0SDSB4TCRMXXPX7HMCZVQEX5HT",
    "controls": {
     "mode": "state",
     "states": [
@@ -109,5 +109,12 @@
    "scope": "By State: AR, TX AND within 150 mi of Conway AR. A lot with no known state or distance is never counted as local; it is listed as not checked."
   }
  },
- "verdict": "PASS"
+ "verdict": "PASS",
+ "captured_utc": "2026-10-10T19:05:07Z",
+ "captured_utc_note": "UTC time recorded by operator immediately before the run; added post-run, nothing else edited",
+ "viewports": [
+  "desktop 1648x1000",
+  "mobile 390x844"
+ ],
+ "host": "127.0.0.1 loopback, ports differ before/after restart"
 }
