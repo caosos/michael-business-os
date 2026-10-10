@@ -28,17 +28,14 @@
    "ARYA-20261010-0644-verify-dispatcher-adoption"
   ]
  },
- "currently_running": {
-  "id": "ARYA-20261010-0644-verify-dispatcher-adoption",
-  "started_at": "2026-10-10T06:44:34Z"
- },
+ "currently_running": null,
  "delivery_interface": {
   "claude_cli": true,
   "quota": "session 36.0% / week 12.0% are under the limits",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-10T06:45:11Z",
+ "generated_at": "2026-10-10T06:45:13Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "nothing needed",
@@ -50,11 +47,11 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-10T06:45:11Z",
+  "observed_at": "2026-10-10T06:45:13Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
-  "status": "busy",
-  "ttl_sec": 300
+  "status": "idle",
+  "ttl_sec": 1200
  },
  "watcher": {
   "ack_branch": "research/agent-01-coordinator",
