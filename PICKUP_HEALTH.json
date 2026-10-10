@@ -68,16 +68,22 @@
    "ARYA-20261010-2113-heavy-scrap-evidence-gate",
    "ARYA-20261010-2116-decision-learning-criteria",
    "ARYA-20261010-2117-a61-full-assessment-record"
+  ],
+  "FETCHED": [
+   "ARYA-20261010-2118-a61-application-acceptance"
   ]
  },
- "currently_running": null,
+ "currently_running": {
+  "id": "ARYA-20261010-2118-a61-application-acceptance",
+  "started_at": "2026-10-10T21:19:26Z"
+ },
  "delivery_interface": {
   "claude_cli": true,
   "quota": "session 39.0% / week 20.0% are under the limits",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-10T21:18:23Z",
+ "generated_at": "2026-10-10T21:19:26Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "no live Claude session (awaiting connection)",
@@ -89,11 +95,11 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-10T21:18:23Z",
+  "observed_at": "2026-10-10T21:19:26Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
-  "status": "idle",
-  "ttl_sec": 1200
+  "status": "busy",
+  "ttl_sec": 300
  },
  "watcher": {
   "ack_branch": "research/agent-01-coordinator",
