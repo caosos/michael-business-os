@@ -9,7 +9,7 @@
    "since": "2026-10-10T19:55:58Z"
   }
  ],
- "coordinator_head": "8f5067b",
+ "coordinator_head": "84661a1",
  "counts": {
   "BLOCKED": [
    "ARYA-20261010-1954-authorized-ui-release"
@@ -63,7 +63,7 @@
    "ARYA-20261010-2100-a57-acceptance-correction",
    "ARYA-20261010-2101-dismiss-and-owner-watch"
   ],
-  "FETCHED": [
+  "RUNNING": [
    "ARYA-20261010-2104-a60-hide-versus-learning"
   ]
  },
@@ -77,10 +77,10 @@
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-10T21:05:30Z",
+ "generated_at": "2026-10-10T21:05:37Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
-  "decision": "nothing needed",
+  "decision": "no live Claude session (awaiting connection)",
   "note": "pickup does not need the interactive session",
   "state": "STOPPED"
  },
@@ -89,7 +89,7 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-10T21:05:30Z",
+  "observed_at": "2026-10-10T21:05:37Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
   "status": "busy",
