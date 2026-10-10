@@ -27,7 +27,7 @@ ROW_CATS = {"trailers": ("trailer",), "equipment": ("equipment", "tractor", "mow
 DEFAULT_ROWS = ("trailers", "equipment", "vehicles", "")
 CONDITIONS = ("", "new", "used", "salvage", "parts", "for parts", "not working", "working", "as is")
 STALE_H = 6
-META = ("min:", "cat:", "rows:", "broad:", "cond:")   # F-54: other saved-search criteria ride in nice_to_have the same way (the frozen schema has no field)
+META = ("min:", "cat:", "rows:", "broad:", "cond:", "any:")   # F-54: other saved-search criteria ride in nice_to_have the same way (the frozen schema has no field)
 EXCLUDE_PREFIX = "exclude:"            # saved inside the campaign's nice_to_have, the only free-text list the frozen schema allows
 DEFAULT_BASE = "Conway AR"
 DEFAULT_RADIUS = 150.0                 # an editable starting radius around the base, not a budget
@@ -112,7 +112,8 @@ def criteria_to_query(doc: dict) -> dict:
     nice = c.get("nice_to_have") or []
     meta = {t[: t.index(":") + 1]: t[t.index(":") + 1:] for t in nice if t.startswith(META)}
     out = {"keywords": ", ".join(c.get("keywords") or []), "base": c.get("origin") or DEFAULT_BASE,
-           "radius": "" if c.get("radius_miles") is None else f"{c['radius_miles']:g}", "any": "", "max_price": f"{c['max_price_usd']:g}" if "max_price_usd" in c else "",
+           "radius": "" if c.get("radius_miles") is None else f"{c['radius_miles']:g}", "any": ", ".join(t for t in meta.get("any:", "").split(">") if t),   # F-59: always present, so an empty focus stays empty (never falls back to the default focus)
+           "max_price": f"{c['max_price_usd']:g}" if "max_price_usd" in c else "",
            "required": ", ".join(c.get("must_have") or []),
            "preferred": ", ".join(t for t in nice if not t.startswith(EXCLUDE_PREFIX) and not t.startswith(META)),
            "exclude": ", ".join(t[len(EXCLUDE_PREFIX):] for t in nice if t.startswith(EXCLUDE_PREFIX))}

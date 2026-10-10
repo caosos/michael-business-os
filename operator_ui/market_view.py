@@ -285,7 +285,7 @@ def save_form(f: dict) -> dict:
     q = ms.parse_query({k: ([c for c in v.split(",") if c.strip()] if k == "cat" else [v]) for k, v in f.items()})   # F-56: `cat` is posted comma-joined (a form keeps one value per name)
     nice = list(q["preferred"]) + [ms.EXCLUDE_PREFIX + t for t in q["exclude"]]
     nice += ([f"min:{q['min_price']:g}"] if q["min_price"] is not None else []) + ([f"cat:{'>'.join(q['cats'])}"] if q["cats"] else []) \
-        + ([f"rows:{'>'.join(q['rows'])}"] if q["rows"] != list(ms.DEFAULT_ROWS) else []) + (["broad:1"] if q["broad"] else []) + ([f"cond:{q['condition']}"] if q["condition"] else [])
+        + ([f"rows:{'>'.join(q['rows'])}"] if q["rows"] != list(ms.DEFAULT_ROWS) else []) + ([f"any:{'>'.join(t.replace('>', ' ') for t in q['any'])}"] if q["any"] else []) + (["broad:1"] if q["broad"] else []) + ([f"cond:{q['condition']}"] if q["condition"] else [])
     return {**{k: f[k] for k in ("csrf", "pin", "nonce") if k in f}, "title": (f.get("title") or q["keywords"]).strip() or "Marketplace search",
             "category": CATEGORY, "keywords": q["keywords"].replace(" ", ", "), "max_price_usd": "" if q["max_price"] is None else str(q["max_price"]),
             "radius_miles": "" if q["radius"] is None else str(q["radius"]), "origin": q["base"],
