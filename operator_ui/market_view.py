@@ -15,20 +15,21 @@ from .live_demo import link_html
 CATEGORY = "marketplace"
 e = lambda v: html.escape("" if v is None else str(v))  # noqa: E731
 
-CSS = """<style>.mk{display:flex;gap:18px;align-items:flex-start}.mk-side{flex:0 0 230px;position:sticky;top:8px}
+CSS = """<style>.mk{display:flex;gap:18px;align-items:flex-start}.mk-side{flex:0 0 230px}
 .mk-main{flex:1;min-width:0}.mk-side .card{padding:10px 12px}.mk-side a{display:block;padding:4px 0}.mk-demo{border-top:2px dashed var(--line);margin-top:12px;padding-top:8px}
 .mk-form label{display:inline-block;margin:0 10px 8px 0}.mk-res{display:flex;gap:12px}.mk-res img{width:120px;height:90px;object-fit:cover;border-radius:6px}
 .mk-tag{font-size:12px;border:1px solid var(--line);border-radius:8px;padding:0 6px;margin-right:4px}
 .mk-form button,.mk-side button{background:var(--acc);color:var(--bg);width:auto;opacity:1}.mk-form button:hover{filter:brightness(1.1)}
 .mk-form button:focus-visible,.mk-form input:focus-visible,.mk-side a:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
-.mk-form button.mk-go{font-size:16px;padding:10px 28px}.mk-chips .chip{background:var(--card)}
+.mk-form button.mk-go{font-size:16px;padding:10px 28px}.mk-chips .chip{background:var(--card);font-size:12px;padding:1px 8px}.mk-chips{margin:4px 0}
 .mk-range input[type=range]{width:46%;display:inline-block;margin:0;padding:0}.mk-range input[type=number]{width:110px;display:inline-block}
 .mk-sec{border-top:2px dashed var(--line);margin-top:16px}
 .mk-gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}.mk-g{border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--card);min-width:0}
 .mk-g .ph{height:110px;display:flex;align-items:center;justify-content:center;border:1px dashed var(--line);border-radius:6px;text-align:center;overflow:hidden}.mk-g img{width:100%;height:110px;object-fit:cover;border-radius:6px}
 .mk-g .pr{font-size:18px;font-weight:700;margin:4px 0 0}.mk-g .ti{font-size:14px;margin:2px 0;overflow-wrap:anywhere}.mk-g button,.mk-pref button{font-size:12px;padding:2px 6px;margin:1px;width:auto;background:var(--acc);color:var(--bg);opacity:1}.mk-pref button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
 .mk-side .mk-range input[type=range],.mk-side .mk-range input[type=number]{width:100%}.mk-side label{display:block}.mk-side input[type=checkbox]{width:auto}
-@media(max-width:700px){.mk{flex-direction:column}.mk-side{position:static;flex:none;width:100%}.mk-res{flex-direction:column}.mk-form input,.mk-form select{max-width:100%}}</style>"""
+.mk-bar{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:flex-end}.mk-bar label{display:block;margin:0;font-size:13px}.mk-bar input,.mk-bar select{width:auto;padding:4px 6px;margin:0;max-width:100%}.mk-bar details{flex:1 1 100%}.mk-bar button.mk-go{padding:6px 22px}.mk-main>.card{padding:8px 12px}.mk-main h2{margin:6px 0}.mk-side input[type=number],.mk-side input[type=text],.mk-side input:not([type]){padding:4px 6px}.mk-jump{display:none}.mk-form details,#save-search{margin:4px 0}
+@media(max-width:700px){.mk{flex-direction:column}.mk-main{order:1}.mk-side{order:2}.mk-jump{display:block}.mk-g .ph,.mk-g img{height:90px}.mk-side{position:static;flex:none;width:100%}.mk-res{flex-direction:column}.mk-form input,.mk-form select{max-width:100%}}</style>"""
 
 
 def _photo(url, listing=None) -> str:
@@ -79,9 +80,9 @@ def gallery(cards: list[dict], q: dict, tok) -> str:
 def prefs_panel(d: dict, tok) -> str:
     f = lambda a, lbl: f"<form method='post' action='/market/pref' style='display:inline' class='mk-pref'>{tok()}<button name='act' value='{a}'>{lbl}</button></form>"  # noqa: E731
     state = "ON" if d["enabled"] else "OFF"
-    return (f"<div class='card small' id='prefs'><b>Suggestions: {state}</b><br>{e(__import__('operator_ui.market_prefs', fromlist=['x']).summary(d))}<br>"
+    return (f"<details class='card small' id='prefs'><summary><b>Suggestions: {state}</b> (how your clicks reorder results)</summary>{e(__import__('operator_ui.market_prefs', fromlist=['x']).summary(d))}<br>"
             "Your clicks only reorder or hide what already passed your filters; they never widen a price, radius or exclusion, and they say nothing about profit.<br>"
-            f"{f('disable', 'Turn off') if d['enabled'] else f('enable', 'Turn on')} {f('reset', 'Reset')}</div>")
+            f"{f('disable', 'Turn off') if d['enabled'] else f('enable', 'Turn on')} {f('reset', 'Reset')}</details>")
 
 
 def render_card(c: dict, tok=None) -> str:
@@ -109,17 +110,17 @@ def distance_caveat(q: dict, results: list[dict]) -> str:
     got, miss = towns(lambda c: c["distance"] is not None), towns(lambda c: c["distance"] is None)
     origin = f"Your base '{e(base)}' is located." if ms._origin(base) else f"Your base '{e(base)}' is NOT located, so no distance can be shown."
     lots = f"Lot towns located: {e(', '.join(got)) or 'none'}. Lot towns NOT located (distance UNKNOWN, not 'far away'): {e(', '.join(miss)) or 'none'}."
-    return ("<div class='card small' id='distance-caveat'><b>About distances.</b> Place coordinates are approximate town centroids from a small local "
+    return ("<details class='card small' id='distance-caveat'><summary><b>About distances</b> (approximate; unknown is not far)</summary>Place coordinates are approximate town centroids from a small local "
             "gazetteer with limited coverage (mostly Arkansas and a few nearby cities). Distances are rough straight-line miles, good to a few miles at best. "
             "A town missing from the gazetteer shows 'distance UNKNOWN' because we cannot place it, not because it is far; out-of-state lots are often in that group. "
-            f"{origin} {lots} No online lookup is made.</div>")
+            f"{origin} {lots} No online lookup is made.</details>")
 
 
 def render_status(d: dict) -> str:
     if d["status"] != "connected":
         return f"<div class='flash err' id='source-status'><b>GSA Auctions: offline.</b> {e(d['message'])}</div>"
     warn = (f" <b class='bad'>STALE ({d['age_h']:g} h old): current bids may have changed.</b>" if d["stale"] else "")
-    return (f"<p class='small' id='source-status'><b>GSA Auctions: connected (cached file)</b> · last fetched as of {e(d['as_of'])} "
+    return (f"<p class='small' id='source-status' style='margin:6px 0'><b>GSA Auctions: connected (cached file)</b> · last fetched {e(str(d['as_of'])[:16].replace('T', ' '))} UTC "
             f"({d['age_h']:g} h ago) · {d['in_scope']} lots in nearby states of {d['in_file']} in the file{warn} · "
             f"not connected: {e(', '.join(ms.NOT_CONNECTED))}</p>")
 
@@ -128,13 +129,13 @@ def _side_filters(q: dict) -> str:
     """F-52 (B): origin/ZIP, radius, price and category checkboxes live in the narrow left sidebar; they belong to the search form (form='mkform')."""
     v = lambda k: e(q.get(k) if q.get(k) is not None else "")  # noqa: E731
     cats = "".join(f"<label><input type='checkbox' form='mkform' name='cat' value='{e(k)}'{' checked' if k in q.get('cats', []) else ''}> {e(k.title())}</label>" for k in ms.ROW_CATS)
-    return ("<div class='card'><b>Filters</b>"
+    return ("<div class='card' id='mkfilters'><b>Filters</b>"
             f"<label>ZIP or city <input form='mkform' name='base' size='12' value='{v('base')}'></label>"
             f"<label>Radius (mi) <input form='mkform' name='radius' size='5' inputmode='decimal' value='{v('radius')}'></label>"
             f"{_slider(q, 'mkform')}<b>Categories</b>{cats}<p class='small mut'>None checked = your rows below (default trailers and equipment).</p></div>")
 
 
-def _sidebar(saved: list[dict], csrf: str, pin_html: str, tok, q: dict) -> str:
+def _sidebar(saved: list[dict], csrf: str, pin_html: str, tok, q: dict, save: str = "") -> str:
     rows = []
     for r in saved:
         d = r["doc"]
@@ -147,7 +148,7 @@ def _sidebar(saved: list[dict], csrf: str, pin_html: str, tok, q: dict) -> str:
     saved_html = f"<ul style='padding-left:16px;margin:4px 0'>{''.join(rows)}</ul>" if rows else "<p class='small mut'>No saved searches yet.</p>"
     return ("<aside class='mk-side'>" + _side_filters(q) + "<div class='card'><nav aria-label='Marketplace'>"
             "<a href='/market?go=1'><b>Find Deals Now</b></a><a href='/market?new=1'>+ New Search</a>"
-            f"<h4 style='margin:10px 0 2px'>My Campaigns / Saved Searches</h4>{saved_html}"
+            f"{save}<details><summary><b>My Campaigns / Saved Searches ({len(rows)})</b></summary>{saved_html}</details>"
             "<a href='/resale'>Saved Deals</a><a href='/market?go=1&amp;sort=closing&amp;closing_by=soon'>Auctions Closing Soon</a>"
             "</nav></div></aside>")
 
@@ -162,8 +163,8 @@ def _slider(q: dict, form: str = "") -> str:
             f"<div><label>Min slider <input form='{form}' type='range' id='min_r' name='min_r' min='{lo}' max='{hi}' step='1' value='{cl('min_price', lo)}' aria-label='Minimum price slider'></label> "
             f"<label>Max slider <input form='{form}' type='range' id='max_r' name='max_r' min='{lo}' max='{hi}' step='1' value='{cl('max_price', hi)}' aria-label='Maximum price slider'></label>"
             f"<input form='{form}' type='hidden' name='prev_min' value='{cl('min_price', lo)}'><input form='{form}' type='hidden' name='prev_max' value='{cl('max_price', hi)}'></div>"
-            f"<p class='small mut'>Type a number, or move a slider (arrow keys work), then press Search; the control you changed is the one used. "
-            f"The ${lo:,} to ${hi:,} slider range is only the scale of this control: it is not a budget and authorizes no spending. Leave a box empty for no limit.</p></fieldset>")
+            f"<p class='small mut'>Type a number or move a slider, then Search; the one you changed is used. Blank = no limit. "
+            f"The ${lo:,} to ${hi:,} range is only this control's scale, not a budget or spending authority.</p></fieldset>")
 
 
 def chips(q: dict) -> str:
@@ -187,21 +188,29 @@ def chips(q: dict) -> str:
             + "".join(f"<span class='chip'>{e(x)}</span>" for x in c) + "</p>")
 
 
+def _save(q: dict, cid: str | None, tok, pin_html: str) -> str:
+    v = lambda k: e(", ".join(q[k]) if isinstance(q.get(k), list) else q.get(k) if q.get(k) is not None else "")  # noqa: E731
+    keep = "".join(f"<input type='hidden' name='{k}' value='{v(k)}'>" for k in ("keywords", "base", "radius", "min_price", "max_price", "any", "required", "preferred", "exclude"))
+    keep += "<input type='hidden' name='broad' value='1'>" if q.get("broad") else ""
+    return (f"<details id='save-search'{' open' if cid else ''}><summary>{'Edit saved search' if cid else 'Save this search'}</summary>"
+            f"<form method='post' action='/market/{'%s/edit' % e(cid) if cid else 'save'}' class='mk-form'>{tok()}{keep}"
+            f"<label>Name this search <input name='title' maxlength='120' value='{v('keywords')}'></label> {pin_html} "
+            f"<button name='do' value='save'>{'Save changes' if cid else 'Save this search'}</button></form>"
+            "<p class='small mut'>Saved with a search: keywords, origin, radius, max price, must/nice/exclude terms. Min price, category focus, broad mode and the other filters apply to this run (and are remembered, even after a restart). "
+            "A search never contacts anyone.</p></details>")
+
+
 def _form(q: dict, cid: str | None, tok, pin_html: str) -> str:
     v = lambda k: e(", ".join(q[k]) if isinstance(q.get(k), list) else q.get(k) if q.get(k) is not None else "")  # noqa: E731
     sel = lambda name, opts, cur: f"<select name='{name}'>" + "".join(  # noqa: E731
         f"<option value='{e(o)}'{' selected' if str(cur) == o else ''}>{e(lbl)}</option>" for o, lbl in opts) + "</select>"
-    keep = "".join(f"<input type='hidden' name='{k}' value='{v(k)}'>" for k in ("keywords", "base", "radius", "min_price", "max_price", "any", "required", "preferred", "exclude"))
-    keep += "<input type='hidden' name='broad' value='1'>" if q.get("broad") else ""
-    save = (f"<form method='post' action='/market/{'%s/edit' % e(cid) if cid else 'save'}' class='mk-form'>{tok()}{keep}"
-            f"<label>Name this search <input name='title' maxlength='120' value='{v('keywords')}'></label> {pin_html} "
-            f"<button name='do' value='save'>{'Save changes' if cid else 'Save this search'}</button></form>")
-    return ("<div class='card'><form method='get' action='/market' class='mk-form' id='mkform' novalidate><input type='hidden' name='go' value='1'>"
+    return ("<div class='card'><form method='get' action='/market' class='mk-form mk-bar' id='mkform' novalidate><input type='hidden' name='go' value='1'>"
             f"<label>Sort {sel('sort', [(s, s.title()) for s in ms.SORTS], q.get('sort', 'closing'))}</label>"
             f"<label>View {sel('view', [('gallery', 'Gallery'), ('list', 'List')], q.get('view', 'gallery'))}</label>"
             f"<label>Category / keywords, any of <input name='any' size='24' value='{v('any')}'></label>"
-            f"<label><input type='checkbox' name='broad' value='1'{' checked' if q.get('broad') else ''}> Broad inventory mode (ignore the category focus; off by default)</label>"
+            f"<label><input type='checkbox' name='broad' value='1'{' checked' if q.get('broad') else ''}> Broad (all categories)</label>"
             f"<label>Keywords, all of <input name='keywords' size='22' value='{v('keywords')}'></label>"
+            f"<button class='mk-go' type='submit'>Search</button>"
             f"<details><summary>More filters</summary>"
             f"<label>Condition (seller text) <input name='condition' size='10' value='{v('condition')}'></label>"
             f"<label>Must include <input name='required' size='14' value='{v('required')}'></label>"
@@ -212,19 +221,16 @@ def _form(q: dict, cid: str | None, tok, pin_html: str) -> str:
             f"<label>Closing by <input type='date' name='closing_by' value='{v('closing_by')}'></label>"
             f"<p class='small'><b>Gallery rows</b> (top to bottom; leave blank for fewer than 4)</p>"
             + "".join(f"<label>Row {i} {sel(f'row{i}', [('', '(none)')] + [(k, k.title()) for k in ms.ROW_CATS], (q.get('rows') or ms.DEFAULT_ROWS)[i - 1])}</label>" for i in range(1, 5))
-            + "</details>"
-            f"<button class='mk-go' type='submit'>Search</button></form>{save}"
-            "<p class='small mut'>Saved with a search: keywords, origin, radius, max price, must/nice/exclude terms. Min price, category focus, broad mode and the other filters apply to this run (and are remembered while you move around). "
-            "A search never contacts anyone.</p></div>")
+            + "</details></form></div>")
 
 
 def working_capital(verified=None) -> str:
     """The documented working-capital planning setting, labelled apart from verified cash. Neither is a spend authorization."""
     amt = ms.working_capital()
-    return ("<div class='card small' id='working-capital'><b>Working capital (planning setting, not cash).</b> "
+    return ("<details class='card small' id='working-capital'><summary><b>Working capital (planning setting, not cash).</b></summary>"
             f"<span class='lbl'>SETTING</span> ${amt:,.0f} protected principal, from the owner's documented capital model (docs/product/DEAL_SNIFFER_START_HERE.md section 1; "
             "override with MBOS_WORKING_CAPITAL_USD). <br><b>Verified cash:</b> <span class='unk'>UNKNOWN</span> unless a figure is recorded on "
-            "<a href='/numbers'>My numbers</a>. A setting is not a balance and nothing here approves a bid, a purchase or a payment.</div>")
+            "<a href='/numbers'>My numbers</a>. A setting is not a balance and nothing here approves a bid, a purchase or a payment.</details>")
 
 
 def gsa_explainer() -> str:
@@ -264,11 +270,12 @@ def render_page(q: dict, d: dict, results: list[dict], hidden: dict, saved: list
         opt = ((f"<details class='mk-sec' id='unchecked-section'><summary><b>Optional: {len(unchecked)} lot(s) that could not be checked (not counted as local or in range). Click to open.</b></summary>"
                 "<p class='small mut'>Their location was not found or they have no bid yet, so the radius or price range cannot be tested. They are shown only so nothing is hidden; "
                 "verify on the original listing.</p>" + wrap(unchecked) + "</details>") if unchecked else "")
-        body = (chips(q) + f"<h2>{len(results)} result{'s' if len(results) != 1 else ''}{scope}</h2>" + (f"<p class='small mut'>Hidden: {e(hid)}.</p>" if hid else "")
-                + distance_caveat(q, results + unchecked) + ("<p class='small mut'>Cached copy of the GSA list, not a fresh fetch. GSA is the only connected source, so this gallery covers GSA government surplus only.</p>"
-                   + ((gallery(results, q, tok) if q.get("view") != "list" else "".join(render_card(c, tok) for c in results)) if results else zero)) + opt)
-    return (CSS + "<h1 class='pagehead'>Michael's Marketplace</h1><div class='mk'>" + _sidebar(saved, csrf, pin_html, tok, q)
-            + f"<section class='mk-main'>{err}{verr}{_form(q, edit_id, tok, pin_html)}{prefs_panel(prefs, tok) if prefs else ''}{working_capital()}{gsa_explainer()}{render_status(d)}{body}</section></div>")
+        body = (chips(q) + f"<h2>{len(results)} result{'s' if len(results) != 1 else ''}{scope}</h2>" + "<p class='small mut' style='margin:2px 0'>Cached copy of the GSA list, not a fresh fetch (GSA surplus only). Price = current bid, not a sold price or final cost; all-in cost UNKNOWN."
+                + (f" Hidden: {e(hid)}." if hid else "") + "</p>"
+                + ((gallery(results, q, tok) if q.get("view") != "list" else "".join(render_card(c, tok) for c in results)) if results else zero) + opt
+                + distance_caveat(q, results + unchecked))
+    return (CSS + "<h1 class='pagehead'>Michael's Marketplace</h1><div class='mk'>" + _sidebar(saved, csrf, pin_html, tok, q, _save(q, edit_id, tok, pin_html))
+            + f"<section class='mk-main' id='results-top'><a class='mk-jump small' href='#mkfilters'>Filters: price, radius, categories (below the results)</a>{err}{verr}{_form(q, edit_id, tok, pin_html)}{render_status(d)}{body}{prefs_panel(prefs, tok) if prefs else ''}{working_capital()}{gsa_explainer()}</section></div>")
 
 
 def save_form(f: dict) -> dict:

@@ -27,15 +27,18 @@ FILTER_KEYS = ("keywords", "base", "radius", "min_price", "max_price", "min_r", 
 
 
 def _remembered(app, qs: dict) -> dict:
-    """Entered filters persist across navigation (single owner, in memory on this app): a visit with no filters restores the last
-    search; `new` clears it. Saving as a campaign is separate (Wanted)."""
+    """Entered filters persist across navigation AND a server restart (single owner): a visit with no filters restores the last search
+    from the prefs file (MBOS_MARKET_PREFS_FILE); `new` clears it. Saving as a campaign is separate (Wanted)."""
     given = {k: qs[k] for k in FILTER_KEYS if k in qs}
     if qs.get("new"):
-        app.market_last = {}
+        mp.remember({})
     elif given:
-        app.market_last = given
-    elif not (qs.get("run") or qs.get("edit")) and getattr(app, "market_last", None):
-        return {**qs, **app.market_last}
+        if given != mp.recall(FILTER_KEYS):
+            mp.remember({k: v if isinstance(v, list) else [v] for k, v in given.items()})
+    elif not (qs.get("run") or qs.get("edit")):
+        last = mp.recall(FILTER_KEYS)
+        if last:
+            return {**qs, **last}
     return qs
 
 
