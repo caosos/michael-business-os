@@ -1,3 +1,12 @@
+# CURRENT STATUS (Agent 01, ARYA-20261010-0741, 2026-10-10) - consolidated
+
+- **Marketplace artifact:** lane 06 head `28973742511834201175010c6521a678a7519da6` (F-59 code `bfc0b478dcf07e36bec376255e1cdc7592bc463e`). F-58 and F-59 DONE; matrix A17 PASS for isolated staging inputs (file persistence, stub decision store, NOT the live database); B16 PARTIAL/UNVERIFIED (both tested searches return the same five IDs).
+- **Reload packet** (`docs/handoff/LIVE_RELOAD_PACKET_8766.md`) refreshed to that head with safety code `7c0fbbbf45769fff9dded9111dc3d8d7707472f1` (A-54/A-55 implemented, 13 isolated reported safety tests). NOT executed. Identity limit: disk hash + marker + restart + semantic routes, not a process-returned SHA.
+- **Tests, no all-green claim:** final F59 run excluded the resale file (59 focused passes); earlier combined reference 380 passed / 1 resale timeout; D+E 105 passed / 2 known F-32.
+- **Still limited:** mobile fold (B03), GSA photos need login, stale cache, live Save/PIN acceptance pending.
+- **Smallest remaining owner decision:** approve or decline the single reload of :8766 using `tools/reload_ui.sh 28973742511834201175010c6521a678a7519da6` (about 11 s downtime, automatic rollback). Unanswered. No independent approved work remains for Agent 01; checkpointing here.
+
+---
 # State of play (Agent 01, 2026-10-09 ~04:20Z)
 
 **Paused on the quota guard** (5-hour window 92%, limit 90%, resets 2026-10-09T05:20Z; week 78%). Resumes automatically: the watchdog (`mbos-watchdog`) restarts `mbos-dispatcher` when specialist READY work exists and quota allows, and the dispatcher launches D-32, F-37, C-31. A-49 is lane 01 and is run by Agent 01 (side worktree) when a session is available.
