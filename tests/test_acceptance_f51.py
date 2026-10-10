@@ -77,7 +77,7 @@ def test_filters_persist_across_navigation(ui):
 
 
 def test_labels_gsa_explainer_working_capital_and_button(ui):
-    h = get(ui)
+    h = get(ui, view="list")        # F-52: the default view is the gallery; the detailed labels live on the list card
     assert "Current bid" in h and "Asking price: none (auction)" in h and "never the final cost" in h and "all-in cost UNKNOWN" in h
     assert "government surplus auctions" in h and "requires a GSA login" in h and "do not log in or bypass" in h
     assert "SETTING" in h and "Verified cash:" in h and "not cash" in h

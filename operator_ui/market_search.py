@@ -19,7 +19,12 @@ from mbos_discovery.normalize import HOME_BASE, haversine_miles
 DEFAULT_CACHE = "/home/michaelos/business-os-worktrees/agent-01-coordinator/var/cache/gsa-active-auctions.json"
 SOURCES = {"gsa": "GSA Auctions"}
 NOT_CONNECTED = ("GovDeals", "Public Surplus", "eBay", "Craigslist", "Facebook Marketplace")
-SORTS = ("closing", "bid", "distance", "title")
+SORTS = ("closing", "bid", "distance", "title", "suggested")
+# F-52 (B): gallery row categories. Matched against the seller's text and the system's category guess; a row name is a label, not a claim.
+ROW_CATS = {"trailers": ("trailer",), "equipment": ("equipment", "tractor", "mower", "loader", "generator", "compressor", "forklift", "backhoe"),
+            "vehicles": ("truck", "pickup", "van", "suv", "sedan", "vehicle", "car"), "electronics": ("computer", "laptop", "monitor", "electronic", "phone", "radio", "camera", "printer", "server"),
+            "tools": ("tool", "welder", "saw", "drill", "grinder", "wrench")}
+DEFAULT_ROWS = ("trailers", "equipment", "vehicles", "")
 CONDITIONS = ("", "new", "used", "salvage", "parts", "for parts", "not working", "working", "as is")
 STALE_H = 6
 EXCLUDE_PREFIX = "exclude:"            # saved inside the campaign's nice_to_have, the only free-text list the frozen schema allows
@@ -59,17 +64,33 @@ def _slider_price(g, box: str, slider: str, prev: str):
     return _num(g(slider)) if moved else _num(g(box)) if g(box) != "" else None
 
 
+def validate(g) -> list[str]:
+    """F-52 (A): every numeric filter that was typed but is not a usable number gets a visible message (the page then runs nothing)."""
+    errs = []
+    for k, label in (("radius", "Radius (miles)"), ("min_price", "Min price"), ("max_price", "Max price")):
+        raw = g(k)
+        if raw != "" and _num(raw, landing_fix.MAX_RADIUS if k == "radius" else 10**7) is None:
+            errs.append(f"{label} '{raw[:20]}' is not a usable number (use 0 or more, digits only); no search was run with it.")
+    lo, hi = _num(g("min_price")), _num(g("max_price"))
+    if lo is not None and hi is not None and lo > hi:
+        errs.append(f"Min price ${lo:,.0f} is higher than max price ${hi:,.0f}; nothing can match.")
+    return errs
+
+
 def parse_query(qs: dict) -> dict:
-    """Query string / saved form -> a clean filter dict. Bad numbers become None (ignored), never an exception."""
+    """Query string / saved form -> a clean filter dict. A bad number is None AND recorded in `errors` so the page says so."""
     g = lambda k: (qs.get(k) or [""])[0].strip() if isinstance(qs.get(k), list) else str(qs.get(k) or "").strip()  # noqa: E731
     sort = g("sort")
     closing = g("closing_by")
     if closing == "soon":
         closing = (datetime.now(timezone.utc) + timedelta(days=7)).strftime("%Y-%m-%d")
-    fresh = not any(k in qs for k in ("keywords", "base", "radius", "max_price", "min_price", "any", "run", "edit"))
+    cats = [c for c in (qs.get("cat") if isinstance(qs.get("cat"), list) else [qs.get("cat")] if qs.get("cat") else []) if c in ROW_CATS]
+    rows = [g(f"row{i}") if g(f"row{i}") in ROW_CATS else "" for i in range(1, 5)] if any(f"row{i}" in qs for i in range(1, 5)) else list(DEFAULT_ROWS)
+    fresh = not any(k in qs for k in ("keywords", "base", "radius", "max_price", "min_price", "any", "run", "edit", "cat"))
     return {"keywords": g("keywords")[:120], "base": (g("base") or DEFAULT_BASE)[:60],
             "radius": DEFAULT_RADIUS if fresh else _num(g("radius"), landing_fix.MAX_RADIUS),
-            "min_price": _slider_price(g, "min_price", "min_r", "prev_min"), "max_price": _slider_price(g, "max_price", "max_r", "prev_max"),
+            "min_price": _slider_price(g, "min_price", "min_r", "prev_min"), "max_price": _slider_price(g, "max_price", "max_r", "prev_max"), "errors": validate(g), "cats": cats, "rows": rows,
+            "view": "list" if g("view") == "list" else "gallery",
             "any": _terms(DEFAULT_ANY if ("any" not in qs and not g("broad")) else g("any")), "broad": g("broad") == "1", "condition": g("condition").lower()[:30], "required": _terms(g("required")),
             "preferred": _terms(g("preferred")), "exclude": _terms(g("exclude")), "source": g("source") or "gsa",
             "kind": g("kind") or "any", "closing_by": closing if re.fullmatch(r"\d{4}-\d{2}-\d{2}", closing) else "",
@@ -190,7 +211,10 @@ def partition(lots: list[dict], q: dict) -> tuple[list[dict], list[dict], dict]:
             hidden["terms"] += 1
             continue
         tags = tag_terms(c, q)
-        focus = q.get("any") and not q.get("broad") and not any(t in c["text"] or t in (c.get("category") or "").lower().replace("_", " ") for t in q["any"])
+        if q.get("cats"):
+            focus = not any(in_cat(c, k) for k in q["cats"])
+        else:
+            focus = q.get("any") and not q.get("broad") and not any(t in c["text"] or t in (c.get("category") or "").lower().replace("_", " ") for t in q["any"])
         pok = _price_ok(c, q)
         if tags is None or focus:
             hidden["terms"] += 1
@@ -206,7 +230,7 @@ def partition(lots: list[dict], q: dict) -> tuple[list[dict], list[dict], dict]:
             why = (["location not found (distance unknown)"] if q["radius"] is not None and c["distance"] is None else []) + (["no bid yet (price unknown)"] if pok is None else [])
             (unchecked if why else out).append({**c, "tags": tags, "unchecked": why})
     key = {"closing": lambda c: (c["closes"] or "9999", c["title"]), "bid": lambda c: (c["bid"] is None, c["bid"] or 0, c["title"]),
-           "distance": lambda c: (c["distance"] is None, c["distance"] or 0, c["title"]), "title": lambda c: c["title"].lower()}[q["sort"]]
+           "distance": lambda c: (c["distance"] is None, c["distance"] or 0, c["title"]), "title": lambda c: c["title"].lower(), "suggested": lambda c: (c["closes"] or "9999", c["title"])}[q["sort"]]
     return sorted(out, key=key), sorted(unchecked, key=key), hidden
 
 
@@ -216,3 +240,21 @@ def decision(card: dict, comp: dict | None = None) -> tuple[str, str]:
     if not comp or comp.get("kind") != "sold" or not comp.get("n"):
         return "WATCH", "RESEARCH NEEDED: no sold-price evidence on file (a current bid or asking price is not a comp)"
     return "WATCH", "A sold comp exists; send it to the decision queue to judge. Search results never say BUY"
+
+
+def in_cat(c: dict, cat: str) -> bool:
+    text = f"{c['title']} {c.get('category') or ''}".lower().replace("_", " ")          # title + category guess: the long description is boilerplate
+    return any(re.search(rf"\b{re.escape(t)}s?\b", text) for t in ROW_CATS[cat])
+
+
+def gallery_rows(cards: list[dict], q: dict) -> list[tuple[str, list[dict]]]:
+    """F-52 (B): the owner's chosen rows (checked categories first, else row slots) then 'other'. A lot sits in the first row it matches.
+    An empty chosen row is kept, so the page can say 'no matching known inventory' instead of hiding the row."""
+    names = [n for n in dict.fromkeys(list(q.get("cats", [])) or [r for r in q.get("rows", DEFAULT_ROWS) if r])]
+    seen, out = set(), []
+    for n in names:
+        row = [c for c in cards if c["id"] not in seen and in_cat(c, n)]
+        seen |= {c["id"] for c in row}
+        out.append((n, row))
+    rest = [c for c in cards if c["id"] not in seen]
+    return out + ([("other", rest)] if rest else [])

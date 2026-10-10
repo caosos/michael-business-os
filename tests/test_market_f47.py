@@ -57,7 +57,7 @@ def get(ui, **qs):
 
 
 def test_gsa_result_has_real_link_photo_bid_and_as_of(ui):
-    h = get(ui, go=1, keywords="trailer")
+    h = get(ui, go=1, keywords="trailer", view="list")        # the detailed list card (F-52: the default view is now the gallery)
     assert "Marianna" in h and "https://www.gsaauctions.gov/auctions/preview/378501" in h
     assert "<img" not in h and "Photo is behind GSA" in h and "$25.00" in h and "2026-10-12" in h
     assert "GSA Auctions: connected" in h and "2026-10-10T00:19:00+00:00" in h
@@ -187,6 +187,6 @@ def test_distance_caveat_is_plain_and_names_located_and_unlocated_places(ui):  #
     assert "id='distance-caveat'" in h and "approximate town centroids" in h and "small local gazetteer with limited coverage" in h
     assert "Your base &#x27;Conway AR&#x27; is located." in h or "Your base 'Conway AR' is located." in h
     assert "Lot towns located:" in h and "Marianna, AR" in h and "Lot towns NOT located" in h
-    h = get(ui, go=1, keywords="trailer", base="Atlantis")
+    h = get(ui, go=1, keywords="trailer", base="Atlantis", view="list")
     assert "is NOT located, so no distance can be shown" in h and "not because it is far" in h
     assert "distance UNKNOWN (place not in our small local gazetteer" in h or "mi from your base" in h

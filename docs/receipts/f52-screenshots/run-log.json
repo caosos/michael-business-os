@@ -1,0 +1,61 @@
+{
+ "default_rows": [
+  "trailers:3",
+  "equipment:0",
+  "vehicles:8",
+  "other:1"
+ ],
+ "default_cards": [
+  "Trailer, Utility",
+  "1967 Striker M5000 Tank Trailer",
+  "1981 Monark 16' Boat w/ Trailer and 2005 Mercury Outboard M\u2026",
+  "1968 Kaiser M51A2 5 ton 6x6 Truck",
+  "1977 Dodge W20 Pickup 2 door Truck",
+  "1978 Seagrave MB23098 Fire Truck",
+  "1983 International F1954 2.5 ton 6x4 Truck",
+  "1984 Chevrolet CD30903 Pickup 2 Door Truck",
+  "1984 International 1654 Crew Cab Truck",
+  "1985 Chevrolet CD30903 pickup 2 door Truck",
+  "1987 Chevrolet CD30903 Pickup 2 door Truck",
+  "Traulsen Double Refrigerator"
+ ],
+ "card_button_style": {
+  "bg": "rgb(36, 86, 201)",
+  "color": "rgb(246, 247, 249)",
+  "opacity": "1"
+ },
+ "sidebar_inputs": [
+  "base",
+  "radius",
+  "min_price",
+  "max_price",
+  "min_r",
+  "max_r",
+  "prev_min",
+  "prev_max",
+  "cat",
+  "cat",
+  "cat",
+  "cat",
+  "cat"
+ ],
+ "unchecked_open": false,
+ "invalid_msg": "Check your filters.\nMin price $900 is higher than max price $100; nothing can match.\nNo search was run.",
+ "invalid_cards": 0,
+ "strict_cards": 5,
+ "strict_unchecked": 148,
+ "custom_rows": [
+  "electronics:0",
+  "trailers:6"
+ ],
+ "empty_row_text": true,
+ "after_feedback_why": [
+  "Why suggested: you saved it; matches words you liked (striker, tank, trailer)",
+  "Why suggested: matches words you liked (trailer)",
+  "Why suggested: matches words you liked (trailer)"
+ ],
+ "prefs_panel": "Suggestions: ON\n1 saved \u00b7 0 dismissed \u00b7 liked words: striker, tank, trailer \u00b7 disliked words: none\nYour clicks only reorder or hide what already passed your filters; they never widen a price, radius or exclusion, and they say nothing about profit.\nTurn off Reset",
+ "after_reset": "Suggestions: ON\n0 saved \u00b7 0 dismissed \u00b7 liked words: none \u00b7 disliked words: none\nYour clicks only reorder or hide what already passed your filters; they never widen a price, radius or exclusion, and they say nothing about profit.\nTurn off Reset",
+ "mobile_overflow": false,
+ "first_title": "1967 Striker M5000 Tank Trailer"
+}

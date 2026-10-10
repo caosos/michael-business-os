@@ -8,6 +8,7 @@ from urllib.parse import quote
 
 from . import landing_fix
 from . import market_search as ms
+from . import market_prefs as mp
 from . import market_view as mv
 from .ux import InputError
 
@@ -22,7 +23,7 @@ def _saved(app) -> list[dict]:
 
 
 FILTER_KEYS = ("keywords", "base", "radius", "min_price", "max_price", "min_r", "max_r", "prev_min", "prev_max", "any", "broad", "condition", "required", "preferred", "exclude", "source",
-               "kind", "closing_by", "sort")
+               "kind", "closing_by", "sort", "cat", "row1", "row2", "row3", "row4", "view")
 
 
 def _remembered(app, qs: dict) -> dict:
@@ -53,20 +54,29 @@ def page_body(app, qs: dict, now, errors=None, values=None) -> str:
     ran = not qs.get("new") and not qs.get("edit")
     data = ms.load_gsa(os.environ.get("MBOS_GSA_CACHE") or None, now, ms._origin(q["base"])) if q["source"] == "gsa" or not ran else \
         {"status": "connected", "as_of": None, "age_h": 0, "stale": False, "in_scope": 0, "in_file": 0, "cards": [], "message": ""}
-    results, unchecked, hidden = ms.partition(data["cards"], q) if ran and data["status"] == "connected" else ([], [], {})
+    results, unchecked, hidden = ms.partition(data["cards"], q) if ran and data["status"] == "connected" and not q["errors"] else ([], [], {})
+    prefs = mp.load()
+    if prefs["enabled"] and "sort" not in qs and (prefs["saved"] or prefs["more"] or prefs["less"]):
+        q["sort"] = "suggested"                      # feedback exists and the owner chose no sort: use it; hard filters already ran
+    if prefs["enabled"]:                              # dismissed lots are hidden and saved/why shown always; the ORDER follows the sort the owner chose
+        results, gone = mp.rank(results, prefs, lambda c: (c["closes"] or "9999", c["title"]), q["sort"] == "suggested")
+        hidden = {**hidden, "dismissed (reset suggestions to restore)": gone} if hidden or gone else hidden
     note = landing_fix.origin_note(q["base"], ms._origin(q["base"]) is not None, q["radius"]) if ran else ""
-    return note + mv.render_page(q, data, results, hidden, saved, app.csrf, bool(app.operator_pin), edit if edit in ids else None, ran, errors, unchecked)
+    return note + mv.render_page(q, data, results, hidden, saved, app.csrf, bool(app.operator_pin), edit if edit in ids else None, ran, errors, unchecked, prefs)
 
 
 def post(app, parts: list[str], f: dict) -> tuple[str | None, list[str] | None]:
     """-> (redirect location, None) on success or (None, errors). parts: ['market','save'] | ['market',cid,'edit'|'pause'|'resume']."""
     try:
-        if parts == ["market", "save"]:
+        if parts == ["market", "pref"]:
+            app._check_csrf(f)                       # a local view preference: CSRF only, no PIN, no money or contact
+            msg = mp.act(f.get("act", ""), f.get("lot", ""), f.get("title", ""))
+        elif parts == ["market", "save"]:
             msg = app.wanted_change(mv.save_form(f), None, "create")
         elif len(parts) == 3 and parts[2] in ("edit", "pause", "resume"):
             msg = app.wanted_change(mv.save_form(f) if parts[2] == "edit" else f, parts[1], parts[2])
         else:
             raise InputError("unknown marketplace action")
-    except InputError as ex:
+    except (InputError, ValueError) as ex:
         return None, [str(ex)]
     return f"/market?msg={quote(msg)}", None
