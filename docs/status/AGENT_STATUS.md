@@ -6,10 +6,10 @@ Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
 State: CLOSED
 Claimed: none
-Done: F-61 @ e54e27a (re-verified: f61+f136+f137 33 passed; clarifications carried by F-136/F-137, no reopen); F-138 @ 22bb3ab
+Done: F-136 @ 48d27b9 (+carried F-61 obligations @ d537b27 via F-137; evidence @ 22bb3ab via F-138; re-dispatch re-verified, f61+f136+f137 33 passed); F-61 @ e54e27a (re-verified: f61+f136+f137 33 passed; clarifications carried by F-136/F-137, no reopen); F-138 @ 22bb3ab
 Blocked: F-31 (F-106 form only) on a lane A/C task: nothing feeds a stored human scope override into the engine bundle (see receipt); B-22 also still READY
 Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
-Last updated: 2026-10-10 (F-137 CLOSED)
+Last updated: 2026-10-10 (F-136 re-dispatch verified, no source change)
 
 ## Current objective
 CLOSED (ADR-0014 / Aria 1945). Everything pushed; the lane is handed to a fresh bounded worker via `docs/handoff/LANE_06.md`. Nothing is half-applied.
