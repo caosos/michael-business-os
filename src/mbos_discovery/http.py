@@ -36,13 +36,21 @@ class Transport(Protocol):
                 body: bytes | None = None, timeout: float = 20.0) -> HttpResponse: ...
 
 
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, *a, **k):
+        return None          # surface 3xx to the caller so every hop passes the host allow-list
+
+
 class UrllibTransport:
     """Real network transport (stdlib). Only ever reached through ReadOnlyTransport."""
+
+    def __init__(self, follow_redirects: bool = True) -> None:
+        self._opener = urllib.request.build_opener() if follow_redirects else urllib.request.build_opener(_NoRedirect)
 
     def request(self, method, url, headers=None, body=None, timeout=20.0) -> HttpResponse:
         req = urllib.request.Request(url, data=body, method=method, headers=dict(headers or {}))
         try:
-            with urllib.request.urlopen(req, timeout=timeout) as resp:
+            with self._opener.open(req, timeout=timeout) as resp:
                 return HttpResponse(resp.status, resp.read(), dict(resp.headers.items()))
         except urllib.error.HTTPError as e:
             return HttpResponse(e.code, e.read() or b"", dict(e.headers.items()) if e.headers else {})

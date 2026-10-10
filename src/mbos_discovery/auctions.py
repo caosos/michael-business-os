@@ -34,6 +34,7 @@ AR_PLACES: dict[str, tuple[float, float]] = {
     "morrilton": (35.1509, -92.7435), "heber springs": (35.4917, -92.0332), "hot springs": (34.5037, -93.0552),
     "pine bluff": (34.2284, -92.0032), "jonesboro": (35.8423, -90.7043), "fort smith": (35.3859, -94.3985),
     "fayetteville": (36.0626, -94.1574), "texarkana": (33.4418, -94.0377), "el dorado": (33.2076, -92.6663),
+    "marianna": (34.7737, -90.7576), "greenbrier": (35.2326, -92.3912),
 }
 
 
