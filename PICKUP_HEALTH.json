@@ -7,20 +7,12 @@
    "needs": "interactive coordinator or owner (see the ack)",
    "reason": "queue hold + PAUSED_BY_OWNER recorded, but F-53 worker (pid 3399484), dispatcher and pickup daemon are still running and need a host/owner stop; see receipt",
    "since": "2026-10-10T05:29:31Z"
-  },
-  {
-   "attempts": 0,
-   "id": "ARYA-20261010-0532-quota-observation",
-   "needs": "owner resume",
-   "reason": "PAUSED_BY_OWNER: model work disabled; acknowledged only (resume = delete var/PAUSED_BY_OWNER)",
-   "since": "2026-10-10T05:33:21Z"
   }
  ],
- "coordinator_head": "318b816",
+ "coordinator_head": "8cec880",
  "counts": {
   "BLOCKED": [
-   "ARYA-20261010-0528-owner-pause-compute",
-   "ARYA-20261010-0532-quota-observation"
+   "ARYA-20261010-0528-owner-pause-compute"
   ],
   "COMPLETED": [
    "ARYA-20261010-0328-f49-verification",
@@ -36,7 +28,8 @@
    "ARYA-20261010-0453-f52-runtime-observation",
    "ARYA-20261010-0512-f52-acceptance-gaps",
    "ARYA-20261010-0514-pickup-base-race",
-   "ARYA-20261010-0530-owner-resume-included-quota"
+   "ARYA-20261010-0530-owner-resume-included-quota",
+   "ARYA-20261010-0532-quota-observation"
   ]
  },
  "currently_running": null,
@@ -46,7 +39,7 @@
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-10T05:33:23Z",
+ "generated_at": "2026-10-10T05:36:16Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "nothing needed",
@@ -58,7 +51,7 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-10T05:33:23Z",
+  "observed_at": "2026-10-10T05:36:16Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
   "status": "idle",
