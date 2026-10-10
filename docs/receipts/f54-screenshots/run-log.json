@@ -1,0 +1,69 @@
+{
+ "B01_1648x1000": {
+  "first_card": {
+   "top": 516,
+   "vh": 1000
+  },
+  "overflow": false,
+  "max_columns_in_a_row": 3,
+  "card_width": 253
+ },
+ "B18_script_executed": false,
+ "B18_script_elements_from_title": 0,
+ "B18_title_text_shown_literally": true,
+ "A16_slider_value_after_keys": "3",
+ "A16_chips_after_keyboard_submit": "Applied filters: Origin: Conway AR (ZIP 72032)Radius: 150 mi (known distances only)Mode: repairable trailers/equipment focus: trailer, equipmentMin price: $3Max price: $19,000",
+ "A16_errors": false,
+ "A16_tab_moves_focus_visibly": "INPUT:max_price",
+ "B16_back_forward": {
+  "first": [
+   8,
+   "Applied filters: Origin: Conway AR (ZIP 72032)Radius: 150 mi (known distances only)Mode: BROAD inventory (all categories)Max price: $100"
+  ],
+  "second": [
+   8,
+   "Applied filters: Origin: Conway AR (ZIP 72032)Radius: 25000 mi (known distances only)Mode: BROAD inventory (all categories)Max price: $100,000"
+  ],
+  "back_equals_first": true,
+  "forward_equals_second": true
+ },
+ "F54_invalid_shows_error": true,
+ "F54_plain_load_after_invalid": {
+  "error_banner": false,
+  "chips": "Applied filters: Origin: Conway AR (ZIP 72032)Radius: 120 mi (known distances only)Mode: repairable trailers/equipment focus: trailer, equipmentMax price: $500"
+ },
+ "F54_new_instance_plain_load": {
+  "error_banner": false,
+  "chips": "Applied filters: Origin: Conway AR (ZIP 72032)Radius: 120 mi (known distances only)Mode: repairable trailers/equipment focus: trailer, equipmentMax price: $500"
+ },
+ "A17_after_save_url": "http://127.0.0.1:39711/market?msg=Campaign%20created%20%28cmp_P4EXCS0XXKS4G5Z2FQ4B1YX3R4%2",
+ "A17_saved_run_chips": "Applied filters: Origin: Conway AR (ZIP 72032)Radius: 120 mi (known distances only)Mode: repairable trailers/equipment focus: noneMin price: $10Max price: $500Keywords: trailer",
+ "A17_errors": false,
+ "B19_dom_lots": [
+  "3-1-QSC-I-27-006-005",
+  "3-1-QSC-I-27-017-016",
+  "3-1-QSC-I-27-017-017",
+  "3-1-QSC-I-27-017-037",
+  "3-1-QSC-I-27-017-038",
+  "3-1-QSC-I-27-017-039",
+  "4-1-QSC-I-27-007-001",
+  "4-1-QSC-I-27-013-001"
+ ],
+ "B19_raw_ids": [
+  "3-1-QSC-I-27-006-005",
+  "3-1-QSC-I-27-017-016",
+  "3-1-QSC-I-27-017-017",
+  "3-1-QSC-I-27-017-037",
+  "3-1-QSC-I-27-017-038",
+  "3-1-QSC-I-27-017-039",
+  "4-1-QSC-I-27-005-001",
+  "4-1-QSC-I-27-007-001",
+  "4-1-QSC-I-27-013-001"
+ ],
+ "B12_all_links_are_source_urls": true,
+ "B12_external_hosts": [
+  "www.gsaauctions.gov"
+ ],
+ "C07_forbidden_phrases_present": [],
+ "C07_has_research_needed": false
+}

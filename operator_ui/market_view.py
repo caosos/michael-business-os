@@ -61,7 +61,7 @@ def gallery_card(c: dict, tok) -> str:
     img = _photo(c["image"], c["url"])
     ph = img if img.startswith("<img") else f"<div class='ph small mut'>{img}</div>"      # the honest tile/placeholder; never a faked picture
     price = "<div class='pr'>No bids yet</div><div class='small mut'>price UNKNOWN</div>" if c["bid"] is None else f"<div class='pr'>${c['bid']:,.0f}</div><div class='small mut'>current bid</div>"
-    town = e(c["city"] or "town UNKNOWN") + (f" · {c['distance']:g} mi" if c["distance"] is not None else " · distance UNKNOWN")
+    town = e(c["city"] or "town UNKNOWN") + (f" · {round(c['distance'], 1):g} mi" if c["distance"] is not None else " · distance UNKNOWN")
     ti = c["title"] if len(c["title"]) <= 60 else c["title"][:59] + "…"
     flag = " <span class='badge'>SAVED</span>" if c.get("saved") else ""
     return (f"<div class='mk-g' data-lot='{e(c['id'])}'>{ph}{price}<div class='ti'><b>{e(ti)}</b>{flag}</div><div class='small'>{town}</div>"
@@ -88,7 +88,7 @@ def prefs_panel(d: dict, tok) -> str:
 def render_card(c: dict, tok=None) -> str:
     verdict, why = ms.decision(c)
     tags = "".join(f"<span class='mk-tag'>{e(k)}: {e(t)} ({e(tag)})</span>" for k in ("required", "preferred") for t, tag in (c.get("tags") or {}).get(k, []))
-    where = e(c["city"] or "UNKNOWN") + (f" · {c['distance']:g} mi from your base" if c["distance"] is not None else " · distance UNKNOWN (place not in our small local gazetteer; see the note above)")
+    where = e(c["city"] or "UNKNOWN") + (f" · {round(c['distance'], 1):g} mi from your base" if c["distance"] is not None else " · distance UNKNOWN (place not in our small local gazetteer; see the note above)")
     stale = " <b class='bad'>STALE: bid may have moved</b>" if c["stale"] else ""
     return (f"<div class='card mk-res'>{_photo(c['image'], c['url'])}<div style='min-width:0'><h3 style='margin:0 0 4px'>{e(c['title'])} "
             f"<span class='badge'>{verdict}</span> <span class='lbl'>RESEARCH NEEDED</span></h3>"
@@ -196,7 +196,7 @@ def _save(q: dict, cid: str | None, tok, pin_html: str) -> str:
             f"<form method='post' action='/market/{'%s/edit' % e(cid) if cid else 'save'}' class='mk-form'>{tok()}{keep}"
             f"<label>Name this search <input name='title' maxlength='120' value='{v('keywords')}'></label> {pin_html} "
             f"<button name='do' value='save'>{'Save changes' if cid else 'Save this search'}</button></form>"
-            "<p class='small mut'>Saved with a search: keywords, origin, radius, max price, must/nice/exclude terms. Min price, category focus, broad mode and the other filters apply to this run (and are remembered, even after a restart). "
+            "<p class='small mut'>Saved with a search: keywords, origin, radius, min and max price, must/nice/exclude terms, category focus, row order, broad mode and condition. Sort, view and closing date are not saved (they apply to this run and are remembered, even after a restart). A saved search needs a max price. "
             "A search never contacts anyone.</p></details>")
 
 
@@ -282,6 +282,8 @@ def save_form(f: dict) -> dict:
     """Marketplace form -> the Wanted campaign form fields (exclude terms ride in nice_to_have as `exclude:word`)."""
     q = ms.parse_query({k: [v] for k, v in f.items()})
     nice = list(q["preferred"]) + [ms.EXCLUDE_PREFIX + t for t in q["exclude"]]
+    nice += ([f"min:{q['min_price']:g}"] if q["min_price"] is not None else []) + ([f"cat:{'>'.join(q['cats'])}"] if q["cats"] else []) \
+        + ([f"rows:{'>'.join(q['rows'])}"] if q["rows"] != list(ms.DEFAULT_ROWS) else []) + (["broad:1"] if q["broad"] else []) + ([f"cond:{q['condition']}"] if q["condition"] else [])
     return {**{k: f[k] for k in ("csrf", "pin", "nonce") if k in f}, "title": (f.get("title") or q["keywords"]).strip() or "Marketplace search",
             "category": CATEGORY, "keywords": q["keywords"].replace(" ", ", "), "max_price_usd": "" if q["max_price"] is None else str(q["max_price"]),
             "radius_miles": "" if q["radius"] is None else str(q["radius"]), "origin": q["base"],

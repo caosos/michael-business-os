@@ -27,6 +27,7 @@ ROW_CATS = {"trailers": ("trailer",), "equipment": ("equipment", "tractor", "mow
 DEFAULT_ROWS = ("trailers", "equipment", "vehicles", "")
 CONDITIONS = ("", "new", "used", "salvage", "parts", "for parts", "not working", "working", "as is")
 STALE_H = 6
+META = ("min:", "cat:", "rows:", "broad:", "cond:")   # F-54: other saved-search criteria ride in nice_to_have the same way (the frozen schema has no field)
 EXCLUDE_PREFIX = "exclude:"            # saved inside the campaign's nice_to_have, the only free-text list the frozen schema allows
 DEFAULT_BASE = "Conway AR"
 DEFAULT_RADIUS = 150.0                 # an editable starting radius around the base, not a budget
@@ -109,11 +110,23 @@ def criteria_to_query(doc: dict) -> dict:
     """A saved campaign -> the filter dict it was saved from (exclude terms ride in nice_to_have as `exclude:word`)."""
     c = doc.get("criteria") or {}
     nice = c.get("nice_to_have") or []
-    return {"keywords": ", ".join(c.get("keywords") or []), "base": c.get("origin") or DEFAULT_BASE,
-            "radius": "" if c.get("radius_miles") is None else f"{c['radius_miles']:g}", "any": "", "max_price": f"{c['max_price_usd']:g}" if "max_price_usd" in c else "",
-            "required": ", ".join(c.get("must_have") or []),
-            "preferred": ", ".join(t for t in nice if not t.startswith(EXCLUDE_PREFIX)),
-            "exclude": ", ".join(t[len(EXCLUDE_PREFIX):] for t in nice if t.startswith(EXCLUDE_PREFIX))}
+    meta = {t[: t.index(":") + 1]: t[t.index(":") + 1:] for t in nice if t.startswith(META)}
+    out = {"keywords": ", ".join(c.get("keywords") or []), "base": c.get("origin") or DEFAULT_BASE,
+           "radius": "" if c.get("radius_miles") is None else f"{c['radius_miles']:g}", "any": "", "max_price": f"{c['max_price_usd']:g}" if "max_price_usd" in c else "",
+           "required": ", ".join(c.get("must_have") or []),
+           "preferred": ", ".join(t for t in nice if not t.startswith(EXCLUDE_PREFIX) and not t.startswith(META)),
+           "exclude": ", ".join(t[len(EXCLUDE_PREFIX):] for t in nice if t.startswith(EXCLUDE_PREFIX))}
+    if "min:" in meta:
+        out["min_price"] = meta["min:"]
+    if meta.get("cat:"):
+        out["cat"] = meta["cat:"].split(">")
+    if meta.get("rows:"):
+        out.update({f"row{i}": r for i, r in enumerate(meta["rows:"].split(">"), 1) if i <= 4})
+    if meta.get("broad:") == "1":
+        out["broad"] = "1"
+    if meta.get("cond:"):
+        out["condition"] = meta["cond:"]
+    return out
 
 
 def _origin(base: str):
@@ -133,7 +146,7 @@ def _card(adapter, rec, now, asof, origin) -> dict:
     loc = lot.get("location") if isinstance(lot.get("location"), dict) else {}
     desc = _text(p.get("lotInfo"))
     c = place_coords(loc) if loc else None
-    dist = round(haversine_miles(origin, c), 1) if (c and origin) else None      # grounded only: known place AND known base
+    dist = haversine_miles(origin, c) if (c and origin) else None      # grounded only; UNROUNDED: the radius test uses it, only the display rounds (F-54)
     bid = lot.get("current_bid")
     return {"id": lot.lot_id, "title": lot.get("title"), "description": _short(desc), "text": f"{lot.get('title')} {desc}".lower(),
             "url": lot.get("rules_url") if lot.get("rules_url") != UNKNOWN else None, "image": p.get("imageURL") or None,

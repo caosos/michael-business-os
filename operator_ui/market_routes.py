@@ -33,7 +33,9 @@ def _remembered(app, qs: dict) -> dict:
     if qs.get("new"):
         mp.remember({})
     elif given:
-        if given != mp.recall(FILTER_KEYS):
+        if ms.parse_query(given)["errors"]:
+            pass                                      # F-54: a refused request never replaces the last good choices
+        elif given != mp.recall(FILTER_KEYS):
             mp.remember({k: v if isinstance(v, list) else [v] for k, v in given.items()})
     elif not (qs.get("run") or qs.get("edit")):
         last = mp.recall(FILTER_KEYS)
@@ -50,7 +52,7 @@ def page_body(app, qs: dict, now, errors=None, values=None) -> str:
     if values is not None:
         q = ms.parse_query({k: [v] for k, v in values.items()})
     elif pick in ids:
-        q = ms.parse_query({k: [str(v)] for k, v in ms.criteria_to_query(ids[pick]).items()})
+        q = ms.parse_query({k: v if isinstance(v, list) else [str(v)] for k, v in ms.criteria_to_query(ids[pick]).items()})
     else:
         q = ms.parse_query(qs)
     edit = (qs.get("edit") or [None])[0]

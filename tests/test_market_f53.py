@@ -147,3 +147,64 @@ def test_cards_come_before_the_secondary_panels_and_panels_are_collapsed(ui):
 def test_mobile_css_puts_results_before_the_sidebar():
     from operator_ui import market_view as mv
     assert ".mk-main{order:1}" in mv.CSS and ".mk-side{order:2}" in mv.CSS
+
+
+# ---- F-54: radius compares the UNROUNDED haversine distance; saved-search round trip; invalid requests never overwrite the last good choices
+def _rounding_down_lot():
+    for base in ("Conway AR", "Little Rock AR", "Searcy AR", "Russellville AR", "Benton AR"):
+        for c in ms.load_gsa(None, NOW, ms._origin(base))["cards"]:
+            d = c["distance"]
+            if d is not None and round(d, 1) < d - 0.004:
+                return base, c, round(d, 1)
+    pytest.fail("fixture needs a lot whose real distance rounds down")
+
+
+def test_radius_boundary_real_haversine_just_over_is_out_and_exact_is_in():
+    base, lot, shown = _rounding_down_lot()
+    assert lot["distance"] > shown and lot["distance"] != round(lot["distance"], 1)            # the card keeps the real distance
+    cards = ms.load_gsa(None, NOW, ms._origin(base))["cards"]
+    over = ms.partition(cards, q_of(base=base, broad="1", radius=f"{shown:g}"))[0]
+    assert lot["id"] not in {c["id"] for c in over}            # e.g. 50.04 mi must not pass a 50 mi limit (old code rounded to 50.0 and let it in)
+    exact = ms.partition(cards, q_of(base=base, broad="1", radius=f"{lot['distance']:.10f}"))[0]
+    assert lot["id"] in {c["id"] for c in exact}               # exactly the distance is inclusive
+    assert lot["id"] not in {c["id"] for c in ms.partition(cards, q_of(base=base, broad="1", radius=f"{lot['distance'] - 0.001:.6f}"))[0]}
+
+
+def test_saved_search_round_trip_keeps_min_price_categories_rows_broad_condition():
+    from operator_ui import market_view as mv
+    f = {"csrf": "x", "keywords": "trailer", "base": "Conway AR", "radius": "120", "min_price": "100", "max_price": "500", "cat": "equipment", "row1": "tools",
+         "row2": "equipment", "row3": "", "row4": "", "broad": "1", "condition": "used", "exclude": "broken", "preferred": "tandem"}
+    saved = mv.save_form(f)
+    doc = {"criteria": {"keywords": ["trailer"], "origin": saved["origin"], "radius_miles": float(saved["radius_miles"]), "max_price_usd": float(saved["max_price_usd"]),
+                        "must_have": [], "nice_to_have": [w.strip() for w in saved["nice_to_have"].split(",")]}}
+    q = ms.parse_query({k: v if isinstance(v, list) else [str(v)] for k, v in ms.criteria_to_query(doc).items()})
+    assert (q["min_price"], q["max_price"], q["radius"]) == (100.0, 500.0, 120.0) and q["errors"] == []
+    assert q["cats"] == ["equipment"] and q["rows"][:2] == ["tools", "equipment"] and q["broad"] and q["condition"] == "used"
+    assert q["exclude"] == ["broken"] and q["preferred"] == ["tandem"]
+
+
+def test_saved_search_http_round_trip(ui):
+    from tests.test_market_f47 import post
+    st, loc, _ = post(ui, "/market/save", keywords="trailer", base="Conway AR", radius="120", min_price="100", max_price="500", cat="equipment", title="rt")
+    assert st == 303 and "created" in loc
+    cid = ui.campaign_records()[0]["doc"]["campaign_id"]
+    h = get(ui, run=cid)
+    assert "Min price: $100" in h and "Max price: $500" in h and "Radius: 120 mi" in h and "filter-errors" not in h
+
+
+def test_invalid_request_never_overwrites_last_good_choices(ui, tmp_path):
+    get(ui, go=1, radius="120", max_price="500", cat="tools")
+    good = mp.recall(("radius", "max_price", "cat"))
+    assert good["radius"] == ["120"]
+    bad = get(ui, go=1, radius="x")
+    assert "id='filter-errors'" in bad                              # the refused request is told so
+    assert mp.recall(("radius", "max_price", "cat")) == good        # and the stored choices are untouched
+    for page in (get(ui), req(ui, "GET", "/market")[2]):            # plain load: choices restored, no error banner
+        assert "Radius: 120 mi" in page and "Max price: $500" in page and "filter-errors" not in page
+    app2, httpd2 = _fresh_app(tmp_path, "after-bad")
+    try:
+        again = req(app2, "GET", "/market")[2]
+    finally:
+        httpd2.shutdown()
+        httpd2.server_close()
+    assert "Radius: 120 mi" in again and "Max price: $500" in again and "filter-errors" not in again
