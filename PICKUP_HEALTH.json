@@ -7,12 +7,20 @@
    "needs": "interactive coordinator or owner (see the ack)",
    "reason": "release execution needs the Agent 01 engineering session (live restart); row A-58 added, docs reconciled",
    "since": "2026-10-10T19:55:58Z"
+  },
+  {
+   "attempts": 1,
+   "id": "ARYA-20261010-2142-a63-sustained-progression",
+   "needs": "interactive coordinator or owner (see the ack)",
+   "reason": "needs code (tools/next_work.py); queued as READY_QUEUE A-65 for the existing engineering session",
+   "since": "2026-10-10T21:43:06Z"
   }
  ],
- "coordinator_head": "ecdfa1b",
+ "coordinator_head": "d94f35a",
  "counts": {
   "BLOCKED": [
-   "ARYA-20261010-1954-authorized-ui-release"
+   "ARYA-20261010-1954-authorized-ui-release",
+   "ARYA-20261010-2142-a63-sustained-progression"
   ],
   "COMPLETED": [
    "ARYA-20261010-0328-f49-verification",
@@ -73,9 +81,6 @@
    "ARYA-20261010-2127-a63-dependency-reconcile",
    "ARYA-20261010-2129-a61-integrity-provenance",
    "ARYA-20261010-2133-engineering-proof"
-  ],
-  "RUNNING": [
-   "ARYA-20261010-2142-a63-sustained-progression"
   ]
  },
  "currently_running": {
@@ -84,11 +89,11 @@
  },
  "delivery_interface": {
   "claude_cli": true,
-  "quota": "session 42.0% / week 20.0% are under the limits",
+  "quota": "session 8.0% / week 21.0% are under the limits",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-10T21:42:41Z",
+ "generated_at": "2026-10-10T21:43:06Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "nothing needed",
@@ -100,7 +105,7 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-10T21:42:41Z",
+  "observed_at": "2026-10-10T21:43:06Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
   "status": "busy",
