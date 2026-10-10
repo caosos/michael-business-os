@@ -472,6 +472,19 @@ Evidence required before any bid ceiling is derived:
 
 This is a documented guideline only; no automated implementation exists. No yard contact, bids or purchases are authorised by it.
 
+### 13c. Owner decision learning criteria (owner goal; ARYA-20261010-2116)
+
+Owner goal: every decision made together is learned by the system so it can eventually assess on its own. This section is **criteria only**; the learning capability is NOT implemented by this text. It folds into the existing valuation/owner-watch learning inspection (A-61, inspection-first). It adds no new worker, datastore or parallel feature. A-59/A-60 and their acceptance are unchanged.
+
+- **Reuse first.** Inspect existing decision, evidence, outcome and lesson records (contract models `Outcome`, `OUTCOME_RECORDED`/`LESSON_RECORDED` receipts, provenance) before designing storage. A-61 reports the smallest fit and any dependency.
+- **A retrievable decision record identifies:** stable listingID and source; time; evidence available at that time; owner estimates (labelled as owner estimates, distinct from sourced evidence); alternatives considered; reason for pass/watch/pursue; uncertainty and missing evidence; later actual outcome.
+- **Outcomes honest.** Learn only from supported outcomes and owner corrections. An estimate is never recorded as a realized result.
+- **Owner control.** The owner can inspect, correct, and reset/disable learned preferences, following existing audit/history conventions. Provenance is preserved; corrections append, they never silently overwrite historical facts.
+- **Scope of a signal.** A pass or X-hide on ONE listing is not a category dislike. Explicit category/similarity feedback is a separate signal.
+- **Precedence.** Learned ranking never overrides hard filters, feasibility/evidence gates (13a, 13b-1) or owner constraints.
+- **Authority.** Independent assessment/recommendation is a product goal, not permission to bid, buy, contact sellers or mutate external accounts. Transactions stay owner-gated. Local owner-reported watch/bid records are not live GSA sync and must not be described as such.
+- **Privacy.** No real private budgets, owner bids, repair quotes or case-specific amounts in GitHub, tests or public receipts. Any authorised private decision data lives only in the owner-local protected record path.
+
 
 ## 14. Inventory merchandising
 
