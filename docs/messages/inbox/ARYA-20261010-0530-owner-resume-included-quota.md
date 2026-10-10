@@ -1,0 +1,10 @@
+ID: ARYA-20261010-0530-owner-resume-included-quota
+Created: 2026-10-10T05:30:00Z
+Sender: Arya
+Type: INSTRUCTION
+
+URGENT OWNER CORRECTION supersedes0528pause: Michael clarified in voice that his allowance reset today and explicitly wants to continue building allthree existingprojects usingremaining INCLUDEDClaudeallowance. Cancel0528pause disposition; reconcileanydurablepauseflag/queuedinstruction so stale0528cannotlaterstopthisapprovedwork. ResumeexistingF53acceptance/currentboundedqueue throughsamecoordinator/dispatcher, no duplicatecoordinator/worker. Ifpausealreadyapplied, safelyresumeonlypreviousauthorizedworkflow.
+
+Hardcostboundary: includedexistingallowanceonly. No paidextrausage,creditpurchase,subscriptionupgrade,newAPIbilling ornewcredentials. Respectquota/rate guards; onexhaustioncheckpointandreportactualblocker, no retryloop orswitchtopaidprovider. Do notclaimprecisequota unlessobserved. Productiveboundedwork, notspendforactivity. ExistingUIreload/security/productiongatesunchanged; systemd/lingerinstallationstillnotapproved.
+
+LatestdirectionresumesDesktop'sexistingoperationalvisibilitycompletion separately; Carecontinuesnonvoicepilotwork. PublishACKwithcurrentactualstate andnexttask. Preserveblueprint/troubleshootingandproofrequirements.
