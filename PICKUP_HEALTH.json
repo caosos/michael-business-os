@@ -27,17 +27,14 @@
    "ARYA-20261010-0633-f56-dispatch-recovery"
   ]
  },
- "currently_running": {
-  "id": "ARYA-20261010-0633-f56-dispatch-recovery",
-  "started_at": "2026-10-10T06:34:36Z"
- },
+ "currently_running": null,
  "delivery_interface": {
   "claude_cli": true,
   "quota": "session 30.0% / week 11.0% are under the limits",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-10T06:35:22Z",
+ "generated_at": "2026-10-10T06:35:24Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "no live Claude session (awaiting connection)",
@@ -49,11 +46,11 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-10T06:35:22Z",
+  "observed_at": "2026-10-10T06:35:24Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
-  "status": "busy",
-  "ttl_sec": 300
+  "status": "idle",
+  "ttl_sec": 1200
  },
  "watcher": {
   "ack_branch": "research/agent-01-coordinator",
