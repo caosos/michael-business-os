@@ -427,6 +427,21 @@ The same general engine can extend to:
 Long-term marketplace transaction data becomes valuable valuation evidence:
 ask → offers → accepted price → actually paid → completed.
 
+### 13a. Trailer visual-inspection buying guideline (owner-required; ARYA-20261010-1812)
+
+Michael explicitly required this as canonical decision guidance: the system must have eyes on what a trailer actually looks like before recommending it. This is a **guideline**, not a claim that an automated visual-inspection feature exists.
+
+Rules:
+- Open and visually inspect the actual listing photographs before recommending a trailer or selecting like-for-like comparables. Dimensions and sale price alone are insufficient.
+- Separate **visible facts**, **seller claims** and **unknowns**. A light-duty/heavy-duty characterization from photographs is provisional.
+- Verify capacity from manufacturer documentation and the VIN/certification label (GVWR/GAWR). Never infer safe capacity from wheel size, apparent construction or dimensions.
+- Compare construction, verified capacity, condition, gate/ramp, paperwork and all-in cost. A generic 5x8 listing is not automatically comparable.
+- Insufficient photos or capacity evidence means the verdict is **needs photographs/inspection**; do not label it a good buy.
+
+Minimum photo evidence: front, rear and both sides; underside rails and crossmembers; full tongue and its connections; axle, springs and hubs; both sides of the deck; tire date and load markings; VIN/capacity label; gate/ramp, coupler, chains and lights.
+
+Reviewed public example: HiBid item 323080435 sold for $575. Photos show a mesh deck, low rails, small wheels, a central tongue and rust/discoloration. Likely light-duty is provisional; capacity and hidden frame condition remain unknown. The sold price is a valid historical sale datapoint, not a recommendation or like-for-like valuation.
+
 ## 14. Inventory merchandising
 
 The system should actively make inventory interesting and engaging.
