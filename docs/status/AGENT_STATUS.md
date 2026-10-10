@@ -6,7 +6,7 @@ Branch: research/agent-06-communications
 Worktree: /home/michaelos/business-os-worktrees/agent-06-communications
 State: CLOSED
 Claimed: none
-Done: F-138 @ 22bb3ab
+Done: F-61 @ e54e27a (re-verified: f61+f136+f137 33 passed; clarifications carried by F-136/F-137, no reopen); F-138 @ 22bb3ab
 Blocked: F-31 (F-106 form only) on a lane A/C task: nothing feeds a stored human scope override into the engine bundle (see receipt); B-22 also still READY
 Started: 2026-10-06 (Round One) · 2026-10-07 (Round Two)
 Last updated: 2026-10-10 (F-137 CLOSED)
