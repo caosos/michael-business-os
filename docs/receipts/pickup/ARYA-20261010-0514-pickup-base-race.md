@@ -1,25 +1,25 @@
-# Receipt: ARYA-20261010-0514-pickup-base-race
+# Pickup receipt: ARYA-20261010-0514-pickup-base-race
 
-Executor: Agent 01 automatic pickup, docs-only, dry-run. No code changed, no restart, no spend or contact.
+- Stage: COMPLETED as coordination (the fix was already delivered by the owner code path in `03d0e1e`; this run verified it, reconciled F-53, and changed no code, restart, spend, contact or other projects)
+- Source: `origin/liaison/aria-to-agent-01:docs/messages/inbox/ARYA-20261010-0514-pickup-base-race.md`
 
-## Finding (verified by reading the repo)
-- The false positive was real. `tools/pickup_git.py::changed_files` diffed the worktree against the moving `origin/research/agent-01-coordinator`. Code the coordinator took during the run (A-52: 4ca13ac, e693ae, afc8fed) showed up as "changed by the executor", so the docs-only guard in `tools/inbox_pickup.py:168` blocked 0512.
-- The fix is already on the coordinator branch as 03d0e1e, pushed before this instruction was picked up. `changed_files` now diffs against `git merge-base HEAD origin/<coord>`, the fork point, plus uncommitted and untracked files. Commits others push meanwhile are not counted.
-- The strict policy is unchanged: any non-`docs/` path in the child's own changes still blocks (`inbox_pickup.py:168-170`, test at `tests/unit/test_inbox_pickup.py:156`).
-- 03d0e1e also made the rebase use the executor's own identity and report git's reason on failure.
-- The regression test is `test_docs_guard_ignores_code_pushed_by_others_after_the_run_started`. It pushes code to the coordinator branch while the executor runs. The task still ends COMPLETED, and the other agent's `tools/new_code.py` survives the rebase.
+## Provenance finding (read-only, confirmed)
+- `git diff --stat ecd9638 c7ca90b -- . ':!docs'` is empty. The 0512 pickup child `c7ca90b` changed only three docs files (ACK, receipt, READY_QUEUE F-53 row) versus its parent `ecd9638`. The child never touched code.
+- The coordinator advanced concurrently with A-52 code (`4ca13ac`, `e693ae`, `afc8fed`). The old `pickup_git.changed_files` diffed against the moving `origin/research/agent-01-coordinator`, so upstream code showed up as the executor's change. The race hypothesis is confirmed.
 
-## Caveat on "immutable captured base"
-The merge-base is recomputed on each call, not captured once at start. It stays correct because the worktree's own commits sit above the fork point, and a rebase only moves the fork point past commits that are already upstream. I did not change this, because that needs code. If Arya wants a literal captured base SHA, that is a code change for Agent 01's lane.
-
-## 0512 resumption and F-53
-- 0512 already published through the verified route (b8cad80). No duplicate executor or task was started.
-- F-53 is now in the authoritative queue. `origin/research/agent-01-coordinator:docs/status/READY_QUEUE.md` line 373 has F-53 as a P0 row for lane 06, "NOT done by pickup", in the same file as F-52 and A-52. Its status is READY (not claimed or started), and it is scheduled only as a queue row.
-- Product acceptance and the live gate are unchanged.
+## Fix (already on the coordinator branch, `03d0e1e`, owner code path)
+- `tools/pickup_git.changed_files` now diffs against `git merge-base HEAD origin/<coordinator>` (the fork point), plus uncommitted and untracked files. Upstream pushes made after the run started are not counted. The docs-only policy is unchanged and strict. The guard was not relaxed or bypassed.
+- `publish` rebases with its own identity and reports git's actual reason when the rebase fails.
 
 ## Tests
-- Not run. This worktree's Python has no pytest, and no other interpreter on the host has it, so I could not execute `tests/unit/test_inbox_pickup.py`. The evidence above comes from reading the diff and the tests. UNK: current pass count.
+- `tests/unit/test_inbox_pickup.py`: 12 passed in 5.16s (run with `../agent-01-coordinator/.venv`).
+- `test_docs_guard_ignores_code_pushed_by_others_after_the_run_started`: another clone pushes `tools/new_code.py` mid-run. The run still reaches COMPLETED, the upstream code survives the rebase, and the docs land.
+- GAP: I did not find a test that names the opposite case, where a child that itself writes non-docs code must still block. Existing guard tests may cover it (not located in a 5-line grep). Added to the queue below instead of asserting it.
+
+## Reconciliation
+- F-53 is now on the authoritative `origin/research/agent-01-coordinator` READY_QUEUE.md (row 373, status READY, lane 06, code lane). It is queued, not scheduled or started. It is not claimed done.
+- 0512 publication: it was published as `c7ca90b` (receipt present at `docs/receipts/pickup/ARYA-20261010-0512-f52-acceptance-gaps.md`). No duplicate executor or task was started.
+- F-52 acceptance and the live gate are unchanged.
 
 ## Remaining
-- Someone should run `tests/unit/test_inbox_pickup.py` where pytest is available, to confirm the fix and the regression test pass.
-- Optional code task for Agent 01 if a literal captured-base SHA is wanted.
+- Code lane (01, side worktree), small: add an explicit regression test that a child's own non-docs change is blocked by the docs-only guard (confirm whether one already exists first). No owner decision needed.
