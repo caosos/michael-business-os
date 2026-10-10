@@ -3,10 +3,11 @@ No network, no proxy, no token: GSA photo URLs (ppms.gov) answer 401 without a G
 
 from __future__ import annotations
 
+import os
 import re
 from html import escape as e
 
-from . import live_demo
+from . import gazetteer, live_demo
 
 NO_PHOTO = "Photo is behind GSA's login: open the original listing"
 BANKROLL = "Simulated bankroll, not your cash"
@@ -19,9 +20,50 @@ def live_only(loaded: dict, store) -> dict:
     doc = loaded.get("doc")
     if loaded.get("kind") != "plan" or not isinstance(doc, dict):
         return loaded
-    legs = [l for l in doc.get("legs") or [] if not live_demo.is_demo(store.item(l.get("item_id")))]
-    keep = [i for i in doc.get("replace_if_stale") or [] if not live_demo.is_demo(store.item(i))]
-    return {**loaded, "doc": {**doc, "legs": legs, "replace_if_stale": keep}}
+    def demo(iid):  # an id the store does not know cannot be shown as real (F-48), and a TRAIN-* id is demo by name
+        it = store.item(iid)
+        return it is None or str(iid).upper().startswith("TRAIN-") or LiveStore._demo(it)
+
+    legs = [l for l in doc.get("legs") or [] if not demo(l.get("item_id"))]
+    keep = [i for i in doc.get("replace_if_stale") or [] if not demo(i)]
+    gone = {str(l.get("item_id")) for l in doc.get("legs") or []} - {str(l.get("item_id")) for l in legs}
+    gone |= {str(i) for i in doc.get("replace_if_stale") or []} - {str(i) for i in keep}
+    errs = [x for x in loaded.get("errors") or [] if not any(g in str(x) for g in gone) and "TRAIN-" not in str(x)]  # validation text echoes ids
+    return {**loaded, "errors": errs, "doc": {**doc, "legs": legs, "replace_if_stale": keep}}
+
+
+class LiveStore:
+    """Read-only view of the store without demo/training items (F-49): digest, summary, holds, outcomes and the ledger list only real
+    items. Everything else (single item lookups by id, chain verification, writes) passes through untouched."""
+
+    def __init__(self, store):
+        self._s = store
+
+    def __getattr__(self, name):
+        return getattr(self._s, name)
+
+    @staticmethod
+    def _demo(item) -> bool:
+        """MBOS_UI_FIXTURE_ITEMS=1 (test suites whose only items are fixtures) turns the source-host rule off; TRAIN-* stays hidden.
+        TRAIN-* fixtures, or an item whose sources are all reserved/fixture hosts (example.invalid). An item with no source at all is kept."""
+        if live_demo.is_training(item):
+            return True
+        return not os.environ.get("MBOS_UI_FIXTURE_ITEMS") and (bool((item or {}).get("sources")) and not live_demo.has_verified_source(item))
+
+    def _live(self, iid) -> bool:
+        return not iid or not self._demo(self._s.item(iid))
+
+    def items_in_states(self, *a, **k):
+        return [i for i in self._s.items_in_states(*a, **k) if not self._demo(i)]
+
+    def held(self, *a, **k):
+        return [h for h in self._s.held(*a, **k) if self._live((h.get("item") or {}).get("item_id"))]
+
+    def outcomes(self, *a, **k):
+        return [o for o in self._s.outcomes(*a, **k) if self._live(o.get("item_id"))]
+
+    def receipts(self, *a, **k):
+        return [r for r in self._s.receipts(*a, **k) if self._live(r.get("item_id"))]
 
 
 def bankroll_html(ledger: dict | None, money) -> str:
@@ -40,7 +82,7 @@ def parse_origin(base: str):
     m = _LATLNG.match(base or "")
     if m and abs(float(m.group(1))) <= 90 and abs(float(m.group(2))) <= 180:
         return float(m.group(1)), float(m.group(2))
-    return None
+    return gazetteer.locate(base)
 
 
 def origin_note(base: str, located: bool, radius) -> str:
@@ -49,7 +91,7 @@ def origin_note(base: str, located: bool, radius) -> str:
         return ""
     return (f"<div class='card'><b>Origin '{e(base)}' accepted but not located.</b> Distances are UNKNOWN"
             + (f" and the {radius:g} mi radius is not applied" if radius is not None else "")
-            + ". Type a city lane 02 knows (Arkansas towns), or 'latitude, longitude'.</div>")
+            + ". Type a US ZIP or city in the local gazetteer (operator_ui/data/gazetteer_us.csv, or MBOS_GAZETTEER_FILE), or 'latitude, longitude'. No network lookup is made.</div>")
 
 
 def photo_tile(url, listing_url) -> str:

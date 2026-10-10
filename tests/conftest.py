@@ -14,6 +14,13 @@ from pathlib import Path
 import pytest
 import sqlalchemy as sa
 
+
+@pytest.fixture(autouse=True)
+def _fixture_items(monkeypatch):
+    """Fixture items carry example.invalid sources; F-49 hides those from live pages unless a suite declares it is fixture-only."""
+    monkeypatch.setenv("MBOS_UI_FIXTURE_ITEMS", "1")
+
+
 # DBOS is a per-process singleton, so the reference-backend suite and the lane D suite (F-04) cannot share a process.
 #   .venv/bin/python -m pytest -q tests                      → reference backend (tests/test_*.py)
 #   MBOS_UI_LANE_D=1 .venv/bin/python -m pytest -q tests     → lane D + lane E (tests/lane_d/)

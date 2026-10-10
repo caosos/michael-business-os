@@ -25,7 +25,7 @@ try:  # lane C's package is optional: without it the notes form is simply unavai
 except ImportError:  # pragma: no cover
     NOTE_CATEGORIES, NOTE_KINDS = frozenset(), frozenset()
 
-from . import deal_ui, live_demo, market_routes, resale_view, attest_view, bought_view, card_view, comps_view, glance_view, inputs_view, ux, views, wanted_view
+from . import deal_ui, landing_fix, live_demo, market_routes, resale_view, attest_view, bought_view, card_view, comps_view, glance_view, inputs_view, ux, views, wanted_view
 from .digest import figures as digest_figures, dollars as _dollars
 from .card_view import ec
 from .backend import AlreadyClosed, FollowupRefused, ItemNotFound, NoteRefused, NumbersRefused, ProfileUnavailable
@@ -994,7 +994,7 @@ def make_handler(app):
             if u.path == "/":
                 return self._redirect("/queue?" + u.query)
             if u.path == "/queue":
-                from . import landing_fix, mission_view
+                from . import mission_view
 
                 try:
                     lv = landing_fix.live_only(mission_view.load_live(app.store, now, app.mission_file), app.store)
@@ -1041,7 +1041,7 @@ def make_handler(app):
             if u.path == "/digest":
                 from . import digest as digest_view
 
-                return self._send(200, page("Morning digest", render_digest(digest_view.build(app.store, iso(now))), app.state()))
+                return self._send(200, page("Morning digest", render_digest(digest_view.build(landing_fix.LiveStore(app.store), iso(now))), app.state()))
             if u.path == "/notes":
                 return self._notes_page(flash or err, bool(err))
             if u.path.startswith("/item/"):
@@ -1049,7 +1049,7 @@ def make_handler(app):
             if u.path == "/mission":
                 from . import mission_view
 
-                loaded = mission_view.load_live(app.store, now, app.mission_file)
+                loaded = landing_fix.live_only(mission_view.load_live(app.store, now, app.mission_file), app.store)  # F-49: no demo legs
                 known = {l["item_id"] for l in (loaded["doc"] or {}).get("legs", []) if app.store.item(l["item_id"])} if loaded["kind"] == "plan" else set()
                 ids = {l["item_id"] for l in (loaded["doc"] or {}).get("legs", [])} | set((loaded["doc"] or {}).get("replace_if_stale") or []) if loaded["kind"] == "plan" else set()
                 titles = {i: ((app.store.item(i) or {}).get("normalized") or {}).get("title") for i in ids}
@@ -1092,7 +1092,7 @@ def make_handler(app):
             if u.path == "/summary":
                 from . import summary as summary_view
 
-                s_ = summary_view.build_summary(app.store, now, health_file=app.health_file)
+                s_ = summary_view.build_summary(landing_fix.LiveStore(app.store), now, health_file=app.health_file)
                 return self._send(200, page("Daily summary", "<div class='card'>" + summary_view.render_html_body(s_) +
                                             "<p class='small mut'>Files on disk: <code>python -m operator_ui summary --out-dir DIR</code>"
                                             " (local only; never sent).</p></div>", app.state()))
@@ -1100,13 +1100,13 @@ def make_handler(app):
                 pid = u.path.split("/")[2]
                 return self._send(200, page("Provenance", render_provenance(app.store.provenance(pid), pid), app.state()))
             if u.path == "/holds":
-                return self._send(200, page("HOLD backlog", render_holds(app.store.held(), now), app.state()))
+                return self._send(200, page("HOLD backlog", render_holds(landing_fix.LiveStore(app.store).held(), now), app.state()))
             if u.path == "/sources":
                 return self._send(200, page("Source health", render_sources(load_health(app.health_file), now), app.state()))
             if u.path == "/outcomes":
-                return self._send(200, page("Outcomes", render_outcomes(app.store.outcomes(), app.store), app.state()))
+                return self._send(200, page("Outcomes", render_outcomes(landing_fix.LiveStore(app.store).outcomes(), app.store), app.state()))
             if u.path == "/ledger":
-                return self._send(200, page("Receipt ledger", render_ledger(app.store), app.state()))
+                return self._send(200, page("Receipt ledger", render_ledger(landing_fix.LiveStore(app.store)), app.state()))
             if u.path.startswith("/areq/"):
                 c = views.card(app.store, u.path.split("/")[2], now)
                 if c is None:
