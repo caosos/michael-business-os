@@ -484,6 +484,9 @@ Owner goal: every decision made together is learned by the system so it can even
 - **Precedence.** Learned ranking never overrides hard filters, feasibility/evidence gates (13a, 13b-1) or owner constraints.
 - **Authority.** Independent assessment/recommendation is a product goal, not permission to bid, buy, contact sellers or mutate external accounts. Transactions stay owner-gated. Local owner-reported watch/bid records are not live GSA sync and must not be described as such.
 - **Privacy.** No real private budgets, owner bids, repair quotes or case-specific amounts in GitHub, tests or public receipts. Any authorised private decision data lives only in the owner-local protected record path.
+- **Full assessment case (ARYA-20261010-2117).** The unit of learning is a private, listing-linked assessment case, not a final number, saved ID, chat memory or broad preference. It records an evidence and decision-rationale SUMMARY (not hidden chain-of-thought): condition and photo evidence; dimensions/capacity uncertainty; owner skills and actual repair work; title/paperwork; supported costs; sold-comparable quality; alternative exits; reasons to reject or pursue; missing evidence; later outcome. Owner estimates are labelled apart from verified facts; the per-item decision is kept apart from category preference.
+- **Proposal-first.** Future system assessments come to the owner first as "Here is what we propose and why", with evidence and uncertainty, for owner review. This grants NO autonomous bidding, purchasing or contact.
+- **Storage honesty.** Do not force the case into a purchase/acquisition record, a narrow attestation or a false verification field. A real private case counts as learned only after an authorised local write AND retrieval verification under the correct listingID; until then, no "learned" claim. Parent retains the actual private case; none goes in GitHub or test fixtures.
 
 
 ## 14. Inventory merchandising
