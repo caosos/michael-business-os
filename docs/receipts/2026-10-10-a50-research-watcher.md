@@ -1,0 +1,6 @@
+# A-50 DONE: ResearchWatcher no longer swallows a human input made in the round after a re-check (Agent 01, code)
+
+- Bug: after a re-check ResearchWatcher "absorbed" the next growth of that item as the re-check's own. A human attestation/quote in that next round was swallowed (seen in A-49 round 3; a re-check was skipped).
+- Fix (src/mbos/inbox.py, src/mbos/cli.py): the production counter `_parked_research_lengths` now counts ONLY human-written research entries (`source_uri LIKE 'human:%'`; the workflow login cannot write these), so the re-check's own research is never growth and the absorb/pending rule is deleted. HumanInputWatcher (A-43) is unchanged; one input seen by both still coalesces into one workflow (A-49 test).
+- Tests: tests/integration/test_a40_audit_fixes.py 11 pass (a42 stub test rewritten for the new semantics incl. "human input right after a re-check is seen"; new a50 test with the production counter + real DB: quote -> re-check, attestation in the round after -> re-check again, quiet tick -> nothing; mutation-checked: it fails with the old ResearchWatcher). tests/integration/test_a49_hold_and_recheck.py 5 pass (real DB, 18 s).
+- Not run: the full suite (known baseline: test_resale_f39 timeout, F-32 x2). No service restarted: the running mbos-dev-worker keeps the old code until its next owner-approved restart.

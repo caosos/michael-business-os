@@ -32,33 +32,20 @@ class InboxWatcher:
 
 
 class ResearchWatcher:
-    """F-109: re-check a parked item when its research grew (a UI attestation or comp), not only when the inbox changed.
-    `lengths() -> {item_id: len(research)}` for the parked (RESEARCHING) items. An item seen for the first time is only baselined
-    (the inbox watcher and the worker start already cover what existed). The length seen is recorded BEFORE the re-check runs, and the
-    re-check's own research entries are absorbed into the baseline on the following tick without queueing again."""
+    """F-109 / A-50: re-check a parked item when a HUMAN added evidence (a UI attestation, a quote, an override), not only when the inbox changed.
+    `lengths() -> {item_id: n}` counts the parked (RESEARCHING) items' HUMAN-written research entries only, so the re-check's own research never
+    counts as growth and nothing has to be absorbed: a human input that lands in the round after a re-check is still seen (the old
+    absorb-the-next-growth rule swallowed it). An item seen for the first time is only baselined (the inbox watcher and the worker start
+    already cover what existed); the count is recorded BEFORE the re-check runs."""
 
     def __init__(self, lengths: Callable[[], dict[str, int]], recheck: Callable[[list[str]], list[str]]):
-        self.lengths, self.recheck, self.seen, self.pending = lengths, recheck, {}, set()
+        self.lengths, self.recheck, self.seen = lengths, recheck, {}
 
     def tick(self) -> list[str]:
         now = self.lengths()
-        grown = []
-        for iid, n in now.items():
-            if iid in self.seen and n > self.seen[iid]:
-                if iid in self.pending:  # grew because our own re-check wrote research: absorb it
-                    self.pending.discard(iid)
-                else:
-                    grown.append(iid)
-            self.seen[iid] = n
-        for iid in list(self.seen):
-            if iid not in now:  # left RESEARCHING: forget it, so a later park starts from a fresh baseline
-                del self.seen[iid]
-                self.pending.discard(iid)
-        if not grown:
-            self.pending.clear()
-            return []
-        self.pending = set(grown)
-        return self.recheck(grown)
+        grown = [iid for iid, n in now.items() if iid in self.seen and n > self.seen[iid]]
+        self.seen = dict(now)  # an item that left RESEARCHING is forgotten, so a later park starts from a fresh baseline
+        return self.recheck(grown) if grown else []
 
 
 class HumanInputWatcher:

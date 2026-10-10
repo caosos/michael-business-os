@@ -148,17 +148,18 @@ def test_a42_researcher_does_not_persist_the_ledger_context():
 
 def test_a42_research_watcher_wakes_on_new_evidence_once():
     calls = []
-    lens = {"itm_1": 2, "itm_2": 1}
+    lens = {"itm_1": 2, "itm_2": 1}                # human-written entries only (A-50)
     w = ResearchWatcher(lambda: dict(lens), lambda ids: calls.append(ids) or ["wf"])
     assert w.tick() == [] and not calls            # first sight = baseline
     lens["itm_1"] = 3                              # an attestation landed
     assert w.tick() == ["wf"] and calls == [["itm_1"]]
-    lens["itm_1"] = 4                              # the re-check's own research entry: absorbed, no loop
-    assert w.tick() == [] and len(calls) == 1
+    assert w.tick() == [] and len(calls) == 1      # nothing new: no loop (the re-check's own research is not counted at all)
+    lens["itm_1"] = 4                              # A-50: a human input in the round right after a re-check is NOT absorbed
+    assert w.tick() == ["wf"] and calls[-1] == ["itm_1"]
     lens["itm_2"] = 2
     assert w.tick() == ["wf"] and calls[-1] == ["itm_2"]
     del lens["itm_2"]                              # unparked
-    assert w.tick() == [] and len(calls) == 2
+    assert w.tick() == [] and len(calls) == 3
 
 
 def test_human_input_is_stored_with_human_provenance_and_the_workflow_login_cannot_forge_it(db, item_id):
@@ -223,3 +224,28 @@ def test_human_input_watcher_ignores_unrelated_growth_and_baselines_first_sight(
     assert w.tick() == ["wf"] and calls == [["a"]]
     del counts["a"]                        # unparked
     assert w.tick() == [] and len(calls) == 1
+
+
+def test_a50_attestation_after_a_recheck_is_not_absorbed_with_the_production_counter(db, monkeypatch):
+    """A-50: the production counter counts only human entries: a quote in round 1 and an attestation in the round AFTER the re-check each queue a
+    re-check; the re-check's own system research never does."""
+    from mbos import cli
+
+    comps = Components().with_defaults("lane_d")
+    raw = next(r for r in FixtureSourceAdapter(FIXTURE, name="fixture").fetch() if r.source_listing_id == "FIX-TRAILER-1")
+    with db["app"].begin() as c:
+        iid = spine_d.ingest(c, {**asdict(raw), "source_listing_id": "A50-PARKED"}, asdict(comps.normalizer.normalize(raw)), "fixture", "0.1.0", comps)["item_id"]
+        pid = spine_d.record_lane_provenance(c, {"provenance_id": new_id("prov"), "created_at": "2026-10-08T12:00:00Z", "actor_type": "system",
+                                                 "agent_name": "a50-test", "basis": "INFERENCE", "tool_name": "t", "tool_version": "1"})
+        spine_d._to(c, iid, "RESEARCHING", "A-50 test: parked", [pid])
+    monkeypatch.setattr(cli, "_engine", lambda e=db["app"]: e)
+    calls = []
+    rw = ResearchWatcher(cli._parked_research_lengths, lambda ids: calls.append(ids) or ["wf"])
+    assert rw.tick() == [] and not calls
+    with db["owner"].begin() as c:
+        spine_d.record_human_input(c, iid, "quote", "amount_usd", 735, "A-50 quoted $735", "michael")
+    assert rw.tick() == ["wf"] and calls == [[iid]]
+    with db["owner"].begin() as c:                                          # the round after the re-check
+        spine_d.record_attestation(c, iid, "scope_verified", "A-50 checked on site", "michael")
+    assert rw.tick() == ["wf"] and calls == [[iid], [iid]]
+    assert rw.tick() == [] and len(calls) == 2

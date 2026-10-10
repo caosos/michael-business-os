@@ -338,9 +338,11 @@ def cmd_note(a: argparse.Namespace) -> int:
 
 
 def _parked_research_lengths() -> dict[str, int]:
-    with _engine().connect() as c:
+    with _engine().connect() as c:  # A-50: only entries a HUMAN wrote (attestations, quotes, overrides; source_uri human:*, which the workflow login cannot write), so the re-check's own research never counts as growth
         return {r[0]: r[1] for r in c.execute(sa.text(
-            "SELECT item_id, coalesce(jsonb_array_length(doc->'research'), 0) FROM mbos.items WHERE state = 'RESEARCHING'"))}
+            "SELECT i.item_id, (SELECT count(*) FROM jsonb_array_elements(CASE WHEN jsonb_typeof(i.doc->'research') = 'array' THEN i.doc->'research' "
+            "ELSE '[]'::jsonb END) e WHERE e->>'source_uri' LIKE 'human:%') "
+            "FROM mbos.items i WHERE i.state = 'RESEARCHING'"))}
 
 
 def _parked_human_input_counts() -> dict[str, int]:
