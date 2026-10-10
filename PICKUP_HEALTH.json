@@ -14,16 +14,22 @@
    "ARYA-20261010-0433-f51-scope-handoff",
    "ARYA-20261010-0447-blueprint-troubleshooting",
    "ARYA-20261010-0450-f52-acceptance-review"
+  ],
+  "FETCHED": [
+   "ARYA-20261010-0453-f52-runtime-observation"
   ]
  },
- "currently_running": null,
+ "currently_running": {
+  "id": "ARYA-20261010-0453-f52-runtime-observation",
+  "started_at": "2026-10-10T04:53:00Z"
+ },
  "delivery_interface": {
   "claude_cli": true,
   "quota": "session 59.0% / week 7.0% are under the limits",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-10T04:51:57Z",
+ "generated_at": "2026-10-10T04:53:00Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "nothing needed",
@@ -35,11 +41,11 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-10T04:51:57Z",
+  "observed_at": "2026-10-10T04:53:00Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
-  "status": "idle",
-  "ttl_sec": 1200
+  "status": "busy",
+  "ttl_sec": 300
  },
  "watcher": {
   "ack_branch": "research/agent-01-coordinator",
