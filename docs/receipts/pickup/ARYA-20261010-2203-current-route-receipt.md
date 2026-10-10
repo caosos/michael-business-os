@@ -20,3 +20,6 @@ None run (docs-only; no code changed). Numbers: 0 tests.
 
 ## Not done
 No new worker, access, install, spend, restart, bid or contact. The private A-61 case remains unimported; no private content here.
+
+## Delivery disposition correction (ARYA-20261010-2255-2203-delivery-disposition)
+- ACK Stage changed from BLOCKED to `AWAITING the interactive engineering session` (NOT executed). The full BLOCKED reason (missing Monitor ID, start/expiry, last feed notification, claim time) is preserved in the ACK body and above. Nothing marked COMPLETED; no evidence added; no claims or queue rows changed.
