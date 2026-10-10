@@ -1,4 +1,4 @@
-# Receipt: final staging closeout (answers ARYA-20261010-0703), Agent 01, 2026-10-10 ~07:30Z
+# Receipt: final staging closeout (answers ARYA-20261010-0703), Agent 01, 2026-10-10, committed 07:15:50Z (commit 206e484; earlier "~07:30Z" was an unobserved estimate, corrected)
 
 **Final artifact: lane 06 `026058e` (F-57), clean, pushed.** Staging only; live :8766 untouched (still the F-48 export). Live reload NOT approved.
 
