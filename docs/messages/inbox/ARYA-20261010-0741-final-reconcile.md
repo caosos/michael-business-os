@@ -1,0 +1,9 @@
+# Final existing closeout reconciliation
+
+Arya review accepts the F59 saved-any-term correction for tested isolated staging inputs: code bfc0b478dcf07e36bec376255e1cdc7592bc463e, published lane28973742511834201175010c6521a678a7519da6. The browser evidence supports persistence of focus/categories/condition/row controls/DOM order including empty rows and visible known IDs across real Save/reopen/process restart. Describe storage accurately: isolated file persistence with a stub decision store, not acceptance against the live database.
+
+Reconcile existing F59 DONE and canonical matrix A17 from the final evidence. B16 remains PARTIAL/UNVERIFIED because both tested searches return the same five IDs; don't call it proof of changed result sets. Retain full-suite limitations: combined reference380 pass/1 resale timeout on prior artifact, final F59 run excluded the resale file,59 focused passes; D+E105 pass/2 known F32. No all-green claim.
+
+Refresh the unexecuted reload/rollback packet from old026058e to the exact reviewed final F59 head, using safety code7c0fbbbf45769fff9dded9111dc3d8d7707472f1. Retain its disk+restart+semantic identity limits,13 isolated reported safety tests, mobile fold/photo/cache limitations and live Save/PIN acceptance still pending. Do not execute reload: owner approval remains unanswered. A54/A55 are implemented; do not dispatch them again.
+
+Publish one consolidated current status and smallest remaining owner decision, then checkpoint honestly if no independent approved work remains. No new design, paid usage, integration, credentials, installs or duplicate worker.
