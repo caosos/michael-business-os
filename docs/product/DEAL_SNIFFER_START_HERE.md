@@ -442,6 +442,21 @@ Rules:
 Minimum photo evidence: front, rear and both sides; underside rails and crossmembers; full tongue and its connections; axle, springs and hubs; both sides of the deck; tire date and load markings; VIN/capacity label; gate/ramp, coupler, chains and lights.
 
 Reviewed public example: HiBid item 323080435 sold for $575. Photos show a mesh deck, low rails, small wheels, a central tongue and rust/discoloration. Likely light-duty is provisional; capacity and hidden frame condition remain unknown. The sold price is a valid historical sale datapoint, not a recommendation or like-for-like valuation.
+### 13b. Component and exit-path assessment guideline (owner core objective; ARYA-20261010-1911)
+
+Michael described this as Deal Sniffer's absolute objective: "I want to look at these things and piece them out." The assessment must reflect his practical mechanical and welding capability; a nonrunning asset is not automatically worthless or unsuitable. This is a **guideline**, not a claim that automated component assessment exists.
+
+Exit paths (mutually exclusive per asset): (1) sell whole as-is; (2) repair and resell; (3) part out; (4) repurpose or convert. State which path fits the available evidence and why. Never add the whole asset's sale value to the sale values of its own components.
+
+Rules:
+- Itemize recoverable components (engine, trailer, controls, other usable parts). For each, separate **visible condition**, **seller claims**, **tested facts** and **unknowns**. Inspect the actual listing photos and obtain missing evidence; never infer serviceability or capacity.
+- Use relevant sold comparables per exit path and per component. Keep asking prices apart from realized sales; adjust for condition, compatibility and realistic demand. Unsupported estimates are labelled **unknown** or **provisional**.
+- A nonrunning whole asset may be attractive if supported component recovery justifies total cost and effort. Do not reject it solely because it does not run.
+- Cost the full path: needed parts, work, fuel, fees, paperwork/title, disposal, storage and time to sell. Model realistic liquidation, unsold components and residual disposal, not prompt sale at best asking price.
+- Distinguish work Michael can do himself (mechanical, welding) from work needing outside help, time/opportunity cost, and actual cash outlay. Do not price all labor or transport as hired, and do not assume tools, transport capacity or unlimited time.
+- Repurposing needs a supported feasibility assessment. Example: a boat-trailer frame is not automatically suitable as a car trailer. Verify frame, axle, brakes, load distribution, manufacturer GVWR/GAWR and applicable engineering/safety requirements. Unknown capacity stays unknown; skill does not replace structural or capacity evidence.
+- No private prices, budgets, purchase ceilings or personal financial examples belong in this document.
+
 
 ## 14. Inventory merchandising
 
