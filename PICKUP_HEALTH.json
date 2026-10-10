@@ -14,13 +14,21 @@
    "needs": "interactive coordinator or owner (see the ack)",
    "reason": "needs code (tools/next_work.py); queued as READY_QUEUE A-65 for the existing engineering session",
    "since": "2026-10-10T21:43:06Z"
+  },
+  {
+   "attempts": 1,
+   "id": "ARYA-20261010-2203-current-route-receipt",
+   "needs": null,
+   "reason": "receipt not published: REFUSED by the queue guard (A-57), nothing pushed: A-60: dependency A-59 in parent 1 dropped by the result (no edit marker)",
+   "since": "2026-10-10T22:04:42Z"
   }
  ],
  "coordinator_head": "c7e4da2",
  "counts": {
   "BLOCKED": [
    "ARYA-20261010-1954-authorized-ui-release",
-   "ARYA-20261010-2142-a63-sustained-progression"
+   "ARYA-20261010-2142-a63-sustained-progression",
+   "ARYA-20261010-2203-current-route-receipt"
   ],
   "COMPLETED": [
    "ARYA-20261010-0328-f49-verification",
@@ -82,9 +90,6 @@
    "ARYA-20261010-2129-a61-integrity-provenance",
    "ARYA-20261010-2133-engineering-proof",
    "ARYA-20261010-2154-owner-ledger-reservations"
-  ],
-  "RUNNING": [
-   "ARYA-20261010-2203-current-route-receipt"
   ]
  },
  "currently_running": {
@@ -93,11 +98,11 @@
  },
  "delivery_interface": {
   "claude_cli": true,
-  "quota": "session 11.0% / week 21.0% are under the limits",
+  "quota": "session 13.0% / week 22.0% are under the limits",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-10T22:04:18Z",
+ "generated_at": "2026-10-10T22:04:42Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "nothing needed",
@@ -109,7 +114,7 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-10T22:04:18Z",
+  "observed_at": "2026-10-10T22:04:42Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
   "status": "busy",
