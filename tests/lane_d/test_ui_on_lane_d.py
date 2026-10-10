@@ -82,7 +82,7 @@ def test_components_are_lane_e_and_backend_is_lane_d(rtd, ui_d):
 
 def test_queue_card_and_pages_render_on_lane_d(rtd, discover_d, ui_d):
     item_id, areq = ready(ui_d, discover_d)
-    s, _, body = req(ui_d, "GET", "/?demo=1")
+    s, _, body = req(ui_d, "GET", "/queue?demo=1")
     assert s == 200 and "Demo / training examples" in body and "system RUNNING" in body
     s, _, card = req(ui_d, "GET", f"/areq/{areq['action_request_id']}")
     for text in ("Why the system recommends this", "Economics", "Provenance", areq["payload_hash"], "Step-up PIN",
@@ -129,7 +129,7 @@ def test_frozen_system_denies_at_the_real_gateway(rtd, discover_d, ui_d):
     with rtd.engine.begin() as c:
         spine_d.set_kill_switch(c, "global_freeze", True, reason="F-04 test: freeze before YES")
     try:
-        assert ui_d.store.system_state() == "FROZEN" and "system FROZEN" in req(ui_d, "GET", "/")[2]
+        assert ui_d.store.system_state() == "FROZEN" and "system FROZEN" in req(ui_d, "GET", "/queue")[2]
         _, loc, _ = post(ui_d, areq, "YES", pin=PIN)
         assert "msg=YES recorded" in loc                                  # the human decision is recorded...
         wait(lambda: state(ui_d, item_id) == "FAILED")                    # ...and the real gateway refuses to act
@@ -219,7 +219,7 @@ def test_opportunity_card_on_lane_d_with_zero_enrichment(rtd, discover_d, ui_d):
     for r in ui_d.store.receipts(item_id=item_id):                   # R17: every receipt is in the trail
         assert r["receipt_id"] in body, r["type"]
     assert body.index("<h2>Recommendation</h2>") < body.index(">YES<") and 'name="return" value="item"' in body
-    assert f'href="/item/{item_id}"' in req(ui_d, "GET", "/?demo=1")[2]
+    assert f'href="/item/{item_id}"' in req(ui_d, "GET", "/queue?demo=1")[2]
 
 
 def test_decide_from_the_card_on_lane_d_returns_to_the_card_and_executes_once(rtd, discover_d, ui_d):

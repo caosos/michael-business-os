@@ -31,7 +31,7 @@ def test_the_a23_examples_validate_and_render_everything_asked_for(tmp_path):
     h = html_of(PLAN, tmp_path)
     assert "$1,500" in h and "30 h" in h and "2026-10-05 to 2026-10-11" in h                       # target, hours, week
     for label, v in (("Protected principal", "$500"), ("Earned working capital", "$0"), ("Capital deployed", "$30"),
-                     ("Realized profit", "$0"), ("Available to deploy", "$470")):               # the five ledger fields
+                     ("Realized profit", "$0"), ("Simulated bankroll available (not your cash)", "$470")):               # the five ledger fields
         assert f"<td>{label}</td><td class='num'>{v}</td>" in h, label
     assert "$275 / $455 / $570" in h and "$1,045" in h and ">low<" in h                          # projected week, gap, confidence
     assert "Remaining gap" in h and "Realized so far" in h and "Best next opportunities (2)" in h

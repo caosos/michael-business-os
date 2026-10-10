@@ -88,27 +88,27 @@ def test_owner_dsn_prefers_the_canonical_name_and_warns_on_the_old_one():
 
 
 def test_red_notice_when_owner_writes_would_run_on_the_worker_login(ui):
-    h = req(ui, "GET", "/")[2]
+    h = req(ui, "GET", "/queue")[2]
     assert 'id="owner-login"' in h and "MBOS_OWNER_DATABASE_URL" in h and "refused" in h
     ui.store.owner_login = True
-    assert 'id="owner-login"' not in req(ui, "GET", "/")[2]
+    assert 'id="owner-login"' not in req(ui, "GET", "/queue")[2]
 
 
 # F-89
 def test_frozen_banner_explains_and_names_the_release_command(ui):
     ui.store.state = "FROZEN"
-    h = req(ui, "GET", "/")[2]
+    h = req(ui, "GET", "/queue")[2]
     assert 'id="frozen"' in h and "mbos panic off --reason" in h and "kill switch" in h
     ui.store.state = "RUNNING"
-    assert 'id="frozen"' not in req(ui, "GET", "/")[2]
+    assert 'id="frozen"' not in req(ui, "GET", "/queue")[2]
 
 
 # F-100
 def test_tabs_without_a_data_source_are_hidden(ui, tmp_path, monkeypatch):
-    h = req(ui, "GET", "/")[2]
+    h = req(ui, "GET", "/queue")[2]
     assert 'href="/sources"' not in h and 'href="/usage"' not in h and 'href="/preview"' not in h and 'href="/mission"' in h
     monkeypatch.setenv("MBOS_SOURCE_HEALTH_FILE", str(tmp_path / "h.json"))
-    assert 'href="/sources"' in req(ui, "GET", "/")[2]
+    assert 'href="/sources"' in req(ui, "GET", "/queue")[2]
 
 
 # F-90
@@ -184,13 +184,13 @@ def test_today_header_has_three_lines_and_never_invents():
     doc = copy.deepcopy(PLAN)
     doc["legs"] = [leg(title="TV flip", verdict="YES", waiting_on=[])]
     h = mv.today_header({"kind": "plan", "doc": doc, "errors": []})
-    assert "Gap to target" in h and "Cash" in h and "Best next move" in h and "TV flip" in h and "available to deploy" in h
+    assert "Gap to target" in h and "Bankroll" in h and "Best next move" in h and "TV flip" in h and "Simulated bankroll, not your cash" in h
     u = mv.today_header({"kind": "none", "doc": None, "errors": ["x"]})
     assert u.count("UNKNOWN") >= 3
 
 
 def test_today_page_renders_the_header(ui):
-    assert "Best next move" in req(ui, "GET", "/")[2]
+    assert "Best next move" in req(ui, "GET", "/queue")[2]
 
 
 # F-95

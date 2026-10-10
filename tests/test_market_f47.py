@@ -59,7 +59,7 @@ def get(ui, **qs):
 def test_gsa_result_has_real_link_photo_bid_and_as_of(ui):
     h = get(ui, go=1, keywords="trailer")
     assert "Marianna" in h and "https://www.gsaauctions.gov/auctions/preview/378501" in h
-    assert "<img src='https://" in h and "$25.00" in h and "2026-10-12" in h
+    assert "<img" not in h and "Photo is behind GSA" in h and "$25.00" in h and "2026-10-12" in h
     assert "GSA Auctions: connected" in h and "2026-10-10T00:19:00+00:00" in h
     assert "buyer premium UNKNOWN" in h and "transport UNKNOWN" in h and "repair UNKNOWN" in h and "RESEARCH NEEDED" in h
     assert "Michael's Marketplace" in h and "Find Deals Now" in h and "+ New Search" in h and "Auctions Closing Soon" in h
@@ -113,7 +113,7 @@ def test_save_needs_pin_and_a_price(ui):
 def test_demo_isolation_no_train_or_example_invalid_in_live_results(ui):
     h = get(ui, go=1)
     assert "TRAIN-" not in h and "example.invalid" not in h and "DEMO / TRAINING" not in h
-    assert "href='/?demo=1'" in h                                 # demo lives behind a separate sidebar area only
+    assert "href='/queue?demo=1'" in h                                 # demo lives behind a separate sidebar area only
 
 
 def test_unsupported_source_is_not_connected_never_mock(ui):

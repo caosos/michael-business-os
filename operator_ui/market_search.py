@@ -10,6 +10,7 @@ import re
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from . import landing_fix
 from mbos_discovery.adapter import SearchProfile
 from mbos_discovery.auctions import UNKNOWN, place_coords
 from mbos_discovery.gsa_live import GsaLiveAdapter, _text
@@ -48,7 +49,7 @@ def parse_query(qs: dict) -> dict:
     closing = g("closing_by")
     if closing == "soon":
         closing = (datetime.now(timezone.utc) + timedelta(days=7)).strftime("%Y-%m-%d")
-    return {"keywords": g("keywords")[:120], "base": (g("base") or DEFAULT_BASE)[:60], "radius": _num(g("radius"), 3000),
+    return {"keywords": g("keywords")[:120], "base": (g("base") or DEFAULT_BASE)[:60], "radius": _num(g("radius"), landing_fix.MAX_RADIUS),
             "max_price": _num(g("max_price")), "condition": g("condition").lower()[:30], "required": _terms(g("required")),
             "preferred": _terms(g("preferred")), "exclude": _terms(g("exclude")), "source": g("source") or "gsa",
             "kind": g("kind") or "any", "closing_by": closing if re.fullmatch(r"\d{4}-\d{2}-\d{2}", closing) else "",
@@ -69,7 +70,7 @@ def criteria_to_query(doc: dict) -> dict:
 def _origin(base: str):
     if base.strip().lower() in ("", "conway", "conway ar", "conway, ar"):
         return HOME_BASE
-    return place_coords({"city": re.sub(r"[, ]+(ar|arkansas)$", "", base.strip(), flags=re.I)})
+    return landing_fix.parse_origin(base) or place_coords({"city": re.sub(r"[, ]+(ar|arkansas)$", "", base.strip(), flags=re.I)})
 
 
 def _short(s: str, n=280) -> str:

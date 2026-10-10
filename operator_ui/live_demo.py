@@ -149,7 +149,9 @@ def render_gsa_lot(lot: dict) -> str:
     link = lot.get("itemDescURL") or lot.get("url")
     img = lot.get("imageURL") or lot.get("image_url")
     pk = classify_url(img)[0] if img else "none"
-    photo = (f"<img src='{e(img)}' alt='Lot photo' loading='lazy' style='max-width:160px' referrerpolicy='no-referrer'>"
+    from . import landing_fix  # F-48: ppms.gov photos need a GSA login (401): tile, never a broken <img>
+    photo = (landing_fix.photo_tile(img, link) if landing_fix.is_gsa_image(img) else
+             f"<img src='{e(img)}' alt='Lot photo' loading='lazy' style='max-width:160px' referrerpolicy='no-referrer'>"
              if pk == "live" else "<span class='mut small'>Photo unavailable</span>")
     return (f"<div class='card'><h2>{e(lot.get('itemName') or lot.get('title') or lid)} <span class='lbl'>GSA</span></h2>{photo}"
             f"<p>Lot {e(lid)} · {e(lot.get('location') or 'UNKNOWN')} · high bid {e(lot.get('highBidAmount', 'UNKNOWN'))} "

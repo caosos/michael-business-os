@@ -6,6 +6,7 @@ from __future__ import annotations
 import os
 from urllib.parse import quote
 
+from . import landing_fix
 from . import market_search as ms
 from . import market_view as mv
 from .ux import InputError
@@ -35,7 +36,8 @@ def page_body(app, qs: dict, now, errors=None, values=None) -> str:
     data = ms.load_gsa(os.environ.get("MBOS_GSA_CACHE") or None, now, ms._origin(q["base"])) if q["source"] == "gsa" or not ran else \
         {"status": "connected", "as_of": None, "age_h": 0, "stale": False, "in_scope": 0, "in_file": 0, "cards": [], "message": ""}
     results, hidden = ms.search(data["cards"], q) if ran and data["status"] == "connected" else ([], {})
-    return mv.render_page(q, data, results, hidden, saved, app.csrf, bool(app.operator_pin), edit if edit in ids else None, ran, errors)
+    note = landing_fix.origin_note(q["base"], ms._origin(q["base"]) is not None, q["radius"]) if ran else ""
+    return note + mv.render_page(q, data, results, hidden, saved, app.csrf, bool(app.operator_pin), edit if edit in ids else None, ran, errors)
 
 
 def post(app, parts: list[str], f: dict) -> tuple[str | None, list[str] | None]:

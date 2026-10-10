@@ -100,7 +100,7 @@ def _verdict(v):
     return f'<span class="badge v-{e(v)}">System says {e(v)}</span>' if v else ""
 
 
-NAV = [("/", "Queue", None), ("/market", "Marketplace", None), ("/mission", "Weekly mission", None), ("/numbers", "My numbers", None), ("/wanted", "Wanted", None),
+NAV = [("/market", "Marketplace", None), ("/queue", "Queue", None), ("/mission", "Weekly mission", None), ("/numbers", "My numbers", None), ("/wanted", "Wanted", None),
        ("/usage", "Usage", "usage"), ("/intake", "Intake", None), ("/assets", "My assets", None), ("/resale", "Resale", None), ("/owner-listing", "Add a listing", None), ("/gsa", "GSA lots", None), ("/preview", "Audience previews", "preview"),
        ("/digest", "Morning digest", None), ("/summary", "Daily summary", None), ("/notes", "My notes", None),
        ("/holds", "HOLD backlog", None), ("/outcomes", "Outcomes", None), ("/sources", "Source health", "sources"),
@@ -119,7 +119,7 @@ class UiState(str):
 
 
 _CUR = threading.local()  # the path of the request being served, so the page chrome can mark the active tab (F-45)
-NAV_ALIAS = {"/areq": "/", "/item": "/", "/provenance": "/ledger"}
+NAV_ALIAS = {"/areq": "/queue", "/item": "/queue", "/": "/market", "/provenance": "/ledger"}
 
 
 def _active(path):
@@ -951,6 +951,12 @@ def make_handler(app):
         def log_message(self, fmt, *args):  # quiet; the receipt ledger is the audit log
             pass
 
+        def _redirect(self, loc):
+            self.send_response(303)
+            self.send_header("Location", loc)
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+
         def _send(self, status, body, ctype="text/html; charset=utf-8", headers=None):
             data = body.encode("utf-8")
             self.send_response(status)
@@ -983,11 +989,15 @@ def make_handler(app):
             now = utcnow()
             flash = (qs.get("msg") or [None])[0]
             err = (qs.get("err") or [None])[0]
+            if u.path == "/" and not u.query:  # F-48: the default landing is Michael's Marketplace; the old queue is /queue
+                return self._redirect("/market")
             if u.path == "/":
-                from . import mission_view
+                return self._redirect("/queue?" + u.query)
+            if u.path == "/queue":
+                from . import landing_fix, mission_view
 
                 try:
-                    lv = mission_view.load_live(app.store, now, app.mission_file)
+                    lv = landing_fix.live_only(mission_view.load_live(app.store, now, app.mission_file), app.store)
                     head = mission_view.today_header(lv, None, self._leg_states(lv))
                 except Exception as ex:  # noqa: BLE001 - Today must still render; say the header is unavailable
                     head = f"<div class='card'><p class='bad'>Today's header is unavailable ({e(type(ex).__name__)}).</p></div>"

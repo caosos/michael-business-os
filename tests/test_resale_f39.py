@@ -52,4 +52,4 @@ def test_item_moves_intake_to_sold_with_receipt_and_simulated_is_never_earned(ui
     for kw in ({"step": "photos", "photos": "b.jpg"}, {"step": "listing", "listing": "ad", "ask": "120"}, {"step": "listed"}, {"step": "sold", "price": "120", "receipt": "cash"}):
         advance(ui, rid, **kw)
     assert ui.resale.realized()["earned"] == 70.0 and "EARNED (" in req(ui, "GET", "/resale?demo=1")[2]
-    assert "Morning Money Hunt" in req(ui, "GET", "/?demo=1")[2]
+    assert "Morning Money Hunt" in req(ui, "GET", "/queue?demo=1")[2]

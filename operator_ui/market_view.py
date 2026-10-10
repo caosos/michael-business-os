@@ -7,6 +7,7 @@ import html
 import secrets
 from urllib.parse import quote, urlsplit
 
+from . import landing_fix
 from . import market_search as ms
 from .deal_ui import classify_url
 from .live_demo import link_html
@@ -21,7 +22,9 @@ CSS = """<style>.mk{display:flex;gap:18px;align-items:flex-start}.mk-side{flex:0
 @media(max-width:700px){.mk{flex-direction:column}.mk-side{position:static;flex:none;width:100%}.mk-res{flex-direction:column}.mk-form input,.mk-form select{max-width:100%}}</style>"""
 
 
-def _photo(url) -> str:
+def _photo(url, listing=None) -> str:
+    if landing_fix.is_gsa_image(url):
+        return landing_fix.photo_tile(url, listing)
     try:
         host = urlsplit(url or "").hostname or ""
     except ValueError:
@@ -40,7 +43,7 @@ def render_card(c: dict) -> str:
     tags = "".join(f"<span class='mk-tag'>{e(k)}: {e(t)} ({e(tag)})</span>" for k in ("required", "preferred") for t, tag in (c.get("tags") or {}).get(k, []))
     where = e(c["city"] or "UNKNOWN") + (f" · {c['distance']:g} mi from your base" if c["distance"] is not None else " · distance UNKNOWN (place not located)")
     stale = " <b class='bad'>STALE: bid may have moved</b>" if c["stale"] else ""
-    return (f"<div class='card mk-res'>{_photo(c['image'])}<div style='min-width:0'><h3 style='margin:0 0 4px'>{e(c['title'])} "
+    return (f"<div class='card mk-res'>{_photo(c['image'], c['url'])}<div style='min-width:0'><h3 style='margin:0 0 4px'>{e(c['title'])} "
             f"<span class='badge'>{verdict}</span> <span class='lbl'>RESEARCH NEEDED</span></h3>"
             f"<p class='small'>{e(c['description']) or '<span class=mut>No description from the seller</span>'}</p>"
             f"<p>Current bid <b>{_money(c['bid'])}</b> (a bid, not a sold price) · closes {e(c['closes'] or 'UNKNOWN')} · {where} · "
@@ -75,7 +78,7 @@ def _sidebar(saved: list[dict], csrf: str, pin_html: str, tok) -> str:
             "<a href='/market?go=1'><b>Find Deals Now</b></a><a href='/market?new=1'>+ New Search</a>"
             f"<h4 style='margin:10px 0 2px'>My Campaigns / Saved Searches</h4>{saved_html}"
             "<a href='/resale'>Saved Deals</a><a href='/market?go=1&amp;sort=closing&amp;closing_by=soon'>Auctions Closing Soon</a>"
-            "<div class='mk-demo'><span class='small mut'>Separate area</span><a href='/?demo=1'>DEMO / training data</a></div></nav></div></aside>")
+            "<div class='mk-demo'><span class='small mut'>Separate area</span><a href='/queue?demo=1'>DEMO / training data</a></div></nav></div></aside>")
 
 
 def _form(q: dict, cid: str | None, tok, pin_html: str) -> str:

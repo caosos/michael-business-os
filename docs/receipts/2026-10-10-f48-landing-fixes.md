@@ -1,0 +1,11 @@
+# Receipt F-48: landing composition fixes (DRY-RUN)
+
+- **Task:** F-48 (P0, owner acceptance failure ARIA-20261009-2011). **Lane:** 06. Nothing was sent, bid, bought, fetched, proxied or published; no GSA token used.
+- **Provenance (FACT):** found by lane 01 rehearsing head `81e33b2`. Code is lane 06 only: new `operator_ui/landing_fix.py` (small helpers); edits to `mission_view.py`, `market_view.py`, `market_search.py`, `market_routes.py`, `live_demo.py`; `server.py` +~14 lines (landing routing, `_redirect`, live-only header).
+- **(1)** `/queue` header uses `landing_fix.live_only`: demo/training legs are removed before the best next move; glance cards, counts and the queue were already demo-filtered (F-46).
+- **(2)** The header line is now "Bankroll: $X Simulated bankroll, not your cash", with source and as-of, and "Not used to recommend anything". The Weekly mission ledger row is renamed "Simulated bankroll available (not your cash)".
+- **(3)** `GET /` redirects (303) to `/market`; `/queue` is the old landing (nav tab "Queue"); `/?msg=...` forwards to `/queue?msg=...` so form flashes still land.
+- **(4)** GSA `ppms.gov` image URLs render a tile "Photo is behind GSA's login: open the original listing" (link to the original listing), no `<img>`; the image URL is kept inside a `<details>`. Applies to the Marketplace card and `live_demo.render_gsa_lot`.
+- **(5)** Origin: any text accepted; "lat, lng" is located; a city lane 02 knows is located; otherwise the page says "accepted but not located: distances UNKNOWN and the radius is not applied" (no silent ignore). Radius cap raised 3000 -> 25000 mi.
+- **Tests:** new `tests/test_landing_f48.py` (6) and one in `test_live_demo_f46.py`; existing tests that read the queue at `/` now use `/queue`. Reference backend 310 passed / 1 failed (`test_resale_f39` item test: known order-dependent stall, passes alone); lane D + E 105 passed / 2 failed (pre-existing F-32 `test_inputs_f32`). Same two known failures as F-47.
+- **UNKNOWN / not done:** `/mission` still lists demo legs (its lane D test links a demo item); proposed to filter it with a test change. ZIP codes and non-Arkansas cities cannot be located (lane 02 `AR_PLACES` only): needs a gazetteer from lane 02. server.py is still ~1550 lines: split task recommended.

@@ -79,10 +79,10 @@ def test_research_needed_replaces_the_sold_price_prompt():
 
 def test_http_demo_switch_banner_and_no_link(rt, ui, discover):
     iid, _ = ready(rt, discover)
-    normal = req(ui, "GET", "/")[2]
+    normal = req(ui, "GET", "/queue")[2]
     assert iid not in normal and "TRAIN-" not in normal and "DEMO / TRAINING DATA" not in normal and "Show demo data" in normal
     assert not re.search(r"href=['\"][^'\"]*example\.invalid", normal)
-    demo = req(ui, "GET", "/?demo=1")[2]
+    demo = req(ui, "GET", "/queue?demo=1")[2]
     assert iid in demo and "DEMO / TRAINING DATA, NOT REAL LISTINGS, DO NOT BUY" in demo and "Demo / training examples" in demo
     item = req(ui, "GET", f"/item/{iid}")[2]
     assert "DEMO / TRAINING DATA, NOT REAL LISTINGS, DO NOT BUY" in item and not re.search(r"href=['\"][^'\"]*example\.invalid", item)
@@ -100,3 +100,12 @@ def test_http_owner_listing_intake(ui):
     assert "flash err" in b
     s, _, b = req(ui, "POST", "/owner-listing", {"csrf": ui.csrf, "url": "javascript:alert(1)"})
     assert "flash err" in b and 'href="javascript' not in b
+
+
+def test_f48_queue_and_mission_have_no_training_item_or_unlabelled_bankroll(rt, ui, discover):  # F-48
+    iid, _ = ready(rt, discover)
+    assert req(ui, "GET", "/")[1] == "/market"
+    for path in ("/queue", "/mission"):
+        h = req(ui, "GET", path)[2]
+        assert iid not in h and "TRAIN-" not in h and "55 inch" not in h, path
+        assert "available to deploy" not in h, path

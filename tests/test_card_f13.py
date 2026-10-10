@@ -140,7 +140,7 @@ def test_elementary_advice_failing_validate_is_flagged_not_hidden(rt, discover, 
 def test_unknown_item_404_queue_links_to_the_card_and_old_page_still_works(rt, discover, ui):
     assert item_page(ui, "itm_01JA0000000000000000009999")[0] == 404
     item_id, areq = ready(rt, discover)
-    assert f'href="/item/{item_id}"' in req(ui, "GET", "/?demo=1")[2]
+    assert f'href="/item/{item_id}"' in req(ui, "GET", "/queue?demo=1")[2]
     assert req(ui, "GET", f"/areq/{areq['action_request_id']}")[0] == 200   # technical view stays
     assert "Your decision" in item_page(ui, item_id)[2]
 
@@ -162,7 +162,7 @@ def test_missing_operator_profile_is_a_clear_error_not_a_guess(rt, discover, ui,
     monkeypatch.setenv("MBOS_OPERATOR_PROFILE", str(tmp_path / "nope.json"))
     s, _, body = item_page(ui, item_id)
     assert s == 503 and "operator profile not found" in body and "MBOS_OPERATOR_PROFILE" in body
-    assert req(ui, "GET", "/?demo=1")[0] == 200
+    assert req(ui, "GET", "/queue?demo=1")[0] == 200
 
 
 def test_notes_are_unavailable_on_the_reference_backend_and_nothing_is_stored(rt, discover, ui):

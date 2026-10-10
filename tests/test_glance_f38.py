@@ -69,7 +69,7 @@ def test_done_is_receipt_backed_and_blocked_is_the_only_red():
 # ---- real server, real spine: every click is a real transition ----
 def test_today_http_shows_cards_and_pass_click_is_real(rt, discover, ui):
     item_id, areq = ready(rt, discover, "FIX-LEAD-SMARTHOME-1")
-    s, _, body = req(ui, "GET", "/?demo=1")
+    s, _, body = req(ui, "GET", "/queue?demo=1")
     assert s == 200
     for t in ("<h2>Done</h2>", "<h2>Working</h2>", "<h2>Blocked</h2>", "<h2>Opportunities</h2>", "<h2>Next</h2>", "More details", "Approve", "SIMULATED"):
         assert t in body, t
@@ -83,12 +83,12 @@ def test_today_http_shows_cards_and_pass_click_is_real(rt, discover, ui):
 
 def test_today_http_approve_needs_pin_then_done_shows_receipt(rt, discover, ui):
     item_id, areq = ready(rt, discover, "FIX-TRAILER-1")
-    _, _, body = req(ui, "GET", "/?demo=1")
+    _, _, body = req(ui, "GET", "/queue?demo=1")
     assert 'placeholder="PIN"' in body  # the irreversible YES still asks for the PIN
     _, loc, _ = post(ui, areq, "YES")
     assert "err=" in loc and approvals(rt.engine, areq["action_request_id"]) == []
     post(ui, areq, "YES", pin=PIN)
     wait_state(rt.engine, item_id, "ACTED")
-    _, _, body = req(ui, "GET", "/?demo=1")
+    _, _, body = req(ui, "GET", "/queue?demo=1")
     seq = q(rt.engine, "SELECT seq FROM mbos.receipts WHERE action_request_id = :a AND type='ACTION_EXECUTED'", a=areq["action_request_id"])[0][0]
     assert f"receipt #{seq}" in body and "dry-run: nothing real happened" in body and "CONFIRMED" not in body

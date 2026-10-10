@@ -19,11 +19,13 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Optional
 
+from . import landing_fix
+
 e = lambda v: html.escape("" if v is None else str(v))  # noqa: E731
 
 LEDGER_FIELDS = [("protected_principal", "Protected principal"), ("earned_working_capital", "Earned working capital"),
                  ("capital_deployed", "Capital deployed"), ("realized_profit", "Realized profit"),
-                 ("available_to_deploy", "Available to deploy")]
+                 ("available_to_deploy", "Simulated bankroll available (not your cash)")]
 
 
 def load_plan(path: Optional[str] = None) -> dict:
@@ -237,9 +239,7 @@ def today_header(loaded: dict, titles: Optional[dict] = None, states: Optional[d
         gap_html = f"<b>{money(gap)}</b> <span class='small mut'>still to earn this week</span>"
     else:
         gap_html = "<b class='unk'>UNKNOWN</b> <span class='small mut'>no plan yet; see <a href='/mission'>Weekly mission</a></span>"
-    avail = (ledger or {}).get("available_to_deploy")
-    avail_html = (f"<b>{money(avail)}</b> <span class='small mut'>available to deploy</span>" if avail is not None else
-                  "<b class='unk'>UNKNOWN</b> <span class='small mut'>fund your bankroll on <a href='/numbers'>My numbers</a></span>")
+    avail_html = landing_fix.bankroll_html(ledger, money)
     legs = (doc or {}).get("legs") or [] if kind == "plan" else []
     plan_doc = {"legs": legs}
     yes = decidable(plan_doc, states)  # F-121: open requests only; a held or executed leg is not "ready for your YES"
@@ -260,5 +260,5 @@ def today_header(loaded: dict, titles: Optional[dict] = None, states: Optional[d
     else:
         move = "<span class='unk'>UNKNOWN</span> <span class='small mut'>no plan to pick a move from</span>"
     return ("<div class='card'><div><span class='small mut'>Gap to target</span> " + gap_html + "</div>"
-            "<div><span class='small mut'>Cash</span> " + avail_html + "</div>"
+            "<div><span class='small mut'>Bankroll</span> " + avail_html + "</div>"
             "<div><span class='small mut'>Best next move</span> " + move + "</div></div>")
