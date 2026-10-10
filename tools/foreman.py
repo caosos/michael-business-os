@@ -183,6 +183,12 @@ def main(argv: list[str] | None = None) -> int:
             t = r["ready"][0]
             print(f"WAKE {r['lane']}: Fetch origin, read docs/status/READY_QUEUE.md on research/agent-01-coordinator, claim {t['id']} "
                   f"({t['title']}), push the claim, work it DRY-RUN only, push, then claim the next READY task.")
+    invalid = [w for w in warnings if w.startswith("queue schema: ")]
+    if a.launch and invalid:                         # A-53: never launch from a queue with rows whose columns cannot be trusted
+        for w in invalid:
+            print("INVALID ROW", w[len("queue schema: "):])
+        print("REFUSING --launch/--exec: fix the malformed row(s) above first (no worker was started, no attempt consumed)")
+        return 4
     if a.launch:
         cmds = launch_commands(idle)
         for c in cmds:

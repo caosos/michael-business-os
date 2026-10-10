@@ -158,3 +158,20 @@ def test_malformed_rows_are_reported_not_skipped_and_known_odd_statuses_are_not(
     assert any(p.startswith("F-12:") and "columns" in p for p in probs) and not any(p.startswith("F-10:") for p in probs)
     assert f.schema_problems("| F-20 | P1 | t | none | PARTIAL @ abc | worker:lane-06 | ok |\n| G-21 | P1 | t | none | SPLIT (x) | 07 | ok |") == []
     assert f.schema_problems("| F-21 | none | t | none | whatever | 06 | ok |")[0].startswith("F-21: priority")
+
+
+def test_a53_launch_and_exec_refuse_a_queue_with_a_malformed_row_and_name_it(monkeypatch, capsys):
+    f = _load_foreman()
+    started = []
+    monkeypatch.setattr(f.subprocess, "run", lambda *a, **k: started.append(a) or None)
+    monkeypatch.setattr(f, "survey", lambda repo: ([{"lane": "06", "state": "CLOSED", "claimed": "", "head": "abc", "idle_with_work": True,
+                                                    "ready": [{"id": "F-10", "pri": "P0", "title": "t"}], "blocked": ""}],
+                                                   ["queue schema: F-12: 6 columns, expected 7 (a cell is missing or fused; status may be read from the wrong cell)"]))
+    for argv in (["--no-fetch", "--launch"], ["--no-fetch", "--launch", "--exec", "1"]):
+        assert f.main(argv) == 4
+        out = capsys.readouterr().out
+        assert "INVALID ROW F-12: 6 columns" in out and "LAUNCH" not in out
+    assert started == []                                                          # no worker started
+    monkeypatch.setattr(f, "survey", lambda repo: ([{"lane": "06", "state": "CLOSED", "claimed": "", "head": "abc", "idle_with_work": True,
+                                                    "ready": [{"id": "F-10", "pri": "P0", "title": "t"}], "blocked": ""}], []))
+    assert f.main(["--no-fetch", "--launch"]) == 2 and "LAUNCH" in capsys.readouterr().out      # a clean queue still launches (exit 2 = idle with work)
