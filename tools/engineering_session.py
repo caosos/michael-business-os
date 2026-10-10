@@ -83,7 +83,12 @@ def begin(tid: str, ident: dict | None = None) -> str:
     if rec and rec["state"] == "DONE":
         return "DUPLICATE_IGNORED"                         # a second delivery of a finished instruction executes nothing
     ident = ident or session_identity()
-    if rec and rec["state"] == "STARTED":                  # re-entry / restart while unfinished: resume the same record, never a second START
+    if rec and rec["state"] == "STARTED":
+        holder = (rec.get("session") or {}).get("pid")
+        if holder and holder != ident.get("pid") and pid_alive(holder):
+            return "ACTIVE_CLAIM"                          # another LIVE session holds it: never run it twice or interrupt it
+        # re-entry / restart while unfinished (same session, or the holder is gone): resume the same record, never a second START
+        rec["session"] = ident
         rec["resumes"] = rec.get("resumes", 0) + 1
         rec["last_resume_at"] = now()
         save(d)
@@ -95,6 +100,14 @@ def begin(tid: str, ident: dict | None = None) -> str:
     p.write_text(f"# Engineering receipt: {tid}\n\n## START {d[tid]['started_at']}\n- Executed by the interactive engineering session: pid {ident.get('pid')}, entrypoint {ident.get('entrypoint')}, "
                  f"kind {ident.get('kind')}. This is not the pickup watcher.\n")
     return "RUN"
+
+
+def pid_alive(pid) -> bool:
+    try:
+        os.kill(int(pid), 0)
+        return True
+    except (TypeError, ValueError, OSError):
+        return False
 
 
 def next_eligible(queue_text: str, extra_done: set[str] = frozenset()) -> dict | None:
@@ -116,6 +129,12 @@ def finish(tid: str, queue_text: str, note: str = "") -> dict:
     nxt = next_eligible(queue_text, {tid})
     rec.update(state="DONE", done_at=now(), note=note, next=({"id": nxt["id"], "pri": nxt["pri"], "title": nxt["title"]} if nxt else None))
     save(d)
+    if nxt:                                                  # completion hands control back to the session loop: the next item is announced on the next cycle
+        try:
+            import next_work
+            next_work.renotify(nxt["id"])
+        except Exception:  # noqa: BLE001  (the receipt and state above are the truth; a missing feed must not fail a completion)
+            pass
     with open(receipt_path(tid), "a") as fh:
         fh.write(f"\n## DONE {rec['done_at']}\n- Result: {note or '(no note)'}\n- Next eligible approved task (deps met, Done history honoured): "
                  f"{(nxt['id'] + ' ' + nxt['title']) if nxt else 'none'}\n")
@@ -133,7 +152,11 @@ def main(argv: list[str]) -> int:
     elif a.cmd == "begin":
         print(begin(a.task_id))
     else:
-        print(json.dumps(finish(a.task_id, foreman.show(ROOT, foreman.COORD, "docs/status/READY_QUEUE.md") or "", a.note)))
+        out = finish(a.task_id, foreman.show(ROOT, foreman.COORD, "docs/status/READY_QUEUE.md") or "", a.note)
+        print(json.dumps(out))
+        n = out.get("next")
+        print(f"CONTROL RETURNS TO THE SESSION LOOP: next eligible approved task is {n['id']}: run `begin {n['id']}` (the feed announces it on its next cycle)" if n
+              else "CONTROL RETURNS TO THE SESSION LOOP: no eligible approved task (every READY row is blocked, owned by another lane, or waiting on a dependency)")
     return 0
 
 

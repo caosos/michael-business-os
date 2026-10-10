@@ -66,3 +66,13 @@ def test_finish_without_begin_is_refused_and_state_survives_a_process_restart():
 def test_session_identity_is_honest_when_not_under_a_registered_session(tmp_path, monkeypatch):
     monkeypatch.setattr(es, "SESSIONS", tmp_path / "none")
     assert es.session_identity()["entrypoint"] == "unknown"
+
+
+def test_a_live_holder_keeps_its_claim_a_dead_holder_is_recovered(monkeypatch):
+    es.begin("MSG-9", {"pid": 111, "entrypoint": "cli"})
+    monkeypatch.setattr(es, "pid_alive", lambda p: p == 111)
+    assert es.begin("MSG-9", {"pid": 222, "entrypoint": "cli"}) == "ACTIVE_CLAIM"       # another live session holds it: no duplicate run
+    assert es.load()["MSG-9"]["session"]["pid"] == 111
+    monkeypatch.setattr(es, "pid_alive", lambda p: False)
+    assert es.begin("MSG-9", {"pid": 222, "entrypoint": "cli"}) == "RESUME"             # holder gone: the new session recovers the same record
+    assert es.load()["MSG-9"]["session"]["pid"] == 222 and es.receipt_path("MSG-9").read_text().count("## START") == 1

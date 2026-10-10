@@ -12,6 +12,12 @@
 - Pickup: `Type: ENGINEERING_PROOF` is ACKed ("AWAITING the interactive engineering session"), never executed or completed by pickup; its record becomes COMPLETED only when the engineering session sets the ack Stage to COMPLETED on origin.
 - Instruction-ID dedup and the ACK -> START -> result states are unchanged.
 
+## Sustained progression (A-65 correction of the one-shot feed)
+- **Notified is not claimed.** `next_work.py` keeps `{first, last, count}` per instruction/row in `var/next_work_seen.json` and announces an item as `NEW`, then as `REMINDER #n` every 600 s while it is still eligible and unclaimed. Claimed = `engineering_session begin` recorded STARTED/DONE (`var/engineering_state.json`); claimed or DONE items are silent. An instruction is actionable when it has no ack or its ack says AWAITING the engineering session (pickup-completed docs messages are not nagged). An item that stops being eligible is forgotten; a `--baseline` marks history closed.
+- **Completion returns control:** `finish` computes the next eligible approved task (priority, deps met, Done history) and clears its notification record so the next 120 s cycle announces it at once (not after the interval), once; the command also prints "CONTROL RETURNS TO THE SESSION LOOP: run begin <id>" or why there is no eligible task. It spawns no worker.
+- **Duplicate / claim rules:** `begin` on DONE = DUPLICATE_IGNORED; on STARTED held by a different LIVE session pid = ACTIVE_CLAIM (no duplicate run, no interruption); held by the same session or a dead pid = RESUME (recovery, one START).
+- Limits unchanged: 120 s polling (reminders are bounded by that granularity, not sub-minute), session-open lifetime, 30-minute Monitor expiry with re-arm by the session. Re-arm log: 2026-10-10T21:31Z armed (task bdbh7vwvt, old one-shot code); stopped manually ~21:5xZ and re-armed with the A-65 code (a code upgrade, not an expiry). The first real 30-minute expiry notice will be recorded here when it occurs.
+
 ## Protocol for Arya: ONE harmless bounded engineering proof (no manual paste)
 Publish via the GitHub inbox, from the distinct sender, a message `ARYA-<yyyymmdd>-<hhmm>-engineering-proof` containing:
 ```
