@@ -71,15 +71,22 @@ def commit_all(wt: Path, message: str) -> Optional[str]:
 
 def publish(wt: Path) -> tuple[bool, str]:
     """Fast-forward the coordinator branch with the side branch (one rebase retry if the coordinator moved). -> (ok, detail)."""
+    resolved = False
     for _ in range(2):
         r = git("push", "-q", "origin", f"HEAD:{COORD}", cwd=wt)
         if r.returncode == 0:
-            return True, git("rev-parse", "--short", "HEAD", cwd=wt).stdout.strip()
+            return True, git("rev-parse", "--short", "HEAD", cwd=wt).stdout.strip() + (" (same-line docs conflict resolved in favour of upstream)" if resolved else "")
         git("fetch", "-q", "origin", cwd=wt)
         rb = git(*IDENT, "rebase", "-q", "origin/" + COORD, cwd=wt)
         if rb.returncode != 0:
             git("rebase", "--abort", cwd=wt)
-            return False, "push rejected and rebase failed: " + (rb.stderr.strip() or rb.stdout.strip())[:200]
+            # Docs-only changes (the caller's guard has passed): on a same-line conflict (typically the executor and the coordinator both edited one
+            # READY_QUEUE row) the coordinator's upstream line wins; the executor's non-conflicting additions are kept. Recorded in the detail.
+            rb = git(*IDENT, "rebase", "-q", "-X", "ours", "origin/" + COORD, cwd=wt)
+            if rb.returncode != 0:
+                git("rebase", "--abort", cwd=wt)
+                return False, "push rejected and rebase failed even preferring upstream: " + (rb.stderr.strip() or rb.stdout.strip())[:200]
+            resolved = True
     return False, "push rejected twice"
 
 

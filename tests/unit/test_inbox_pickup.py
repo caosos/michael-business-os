@@ -321,3 +321,32 @@ def test_a_pause_citing_a_cancelled_instruction_is_ignored_and_never_reexecuted(
     flag.write_text("PAUSED_BY_OWNER (owner via ARYA-20261010-0600-new-pause)")
     assert "0600" in pz.reason()                                              # a genuinely new pause still works
     assert not ip.eligible("ARYA-20261010-0528-owner-pause-compute") and ip.eligible("ARYA-20261010-0600-new-pause")
+
+
+def test_same_line_docs_conflict_with_the_coordinator_resolves_for_upstream_and_publishes(world, tmp_path):
+    mid = "ARYA-20261010-0913-conflict"
+    world.send(mid, "Type: TASK_REQUEST\nedit the same queue row\n")
+
+    def edits_same_row(m, wt, dry):
+        other = tmp_path / "coord"                       # the coordinator edits the SAME line of a docs file and pushes first
+        subprocess.run(["git", "clone", "-q", "-b", "research/agent-01-coordinator", str(world.origin), str(other)], check=True, capture_output=True)
+        (other / "docs/QUEUE.md").write_text("| F-1 | status DONE by coordinator |\n")
+        g(other, "add", "-A"); g(other, "commit", "-qm", "coord edit"); g(other, "push", "-q", "origin", "research/agent-01-coordinator")
+        ip.pg.fetch()
+        (wt / "docs/QUEUE.md").write_text("| F-1 | status DONE by executor |\n")                 # conflicting edit of the same line
+        (wt / "docs/receipts/pickup").mkdir(parents=True, exist_ok=True)
+        (wt / f"docs/receipts/pickup/{m}.md").write_text("r")
+        a = wt / f"docs/messages/acks/{m}.md"
+        a.write_text(a.read_text().replace("**Stage:** ACKED", "**Stage:** COMPLETED"))
+        return {"ok": True, "process_ok": True}
+
+    seed = tmp_path / "seedq"
+    subprocess.run(["git", "clone", "-q", "-b", "research/agent-01-coordinator", str(world.origin), str(seed)], check=True, capture_output=True)
+    (seed / "docs/QUEUE.md").write_text("| F-1 | status READY |\n")
+    g(seed, "add", "-A"); g(seed, "commit", "-qm", "queue"); g(seed, "push", "-q", "origin", "research/agent-01-coordinator")
+    store = pickup_state.Store(world.dir)
+    ip.pg.fetch()
+    assert ip.deliver(mid, store, False, executor=edits_same_row) == "COMPLETED"
+    q = subprocess.run(["git", "show", "research/agent-01-coordinator:docs/QUEUE.md"], cwd=world.origin, capture_output=True, text=True).stdout
+    assert "DONE by coordinator" in q and "DONE by executor" not in q                              # upstream wins the contested line
+    assert f"docs/receipts/pickup/{mid}.md" in world.files("research/agent-01-coordinator", "docs/receipts")      # executor's own files still land
