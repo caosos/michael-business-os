@@ -423,3 +423,28 @@ def test_a59_unreadable_origin_queue_refuses_and_absent_baseline_allows(world, t
 
     monkeypatch.setattr(ip.pg, "git", broken)
     assert any("cannot read" in p for p in ip.pg.queue_problems(wt))
+
+
+def test_a63_engineering_proof_is_acked_but_never_executed_or_completed_by_pickup(world, tmp_path):
+    mid = "ARYA-20261010-2301-engineering-proof"
+    world.send(mid, "Type: ENGINEERING_PROOF\nNonce: abc123\nprove the engineering session receives this\n")
+    called = []
+    store = pickup_state.Store(world.dir)
+    ip.pg.fetch()
+    assert ip.deliver(mid, store, False, executor=lambda m, wt, dry: called.append(m) or {"ok": True}) == "BLOCKED"
+    assert called == []                                                           # no executor ran
+    r = store.get(mid)
+    assert r["state"] == "BLOCKED" and "engineering" in r["needs"]
+    assert mid in ip.pg.acked_ids()
+    ack = subprocess.run(["git", "show", f"research/agent-01-coordinator:docs/messages/acks/{mid}.md"], cwd=world.origin, capture_output=True, text=True).stdout
+    assert "AWAITING the interactive engineering session" in ack and "COMPLETED" not in ack.split("**Stage:**")[1].split("\n")[0]
+    assert mid not in ip.pending([mid], ip.pg.acked_ids(), store.all(), __import__("time").time())   # not retried
+    # the engineering session completes it by publishing the ack Stage; pickup's own record then follows
+    seed = tmp_path / "eng"
+    subprocess.run(["git", "clone", "-q", "-b", "research/agent-01-coordinator", str(world.origin), str(seed)], check=True, capture_output=True)
+    f = seed / f"docs/messages/acks/{mid}.md"
+    f.write_text(f.read_text().replace("**Stage:** ACKED", "**Stage:** COMPLETED").replace("ACKED (", "COMPLETED (", 1))
+    g(seed, "add", "-A"); g(seed, "commit", "-qm", "eng completes"); g(seed, "push", "-q", "origin", "research/agent-01-coordinator")
+    ip.pg.fetch()
+    assert ip.reconcile_engineering(store) == [mid] and store.get(mid)["state"] == "COMPLETED"
+    assert ip.reconcile_engineering(store) == []

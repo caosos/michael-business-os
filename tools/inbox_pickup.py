@@ -51,6 +51,24 @@ def is_ping(body: str) -> Optional[str]:
     return (n.group(1) if n else "none") if m else None
 
 
+def is_engineering(body: str) -> bool:
+    """`Type: ENGINEERING_PROOF`: must be executed by the interactive engineering session (A-63). Pickup only ACKs it and leaves it open."""
+    return bool(re.search(r"^Type:\s*ENGINEERING_PROOF\b", body, re.M))
+
+
+def reconcile_engineering(store: Store) -> list[str]:
+    """An engineering-owned message pickup left open becomes COMPLETED when the engineering session set its ack Stage to COMPLETED on origin."""
+    done = []
+    for mid, r in store.all().items():
+        if r.get("state") != "BLOCKED" or "engineering" not in str(r.get("needs", "")):
+            continue
+        ack = pg.git("show", f"origin/{pg.COORD}:docs/messages/acks/{mid}.md").stdout
+        if re.search(r"\*\*Stage:\*\*\s*COMPLETED\b", ack):
+            store.correct(mid, "COMPLETED", "the interactive engineering session completed it (ack Stage COMPLETED on origin)", evidence=[f"origin/{pg.COORD}:docs/messages/acks/{mid}.md"])
+            done.append(mid)
+    return done
+
+
 def pending(inbox: list[str], acked: set[str], data: dict[str, Any], t: float, cutoff: str = CUTOFF) -> list[str]:
     out = []
     for mid in inbox:
@@ -149,13 +167,19 @@ def deliver(mid: str, store: Store, dry: bool, executor=None) -> str:
         return "BLOCKED"
     store.move(mid, "DELIVERED", operation="executor started", attempts=attempts, pid=os.getpid(), kind="PING" if ping is not None else "WORK")
     if mid not in pg.acked_ids():                                         # a retry never re-acks
-        write_file(wt, f"docs/messages/acks/{mid}.md", ack_text(mid, "ACKED (received and queued by automatic pickup; NOT yet completed)"))
+        eng = is_engineering(body)
+        write_file(wt, f"docs/messages/acks/{mid}.md", ack_text(mid, "ACKED (received by automatic pickup; AWAITING the interactive engineering session, which pickup does not replace; NOT completed)" if eng
+                                                                else "ACKED (received and queued by automatic pickup; NOT yet completed)"))
         sha = pg.commit_all(wt, f"agent 01 pickup: ACK {mid}")
         ok, detail = pg.publish(wt) if sha else (False, "nothing to commit")
         if not ok:
             store.block(mid, "ack not published: " + detail, attempts=attempts, retry_after=time.time() + RETRY_S)
             return "BLOCKED"
         store.move(mid, "ACKED", operation="ack pushed", evidence=[f"origin/{pg.COORD}:docs/messages/acks/{mid}.md"], branch=pg.COORD, sha=detail)
+    if is_engineering(body):                           # only the interactive engineering session may execute and complete it
+        store.block(mid, "awaiting the interactive engineering session (pickup acked only, never executes or completes it)", attempts=max(attempts - 1, 0), retry_after=9e12,
+                    needs="interactive engineering session", branch=pg.COORD)
+        return "BLOCKED"
     if ping is None and pause.reason():                # owner pause: acknowledged, but no model executor may start
         store.block(mid, "PAUSED_BY_OWNER: model work disabled; acknowledged only (resume = delete var/PAUSED_BY_OWNER)", attempts=max(attempts - 1, 0),
                     retry_after=time.time() + 3600, needs="owner resume")
@@ -205,6 +229,7 @@ def cycle(store: Store, dry: bool, beat: "ph.Beat") -> dict[str, Any]:
             else:
                 store.move(mid, "FETCHED", operation="fetched", evidence=[f"{pg.INBOX_REF}:docs/messages/inbox/{mid}.md"], attempts=0)
         recover(store, acked, alive)
+        reconcile_engineering(store)
         for mid in pending(inbox, acked, store.all(), time.time())[:2]:
             beat.start_delivery(mid)                 # task id + start time are published BEFORE the long synchronous delivery
             try:
