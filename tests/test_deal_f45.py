@@ -25,11 +25,11 @@ def test_link_rules():
 
 
 def test_demo_fixture_is_labelled_and_never_a_link(ui):
-    b = req(ui, "GET", "/resale")[2]
-    assert "example.invalid" in b and "not a live listing and is not clickable" in b and "<span class=lbl>DEMO</span>" in b
+    b = req(ui, "GET", "/resale?demo=1")[2]
+    assert "example.invalid" in b and "No real listing, training example" in b and "<span class=lbl>DEMO</span>" in b
     assert "href=\"https://listings.example.invalid" not in b and "href='https://listings.example.invalid" not in b
     ui.deals["live-1"] = {**copy.deepcopy(rv.DEMO_DEALS["demo-utility-trailer"]), "item_id": "live-1", "title": "TEST live trailer", "demo": False, "url": LIVE}
-    b = req(ui, "GET", "/resale")[2]
+    b = req(ui, "GET", "/resale?demo=1")[2]
     assert f'href="{LIVE}"' in b and "View original listing" in b
 
 
@@ -39,7 +39,7 @@ def test_hostile_text_is_escaped_and_ad_is_verbatim(ui):
     ui.deals["evil"] = {**copy.deepcopy(rv.DEMO_DEALS["demo-utility-trailer"]), "item_id": "evil", "title": evil, "demo": False, "location": evil,
                         "description": ad, "condition": evil, "url": 'https://www.govdeals.com/"><script>alert(3)</script>',
                         "photos": [{"url": 'https://cdn.net/a.jpg"><script>alert(4)</script>', "source": evil}]}
-    b = req(ui, "GET", "/resale")[2]
+    b = req(ui, "GET", "/resale?demo=1")[2]
     assert "<script>alert" not in b and "onerror=alert" not in b.replace("&lt;img src=x onerror=alert(2)&gt;", "")
     assert "&lt;script&gt;alert(1)&lt;/script&gt;" in b and "Line &lt;b&gt;two&lt;/b&gt;\nmore 0" in b       # verbatim, line breaks kept, escaped
     assert "Show full ad" in b
@@ -65,7 +65,7 @@ def test_photos_cover_count_provenance_fallback_and_mockups_apart():
 
 
 def test_glance_card_has_the_fields_and_proof_is_collapsed(ui):
-    b = req(ui, "GET", "/resale")[2]
+    b = req(ui, "GET", "/resale?demo=1")[2]
     for s in ("Price now", "Distance", "Condition", "SOLD comps", "ASKING comps", "Expected net", "Profit / hour", "Days to cash", "Max bid", "<b>Next:</b>", "View proof"):
         assert s in b
     i = b.index("View proof")
@@ -74,29 +74,29 @@ def test_glance_card_has_the_fields_and_proof_is_collapsed(ui):
 
 def test_filters_explain_and_never_delete(ui):
     n = len(ui.deals)
-    b = req(ui, "GET", "/resale?max_distance=30&find=1")[2]
+    b = req(ui, "GET", "/resale?demo=1&max_distance=30&find=1")[2]
     assert "Find Deals Now ran (DRY-RUN)" in b and "No live source is connected" in b
     assert "1 deal(s) hidden by your filters" in b and "25 mi" not in b.split("hidden by your filters")[1][:200] and "32 mi is farther than 30 mi" in b
     assert len(ui.deals) == n
-    b = req(ui, "GET", "/resale?sale_type=fixed")[2]
+    b = req(ui, "GET", "/resale?demo=1&sale_type=fixed")[2]
     assert "it is a auction sale, not fixed" in b
-    b = req(ui, "GET", "/resale?max_distance=abc&profit_at_least=")[2]
+    b = req(ui, "GET", "/resale?demo=1&max_distance=abc&profit_at_least=")[2]
     assert "ignored &#x27;abc&#x27; for max_distance" in b and "hidden by your filters" not in b
-    b = req(ui, "GET", "/resale?closing_soon=1&confidence=HIGH&title_status=clean&max_days=5&max_price=100&min_price=1&condition=x&category=y&subtype=z")[2]
+    b = req(ui, "GET", "/resale?demo=1&closing_soon=1&confidence=HIGH&title_status=clean&max_days=5&max_price=100&min_price=1&condition=x&category=y&subtype=z")[2]
     assert b.count("deal(s) hidden") == 1
 
 
 def test_tow_limits_are_editable_and_drive_transport_filter(ui):
-    assert "limit UNKNOWN lb" in req(ui, "GET", "/resale")[2] and "tow check UNKNOWN" in req(ui, "GET", "/resale")[2]
+    assert "limit UNKNOWN lb" in req(ui, "GET", "/resale?demo=1")[2] and "tow check UNKNOWN" in req(ui, "GET", "/resale?demo=1")[2]
     bad = req(ui, "POST", "/resale/tow", {"csrf": ui.csrf, "pin": "bad", "tow_limit_lb": "2000"})
     assert not ui.tow and bad[0] == 200
     assert req(ui, "POST", "/resale/tow", {"csrf": ui.csrf, "pin": PIN, "vehicle": "TEST pickup", "tow_limit_lb": "2000"})[0] == 303
     assert ui.tow["tow_limit_lb"] == 2000.0
-    b = req(ui, "GET", "/resale?transport=can_tow")[2]
+    b = req(ui, "GET", "/resale?demo=1&transport=can_tow")[2]
     assert "2,800 lb is over your 2,000 lb tow limit" in b and "demo-splitter" in b
-    assert "can tow" in req(ui, "GET", "/resale")[2]
+    assert "can tow" in req(ui, "GET", "/resale?demo=1")[2]
     req(ui, "POST", "/resale/tow", {"csrf": ui.csrf, "pin": PIN, "vehicle": "TEST truck", "tow_limit_lb": "9000"})   # edited, not fixed
-    assert ui.tow["tow_limit_lb"] == 9000.0 and "hidden by your filters" not in req(ui, "GET", "/resale?transport=can_tow")[2]
+    assert ui.tow["tow_limit_lb"] == 9000.0 and "hidden by your filters" not in req(ui, "GET", "/resale?demo=1&transport=can_tow")[2]
     assert req(ui, "POST", "/resale/tow", {"csrf": ui.csrf, "pin": PIN, "tow_limit_lb": "-5"})[0] == 200
     assert req(ui, "POST", "/resale/tow", {"csrf": "x", "pin": PIN, "tow_limit_lb": "5"})[0] == 200 and ui.tow["tow_limit_lb"] == 9000.0
 
@@ -105,12 +105,12 @@ def test_presets_save_and_apply(ui):
     assert req(ui, "POST", "/resale/preset", {"csrf": "bad", "name": "n", "max_distance": "30"})[0] == 200 and not ui.presets
     s, loc, _ = req(ui, "POST", "/resale/preset", {"csrf": ui.csrf, "name": "Near <b>me</b>", "max_distance": "30", "bogus": "1"})
     assert s == 303 and ui.presets == {"Near <b>me</b>": {"max_distance": 30.0}}
-    b = req(ui, "GET", "/resale?preset=Near%20%3Cb%3Eme%3C%2Fb%3E")[2]
+    b = req(ui, "GET", "/resale?demo=1&preset=Near%20%3Cb%3Eme%3C%2Fb%3E")[2]
     assert "hidden by your filters" in b and "Near &lt;b&gt;me&lt;/b&gt;" in b and "Near <b>me</b>" not in b
 
 
 def test_chrome_active_nav_heading_and_milestones(ui):
-    b = req(ui, "GET", "/resale")[2]
+    b = req(ui, "GET", "/resale?demo=1")[2]
     assert '<a href="/resale" class=active aria-current=page>Resale</a>' in b and b.count("aria-current=page") == 1
     assert '<h1 class="pagehead">Resale</h1>' in b
     for s in ("Usable now", "Blocked", "Future", "Daily search", "Live auction connector", "Overnight negotiation", "No dates are promised"):
@@ -135,5 +135,5 @@ def test_dump_pages_for_screenshots(ui, tmp_path):
     ui.deals["live-shot"] = {**copy.deepcopy(rv.DEMO_DEALS["demo-utility-trailer"]), "item_id": "live-shot", "title": "TEST live 14 ft trailer", "demo": False, "url": LIVE,
                              "photos": [{"url": "https://cdn.photos.net/a.jpg", "source": "GovDeals", "captured_at": "2026-10-09"}, {"url": "https://cdn.photos.net/b.jpg", "expired": True}]}
     req(ui, "POST", "/resale/tow", {"csrf": ui.csrf, "pin": PIN, "vehicle": "TEST pickup", "tow_limit_lb": "2000"})
-    for name, path in (("resale", "/resale"), ("resale-filtered", "/resale?transport=can_tow&find=1"), ("notes", "/notes")):
+    for name, path in (("resale", "/resale?demo=1"), ("resale-filtered", "/resale?demo=1&transport=can_tow&find=1"), ("notes", "/notes")):
         (os.path.join(out, name + ".html") and open(os.path.join(out, name + ".html"), "w")).write(req(ui, "GET", path)[2])

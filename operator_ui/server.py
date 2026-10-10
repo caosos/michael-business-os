@@ -25,7 +25,7 @@ try:  # lane C's package is optional: without it the notes form is simply unavai
 except ImportError:  # pragma: no cover
     NOTE_CATEGORIES, NOTE_KINDS = frozenset(), frozenset()
 
-from . import deal_ui, resale_view, attest_view, bought_view, card_view, comps_view, glance_view, inputs_view, ux, views, wanted_view
+from . import deal_ui, live_demo, resale_view, attest_view, bought_view, card_view, comps_view, glance_view, inputs_view, ux, views, wanted_view
 from .digest import figures as digest_figures, dollars as _dollars
 from .card_view import ec
 from .backend import AlreadyClosed, FollowupRefused, ItemNotFound, NoteRefused, NumbersRefused, ProfileUnavailable
@@ -101,7 +101,7 @@ def _verdict(v):
 
 
 NAV = [("/", "Queue", None), ("/mission", "Weekly mission", None), ("/numbers", "My numbers", None), ("/wanted", "Wanted", None),
-       ("/usage", "Usage", "usage"), ("/intake", "Intake", None), ("/assets", "My assets", None), ("/resale", "Resale", None), ("/preview", "Audience previews", "preview"),
+       ("/usage", "Usage", "usage"), ("/intake", "Intake", None), ("/assets", "My assets", None), ("/resale", "Resale", None), ("/owner-listing", "Add a listing", None), ("/gsa", "GSA lots", None), ("/preview", "Audience previews", "preview"),
        ("/digest", "Morning digest", None), ("/summary", "Daily summary", None), ("/notes", "My notes", None),
        ("/holds", "HOLD backlog", None), ("/outcomes", "Outcomes", None), ("/sources", "Source health", "sources"),
        ("/ledger", "Receipt ledger", None)]
@@ -531,6 +531,7 @@ class App:
         self.presets: dict = {}  # F-45: saved filter presets, in memory
         self.deals = dict(resale_view.DEMO_DEALS)  # F-39: labelled DEMO lots until a feed provides them
         self.assets = {}  # F-34: in-memory DRY-RUN owned-asset drafts
+        self.owner_listings: dict = {}  # F-46: OWNER-SUPPLIED url/photos/text, in memory, DRY-RUN
         self.intake_drafts = {}  # F-20: in-memory DRY-RUN drafts, never published
         self.csrf = secrets.token_urlsafe(32)
         self.session_id = "web-" + secrets.token_hex(4)
@@ -991,18 +992,41 @@ def make_handler(app):
                 except Exception as ex:  # noqa: BLE001 - Today must still render; say the header is unavailable
                     head = f"<div class='card'><p class='bad'>Today's header is unavailable ({e(type(ex).__name__)}).</p></div>"
                 st = app.state()
+                demo = (qs.get("demo") or [""])[0] == "1"  # F-46: training items only behind the DEMO switch
+                q, dq = live_demo.split_queue(app.store, views.queue(app.store, now))
+                n_hidden = sum(len(v) for v in dq.values())
+                parked = [(it, g) for it, g in self._parked() if not live_demo.is_demo(it)]
                 try:  # F-38: the glanceable top; the full queue below is unchanged
-                    glance = glance_view.render(glance_view.build(app.store, now, self._parked(), st), app.csrf)
+                    gl = glance_view.build(app.store, now, parked, st)
+                    keep = lambda r: not live_demo.is_demo(app.store.item(r["item_id"]))  # noqa: E731
+                    for k in ("opportunities", "done", "working"):
+                        gl[k] = [o for o in gl[k] if keep(o)]
+                    gl["next"] = gl["next"] if gl["next"] is None or keep({"item_id": gl["next"]["href"].rsplit("/", 1)[-1]}) else None
+                    glance = glance_view.render(gl, app.csrf)
                 except Exception as ex:  # noqa: BLE001 - Today must still render
                     glance = f"<div class='card'><p class='bad'>At-a-glance cards are unavailable ({e(type(ex).__name__)}).</p></div>"
                 try:  # F-39: asset deals first
-                    cards = [resale_view.decide(d) for d in app.deals.values()]
-                    deals = (resale_view.control_strip(app.resale, cards, len(views.queue(app.store, now))) +
-                             resale_view.render_hunt(cards, resale_view.changes(app.resale, cards), full=False))
+                    cards = [resale_view.decide(d) for d in app.deals.values()] if demo else []
+                    deals = (resale_view.control_strip(app.resale, cards, len(q["pending"])) +
+                             resale_view.render_hunt(cards, resale_view.changes(app.resale, cards), full=False)) if demo else ""
+                    deals = deals
                 except Exception as ex:  # noqa: BLE001 - Today must still render
                     deals = f"<div class='card'><p class='bad'>Asset deals are unavailable ({e(type(ex).__name__)}).</p></div>"
-                return self._send(200, page("Operator queue", deals + glance + head + comps_view.render_today(self._parked())
-                                            + f"<details><summary><b>Full queue</b></summary>{render_queue(views.queue(app.store, now))}</details>",
+                n_hidden += len(app.deals)
+                sw = live_demo.hidden_note(n_hidden, False)
+                demo_sec = ""
+                if demo:  # the same glance cards, but only for demo items and only inside the banner section
+                    try:
+                        dg = glance_view.build(app.store, now, [(it, g) for it, g in self._parked() if live_demo.is_demo(it)], st)
+                        for k in ("opportunities", "done", "working"):
+                            dg[k] = [o for o in dg[k] if live_demo.is_demo(app.store.item(o["item_id"]))]
+                        dg["next"], dg["blocked"] = None, [x for x in dg["blocked"] if x.get("item_id") and live_demo.is_demo(app.store.item(x["item_id"]))]
+                        dglance = glance_view.render(dg, app.csrf)
+                    except Exception as ex:  # noqa: BLE001
+                        dglance = f"<p class='bad'>Demo cards unavailable ({e(type(ex).__name__)}).</p>"
+                    demo_sec = live_demo.render_demo_section(dq, deals + dglance)
+                return self._send(200, page("Operator queue", sw + glance + head + comps_view.render_today(parked)
+                                            + f"<details><summary><b>Full queue</b></summary>{render_queue(q)}</details>" + demo_sec,
                                             st, flash or err, bool(err)))
             if u.path == "/digest":
                 from . import digest as digest_view
@@ -1033,6 +1057,13 @@ def make_handler(app):
                 return self._assets_page(u.path.split("/")[2] if u.path != "/assets" else None, flash or err, bool(err))
             if u.path == "/resale":
                 return self._resale_page(now, flash or err, bool(err), qs)
+            if u.path == "/owner-listing":
+                return self._send(200, page("Add a listing", live_demo.render_owner_form(app.csrf) + "".join(
+                    live_demo.render_owner_listing(d) for d in app.owner_listings.values()), app.state()))
+            if u.path == "/gsa":
+                lots = live_demo.load_gsa_lots(os.environ.get("MBOS_GSA_LOTS_FILE"))
+                return self._send(200, page("GSA lots", "".join(live_demo.render_gsa_lot(x) for x in lots) or
+                                            "<div class='card'><p>No GSA lots on file (none fetched yet). Nothing is shown rather than guessed.</p></div>", app.state()))
             if u.path == "/intake":
                 from . import intake_view
 
@@ -1080,7 +1111,8 @@ def make_handler(app):
 
         def _resale_page(self, now, flash=None, is_err=False, qs=None):
             qs = qs or {}
-            cards = [resale_view.decide(d) for d in app.deals.values()]
+            demo = (qs.get("demo") or [""])[0] == "1"
+            cards = [resale_view.decide(d) for d in app.deals.values()] if demo else []  # F-46: DEMO lots only behind the switch
             realized = {}
             for it in app.resale.items.values():
                 if it["stage"] == "sold" and it["deal_id"]:
@@ -1088,7 +1120,8 @@ def make_handler(app):
             preset = (qs.get("preset") or [None])[0]
             flt, warn = (dict(app.presets[preset]), []) if preset in app.presets else deal_ui.parse_filters(qs)
             kept, out = deal_ui.apply_filters(cards, flt, app.tow)
-            body = (resale_view.control_strip(app.resale, cards, len(views.queue(app.store, now))) + deal_ui.render_milestones()
+            body = ((live_demo.BANNER + live_demo.hidden_note(0, True) if demo else live_demo.hidden_note(len(app.deals), False))
+                    + resale_view.control_strip(app.resale, cards, len(views.queue(app.store, now))) + deal_ui.render_milestones()
                     + deal_ui.render_filters(flt, app.presets, app.csrf, preset if preset in app.presets else None, warn, len(cards), len(kept), bool(qs.get("find")))
                     + deal_ui.render_tow(app.tow, app.csrf, bool(app.operator_pin)) + deal_ui.render_filtered_out(out)
                     + resale_view.render_hunt(kept, resale_view.changes(app.resale, cards), full=False)
@@ -1381,6 +1414,8 @@ def make_handler(app):
                 controls += f"<p class='small'><a href='/areq/{e(open_areq['action_request_id'])}'>Technical view of this request (payload, hashes)</a></p>"
             body = card_view.render_item_card(card, res["errors"], controls, hold)
             store_item = app.store.item(item_id) or {}
+            if live_demo.is_demo(store_item):  # F-46: never present a training item as real
+                body = live_demo.BANNER + body
             body = comps_view.render_needs(card, store_item.get("state", "?"), app.csrf, bool(app.operator_pin),
                                            bool(app.comps_inbox), comp_reasons, comp_values, secrets.token_hex(8),
                                            lane=store_item.get("type"), parts_only=comps_view.parts_only(app.comps_inbox, item_id)) + body
@@ -1412,6 +1447,17 @@ def make_handler(app):
                 return self._post_resale(parts[:2] if parts[1] == "add" else [parts[0], parts[1]])
             if parts == ["assets", "add"] or (len(parts) == 3 and parts[0] == "assets" and parts[2] == "answer"):
                 return self._post_assets(parts)
+            if parts == ["owner-listing"]:
+                n = min(int(self.headers.get("Content-Length") or 0), 65536)
+                f = {k: v[0] for k, v in parse_qs(self.rfile.read(n).decode("utf-8", "replace"), keep_blank_values=True).items()}
+                try:
+                    app._check_csrf(f)
+                    d = live_demo.parse_owner_listing(f, app.author, iso(utcnow()))
+                except Exception as ex:  # shown, nothing recorded
+                    return self._send(200, page("Add a listing", live_demo.render_owner_form(app.csrf, f"<div class='flash err'>{e(ex)}</div>"), app.state()))
+                app.owner_listings[secrets.token_hex(4)] = d
+                return self._send(200, page("Add a listing", live_demo.render_owner_form(app.csrf) + "".join(
+                    live_demo.render_owner_listing(x) for x in app.owner_listings.values()), app.state()))
             if parts == ["intake", "start"] or (len(parts) == 3 and parts[0] == "intake" and parts[2] == "answer"):
                 return self._post_intake(parts)
             if len(parts) == 2 and parts[0] == "numbers" and parts[1] in ("mission", "capital"):

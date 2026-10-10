@@ -221,11 +221,14 @@ def render_needs(card: dict, item_state: str, csrf: str, pin_set: bool, inbox_se
         return (f"<div class='card rec' id='needs'><h2>Needs from you</h2><p style='font-size:18px'><b>{e(gap_text(card))}</b></p>"
                 "<p>This is a service job: the system is waiting on things only you can confirm (see <a href='#confirm'>Confirm what you know</a>), "
                 f"not on a sold price. A price you saw is optional.</p>{errs}<details{' open' if errs else ''}><summary>Add a price I saw</summary>{form}</details></div>")
-    return (f"<div class='card rec' id='needs'><h2>Needs from you</h2><p style='font-size:18px'><b>{e(gap_text(card))}</b></p>"
-            + ("<p>The system has what it needs to judge this; the verdict above is its answer. A price you saw is optional.</p>"
-               if not_blocker_text(card) else
-               "<p>This item is parked: the system cannot recommend it until it has a price to compare with. A price you actually saw is enough.</p>")
-            + f"{errs}<h3>Add a price I saw</h3>{form}</div>")
+    if not_blocker_text(card):
+        return (f"<div class='card rec' id='needs'><h2>Needs from you</h2><p style='font-size:18px'><b>{e(gap_text(card))}</b></p>"
+                "<p>The system has what it needs to judge this; the verdict above is its answer. A price you saw is optional.</p>"
+                f"{errs}<details{' open' if errs else ''}><summary>Details: add a price I saw</summary>{form}</details></div>")
+    # F-46: no sold evidence is a stop sign, not a prompt to go and look; the price form lives under Details
+    return (f"<div class='card rec' id='needs'><h2>Research needed</h2><p style='font-size:18px'><b class='bad'>RESEARCH NEEDED, DO NOT BUY YET.</b> "
+            f"<span class='small'>{e(gap_text(card))}</span></p>"
+            f"{errs}<details{' open' if errs else ''}><summary>Details: add a price I saw</summary>{form}</details></div>")
 
 
 def saved_message(item_id: str, created: bool, condition: Optional[str] = None) -> str:
@@ -242,5 +245,5 @@ def render_today(parked: list) -> str:
     if not parked:
         return ""
     rows = "".join(f"<div class='card q'><a class='rowlink' href='/item/{e(it['item_id'])}#needs'><b>{e(it['normalized']['title'])}</b>"
-                   f"<div>Needs from you: <b>{e(gap)}</b></div></a></div>" for it, gap in parked)
-    return f"<h2>Needs from you ({len(parked)})</h2>{rows}"
+                   f"<div><b class='bad'>RESEARCH NEEDED, DO NOT BUY YET</b> <span class='small mut'>({e(gap)}; open for details)</span></div></a></div>" for it, gap in parked)
+    return f"<h2>Research needed ({len(parked)})</h2>{rows}"

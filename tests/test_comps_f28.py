@@ -81,9 +81,10 @@ def inbox(ui):
 
 def test_a_researching_item_shows_the_gap_and_the_form(ui):
     h = req(ui, "GET", f"/item/{ITEM['item_id']}")[2]
-    assert "Needs from you" in h and "no comparable sold price" in h and "Add a price I saw" in h and "name=\"sold_price\"" in h
-    today = req(ui, "GET", "/")[2]
-    assert "Needs from you (1)" in today and "no comparable sold price" in today
+    assert "RESEARCH NEEDED, DO NOT BUY YET" in h and "no comparable sold price" in h and "dd a price I saw" in h and "name=\"sold_price\"" in h
+    assert ITEM["item_id"] not in req(ui, "GET", "/")[2]   # F-46: a demo item is not on the normal feed
+    today = req(ui, "GET", "/?demo=1")[2]
+    assert "no comparable sold price" in today
     assert "<b>zero turn</b>" not in today                       # hostile title is escaped
 
 

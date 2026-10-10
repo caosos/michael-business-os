@@ -11,6 +11,7 @@ The page is a pure rendering of `mbos.card.build_card(...)`; this module adds NO
 from __future__ import annotations
 
 import html
+from . import live_demo
 from typing import Any
 
 e = lambda v: html.escape("" if v is None else str(v))  # noqa: E731
@@ -63,7 +64,7 @@ def _link_prov(pid: str) -> str:
 
 def render_header(card: dict) -> str:
     i = card["item"]
-    link = f"<a href='{e(i['url'])}' rel='noreferrer noopener'>listing</a>" if str(i.get("url", "")).startswith(("http://", "https://")) else e(i.get("url"))
+    link = live_demo.link_html(i.get("url"))  # F-46: reserved fixture hosts are never links
     return (f"<div class='card'><div class='row'><span class='badge {e(i['type'])}'>{'FLIP' if i['type'] == 'flip' else 'SERVICE'}</span>"
             f"<span class='mut'>{e(i['category'])}</span><span class='grow'></span>"
             f"<span class='small mut'>{e(i['source'])} · {link} · card <code>{e(card['card_hash'][:19])}</code></span></div>"

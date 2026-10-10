@@ -63,7 +63,7 @@ def render_link(deal: dict) -> str:
         return (f"<a class='listing-link' href=\"{e(detail)}\" target='_blank' rel='noopener noreferrer nofollow'>View original listing</a> "
                 f"<span class='small mut'>({e(host)})</span>")
     if kind == "demo":
-        return f"<span class='lbl'>DEMO</span> <span class='small mut'>fixture link <code>{e(detail)}</code> is not a live listing and is not clickable</span>"
+        return f"<span class='lbl'>DEMO</span> <span class='small mut'><b>No real listing, training example</b> (<code>{e(detail)}</code> is not clickable)</span>"
     why = f" <span class='small mut'>({e(detail)})</span>" if kind == "rejected" else ""
     return f"<span class='small mut'><b>No verified live link</b>{why}</span>"
 

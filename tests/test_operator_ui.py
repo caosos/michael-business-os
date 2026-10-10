@@ -90,7 +90,7 @@ def test_ui_owns_no_gateway_timer_or_ledger():
         assert banned not in src, banned
     assert "spine.decide(" in (PKG / "backend.py").read_text()
     assert {p.name for p in PKG.glob("*.py")} == {"__init__.py", "__main__.py", "backend.py", "mbos_canonical.py",
-                                               "server.py", "sources.py", "ux.py", "views.py", "digest.py", "summary.py", "card_view.py", "mission_view.py", "merch.py", "merch_view.py", "usage_view.py", "intake_view.py", "numbers_view.py", "wanted_view.py", "comps_view.py", "attest_view.py", "inputs_view.py", "assets_view.py", "bought_view.py", "glance_view.py", "resale_view.py", "deal_ui.py"}
+                                               "server.py", "sources.py", "ux.py", "views.py", "digest.py", "summary.py", "card_view.py", "mission_view.py", "merch.py", "merch_view.py", "usage_view.py", "intake_view.py", "numbers_view.py", "wanted_view.py", "comps_view.py", "attest_view.py", "inputs_view.py", "assets_view.py", "bought_view.py", "glance_view.py", "resale_view.py", "deal_ui.py", "live_demo.py"}
 
 
 # ---------------------------------------------------------------- cards
@@ -98,9 +98,9 @@ def test_queue_and_card_show_why(rt, discover, ui):
     flip, areq = ready(rt, discover, "FIX-TRAILER-1")
     svc = discover("FIX-LEAD-SMARTHOME-1")["FIX-LEAD-SMARTHOME-1"]
     wait_state(rt.engine, svc, "AWAITING_APPROVAL")
-    s, _, body = req(ui, "GET", "/")
+    s, _, body = req(ui, "GET", "/?demo=1")
     assert s == 200
-    for text in ("FLIP", "SERVICE", "System says YES", "Needs your decision", "DRY-RUN"):
+    for text in ("DEMO / TRAINING DATA", "Demo / training examples", "Approve"):
         assert text in body
     s, _, body = req(ui, "GET", f"/areq/{areq['action_request_id']}")
     for text in ("Why the system recommends this", "Economics", "Confidence &amp; risk", "Provenance",

@@ -213,13 +213,19 @@ def sale_label(it: dict) -> str:
     return "SIMULATED, not earned" if it["simulated"] else "EARNED (owner-recorded, receipted)"
 
 
+def utcnow_iso() -> str:
+    from datetime import datetime, timezone
+
+    return datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+
+
 def control_strip(book: Book, cards: list[dict], approvals: int | None) -> str:
     tied = book.open_cost()
     rz = book.realized()
     exp = sum(c["net"] for c in cards if c["net"] is not None and c["action"] != "PASS")
     closing = [c for c in cards if c["hours_left"] is not None and c["hours_left"] <= 48]
     paper = [c for c in cards if c["paperwork"].startswith(("bill_of_sale", "no_title", "salvage"))]
-    stats = [("Capital available", money(max(0.0, PRINCIPAL + rz["earned"] - tied))), ("Capital tied up", money(tied)),
+    stats = [("DEMO capital available", money(max(0.0, PRINCIPAL + rz["earned"] - tied))), ("Capital tied up", money(tied)),
              ("Inventory", sum(1 for i in book.items.values() if i["stage"] != "sold")),
              ("Expected profit (open deals)", money(exp)), ("Realized profit (earned)", money(rz["earned"])),
              ("Simulated profit (NOT earned)", money(rz["simulated"])), ("Auctions closing ≤48h", len(closing)),
@@ -228,7 +234,9 @@ def control_strip(book: Book, cards: list[dict], approvals: int | None) -> str:
              ("Receipts", len(book.receipts))]
     cells = "".join(f"<td><span class='small mut'>{e(k)}</span><br><b>{e(v)}</b></td>" for k, v in stats)
     return (f"<div class='card' id='control-strip'><table><tr>{cells}</tr></table>"
-            f"<p class='small mut'>Principal {money(PRINCIPAL)} is the owner's protected bankroll. DRY-RUN ledger; simulated sales never count as earned.</p></div>")
+            f"<p class='small mut'><b>DEMO bankroll {money(PRINCIPAL)}</b> (source: dry-run ledger, not real cash; as of {e(utcnow_iso())}). "
+            "Real cash on hand: UNKNOWN until you enter it on My numbers. No recommendation is made from a demo balance. "
+            "Simulated sales never count as earned.</p></div>")
 
 
 def rank(cards: list[dict]) -> list[dict]:

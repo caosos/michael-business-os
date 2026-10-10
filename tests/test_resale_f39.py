@@ -32,7 +32,7 @@ def advance(ui, iid, **kw):
 
 
 def test_item_moves_intake_to_sold_with_receipt_and_simulated_is_never_earned(ui):
-    st, _, b = req(ui, "GET", "/resale")
+    st, _, b = req(ui, "GET", "/resale?demo=1")
     assert st == 200 and "Capital tied up" in b and "demo-splitter" in b
     assert req(ui, "POST", "/resale/add", {"csrf": ui.csrf, "pin": "bad", "title": "t"})[0] == 200 and not ui.resale.items  # PIN gate
     assert req(ui, "POST", "/resale/add", {"csrf": ui.csrf, "pin": PIN, "title": "TEST mower", "paid": "100", "deal": "demo-splitter"})[0] == 303
@@ -44,12 +44,12 @@ def test_item_moves_intake_to_sold_with_receipt_and_simulated_is_never_earned(ui
     it = ui.resale.items[iid]
     assert it["stage"] == "sold" and it["sale"]["net"] == 190 and it["receipt_id"] in {r["id"] for r in ui.resale.receipts}
     assert len(ui.resale.receipts) == 5
-    b = req(ui, "GET", "/resale")[2]
+    b = req(ui, "GET", "/resale?demo=1")[2]
     assert "SIMULATED, not earned" in b and ui.resale.realized() == {"earned": 0.0, "simulated": 190.0, "n_earned": 0, "n_simulated": 1}
     assert "EARNED (" not in b
     req(ui, "POST", "/resale/add", {"csrf": ui.csrf, "pin": PIN, "title": "real one", "paid": "50", "real": "1"})
     rid = [k for k, v in ui.resale.items.items() if not v["simulated"]][0]
     for kw in ({"step": "photos", "photos": "b.jpg"}, {"step": "listing", "listing": "ad", "ask": "120"}, {"step": "listed"}, {"step": "sold", "price": "120", "receipt": "cash"}):
         advance(ui, rid, **kw)
-    assert ui.resale.realized()["earned"] == 70.0 and "EARNED (" in req(ui, "GET", "/resale")[2]
-    assert "Morning Money Hunt" in req(ui, "GET", "/")[2]
+    assert ui.resale.realized()["earned"] == 70.0 and "EARNED (" in req(ui, "GET", "/resale?demo=1")[2]
+    assert "Morning Money Hunt" in req(ui, "GET", "/?demo=1")[2]
