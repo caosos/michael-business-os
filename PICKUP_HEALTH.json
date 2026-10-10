@@ -22,7 +22,7 @@
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-10T04:49:16Z",
+ "generated_at": "2026-10-10T04:50:19Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "nothing needed",
@@ -34,7 +34,7 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-10T04:49:16Z",
+  "observed_at": "2026-10-10T04:50:19Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
   "status": "idle",
@@ -44,7 +44,7 @@
   "ack_branch": "research/agent-01-coordinator",
   "inbox_ref": "origin/liaison/aria-to-agent-01",
   "interval_s": 60,
-  "started_at": "2026-10-10T04:43:59Z",
+  "started_at": "2026-10-10T04:50:18Z",
   "status": "running"
  }
 }
