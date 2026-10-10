@@ -168,3 +168,19 @@ def test_work_executor_success_completes_and_unauthorized_sender_is_ignored(worl
     assert ip.deliver(mid, store, False, executor=good) == "COMPLETED"
     run_cycle(world)
     assert store.get("EVIL-20261010-0906-x") == {}
+
+
+def test_message_acked_by_someone_else_is_recorded_not_executed(world):
+    mid = "ARYA-20261010-0907-handled"
+    world.send(mid, "Type: TASK_REQUEST\nhandled by hand\n")
+    sender = world.dir.parent / "hand"                # a human/agent pushes the ack on the coordinator branch first
+    subprocess.run(["git", "clone", "-q", "-b", "research/agent-01-coordinator", str(world.origin), str(sender)], check=True, capture_output=True)
+    (sender / "docs/messages/acks" / f"{mid}.md").write_text("# manual ack")
+    g(sender, "add", "-A"); g(sender, "commit", "-qm", "manual ack"); g(sender, "push", "-q", "origin", "research/agent-01-coordinator")
+    calls = []
+    ip.run_work = lambda *a: calls.append(a) or {"ok": True, "process_ok": True}
+    store = run_cycle(world, dry=False)
+    r = store.get(mid)
+    assert r["state"] == "COMPLETED" and r["completed_at"] and not r.get("delivered_at") and calls == []
+    run_cycle(world, dry=False)
+    assert calls == []

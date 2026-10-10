@@ -55,8 +55,8 @@ def pending(inbox: list[str], acked: set[str], data: dict[str, Any], t: float, c
         r = data.get(mid, {})
         if not eligible(mid, cutoff) or r.get("state") == "COMPLETED":
             continue
-        if mid in acked and r.get("state") in ("ACKED", "RUNNING", "COMPLETED"):
-            continue                                                  # already acknowledged: never executed twice
+        if mid in acked and (not r or r.get("state") in ("FETCHED", "ACKED", "RUNNING", "COMPLETED")):
+            continue                  # acknowledged by anyone (a human, another run): never executed twice. Only our own BLOCKED retries pass
         if r.get("state") == "RUNNING":
             continue                                                  # recover() decides
         if r.get("attempts", 0) >= MAX_ATTEMPTS or (r.get("retry_after") or 0) > t:
@@ -203,7 +203,11 @@ def cycle(store: Store, dry: bool, hb_state: dict, interval: int, started: str) 
     if git_ok:
         inbox, acked = pg.inbox_ids(), pg.acked_ids()
         for mid in inbox:
-            if eligible(mid) and not store.get(mid) and mid not in acked:
+            if not eligible(mid) or store.get(mid):
+                continue
+            if mid in acked:   # handled by someone else before we saw it: record it, do not execute it
+                store.move(mid, "COMPLETED", operation="skipped", outcome="already acknowledged by another actor; not executed by pickup", evidence=[f"origin/{pg.COORD}:docs/messages/acks/{mid}.md"])
+            else:
                 store.move(mid, "FETCHED", operation="fetched", evidence=[f"{pg.INBOX_REF}:docs/messages/inbox/{mid}.md"], attempts=0)
         recover(store, acked, alive)
         for mid in pending(inbox, acked, store.all(), time.time())[:2]:
@@ -219,6 +223,10 @@ def cycle(store: Store, dry: bool, hb_state: dict, interval: int, started: str) 
         hb_state.update(key=key, at=time.time(), published=ok, detail=detail)
         store.receipt("heartbeat", "publish heartbeat", "ok" if ok else "failed: " + detail, evidence=[f"origin/{pg.STATUS_BRANCH}:PICKUP_HEALTH.json"], branch=pg.STATUS_BRANCH, sha=detail if ok else None)
     return hb
+
+
+def code_stamp() -> tuple:
+    return tuple((f, (Path(__file__).parent / f).stat().st_mtime_ns) for f in ("inbox_pickup.py", "pickup_git.py", "pickup_state.py"))
 
 
 def main(argv: Optional[list[str]] = None) -> int:
@@ -239,7 +247,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     except OSError:
         print("another inbox_pickup is already running (lock held)", file=sys.stderr)
         return 3
-    started, hb_state = now(), {}
+    started, hb_state, stamp0 = now(), {}, code_stamp()
     store.receipt("watcher", "watcher started", "ok", evidence=[f"pid {os.getpid()}"])
     while True:
         try:
@@ -251,6 +259,9 @@ def main(argv: Optional[list[str]] = None) -> int:
         if a.once:
             return 0
         time.sleep(a.interval)
+        if code_stamp() != stamp0:                      # a fix was committed: re-exec this same process, never between instructions
+            store.receipt("watcher", "code changed: re-exec", "ok")
+            os.execv(sys.executable, [sys.executable, "-u", "-I", *sys.argv])
 
 
 if __name__ == "__main__":
