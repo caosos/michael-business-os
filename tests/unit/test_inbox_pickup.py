@@ -375,3 +375,51 @@ def test_publish_is_refused_when_the_executor_would_reopen_a_done_queue_row(worl
     assert ip.deliver(mid, store, False, executor=reverts) != "COMPLETED"
     after = subprocess.run(["git", "show", "research/agent-01-coordinator:docs/status/READY_QUEUE.md"], cwd=world.origin, capture_output=True, text=True).stdout
     assert "F-60 | P0 | t | none | DONE" in after and "F-61" in after            # origin queue untouched
+
+
+def _seed_queue(world, tmp_path, text, name):
+    seed = tmp_path / name
+    subprocess.run(["git", "clone", "-q", "-b", "research/agent-01-coordinator", str(world.origin), str(seed)], check=True, capture_output=True)
+    (seed / "docs/status").mkdir(parents=True, exist_ok=True)
+    (seed / "docs/status/READY_QUEUE.md").write_text(text)
+    g(seed, "add", "-A"); g(seed, "commit", "-qm", "queue"); g(seed, "push", "-q", "origin", "research/agent-01-coordinator")
+
+
+QHDR = "| ID | Pri | Task | Deps | Status | Agent | Acceptance |\n"
+
+
+def _publish_with(world, tmp_path, mid, mutate):
+    world.send(mid, "Type: TASK_REQUEST\nx\n")
+
+    def ex(m, wt, dry):
+        mutate(wt)
+        (wt / "docs/receipts/pickup").mkdir(parents=True, exist_ok=True)
+        (wt / f"docs/receipts/pickup/{m}.md").write_text("r")
+        return {"ok": True, "process_ok": True}
+
+    ip.pg.fetch()
+    out = ip.deliver(mid, pickup_state.Store(world.dir), False, executor=ex)
+    return out, subprocess.run(["git", "show", "research/agent-01-coordinator:docs/status/READY_QUEUE.md"], cwd=world.origin, capture_output=True, text=True).stdout
+
+
+def test_a59_emptied_or_deleted_established_queue_is_not_published(world, tmp_path):
+    _seed_queue(world, tmp_path, QHDR + "| F-60 | P0 | t | none | DONE | 06 | p |\n", "s1")
+    out, after = _publish_with(world, tmp_path, "ARYA-20261010-2201-empty", lambda wt: (wt / "docs/status/READY_QUEUE.md").write_text(""))
+    assert out != "COMPLETED" and "F-60" in after
+    out, after = _publish_with(world, tmp_path, "ARYA-20261010-2202-deleted", lambda wt: (wt / "docs/status/READY_QUEUE.md").unlink())
+    assert out != "COMPLETED" and "F-60" in after
+
+
+def test_a59_unreadable_origin_queue_refuses_and_absent_baseline_allows(world, tmp_path, monkeypatch):
+    wt, why = ip.pg.prepare_side()
+    assert wt, why
+    assert ip.pg.queue_problems(wt) == []                      # no queue upstream yet: initial baseline is allowed
+    real = ip.pg.git
+
+    def broken(*a, **k):
+        if a[:1] == ("ls-tree",):
+            return subprocess.CompletedProcess(a, 128, "", "fatal: simulated read failure")
+        return real(*a, **k)
+
+    monkeypatch.setattr(ip.pg, "git", broken)
+    assert any("cannot read" in p for p in ip.pg.queue_problems(wt))

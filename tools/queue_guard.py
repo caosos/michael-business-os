@@ -22,6 +22,15 @@ except ImportError:  # run as a script
 
 FIELDS = ("task", "actor", "reason", "message", "action")
 EMPTY = {"", "none", "-", "n/a"}
+_ID = re.compile(r"[A-GX]-\d+")
+
+
+def _dep_ids(v: str) -> set[str]:
+    return set(_ID.findall(v or ""))
+
+
+def _owner_tokens(v: str) -> set[str]:
+    return set(re.findall(r"[a-z0-9]+", (v or "").lower())) - {"none", "n", "a"}
 
 
 def _rows(text: str | None) -> dict[str, dict]:
@@ -43,10 +52,29 @@ def check(result: str | None, parents: list[str | None], markers: list[dict] | N
                 continue
             if old["status"].upper().startswith("DONE") and not new["status"].upper().startswith("DONE") and not _allowed(markers, tid, "reopen", "cancel"):
                 problems.append(f"{tid}: DONE in parent {n} but {new['status'][:20]!r} in the result (no reopen/cancel marker)")
+            if _allowed(markers, tid, "edit"):
+                continue
             for key, label in (("deps", "dependencies"), ("agent", "owner")):
-                if old[key].lower() not in EMPTY and new[key].lower() in EMPTY and not _allowed(markers, tid, "edit"):
+                if old[key].lower() not in EMPTY and new[key].lower() in EMPTY:
                     problems.append(f"{tid}: {label} {old[key][:30]!r} in parent {n} lost in the result (no edit marker)")
+            lost = _dep_ids(old["deps"]) - _dep_ids(new["deps"])
+            if lost and new["deps"].lower() not in EMPTY:                      # one of several dependencies dropped (formatting-only changes keep the same IDs)
+                problems.append(f"{tid}: dependency {', '.join(sorted(lost))} in parent {n} dropped by the result (no edit marker)")
+            ot, nt = _owner_tokens(old["agent"]), _owner_tokens(new["agent"])
+            if ot and nt and not ot & nt:                                      # owner replaced by a different one ('01' -> '01 engineering' is fine)
+                problems.append(f"{tid}: owner {old['agent'][:30]!r} in parent {n} replaced by {new['agent'][:30]!r} (no edit marker)")
     return sorted(set(problems))
+
+
+def done_line_problems(parent: str | None, result: str | None) -> list[str]:
+    """AGENT_STATUS `Done:` history (22bb3ab regression): every task ID the parent lists as Done must still be listed by the result; a status writer
+    merges into the line, it never replaces it with the latest task only."""
+    try:
+        from tools.foreman import parse_status
+    except ImportError:
+        from foreman import parse_status
+    lost = parse_status(parent)["done"] - parse_status(result)["done"]
+    return [f"Done history lost: {', '.join(sorted(lost))}"] if lost else []
 
 
 def main(argv: list[str]) -> int:

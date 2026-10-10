@@ -70,12 +70,24 @@ def commit_all(wt: Path, message: str) -> Optional[str]:
 
 
 def queue_problems(wt: Path) -> list[str]:
-    """A-57: the queue this publish would push must not drop, reopen or strip rows that origin already has (see tools/queue_guard.py)."""
-    from queue_guard import check
+    """A-57/A-59: the queue this publish would push must not drop, reopen or strip rows that origin already has (see tools/queue_guard.py).
+    An ABSENT baseline (origin has no queue file yet) is allowed; a failed read, a missing or empty result against an established queue is refused."""
+    from queue_guard import check, _rows
     q = "docs/status/READY_QUEUE.md"
-    up = git("show", f"origin/{COORD}:{q}", cwd=wt).stdout
-    mine = git("show", f"HEAD:{q}", cwd=wt).stdout
-    return check(mine, [up]) if up and mine else []
+    listed = git("ls-tree", "--name-only", f"origin/{COORD}", q, cwd=wt)
+    if listed.returncode != 0:
+        return [f"cannot read origin/{COORD} to find the queue ({listed.stderr.strip()[:80]})"]
+    if not listed.stdout.strip():
+        return []                                                  # no established queue upstream: nothing to protect
+    up = git("show", f"origin/{COORD}:{q}", cwd=wt)
+    if up.returncode != 0:
+        return [f"cannot read origin's {q} ({up.stderr.strip()[:80]})"]
+    mine = git("show", f"HEAD:{q}", cwd=wt)
+    if mine.returncode != 0:
+        return [f"{q} is missing from the result but exists upstream (deleted or unreadable)"]
+    if _rows(up.stdout) and not _rows(mine.stdout):
+        return [f"{q} in the result has no task rows but origin's established queue has {len(_rows(up.stdout))}"]
+    return check(mine.stdout, [up.stdout])
 
 
 def publish(wt: Path) -> tuple[bool, str]:

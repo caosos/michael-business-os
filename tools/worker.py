@@ -83,7 +83,7 @@ Do exactly this task, then stop:
 2. Work on branch `{branch}` only (you are already in its worktree). Never edit another lane's branch or worktree. Never merge to main.
 3. Implement and test. Keep the diff small. Run the lane's health command from its handoff and report the exact pass/fail numbers.
 4. Write a receipt under docs/receipts/ for consequential work. No action without a receipt; no receipt without provenance.
-5. Update docs/status/AGENT_STATUS.md (`Done: {task['id']} @ <commit>`, `State: CLOSED`).
+5. Update docs/status/AGENT_STATUS.md: ADD `{task['id']} @ <commit>` to the FRONT of the existing `Done:` line and keep every earlier entry (merge, never replace the line with the latest task only: 22bb3ab lost the history that way), and set `State: CLOSED`.
 6. Commit with identity `git -c user.name="{name}" -c user.email="michaelos+{LANES[lane][1]}@users.noreply.github.com"`. End the message with `Co-Authored-By: Claude <noreply@anthropic.com>`. Then `git push origin HEAD` (never force).
 7. Print a final JSON line: {{"task":"{task['id']}","status":"DONE|BLOCKED|FAILED","commit":"<sha or null>","tests":"<n passed/n failed>","notes":"<one line>"}} and exit.
 
@@ -117,6 +117,15 @@ def should_escalate(row: dict) -> bool:
     if rep.get("status") == "BLOCKED":
         return False
     return True
+
+
+def status_history_problems(worktree: Path, before: Optional[str], after: Optional[str]) -> list[str]:
+    """Done IDs the lane's AGENT_STATUS listed before the run but not after it (a writer replaced the line instead of merging into it)."""
+    if not before or not after or before == after:
+        return []
+    from queue_guard import done_line_problems
+    show = lambda rev: sh(["git", "show", f"{rev}:docs/status/AGENT_STATUS.md"], worktree).stdout
+    return done_line_problems(show(before), show(after))
 
 
 def run_one(task_id: str, lane: str, profile: router.TaskProfile, *, worktree: Path, dry: bool, model: Optional[str],
@@ -191,7 +200,10 @@ def run_one(task_id: str, lane: str, profile: router.TaskProfile, *, worktree: P
             break
         escalated_from, retry = cur.model, retry + 1
         attempts.append(nxt)
-    return {"ok": rows[-1]["task_completed"], "process_ok": rows[-1]["success"], "worker_report": rows[-1].get("worker_report"),
+    history = status_history_problems(worktree, rows[0].get("head_before"), rows[-1].get("head_after"))   # A-59: the Done history must survive the run
+    if history:
+        sys.stderr.write("WARNING (A-59): " + "; ".join(history) + "\n")
+    return {"ok": rows[-1]["task_completed"], "status_history_problems": history, "process_ok": rows[-1]["success"], "worker_report": rows[-1].get("worker_report"),
             "permission_denials": rows[-1].get("permission_denials"), "result_text": rows[-1].get("result_text"), "route": route.as_dict(), "runs": rows, "final_model": attempts[-1].model}
 
 

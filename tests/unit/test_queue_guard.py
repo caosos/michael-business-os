@@ -66,3 +66,35 @@ class QueueGuard(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class A59(unittest.TestCase):
+    def test_partial_dependency_drop_rejected(self):
+        p = check(HEAD + row("F-9", "READY", "A-54, A-55"), [HEAD + row("F-9", "READY", "A-54, A-55, F-138")])
+        self.assertEqual(len(p), 1)
+        self.assertIn("F-138", p[0])
+        self.assertEqual(check(HEAD + row("F-9", "READY", "A-54, A-55", "06"), [HEAD + row("F-9", "READY", "A-54,A-55", "06")]), [])    # formatting only
+        self.assertEqual(check(HEAD + row("F-9", "READY", "none"), [HEAD + row("F-9", "READY", "none")]), [])
+
+    def test_owner_replacement_rejected_but_refinement_passes(self):
+        self.assertEqual(len(check(HEAD + row("F-9", "READY", agent="01"), [HEAD + row("F-9", "READY", agent="06")])), 1)
+        self.assertEqual(check(HEAD + row("F-9", "READY", agent="01 engineering"), [HEAD + row("F-9", "READY", agent="01")]), [])
+        self.assertEqual(check(HEAD + row("F-9", "READY", agent="01"), [HEAD + row("F-9", "READY", agent="06")], [mark("F-9", "edit")]), [])
+
+    def test_done_history_must_be_merged_not_replaced(self):
+        from tools.queue_guard import done_line_problems
+        old = "Done: F-137 @ d537b27 · F-136 @ 48d27b9 · F-61 @ e54e27a · F-60 @ 64b152b\n"
+        self.assertEqual(done_line_problems(old, "Done: F-138 @ 22bb3ab · " + old[6:]), [])
+        bad = done_line_problems(old, "Done: F-61 @ e54e27a; F-138 @ 22bb3ab\n")
+        self.assertTrue(bad and "F-137" in bad[0] and "F-60" in bad[0])
+        self.assertEqual(done_line_problems(None, "Done: F-1 @ a\n"), [])
+
+    def test_22bb3ab_regression_replay(self):
+        from tools.queue_guard import done_line_problems
+        st = lambda rev: subprocess.run(["git", "show", f"{rev}:docs/status/AGENT_STATUS.md"], cwd=ROOT, capture_output=True, text=True).stdout
+        eda, bad = st("eda3eee"), st("22bb3ab")
+        if not eda or not bad:
+            self.skipTest("lane 06 commits not in this clone")
+        problems = done_line_problems(eda, bad)
+        self.assertTrue(problems and "F-137" in problems[0] and "F-59" in problems[0], problems)
+        self.assertEqual(done_line_problems(eda, eda), [])
