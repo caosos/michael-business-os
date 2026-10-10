@@ -87,6 +87,18 @@ class Store:
                      branch=fields.get("branch"), sha=fields.get("sha"))
         return rec
 
+    def correct(self, mid: str, state: str, reason: str, **fields: Any) -> dict[str, Any]:
+        """Audited override of a wrong record (the only way to reopen a COMPLETED id): the receipt carries the old state and the reason."""
+        data = self._load()
+        old = data.get(mid, {}).get("state")
+        rec = {**data.get(mid, {}), **fields, "state": state, f"{state.lower()}_at": now(), "corrected_from": old}
+        if state != "BLOCKED":
+            rec.pop("blocked", None)
+        data[mid] = rec
+        self._save(data)
+        self.receipt(mid, "state corrected", f"{old} -> {state}: {reason}", evidence=fields.get("evidence"))
+        return rec
+
     def block(self, mid: str, reason: str, *, retry_after: Optional[float] = None, **fields: Any) -> dict[str, Any]:
         fields.setdefault("attempts", self.get(mid).get("attempts", 0))
         return self.move(mid, "BLOCKED", operation="blocked", outcome=reason, blocked=reason, retry_after=retry_after, **fields)
