@@ -29,7 +29,7 @@ Done: B-21 @ d6eec69 (evidence-based category tags; quoted INFERENCE; injection-
 Done: B-20 @ d4e8670 (campaign matcher; gated, read-only, explained; 267 tests)
 Done: B-22 @ 3b77cd0 (comps entered for an Item always candidates via for_item_id; unmatched comps reported with reason; 312 tests)
 Done: C-04 (support, source side) @ a1a7730 (lead Agent 03 C-04 @ 882c726)
-Done: B-25 @ COMMIT (GSA live adapter, DEMO_KEY, 1 fetch cached; real AR trailer -> Item with URL + photo; premium/sold UNKNOWN; 337 tests)
+Done: B-25 @ 7ce64cb (GSA live adapter, DEMO_KEY, 1 fetch cached; real AR trailer -> Item with URL + photo; premium/sold UNKNOWN; 337 tests)
 Current phase: CLOSED. B-01..B-11 and B-13..B-21 DONE; B-12 blocked (Michael #8 + credentials); see docs/handoff/LANE_02.md
 Started: 2026-10-06 (Round One) · Round Two started 2026-10-07
 Last updated: 2026-10-09
