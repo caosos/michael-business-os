@@ -458,6 +458,20 @@ Rules:
 - Repurposing needs a supported feasibility assessment. Example: a boat-trailer frame is not automatically suitable as a car trailer. Verify frame, axle, brakes, load distribution, manufacturer GVWR/GAWR and applicable engineering/safety requirements. Unknown capacity stays unknown; skill does not replace structural or capacity evidence.
 - No private prices, budgets, purchase ceilings or personal financial examples belong in this document.
 
+#### 13b-1. Heavy scrap / component recovery feasibility gate (owner decision rule; ARYA-20261010-2113)
+
+Owner rule: a bid cannot be made when the cost of moving a very heavy machine is unknown. A heavy asset valued on scrap or component recovery gets **no bid recommendation** until one of these is satisfied:
+- **(a)** a yard is verified to accept the actual material/item, with supported **net** pickup-offer evidence; or
+- **(b)** realistic transport, loading/unloading and any needed cutting/disassembly costs are established.
+
+Evidence required before any bid ceiling is derived:
+- Actual weight and dimensions; loading equipment/capability and site access; pickup deadline and removal obligations; title/paperwork; all applicable fees. Seller loading help or yard pickup is **not** assumed.
+- Gross scrap value is kept separate from **net realized proceeds** after pickup/transport/cutting/fees/disposal. Whole-asset scrap and component values are alternatives (see exit paths above); never add them together.
+- If any material transport/removal cost is unknown, output **BLOCKED: missing evidence** and list the exact missing items. Do not substitute an invented profit figure.
+- "Why didn't the seller scrap it?" is a due-diligence question, not evidence of a bad deal, guaranteed profit or hidden defect. Hypotheses stay labelled as hypotheses until verified.
+
+This is a documented guideline only; no automated implementation exists. No yard contact, bids or purchases are authorised by it.
+
 
 ## 14. Inventory merchandising
 
