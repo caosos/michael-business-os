@@ -1,4 +1,4 @@
-# SUPERSEDED: pause applied 05:31Z in error, cancelled by the owner (ARYA-0530, 05:30Z), undone ~05:45Z
+# SUPERSEDED: pause applied 05:31Z in error, cancelled by the owner (ARYA-0530, 05:30Z), undone ~05:35Z
 
 **What happened:** the owner paused at 05:28Z (0528) and cancelled that pause at 05:30Z (0530). Agent 01 acted on the 0528 event alone at 05:31Z, without re-checking the inbox for newer messages, stopped the F-53 worker and the dispatcher, and set `var/PAUSED_BY_OWNER`. Undone: flag removed, queue restored, dispatcher restarted, F-53 resumes from its intact work. Cost of the error: about 16 minutes of F-53 model run and a short stall. The pause switch code stays (it is useful) but its flag file does not exist. The text below is the historical record of what was done and where the checkpoint is; it is no longer in force.
 

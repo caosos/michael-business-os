@@ -7,7 +7,7 @@
 - **Priority:** P0 = critical path · P1 = next-up · P2 = useful parallel work.
 - **Every task is DRY-RUN ONLY.** No action without a receipt, and no receipt without provenance.
 
-> **Pause CANCELLED by the owner at 05:30Z (ARYA-20261010-0530); Agent 01 applied 0528 at 05:31Z by mistake, undid it at ~05:45Z.** Queue restored; see `docs/status/PAUSED_BY_OWNER.md`.
+> **Pause CANCELLED by the owner at 05:30Z (ARYA-20261010-0530); Agent 01 applied 0528 at 05:31Z by mistake, undid it at ~05:35Z.** Queue restored; see `docs/status/PAUSED_BY_OWNER.md`.
 
 ## Critical path
 `G-04` (07: release-candidate run on lanes D/E) + `A-02` (01: release gate) → wave-two release candidate. A-01's remaining A1–A10 parity on lane D runs in parallel.
