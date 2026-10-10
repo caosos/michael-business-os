@@ -82,7 +82,7 @@ def test_labels_gsa_explainer_working_capital_and_button(ui):
     assert "government surplus auctions" in h and "requires a GSA login" in h and "do not log in or bypass" in h
     assert "SETTING" in h and "Verified cash:" in h and "not cash" in h
     assert "type='range'" in h and "aria-label='Minimum price slider'" in h and "not a budget" in h
-    assert "background:var(--acc);color:var(--bg)" in h and "<button class='mk-go' type='submit'>Search</button>" in h and "disabled" not in h.split("mk-go")[1][:80]
+    assert "background:var(--acc);color:var(--bg)" in h and "<button class='mk-go' type='submit' form='mkform'>Search Now</button>" in h and "disabled" not in h.split("mk-go")[1][:80]
 
 
 def test_demo_only_behind_explicit_route(ui):

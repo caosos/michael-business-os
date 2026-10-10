@@ -23,7 +23,7 @@ CSS = """<style>main{max-width:1900px}.banner{padding:3px 16px;font-size:13px}he
 .mk-form button:focus-visible,.mk-form input:focus-visible,.mk-side a:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
 .mk-form button.mk-go{font-size:16px;padding:10px 28px}.mk-chips .chip{background:var(--card);font-size:12px;padding:1px 8px}.mk-chips{margin:4px 0}
 .mk-range input[type=range]{width:46%;display:inline-block;margin:0;padding:0}.mk-range input[type=number]{width:110px;display:inline-block}
-.mk-sec{border-top:2px dashed var(--line);margin-top:16px}
+.mk-sec2{font-size:13px}.mk-side .card button.mk-go{display:block;width:100%;margin-top:6px}.mk-sec{border-top:2px dashed var(--line);margin-top:16px}
 .mk-gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),1fr));gap:10px}.mk-g{border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--card);min-width:0}
 .mk-g .ph{height:110px;display:flex;align-items:center;justify-content:center;border:1px dashed var(--line);border-radius:6px;text-align:center;overflow:hidden}.mk-g img{width:100%;height:110px;object-fit:cover;border-radius:6px}
 .mk-g .pr{font-size:18px;font-weight:700;margin:4px 0 0}.mk-g .ti{font-size:14px;margin:2px 0;overflow-wrap:anywhere}.mk-g button,.mk-pref button{font-size:12px;padding:2px 6px;margin:1px;width:auto;background:var(--acc);color:var(--bg);opacity:1}.mk-pref button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
@@ -132,7 +132,8 @@ def _side_filters(q: dict) -> str:
     return ("<div class='card' id='mkfilters'><b>Filters</b>"
             f"<label>ZIP or city <input form='mkform' name='base' size='12' value='{v('base')}'></label>"
             f"<label>Radius (mi) <input form='mkform' name='radius' size='5' inputmode='decimal' value='{v('radius')}'></label>"
-            f"{_slider(q, 'mkform')}<b>Categories</b>{cats}<p class='small mut'>None checked = your rows below (default trailers and equipment).</p></div>")
+            f"{_slider(q, 'mkform')}<b>Categories</b>{cats}<p class='small mut'>None checked = your rows below (default trailers and equipment).</p>"
+            "<button class='mk-go' type='submit' form='mkform'>Search Now</button></div>")
 
 
 def _sidebar(saved: list[dict], csrf: str, pin_html: str, tok, q: dict, save: str = "") -> str:
@@ -147,9 +148,9 @@ def _sidebar(saved: list[dict], csrf: str, pin_html: str, tok, q: dict, save: st
                     f"<a style='display:inline' href='/market?run={cid}'>Run</a> · <a style='display:inline' href='/market?edit={cid}'>Edit</a> {toggle}</li>")
     saved_html = f"<ul style='padding-left:16px;margin:4px 0'>{''.join(rows)}</ul>" if rows else "<p class='small mut'>No saved searches yet.</p>"
     return ("<aside class='mk-side'>" + _side_filters(q) + "<div class='card'><nav aria-label='Marketplace'>"
-            "<a href='/market?go=1'><b>Find Deals Now</b></a><a href='/market?new=1'>+ New Search</a>"
-            f"{save}<details><summary><b>My Campaigns / Saved Searches ({len(rows)})</b></summary>{saved_html}</details>"
-            "<a href='/resale'>Saved Deals</a><a href='/market?go=1&amp;sort=closing&amp;closing_by=soon'>Auctions Closing Soon</a>"
+            "<p class='small mut' style='margin:0 0 4px'>More</p><a class='mk-sec2' href='/market?new=1'>New Search</a>"
+            f"{save}<details><summary>My Campaigns / Saved Searches ({len(rows)})</summary>{saved_html}</details>"
+            "<a class='mk-sec2' href='/resale'>Saved Deals</a><a class='mk-sec2' href='/market?go=1&amp;sort=closing&amp;closing_by=soon'>Auctions Closing Soon</a>"
             "</nav></div></aside>")
 
 
@@ -212,7 +213,6 @@ def _form(q: dict, cid: str | None, tok, pin_html: str) -> str:
             f"<label>Category / keywords, any of <input name='any' size='24' value='{v('any')}'></label>"
             f"<label><input type='checkbox' name='broad' value='1'{' checked' if q.get('broad') else ''}> Broad (all categories)</label>"
             f"<label>Keywords, all of <input name='keywords' size='22' value='{v('keywords')}'></label>"
-            f"<button class='mk-go' type='submit'>Search</button>"
             f"<details><summary>More filters</summary>"
             f"<label>Condition (seller text) <input name='condition' size='10' value='{v('condition')}'></label>"
             f"<label>Must include <input name='required' size='14' value='{v('required')}'></label>"

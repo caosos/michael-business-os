@@ -62,7 +62,7 @@ def test_gsa_result_has_real_link_photo_bid_and_as_of(ui):
     assert "<img" not in h and "Photo is behind GSA" in h and "$25.00" in h and "2026-10-12" in h
     assert "GSA Auctions: connected" in h and "2026-10-10T00:19:00+00:00" in h
     assert "buyer premium UNKNOWN" in h and "transport UNKNOWN" in h and "repair UNKNOWN" in h and "RESEARCH NEEDED" in h
-    assert "Michael's Marketplace" in h and "Find Deals Now" in h and "+ New Search" in h and "Auctions Closing Soon" in h
+    assert "Michael's Marketplace" in h and "Search Now" in h and "New Search" in h and "Auctions Closing Soon" in h
     assert "mi from your base" in h                              # Marianna AR is a located place, so distance is grounded
 
 
