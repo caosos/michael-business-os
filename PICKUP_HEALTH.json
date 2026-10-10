@@ -1,7 +1,7 @@
 {
  "account": "michaelos",
  "blockers": [],
- "coordinator_head": "3325d38",
+ "coordinator_head": "03ceecc",
  "counts": {
   "COMPLETED": [
    "ARYA-20261010-0328-f49-verification",
@@ -17,34 +17,33 @@
  "currently_running": null,
  "delivery_interface": {
   "claude_cli": true,
-  "quota": "session 54.0% / week 7.0% are under the limits",
+  "quota": "session 55.0% / week 7.0% are under the limits",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-10T04:34:17Z",
+ "generated_at": "2026-10-10T04:39:47Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
-  "decision": "no live Claude session (awaiting connection)",
+  "decision": "nothing needed",
   "note": "pickup does not need the interactive session",
   "state": "STOPPED"
  },
- "pid": 3332783,
+ "pid": 3355056,
  "receipts": "var/pickup/receipts.jsonl (hash-chained, local) and docs/receipts/pickup/<id>.md on the coordinator branch",
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-10T04:34:17Z",
-  "pid": 3332783,
+  "observed_at": "2026-10-10T04:39:47Z",
+  "pid": 3355056,
   "source": "inbox_pickup process",
   "status": "idle",
-  "ttl_sec": 300
+  "ttl_sec": 1200
  },
  "watcher": {
   "ack_branch": "research/agent-01-coordinator",
-  "eligible_ids": "ARIA|ARYA|DA-YYYYMMDD-HHMM-* at or after 20261010-0000",
   "inbox_ref": "origin/liaison/aria-to-agent-01",
   "interval_s": 60,
-  "started_at": "2026-10-10T04:25:26Z",
+  "started_at": "2026-10-10T04:39:46Z",
   "status": "running"
  }
 }
