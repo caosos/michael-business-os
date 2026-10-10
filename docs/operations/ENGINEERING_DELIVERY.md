@@ -32,3 +32,5 @@ Pass criteria, each with its own evidence: (1) fetch + (2) delivery: pickup rece
 - **Proven live in this session:** a real `begin` receipt for ARYA-2127 names pid 2937731 / `cli`; the Monitor is armed (task bdbh7vwvt).
 - **UNPROVEN:** an end-to-end live proof without a paste (needs Arya's message above and the session to be open and armed); pickup watcher adoption of the new type (it re-execs on code change, not separately verified here); the watchdog still misreports this session (its code was not changed: it is an older long-running service, and a restart is outside this task).
 - **If owner wants a stronger route:** exact permission change needed = approve `MBOS_ALLOW_TMUX_WAKE=1` for the watchdog AND run the coordinator inside tmux session `mbos-agent-01`; not requested here.
+
+**Actual expiry/re-arm evidence:** Monitor brn9342yu (armed ~22:10Z, 120 s polling) delivered 2 events (instruction 2208, then the A-60 READY row) and expired after 30 minutes as documented; re-armed by the session at 2026-10-10T22:16:52Z as task b8bnoxds1. Nothing was delivered between expiry and re-arm by design (session-owned, 30-minute limit).
