@@ -5,7 +5,7 @@ from http.server import ThreadingHTTPServer
 from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
-tmp = Path(tempfile.mkdtemp())
+tmp = Path(os.environ.get("MBOS_STAGING_DIR") or tempfile.mkdtemp())   # F-137: a fixed dir lets a restarted process re-read the same saved searches
 os.environ["MBOS_MARKET_PREFS_FILE"] = str(tmp / "prefs.json")
 from operator_ui.server import App, make_handler  # noqa: E402
 from tests.test_wanted_f23 import GOV_POLICY, StubStore  # noqa: E402

@@ -56,6 +56,15 @@ def pref_buttons(c: dict, tok) -> str:
             + (f"<p class='small mut' data-why>{e(c['why'])}</p>" if c.get("why") else ""))
 
 
+def gallery_labels(c: dict) -> str:
+    """F-137: compact reserve + current-vs-estimated-next-bid line for the gallery card (cached values, live minimum unverified)."""
+    L = c.get("labels") or ms.auction_labels({})
+    nb = f"~${L['est_next_bid']:,.0f}" if L["est_next_bid"] is not None else "UNKNOWN"
+    cur = f"${L['current_bid']:,.0f}" if L["current_bid"] is not None else "none"
+    res = {"Yes": "Yes (amount undisclosed)", "No": "No", "Unknown": "UNKNOWN"}[L["reserve"]]
+    return f"Bid {e(cur)} → est. next {e(nb)} (cached, unverified) · Reserve: {e(res)}"
+
+
 def gallery_card(c: dict, tok) -> str:
     """F-52 (B): dense card: photo (or an honest placeholder), price attached, short title, town, closing; details on the original listing."""
     img = _photo(c["image"], c["url"])
@@ -66,7 +75,7 @@ def gallery_card(c: dict, tok) -> str:
     flag = " <span class='badge'>SAVED</span>" if c.get("saved") else ""
     return (f"<div class='mk-g' data-lot='{e(c['id'])}'>{ph}{price}<div class='ti'><b>{e(ti)}</b>{flag}</div><div class='small'>{town}</div>"
             f"<div class='small mut'>closes {e(c['closes'] or 'UNKNOWN')} · posted age: not given · auction, all-in cost unknown</div>"
-            f"<div class='small'>{link_html(c['url'])} · <span class='lbl'>WATCH</span></div>{pref_buttons(c, tok)}</div>")
+            f"<div class='small mut gal-lbl'>{gallery_labels(c)}</div><div class='small'>{link_html(c['url'])} · <span class='lbl'>WATCH</span></div>{pref_buttons(c, tok)}</div>")
 
 
 def gallery(cards: list[dict], q: dict, tok) -> str:
@@ -96,7 +105,7 @@ def render_card(c: dict, tok=None) -> str:
             f"<p class='small'>{e(c['description']) or '<span class=mut>No description from the seller</span>'}</p>"
             f"<p><span class='lbl'>AUCTION</span> Current bid <b>{_money(c['bid'])}</b> (a bid, not a sold price or final cost) · Asking price: none (auction) · closes {e(c['closes'] or 'UNKNOWN')} · {where} · "
             f"condition (seller says): {e(c['condition'] or 'UNKNOWN')}</p>"
-            f"<p class='small' id='auction-labels'>Next minimum bid: {e(L['next_min_text'])} · Reserve: {e(L['reserve_text'])} · source GSA Auctions cache</p>"
+            f"<p class='small' id='auction-labels'>Next bid: {e(L['next_min_text'])} · Reserve: {e(L['reserve_text'])} · source GSA Auctions cache</p>"
             f"<p class='small'>Price math: bid {_money(c['bid'])} + buyer premium UNKNOWN + transport UNKNOWN + repair UNKNOWN "
             f"= all-in cost UNKNOWN (never the final cost) · sold comp: none on file</p>{('<p>' + tags + '</p>') if tags else ''}{('<p class=small><b>Not checked against your filters:</b> ' + e('; '.join(c['unchecked'])) + '</p>') if c.get('unchecked') else ''}"
             f"<p>Original listing: {link_html(c['url'])}</p>{pref_buttons(c, tok) if tok else ''}"

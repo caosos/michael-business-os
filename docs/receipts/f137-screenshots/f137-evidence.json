@@ -1,0 +1,113 @@
+{
+ "code_sha": "1182e8a74902c1f73b988cc511b5c3d7d7c9e65e",
+ "dirty": true,
+ "cache_sha256": "d02f3acc4a6eef4b7abd4065c2dc5d4370dd6064fe0bba1b385ec6a8fa154ba7",
+ "cache_as_of": "2026-10-10T00:19:23.772932+00:00",
+ "store": "STUB",
+ "pid_before": 3977706,
+ "pid_after": 3978100,
+ "shots": [
+  {
+   "file": "desktop-1648x1000-labels-gallery.png",
+   "scrollY": 0,
+   "label_text": "Bid $25 \u2192 est. next ~$98 (cached, unverified) \u00b7 Reserve: Yes (amount undisclosed)",
+   "search_now_in_first_viewport": true,
+   "kind": "SCROLLED viewport (first label centred)",
+   "scrollY_after": 138
+  },
+  {
+   "file": "desktop-1648x1000-labels-list.png",
+   "scrollY": 0,
+   "label_text": "Next bid: ESTIMATED $98.00 (cached current bid + $73.00 increment, as of cached 2026-10-10T00:19:23.772932+00:00; live minimum unverified) \u00b7 Reserve: Yes, reserve amount undisclosed (the GSA cache has no reserve amount field) \u00b7 source GSA Auctions cache",
+   "search_now_in_first_viewport": true,
+   "kind": "SCROLLED viewport (first label centred)",
+   "scrollY_after": 6
+  },
+  {
+   "file": "desktop-1648x1000-state-AR-TX.png",
+   "scrollY": 0,
+   "label_text": null,
+   "search_now_in_first_viewport": true,
+   "kind": "UNSCROLLED first viewport (scrollY=0)"
+  },
+  {
+   "file": "mobile-390x844-labels-gallery.png",
+   "scrollY": 0,
+   "label_text": "Bid $25 \u2192 est. next ~$98 (cached, unverified) \u00b7 Reserve: Yes (amount undisclosed)",
+   "search_now_in_first_viewport": true,
+   "kind": "SCROLLED viewport (first label centred)",
+   "scrollY_after": 1713
+  },
+  {
+   "file": "mobile-390x844-labels-list.png",
+   "scrollY": 0,
+   "label_text": "Next bid: ESTIMATED $98.00 (cached current bid + $73.00 increment, as of cached 2026-10-10T00:19:23.772932+00:00; live minimum unverified) \u00b7 Reserve: Yes, reserve amount undisclosed (the GSA cache has no reserve amount field) \u00b7 source GSA Auctions cache",
+   "search_now_in_first_viewport": true,
+   "kind": "SCROLLED viewport (first label centred)",
+   "scrollY_after": 1947
+  },
+  {
+   "file": "mobile-390x844-state-AR-TX.png",
+   "scrollY": 0,
+   "label_text": null,
+   "search_now_in_first_viewport": true,
+   "kind": "UNSCROLLED first viewport (scrollY=0)"
+  }
+ ],
+ "persistence": {
+  "before_save": {
+   "mode": "state",
+   "states": [
+    "AR",
+    "TX"
+   ],
+   "also": true
+  },
+  "before_ids": [
+   "3-1-QSC-I-27-006-005",
+   "3-1-QSC-I-27-017-037",
+   "3-1-QSC-I-27-017-017",
+   "3-1-QSC-I-27-017-038",
+   "3-1-QSC-I-27-017-016"
+  ],
+  "reopen": {
+   "url": "http://127.0.0.1:36675/market?run=cmp_5H0429A2JJS2E268CYVSDFF69W",
+   "controls": {
+    "mode": "state",
+    "states": [
+     "AR",
+     "TX"
+    ],
+    "also": true
+   },
+   "ids": [
+    "3-1-QSC-I-27-006-005",
+    "3-1-QSC-I-27-017-037",
+    "3-1-QSC-I-27-017-017",
+    "3-1-QSC-I-27-017-038",
+    "3-1-QSC-I-27-017-016"
+   ],
+   "scope": "By State: AR, TX AND within 150 mi of Conway AR. A lot with no known state or distance is never counted as local; it is listed as not checked."
+  },
+  "restart": {
+   "url": "http://127.0.0.1:43921/market?run=cmp_5H0429A2JJS2E268CYVSDFF69W",
+   "controls": {
+    "mode": "state",
+    "states": [
+     "AR",
+     "TX"
+    ],
+    "also": true
+   },
+   "ids": [
+    "3-1-QSC-I-27-006-005",
+    "3-1-QSC-I-27-017-037",
+    "3-1-QSC-I-27-017-017",
+    "3-1-QSC-I-27-017-038",
+    "3-1-QSC-I-27-017-016"
+   ],
+   "scope": "By State: AR, TX AND within 150 mi of Conway AR. A lot with no known state or distance is never counted as local; it is listed as not checked."
+  }
+ },
+ "verdict": "PASS"
+}

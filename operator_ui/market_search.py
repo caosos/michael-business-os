@@ -5,6 +5,7 @@ Wanted campaigns (wanted_view), not a second store. Pure functions; no write pat
 
 from __future__ import annotations
 
+import math
 import os
 import re
 from datetime import datetime, timedelta, timezone
@@ -168,27 +169,28 @@ def _short(s: str, n=280) -> str:
 
 
 def _amt(v):
-    return float(v) if isinstance(v, (int, float)) and not isinstance(v, bool) and v == v and v >= 0 else None
+    return float(v) if isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v) and v >= 0 else None
 
 
-def auction_labels(p: dict) -> dict:
-    """F-61: current bid, next minimum bid and reserve, only from GSA fields in the cache (`highBidAmount`, `aucIncrement`, `reserve`).
-    Next minimum = current bid + `aucIncrement`, only when both are present (no bid: UNKNOWN, the opening minimum is not in the cache).
-    Reserve is Yes / No / Unknown from the `reserve` flag; the cache has no reserve-amount field, so Yes reads 'reserve amount undisclosed'.
-    Never a floor from retail price or the next minimum bid."""
+def auction_labels(p: dict, asof=None) -> dict:
+    """F-61/F-137: current bid, ESTIMATED next bid and reserve, only from GSA fields in the cache (`highBidAmount`, `aucIncrement`, `reserve`).
+    Estimated next bid = cached current bid + cached `aucIncrement`, only when both are finite (as of the cache time; the live minimum is unverified and
+    is never stated as the minimum). No bid: UNKNOWN, the opening minimum is not in the cache. Reserve is Yes / No / Unknown; Yes reads 'reserve amount undisclosed'.
+    Never a floor from retail price or the estimate."""
     bid, inc, r = _amt(p.get("highBidAmount")), _amt(p.get("aucIncrement")), p.get("reserve")
     r = r.strip().lower() if isinstance(r, str) else r
     reserve = "Yes" if r is True or r in ("yes", "true", "y") else "No" if r is False or r in ("no", "false", "n") else "Unknown"
-    nxt = bid + inc if bid is not None and inc is not None else None
+    nxt = _amt(bid + inc) if bid is not None and inc is not None else None
+    when = f"as of cached {asof}" if asof else "as of the cache time (unstamped)"
     if nxt is not None:
-        nxt_txt = f"${nxt:,.2f} (current bid + ${inc:,.2f} increment)"
+        nxt_txt = f"ESTIMATED ${nxt:,.2f} (cached current bid + ${inc:,.2f} increment, {when}; live minimum unverified)"
     elif bid is None:
-        nxt_txt = "UNKNOWN (no bid yet; the opening minimum is not in the GSA cache" + (f"; bid increment ${inc:,.2f}" if inc is not None else "") + ")"
+        nxt_txt = "UNKNOWN (no bid yet; the opening minimum is not in the GSA cache; live minimum unverified" + (f"; cached bid increment ${inc:,.2f}" if inc is not None else "") + ")"
     else:
-        nxt_txt = "UNKNOWN (the GSA cache has no bid increment for this lot: field aucIncrement)"
+        nxt_txt = "UNKNOWN (the GSA cache has no usable bid increment for this lot: field aucIncrement; live minimum unverified)"
     res_txt = {"Yes": "Yes, reserve amount undisclosed (the GSA cache has no reserve amount field)", "No": "No",
                "Unknown": "UNKNOWN (the GSA cache has no usable reserve field for this lot: field reserve)"}[reserve]
-    return {"current_bid": bid, "next_min_bid": nxt, "next_min_text": nxt_txt, "reserve": reserve, "reserve_text": res_txt}
+    return {"current_bid": bid, "est_next_bid": nxt, "next_min_text": nxt_txt, "reserve": reserve, "reserve_text": res_txt, "asof": asof}
 
 
 def _card(adapter, rec, now, asof, origin) -> dict:
@@ -205,7 +207,7 @@ def _card(adapter, rec, now, asof, origin) -> dict:
             "city": f"{loc.get('city')}, {loc.get('state')}" if loc.get("city") else None,
             "state": str(loc.get("state")).strip().upper() if str(loc.get("state") or "").strip().upper() in US_STATES else None,   # F-136: only a real 2-letter code from the cache; else unknown
              "distance": dist, "category": lot.get("category"),
-            "condition": None, "labels": auction_labels(p), "source": "GSA Auctions", "fetched_at": asof, "kind": "auction", "stale": _age_h(asof, now) > STALE_H}
+            "condition": None, "labels": auction_labels(p, asof), "source": "GSA Auctions", "fetched_at": asof, "kind": "auction", "stale": _age_h(asof, now) > STALE_H}
 
 
 def _age_h(asof, now) -> float:
