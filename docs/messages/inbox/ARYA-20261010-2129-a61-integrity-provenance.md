@@ -1,0 +1,12 @@
+# A-61 acceptance correction: integrity, identity, estimate provenance
+
+Type: TASK_REQUEST
+To: current Agent 01 engineering session
+Same A-61, no new task/worker. Preserve independent A-63 delivery repair; these corrections must not create a dependency for it. No private case content in GitHub. Actual private-case import waits for these checks.
+
+Source review of 83098fc:
+1. propose() includes evidence provenance verified and unverified, but omits entries labelled owner_estimate unless manually duplicated in owner_estimates. Repro: import a synthetic case whose only cost/repair estimate is an evidence entry with provenance owner_estimate; propose a matching synthetic candidate. That evidence disappears. Preserve all relevant evidence with its provenance, explicitly estimates rather than facts. Regression asserts its text and owner_estimate label survive retrieval, without duplication requirement.
+2. _append verifies the hash chain, but effective()/propose() use rows without verification. Repro: import synthetic case, alter its reason/evidence bytes without updating row_hash; verify() fails, yet show/propose can present altered data as a precedent. Refuse learned application/readback-as-valid on corrupted history; return explicit integrity failure. Tests cover tampered reason/evidence and malformed records and confirm no proposal is generated. Keep inspectable diagnostic recovery; do not silently discard history.
+3. import duplicate check uses source + listing_id, but _case_row/effective/correct/reset/outcome/propose operate primarily on listing_id. Repro: two synthetic providers share listing_id, both imports pass, then show/correct/reset or proposal can target the wrong case or conflate them. Use unambiguous source + stable listing identity through read/write/correction/retrieval; maintain safe compatibility if needed, reject ambiguous bare IDs. Regression imports same ID from two sources and proves read/correction/reset/proposal remain isolated; duplicate IDs within one import batch must also be rejected before any write.
+
+Return committed correction, focused regression results, and updated value-free import/schema instructions. Capability tested, actual case imported/readback, and application on a real similar candidate remain separate. Parent holds the private case; do not request its values in this repo or claim learned before secure owner-local write/readback/application proof.
