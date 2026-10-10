@@ -144,9 +144,9 @@ def test_cards_come_before_the_secondary_panels_and_panels_are_collapsed(ui):
     assert "id='applied-filters'" in h and "current bid" in h and "all-in cost UNKNOWN" in h        # truth labels stay visible
 
 
-def test_mobile_css_puts_results_before_the_sidebar():
+def test_mobile_css_puts_the_filters_and_search_now_before_the_results():
     from operator_ui import market_view as mv
-    assert ".mk-main{order:1}" in mv.CSS and ".mk-side{order:2}" in mv.CSS
+    assert ".mk-main{order:2}" in mv.CSS and ".mk-side{order:1}" in mv.CSS      # F-60: Search Now lives in the filter card, so it comes first
 
 
 # ---- F-54: radius compares the UNROUNDED haversine distance; saved-search round trip; invalid requests never overwrite the last good choices

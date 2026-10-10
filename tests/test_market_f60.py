@@ -15,7 +15,7 @@ def prefs_file(tmp_path, monkeypatch):
 
 
 def _card(h: str) -> str:
-    return re.search(r"<div class='card' id='mkfilters'>.*?</button></div>", h, re.S).group(0)
+    return re.search(r"<div class='card' id='mkfilters'>.*?</p></div>", h, re.S).group(0)
 
 
 def test_search_now_is_in_filter_card_and_owned_by_the_search_form(ui):
@@ -53,6 +53,7 @@ def test_real_browser_click_and_enter_submit_current_values(ui):
             pg = b.new_page(viewport=vp)
             pg.goto(base + "/market?go=1&broad=1&radius=150")
             wide = ids(pg)
+            assert pg.evaluate("()=>{const r=document.querySelector('button.mk-go').getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight}"), vp
             pg.fill("#max_price", "25")
             pg.click("button.mk-go")
             pg.wait_for_load_state()

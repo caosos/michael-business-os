@@ -27,9 +27,9 @@ CSS = """<style>main{max-width:1900px}.banner{padding:3px 16px;font-size:13px}he
 .mk-gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),1fr));gap:10px}.mk-g{border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--card);min-width:0}
 .mk-g .ph{height:110px;display:flex;align-items:center;justify-content:center;border:1px dashed var(--line);border-radius:6px;text-align:center;overflow:hidden}.mk-g img{width:100%;height:110px;object-fit:cover;border-radius:6px}
 .mk-g .pr{font-size:18px;font-weight:700;margin:4px 0 0}.mk-g .ti{font-size:14px;margin:2px 0;overflow-wrap:anywhere}.mk-g button,.mk-pref button{font-size:12px;padding:2px 6px;margin:1px;width:auto;background:var(--acc);color:var(--bg);opacity:1}.mk-pref button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
-.mk-side .mk-range input[type=range],.mk-side .mk-range input[type=number]{width:100%}.mk-side label{display:block}.mk-side input[type=checkbox]{width:auto}
+.mk-side .mk-range input[type=range],.mk-side .mk-range input[type=number]{width:100%}.mk-side label{display:block}.mk-side .mk-range>label{display:inline-block;width:47%;margin:0 1% 4px 0}.mk-side .mk-range .small{margin:4px 0}.mk-side .mk-range div label{margin:0}.mk-side input[type=checkbox]{width:auto}
 .mk-bar{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:flex-end}.mk-bar label{display:block;margin:0;font-size:13px}.mk-bar input,.mk-bar select{width:auto;padding:4px 6px;margin:0;max-width:100%}.mk-bar details{flex:1 1 100%}.mk-bar button.mk-go{padding:6px 22px}.mk-main>.card{padding:8px 12px}.mk-main h2{margin:6px 0}.mk-side input[type=number],.mk-side input[type=text],.mk-side input:not([type]){padding:4px 6px}.mk-jump{display:none}.mk-form details,#save-search{margin:4px 0}
-@media(max-width:700px){header nav{flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px}.mk{flex-direction:column}.mk-main{order:1}.mk-side{order:2}.mk-jump{display:block}.mk-g .ph,.mk-g img{height:90px}.mk-side{position:static;flex:none;width:100%}.mk-res{flex-direction:column}.mk-form input,.mk-form select{max-width:100%}}</style>"""
+@media(max-width:700px){header nav{flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px}.mk{flex-direction:column}.mk-main{order:2}.mk-side{order:1}.mk-jump{display:block}.mk-g .ph,.mk-g img{height:90px}.mk-side{position:static;flex:none;width:100%}.mk-res{flex-direction:column}.mk-form input,.mk-form select{max-width:100%}}</style>"""
 
 
 def _photo(url, listing=None) -> str:
@@ -132,8 +132,8 @@ def _side_filters(q: dict) -> str:
     return ("<div class='card' id='mkfilters'><b>Filters</b>"
             f"<label>ZIP or city <input form='mkform' name='base' size='12' value='{v('base')}'></label>"
             f"<label>Radius (mi) <input form='mkform' name='radius' size='5' inputmode='decimal' value='{v('radius')}'></label>"
-            f"{_slider(q, 'mkform')}<b>Categories</b>{cats}<p class='small mut'>None checked = your rows below (default trailers and equipment).</p>"
-            "<button class='mk-go' type='submit' form='mkform'>Search Now</button></div>")
+            f"{_slider(q, 'mkform')}<button class='mk-go' type='submit' form='mkform'>Search Now</button>"
+            f"<b>Categories</b>{cats}<p class='small mut'>None checked = your rows below (default trailers and equipment).</p></div>")
 
 
 def _sidebar(saved: list[dict], csrf: str, pin_html: str, tok, q: dict, save: str = "") -> str:
@@ -277,7 +277,7 @@ def render_page(q: dict, d: dict, results: list[dict], hidden: dict, saved: list
                 + ((gallery(results, q, tok) if q.get("view") != "list" else "".join(render_card(c, tok) for c in results)) if results else zero) + opt
                 + distance_caveat(q, results + unchecked))
     return (CSS + "<h1 class='pagehead'>Michael's Marketplace</h1><div class='mk'>" + _sidebar(saved, csrf, pin_html, tok, q, _save(q, edit_id, tok, pin_html))
-            + f"<section class='mk-main' id='results-top'><a class='mk-jump small' href='#mkfilters'>Filters: price, radius, categories (below the results)</a>{err}{verr}{_form(q, edit_id, tok, pin_html)}{render_status(d)}{body}{prefs_panel(prefs, tok) if prefs else ''}{working_capital()}{gsa_explainer()}</section></div>")
+            + f"<section class='mk-main' id='results-top'>{err}{verr}{_form(q, edit_id, tok, pin_html)}{render_status(d)}{body}{prefs_panel(prefs, tok) if prefs else ''}{working_capital()}{gsa_explainer()}</section></div>")
 
 
 def save_form(f: dict) -> dict:
