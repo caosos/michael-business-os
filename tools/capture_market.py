@@ -1,4 +1,4 @@
-"""Provenance screenshots of the REAL /market page (no fixture, no stub): first viewport + full page, each with a metadata sidecar and a listing-ID check
+"""Provenance screenshots of the /market page over REAL cached GSA inventory (no inventory fixture; the staging server's decision store is a STUB): first viewport + full page, each with a metadata sidecar and a listing-ID check
 against the actual GSA cache file. Run with a Python that has Playwright (the lane 06 venv) against an isolated staging server:
 
     ~/business-os-worktrees/agent-06-communications/.venv/bin/python tools/capture_market.py OUTDIR --sha 120e452 --port 8767
@@ -98,7 +98,7 @@ def main() -> int:
                     "first_card_top_px": pg.evaluate("()=>{const g=document.querySelector('.mk-g');return g?Math.round(g.getBoundingClientRect().top+scrollY):null}"),
                     "cards_across_in_first_viewport": pg.evaluate("(h)=>{const t={};document.querySelectorAll('.mk-g').forEach(g=>{const r=g.getBoundingClientRect();if(r.top<h&&r.bottom>0){const k=Math.round(r.top);t[k]=(t[k]||0)+1}});return Math.max(0,...Object.values(t))}", h),
                     "horizontal_overflow": pg.evaluate("()=>document.documentElement.scrollWidth>document.documentElement.clientWidth"),
-                    "b19_comparison_with_cache": compare(pg, lots), "fixture": "NONE: real cache file, real server code, no stub store"}
+                    "b19_comparison_with_cache": compare(pg, lots), "fixture": "inventory: REAL cached GSA file, no fixture; decision store: STUB (serve_market_staging.py uses StubStore), so no real-persistence claim from these runs"}
             pg.screenshot(path=str(out / f"{name}-first-viewport.png"))
             pg.screenshot(path=str(out / f"{name}-full-page.png"), full_page=True)
             (out / f"{name}.json").write_text(json.dumps(meta, indent=1))
