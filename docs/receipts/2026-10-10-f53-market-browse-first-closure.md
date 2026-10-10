@@ -1,0 +1,12 @@
+# F-53 receipt: /market browse-first, restart persistence, final-value validation (DRY-RUN)
+
+Provenance: queue row F-53 (ARYA-20261010-0512); base `2e4bc72`; code in `operator_ui/market_{prefs,routes,search,view}.py`; tests `tests/test_market_f53.py` (+ small edits to `conftest.py`, `test_acceptance_f51.py`, `test_landing_f48.py`); browser tool `tools/f53_browser.py`; evidence `docs/receipts/f53-screenshots/`.
+
+1. **Browse-first.** Filters moved to a narrow sidebar; advanced filters, save-search, preferences, capital and details sit in closed disclosures; results come before secondary panels (stacked at 390px). 1280x800: first card top 538 px, 3 cards in the first viewport (`01-first-viewport-1280x800.png`). At 390px the first card starts at 921 px, below the first screen, with no horizontal overflow (known limit). Truth labels (cached/not fresh, current bid not final cost, all-in unknown, no photo placeholder) kept.
+2. **Restart persistence.** Last filter/category/row-order choices stored under `last` in the existing prefs file (`MBOS_MARKET_PREFS_FILE`); the memory-only `_remembered` is no longer the source. Proven with two isolated app instances on a tmp store (`test_owner_choices_survive_a_server_restart...`, `test_row_order_survives_restart`; `02-after-restart-persisted.png`). No live restart performed. File is treated as untrusted (known keys, short strings only).
+3. **Final-value validation.** Resolved values (slider or direct query, not only form boxes) are validated: blank = no limit; negative, non-numeric and inverted are refused with a visible message and no search; equal bounds and exact-boundary bids/radius are inclusive; unknown price/distance stay out of the checked results.
+4. **Gates (final artifact).** Reference suite: 371 passed, 1 failed (`test_resale_f39` socket timeout, known baseline). Lane D + E suite: 105 passed, 2 failed (`test_inputs_f32` x2, KeyError 'value', known F-32 baseline). Matrix: 40 PASS, 6 NOT RUN (A16, B01, B16, B18, C07, C08), 0 FAIL, in `docs/handoff/F-51-F-52-acceptance-matrix.md`.
+
+Not done / limits: live UI reload (owner-gated) NOT RUN; live acceptance NOT RUN; 1648x1000 and keyboard passes not captured; mobile first card is below the first 800 px screen.
+
+Next START: owner decision on the owner-gated live reload; then a bounded pass for the 6 NOT RUN cases (keyboard, 1648x1000, back-navigation, injection fixture). Lane CLOSED does not mean product done.

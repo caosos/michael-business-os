@@ -13,7 +13,7 @@ from pathlib import Path
 
 ACTIONS = ("save", "unsave", "dismiss", "more", "less", "reset", "disable", "enable")
 STOP = {"with", "from", "this", "that", "used", "lot", "item", "items", "unit", "units", "only", "each", "the", "and", "for", "set", "other"}
-EMPTY = {"enabled": True, "saved": [], "dismissed": [], "more": {}, "less": {}}
+EMPTY = {"enabled": True, "saved": [], "dismissed": [], "more": {}, "less": {}, "last": {}}
 
 
 def path() -> Path:
@@ -23,9 +23,9 @@ def path() -> Path:
 def load() -> dict:
     try:
         d = json.loads(path().read_text())
-        return {**EMPTY, **d} if isinstance(d, dict) else dict(EMPTY, saved=[], dismissed=[], more={}, less={})
+        return {**EMPTY, **d} if isinstance(d, dict) else dict(EMPTY, saved=[], dismissed=[], more={}, less={}, last={})
     except (OSError, ValueError):
-        return {"enabled": True, "saved": [], "dismissed": [], "more": {}, "less": {}}
+        return {"enabled": True, "saved": [], "dismissed": [], "more": {}, "less": {}, "last": {}}
 
 
 def _store(d: dict) -> None:
@@ -35,6 +35,20 @@ def _store(d: dict) -> None:
     with os.fdopen(fd, "w") as fh:
         json.dump(d, fh)
     os.replace(tmp, p)
+
+
+def recall(keys) -> dict:
+    """F-53: the owner's last filter/category/row-order choices, restored after a server restart. Only known filter keys, only lists of short strings."""
+    last = load().get("last")
+    if not isinstance(last, dict):
+        return {}
+    return {k: [str(x)[:200] for x in v][:12] for k, v in last.items() if k in keys and isinstance(v, list)}
+
+
+def remember(given: dict) -> None:
+    d = load()
+    d["last"] = given
+    _store(d)
 
 
 def terms(title: str) -> list[str]:
@@ -47,7 +61,7 @@ def act(action: str, lot_id: str, title: str = "") -> str:
     d = load()
     lot_id = re.sub(r"[^A-Za-z0-9._-]", "", lot_id or "")[:60]
     if action == "reset":
-        _store({"enabled": d["enabled"], "saved": [], "dismissed": [], "more": {}, "less": {}})
+        _store({"enabled": d["enabled"], "saved": [], "dismissed": [], "more": {}, "less": {}, "last": d.get("last") or {}})
         return "Suggestions reset: saves, dismissals and likes were cleared."
     if action in ("disable", "enable"):
         d["enabled"] = action == "enable"

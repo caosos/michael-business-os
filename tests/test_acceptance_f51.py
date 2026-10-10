@@ -47,7 +47,7 @@ def test_default_view_is_trailer_equipment_near_conway_and_broad_is_explicit(ui)
     assert "Mode: repairable trailers/equipment focus: trailer, equipment" in h and "Radius: 150 mi" in h and "Origin: Conway AR (ZIP 72032)" in h
     assert "Trailer, Utility" in h and "iPad Mini" not in h and "Whirlpool" not in h
     hb = get(ui, go=1, broad=1, base="Conway AR", radius="")
-    assert "Mode: BROAD inventory" in hb and "iPad Mini" in hb and "Broad inventory mode" in hb
+    assert "Mode: BROAD inventory" in hb and "iPad Mini" in hb and "Broad (all categories)" in hb
 
 
 def test_http_min_max_radius_change_results_and_chips(ui):

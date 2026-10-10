@@ -56,24 +56,32 @@ def _terms(raw) -> list[str]:
     return [w.strip().lower() for w in re.split(r"[,\n]", raw or "") if w.strip()][:12]
 
 
-def _slider_price(g, box: str, slider: str, prev: str):
-    """No scripts run on this page (CSP), so the slider and the number box are two form fields. The slider wins only when the user moved it
-    (its value differs from the value the page rendered, `prev`); otherwise the typed number is used."""
-    lo, hi = PRICE_RANGE
+def _price_pick(g, box: str, slider: str, prev: str) -> tuple[str, str]:
+    """-> (raw text that decides, control name). No scripts run on this page (CSP), so the slider and the number box are two form fields.
+    The slider wins only when the user moved it (its value differs from the value the page rendered, `prev`); otherwise the typed number is used."""
     moved = g(slider) != "" and g(slider) != g(prev)
-    return _num(g(slider)) if moved else _num(g(box)) if g(box) != "" else None
+    return (g(slider), slider) if moved else (g(box), box)
+
+
+def _slider_price(g, box: str, slider: str, prev: str):
+    raw, _ = _price_pick(g, box, slider, prev)
+    return _num(raw) if raw != "" else None
 
 
 def validate(g) -> list[str]:
-    """F-52 (A): every numeric filter that was typed but is not a usable number gets a visible message (the page then runs nothing)."""
-    errs = []
-    for k, label in (("radius", "Radius (miles)"), ("min_price", "Min price"), ("max_price", "Max price")):
-        raw = g(k)
-        if raw != "" and _num(raw, landing_fix.MAX_RADIUS if k == "radius" else 10**7) is None:
-            errs.append(f"{label} '{raw[:20]}' is not a usable number (use 0 or more, digits only); no search was run with it.")
-    lo, hi = _num(g("min_price")), _num(g("max_price"))
-    if lo is not None and hi is not None and lo > hi:
-        errs.append(f"Min price ${lo:,.0f} is higher than max price ${hi:,.0f}; nothing can match.")
+    """F-52/F-53 (A): validate the FINAL resolved numeric values, whichever control decided them (box, slider or a direct query string):
+    a value that is present but not a usable number gets a visible message, and min above max is refused. Equal min and max is allowed."""
+    errs, val = [], {}
+    raw = g("radius")
+    if raw != "" and _num(raw, landing_fix.MAX_RADIUS) is None:
+        errs.append(f"Radius (miles) '{raw[:20]}' is not a usable number (0 to {landing_fix.MAX_RADIUS:,} miles, digits only); no search was run with it.")
+    for k, box, slider, prev, label in (("min", "min_price", "min_r", "prev_min", "Min price"), ("max", "max_price", "max_r", "prev_max", "Max price")):
+        raw, ctl = _price_pick(g, box, slider, prev)
+        val[k] = _num(raw) if raw != "" else None
+        if raw != "" and val[k] is None:
+            errs.append(f"{label} '{raw[:20]}' (from the {'slider' if ctl == slider else 'number box'}) is not a usable number (use 0 or more, digits only); no search was run with it.")
+    if val["min"] is not None and val["max"] is not None and val["min"] > val["max"]:
+        errs.append(f"Min price ${val['min']:,.0f} is higher than max price ${val['max']:,.0f}; nothing can match.")
     return errs
 
 

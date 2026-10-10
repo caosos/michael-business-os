@@ -1,0 +1,149 @@
+"""F-53: close the four F-52 acceptance gaps: (1) browse-first layout, (2) filter/category/row-order choices survive a real restart
+(proven on a second App instance sharing only the prefs file), (3) validation of the FINAL resolved numbers (sliders + direct query)."""
+
+from __future__ import annotations
+
+import json
+import threading
+from http.server import ThreadingHTTPServer
+
+import pytest
+
+from operator_ui import market_prefs as mp
+from operator_ui import market_search as ms
+from operator_ui.server import App, make_handler
+from tests.conftest import PIN
+from tests.test_operator_ui import req
+from tests.test_market_f47 import NOW, GOV_POLICY, StubStore, cache, get, ui  # noqa: F401
+from tests.test_market_f52 import lots
+
+
+@pytest.fixture(autouse=True)
+def prefs_file(tmp_path, monkeypatch):
+    monkeypatch.setenv("MBOS_MARKET_PREFS_FILE", str(tmp_path / "prefs.json"))
+
+
+def _fresh_app(tmp_path, name):
+    """A brand-new App + HTTP server: shares NO memory with another instance, only files (what a process restart keeps)."""
+    app = App(StubStore(), operator_pin=PIN, campaigns_file=str(tmp_path / f"{name}.json"), policy_path=str(GOV_POLICY) if GOV_POLICY else None)
+    httpd = ThreadingHTTPServer(("127.0.0.1", 0), make_handler(app))
+    threading.Thread(target=httpd.serve_forever, daemon=True).start()
+    app.port = httpd.server_address[1]
+    return app, httpd
+
+
+# ---- (3) final resolved numeric values
+def q_of(**kw):
+    return ms.parse_query({k: [v] for k, v in kw.items()})
+
+
+@pytest.mark.parametrize("kw", [
+    {"max_price": "abc"}, {"min_price": "-5"}, {"max_price": "-0.01"}, {"radius": "-1"}, {"radius": "far"}, {"radius": "25001"},
+    {"min_price": "nan"}, {"max_price": "inf"}, {"max_price": "1e999"},
+    {"min_price": "900", "max_price": "100"},                                                    # inverted boxes
+    {"max_price": "100", "max_r": "abc", "prev_max": "20000"},                                    # moved slider, nonnumeric
+    {"min_r": "-3", "prev_min": "1"},                                                              # moved slider, negative
+    {"min_r": "900", "prev_min": "1", "max_r": "100", "prev_max": "20000"},                        # inverted sliders
+    {"min_r": "900", "prev_min": "1", "max_price": "100"},                                         # inverted: slider min vs typed max
+    {"min_price": "500", "max_r": "100", "prev_max": "20000"},                                     # inverted: typed min vs slider max
+])
+def test_final_resolved_values_invalid_are_said_and_run_nothing(ui, kw):
+    assert q_of(**kw)["errors"], kw
+    h = get(ui, go=1, **kw)
+    assert "id='filter-errors'" in h and "No search was run" in h and "data-lot=" not in h
+
+
+@pytest.mark.parametrize("kw,lo,hi", [
+    ({"min_price": "", "max_price": ""}, None, None),                                           # blank = no limit
+    ({"min_price": "  ", "max_price": " "}, None, None),
+    ({"min_price": "100", "max_price": "100"}, 100.0, 100.0),                                   # exact boundary: equal is allowed
+    ({"min_price": "0", "max_price": "0"}, 0.0, 0.0),
+    ({"min_price": "$1,000", "max_price": "20000"}, 1000.0, 20000.0),
+    ({"min_price": "5", "min_r": "300", "prev_min": "300"}, 5.0, None),                          # slider untouched: the typed box decides
+    ({"min_price": "5", "min_r": "300", "prev_min": "1"}, 300.0, None),                          # slider moved: it decides
+    ({"max_r": "250", "prev_max": "20000"}, None, 250.0),
+])
+def test_final_resolved_values_valid(kw, lo, hi):
+    q = q_of(**kw)
+    assert q["errors"] == [] and q["min_price"] == lo and q["max_price"] == hi
+
+
+def test_radius_boundaries():
+    assert q_of(radius="0", max_price="1")["errors"] == [] and q_of(radius="0", max_price="1")["radius"] == 0.0
+    assert q_of(radius="25000")["errors"] == []
+    assert q_of(radius="")["errors"] == [] and q_of(radius="", max_price="1")["radius"] is None
+
+
+def test_exact_boundary_bid_is_inside_and_strict_unknowns_stay_out():
+    cards = lots()
+    known = sorted({c["bid"] for c in cards if c["bid"] is not None})
+    assert known, "fixture must have bid values"
+    b = known[len(known) // 2]
+    res, unchecked, _ = ms.partition(cards, q_of(broad="1", min_price=str(b), max_price=str(b)))
+    assert res and all(c["bid"] == b for c in res)                                                  # inclusive both ends
+    assert all(c["bid"] is None for c in unchecked) and unchecked                                    # no-bid lots are never "in range"
+    assert not {c["id"] for c in res} & {c["id"] for c in unchecked}
+    below, _, _ = ms.partition(cards, q_of(broad="1", max_price=str(max(b - 0.01, 0))))
+    assert all(c["bid"] < b for c in below)
+
+
+# ---- (2) persistence across a real restart
+def test_owner_choices_survive_a_server_restart_on_an_isolated_instance(ui, tmp_path):
+    pick = dict(go=1, cat="equipment", row1="vehicles", row2="tools", row3="", row4="", sort="bid", max_price="5000", radius="200", broad=1)
+    first = get(ui, **pick)
+    assert "Max price: $5,000" in first
+    assert json.loads(mp.path().read_text())["last"]["cat"] == ["equipment"]                       # written to disk, not app memory
+    app2, httpd2 = _fresh_app(tmp_path, "restarted")                                                # nothing in memory; same prefs file
+    try:
+        assert not hasattr(app2, "market_last")
+        again = req(app2, "GET", "/market")[2]
+    finally:
+        httpd2.shutdown()
+        httpd2.server_close()
+    assert "Max price: $5,000" in again and "Radius: 200 mi" in again and "Mode: BROAD" in again
+    assert "<option value='bid' selected>" in again
+
+
+def test_row_order_survives_restart(ui, tmp_path):
+    get(ui, go=1, row1="equipment", row2="trailers", row3="", row4="")
+    app2, httpd2 = _fresh_app(tmp_path, "r2")
+    try:
+        h = req(app2, "GET", "/market")[2]
+    finally:
+        httpd2.shutdown()
+        httpd2.server_close()
+    assert h.index("data-row='equipment'") < h.index("data-row='trailers'")
+
+
+def test_new_search_clears_remembered_choices_and_reset_keeps_them(ui):
+    get(ui, go=1, cat="tools", max_price="77")
+    assert mp.recall(("cat", "max_price"))
+    mp.act("reset", "")
+    assert mp.recall(("cat", "max_price")), "resetting suggestions must not erase the owner's filter choices"
+    get(ui, new=1)
+    assert mp.recall(("cat", "max_price")) == {}
+
+
+def test_remembered_file_is_untrusted_and_only_known_keys_come_back(tmp_path):
+    mp.path().write_text(json.dumps({"last": {"cat": ["tools"], "evil": ["x"], "max_price": "notalist", "base": ["a" * 999]}}))
+    got = mp.recall(("cat", "max_price", "base"))
+    assert got == {"cat": ["tools"], "base": ["a" * 200]}
+    mp.path().write_text("{not json")
+    assert mp.recall(("cat",)) == {}
+
+
+# ---- (1) browse-first layout
+def test_cards_come_before_the_secondary_panels_and_panels_are_collapsed(ui):
+    h = get(ui, go=1)
+    first_card = h.index("data-lot=")
+    for marker in ("id='prefs'", "id='working-capital'", "id='gsa-explainer'", "id='distance-caveat'", "id='save-search'"):
+        i = h.index(marker)
+        assert i > first_card or marker == "id='save-search'", marker
+        assert h[max(0, i - 40):i].count("<details") or h[i - 1] == "<", marker
+    assert h.index("id='save-search'") < first_card and "id='save-search' open" not in h          # compact: closed disclosure
+    assert "id='applied-filters'" in h and "current bid" in h and "all-in cost UNKNOWN" in h        # truth labels stay visible
+
+
+def test_mobile_css_puts_results_before_the_sidebar():
+    from operator_ui import market_view as mv
+    assert ".mk-main{order:1}" in mv.CSS and ".mk-side{order:2}" in mv.CSS

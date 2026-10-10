@@ -1,0 +1,47 @@
+{
+ "desktop_first_card": {
+  "top": 538,
+  "bottom": 921,
+  "vh": 800
+ },
+ "desktop_rows": [
+  "trailers:3",
+  "equipment:0",
+  "vehicles:8",
+  "other:1"
+ ],
+ "desktop_cards_in_first_viewport": 3,
+ "page_height": 2804,
+ "inst1_rows": [
+  "trailers:1",
+  "equipment:0"
+ ],
+ "inst2_rows_after_restart": [
+  "trailers:1",
+  "equipment:0"
+ ],
+ "inst2_chips": "Applied filters: Origin: Conway AR (ZIP 72032)Radius: 150 mi (known distances only)Mode: BROAD inventory (all categories)Max price: $100,000",
+ "inst2_sort": "bid",
+ "inst2_checked_cats": [
+  "trailers",
+  "equipment"
+ ],
+ "after_new_chips": "Applied filters: Origin: Conway AR (ZIP 72032)Radius: 150 mi (known distances only)Mode: repairable trailers/equipment focus: trailer, equipment",
+ "slider_min_over_typed_max_msg": "Check your filters.\nMin price $20,000 is higher than max price $100; nothing can match.\nNo search was run.",
+ "slider_inverted_cards": 0,
+ "slider_negative_msg": "Check your filters.\nMin price '-3' (from the slider) is not a usable number (use 0 or more, digits only); no search was run with it.\nNo search was run.",
+ "equal_bounds_filter_errors": false,
+ "equal_bounds_chips": "Applied filters: Origin: Conway AR (ZIP 72032)Radius: noneMode: BROAD inventory (all categories)Min price: $100Max price: $100",
+ "strict_checked": 5,
+ "strict_unchecked_in_closed_section": {
+  "open": false,
+  "n": 148
+ },
+ "mobile_first_card": {
+  "top": 921,
+  "bottom": 1243,
+  "vh": 800
+ },
+ "mobile_overflow": false,
+ "mobile_search_button_visible": true
+}

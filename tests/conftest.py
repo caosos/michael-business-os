@@ -123,3 +123,9 @@ def ui(rt):
     yield app
     httpd.shutdown()
     httpd.server_close()
+
+
+@pytest.fixture(autouse=True)
+def _isolated_market_prefs(tmp_path, monkeypatch):
+    """F-53: /market remembers the last filters in the prefs file; no test may read or write the real var/market_prefs.json."""
+    monkeypatch.setenv("MBOS_MARKET_PREFS_FILE", str(tmp_path / "market_prefs_isolated.json"))

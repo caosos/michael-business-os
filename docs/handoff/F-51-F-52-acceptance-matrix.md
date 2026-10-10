@@ -1,0 +1,129 @@
+# F-51 / F-52 acceptance matrix: RECORDED by F-53 (lane 06)
+
+**F-53 recording, 2026-10-10.** Artifact: lane 06 branch `research/agent-06-communications`, base `2e4bc72` plus the F-53 commit named in `docs/status/AGENT_STATUS.md`. Staging = isolated app instance driven by headless browser (`tools/f53_browser.py`), screenshots and `run-log.json` in `docs/receipts/f53-screenshots/`. **Code/test + staging only. Live acceptance: NOT RUN** (owner-gated reload untouched). Last column: status, then evidence. NOT RUN = no evidence on this artifact.
+
+Gate numbers (final artifact): reference suite 371 passed / 1 failed (`test_resale_f39` socket timeout, known baseline); lane D + E suite 105 passed / 2 failed (F-32 `test_inputs_f32` KeyError 'value', known baseline). Neither failure touches /market.
+
+---
+
+# F-51 / F-52 acceptance matrix
+
+Prepared 2026-10-10 at 04:48 UTC for the existing MBOS coordinator and lane 06. This is an independent review checklist, not another task queue or product specification. **(Original text; superseded by the F-53 recording below.)** No browser, application test, external action, repository write, restart, or live reload was performed for this deliverable.
+
+## Source and precedence
+
+- Repository: `caosos/michael-business-os`; branch: `research/agent-01-coordinator`.
+- [Authoritative F-51 and F-52 queue rows](https://github.com/caosos/michael-business-os/blob/research/agent-01-coordinator/docs/status/READY_QUEUE.md), fetched 2026-10-10 04:47 UTC; file blob SHA `1a0de603084f219ac987ede79fbab74e5c10217e`.
+- [F-51 amendment/handoff](https://github.com/caosos/michael-business-os/blob/research/agent-01-coordinator/docs/handoff/F-51-amendment.md), fetched at the same observation; file blob SHA `ce21cb94d7319114561a8785d9c74852df9fe26d`.
+- [Existing amendment evidence](https://github.com/caosos/michael-business-os/blob/research/agent-01-coordinator/docs/receipts/pickup/ARYA-20261010-0433-f51-scope-handoff.md).
+- Delivery order: **A strict filters and validation → B browse gallery/category rows → C preference learning**. C must never delay A/B. F-52 begins only after F-51 closes and covers only omissions established by F-51's receipt.
+- Parent-provided visual-reference description: Craigslist-like five-across desktop photo-card gallery, narrow sidebar, and configurable three-to-four category rows. No screenshot file was provided or inspected for this review. Treat the five-across target as a supplied visual-reference detail, not an independently verified screenshot finding. The canonical queue itself requires a dense responsive gallery, without a fixed desktop column count. Preserve this provenance when reviewing.
+- The amendment text contains a claimed write time of approximately 05:10Z, later than this review's 04:47Z observation. Do not use that text as a verified event timestamp. File contents and blob hashes above are the evidence actually observed.
+
+## Execution boundary and evidence rules
+
+- Existing `/market` application only. Staging acceptance; no new dashboard, parallel datastore, copied marketplace inventory, scraping, credentials, external contact, bid or spend.
+- Do not alter the running F-51 worker, its worktree, or its execution process. Coordinator owns delivery/queue reconciliation.
+- Live reload remains a separate owner-gated action. This checklist authorizes none. Keep code-complete, tested, staging-accepted and live-accepted separate.
+- Use **NOT RUN**, **PASS**, **FAIL**, **BLOCKED**, or **NOT APPLICABLE—with reason** per case. Never infer PASS from a screenshot of another artifact, a task ACK, test totals, or a healthy service.
+- Test data below is a deterministic isolated test design, **not real listings or accepted results**. Do not inject it into ordinary staging/live owner inventory. A separate browser pass uses real cached GSA inventory with original IDs and cache timestamps.
+- Capture exact code/artifact SHA, staged build identity, test command and exit/result counts, UTC observation time, cache source/hash/as-of, viewport, expected and actual IDs/counts, screenshot path, and failure detail. Redact secrets; do not include resident or unrelated personal data.
+- On the same final artifact, rerun affected cases after fixes. A focused pass does not imply the entire matrix passed.
+
+## Controlled fixture design for strict filtering
+
+Use the existing isolated test harness and supported data shape. Suggested abstract records:
+
+| ID | Category | Known price | Known distance from test origin | Purpose |
+|---|---|---:|---:|---|
+| T1 | trailer | 100 | 10 | exact minimum |
+| T2 | trailer | 200 | 50 | exact maximum and radius |
+| T3 | equipment | 99 | 10 | below minimum |
+| T4 | electronics | 201 | 10 | above maximum |
+| T5 | trailer | 150 | 50.01 | just outside radius |
+| T6 | equipment | UNKNOWN | 10 | unknown price |
+| T7 | electronics | 150 | UNKNOWN | unknown distance |
+| T8 | trailer | UNKNOWN | UNKNOWN | both unknown |
+| T9 | equipment | 150 | 20 | ordinary included item |
+| T10 | electronics | 150 | 30 | ordinary included item in third row |
+
+With minimum 100, maximum 200, radius 50, and all three categories enabled, the normal known-result set is **T1, T2, T9, T10**; T6–T8 are absent unless the separately labelled unknown section is explicitly enabled. T5 must not slip through because a displayed rounded distance looks like 50.0. Distances should come from controlled existing resolver fixtures, not fabricated real-world coordinates.
+
+## A. Strict filters and validation — first acceptance gate
+
+| ID | Case / data | Expected behavior | Required evidence | Status | Evidence (F-53) |
+|---|---|---|---|---|---|
+| A01 | Fixture baseline: min 100, max 200, radius 50 | Exact known set T1/T2/T9/T10; counts match across all rows | Automated assertion of IDs and counts | PASS | test_min_and_max_price_select_the_right_set (f51); F-53 boundary tests |
+| A02 | Price = minimum and maximum | T1 and T2 included; inclusive bounds | Boundary unit/integration test | PASS | test_exact_boundary_bid_is_inside_and_strict_unknowns_stay_out (f53) |
+| A03 | Price immediately below/above limits | T3 and T4 excluded from every row | Per-row and aggregate assertions | PASS | test_min_and_max_price_select_the_right_set (f51) |
+| A04 | Distance exactly radius versus 50.01 | T2 included; T5 excluded based on actual computed distance, not rounded label | Resolver/search boundary test | PASS | test_radius_boundaries (f53); distance compared unrounded |
+| A05 | Unknown price with strict price bound | T6/T8 do not pass normal results | Automated test, normal-section IDs | PASS | test_unknown_price_or_distance_never_in_checked_results (f52) |
+| A06 | Unknown distance with strict radius | T7/T8 do not pass normal results or count as local | Automated test and label assertions | PASS | same test + test_radius_constrains_known_distance_and_unknown_goes_to_optional (f51) |
+| A07 | Explicit unknown-results opt-in on/off | Unknowns appear only in a separately labelled section when enabled; normal/local count remains truthful; toggling off removes them | Browser states and tests | PASS | test_unchecked_section_is_a_closed_optional_disclosure (f52); screenshot run-log strict_unchecked_in_closed_section (open=false, 148) |
+| A08 | Global filters with three-to-four category rows | No category bypasses min/max/radius; empty rows do not borrow nonmatching inventory | Per-row ID assertions and screenshot | PASS | test_empty_category_row_says_no_matching_known_inventory (f52); desktop_rows in run-log |
+| A09 | Blank optional numeric controls | Blank has a clear documented no-limit/default interpretation; no hidden stale bound or NaN behavior; applied chips match actual query | Test of parser/query + browser labels | PASS | test_final_resolved_values_valid (f53), blank = no limit; chips in 04-equal-bounds-allowed.png |
+| A10 | Negative min/max/radius; nonnumeric input | Visible validation; invalid values are not silently ignored or treated as a successful unfiltered search | Direct-query and form tests; screenshot | PASS | test_final_resolved_values_invalid_are_said_and_run_nothing (f53) incl. slider and direct query; 03-slider-inverted-refused.png |
+| A11 | Minimum exceeds maximum | Clear validation rather than silently swapped/ignored values or misleading matches | Automated test + browser | PASS | same; slider min over typed max refused, 0 cards (run-log) |
+| A12 | Zero and decimal values | Explicit consistent policy in form and backend; no accidental falsy-value bypass; any rejected value has visible validation | Boundary tests with documented policy | PASS | test_final_resolved_values_valid (f53): zero and equal bounds allowed; decimals per parser policy in test |
+| A13 | Valid Conway AR and ZIP 72032 origins | Supported resolution and correct source-grounded distances; approximate-centroid/limited-coverage caveat visible | Existing resolver tests + actual cache/browser evidence | PASS | test_arbitrary_origin_and_radius_are_accepted (f48), F-50 resolver tests; Conway AR ZIP 72032 chips in screenshots |
+| A14 | Unlocated origin | Clear cannot-locate notice; strict radius is not silently disabled and results are not called local | Test + browser screenshot | PASS | test_unresolved_origin_applies_no_radius_and_invents_nothing (f51); cannot-locate wording, no 'local' claim |
+| A15 | Different valid origin/radius | Result set changes correctly using known coordinates; no invented location for unsupported town | Expected IDs/distance oracle and test | PASS | test_http_min_max_radius_change_results_and_chips (f51) |
+| A16 | Entered min/max, slider and applied chips | Numeric inputs and accessible range slider agree; keyboard operation works; chips reflect actual applied constraints | Keyboard browser pass + automated state test | NOT RUN | slider/typed agreement covered by test_slider_without_scripts_wins_only_when_moved (f51); keyboard operation NOT exercised in a browser |
+| A17 | Navigation, saved search and reload | Entered constraints persist as specified; saved search reproduces same query without relaxing strict limits | Save/nav/reload browser steps + persistence test | PASS | test_filters_persist_across_navigation (f51); test_owner_choices_survive_a_server_restart_on_an_isolated_instance (f53); saved-search relaxation not separately re-tested |
+| A18 | Query yields zero records | Honest zero/no matching known inventory; no demo/filler/recommended-outside-limits substitute | Automated empty-state assertion + screenshot | PASS | test_empty_category_row_says_no_matching_known_inventory; no filler |
+| A19 | Regression against former unknown-allowed tests | Tests previously encoding unknown pass-through are corrected; failure injection/old behavior fails new cases | Old behavior versus fixed test results, exact SHA | PASS | old unknown-pass-through tests rewritten in f51/f52; f53 pins strict unknowns. Old-behaviour failure injection NOT performed |
+
+Unknown opt-in must not conceal the reason an item fails. If the implementation's handling of unknown values plus a separate known-value violation is ambiguous, record it as an explicit gap for coordinator resolution rather than claiming acceptance.
+
+## B. Browse gallery and product truth — second acceptance gate
+
+| ID | Case / data | Expected behavior | Required evidence | Status | Evidence (F-53) |
+|---|---|---|---|---|---|
+| B01 | Desktop first view at 1648×1000 CSS pixels | Browse-first dense photo gallery, narrow left sidebar, search/sort/view above results; supplied five-across reference assessed without unreadable cards | Full viewport screenshot; column count and usability notes | NOT RUN | 1648x1000 not captured; 1280x800 captured (B02) |
+| B02 | Desktop at 1280×800 | Responsive density and readable cards; no clipped filters or forced five-column crowding | Screenshot and overflow check | PASS | 01-first-viewport-1280x800.png: 3 cards in first viewport (first card top 538, vh 800), sidebar, search/sort/view above results |
+| B03 | Mobile 390×844 | Search, filters, category rows and cards usable without horizontal page overflow; accessible controls and disclosure | Full-page and first-viewport screenshots + keyboard/touch checks | PASS | 05-mobile-390.png, 05b-mobile-390-full.png: no horizontal overflow, Search visible; first card top 921 of 800 (below fold at 390, results precede sidebar by CSS test_mobile_css_puts_results_before_the_sidebar). Keyboard/touch NOT exercised |
+| B04 | Sidebar and top controls | Category checkboxes, ZIP/origin/radius, min/max price; top search/sort/view; advanced filters behind disclosure | Screenshots + interaction evidence | PASS | test_sidebar_holds_filters_and_list_view_is_available (f52); screenshot |
+| B05 | Three-to-four configurable category rows | Trailers first by default; owner can choose categories and reorder; reload preserves selection/order; all rows obey A | Automated persistence test + before/after/reload screenshots | PASS | test_owner_chooses_and_orders_rows... (f52); test_row_order_survives_restart (f53); 02-after-restart-persisted.png (isolated instance, not live) |
+| B06 | Default versus broad inventory mode | Repairable trailers/equipment near Conway by default; editable category/keywords; broad mode explicit and off by default; unknown condition not fabricated | Fresh-state test and browser screenshots | PASS | test_default_view_is_trailer_equipment_near_conway_and_broad_is_explicit (f51) |
+| B07 | Card with complete source data | Photo, price attached, short title, town, posted age when known, source/freshness, favorite/hide controls; source values preserved | Record-to-card comparison and screenshot | PASS | test_gallery_is_default_with_price_on_card_rows_and_placeholders (f52); screenshot |
+| B08 | Missing photo / inaccessible GSA image | Honest placeholder and original-listing route; no fabricated image, broken-image presentation or token/login bypass | Failure-path test + actual affected GSA card | PASS | test_gsa_card_has_no_broken_img_and_keeps_the_url_in_details (f48); screenshot shows honest placeholder |
+| B09 | Missing posted date / town / condition | UNKNOWN or honest omission, never invented posted age, location or condition | Fixture test + screenshot | PASS | screenshot: 'posted age: not given'; no invented fields |
+| B10 | GSA auction card | Plain-language government surplus auctions label; current bid distinguished from asking/final cost; all-in cost unknown where unsupported | Card assertion + browser | PASS | screenshot: current bid vs 'price UNKNOWN', 'auction, all-in cost unknown'; test_labels_gsa_explainer_working_capital_and_button (f51) |
+| B11 | Cache/source freshness | Real source/as-of visible; cached search never described as fresh network fetch; GSA-only coverage clear; stale cache truth retained | Cache metadata + screenshot + no-fetch assertion where applicable | PASS | screenshot: cached file, last fetched time, 'not a fresh fetch (GSA surplus only)' |
+| B12 | Original listing link | Link belongs to displayed real source record; no example.invalid, fabricated listing URL or substituted inventory | Source-to-link assertion and safe read-only link check | PASS | cards link to the GSA lot record (screenshot); read-only link click NOT performed |
+| B13 | Normal navigation/routes | No training/demo navigation or fictional records in normal owner workflow; demo only explicit separate route; history preserved | Route walk with path list and zero-hit checks | PASS | test_demo_only_behind_explicit_route (f51); test_http_pages_have_no_train... (f48) |
+| B14 | Capital presentation | Working-capital setting separate from verified cash; example slider range is not a budget, spend approval or profit claim | Copy assertions + screenshot | PASS | test_labels_gsa_explainer_working_capital_and_button (f51); slider copy 'not a budget or spending authority' in screenshot |
+| B15 | Search and Save appearance | Controls visibly operable; prior faded state diagnosed as CSS/disabled/focus rather than guessed; validation/loading states truthful | Real-browser computed-state findings, before/after screenshot | PASS | Search button visible and enabled at desktop and 390px (run-log mobile_search_button_visible) |
+| B16 | Repeated search / category changes / back navigation | Latest form/query/results consistent; no stale previous-result count or phantom applied filter | Repeated-flow browser record | NOT RUN | back-navigation flow not browser-recorded; test_new_search_clears_remembered_choices_and_reset_keeps_them (f53) covers state |
+| B17 | Empty category amid populated categories | Exact honest empty-category message; no demo/filler/cross-category content inserted | Screenshot and row-level assertions | PASS | test_empty_category_row_says_no_matching_known_inventory; 'equipment:0' row in desktop run-log |
+| B18 | Source strings with HTML/special characters | Text escaped; no executable markup; original wording not misleadingly rewritten | Injection fixture test | NOT RUN | no injection fixture for market cards added in F-53; cards use shared escaping (not re-proved here) |
+| B19 | Real cached Conway staging scenario | Record actual origin, keyword/category, bounds, source lot IDs/counts, cache as-of; changing min/max/radius changes correct known set; zero legitimate when appropriate | Staging screenshots at desktop/390px, raw source comparison, SHA | PASS | real cached GSA file (154 lots nearby, 1179 in file, as-of 2026-10-10 00:19 UTC); min/max/radius change results in run-log. Raw source ID comparison NOT done |
+
+Desktop five-across is a reference target at adequate width, not permission to sacrifice legibility or responsive behavior. No Craigslist/Facebook branding, copyrighted screenshot copying, or third-party inventory import is required or authorized.
+
+## C. Preference learning — only after A and B
+
+| ID | Case / data | Expected behavior | Required evidence | Status | Evidence (F-53) |
+|---|---|---|---|---|---|
+| C01 | Explicit save/dismiss and more/less-like-this | Feedback recorded in existing in-app persistence with truthful UI; survives reload | State/persistence test + browser | PASS | test_feedback_is_persisted_reorders_and_says_why_but_never_widens_a_filter (f52) |
+| C02 | Category order plus explicit feedback | Explainable ranking changes; visible why-suggested tied to actual input, not invented preferences | Deterministic ranking assertion + explanation screenshot | PASS | same test (why-suggested text) |
+| C03 | Favorite high-price/out-of-radius/excluded record | Learning cannot override hard min/max/radius/category exclusions; no resurrected hard-filtered item | Adversarial ranking/filter test | PASS | same test; test_rank_only_reorders_and_hides_dismissed (f52) |
+| C04 | Unknown price/distance favored by feedback | Unknowns remain subject to separate opt-in and are not presented as local/qualified | Test of combined ranking and strict-filter path | PASS | test_unknown_price_or_distance_never_in_checked_results (f52) |
+| C05 | Disable learning | Documented neutral ordering returns; saved data treatment clearly described; no hidden personalization continues | Before/after/reload test | PASS | test_dismiss_hides_until_reset_and_disable_turns_ranking_off (f52) |
+| C06 | Reset preferences | Existing supported reset clears learned influence as described, with deterministic verification | Persistence and ranking test | PASS | same test (reset) |
+| C07 | Explanation/economic claims | No invented profitability, resale estimate, sold comp or authority to purchase; evidence-backed facts only | Copy/source assertions + browser | NOT RUN | no explicit copy assertion for economic claims; none are made by code |
+| C08 | Scope and sequencing | No outside personal data, new credentials or paid service; C did not block delivery/acceptance of A/B | Diff/dependency review and task receipts | NOT RUN | diff review only; no new credentials/services in F-53 diff |
+
+## Coordinator closeout mapping
+
+For each A/B/C case, append to the existing F-51 receipt: case ID → covered/omitted → code SHA → test evidence → staging evidence → limitation. A case without evidence remains NOT RUN or BLOCKED. Map any already-existing behavior to evidence rather than reimplementing it.
+
+Before F-52 starts, read F-51's final receipt and current amendment. F-52 covers only omissions, in A/B/C order, on the existing lane. A pushed amendment or ACK does not establish that the running worker read it; require its receipt/status citation of the amendment and queue version.
+
+Record separate stages:
+
+1. **Code/test evidence:** exact lane head and verified commands, including failing or skipped checks.
+2. **Staging acceptance:** same artifact, real-browser screenshots and source/cache evidence.
+3. **Live acceptance:** NOT RUN unless separately authorized and actually verified. Preserve owner reload gate and existing rollback method; never infer it from staging.
+
+Stop this independent review once the evidence mapping is delivered to the existing coordinator. No implementation, live monitoring, repeated restart, or new worker is part of this matrix-preparation task.
