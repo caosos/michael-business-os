@@ -350,3 +350,28 @@ def test_same_line_docs_conflict_with_the_coordinator_resolves_for_upstream_and_
     q = subprocess.run(["git", "show", "research/agent-01-coordinator:docs/QUEUE.md"], cwd=world.origin, capture_output=True, text=True).stdout
     assert "DONE by coordinator" in q and "DONE by executor" not in q                              # upstream wins the contested line
     assert f"docs/receipts/pickup/{mid}.md" in world.files("research/agent-01-coordinator", "docs/receipts")      # executor's own files still land
+
+
+def test_publish_is_refused_when_the_executor_would_reopen_a_done_queue_row(world, tmp_path):
+    """A-57: an executor result that moves a DONE row back to READY or drops a row is never pushed (the 9435d68 failure mode)."""
+    mid = "ARYA-20261010-2001-queue-regress"
+    world.send(mid, "Type: TASK_REQUEST\nedit the queue\n")
+    hdr = "| ID | Pri | Task | Deps | Status | Agent | Acceptance |\n"
+    seed = tmp_path / "seedg"
+    subprocess.run(["git", "clone", "-q", "-b", "research/agent-01-coordinator", str(world.origin), str(seed)], check=True, capture_output=True)
+    (seed / "docs/status").mkdir(parents=True, exist_ok=True)
+    (seed / "docs/status/READY_QUEUE.md").write_text(hdr + "| F-60 | P0 | t | none | DONE | 06 | p |\n| F-61 | P0 | t | F-60 | READY | 06 | p |\n")
+    g(seed, "add", "-A"); g(seed, "commit", "-qm", "queue"); g(seed, "push", "-q", "origin", "research/agent-01-coordinator")
+    before = subprocess.run(["git", "rev-parse", "research/agent-01-coordinator"], cwd=world.origin, capture_output=True, text=True).stdout
+
+    def reverts(m, wt, dry):
+        (wt / "docs/status/READY_QUEUE.md").write_text(hdr + "| F-60 | P0 | t | none | READY | 06 | p |\n")      # F-60 reopened, F-61 dropped
+        (wt / "docs/receipts/pickup").mkdir(parents=True, exist_ok=True)
+        (wt / f"docs/receipts/pickup/{m}.md").write_text("r")
+        return {"ok": True, "process_ok": True}
+
+    store = pickup_state.Store(world.dir)
+    ip.pg.fetch()
+    assert ip.deliver(mid, store, False, executor=reverts) != "COMPLETED"
+    after = subprocess.run(["git", "show", "research/agent-01-coordinator:docs/status/READY_QUEUE.md"], cwd=world.origin, capture_output=True, text=True).stdout
+    assert "F-60 | P0 | t | none | DONE" in after and "F-61" in after            # origin queue untouched

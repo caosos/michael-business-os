@@ -1,0 +1,7 @@
+# A-57 DONE: fail-closed queue-merge guard (Agent 01, code)
+
+- Root cause (9435d68, parents f5a844a and 7a54f65): the stale-side merge took the remote side of docs/status/READY_QUEUE.md, so newer rows were dropped and F-60 went DONE -> READY.
+- `tools/queue_guard.py` `check(result, parents, markers)` compares the result with every parent row by row: a dropped task ID, a DONE row leaving DONE, or deps/owner lost are problems unless an attributable marker (task, actor, reason, message, action = cancel/reopen/edit; any missing field = ignored) allows it. CLI: `python tools/queue_guard.py RESULT PARENT...` (exit 1 unsafe).
+- Wired into `pickup_git.publish()`: before every push the queue to be pushed is checked against origin's; a problem returns "REFUSED by the queue guard (A-57), nothing pushed" and the task ends non-COMPLETED. `queue_guard.py` is in the watcher's self re-exec file list.
+- Tests: `tests/unit/test_queue_guard.py` 7 pass (real replay of 9435d68 rejected incl. F-60; F-60 DONE accepted; dropped row; lost deps/owner; normal progress passes; attributed reopen/cancel/edit pass; unattributed/wrong-task/wrong-action marker ignored). `tests/unit/test_inbox_pickup.py` 17 pass incl. the new publish-refusal test (fails when the guard is disabled: mutation-checked; origin queue untouched).
+- Not done: no marker plumbing from the executor yet; the publish path passes none, so any reopen/cancel by pickup is refused by design.

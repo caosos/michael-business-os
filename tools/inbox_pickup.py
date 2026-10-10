@@ -215,7 +215,7 @@ def cycle(store: Store, dry: bool, beat: "ph.Beat") -> dict[str, Any]:
 
 
 def code_stamp() -> tuple:
-    return tuple((f, (Path(__file__).parent / f).stat().st_mtime_ns) for f in ("inbox_pickup.py", "pickup_git.py", "pickup_state.py"))
+    return tuple((f, (Path(__file__).parent / f).stat().st_mtime_ns) for f in ("inbox_pickup.py", "pickup_git.py", "pickup_state.py", "queue_guard.py"))
 
 
 def main(argv: Optional[list[str]] = None) -> int:

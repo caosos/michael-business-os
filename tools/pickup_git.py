@@ -69,10 +69,22 @@ def commit_all(wt: Path, message: str) -> Optional[str]:
     return git("rev-parse", "--short", "HEAD", cwd=wt).stdout.strip() if r.returncode == 0 else None
 
 
+def queue_problems(wt: Path) -> list[str]:
+    """A-57: the queue this publish would push must not drop, reopen or strip rows that origin already has (see tools/queue_guard.py)."""
+    from queue_guard import check
+    q = "docs/status/READY_QUEUE.md"
+    up = git("show", f"origin/{COORD}:{q}", cwd=wt).stdout
+    mine = git("show", f"HEAD:{q}", cwd=wt).stdout
+    return check(mine, [up]) if up and mine else []
+
+
 def publish(wt: Path) -> tuple[bool, str]:
     """Fast-forward the coordinator branch with the side branch (one rebase retry if the coordinator moved). -> (ok, detail)."""
     resolved = False
     for _ in range(2):
+        bad = queue_problems(wt)
+        if bad:
+            return False, "REFUSED by the queue guard (A-57), nothing pushed: " + "; ".join(bad)[:300]
         r = git("push", "-q", "origin", f"HEAD:{COORD}", cwd=wt)
         if r.returncode == 0:
             return True, git("rev-parse", "--short", "HEAD", cwd=wt).stdout.strip() + (" (same-line docs conflict resolved in favour of upstream)" if resolved else "")
