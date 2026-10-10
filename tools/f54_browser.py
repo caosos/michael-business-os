@@ -51,16 +51,19 @@ with sync_playwright() as p:
     pg.focus("#min_price"); pg.keyboard.press("Tab")
     log["A16_tab_moves_focus_visibly"] = pg.evaluate("()=>document.activeElement.tagName+':'+(document.activeElement.name||document.activeElement.id)")
     pg.screenshot(path=str(out / "A16-keyboard.png"))
-    # B16 back navigation
+    # B16 back navigation (F-59: visible KNOWN-ID sets, cards outside the unchecked section; not a count of all .mk-g)
+    ids = "()=>[...document.querySelectorAll('.mk-g')].filter(g=>!g.closest('#unchecked-section')).map(g=>g.dataset.lot).filter(Boolean).sort()"
+    snap = lambda: (pg.evaluate(ids), pg.inner_text("#applied-filters"))  # noqa: E731
     pg.goto(base + "/market?go=1&broad=1&max_price=100&radius=150")
-    n1, c1 = pg.evaluate("()=>document.querySelectorAll('.mk-g').length"), pg.inner_text("#applied-filters")
+    s1 = snap()
     pg.goto(base + "/market?go=1&broad=1&max_price=100000&radius=25000")
-    n2, c2 = pg.evaluate("()=>document.querySelectorAll('.mk-g').length"), pg.inner_text("#applied-filters")
+    s2 = snap()
     pg.go_back(); pg.wait_for_load_state()
-    n3, c3 = pg.evaluate("()=>document.querySelectorAll('.mk-g').length"), pg.inner_text("#applied-filters")
+    s3 = snap()
     pg.go_forward(); pg.wait_for_load_state()
-    n4, c4 = pg.evaluate("()=>document.querySelectorAll('.mk-g').length"), pg.inner_text("#applied-filters")
-    log["B16_back_forward"] = {"first": [n1, c1], "second": [n2, c2], "back_equals_first": (n3, c3) == (n1, c1), "forward_equals_second": (n4, c4) == (n2, c2)}
+    s4 = snap()
+    log["B16_back_forward"] = {"first": {"visible_known_ids": s1[0], "chips": s1[1]}, "second": {"visible_known_ids": s2[0], "chips": s2[1]}, "searches_differ": s1 != s2,
+                               "back_equals_first": s3 == s1, "forward_equals_second": s4 == s2}
     # F-54 prefs: valid, invalid, plain load, new instance
     pg.goto(base + "/market?go=1&radius=120&max_price=500")
     pg.goto(base + "/market?go=1&radius=x"); log["F54_invalid_shows_error"] = bool(pg.query_selector("#filter-errors"))

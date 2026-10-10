@@ -1,0 +1,27 @@
+{
+ "B16_back_forward": {
+  "first": {
+   "visible_known_ids": [
+    "3-1-QSC-I-27-006-005",
+    "3-1-QSC-I-27-017-016",
+    "3-1-QSC-I-27-017-017",
+    "3-1-QSC-I-27-017-037",
+    "3-1-QSC-I-27-017-038"
+   ],
+   "chips": "Applied filters: Origin: Conway AR (ZIP 72032)Radius: 150 mi (known distances only)Mode: BROAD inventory (all categories)Max price: $100"
+  },
+  "second": {
+   "visible_known_ids": [
+    "3-1-QSC-I-27-006-005",
+    "3-1-QSC-I-27-017-016",
+    "3-1-QSC-I-27-017-017",
+    "3-1-QSC-I-27-017-037",
+    "3-1-QSC-I-27-017-038"
+   ],
+   "chips": "Applied filters: Origin: Conway AR (ZIP 72032)Radius: 25000 mi (known distances only)Mode: BROAD inventory (all categories)Max price: $100,000"
+  },
+  "searches_differ": true,
+  "back_equals_first": true,
+  "forward_equals_second": true
+ }
+}
