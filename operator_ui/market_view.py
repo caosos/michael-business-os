@@ -15,7 +15,7 @@ from .live_demo import link_html
 CATEGORY = "marketplace"
 e = lambda v: html.escape("" if v is None else str(v))  # noqa: E731
 
-CSS = """<style>.mk{display:flex;gap:18px;align-items:flex-start}.mk-side{flex:0 0 230px}
+CSS = """<style>main{max-width:1900px}.banner{padding:3px 16px;font-size:13px}header{padding:4px 16px;flex-wrap:nowrap}header b{display:none}header nav{display:flex;gap:2px 12px;flex-wrap:wrap}header nav a{margin:0;white-space:nowrap}main{padding:8px 16px}.pagehead{margin:4px 0 8px;font-size:20px}.mk-row>h2{margin:8px 0 4px}.mk-gal>p{grid-column:1/-1;margin:2px 0}.mk{display:flex;gap:18px;align-items:flex-start}.mk-side{flex:0 0 210px}
 .mk-main{flex:1;min-width:0}.mk-side .card{padding:10px 12px}.mk-side a{display:block;padding:4px 0}.mk-demo{border-top:2px dashed var(--line);margin-top:12px;padding-top:8px}
 .mk-form label{display:inline-block;margin:0 10px 8px 0}.mk-res{display:flex;gap:12px}.mk-res img{width:120px;height:90px;object-fit:cover;border-radius:6px}
 .mk-tag{font-size:12px;border:1px solid var(--line);border-radius:8px;padding:0 6px;margin-right:4px}
@@ -24,12 +24,12 @@ CSS = """<style>.mk{display:flex;gap:18px;align-items:flex-start}.mk-side{flex:0
 .mk-form button.mk-go{font-size:16px;padding:10px 28px}.mk-chips .chip{background:var(--card);font-size:12px;padding:1px 8px}.mk-chips{margin:4px 0}
 .mk-range input[type=range]{width:46%;display:inline-block;margin:0;padding:0}.mk-range input[type=number]{width:110px;display:inline-block}
 .mk-sec{border-top:2px dashed var(--line);margin-top:16px}
-.mk-gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}.mk-g{border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--card);min-width:0}
+.mk-gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),1fr));gap:10px}.mk-g{border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--card);min-width:0}
 .mk-g .ph{height:110px;display:flex;align-items:center;justify-content:center;border:1px dashed var(--line);border-radius:6px;text-align:center;overflow:hidden}.mk-g img{width:100%;height:110px;object-fit:cover;border-radius:6px}
 .mk-g .pr{font-size:18px;font-weight:700;margin:4px 0 0}.mk-g .ti{font-size:14px;margin:2px 0;overflow-wrap:anywhere}.mk-g button,.mk-pref button{font-size:12px;padding:2px 6px;margin:1px;width:auto;background:var(--acc);color:var(--bg);opacity:1}.mk-pref button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
 .mk-side .mk-range input[type=range],.mk-side .mk-range input[type=number]{width:100%}.mk-side label{display:block}.mk-side input[type=checkbox]{width:auto}
 .mk-bar{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:flex-end}.mk-bar label{display:block;margin:0;font-size:13px}.mk-bar input,.mk-bar select{width:auto;padding:4px 6px;margin:0;max-width:100%}.mk-bar details{flex:1 1 100%}.mk-bar button.mk-go{padding:6px 22px}.mk-main>.card{padding:8px 12px}.mk-main h2{margin:6px 0}.mk-side input[type=number],.mk-side input[type=text],.mk-side input:not([type]){padding:4px 6px}.mk-jump{display:none}.mk-form details,#save-search{margin:4px 0}
-@media(max-width:700px){.mk{flex-direction:column}.mk-main{order:1}.mk-side{order:2}.mk-jump{display:block}.mk-g .ph,.mk-g img{height:90px}.mk-side{position:static;flex:none;width:100%}.mk-res{flex-direction:column}.mk-form input,.mk-form select{max-width:100%}}</style>"""
+@media(max-width:700px){header nav{flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px}.mk{flex-direction:column}.mk-main{order:1}.mk-side{order:2}.mk-jump{display:block}.mk-g .ph,.mk-g img{height:90px}.mk-side{position:static;flex:none;width:100%}.mk-res{flex-direction:column}.mk-form input,.mk-form select{max-width:100%}}</style>"""
 
 
 def _photo(url, listing=None) -> str:
