@@ -54,10 +54,10 @@
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-10T18:46:50Z",
+ "generated_at": "2026-10-10T18:57:01Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
-  "decision": "no live Claude session (awaiting connection)",
+  "decision": "nothing needed",
   "note": "pickup does not need the interactive session",
   "state": "STOPPED"
  },
@@ -66,7 +66,7 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-10T18:46:50Z",
+  "observed_at": "2026-10-10T18:57:01Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
   "status": "idle",
