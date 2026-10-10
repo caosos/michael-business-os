@@ -14,7 +14,7 @@
 ## Tests
 - `tests/unit/test_inbox_pickup.py`: 12 passed in 5.16s (run with `../agent-01-coordinator/.venv`).
 - `test_docs_guard_ignores_code_pushed_by_others_after_the_run_started`: another clone pushes `tools/new_code.py` mid-run. The run still reaches COMPLETED, the upstream code survives the rebase, and the docs land.
-- GAP: I did not find a test that names the opposite case, where a child that itself writes non-docs code must still block. Existing guard tests may cover it (not located in a 5-line grep). Added to the queue below instead of asserting it.
+- `test_inbox_pickup.py:145-157`: a child that writes `tools/evil.py` is BLOCKED with a "non-docs" reason and the file never reaches the coordinator branch. Real child code still blocks.
 
 ## Reconciliation
 - F-53 is now on the authoritative `origin/research/agent-01-coordinator` READY_QUEUE.md (row 373, status READY, lane 06, code lane). It is queued, not scheduled or started. It is not claimed done.
@@ -22,4 +22,4 @@
 - F-52 acceptance and the live gate are unchanged.
 
 ## Remaining
-- Code lane (01, side worktree), small: add an explicit regression test that a child's own non-docs change is blocked by the docs-only guard (confirm whether one already exists first). No owner decision needed.
+- None for this task. No code, owner decision or new queue row needed.
