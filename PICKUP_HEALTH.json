@@ -47,16 +47,22 @@
    "ARYA-20261010-1845-current-runtime-proof",
    "ARYA-20261010-1902-final-artifact-evidence",
    "ARYA-20261010-1906-completion-history-regression"
+  ],
+  "FETCHED": [
+   "ARYA-20261010-1911-component-exit-guideline"
   ]
  },
- "currently_running": null,
+ "currently_running": {
+  "id": "ARYA-20261010-1911-component-exit-guideline",
+  "started_at": "2026-10-10T19:11:50Z"
+ },
  "delivery_interface": {
   "claude_cli": true,
   "quota": "session 23.0% / week 18.0% are under the limits",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-10T19:08:45Z",
+ "generated_at": "2026-10-10T19:11:50Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "nothing needed",
@@ -68,11 +74,11 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-10T19:08:45Z",
+  "observed_at": "2026-10-10T19:11:50Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
-  "status": "idle",
-  "ttl_sec": 1200
+  "status": "busy",
+  "ttl_sec": 300
  },
  "watcher": {
   "ack_branch": "research/agent-01-coordinator",
