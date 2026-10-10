@@ -1,0 +1,35 @@
+{
+ "listing_id": "<stable listing id, e.g. the GSA lot id>",
+ "source": "<gsa|...>",
+ "title": "<listing title>",
+ "decided_at": "<ISO 8601 time>",
+ "decision": "pass | watch | pursue",
+ "reason_summary": "<why, a summary of the reasoning, not a transcript>",
+ "evidence": [
+  {
+   "kind": "condition|photo|dimensions|capacity|paperwork|cost|sold_comparable|repair_work|other",
+   "text": "<what was known then>",
+   "provenance": "verified | owner_estimate | unverified"
+  }
+ ],
+ "owner_estimates": [
+  {
+   "label": "<what is estimated>",
+   "amount_usd": null,
+   "note": "<basis>"
+  }
+ ],
+ "alternatives_considered": [
+  "<alternative exit>"
+ ],
+ "uncertainty": [
+  "<what was uncertain>"
+ ],
+ "missing_evidence": [
+  "<what was missing>"
+ ],
+ "owner_skills": "<skills and actual repair work>",
+ "category_tags": [
+  "<tag used to find similar candidates>"
+ ]
+}
