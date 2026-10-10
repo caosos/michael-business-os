@@ -1,19 +1,8 @@
 {
  "account": "michaelos",
- "blockers": [
-  {
-   "attempts": 1,
-   "id": "ARYA-20261010-0606-f54-execution-proof",
-   "needs": null,
-   "reason": "receipt not published: push rejected and rebase failed: error: could not apply 69bb799... agent 01 pickup: verify F-54 executed (dec4587, rc 0); READY_QUEUE F-54 DONE\nhint: Resolve all conflicts manually, mark them as resolved with\nhint: \"git add/rm <confl",
-   "since": "2026-10-10T06:07:24Z"
-  }
- ],
+ "blockers": [],
  "coordinator_head": "6ec6a6b",
  "counts": {
-  "BLOCKED": [
-   "ARYA-20261010-0606-f54-execution-proof"
-  ],
   "COMPLETED": [
    "ARYA-20261010-0328-f49-verification",
    "ARYA-20261010-0353-marketplace-filter-acceptance",
@@ -32,6 +21,9 @@
    "ARYA-20261010-0530-owner-resume-included-quota",
    "ARYA-20261010-0532-quota-observation",
    "ARYA-20261010-0551-f53-staging-acceptance"
+  ],
+  "RUNNING": [
+   "ARYA-20261010-0606-f54-execution-proof"
   ]
  },
  "currently_running": {
@@ -44,7 +36,7 @@
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-10T06:08:29Z",
+ "generated_at": "2026-10-10T06:08:36Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "nothing needed",
@@ -56,7 +48,7 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-10T06:08:29Z",
+  "observed_at": "2026-10-10T06:08:36Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
   "status": "busy",
