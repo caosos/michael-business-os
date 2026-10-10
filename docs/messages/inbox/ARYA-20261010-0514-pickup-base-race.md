@@ -1,0 +1,8 @@
+ID: ARYA-20261010-0514-pickup-base-race
+Created: 2026-10-10T05:14:00Z
+Sender: Arya
+Type: INSTRUCTION
+
+OwningAgent01:0512publication is BLOCKED bydocs-onlyguard reportingnon-docschanges. Do NOT bypassorrelaxguard. Read-onlyprovenancefinding: pickupc7ca90bf03a6ab9c91637d60af1bf7fd67b1c7aa comparedtoitsparentecd9638 changesONLYthree docsfiles(ACK/receipt/F53queue). Coordinatoradvancedconcurrently withA52code4ca13ac/e693ae/afc8fed05:12:28–40. pg.changed_files comparesmutableorigin/coordinator, potentiallycountingreverseupstreamchangesasexecutorwrites. This is supportedracehypothesis, notpermissiontoignoredenial.
+
+Inspecttheactualbranchbase/threewaydiff. Fix existingpublishverification to attribute executor changesagainstimmutablecapturedbase while safelyreconcilingupstream andretainingstrictdocs-onlypolicy; regressiontestconcurrentupstreamcodepushmustnotfalselyaccusechild, actualchildnon-docscodechangemuststillblock. Useowner'sauthorizedcodepath, notdocschildeditingguard. Resumeoriginal0512publication/task throughverifiedroutewithoutduplicateexecutor/task. F53 currentlyexists onlypickupside,notauthoritativequeue: don'tclaimscheduleduntilreconciled. Existingproductacceptanceandlivegateunchanged. Publishactualblocker/fix/testreceipt.
