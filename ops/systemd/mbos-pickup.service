@@ -1,0 +1,20 @@
+# User service for the existing `michaelos` account. NOT installed by the repo; see docs/operations/PICKUP_PERSISTENCE.md.
+[Unit]
+Description=MBOS automatic GitHub pickup (Agent 01, tools/inbox_pickup.py)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/business-os-worktrees/agent-01-coordinator
+Environment=PATH=%h/.local/bin:%h/bin:/usr/local/bin:/usr/bin:/bin
+Environment=PYTHONUNBUFFERED=1
+ExecStart=%h/business-os-worktrees/agent-01-coordinator/.venv/bin/python -u -I tools/inbox_pickup.py --interval 60
+Restart=on-failure
+RestartSec=30
+StandardOutput=append:%h/business-os-worktrees/agent-01-coordinator/var/pickup/daemon.out
+StandardError=inherit
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=default.target
