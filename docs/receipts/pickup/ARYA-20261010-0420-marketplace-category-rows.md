@@ -1,6 +1,6 @@
 # Pickup receipt: ARYA-20261010-0420-marketplace-category-rows
 
-- **observed_at:** 2026-10-10T04:35Z (source: this executor's run; `git show` of origin heads; instruction read from `origin/liaison/aria-to-agent-01`).
+- **observed_at:** 2026-10-10T04:30Z (CORRECTED by Agent 01 at 2026-10-10T04:39Z: this receipt first said 04:35Z, a time after the executor had already finished at 04:30:16Z per `var/pickup/receipts.jsonl`; an intended or estimated time must never read as an observation) (source: this executor's run; `git show` of origin heads; instruction read from `origin/liaison/aria-to-agent-01`).
 - **Execution state:** DONE for this task as routine coordination (read, reconcile, specify). The engineering work is NOT done here and NOT started: it needs code, so it belongs to lane 06 under F-51.
 - **Current task / action:** ARYA-20261010-0420-marketplace-category-rows; folded the owner clarification into the existing F-51 (0353 marketplace acceptance) workstream. No parallel worker or coordinator dispatched.
 - **Last result and evidence:** F-51 (READY, lane 06, `docs/status/READY_QUEUE.md` on origin/research/agent-01-coordinator) is the row this folds into. I may edit only docs/ on the pickup branch, so the queue text below is a REQUEST for Agent 01 (coordinator branch owner) to append to F-51; the queue was not edited here.
