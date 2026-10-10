@@ -4,11 +4,12 @@
   {
    "attempts": 1,
    "id": "ARYA-20261010-0512-f52-acceptance-gaps",
+   "needs": null,
    "reason": "executor touched non-docs files, not published: tests/unit/test_inbox_pickup.py, tools/inbox_pickup.py, tools/pickup_health.py",
    "since": "2026-10-10T05:12:43Z"
   }
  ],
- "coordinator_head": "afc8fed",
+ "coordinator_head": "8811350",
  "counts": {
   "BLOCKED": [
    "ARYA-20261010-0512-f52-acceptance-gaps"
@@ -27,14 +28,17 @@
    "ARYA-20261010-0453-f52-runtime-observation"
   ]
  },
- "currently_running": null,
+ "currently_running": {
+  "id": "ARYA-20261010-0512-f52-acceptance-gaps",
+  "started_at": "2026-10-10T05:13:46Z"
+ },
  "delivery_interface": {
   "claude_cli": true,
   "quota": "session 2.0% / week 8.0% are under the limits",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-10T05:12:43Z",
+ "generated_at": "2026-10-10T05:13:46Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "nothing needed",
@@ -46,18 +50,17 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-10T05:12:43Z",
+  "observed_at": "2026-10-10T05:13:46Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
-  "status": "idle",
+  "status": "busy",
   "ttl_sec": 300
  },
  "watcher": {
   "ack_branch": "research/agent-01-coordinator",
-  "eligible_ids": "ARIA|ARYA|DA-YYYYMMDD-HHMM-* at or after 20261010-0000",
   "inbox_ref": "origin/liaison/aria-to-agent-01",
   "interval_s": 60,
-  "started_at": "2026-10-10T05:12:03Z",
+  "started_at": "2026-10-10T05:13:45Z",
   "status": "running"
  }
 }
