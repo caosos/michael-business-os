@@ -1,0 +1,108 @@
+{
+ "code_sha": "179bd62cec8c6e6db5eb16760441321349e3d619",
+ "operator_ui_tests_tools_dirty": false,
+ "cache_sha256": "7eb8efd4b6d7be71bc932a8ef774e8b6bd8a932f2ddb56f2e8b109d829e9de7b",
+ "cache_as_of_utc": "2026-10-11T02:48:28Z",
+ "store": "STUB (no database)",
+ "fixture_dir": "tests/fixtures/alerts (scrubbed)",
+ "captured_at_utc": "2026-10-11T23:33:33+00:00",
+ "failed": [],
+ "checks": [
+  {
+   "check": "desktop-1648x1000: GSA default shows GSA lots and no fixture label",
+   "ok": true,
+   "lots": 153
+  },
+  {
+   "check": "desktop-1648x1000: no staging flag -> GovDeals NOT CONNECTED, no listings",
+   "ok": true
+  },
+  {
+   "check": "desktop-1648x1000: staging GovDeals shows FIXTURE banner and per-row not-live status",
+   "ok": true
+  },
+  {
+   "check": "desktop-1648x1000: fixture row never says connected",
+   "ok": true,
+   "row": "GovDeals: FIXTURE / not live \u00b7 2 test listing(s) \u00b7 newest test e-mail dated 2026-10-07 11:00 UTC \u00b7 STALE"
+  },
+  {
+   "check": "desktop-1648x1000: Craigslist/eBay/Facebook rows NOT CONNECTED",
+   "ok": true
+  },
+  {
+   "check": "desktop-1648x1000: fixture cards carry label, source link, price, town, freshness",
+   "ok": true,
+   "cards": 2
+  },
+  {
+   "check": "desktop-1648x1000: price filter applies to fixture records",
+   "ok": true
+  },
+  {
+   "check": "desktop-1648x1000: max price 300 hides the $350 fixture trailer",
+   "ok": true
+  },
+  {
+   "check": "desktop-1648x1000: all merges GSA with labelled fixture cards",
+   "ok": true,
+   "cards": 131
+  },
+  {
+   "check": "desktop-1648x1000: eBay stays not connected even on staging",
+   "ok": true
+  },
+  {
+   "check": "desktop-1648x1000: Search Now still last after the filters",
+   "ok": true
+  },
+  {
+   "check": "mobile-390x844: GSA default shows GSA lots and no fixture label",
+   "ok": true,
+   "lots": 153
+  },
+  {
+   "check": "mobile-390x844: no staging flag -> GovDeals NOT CONNECTED, no listings",
+   "ok": true
+  },
+  {
+   "check": "mobile-390x844: staging GovDeals shows FIXTURE banner and per-row not-live status",
+   "ok": true
+  },
+  {
+   "check": "mobile-390x844: fixture row never says connected",
+   "ok": true,
+   "row": "GovDeals: FIXTURE / not live \u00b7 2 test listing(s) \u00b7 newest test e-mail dated 2026-10-07 11:00 UTC \u00b7 STALE"
+  },
+  {
+   "check": "mobile-390x844: Craigslist/eBay/Facebook rows NOT CONNECTED",
+   "ok": true
+  },
+  {
+   "check": "mobile-390x844: fixture cards carry label, source link, price, town, freshness",
+   "ok": true,
+   "cards": 2
+  },
+  {
+   "check": "mobile-390x844: price filter applies to fixture records",
+   "ok": true
+  },
+  {
+   "check": "mobile-390x844: max price 300 hides the $350 fixture trailer",
+   "ok": true
+  },
+  {
+   "check": "mobile-390x844: all merges GSA with labelled fixture cards",
+   "ok": true,
+   "cards": 131
+  },
+  {
+   "check": "mobile-390x844: eBay stays not connected even on staging",
+   "ok": true
+  },
+  {
+   "check": "mobile-390x844: Search Now still last after the filters",
+   "ok": true
+  }
+ ]
+}

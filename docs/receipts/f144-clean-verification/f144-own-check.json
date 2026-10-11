@@ -1,0 +1,85 @@
+{
+ "pass": false,
+ "res": {
+  "desktop": {
+   "title": "DealSniffer Marketplace",
+   "first_visit_prompt": false,
+   "no_error_banner": true,
+   "default": [
+    "500",
+    "150",
+    "500 miles",
+    "150 miles"
+   ],
+   "typed750_live": [
+    "750",
+    "750",
+    "750 miles",
+    "750 miles"
+   ],
+   "after_submit": [
+    true,
+    "750",
+    "750",
+    "750",
+    "750 miles"
+   ],
+   "saved_reload": [
+    "750",
+    "750",
+    "750"
+   ],
+   "slider_after_expand": [
+    "300",
+    "750",
+    "300 miles"
+   ],
+   "r25000": [
+    "25000",
+    "25000",
+    "25000",
+    "25,000 miles"
+   ]
+  },
+  "mobile": {
+   "title": "DealSniffer Marketplace",
+   "first_visit_prompt": false,
+   "no_error_banner": true,
+   "default": [
+    "500",
+    "150",
+    "500 miles",
+    "150 miles"
+   ],
+   "typed750_live": [
+    "750",
+    "750",
+    "750 miles",
+    "750 miles"
+   ],
+   "after_submit": [
+    true,
+    "750",
+    "750",
+    "750",
+    "750 miles"
+   ],
+   "saved_reload": [
+    "750",
+    "750",
+    "750"
+   ],
+   "slider_after_expand": [
+    "300",
+    "750",
+    "300 miles"
+   ],
+   "r25000": [
+    "25000",
+    "25000",
+    "25000",
+    "25,000 miles"
+   ]
+  }
+ }
+}
