@@ -122,7 +122,7 @@
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-11T23:24:50Z",
+ "generated_at": "2026-10-11T23:34:53Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "nothing needed",
@@ -134,7 +134,7 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-11T23:24:50Z",
+  "observed_at": "2026-10-11T23:34:53Z",
   "pid": 592613,
   "source": "inbox_pickup process",
   "status": "idle",
