@@ -1,0 +1,126 @@
+{
+ "isolation": {
+  "store_dir_used": "/tmp/tmplk8u2sx3/cases",
+  "store_dir_is_inside_repo": false,
+  "owner_private_store_untouched": true,
+  "same_known_ids_with_and_without_store": true,
+  "network": "none: loopback only, cache is the committed test fixture, nothing fetched",
+  "code_sha": "4a818b97b19f8a9e5d562a21da99d66766d09395",
+  "captured_at_utc": "2026-10-11T02:18:03+00:00",
+  "data": "SYNTHETIC case only"
+ },
+ "shots": [
+  {
+   "viewport": "1648x1000",
+   "store": "no-store",
+   "expanded": false,
+   "known_count": 5,
+   "known_ids": [
+    "3-1-QSC-I-27-006-005",
+    "3-1-QSC-I-27-017-037",
+    "3-1-QSC-I-27-017-017",
+    "3-1-QSC-I-27-017-038",
+    "3-1-QSC-I-27-017-016"
+   ],
+   "precedent_blocks": 0,
+   "page_note": "",
+   "file": "1648x1000-no-store.png"
+  },
+  {
+   "viewport": "390x844",
+   "store": "no-store",
+   "expanded": false,
+   "known_count": 5,
+   "known_ids": [
+    "3-1-QSC-I-27-006-005",
+    "3-1-QSC-I-27-017-037",
+    "3-1-QSC-I-27-017-017",
+    "3-1-QSC-I-27-017-038",
+    "3-1-QSC-I-27-017-016"
+   ],
+   "precedent_blocks": 0,
+   "page_note": "",
+   "file": "390x844-no-store.png"
+  },
+  {
+   "viewport": "1648x1000",
+   "store": "synthetic-store",
+   "expanded": false,
+   "known_count": 5,
+   "known_ids": [
+    "3-1-QSC-I-27-006-005",
+    "3-1-QSC-I-27-017-037",
+    "3-1-QSC-I-27-017-017",
+    "3-1-QSC-I-27-017-038",
+    "3-1-QSC-I-27-017-016"
+   ],
+   "precedent_blocks": 1,
+   "page_note": "",
+   "file": "1648x1000-synthetic-store.png"
+  },
+  {
+   "viewport": "1648x1000",
+   "store": "synthetic-store",
+   "expanded": true,
+   "known_count": 5,
+   "known_ids": [
+    "3-1-QSC-I-27-006-005",
+    "3-1-QSC-I-27-017-037",
+    "3-1-QSC-I-27-017-017",
+    "3-1-QSC-I-27-017-038",
+    "3-1-QSC-I-27-017-016"
+   ],
+   "precedent_blocks": 1,
+   "page_note": "",
+   "file": "1648x1000-synthetic-store-expanded.png"
+  },
+  {
+   "viewport": "390x844",
+   "store": "synthetic-store",
+   "expanded": false,
+   "known_count": 5,
+   "known_ids": [
+    "3-1-QSC-I-27-006-005",
+    "3-1-QSC-I-27-017-037",
+    "3-1-QSC-I-27-017-017",
+    "3-1-QSC-I-27-017-038",
+    "3-1-QSC-I-27-017-016"
+   ],
+   "precedent_blocks": 1,
+   "page_note": "",
+   "file": "390x844-synthetic-store.png"
+  },
+  {
+   "viewport": "390x844",
+   "store": "synthetic-store",
+   "expanded": true,
+   "known_count": 5,
+   "known_ids": [
+    "3-1-QSC-I-27-006-005",
+    "3-1-QSC-I-27-017-037",
+    "3-1-QSC-I-27-017-017",
+    "3-1-QSC-I-27-017-038",
+    "3-1-QSC-I-27-017-016"
+   ],
+   "precedent_blocks": 1,
+   "page_note": "",
+   "file": "390x844-synthetic-store-expanded.png"
+  },
+  {
+   "viewport": "1648x1000",
+   "store": "synthetic-disabled",
+   "expanded": false,
+   "known_count": 5,
+   "known_ids": [
+    "3-1-QSC-I-27-006-005",
+    "3-1-QSC-I-27-017-037",
+    "3-1-QSC-I-27-017-017",
+    "3-1-QSC-I-27-017-038",
+    "3-1-QSC-I-27-017-016"
+   ],
+   "precedent_blocks": 0,
+   "page_note": "Showing earlier decisions is switched off (you disabled learned use of your decision cases).",
+   "file": "1648x1000-synthetic-disabled.png"
+  }
+ ]
+}

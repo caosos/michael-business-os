@@ -11,6 +11,7 @@ from . import landing_fix
 from . import market_search as ms
 from .deal_ui import classify_url
 from .live_demo import link_html
+from . import precedent_view as pv
 
 CATEGORY = "marketplace"
 e = lambda v: html.escape("" if v is None else str(v))  # noqa: E731
@@ -92,10 +93,10 @@ def gallery_card(c: dict, tok) -> str:
             f"<div class='small mut gal-lbl'>{gallery_labels(c)}</div><div class='small'>{link_html(c['url'])} · <span class='lbl'>WATCH</span></div>{pref_buttons(c, tok)}</div>")
 
 
-def gallery(cards: list[dict], q: dict, tok) -> str:
+def gallery(cards: list[dict], q: dict, tok, prec: dict | None = None) -> str:
     out = []
     for name, row in ms.gallery_rows(cards, q):
-        body = "".join(gallery_card(c, tok) for c in row) or "<p class='mut small'>No matching known inventory in this category (known = the cached GSA list only).</p>"
+        body = "".join(pv.inject(gallery_card(c, tok), (prec or {}).get(c["id"], "")) for c in row) or "<p class='mut small'>No matching known inventory in this category (known = the cached GSA list only).</p>"
         out.append(f"<section class='mk-row' data-row='{e(name)}'><h2 style='text-transform:capitalize'>{e(name)} <span class='small mut'>({len(row)})</span></h2><div class='mk-gal'>{body}</div></section>")
     return "".join(out)
 
@@ -332,6 +333,7 @@ def render_page(q: dict, d: dict, results: list[dict], hidden: dict, saved: list
         scope = (f" within {q['radius']:g} mi of {e(q['base'])}" if q["radius"] is not None else "") if q.get("loc_mode") != "state" else f" in {e(', '.join(q['states']))}" + (f" and within {q['radius']:g} mi of {e(q['base'])}" if q.get("also_radius") and q["radius"] is not None else "")
         zero = ("<p class='mut' id='zero-results'><b>0 results</b> match every filter" + scope + ". Nothing is padded in"
                 + (f"; {len(unchecked)} lot(s) could not be checked and are listed below, not counted" if unchecked else "") + ". Loosen a filter or widen the radius.</p>")
+        prec, prec_note = pv.for_cards(results)          # F-139: read-only, checked results only
         render = (lambda c: gallery_card(c, tok)) if q.get("view") != "list" else (lambda c: render_card(c, tok))
         wrap = (lambda cs: f"<div class='mk-gal'>{''.join(map(render, cs))}</div>") if q.get("view") != "list" else (lambda cs: "".join(map(render, cs)))
         opt = ((f"<details class='mk-sec' id='unchecked-section'><summary><b>Optional: {len(unchecked)} lot(s) that could not be checked (not counted as local or in range). Click to open.</b></summary>"
@@ -343,7 +345,8 @@ def render_page(q: dict, d: dict, results: list[dict], hidden: dict, saved: list
                     "there is no guaranteed replacement. Undo a hide below, or loosen a filter.</p>")
         body = (chips(q) + f"<h2>{len(results)} result{'s' if len(results) != 1 else ''}{scope}</h2>" + "<p class='small mut' style='margin:2px 0'>Cached copy of the GSA list, not a fresh fetch (GSA surplus only). Price = current bid, not a sold price or final cost; all-in cost UNKNOWN."
                 + (f" Hidden: {e(hid)}." if hid else "") + "</p>"
-                + ((gallery(results, q, tok) if q.get("view") != "list" else "".join(render_card(c, tok) for c in results)) if results else zero) + opt
+                + (f"<p class='small mut' id='precedent-note'>{e(prec_note)}</p>" if prec_note and results else "")
+                + ((gallery(results, q, tok, prec) if q.get("view") != "list" else "".join(pv.inject(render_card(c, tok), prec.get(c["id"], "")) for c in results)) if results else zero) + opt
                 + distance_caveat(q, results + unchecked))
     return (CSS + "<h1 class='pagehead'>Michael's Marketplace</h1><div class='mk'>" + _sidebar(saved, csrf, pin_html, tok, q, _save(q, edit_id, tok, pin_html))
             + f"<section class='mk-main' id='results-top'>{err}{verr}{_form(q, edit_id, tok, pin_html)}{render_status(d)}{body}{hidden_panel(prefs, tok) if prefs else ''}{prefs_panel(prefs, tok) if prefs else ''}{working_capital()}{gsa_explainer()}</section></div>")
