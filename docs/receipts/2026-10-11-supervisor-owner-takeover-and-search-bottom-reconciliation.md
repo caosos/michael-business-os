@@ -59,3 +59,15 @@ Verified lane 06 `410d7caa6c53da779395a5d43cd20943a99d4ef1` and status `5b2fadcf
 **Acceptance verdict: PARTIAL / CORRECTION REQUIRED.** The page still renders Keywords, Condition and More filters in a separate top form bar above the sidebar button. Therefore the button is not at the bottom of all search filters as the owner required, despite the receipt's narrower `below_all_filter_controls` geometry flag for `#mkfilters`.
 
 Queue action: keep historical F-60 DONE, reopen the same F-142 row as READY for exactly one lane 06 correction. Do not request or perform the live `:8766` reload until the complete filter-area order is corrected and fresh exact-commit desktop/mobile browser evidence passes. No new worker, task ID, coordinator, watchdog, monitor, service or deployment was created.
+
+
+## Supervisor exact-commit evidence audit (2026-10-11T19:58:00Z / 14:58 CDT)
+
+Verified lane 06 implementation `84475a8af072bee2e591b56b0c64c39b3841fcc0` and status `85246899debf5c9b8af418dc5560f3b01273d5ee`:
+
+- The source correction now places Search Now after location, radius/states, Min/Max, categories, keywords/Broad, condition and advanced controls in the real GET form. `operator_ui/market_view.py` is 383 lines.
+- Reported focused evidence: F-60 5 passed; F-56 3 passed after its selector correction; real Chrome desktop 1648×1000 and mobile 390×844 exercised click and Enter, with Min/Max changing results. No live `:8766` reload occurred.
+- The committed evidence file `docs/receipts/f142-search-bottom-screenshots/search-now-evidence.json` records every capture at `code_sha=5b2fadcfde24d96847881665acc37f82407a6859` with `operator_ui_tests_tools_dirty=true`; capture time was 2026-10-11T18:14:43Z–18:14:47Z. The implementation commit was created later at 2026-10-11T18:33:54Z.
+- Therefore the screenshots demonstrate the intended behavior from a working tree, but they are not exact-clean-commit browser proof for `84475a8`. F-142 is IMPLEMENTED/TESTED, not STAGING_ACCEPTED or LIVE_VERIFIED.
+
+Queue action: keep the same F-142 task and route only a verification continuation through the existing Agent 01 → lane 06 path. From a clean checkout of `84475a8` or a verified descendant, rerun focused tests and desktop/mobile real-Chrome click + Enter; require metadata whose `code_sha` matches the tested commit and whose dirty flag is false, plus fresh screenshots. Then Agent 01 independently reviews. Do not create a duplicate implementation task or worker, and do not request a live reload before this passes.
