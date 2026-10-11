@@ -4,10 +4,10 @@
 - **Role:** Chief Coordinator / Core Platform / Integration (Lane A)
 - **Branch:** `research/agent-01-coordinator`
 - **Worktree:** `/home/michaelos/business-os-worktrees/agent-01-coordinator`
-- **State:** WORKING (reboot-recovery closeout: persistence units NEED; A-69 live proof)
+- **State:** COMPLETE (reboot recovery closeout done; standing liaison and feed re-arm continue)
 - **Proposed:** (02) B-23 fixture adapter emits contract enum values (`ingestion_method` json/api, counterparty role `other`); then drop `auction_lot.conform`
 - **Done:** A-51 @ 12817e7; A-49 @ b2b3399; A-47 @ 6e6aa84; A-48 @ 8abbfa0; A-43 @ da6cf4a; A-44 @ 6440be3; A-42 @ 69402d9; A-41 @ 281cc74; A-40 @ 1160310; A-39 @ 6185927; A-38 @ 2198a74; A-37 @ b92683d
-- **NEED (owner, one fix):** reboot persistence for the 5 tmux sessions; the session permission classifier refused writing user systemd units. Michael says "install the user-level MBOS persistence units" in this session, or allows Bash writes under `ops/systemd/` and `~/.config/systemd/user/`. Detail: `docs/receipts/2026-10-11-reboot-recovery-closeout.md`
+- **Done (reboot persistence):** five user units enabled+active, Linger=yes; `docs/operations/REBOOT_RECOVERY.md`; cold start proven only by the next reboot
 - **Claimed:** A-31 (first bounded worker end to end), A-28 (07's F-50), A-29 (foreman --launch)
 - **Done (this wave, runtime migration):** ADR-0014; lanes 02-06 closed out and sessions closed after verification; `tools/worker.py`, `mbos.router`, `mbos.telemetry`; quota from `rate_limit_event` verified; Aria 1945 ack
 - **Done (this wave):** A-24, A-25, A-26, A-27, A-12; Aria 1840 ack (ADR-0012, card capital-velocity fields) @ 292adae; Aria 1905 ack (ADR-0013, 20 tasks queued) @ e20d6af; A-23 mission schema @ a704e84 (+ principal_impairment @ 7b42c05); A-22 `tools/foreman.py`; release gate 285 passed (stale lane installs refreshed)

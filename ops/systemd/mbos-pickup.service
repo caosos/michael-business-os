@@ -1,20 +1,12 @@
-# User service for the existing `michaelos` account. NOT installed by the repo; see docs/operations/PICKUP_PERSISTENCE.md.
+# User unit (account michaelos). Installed by ops/systemd/install_user_units.sh; see docs/operations/REBOOT_RECOVERY.md.
 [Unit]
-Description=MBOS automatic GitHub pickup (Agent 01, tools/inbox_pickup.py)
-Wants=network-online.target
-After=network-online.target
+Description=MBOS pickup tmux session (restores the EXISTING session after reboot; never starts a duplicate)
 
 [Service]
-Type=simple
-WorkingDirectory=%h/business-os-worktrees/agent-01-coordinator
+Type=oneshot
+RemainAfterExit=yes
 Environment=PATH=%h/.local/bin:%h/bin:/usr/local/bin:/usr/bin:/bin
-Environment=PYTHONUNBUFFERED=1
-ExecStart=%h/business-os-worktrees/agent-01-coordinator/.venv/bin/python -u -I tools/inbox_pickup.py --interval 60
-Restart=on-failure
-RestartSec=30
-StandardOutput=append:%h/business-os-worktrees/agent-01-coordinator/var/pickup/daemon.out
-StandardError=inherit
-NoNewPrivileges=yes
+ExecStart=%h/business-os-worktrees/agent-01-coordinator/ops/systemd/mbos-ensure-tmux.sh pickup
 
 [Install]
 WantedBy=default.target

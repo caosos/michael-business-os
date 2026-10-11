@@ -1,0 +1,12 @@
+# User unit (account michaelos). Installed by ops/systemd/install_user_units.sh; see docs/operations/REBOOT_RECOVERY.md.
+[Unit]
+Description=MBOS agent-01 tmux session (restores the EXISTING session after reboot; never starts a duplicate)
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+Environment=PATH=%h/.local/bin:%h/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=%h/business-os-worktrees/agent-01-coordinator/ops/systemd/mbos-ensure-tmux.sh agent-01
+
+[Install]
+WantedBy=default.target
