@@ -14,7 +14,7 @@
    "results_after": 97,
    "changed": true,
    "shot": "live-desktop-click.png",
-   "at": "2026-10-11T21:29:38+00:00"
+   "at": "2026-10-11T21:33:26+00:00"
   },
   {
    "view": "mobile",
@@ -28,7 +28,7 @@
    "results_after": 97,
    "changed": true,
    "shot": "live-mobile-click.png",
-   "at": "2026-10-11T21:29:39+00:00"
+   "at": "2026-10-11T21:33:28+00:00"
   },
   {
    "view": "desktop",
@@ -42,7 +42,7 @@
    "results_after": 97,
    "changed": true,
    "shot": "live-desktop-enter.png",
-   "at": "2026-10-11T21:29:40+00:00"
+   "at": "2026-10-11T21:33:29+00:00"
   }
  ]
 }
