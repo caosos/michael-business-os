@@ -21,6 +21,11 @@ def start():
     return pr, f"http://127.0.0.1:{port}"
 
 
+def nav(pg, loc=None, key=None):
+    with pg.expect_navigation():
+        loc.click() if loc is not None else pg.keyboard.press(key)
+
+
 VIS = "()=>[...document.querySelectorAll('.mk-g')].filter(c=>!c.closest('#unchecked-section')).map(c=>c.dataset.lot)"
 UNC = "()=>[...document.querySelectorAll('#unchecked-section .mk-g')].map(c=>c.dataset.lot)"
 res = {"code_sha": git("rev-parse", "HEAD"), "dirty": bool(git("status", "--porcelain", "--", "operator_ui", "tests", "tools")), "cache_sha256": hashlib.sha256(REAL.read_bytes()).hexdigest(),
@@ -32,21 +37,21 @@ with sync_playwright() as p:
     pg = br.new_page(viewport={"width": 1648, "height": 1000}); pg.goto(base + URL)
     ids0 = pg.evaluate(VIS); unc0 = pg.evaluate(UNC); res["steps"]["before"] = {"checked": len(ids0), "unchecked": len(unc0)}
     pg.locator(".mk-g").first.scroll_into_view_if_needed(); pg.screenshot(path=str(out / "desktop-before.png"))
-    pg.locator(f".mk-g[data-lot='{ids0[0]}'] .mk-x").click(); pg.wait_for_load_state()                      # real mouse click on X
+    nav(pg, pg.locator(f".mk-g[data-lot='{ids0[0]}'] .mk-x"))                      # real mouse click on X
     pg.goto(base + URL); ids1 = pg.evaluate(VIS); res["steps"]["after_click"] = {"hidden": ids0[0], "gone": ids0[0] not in ids1, "rest_same_order": ids1 == ids0[1:]}
-    pg.locator(f".mk-g[data-lot='{ids1[0]}'] .mk-x").focus(); pg.keyboard.press("Enter"); pg.wait_for_load_state()   # keyboard-operated X
+    pg.locator(f".mk-g[data-lot='{ids1[0]}'] .mk-x").focus(); nav(pg, key="Enter")   # keyboard-operated X
     pg.goto(base + URL); ids2 = pg.evaluate(VIS); res["steps"]["after_keyboard"] = {"hidden": ids1[0], "gone": ids1[0] not in ids2, "rest_same_order": ids2 == ids1[1:]}
-    pg.locator("#unchecked-section summary").click()
+    pg.locator("#unchecked-section > summary").click()
     if unc0:
-        pg.locator(f"#unchecked-section .mk-g[data-lot='{unc0[0]}'] .mk-x").click(); pg.wait_for_load_state()
+        nav(pg, pg.locator(f"#unchecked-section .mk-g[data-lot='{unc0[0]}'] .mk-x"))
         pg.goto(base + URL); res["steps"]["unchecked_hide"] = {"hidden": unc0[0], "gone": unc0[0] not in pg.evaluate(UNC)}
     for act in ("disable", "enable"):                                                                            # toggle independence
-        pg.goto(base + URL); pg.locator("#prefs summary").click(); pg.locator(f"#prefs button[value={act}]").click(); pg.wait_for_load_state()
+        pg.goto(base + URL); pg.locator("#prefs summary").click(); nav(pg, pg.locator(f"#prefs button[value={act}]"))
         pg.goto(base + URL); res["steps"][f"toggle_{act}"] = {"still_hidden": not ({ids0[0], ids1[0]} & set(pg.evaluate(VIS)))}
     pg.goto(base + URL); pg.locator("#hidden-list summary").click(); pg.evaluate("document.querySelector('#hidden-list').scrollIntoView()"); pg.screenshot(path=str(out / "desktop-hidden-list.png"))
     pr.terminate(); pr.wait(10); pr, base = start(); res["pid_after"] = pr.pid                                      # REAL restart
     pg.goto(base + URL); ids3 = pg.evaluate(VIS); res["steps"]["after_restart"] = {"hidden_still_gone": not ({ids0[0], ids1[0]} & set(ids3)), "same_as_before_restart": ids3 == ids2}
-    pg.locator("#hidden-list summary").click(); pg.locator(f"#hidden-list li[data-hidden='{ids0[0]}'] button").click(); pg.wait_for_load_state()   # Undo one
+    pg.locator("#hidden-list summary").click(); nav(pg, pg.locator(f"#hidden-list li[data-hidden='{ids0[0]}'] button"))   # Undo one
     pg.goto(base + URL); ids4 = pg.evaluate(VIS); res["steps"]["undo_one"] = {"restored": ids0[0] in ids4, "other_still_hidden": ids1[0] not in ids4}
     pg.screenshot(path=str(out / "desktop-after-undo.png"))
     m = br.new_page(viewport={"width": 390, "height": 844}); m.goto(base + URL); m.locator(".mk-g").first.scroll_into_view_if_needed(); m.screenshot(path=str(out / "mobile-card-x.png"))
@@ -55,7 +60,7 @@ with sync_playwright() as p:
     T = "/market?go=1&base=Conway+AR&broad=1&radius=150&max_price=300"
     pg.goto(base + T)
     for i in pg.evaluate(VIS):
-        pg.goto(base + T); pg.locator(f".mk-g[data-lot='{i}'] .mk-x").click(); pg.wait_for_load_state()
+        pg.goto(base + T); nav(pg, pg.locator(f".mk-g[data-lot='{i}'] .mk-x"))
     pg.goto(base + T); res["steps"]["exhausted"] = {"text": pg.inner_text("#zero-results"), "cards_left": len(pg.evaluate(VIS))}
     pg.screenshot(path=str(out / "desktop-exhausted.png"))
     br.close()
