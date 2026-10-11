@@ -1,0 +1,21 @@
+{
+ "conway150": {
+  "gsa_cards": 1,
+  "your_finds_heading": "YOUR FINDS (0)",
+  "add_form": true,
+  "hidden_note": true
+ },
+ "broad300": {
+  "gsa_cards": 6,
+  "your_finds_heading": "YOUR FINDS (0)",
+  "add_form": true,
+  "hidden_note": true
+ },
+ "price1000": {
+  "gsa_cards": 1,
+  "your_finds_heading": "YOUR FINDS (0)",
+  "add_form": true,
+  "hidden_note": true
+ },
+ "mobile_overflow": false
+}
