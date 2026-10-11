@@ -63,7 +63,7 @@ Canonical owner intent: [DEAL_SNIFFER_START_HERE.md](DEAL_SNIFFER_START_HERE.md)
 - Builder completion must publish GitHub receipt with task ID, commit SHA, tests, browser screenshots where applicable, queue status, and next eligible task. Coordinator must update this checklist and queue without losing historical DONE rows.
 - Notify owner only for finished sections needing acceptance or genuine authority/permission blockers; preserve live release gates and no-spend/no-bid restrictions.
 - Any user-facing change requires actual browser interaction (desktop and mobile), not only code tests. Target source modules under 400 lines when practical; split by responsibility, avoid artificial fragmentation.
-- Current five-minute idle enforcement: NOT VERIFIED. Current direct cloud push notification to this chat: NOT VERIFIED. Current local worker liveness: NOT VERIFIED from GitHub alone.
+- Five-minute idle enforcement: NOT IMPLEMENTED in the inspected source snapshot (see source-audit receipt); current local worker liveness and direct cloud push notification to this chat remain NOT VERIFIED.
 
 
 ## Supervisor verification — five-minute detection and handoff (2026-10-11)
