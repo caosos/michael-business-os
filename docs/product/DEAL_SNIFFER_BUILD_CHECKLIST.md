@@ -64,3 +64,11 @@ Canonical owner intent: [DEAL_SNIFFER_START_HERE.md](DEAL_SNIFFER_START_HERE.md)
 - Notify owner only for finished sections needing acceptance or genuine authority/permission blockers; preserve live release gates and no-spend/no-bid restrictions.
 - Any user-facing change requires actual browser interaction (desktop and mobile), not only code tests. Target source modules under 400 lines when practical; split by responsibility, avoid artificial fragmentation.
 - Current five-minute idle enforcement: NOT VERIFIED. Current direct cloud push notification to this chat: NOT VERIFIED. Current local worker liveness: NOT VERIFIED from GitHub alone.
+
+
+## Supervisor verification — five-minute detection and handoff (2026-10-11)
+- Source-audit receipt: [2026-10-11-supervisor-five-minute-check.md](../receipts/2026-10-11-supervisor-five-minute-check.md), inspected at `336a4ff`.
+- Five-minute idle detection: **NOT IMPLEMENTED in the inspected source**. `foreman.py` reports state but does not time or dispatch; `coordinator_watch.py` polls every 120 seconds, uses a 900-second stale threshold, and rate-limits wakes to 600 seconds. `dispatcher.py` polls every 90 seconds, but its source does not enforce a five-minute maximum idle interval.
+- Next-task handoff: source supports recommendation/notification only. `engineering_session.finish` records the next task and makes it announceable on the next feed cycle; the interactive session must begin it. `next_work.py` polls at least every 120 seconds, reminders are 600 seconds apart, and each Monitor expires after 30 minutes unless the session re-arms it. Historical focused tests and Monitor receipts do not prove a current live run.
+- Current local liveness and end-to-end handoff: **UNVERIFIED**. This Work session could not connect to `:8766` and has no local checkout/process view. Do not report the five-minute requirement as working.
+- Existing next coordinator action remains reconcile F-140 READY against lane 06 status; F-140 remains the existing queued task, with no duplicate worker or monitor created.
