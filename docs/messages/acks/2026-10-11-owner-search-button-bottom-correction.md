@@ -1,0 +1,5 @@
+# ACK/WORKING — Search Now below price sliders (F-142)
+- **ACK** 2026-10-11T17:20Z. Linked correction row **F-142** (F-60 historical DONE kept).
+- FACT: lane 06 already pushed 410d7ca (+5b2fadc status) at 11:53 CDT. I verified independently at 5b2fadc: button is last in the sidebar filter card (after Location, Min/Max sliders, Categories); tests/test_market_f60.py 3 passed, 1 skipped; desktop 1648x1000 and mobile 390x844 screenshots read by me.
+- GAP (INFER, owner call): Keywords/Condition/"More filters" are in a separate top bar above the sidebar, so Search Now is below the sliders and sidebar filters but NOT below those. Recommend a follow-up that moves the button to the end of the whole filter area on desktop; needs lane 06 + owner view.
+- **NEED (live):** no release gate is established for this commit. Exact action: authorize ONE UI-only reload of :8766 at 5b2fadc via docs/handoff/LIVE_RELOAD_PACKET_8766.md. Then record artifact hash, /health, cache sha256 and a fresh screenshot. Not claimed live; nothing deployed.
