@@ -37,7 +37,7 @@
    "since": "2026-10-11T05:59:23Z"
   }
  ],
- "coordinator_head": "df4b53d",
+ "coordinator_head": "7aaed3e",
  "counts": {
   "BLOCKED": [
    "ARYA-20261010-1954-authorized-ui-release",
@@ -120,23 +120,23 @@
  "currently_running": null,
  "delivery_interface": {
   "claude_cli": true,
-  "quota": "latest reading is 181 min old (older than 45)",
+  "quota": "latest reading is 191 min old (older than 45)",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-11T09:21:23Z",
+ "generated_at": "2026-10-11T09:31:25Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
-  "decision": "session is 'shell', not idle (it will see the work on its own sync)",
+  "decision": "nothing needed",
   "note": "pickup does not need the interactive session",
-  "state": "DEGRADED"
+  "state": "HEALTHY"
  },
  "pid": 3355056,
  "receipts": "var/pickup/receipts.jsonl (hash-chained, local) and docs/receipts/pickup/<id>.md on the coordinator branch",
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-11T09:21:23Z",
+  "observed_at": "2026-10-11T09:31:25Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
   "status": "idle",
