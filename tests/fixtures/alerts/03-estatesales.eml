@@ -1,0 +1,13 @@
+From: EstateSales.NET <alerts@estatesales.net>
+To: michael@example.invalid
+Subject: New estate sale near Conway, AR
+Date: Wed, 07 Oct 2026 08:00:00 -0500
+Message-ID: <fixture-es-1@estatesales.net>
+Authentication-Results: mx.example.invalid; dkim=pass header.d=estatesales.net
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body>
+<p><a href="https://www.estatesales.net/AR/Conway/72034/4567890">Conway estate sale: shop tools, generator, air compressor</a>
+ Dates: Oct 10-11 &middot; Conway, AR 72034</p>
+</body></html>

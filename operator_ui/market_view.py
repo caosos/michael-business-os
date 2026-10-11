@@ -12,6 +12,7 @@ from . import market_search as ms
 from .deal_ui import classify_url
 from .live_demo import link_html
 from . import precedent_view as pv
+from . import market_source_view as msv
 
 CATEGORY = "marketplace"
 e = lambda v: html.escape("" if v is None else str(v))  # noqa: E731
@@ -88,7 +89,7 @@ def gallery_card(c: dict, tok) -> str:
     town = e(c["city"] or "town UNKNOWN") + (f" · {round(c['distance'], 1):g} mi" if c["distance"] is not None else " · distance UNKNOWN")
     ti = c["title"] if len(c["title"]) <= 60 else c["title"][:59] + "…"
     flag = " <span class='badge'>SAVED</span>" if c.get("saved") else ""
-    return (f"<div class='mk-g' data-lot='{e(c['id'])}'>{ph}{price}<div class='ti'><b>{e(ti)}</b>{flag}</div><div class='small'>{town}</div>"
+    return (f"<div class='mk-g' data-lot='{e(c['id'])}'>{ph}{price}<div class='ti'><b>{e(ti)}</b>{flag}</div><div class='small'>{town}</div>{msv.card_note(c)}"
             f"<div class='small mut'>closes {e(c['closes'] or 'UNKNOWN')} · posted age: not given · auction, all-in cost unknown</div>"
             f"<div class='small mut gal-lbl'>{gallery_labels(c)}</div><div class='small'>{link_html(c['url'])} · <span class='lbl'>WATCH</span></div>{pref_buttons(c, tok)}</div>")
 
@@ -115,12 +116,14 @@ def render_card(c: dict, tok=None) -> str:
     where = e(c["city"] or "UNKNOWN") + (f" · {round(c['distance'], 1):g} mi from your base" if c["distance"] is not None else " · distance UNKNOWN (place not in our small local gazetteer; see the note above)")
     stale = " <b class='bad'>STALE: bid may have moved</b>" if c["stale"] else ""
     L = c.get("labels") or ms.auction_labels({})
+    auction_line = (f"<p class='small' id='auction-labels'>Next bid: {e(L['next_min_text'])} · Reserve: {e(L['reserve_text'])} · source GSA Auctions cache</p>" if not c.get("fixture")
+                    else f"<p class='small'>{msv.card_note(c)}Reserve and next bid: UNKNOWN (alert e-mail text only).</p>")
     return (f"<div class='card mk-res'>{_photo(c['image'], c['url'])}<div style='min-width:0'><h3 style='margin:0 0 4px'>{e(c['title'])} "
             f"<span class='badge'>{verdict}</span> <span class='lbl'>RESEARCH NEEDED</span></h3>"
             f"<p class='small'>{e(c['description']) or '<span class=mut>No description from the seller</span>'}</p>"
             f"<p><span class='lbl'>AUCTION</span> Current bid <b>{_money(c['bid'])}</b> (a bid, not a sold price or final cost) · Asking price: none (auction) · closes {e(c['closes'] or 'UNKNOWN')} · {where} · "
             f"condition (seller says): {e(c['condition'] or 'UNKNOWN')}</p>"
-            f"<p class='small' id='auction-labels'>Next bid: {e(L['next_min_text'])} · Reserve: {e(L['reserve_text'])} · source GSA Auctions cache</p>"
+            f"{auction_line}"
             + (f"<p class='small' id='opening-min'>No bids yet. {e(L['opening_text'])}" + ("" if L["opening_min"] is not None else f" {link_html(c['url'])}") + "</p>" if c["bid"] is None else "")
             + "<p class='small mut' id='valuation-note'>Valuation: a gross scrap/component estimate is not a net yard pickup offer. Pickup, deductions, towing, disposal, fees, title, condition and recoverable weight: UNKNOWN.</p>"
             f"<p class='small'>Price math: bid {_money(c['bid'])} + buyer premium UNKNOWN + transport UNKNOWN + repair UNKNOWN "
@@ -145,6 +148,8 @@ def distance_caveat(q: dict, results: list[dict]) -> str:
 
 
 def render_status(d: dict) -> str:
+    if d.get("name") or d.get("coverage"):             # F-145: a non-GSA source page (govdeals | publicsurplus | all): per-source coverage
+        return msv.coverage(d)
     if d["status"] != "connected":
         return f"<div class='flash err' id='source-status'><b>GSA Auctions: offline.</b> {e(d['message'])}</div>"
     warn = (f" <b class='bad'>STALE ({d['age_h']:g} h old): current bids may have changed.</b>" if d["stale"] else "")
@@ -219,7 +224,7 @@ def _more_filters(q: dict) -> str:
             f"<label>Must include <input form='mkform' name='required' size='14' value='{v('required')}'></label>"
             f"<label>Nice to include <input form='mkform' name='preferred' size='14' value='{v('preferred')}'></label>"
             f"<label>Exclude <input form='mkform' name='exclude' size='14' value='{v('exclude')}'></label>"
-            f"<label>Source {sel('source', [('gsa', 'GSA Auctions')] + [(n.lower(), n + ' (not connected)') for n in ms.NOT_CONNECTED], q.get('source', 'gsa'))}</label>"
+            f"<label>Source {sel('source', msv.source_options(), q.get('source', 'gsa'))}</label>"
             f"<label>Type {sel('kind', [('any', 'Any'), ('auction', 'Auction'), ('fixed', 'Fixed price')], q.get('kind', 'any'))}</label>"
             f"<label>Closing by <input type='date' form='mkform' name='closing_by' value='{v('closing_by')}'></label>"
             f"<p class='small'><b>Gallery rows</b> (top to bottom; leave blank for fewer than 4)</p>"
@@ -341,11 +346,11 @@ def render_page(q: dict, d: dict, results: list[dict], hidden: dict, saved: list
     verr = ("<div class='flash err' id='filter-errors' role='alert'><b>Check your filters.</b><ul>" + "".join(f"<li>{e(m)}</li>" for m in bad) + "</ul>No search was run.</div>") if bad and ran else ""
     if not ran:
         body = "<p class='mut'>Fill in the search and press Search. Nothing is fetched from the internet by this page.</p>"
-    elif q["source"] != "gsa":
-        body = f"<div class='card'><b>{e(q['source'])}: not connected.</b> No results are shown for a source that is not wired; nothing is mocked.</div>"
+    elif msv.gate(q, d):
+        body = msv.gate(q, d)
     elif q["kind"] == "fixed":
         body = "<div class='card'>GSA Auctions lists auctions only; no fixed-price results from a connected source.</div>"
-    elif d["status"] != "connected" or bad:
+    elif d["status"] not in ("connected", "fixture") or bad:
         body = ""
     else:
         hid = ", ".join(f"{n} by {k}" for k, n in hidden.items() if n)
@@ -363,7 +368,7 @@ def render_page(q: dict, d: dict, results: list[dict], hidden: dict, saved: list
         if n_hid and not results:
             zero = (f"<p class='mut' id='zero-results'><b>0 results left.</b> All {n_hid} cached listing(s) that match your filters" + scope + " are hidden by you. Nothing else was substituted and no new fetch was made; "
                     "there is no guaranteed replacement. Undo a hide below, or loosen a filter.</p>")
-        body = (chips(q) + f"<h2>{len(results)} result{'s' if len(results) != 1 else ''}{scope}</h2>" + "<p class='small mut' style='margin:2px 0'>Cached copy of the GSA list, not a fresh fetch (GSA surplus only). Price = current bid, not a sold price or final cost; all-in cost UNKNOWN."
+        body = (chips(q) + f"<h2>{len(results)} result{'s' if len(results) != 1 else ''}{scope}</h2>" + f"<p class='small mut' style='margin:2px 0'>{e(msv.scope_line(d))}"
                 + (f" Hidden: {e(hid)}." if hid else "") + "</p>"
                 + (f"<p class='small mut' id='precedent-note'>{e(prec_note)}</p>" if prec_note and results else "")
                 + ((gallery(results, q, tok, prec) if q.get("view") != "list" else "".join(pv.inject(render_card(c, tok), prec.get(c["id"], "")) for c in results)) if results else zero) + opt

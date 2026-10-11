@@ -59,9 +59,9 @@ def page_body(app, qs: dict, now, errors=None, values=None) -> str:
         q = ms.parse_query(qs)
     edit = (qs.get("edit") or [None])[0]
     ran = not qs.get("new") and not qs.get("edit")
-    data = ms.load_gsa(os.environ.get("MBOS_GSA_CACHE") or None, now, ms._origin(q["base"])) if q["source"] == "gsa" or not ran else \
+    data = ms.load_source(q["source"], now, ms._origin(q["base"]), os.environ.get("MBOS_GSA_CACHE") or None) if ran else \
         {"status": "connected", "as_of": None, "age_h": 0, "stale": False, "in_scope": 0, "in_file": 0, "cards": [], "message": ""}
-    results, unchecked, hidden = ms.partition(data["cards"], q) if ran and data["status"] == "connected" and not q["errors"] else ([], [], {})
+    results, unchecked, hidden = ms.partition(data["cards"], q) if ran and data["status"] in ("connected", "fixture") and not q["errors"] else ([], [], {})
     prefs = mp.load()
     n_before = len(results) + len(unchecked)
     results, g1 = mp.hide(results, prefs)             # a hidden listing stays hidden in BOTH sections, with suggestions on or off
