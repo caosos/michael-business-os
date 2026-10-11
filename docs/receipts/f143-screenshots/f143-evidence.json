@@ -1,0 +1,332 @@
+{
+ "code_sha": "f255d750324bd054994adc5ea39ef58752110b3b",
+ "operator_ui_tests_tools_dirty": false,
+ "cache_sha256": "7eb8efd4b6d7be71bc932a8ef774e8b6bd8a932f2ddb56f2e8b109d829e9de7b",
+ "cache_as_of_utc": "2026-10-11T02:48:28Z",
+ "store": "STUB (no database)",
+ "port": 45899,
+ "captured_at_utc": "2026-10-11T22:03:30+00:00",
+ "failed": [],
+ "checks": [
+  {
+   "check": "desktop-1648x1000: new user has empty origin and no Conway text",
+   "ok": true,
+   "origin": ""
+  },
+  {
+   "check": "desktop-1648x1000: price sliders absent",
+   "ok": true
+  },
+  {
+   "check": "desktop-1648x1000: Search Now last after every filter",
+   "ok": true
+  },
+  {
+   "check": "desktop-1648x1000: radius slider visible with min/max labels",
+   "ok": true
+  },
+  {
+   "check": "desktop-1648x1000: slider 0: displayed miles == submitted",
+   "ok": true,
+   "shown": "0 miles",
+   "url": "http://127.0.0.1:45899/market?loc_mode=distance&base=Conway+AR&radius=0&state_find=&min_price=&max_price=&any=&broad=1&keywords=&condition=&required=&preferred=&exclude=&source=gsa&kind=any&closing_by=&row1=trailers&row2=equipment&row3=vehicles&row4=&go=1&sort=closing&view=gallery",
+   "known_count": 0,
+   "ids": []
+  },
+  {
+   "check": "desktop-1648x1000: slider 60: displayed miles == submitted",
+   "ok": true,
+   "shown": "60 miles",
+   "url": "http://127.0.0.1:45899/market?loc_mode=distance&base=Conway+AR&radius=60&state_find=&min_price=&max_price=&any=&broad=1&keywords=&condition=&required=&preferred=&exclude=&source=gsa&kind=any&closing_by=&row1=trailers&row2=equipment&row3=vehicles&row4=&go=1&sort=closing&view=gallery",
+   "known_count": 11,
+   "ids": [
+    "3-1-QSC-I-27-019-010",
+    "3-1-QSC-I-27-019-011",
+    "3-1-QSC-I-27-019-005",
+    "3-1-QSC-I-27-019-007",
+    "3-1-QSC-I-27-019-004",
+    "3-1-QSC-I-27-019-003",
+    "3-1-QSC-I-27-019-006",
+    "3-1-QSC-I-27-019-002",
+    "3-1-QSC-I-27-019-001",
+    "3-1-QSC-I-27-019-009",
+    "3-1-QSC-I-27-017-028"
+   ]
+  },
+  {
+   "check": "desktop-1648x1000: slider 120: displayed miles == submitted",
+   "ok": true,
+   "shown": "120 miles",
+   "url": "http://127.0.0.1:45899/market?loc_mode=distance&base=Conway+AR&radius=120&state_find=&min_price=&max_price=&any=&broad=1&keywords=&condition=&required=&preferred=&exclude=&source=gsa&kind=any&closing_by=&row1=trailers&row2=equipment&row3=vehicles&row4=&go=1&sort=closing&view=gallery",
+   "known_count": 19,
+   "ids": [
+    "3-1-QSC-I-27-006-005",
+    "3-1-QSC-I-27-019-010",
+    "3-1-QSC-I-27-019-011",
+    "3-1-QSC-I-27-019-005",
+    "3-1-QSC-I-27-019-007",
+    "3-1-QSC-I-27-019-004",
+    "3-1-QSC-I-27-019-003",
+    "3-1-QSC-I-27-019-006",
+    "3-1-QSC-I-27-019-002",
+    "3-1-QSC-I-27-019-001",
+    "3-1-QSC-I-27-019-009",
+    "3-1-QSC-I-27-017-028",
+    "3-1-QSC-I-27-017-037",
+    "3-1-QSC-I-27-017-054",
+    "3-1-QSC-I-27-017-017",
+    "3-1-QSC-I-27-017-040",
+    "3-1-QSC-I-27-017-039",
+    "3-1-QSC-I-27-017-038",
+    "3-1-QSC-I-27-017-016"
+   ]
+  },
+  {
+   "check": "desktop-1648x1000: slider 25000: displayed miles == submitted",
+   "ok": true,
+   "shown": "25000 miles",
+   "url": "http://127.0.0.1:45899/market?loc_mode=distance&base=Conway+AR&radius=25000&state_find=&min_price=&max_price=&any=&broad=1&keywords=&condition=&required=&preferred=&exclude=&source=gsa&kind=any&closing_by=&row1=trailers&row2=equipment&row3=vehicles&row4=&go=1&sort=closing&view=gallery",
+   "known_count": 19,
+   "ids": [
+    "3-1-QSC-I-27-006-005",
+    "3-1-QSC-I-27-019-010",
+    "3-1-QSC-I-27-019-011",
+    "3-1-QSC-I-27-019-005",
+    "3-1-QSC-I-27-019-007",
+    "3-1-QSC-I-27-019-004",
+    "3-1-QSC-I-27-019-003",
+    "3-1-QSC-I-27-019-006",
+    "3-1-QSC-I-27-019-002",
+    "3-1-QSC-I-27-019-001",
+    "3-1-QSC-I-27-019-009",
+    "3-1-QSC-I-27-017-028",
+    "3-1-QSC-I-27-017-037",
+    "3-1-QSC-I-27-017-054",
+    "3-1-QSC-I-27-017-017",
+    "3-1-QSC-I-27-017-040",
+    "3-1-QSC-I-27-017-039",
+    "3-1-QSC-I-27-017-038",
+    "3-1-QSC-I-27-017-016"
+   ]
+  },
+  {
+   "check": "desktop-1648x1000: typed 97.9: displayed miles == submitted",
+   "ok": true,
+   "shown": "97.9 miles",
+   "url": "http://127.0.0.1:45899/market?loc_mode=distance&base=Conway+AR&radius=97.9&state_find=&min_price=&max_price=&any=&broad=1&keywords=&condition=&required=&preferred=&exclude=&source=gsa&kind=any&closing_by=&row1=trailers&row2=equipment&row3=vehicles&row4=&go=1&sort=closing&view=gallery",
+   "known_count": 12,
+   "ids": [
+    "3-1-QSC-I-27-006-005",
+    "3-1-QSC-I-27-019-010",
+    "3-1-QSC-I-27-019-011",
+    "3-1-QSC-I-27-019-005",
+    "3-1-QSC-I-27-019-007",
+    "3-1-QSC-I-27-019-004",
+    "3-1-QSC-I-27-019-003",
+    "3-1-QSC-I-27-019-006",
+    "3-1-QSC-I-27-019-002",
+    "3-1-QSC-I-27-019-001",
+    "3-1-QSC-I-27-019-009",
+    "3-1-QSC-I-27-017-028"
+   ]
+  },
+  {
+   "check": "desktop-1648x1000: typed 0: displayed miles == submitted",
+   "ok": true,
+   "shown": "0 miles",
+   "url": "http://127.0.0.1:45899/market?loc_mode=distance&base=Conway+AR&radius=0&state_find=&min_price=&max_price=&any=&broad=1&keywords=&condition=&required=&preferred=&exclude=&source=gsa&kind=any&closing_by=&row1=trailers&row2=equipment&row3=vehicles&row4=&go=1&sort=closing&view=gallery",
+   "known_count": 0,
+   "ids": []
+  },
+  {
+   "check": "desktop-1648x1000: typed max price changes results",
+   "ok": true,
+   "before": 5,
+   "after": 3
+  },
+  {
+   "check": "desktop-1648x1000: Enter submits typed min price",
+   "ok": true
+  },
+  {
+   "check": "desktop-1648x1000: obsolete slider fields ignored",
+   "ok": true
+  },
+  {
+   "check": "desktop-1648x1000: second supported origin gives its own located result set",
+   "ok": true,
+   "conway_zip_ids": 12,
+   "fayetteville_ids": 7,
+   "differs": true
+  },
+  {
+   "check": "desktop-1648x1000: origin/radius/price persist across reload",
+   "ok": true
+  },
+  {
+   "check": "desktop-1648x1000: By State does not apply the radius",
+   "ok": true,
+   "scope": "By State: AR; the radius is NOT applied. A lot with no known state or distance is never counted as local; it is listed a"
+  },
+  {
+   "check": "mobile-390x844: new user has empty origin and no Conway text",
+   "ok": true,
+   "origin": ""
+  },
+  {
+   "check": "mobile-390x844: price sliders absent",
+   "ok": true
+  },
+  {
+   "check": "mobile-390x844: Search Now last after every filter",
+   "ok": true
+  },
+  {
+   "check": "mobile-390x844: radius slider visible with min/max labels",
+   "ok": true
+  },
+  {
+   "check": "mobile-390x844: slider 0: displayed miles == submitted",
+   "ok": true,
+   "shown": "0 miles",
+   "url": "http://127.0.0.1:45899/market?loc_mode=distance&base=Conway+AR&radius=0&state_find=&min_price=&max_price=&any=&broad=1&keywords=&condition=&required=&preferred=&exclude=&source=gsa&kind=any&closing_by=&row1=trailers&row2=equipment&row3=vehicles&row4=&go=1&sort=closing&view=gallery",
+   "known_count": 0,
+   "ids": []
+  },
+  {
+   "check": "mobile-390x844: slider 60: displayed miles == submitted",
+   "ok": true,
+   "shown": "60 miles",
+   "url": "http://127.0.0.1:45899/market?loc_mode=distance&base=Conway+AR&radius=60&state_find=&min_price=&max_price=&any=&broad=1&keywords=&condition=&required=&preferred=&exclude=&source=gsa&kind=any&closing_by=&row1=trailers&row2=equipment&row3=vehicles&row4=&go=1&sort=closing&view=gallery",
+   "known_count": 11,
+   "ids": [
+    "3-1-QSC-I-27-019-010",
+    "3-1-QSC-I-27-019-011",
+    "3-1-QSC-I-27-019-005",
+    "3-1-QSC-I-27-019-007",
+    "3-1-QSC-I-27-019-004",
+    "3-1-QSC-I-27-019-003",
+    "3-1-QSC-I-27-019-006",
+    "3-1-QSC-I-27-019-002",
+    "3-1-QSC-I-27-019-001",
+    "3-1-QSC-I-27-019-009",
+    "3-1-QSC-I-27-017-028"
+   ]
+  },
+  {
+   "check": "mobile-390x844: slider 120: displayed miles == submitted",
+   "ok": true,
+   "shown": "120 miles",
+   "url": "http://127.0.0.1:45899/market?loc_mode=distance&base=Conway+AR&radius=120&state_find=&min_price=&max_price=&any=&broad=1&keywords=&condition=&required=&preferred=&exclude=&source=gsa&kind=any&closing_by=&row1=trailers&row2=equipment&row3=vehicles&row4=&go=1&sort=closing&view=gallery",
+   "known_count": 19,
+   "ids": [
+    "3-1-QSC-I-27-006-005",
+    "3-1-QSC-I-27-019-010",
+    "3-1-QSC-I-27-019-011",
+    "3-1-QSC-I-27-019-005",
+    "3-1-QSC-I-27-019-007",
+    "3-1-QSC-I-27-019-004",
+    "3-1-QSC-I-27-019-003",
+    "3-1-QSC-I-27-019-006",
+    "3-1-QSC-I-27-019-002",
+    "3-1-QSC-I-27-019-001",
+    "3-1-QSC-I-27-019-009",
+    "3-1-QSC-I-27-017-028",
+    "3-1-QSC-I-27-017-037",
+    "3-1-QSC-I-27-017-054",
+    "3-1-QSC-I-27-017-017",
+    "3-1-QSC-I-27-017-040",
+    "3-1-QSC-I-27-017-039",
+    "3-1-QSC-I-27-017-038",
+    "3-1-QSC-I-27-017-016"
+   ]
+  },
+  {
+   "check": "mobile-390x844: slider 25000: displayed miles == submitted",
+   "ok": true,
+   "shown": "25000 miles",
+   "url": "http://127.0.0.1:45899/market?loc_mode=distance&base=Conway+AR&radius=25000&state_find=&min_price=&max_price=&any=&broad=1&keywords=&condition=&required=&preferred=&exclude=&source=gsa&kind=any&closing_by=&row1=trailers&row2=equipment&row3=vehicles&row4=&go=1&sort=closing&view=gallery",
+   "known_count": 19,
+   "ids": [
+    "3-1-QSC-I-27-006-005",
+    "3-1-QSC-I-27-019-010",
+    "3-1-QSC-I-27-019-011",
+    "3-1-QSC-I-27-019-005",
+    "3-1-QSC-I-27-019-007",
+    "3-1-QSC-I-27-019-004",
+    "3-1-QSC-I-27-019-003",
+    "3-1-QSC-I-27-019-006",
+    "3-1-QSC-I-27-019-002",
+    "3-1-QSC-I-27-019-001",
+    "3-1-QSC-I-27-019-009",
+    "3-1-QSC-I-27-017-028",
+    "3-1-QSC-I-27-017-037",
+    "3-1-QSC-I-27-017-054",
+    "3-1-QSC-I-27-017-017",
+    "3-1-QSC-I-27-017-040",
+    "3-1-QSC-I-27-017-039",
+    "3-1-QSC-I-27-017-038",
+    "3-1-QSC-I-27-017-016"
+   ]
+  },
+  {
+   "check": "mobile-390x844: typed 97.9: displayed miles == submitted",
+   "ok": true,
+   "shown": "97.9 miles",
+   "url": "http://127.0.0.1:45899/market?loc_mode=distance&base=Conway+AR&radius=97.9&state_find=&min_price=&max_price=&any=&broad=1&keywords=&condition=&required=&preferred=&exclude=&source=gsa&kind=any&closing_by=&row1=trailers&row2=equipment&row3=vehicles&row4=&go=1&sort=closing&view=gallery",
+   "known_count": 12,
+   "ids": [
+    "3-1-QSC-I-27-006-005",
+    "3-1-QSC-I-27-019-010",
+    "3-1-QSC-I-27-019-011",
+    "3-1-QSC-I-27-019-005",
+    "3-1-QSC-I-27-019-007",
+    "3-1-QSC-I-27-019-004",
+    "3-1-QSC-I-27-019-003",
+    "3-1-QSC-I-27-019-006",
+    "3-1-QSC-I-27-019-002",
+    "3-1-QSC-I-27-019-001",
+    "3-1-QSC-I-27-019-009",
+    "3-1-QSC-I-27-017-028"
+   ]
+  },
+  {
+   "check": "mobile-390x844: typed 0: displayed miles == submitted",
+   "ok": true,
+   "shown": "0 miles",
+   "url": "http://127.0.0.1:45899/market?loc_mode=distance&base=Conway+AR&radius=0&state_find=&min_price=&max_price=&any=&broad=1&keywords=&condition=&required=&preferred=&exclude=&source=gsa&kind=any&closing_by=&row1=trailers&row2=equipment&row3=vehicles&row4=&go=1&sort=closing&view=gallery",
+   "known_count": 0,
+   "ids": []
+  },
+  {
+   "check": "mobile-390x844: typed max price changes results",
+   "ok": true,
+   "before": 5,
+   "after": 3
+  },
+  {
+   "check": "mobile-390x844: Enter submits typed min price",
+   "ok": true
+  },
+  {
+   "check": "mobile-390x844: obsolete slider fields ignored",
+   "ok": true
+  },
+  {
+   "check": "mobile-390x844: second supported origin gives its own located result set",
+   "ok": true,
+   "conway_zip_ids": 12,
+   "fayetteville_ids": 7,
+   "differs": true
+  },
+  {
+   "check": "mobile-390x844: origin/radius/price persist across reload",
+   "ok": true
+  },
+  {
+   "check": "mobile-390x844: By State does not apply the radius",
+   "ok": true,
+   "scope": "By State: AR; the radius is NOT applied. A lot with no known state or distance is never counted as local; it is listed a"
+  }
+ ]
+}
