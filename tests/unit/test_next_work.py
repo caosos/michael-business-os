@@ -97,3 +97,49 @@ def test_history_ids_before_the_pickup_cutoff_or_oddly_named_are_never_announced
     lines, seen = step(inbox, Q, {}, {}, 0)
     assert [l for l in lines if "INSTRUCTION" in l] == ["NEW INSTRUCTION ARYA-20261010-2301-new"]
     assert "ARIA-20261009-2100-old" not in seen
+
+
+# ---------------------------------------------------------------- A-68: five-minute handoff (fake clock, synthetic)
+def test_sla_boundary_299_silent_300_reminds_and_the_first_announcement_is_immediate():
+    first, seen = step({}, Q, {}, {}, 1000)
+    assert any(l.startswith("NEW") for l in first)                         # eligible at t0: announced in the same cycle
+    assert nw.RETRY_S == 300 and nw.SLA_S == 300 and nw.POLL_MAX_S < nw.SLA_S
+    assert nw.new_items({}, Q, seen, {}, 1000 + 299, retry_s=nw.RETRY_S)[0] == []                      # 299 s: still quiet
+    at300, seen2 = nw.new_items({}, Q, seen, {}, 1000 + 300, retry_s=nw.RETRY_S)
+    assert at300 and all("SLA 300s exceeded" in l for l in at300)                                      # 300 s: bounded retry, flagged
+    assert nw.new_items({}, Q, seen2, {}, 1000 + 301, retry_s=nw.RETRY_S)[0] == []                     # once per interval, not every cycle
+
+
+def test_suppression_pause_quota_claim_done_and_unmet_dependency_never_announce(tmp_path, monkeypatch):
+    monkeypatch.setattr(nw, "STATE", tmp_path / "seen.json")
+    monkeypatch.setattr(nw, "LOG", tmp_path / "log.jsonl")
+    monkeypatch.setattr(nw, "current", lambda: ({}, Q))
+    monkeypatch.setattr(nw, "engineering_state", lambda: {})
+    assert nw.cycle(now=10, blocked="owner pause: x") == [] and nw.read_state() == {}                  # paused: no announcement and no timer started
+    assert nw.cycle(now=20, blocked="quota guard: over") == [] and nw.read_state() == {}
+    monkeypatch.setattr(nw, "blocked_reason", lambda: None)
+    lines = nw.cycle(now=30)
+    assert ids(lines) == ["A-1", "A-5"]                                                                 # A-2 has an unmet dependency; A-3 other lane; A-4 DONE
+    claimed = {"A-1": {"state": "STARTED"}, "A-5": {"state": "DONE"}}
+    monkeypatch.setattr(nw, "engineering_state", lambda: claimed)
+    assert nw.cycle(now=30 + 301) == []                                                                 # claimed / DONE: silent even after the interval
+
+
+def test_restart_recovery_and_the_latency_log_prove_the_handoff_time(tmp_path, monkeypatch):
+    monkeypatch.setattr(nw, "STATE", tmp_path / "seen.json")
+    monkeypatch.setattr(nw, "LOG", tmp_path / "log.jsonl")
+    monkeypatch.setattr(nw, "current", lambda: ({}, Q))
+    monkeypatch.setattr(nw, "engineering_state", lambda: {})
+    monkeypatch.setattr(nw, "blocked_reason", lambda: None)
+    nw.cycle(now=100)                                                                                  # announced at once (latency 0)
+    assert nw.cycle(now=160) == []                                                                      # a restarted process re-reads the persisted state: no duplicate
+    again = nw.cycle(now=100 + 300)
+    assert again and all(l.startswith("REMINDER") for l in again)                                      # still unclaimed after a restart: re-announced at 300 s
+    import json
+    rows = [json.loads(x) for x in nw.LOG.read_text().splitlines()]
+    assert [r["kind"] for r in rows[:2]] == ["NEW", "NEW"] and rows[0]["since_first_seen_s"] == 0 and all(r["within_sla"] for r in rows[:2])
+    assert rows[-1]["kind"] == "REMINDER" and rows[-1]["since_first_seen_s"] == 300.0
+
+
+def test_a_watch_interval_above_the_cap_is_clamped_below_the_sla():
+    assert max(60, min(10_000, nw.POLL_MAX_S)) == nw.POLL_MAX_S < nw.SLA_S

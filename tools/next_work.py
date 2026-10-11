@@ -23,10 +23,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import foreman  # noqa: E402
+import pause  # noqa: E402
 
 INBOX = "origin/liaison/aria-to-agent-01"
 STATE = ROOT / "var" / "next_work_seen.json"
-RETRY_S = 600                                   # an unclaimed, still-eligible item is announced again after this long (A-65); polling stays 120 s
+SLA_S = 300                                     # A-68: an eligible item must reach the session (or a worker) within this many seconds
+RETRY_S = 300                                   # an unclaimed, still-eligible item is announced again after this long (A-65, tightened by A-68)
+POLL_S, POLL_MAX_S = 120, 240                   # default poll; never above POLL_MAX_S, so first announcement latency stays under SLA_S with margin for the fetch
+LOG = ROOT / "var" / "next_work_log.jsonl"
 AWAITING = "AWAITING the interactive engineering session"
 ID_RE = re.compile(r"^(ARIA|ARYA|DA)-(\d{8})-(\d{4})-")
 CUTOFF = "20261010-0000"                         # same history cutoff as pickup: older or oddly named ids are never announced
@@ -71,9 +75,22 @@ def new_items(inbox: dict, queue_text: str, seen: dict, eng: dict, now: float, r
         elif now - rec.get("last", 0) >= retry_s:
             rec["count"] = rec.get("count", 1) + 1
             rec["last"] = now
-            out.append(f"REMINDER #{rec['count']} (unclaimed since {int(now - rec['first'])}s) " + text)
+            out.append(f"REMINDER #{rec['count']} (unclaimed since {int(now - rec['first'])}s" + (f"; SLA {SLA_S}s exceeded" if now - rec["first"] >= SLA_S else "") + ") " + text)
         keep[key] = rec
     return out, keep
+
+
+def log_events(lines: list[str], old: dict, seen: dict, now: float) -> None:
+    """Append one JSON line per announcement with its eligibility-to-announcement latency (live proof material for the 300 s SLA). Never raises."""
+    try:
+        LOG.parent.mkdir(parents=True, exist_ok=True)
+        with open(LOG, "a") as fh:
+            for line in lines:
+                key = next((k for k in seen if k in line), None)
+                first = (seen.get(key) or {}).get("first", now)
+                fh.write(json.dumps({"at": now, "key": key, "kind": line.split()[0], "since_first_seen_s": round(now - first, 1), "within_sla": (now - first) < SLA_S or line.startswith("NEW")}) + "\n")
+    except OSError:
+        pass
 
 
 def renotify(key: str) -> None:
@@ -115,16 +132,35 @@ def engineering_state() -> dict:
         return {}
 
 
-def cycle(baseline: bool = False, now: float | None = None) -> list[str]:
+def blocked_reason() -> str | None:
+    """Eligibility also needs no owner pause and no quota block (A-68). None = clear. Unknown quota reading counts as clear (as the watchdog does)."""
+    why = pause.reason()
+    if why:
+        return "owner pause: " + why[:80]
+    try:
+        sys.path.insert(0, str(ROOT / "src"))
+        from mbos import router, telemetry
+        g = telemetry.quota_guard(router.load_policy())
+        return None if g["allow"] else "quota guard: " + str(g.get("reason", "blocked"))[:80]
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def cycle(baseline: bool = False, now: float | None = None, blocked: str | None = None) -> list[str]:
     inbox, q = current()
     if not inbox and not q:
         return []                                  # fetch/read failed: report nothing, keep the old state
     t = now if now is not None else time.time()
+    why = blocked if blocked is not None else (None if baseline else blocked_reason())
+    if why and not baseline:
+        return []                                  # paused / quota-blocked: not eligible, no timer runs, nothing is announced
     if baseline:                                   # what exists now is history: never announced, never reminded
         write_state({k: {"first": t, "last": t, "count": 0, "closed": True} for k in list(inbox) + [r["id"] for r in foreman.parse_queue(q)] if k in inbox})
         return []
-    lines, seen = new_items(inbox, q, read_state(), engineering_state(), t)
+    old = read_state()
+    lines, seen = new_items(inbox, q, old, engineering_state(), t)
     write_state(seen)
+    log_events(lines, old, seen, t)
     return lines
 
 
@@ -138,7 +174,7 @@ def main(argv: list[str]) -> int:
         while True:
             for line in cycle():
                 print(line, flush=True)
-            time.sleep(max(60, a.watch))
+            time.sleep(max(60, min(a.watch, POLL_MAX_S)))
     for line in cycle(a.baseline):
         print(line)
     return 0
