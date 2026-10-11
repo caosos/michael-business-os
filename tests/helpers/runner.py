@@ -213,6 +213,7 @@ def lane_d_e2e(fixture: str, gateway_mode: str = "reference") -> None:
         if live:  # leave the item settled: Michael says NO to the concurrent one
             f3 = pending_request(engine, trailer)
             workflows.record_decision(f3["action_request_id"], "NO", f3["payload_hash"], reason="e2e cleanup")
+            wait_state(engine, trailer, "ARCHIVED", timeout=60)  # NO on a follow-up re-enters the lifecycle and archives; cards are built on the settled state
     if smart in awaiting:
         b = pending_request(engine, smart)
         workflows.record_decision(b["action_request_id"], "NO", b["payload_hash"], reason="lane D e2e: not this week")

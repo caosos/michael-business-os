@@ -49,7 +49,11 @@ Build the durable application spine DISCOVER → NORMALIZE → SCORE → RECOMME
 
 ## Test results (FACT; run on this branch)
 - Command: `.venv/bin/python -m pytest -q`
-- Result: **598 passed, 0 failed** (349 s) at 2026-10-11 on rebased HEAD. (Earlier 111 figure was the first-wave count.) One test-isolation fix: `test_probe_and_state_contract_shape` read the real READY_QUEUE after the lane-01 READY wake check landed; it now uses a fixture queue.
+- Result: **605 passed, 0 failed** (292 s) at 2026-10-11 on HEAD 6d1a45e + two test-only fixes (below). Previous: 598 passed.
+  - Fix 1: `test_probe_and_state_contract_shape` read the live `var/watchdog` through a second module instance and failed once a wake was acknowledged; now hermetic.
+  - Fix 2: `test_full_lifecycle_on_lane_d` raced its own cleanup (NO on the concurrent follow-up archives the Item, `spine.apply_no`); the runner now waits for the settled state and the card assertion is PASSED/PASS. Was ~50% flaky; 5/5 after.
+  - FACT: under host load (load avg ~6, 12 sessions) `test_a49_hold_and_recheck` errored once in the full run and passed in isolation; treat as contention, not a defect (UNK: not reproduced).
+  - Previous count line: 598 passed at rebased HEAD. (Earlier 111 figure was the first-wave count.) One test-isolation fix: `test_probe_and_state_contract_shape` read the real READY_QUEUE after the lane-01 READY wake check landed; it now uses a fixture queue.
   - A1–A10 acceptance: all pass. A5 uses a real `os._exit` crash and restart; A6 includes a hard-restart HOLD.
   - Unit tests: contract alignment, state-machine parity, `validate_contracts.py`, protocol conformance, scorer replay.
   - Integration tests: lane-C engine in the workflow, blocking-key dedup, step-up, MODIFY by full payload.

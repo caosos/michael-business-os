@@ -39,7 +39,8 @@ def test_full_lifecycle_on_lane_d(lane_d_urls, tmp_path):
     assert not r["contract_errors"], r["contract_errors"]
     assert r["id_addressable"][0] == r["id_addressable"][1] > 0, r["id_addressable"]  # 04 R2: scorecard/recommendation receipts carry their ids
     assert not r["card_errors"], r["card_errors"]  # every opportunity renders a valid, honest card on lane D
-    assert r["cards"]["trailer"][1] == "CONTACT" and r["cards"]["mower"][1] == "PASS", r["cards"]
+    # settled state: the concurrent follow-up was declined, and NO archives the Item (spine.apply_no)
+    assert r["cards"]["trailer"][:2] == ["PASSED", "PASS"] and r["cards"]["mower"][1] == "PASS", r["cards"]
     assert r["cards"]["enrichment_roundtrip"] == "medium", r["cards"]  # enrichment survives the lane-D ledger
 
 

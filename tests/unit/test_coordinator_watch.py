@@ -109,6 +109,7 @@ def test_probe_and_state_contract_shape(tmp_path, monkeypatch):
     assert cw.probe_verdict(["origin/liaison/x"]) == {"verdict": "IDLE", "reasons": []}
     spec = importlib.util.spec_from_file_location("cs", Path(cw.__file__).resolve().parent / "coordinator_state.py")
     cs = importlib.util.module_from_spec(spec); spec.loader.exec_module(cs)
+    monkeypatch.setattr(cs.cw, "WD", tmp_path)                                     # the state reader has its own cw instance; keep it off the live watchdog dir
     s = cs.state()
     assert {"project", "last_received", "last_ack", "open_items", "heartbeat", "event_wake", "periodic_wake", "accepts_messages"} <= set(s)
     assert s["event_wake"]["status"] == "UNVERIFIED" and "no wake has been acknowledged" in s["event_wake"]["evidence"]
