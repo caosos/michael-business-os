@@ -52,6 +52,8 @@ def post(ui, path, **f):
 
 
 def get(ui, **qs):
+    if "go" in qs:
+        qs.setdefault("base", "Conway AR")
     from urllib.parse import urlencode
     return req(ui, "GET", "/market?" + urlencode(qs))[2]
 
@@ -67,7 +69,7 @@ def test_gsa_result_has_real_link_photo_bid_and_as_of(ui):
 
 
 def test_unlocated_place_has_no_invented_distance(ui):
-    cards = ms.load_gsa(None, NOW)["cards"]
+    cards = ms.load_gsa(None, NOW, ms._origin("Conway AR"))["cards"]
     known = ms.place_coords.__globals__["AR_PLACES"]
     assert cards and any(c["distance"] is not None for c in cards)
     for c in cards:
@@ -129,9 +131,9 @@ def test_offline_when_no_cache(ui, monkeypatch, tmp_path):
 
 
 def test_stale_lot_is_flagged(cache):
-    d = ms.load_gsa(str(cache), ASOF + timedelta(hours=9))
+    d = ms.load_gsa(str(cache), ASOF + timedelta(hours=9), ms._origin("Conway AR"))
     assert d["stale"] and d["age_h"] == 9.0 and all(c["stale"] for c in d["cards"])
-    assert not ms.load_gsa(str(cache), NOW)["stale"]
+    assert not ms.load_gsa(str(cache), NOW, ms._origin("Conway AR"))["stale"]
 
 
 def test_no_photo_card_says_so_and_has_no_img():
@@ -163,7 +165,7 @@ def test_ungrounded_comp_is_watch_never_buy():
 
 
 def test_terms_are_tagged_seller_stated_or_inferred_and_exclude_drops(cache):
-    cards = ms.load_gsa(str(cache), NOW)["cards"]
+    cards = ms.load_gsa(str(cache), NOW, ms._origin("Conway AR"))["cards"]
     tr = next(c for c in cards if "Trailer" in c["title"])
     got, _ = ms.search(cards, ms.parse_query({"required": ["utility"], "preferred": ["trailer"]}))
     assert [t for t in got if t["id"] == tr["id"]][0]["tags"]["required"] == [("utility", "seller-stated")]
@@ -172,7 +174,7 @@ def test_terms_are_tagged_seller_stated_or_inferred_and_exclude_drops(cache):
 
 
 def test_price_radius_sort_filters(cache):
-    cards = ms.load_gsa(str(cache), NOW)["cards"]
+    cards = ms.load_gsa(str(cache), NOW, ms._origin("Conway AR"))["cards"]
     assert all(c["bid"] is None or c["bid"] <= 20 for c in ms.search(cards, ms.parse_query({"max_price": "20"}))[0])
     bids = [c["bid"] for c in ms.search(cards, ms.parse_query({"sort": "bid"}))[0] if c["bid"] is not None]
     assert bids == sorted(bids)

@@ -13,6 +13,7 @@ import json
 import os
 import secrets
 import threading
+from pathlib import Path
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, quote, urlparse
@@ -959,11 +960,12 @@ def make_handler(app):
 
         def _send(self, status, body, ctype="text/html; charset=utf-8", headers=None):
             data = body.encode("utf-8")
+            scripts = "script-src 'self'; " if getattr(_CUR, "path", "") == "/market" else ""     # F-143: only /market may load the one same-origin radius script
             self.send_response(status)
             self.send_header("Content-Type", ctype)
             self.send_header("Content-Length", str(len(data)))
             self.send_header("Content-Security-Policy",
-                             "default-src 'none'; style-src 'unsafe-inline'; img-src https: http:; form-action 'self'; frame-ancestors 'none'; base-uri 'none'")
+                             "default-src 'none'; " + scripts + "style-src 'unsafe-inline'; img-src https: http:; form-action 'self'; frame-ancestors 'none'; base-uri 'none'")
             self.send_header("X-Content-Type-Options", "nosniff")
             self.send_header("Referrer-Policy", "no-referrer")
             self.send_header("Cache-Control", "no-store")
@@ -1057,6 +1059,8 @@ def make_handler(app):
                                                                 + bought_view.render_open_flips(app.store.open_acquisitions()), app.state()))
             if u.path == "/demo":  # F-51: the only door to demo/training data, deliberately not in NAV
                 return self._send(200, page("Demo / training data", live_demo.DEMO_PAGE, app.state()))
+            if u.path == "/static/market_radius.js":
+                return self._send(200, (Path(__file__).parent / "static" / "market_radius.js").read_text(encoding="utf-8"), "text/javascript; charset=utf-8")
             if u.path == "/market":
                 return self._send(200, page("Michael's Marketplace", market_routes.page_body(app, qs, now), app.state(), flash))
             if u.path == "/wanted":

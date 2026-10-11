@@ -41,11 +41,6 @@ def q_of(**kw):
     {"max_price": "abc"}, {"min_price": "-5"}, {"max_price": "-0.01"}, {"radius": "-1"}, {"radius": "far"}, {"radius": "25001"},
     {"min_price": "nan"}, {"max_price": "inf"}, {"max_price": "1e999"},
     {"min_price": "900", "max_price": "100"},                                                    # inverted boxes
-    {"max_price": "100", "max_r": "abc", "prev_max": "20000"},                                    # moved slider, nonnumeric
-    {"min_r": "-3", "prev_min": "1"},                                                              # moved slider, negative
-    {"min_r": "900", "prev_min": "1", "max_r": "100", "prev_max": "20000"},                        # inverted sliders
-    {"min_r": "900", "prev_min": "1", "max_price": "100"},                                         # inverted: slider min vs typed max
-    {"min_price": "500", "max_r": "100", "prev_max": "20000"},                                     # inverted: typed min vs slider max
 ])
 def test_final_resolved_values_invalid_are_said_and_run_nothing(ui, kw):
     assert q_of(**kw)["errors"], kw
@@ -59,9 +54,9 @@ def test_final_resolved_values_invalid_are_said_and_run_nothing(ui, kw):
     ({"min_price": "100", "max_price": "100"}, 100.0, 100.0),                                   # exact boundary: equal is allowed
     ({"min_price": "0", "max_price": "0"}, 0.0, 0.0),
     ({"min_price": "$1,000", "max_price": "20000"}, 1000.0, 20000.0),
-    ({"min_price": "5", "min_r": "300", "prev_min": "300"}, 5.0, None),                          # slider untouched: the typed box decides
-    ({"min_price": "5", "min_r": "300", "prev_min": "1"}, 300.0, None),                          # slider moved: it decides
-    ({"max_r": "250", "prev_max": "20000"}, None, 250.0),
+    ({"min_price": "5", "min_r": "300", "prev_min": "1"}, 5.0, None),                            # F-143: obsolete slider fields are ignored
+    ({"max_r": "250", "prev_max": "20000", "max_price": "40"}, None, 40.0),
+    ({"max_r": "abc", "min_r": "-3"}, None, None),
 ])
 def test_final_resolved_values_valid(kw, lo, hi):
     q = q_of(**kw)
@@ -69,9 +64,11 @@ def test_final_resolved_values_valid(kw, lo, hi):
 
 
 def test_radius_boundaries():
-    assert q_of(radius="0", max_price="1")["errors"] == [] and q_of(radius="0", max_price="1")["radius"] == 0.0
-    assert q_of(radius="25000")["errors"] == []
-    assert q_of(radius="")["errors"] == [] and q_of(radius="", max_price="1")["radius"] is None
+    z = lambda **k: q_of(base="Conway AR", **k)  # noqa: E731
+    assert z(radius="0", max_price="1")["errors"] == [] and z(radius="0", max_price="1")["radius"] == 0.0
+    assert z(radius="25000")["errors"] == []
+    assert z(radius="")["errors"] == [] and z(radius="", max_price="1")["radius"] is None
+    assert q_of(radius="50")["errors"]                                  # F-143: a radius needs the user's own origin (no hidden fallback)
 
 
 def test_exact_boundary_bid_is_inside_and_strict_unknowns_stay_out():

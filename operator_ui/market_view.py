@@ -133,7 +133,7 @@ def distance_caveat(q: dict, results: list[dict]) -> str:
     """F-50: distances come from approximate town centroids in small local gazetteers; say what was and was not located."""
     if not results:
         return ""
-    base = (q.get("base") or "").strip() or ms.DEFAULT_BASE
+    base = (q.get("base") or "").strip()
     towns = lambda sel: sorted({c["city"] or "no town given" for c in results if sel(c)})  # noqa: E731
     got, miss = towns(lambda c: c["distance"] is not None), towns(lambda c: c["distance"] is None)
     origin = f"Your base '{e(base)}' is located." if ms._origin(base) else f"Your base '{e(base)}' is NOT located, so no distance can be shown."
@@ -166,8 +166,8 @@ def scope_text(q: dict) -> str:
     """F-136: the location scope actually applied to this run, in words (the mode is never implicit)."""
     if q.get("loc_mode") == "state":
         st = ", ".join(q.get("states") or []) or "none selected"
-        return f"By State: {st}" + (f" AND within {q['radius']:g} mi of {q['base']}" if q.get("also_radius") and q["radius"] is not None else "; the radius is NOT applied")
-    return f"By Distance: " + (f"within {q['radius']:g} mi of {q['base']} (known distances only)" if q["radius"] is not None else "no radius") + "; states are NOT applied"
+        return f"By State: {st}" + (f" AND within {q['radius']:g} miles" if q.get("also_radius") and q["radius"] is not None else "; the radius is NOT applied")
+    return f"By Distance: " + (f"within {q['radius']:g} miles (known distances only)" if q["radius"] is not None else "no radius") + "; states are NOT applied"
 
 
 def location_panel(q: dict) -> str:
@@ -183,13 +183,24 @@ def location_panel(q: dict) -> str:
     return ("<fieldset id='location-panel' style='border:1px solid var(--line);border-radius:8px;margin:0 0 8px'><legend>Location</legend>"
             f"<div role='radiogroup' aria-label='Location mode'>{mode('distance', 'By Distance')}{mode('state', 'By State')}</div>"
             f"<label>ZIP or city <input form='mkform' name='base' size='12' value='{v('base')}'></label>"
-            f"<label>Radius (mi) <input form='mkform' name='radius' size='5' inputmode='decimal' value='{v('radius')}'></label>"
+            f"{_radius(q)}"
             f"<details id='state-picker'{' open' if find else ''}><summary>States <span class='small'>({len(sel)} selected)</span></summary>"
             f"<label>Find a state <input form='mkform' name='state_find' size='10' value='{e(q.get('state_find') or '')}'></label>"
             f"<div class='st-list' style='max-height:130px;overflow:auto'>{boxes}</div>{hide}"
             f"<label><input form='mkform' type='checkbox' name='also_radius' value='1'{' checked' if q.get('also_radius') else ''}> In By State mode, also keep the radius</label></details>"
             f"<div id='state-chips' aria-label='Selected states'>{chip}</div>"
             f"<p class='small mut' id='location-scope'>{e(scope_text(q))}. A lot with no known state or distance is never counted as local; it is listed as not checked.</p></fieldset>")
+
+
+def _radius(q: dict) -> str:
+    """F-143: a radius slider (0 to the existing validation maximum, miles) coupled by /static/market_radius.js to the numeric `radius` field, which alone is submitted.
+    The slider is hidden until the script runs, so without scripts only the numeric field shows."""
+    hi, r = landing_fix.MAX_RADIUS, q.get("radius")
+    return ("<div id='radius-ctl'><label>Radius (miles) <input form='mkform' type='number' id='radius' name='radius' min='0' max='%d' step='any' inputmode='decimal' value='%s'></label> "
+            "<span class='small'>Selected: <output id='radius-out' for='radius'>%s</output></span>"
+            "<div id='radius-slide' hidden><input type='range' id='radius_r' min='0' max='%d' step='1' value='%s' aria-label='Radius in miles' data-for='radius'>"
+            "<div class='small mut' style='display:flex;justify-content:space-between'><span id='radius-min'>0 miles</span><span id='radius-max'>%s miles</span></div></div></div>"
+            ) % (hi, e("" if r is None else f"{r:g}"), "no limit" if r is None else f"{r:g} miles", hi, "%g" % (hi if r is None else min(r, hi)), f"{hi:,}")
 
 
 def _sel(name: str, opts, cur) -> str:
@@ -247,17 +258,12 @@ def _sidebar(saved: list[dict], csrf: str, pin_html: str, tok, q: dict, save: st
 
 
 def _slider(q: dict, form: str = "") -> str:
-    lo, hi = ms.PRICE_RANGE
+    """F-143: explicit numeric Min/Max price only (blank = unlimited). The range sliders and their hidden previous-value wiring are gone."""
     g = lambda k: "" if q.get(k) is None else f"{q[k]:g}"  # noqa: E731
-    cl = lambda k, d: f"{min(max(q[k], lo), hi):g}" if q.get(k) is not None else str(d)  # noqa: E731
     return ("<fieldset class='mk-range' style='border:1px solid var(--line);border-radius:8px;margin:0 0 8px'><legend>Price range (current bid)</legend>"
             f"<label>Min $ <input form='{form}' type='number' id='min_price' name='min_price' min='0' step='any' inputmode='decimal' value='{e(g('min_price'))}'></label> "
             f"<label>Max $ <input form='{form}' type='number' id='max_price' name='max_price' min='0' step='any' inputmode='decimal' value='{e(g('max_price'))}'></label>"
-            f"<div><label>Min slider <input form='{form}' type='range' id='min_r' name='min_r' min='{lo}' max='{hi}' step='1' value='{cl('min_price', lo)}' aria-label='Minimum price slider'></label> "
-            f"<label>Max slider <input form='{form}' type='range' id='max_r' name='max_r' min='{lo}' max='{hi}' step='1' value='{cl('max_price', hi)}' aria-label='Maximum price slider'></label>"
-            f"<input form='{form}' type='hidden' name='prev_min' value='{cl('min_price', lo)}'><input form='{form}' type='hidden' name='prev_max' value='{cl('max_price', hi)}'></div>"
-            f"<p class='small mut'>Type a number or move a slider, then Search; the one you changed is used. Blank = no limit. "
-            f"The ${lo:,} to ${hi:,} range is only this control's scale, not a budget or spending authority.</p></fieldset>")
+            "<p class='small mut'>Type a number. Blank = no limit. This is not a budget or spending authority.</p></fieldset>")
 
 
 def chips(q: dict) -> str:
@@ -344,7 +350,7 @@ def render_page(q: dict, d: dict, results: list[dict], hidden: dict, saved: list
     else:
         hid = ", ".join(f"{n} by {k}" for k, n in hidden.items() if n)
         unchecked = unchecked or []
-        scope = (f" within {q['radius']:g} mi of {e(q['base'])}" if q["radius"] is not None else "") if q.get("loc_mode") != "state" else f" in {e(', '.join(q['states']))}" + (f" and within {q['radius']:g} mi of {e(q['base'])}" if q.get("also_radius") and q["radius"] is not None else "")
+        scope = (f" within {q['radius']:g} miles" if q["radius"] is not None else "") if q.get("loc_mode") != "state" else f" in {e(', '.join(q['states']))}" + (f" and within {q['radius']:g} miles" if q.get("also_radius") and q["radius"] is not None else "")
         zero = ("<p class='mut' id='zero-results'><b>0 results</b> match every filter" + scope + ". Nothing is padded in"
                 + (f"; {len(unchecked)} lot(s) could not be checked and are listed below, not counted" if unchecked else "") + ". Loosen a filter or widen the radius.</p>")
         prec, prec_note = pv.for_cards(results)          # F-139: read-only, checked results only
@@ -362,7 +368,7 @@ def render_page(q: dict, d: dict, results: list[dict], hidden: dict, saved: list
                 + (f"<p class='small mut' id='precedent-note'>{e(prec_note)}</p>" if prec_note and results else "")
                 + ((gallery(results, q, tok, prec) if q.get("view") != "list" else "".join(pv.inject(render_card(c, tok), prec.get(c["id"], "")) for c in results)) if results else zero) + opt
                 + distance_caveat(q, results + unchecked))
-    return (CSS + "<h1 class='pagehead'>Michael's Marketplace</h1><div class='mk'>" + _sidebar(saved, csrf, pin_html, tok, q, _save(q, edit_id, tok, pin_html))
+    return (CSS + "<script src='/static/market_radius.js' defer></script><h1 class='pagehead'>Michael's Marketplace</h1><div class='mk'>" + _sidebar(saved, csrf, pin_html, tok, q, _save(q, edit_id, tok, pin_html))
             + f"<section class='mk-main' id='results-top'>{err}{verr}{_form(q, edit_id, tok, pin_html)}{render_status(d)}{body}{finds}{hidden_panel(prefs, tok) if prefs else ''}{prefs_panel(prefs, tok) if prefs else ''}{working_capital()}{gsa_explainer()}</section></div>")
 
 

@@ -51,9 +51,9 @@ def test_real_browser_click_and_enter_submit_current_values(ui):
             pytest.skip("no chrome")
         for vp in ({"width": 1280, "height": 800}, {"width": 390, "height": 800}):
             pg = b.new_page(viewport=vp)
-            pg.goto(base + "/market?go=1&broad=1&radius=150")
+            pg.goto(base + "/market?go=1&broad=1&radius=150&base=Conway+AR")
             wide = ids(pg)
-            assert pg.evaluate("()=>{const r=document.querySelector('button.mk-go').getBoundingClientRect(),m=['min_price','max_price','min_r','max_r'].map(i=>document.getElementById(i).getBoundingClientRect().bottom);return m.every(b=>b<=r.top)}"), vp
+            assert pg.evaluate("()=>{const r=document.querySelector('button.mk-go').getBoundingClientRect(),m=['min_price','max_price','radius'].map(i=>document.getElementById(i).getBoundingClientRect().bottom);return m.every(b=>b<=r.top)}"), vp
             pg.fill("#max_price", "25")
             pg.click("button.mk-go")
             pg.wait_for_load_state()
@@ -67,7 +67,7 @@ def test_real_browser_click_and_enter_submit_current_values(ui):
                 pg.keyboard.press("Enter")
             enter_ids = ids(pg)
             assert "max_price=20000" in pg.url and len(enter_ids) > len(click_ids)
-            pg.goto(base + "/market?go=1&broad=1&radius=150&max_price=20000")
+            pg.goto(base + "/market?go=1&broad=1&radius=150&base=Conway+AR&max_price=20000")
             assert ids(pg) == enter_ids
             pg.fill("input[name=radius]", "37.5")
             with pg.expect_navigation():
@@ -77,11 +77,11 @@ def test_real_browser_click_and_enter_submit_current_values(ui):
         b.close()
 
 
-def test_f142_search_now_is_last_control_below_both_price_sliders(ui):
+def test_f142_search_now_is_last_control_below_price_fields(ui):
     """F-142: owner correction: the primary submit sits below Min/Max and every other filter control, in the same real GET form."""
-    card = _card(get(ui))
+    card = _card(get(ui, go=1, base="Conway AR"))
     pos = card.index("Search Now")
-    for needle in ("name='min_price'", "name='max_price'", "name='min_r'", "name='max_r'", "name='cat'", "name='base'", "name='radius'", "name='also_radius'"):
+    for needle in ("name='min_price'", "name='max_price'", "name='cat'", "name='base'", "name='radius'", "name='also_radius'"):
         assert card.rindex(needle) < pos, needle
     assert card.rstrip().endswith("Search Now</button></div>") and card.count("<button") == 1
 

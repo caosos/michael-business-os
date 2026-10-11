@@ -24,7 +24,7 @@ def _saved(app) -> list[dict]:
     return out
 
 
-FILTER_KEYS = ("keywords", "base", "radius", "min_price", "max_price", "min_r", "max_r", "prev_min", "prev_max", "any", "broad", "condition", "required", "preferred", "exclude", "source",
+FILTER_KEYS = ("keywords", "base", "radius", "min_price", "max_price", "any", "broad", "condition", "required", "preferred", "exclude", "source",
                "kind", "closing_by", "sort", "cat", "row1", "row2", "row3", "row4", "view", "state", "loc_mode", "also_radius", "state_find")
 
 

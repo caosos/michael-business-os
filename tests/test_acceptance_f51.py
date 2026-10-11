@@ -12,7 +12,7 @@ from tests.test_operator_ui import req
 
 
 def cards(cache):
-    return ms.load_gsa(str(cache), NOW)["cards"]
+    return ms.load_gsa(str(cache), NOW, ms._origin("Conway AR"))["cards"]
 
 
 def names(rs):
@@ -20,7 +20,7 @@ def names(rs):
 
 
 def q(**kw):
-    return ms.parse_query({k: [str(v)] for k, v in {"broad": "1", **kw}.items()})
+    return ms.parse_query({k: [str(v)] for k, v in {"broad": "1", "base": "Conway AR", **kw}.items()})
 
 
 def test_min_and_max_price_select_the_right_set(cache):
@@ -43,7 +43,7 @@ def test_radius_constrains_known_distance_and_unknown_goes_to_optional(cache):
 
 
 def test_default_view_is_trailer_equipment_near_conway_and_broad_is_explicit(ui):
-    h = get(ui)                                                                # no filters at all
+    h = get(ui, go=1, base="Conway AR", radius="150")                          # F-143: the origin is the user's own, never a hidden default
     assert "Mode: repairable trailers/equipment focus: trailer, equipment" in h and "Radius: 150 mi" in h and "Origin: Conway AR (ZIP 72032)" in h
     assert "Trailer, Utility" in h and "iPad Mini" not in h and "Whirlpool" not in h
     hb = get(ui, go=1, broad=1, base="Conway AR", radius="")
@@ -57,7 +57,7 @@ def test_http_min_max_radius_change_results_and_chips(ui):
     sec = h.split("id='unchecked-section'")[1]
     assert "Blackhawk" in sec and "Trailer, Utility" not in sec
     assert "1 result" in h.split("unchecked-section")[0]                       # the unchecked lots are not in the count
-    z = get(ui, go=1, broad=1, radius="10", min_price="20")
+    z = get(ui, go=1, broad=1, base="Conway AR", radius="10", min_price="20")
     assert "id='zero-results'" in z and "0 results" in z
 
 
@@ -77,11 +77,11 @@ def test_filters_persist_across_navigation(ui):
 
 
 def test_labels_gsa_explainer_working_capital_and_button(ui):
-    h = get(ui, view="list")        # F-52: the default view is the gallery; the detailed labels live on the list card
+    h = get(ui, view="list", base="Conway AR")        # F-52: the default view is the gallery; the detailed labels live on the list card
     assert "Current bid" in h and "Asking price: none (auction)" in h and "never the final cost" in h and "all-in cost UNKNOWN" in h
     assert "government surplus auctions" in h and "requires a GSA login" in h and "do not log in or bypass" in h
     assert "SETTING" in h and "Verified cash:" in h and "not cash" in h
-    assert "type='range'" in h and "aria-label='Minimum price slider'" in h and "not a budget" in h
+    assert "aria-label='Minimum price slider'" not in h and "name='min_r'" not in h and "not a budget" in h
     assert "background:var(--acc);color:var(--bg)" in h and "<button class='mk-go' type='submit' form='mkform'>Search Now</button>" in h and "disabled" not in h.split("mk-go")[1][:80]
 
 
@@ -93,9 +93,8 @@ def test_demo_only_behind_explicit_route(ui):
     assert 'href="/demo"' not in req(ui, "GET", "/market")[2]
 
 
-def test_slider_without_scripts_wins_only_when_moved(ui):
-    assert q(max_r=500, prev_max=20000, max_price=30)["max_price"] == 500       # moved slider beats the old box
-    assert q(max_r=20000, prev_max=20000, max_price=30)["max_price"] == 30      # untouched slider: the typed number
-    assert q(min_r=1, prev_min=1)["min_price"] is None
-    h = get(ui, go=1, broad=1, radius="", max_r="25", prev_max="20000")
-    assert "Max price: $25" in h and "name='max_r'" in h and "name='prev_max' value='25'" in h and "<script" not in h
+def test_obsolete_slider_fields_are_ignored_and_typed_prices_decide(ui):
+    assert q(max_r=500, prev_max=20000, max_price=30)["max_price"] == 30        # F-143: an old slider field never overrides the typed box
+    assert q(min_r=900, prev_min=1)["min_price"] is None and q(max_r=5)["max_price"] is None
+    h = get(ui, go=1, broad=1, base="Conway AR", radius="", max_r="25", prev_max="20000", max_price="40")
+    assert "Max price: $40" in h and "name='max_r'" not in h and "name='prev_max'" not in h and "type='range' id='min_r'" not in h

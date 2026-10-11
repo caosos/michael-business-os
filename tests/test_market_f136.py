@@ -14,6 +14,8 @@ from tests.test_market_f56 import _fresh_app_on, _save_form
 
 
 def get(ui, **qs):
+    if "go" in qs:
+        qs.setdefault("base", "Conway AR")
     return req(ui, "GET", "/market?" + urlencode(qs, doseq=True))[2]          # doseq: a repeated `state` like the browser's checkboxes
 
 
@@ -27,7 +29,7 @@ def L(id, state, dist, bid=50.0, title="trailer"):
 
 
 def Q(**kw):
-    base = {"go": ["1"], "broad": ["1"], "radius": ["150"]}
+    base = {"go": ["1"], "broad": ["1"], "radius": ["150"], "base": ["Conway AR"]}
     base.update({k: v if isinstance(v, list) else [v] for k, v in kw.items()})
     return ms.parse_query(base)
 
@@ -54,7 +56,7 @@ def test_state_mode_with_also_radius_is_a_labelled_intersection():
     q = Q(loc_mode="state", state=["AR", "TX"], also_radius="1")
     res, unk, _ = ms.partition(LOTS, q)
     assert ids(res) == ["a", "g"] and ids(unk) == ["e", "f"]
-    assert "By State: AR, TX AND within 150 mi of Conway AR" == mv.scope_text(q)
+    assert "By State: AR, TX AND within 150 miles" == mv.scope_text(q)
 
 
 def test_strict_conjunction_with_price():
@@ -114,7 +116,7 @@ def test_search_narrows_list_but_keeps_selected(ui):
 def test_real_results_by_state_on_cache(ui):
     from operator_ui.market_search import load_gsa
     from tests.test_market_f47 import NOW
-    cards = load_gsa(None, NOW)["cards"]
+    cards = load_gsa(None, NOW, __import__("operator_ui.market_search", fromlist=["x"])._origin("Conway AR"))["cards"]
     known = {c["state"] for c in cards if c["state"]}
     assert known and all(s in ms.US_STATES for s in known)
     pick = sorted(known)[0]
@@ -135,7 +137,7 @@ def test_saved_roundtrip_reopen_and_restart(ui, tmp_path):
     cid = c["campaign_id"]
 
     def check(h):
-        assert "Location: By State: AR, TX AND within 150 mi" in h and "Min price: $10" in h and "Max price: $500" in h and "Condition: used" in h and "filter-errors" not in h
+        assert "Location: By State: AR, TX AND within 150 miles" in h and "Min price: $10" in h and "Max price: $500" in h and "Condition: used" in h and "filter-errors" not in h
         assert "name='state' value='AR' checked" in h and "name='also_radius' value='1' checked" in h and "locmode" not in h
     check(get(ui, run=cid))
     app2, httpd2 = _fresh_app_on(ui, tmp_path)
@@ -152,6 +154,9 @@ def test_state_choice_persists_across_navigation_and_restart_via_prefs(ui):
     assert "Location: By State: OK" in h
 
 
-def test_nothing_in_defaults_changed_local_default(ui):
+def test_fresh_visit_has_no_hidden_origin_and_michaels_saved_origin_is_kept(ui):
+    h = get(ui)                                                     # F-143: a new user sees an EMPTY origin field and no applied radius
+    assert "name='base' size='12' value=''" in h and "Radius: none" in h and "Conway" not in h.split("<main")[1] if "<main" in h else True
+    get(ui, go=1, broad=1, base="Conway AR", radius="150")          # Michael's saved origin/radius come back from his prefs
     h = get(ui)
-    assert "value='Conway AR'" in h and "value='150.0'" in h and "Radius: 150 mi (known distances only); Location mode: By Distance" in h
+    assert "value='Conway AR'" in h and "value='150'" in h and "Radius: 150 mi (known distances only); Location mode: By Distance" in h

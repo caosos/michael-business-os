@@ -18,7 +18,7 @@ def prefs_file(tmp_path, monkeypatch):
 
 
 def lots():
-    return ms.load_gsa(None, NOW)["cards"]
+    return ms.load_gsa(None, NOW, ms._origin("Conway AR"))["cards"]
 
 
 # ---- (A) strict filters and visible validation

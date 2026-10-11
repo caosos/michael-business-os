@@ -15,7 +15,7 @@ from . import landing_fix
 from mbos_discovery.adapter import SearchProfile
 from mbos_discovery.auctions import UNKNOWN, place_coords
 from mbos_discovery.gsa_live import GsaLiveAdapter, _text
-from mbos_discovery.normalize import HOME_BASE, haversine_miles
+from mbos_discovery.normalize import haversine_miles
 
 DEFAULT_CACHE = "/home/michaelos/business-os-worktrees/agent-01-coordinator/var/cache/gsa-active-auctions.json"
 SOURCES = {"gsa": "GSA Auctions"}
@@ -37,10 +37,8 @@ US_STATES = {"AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas",
              "NV": "Nevada", "NH": "New Hampshire", "NJ": "New Jersey", "NM": "New Mexico", "NY": "New York", "NC": "North Carolina", "ND": "North Dakota", "OH": "Ohio", "OK": "Oklahoma",
              "OR": "Oregon", "PA": "Pennsylvania", "RI": "Rhode Island", "SC": "South Carolina", "SD": "South Dakota", "TN": "Tennessee", "TX": "Texas", "UT": "Utah", "VT": "Vermont",
              "VA": "Virginia", "WA": "Washington", "WV": "West Virginia", "WI": "Wisconsin", "WY": "Wyoming"}
-DEFAULT_BASE = "Conway AR"
 DEFAULT_RADIUS = 150.0                 # an editable starting radius around the base, not a budget
 DEFAULT_ANY = "trailer, equipment"     # the default view: trailers/equipment; "broad" mode (explicit, off by default) drops this focus
-PRICE_RANGE = (1, 20000)               # the price slider's range only: a control scale, NOT a budget or a spend authorization
 
 
 def working_capital() -> float:
@@ -65,30 +63,18 @@ def _terms(raw) -> list[str]:
     return [w.strip().lower() for w in re.split(r"[,\n]", raw or "") if w.strip()][:12]
 
 
-def _price_pick(g, box: str, slider: str, prev: str) -> tuple[str, str]:
-    """-> (raw text that decides, control name). No scripts run on this page (CSP), so the slider and the number box are two form fields.
-    The slider wins only when the user moved it (its value differs from the value the page rendered, `prev`); otherwise the typed number is used."""
-    moved = g(slider) != "" and g(slider) != g(prev)
-    return (g(slider), slider) if moved else (g(box), box)
-
-
-def _slider_price(g, box: str, slider: str, prev: str):
-    raw, _ = _price_pick(g, box, slider, prev)
-    return _num(raw) if raw != "" else None
-
-
 def validate(g) -> list[str]:
-    """F-52/F-53 (A): validate the FINAL resolved numeric values, whichever control decided them (box, slider or a direct query string):
+    """F-52/F-53 (A), F-143: validate the typed numeric values (the price sliders are gone; obsolete min_r/max_r/prev_* query fields are ignored):
     a value that is present but not a usable number gets a visible message, and min above max is refused. Equal min and max is allowed."""
     errs, val = [], {}
     raw = g("radius")
     if raw != "" and _num(raw, landing_fix.MAX_RADIUS) is None:
         errs.append(f"Radius (miles) '{raw[:20]}' is not a usable number (0 to {landing_fix.MAX_RADIUS:,} miles, digits only); no search was run with it.")
-    for k, box, slider, prev, label in (("min", "min_price", "min_r", "prev_min", "Min price"), ("max", "max_price", "max_r", "prev_max", "Max price")):
-        raw, ctl = _price_pick(g, box, slider, prev)
+    for k, box, label in (("min", "min_price", "Min price"), ("max", "max_price", "Max price")):
+        raw = g(box)
         val[k] = _num(raw) if raw != "" else None
         if raw != "" and val[k] is None:
-            errs.append(f"{label} '{raw[:20]}' (from the {'slider' if ctl == slider else 'number box'}) is not a usable number (use 0 or more, digits only); no search was run with it.")
+            errs.append(f"{label} '{raw[:20]}' is not a usable number (use 0 or more, digits only); no search was run with it.")
     if val["min"] is not None and val["max"] is not None and val["min"] > val["max"]:
         errs.append(f"Min price ${val['min']:,.0f} is higher than max price ${val['max']:,.0f}; nothing can match.")
     return errs
@@ -115,11 +101,12 @@ def parse_query(qs: dict) -> dict:
     fresh = not any(k in qs for k in ("keywords", "base", "radius", "max_price", "min_price", "any", "run", "edit", "cat", "state", "loc_mode"))
     states, bad_states = _states(qs)
     mode = "state" if g("loc_mode") == "state" else "distance"
-    errs = validate(g) + [f"'{t}' is not a US state code; it was ignored and no search was run with it." for t in bad_states] \
+    radius_used = (mode == "distance" or g("also_radius") == "1") and g("radius") != ""
+    errs = validate(g) + (["Enter your ZIP or city (the origin the radius is measured from); no search was run without it."] if radius_used and not g("base") else []) + [f"'{t}' is not a US state code; it was ignored and no search was run with it." for t in bad_states] \
         + (["By State is selected but no state is ticked; pick at least one state (or switch to By Distance). No search was run."] if mode == "state" and not states and not bad_states else [])
-    return {"loc_mode": mode, "states": states, "also_radius": g("also_radius") == "1", "state_find": g("state_find")[:30], "keywords": g("keywords")[:120], "base": (g("base") or DEFAULT_BASE)[:60],
-            "radius": DEFAULT_RADIUS if fresh else _num(g("radius"), landing_fix.MAX_RADIUS),
-            "min_price": _slider_price(g, "min_price", "min_r", "prev_min"), "max_price": _slider_price(g, "max_price", "max_r", "prev_max"), "errors": errs, "cats": cats, "rows": rows,
+    return {"loc_mode": mode, "states": states, "also_radius": g("also_radius") == "1", "state_find": g("state_find")[:30], "keywords": g("keywords")[:120], "base": g("base")[:60],
+            "radius": (DEFAULT_RADIUS if g("base") else None) if fresh else _num(g("radius"), landing_fix.MAX_RADIUS),
+            "min_price": _num(g("min_price")), "max_price": _num(g("max_price")), "errors": errs, "cats": cats, "rows": rows,
             "view": "list" if g("view") == "list" else "gallery",
             "any": _terms(DEFAULT_ANY if ("any" not in qs and not g("broad")) else g("any")), "broad": g("broad") == "1", "condition": g("condition").lower()[:30], "required": _terms(g("required")),
             "preferred": _terms(g("preferred")), "exclude": _terms(g("exclude")), "source": g("source") or "gsa",
@@ -132,7 +119,7 @@ def criteria_to_query(doc: dict) -> dict:
     c = doc.get("criteria") or {}
     nice = c.get("nice_to_have") or []
     meta = {t[: t.index(":") + 1]: t[t.index(":") + 1:] for t in nice if t.startswith(META)}
-    out = {"keywords": ", ".join(c.get("keywords") or []), "base": c.get("origin") or DEFAULT_BASE,
+    out = {"keywords": ", ".join(c.get("keywords") or []), "base": c.get("origin") or "",
            "radius": "" if c.get("radius_miles") is None else f"{c['radius_miles']:g}", "any": ", ".join(t for t in meta.get("any:", "").split(">") if t),   # F-59: always present, so an empty focus stays empty (never falls back to the default focus)
            "max_price": f"{c['max_price_usd']:g}" if "max_price_usd" in c else "",
            "required": ", ".join(c.get("must_have") or []),
@@ -158,8 +145,8 @@ def criteria_to_query(doc: dict) -> dict:
 
 
 def _origin(base: str):
-    if base.strip().lower() in ("", "conway", "conway ar", "conway, ar"):
-        return HOME_BASE
+    if not base.strip():
+        return None                                   # F-143: no hidden fallback origin; the user's own origin is required
     return landing_fix.parse_origin(base) or place_coords({"city": re.sub(r"[, ]+(ar|arkansas)$", "", base.strip(), flags=re.I)})
 
 
@@ -230,7 +217,7 @@ def _age_h(asof, now) -> float:
         return 10**6
 
 
-def load_gsa(path: str | None = None, now: datetime | None = None, origin=HOME_BASE) -> dict:
+def load_gsa(path: str | None = None, now: datetime | None = None, origin=None) -> dict:
     """-> {status: connected|offline, as_of, age_h, stale, in_file, in_scope, cards, message}. Offline when the cache is missing/unreadable."""
     now = now or datetime.now(timezone.utc)
     path = path or cache_path()
