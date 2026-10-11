@@ -1,0 +1,20 @@
+# Decision case: fill in the values after each colon. Lines starting with # are ignored. One value per line; repeat a line to add more.
+# Keep this file OUTSIDE the repo (for example in your home folder). Nothing here goes to GitHub.
+listing_id:
+source: gsa
+title:
+decided_at: 2026-01-01T12:00:00Z
+decision: pass            # pass | watch | pursue
+reason: 
+# evidence: kind | provenance | what you knew then.   kind: condition photo dimensions capacity paperwork cost sold_comparable repair_work other
+#           provenance: verified | owner_estimate | unverified
+evidence: condition | verified | 
+evidence: cost | owner_estimate | 
+# estimate: label | amount in dollars (or leave empty) | basis
+estimate: 
+alternative: 
+uncertainty: 
+missing: 
+skills: 
+tags: trailer, 
+

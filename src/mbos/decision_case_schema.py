@@ -88,3 +88,72 @@ def validate_case(c: Any, *, partial: bool = False) -> dict:
         if c["outcome"] not in (None, ""):
             raise CaseError("an outcome is recorded later with the `outcome` command, not at import")
     return out
+
+
+TEXT_TEMPLATE = """# Decision case: fill in the values after each colon. Lines starting with # are ignored. One value per line; repeat a line to add more.
+# Keep this file OUTSIDE the repo (for example in your home folder). Nothing here goes to GitHub.
+listing_id:
+source: gsa
+title:
+decided_at: 2026-01-01T12:00:00Z
+decision: pass            # pass | watch | pursue
+reason: 
+# evidence: kind | provenance | what you knew then.   kind: condition photo dimensions capacity paperwork cost sold_comparable repair_work other
+#           provenance: verified | owner_estimate | unverified
+evidence: condition | verified | 
+evidence: cost | owner_estimate | 
+# estimate: label | amount in dollars (or leave empty) | basis
+estimate: 
+alternative: 
+uncertainty: 
+missing: 
+skills: 
+tags: trailer, 
+"""
+
+_REPEAT = {"evidence", "estimate", "alternative", "uncertainty", "missing", "tags"}
+
+
+def parse_text(text: str) -> dict:
+    """The plain-text form -> a case dict (not yet validated). Empty values are skipped; `tags` takes a comma list."""
+    case: dict = {"evidence": [], "owner_estimates": [], "alternatives_considered": [], "uncertainty": [], "missing_evidence": [], "category_tags": []}
+    names = {"reason": "reason_summary", "skills": "owner_skills"}
+    for n, raw in enumerate(text.splitlines(), 1):
+        line = raw.split("  #", 1)[0].strip() if "  #" in raw else raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        key, sep, val = line.partition(":")
+        key, val = key.strip().lower(), val.strip()
+        if not sep:
+            raise CaseError(f"line {n}: expected 'name: value'")
+        if key not in names and key not in _REPEAT and key not in ("listing_id", "source", "title", "decided_at", "decision"):
+            raise CaseError(f"line {n}: unknown field {key!r}")
+        if not val:
+            continue
+        if key == "evidence":
+            parts = [x.strip() for x in val.split("|", 2)]
+            if len(parts) != 3 or not parts[2]:
+                if len(parts) == 3:
+                    continue                                   # a template line left blank
+                raise CaseError(f"line {n}: evidence needs 'kind | provenance | text'")
+            case["evidence"].append({"kind": parts[0], "provenance": parts[1], "text": parts[2]})
+        elif key == "estimate":
+            parts = [x.strip() for x in val.split("|", 2)] + ["", ""]
+            amt = None
+            if parts[1]:
+                try:
+                    amt = float(parts[1].replace("$", "").replace(",", ""))
+                except ValueError:
+                    raise CaseError(f"line {n}: the estimate amount must be a number or empty")
+            case["owner_estimates"].append({"label": parts[0], "amount_usd": amt, "note": parts[2]})
+        elif key == "alternative":
+            case["alternatives_considered"].append(val)
+        elif key == "uncertainty":
+            case["uncertainty"].append(val)
+        elif key == "missing":
+            case["missing_evidence"].append(val)
+        elif key == "tags":
+            case["category_tags"] += [t.strip() for t in val.split(",") if t.strip()]
+        else:
+            case[names.get(key, key)] = val
+    return case

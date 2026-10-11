@@ -6,7 +6,7 @@ operator notes are make+model knowledge, cached /market lots are not spine Items
 without being misused as an acquisition or a false verification, so this adds the smallest missing piece and reuses the repo's conventions: MBOS-CJSON-1
 hashing (`mbos.hashing`), append-only rows with a hash chain, corrections that append, and an explicit reset/disable.
 
-    python -m mbos.decision_cases template                 print a value-free import template
+    python -m mbos.decision_cases template [--text]        print a value-free import template (--text = the plain-text form, FILE ending .txt)
     python -m mbos.decision_cases import FILE              append the case(s) in a LOCAL json file (never prints their contents)
     python -m mbos.decision_cases show LISTING_ID          read back the effective case (corrections applied) + history
     python -m mbos.decision_cases correct LISTING_ID FILE  append a correction (changed fields only); history is kept
@@ -31,7 +31,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
 
-from mbos.decision_case_schema import (CASE_KEYS, DECISIONS, EVIDENCE_KINDS, MAX_TEXT, KINDS, PROVENANCE, CaseError, _s, validate_case)  # noqa: F401
+from mbos.decision_case_schema import (TEXT_TEMPLATE, parse_text, CASE_KEYS, DECISIONS, EVIDENCE_KINDS, MAX_TEXT, KINDS, PROVENANCE, CaseError, _s, validate_case)  # noqa: F401
 from mbos.hashing import sha256_of
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -148,7 +148,8 @@ def _append(kind: str, listing_id: Optional[str], body: dict, entered_by: str, w
 def import_cases(file: Path, entered_by: str = "michael") -> list[dict]:
     file = file.resolve()
     _must_be_private(file, "the import file") if _in_git(file) else None
-    data = json.loads(file.read_text())
+    raw = file.read_text()
+    data = parse_text(raw) if file.suffix in (".txt", ".case") else json.loads(raw)       # a plain-text form or JSON
     cases = [validate_case(c) for c in (data if isinstance(data, list) else [data])]       # validate ALL before writing any
     keys = [(c["source"], c["listing_id"]) for c in cases]
     if len(set(keys)) != len(keys):
@@ -313,7 +314,7 @@ def main(argv: list[str]) -> int:
     why, src = opts.get("why", ""), opts.get("source")
     try:
         if cmd == "template":
-            print(json.dumps(TEMPLATE, indent=1))
+            print(TEXT_TEMPLATE if "--text" in rest else json.dumps(TEMPLATE, indent=1))
         elif cmd == "import":
             for r in import_cases(Path(pos[0])):
                 print(f"imported {r['source']}/{r['listing_id']} as row {r['seq']} {r['row_hash'][:19]}")

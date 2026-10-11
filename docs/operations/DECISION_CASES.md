@@ -5,7 +5,12 @@
 ## Where a case lives
 `var/private/decision_cases/cases.jsonl` on the owner's machine: git-ignored (`var/`), directory 0700, file 0600, append-only, hash-chained (MBOS-CJSON-1). The module refuses to write if the directory, or an import file, sits inside a git checkout and is tracked or not ignored. Override the location with `MBOS_DECISION_CASES_DIR` (same checks). No database, no network, no GitHub, no PIN, no credential.
 
-## Secure import route (for Michael, on this machine; nothing goes through GitHub or chat relays)
+## Easiest route (plain-text form)
+A value-free form is already at `~/trailer-case.txt` (outside the repo, mode 0600). Open it in any editor, fill in the values after each colon (one `evidence:` line per piece of evidence, marked verified / owner_estimate / unverified), save, then run:
+`cd ~/business-os-worktrees/agent-01-coordinator && PYTHONPATH=src .venv/bin/python -m mbos.decision_cases import ~/trailer-case.txt`
+A file ending `.txt` is read as this form; `.json` still works. A blank or wrong form is refused with the line named and nothing is written. Then `show <listing_id> --source <source>` reads it back. Delete the file when done.
+
+## Secure import route (JSON) (for Michael, on this machine; nothing goes through GitHub or chat relays)
 1. `cd ~/business-os-worktrees/agent-01-coordinator && PYTHONPATH=src .venv/bin/python -m mbos.decision_cases template > ~/trailer-case.json` (the template has no values; keep the file OUTSIDE the repo, e.g. in your home folder).
 2. Fill it in: stable `listing_id` (the GSA lot id) and `source`, `decided_at`, `decision` (pass/watch/pursue), `reason_summary` (a summary of the reasoning, not a transcript), `evidence` entries each marked `verified`, `owner_estimate` or `unverified` (condition, photos, dimensions/capacity, paperwork, costs, sold comparables, repair work), `owner_estimates` (always labelled as estimates), `alternatives_considered`, `uncertainty`, `missing_evidence`, `owner_skills`, `category_tags` (words used to find similar candidates). Dollar amounts are allowed here and stay on this machine.
 3. `PYTHONPATH=src .venv/bin/python -m mbos.decision_cases import ~/trailer-case.json`. It validates everything first, writes nothing on any error, and prints only the listing id, row number and hash.

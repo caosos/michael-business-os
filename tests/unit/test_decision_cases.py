@@ -232,3 +232,43 @@ def test_a64_duplicate_in_one_batch_or_existing_is_rejected_before_any_write(sto
     assert len(dc.rows()) == 1
     dc.import_cases(write(store, "other.json", {**CASE, "source": "other"}))                  # same id, other source: allowed
     assert len(dc.rows()) == 2 and dc.verify()[0]
+
+
+FORM = """# synthetic form
+listing_id: SYN-TXT-1
+source: synthetic
+title: Synthetic utility trailer tandem axle
+decided_at: 2026-01-01T12:00:00Z
+decision: pass
+reason: synthetic reason from the text form
+evidence: condition | verified | synthetic condition note
+evidence: cost | owner_estimate | synthetic repair estimate text
+estimate: synthetic estimate label | | synthetic basis
+alternative: synthetic alternative
+uncertainty: synthetic uncertainty
+missing: synthetic missing title
+skills: synthetic skills
+tags: trailer, utility, tandem
+"""
+
+
+def test_the_plain_text_form_imports_reads_back_and_feeds_proposals(store, capsys):
+    f = store / "case.txt"
+    f.write_text(FORM)
+    assert dc.main(["import", str(f)]) == 0
+    eff = dc.effective("SYN-TXT-1", "synthetic")
+    assert eff["case"]["reason_summary"] == "synthetic reason from the text form" and eff["case"]["category_tags"] == ["trailer", "utility", "tandem"]
+    assert [e["provenance"] for e in eff["case"]["evidence"]] == ["verified", "owner_estimate"] and eff["case"]["owner_estimates"][0]["amount_usd"] is None
+    m = dc.propose({"listing_id": "SYN-9", "title": "Synthetic tandem utility trailer"})["matches"][0]
+    assert m["source_case"]["listing_id"] == "SYN-TXT-1" and m["owner_estimates_not_facts"]
+
+
+def test_the_blank_text_template_is_refused_with_a_clear_reason_and_bad_lines_are_named(store):
+    blank = store / "blank.txt"
+    blank.write_text(dc.TEXT_TEMPLATE)
+    with pytest.raises(dc.CaseError):
+        dc.import_cases(blank)                                                 # nothing filled in: refused, nothing written
+    assert dc.rows() == []
+    for bad, msg in (("listing_id SYN\n", "expected"), ("color: red\n", "unknown field"), ("evidence: cost | verified\n", "kind | provenance"), ("estimate: x | many | y\n", "number")):
+        with pytest.raises(dc.CaseError, match=msg):
+            dc.parse_text(bad)
