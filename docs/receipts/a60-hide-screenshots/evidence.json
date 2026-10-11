@@ -1,0 +1,76 @@
+{
+ "code_sha": "a9be4e4e96c10cffe83db22d8eaf6fcc8d24412d",
+ "dirty": false,
+ "cache_sha256": "d02f3acc4a6eef4b7abd4065c2dc5d4370dd6064fe0bba1b385ec6a8fa154ba7",
+ "cache_as_of": "2026-10-10T00:19:23.772932+00:00",
+ "store": "STUB",
+ "steps": {
+  "before": {
+   "checked": 5,
+   "unchecked": 143
+  },
+  "after_click": {
+   "hidden": "3-1-QSC-I-27-006-005",
+   "gone": true,
+   "rest_same_order": true
+  },
+  "after_keyboard": {
+   "hidden": "3-1-QSC-I-27-017-037",
+   "gone": true,
+   "rest_same_order": true
+  },
+  "unchecked_hide": {
+   "hidden": "3-1-QSC-I-27-006-016",
+   "gone": true
+  },
+  "toggle_disable": {
+   "still_hidden": true
+  },
+  "toggle_enable": {
+   "still_hidden": true
+  },
+  "after_restart": {
+   "hidden_still_gone": true,
+   "same_as_before_restart": true
+  },
+  "undo_one": {
+   "restored": true,
+   "other_still_hidden": true
+  },
+  "exhausted": {
+   "text": "0 results left. All 5 cached listing(s) that match your filters within 150 mi of Conway AR are hidden by you. Nothing else was substituted and no new fetch was made; there is no guaranteed replacement. Undo a hide below, or loosen a filter.",
+   "cards_left": 0
+  }
+ },
+ "pid_before": 112519,
+ "pid_after": 112715,
+ "prefs_file": {
+  "enabled": true,
+  "saved": [],
+  "dismissed": [],
+  "hidden": {
+   "3-1-QSC-I-27-017-037": "Metal Mop Cart Lot",
+   "3-1-QSC-I-27-006-016": "2 Furniture White Board",
+   "3-1-QSC-I-27-006-005": "Trailer, Utility",
+   "3-1-QSC-I-27-017-017": "Traulsen Double Refrigerator",
+   "3-1-QSC-I-27-017-038": "Workbench with Pegboard Backing",
+   "3-1-QSC-I-27-017-016": "iPad Mini Lot"
+  },
+  "more": {},
+  "less": {},
+  "last": {
+   "base": [
+    "Conway AR"
+   ],
+   "radius": [
+    "150"
+   ],
+   "max_price": [
+    "300"
+   ],
+   "broad": [
+    "1"
+   ]
+  }
+ }
+}
