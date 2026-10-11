@@ -1,5 +1,38 @@
 # Live :8766 reload and rollback packet (PREPARED, NOT APPROVED, NOT RUN)
 
+## F-142 REFRESH (2026-10-11T21:09:44Z): THIS SECTION IS THE CURRENT PACKET. Everything below it is audit history.
+**NOT approval to deploy. NOT RUN.** Nothing on :8766 was changed to prepare this. Earlier approvals (A56, A58) are spent and do not cover this artifact.
+
+### Target artifact
+- Lane 06 `research/agent-06-communications` @ **`85246899debf5c9b8af418dc5560f3b01273d5ee`** (status commit; source `84475a8af072bee2e591b56b0c64c39b3841fcc0`; FACT: contained in `origin/research/agent-06-communications`, which is at that SHA now).
+- Staging acceptance: `docs/receipts/2026-10-11-f142-clean-commit-staging-verification.md` (clean checkout, `dirty=false`, focused tests 8/8, real Chrome desktop+mobile click and desktop Enter, Min/Max 11 to 0).
+- Change from live: Search Now is last in the filter card after location, both sliders, categories, keywords/broad and More filters. Source diff vs the live tree (`63d741d`) touches `operator_ui/` and `comms_spec/` only.
+
+### Preflight facts re-checked 2026-10-11T21:09:44Z (read-only)
+- **Live now:** `mbos-dev-ui` tmux; `.venv/bin/python -u -m operator_ui serve --port 8766` PID 592603 (listening 127.0.0.1:8766), run from `~/business-os-worktrees/agent-01-coordinator`. `var/lanes/agent-06/ARTIFACT` = `sha=63d741d3cf0d3df72fc8a672f4c84256356c15c3`, `tree_sha256=032f66f986e72010bead1280e76761e9126fb59e6b589117a7d7c55b1ea9e173`, `exported_utc=20261011T045228Z`. So the previously prepared target `eda3eee` is obsolete; the live tree is the F-60 build and the old command in the history below must NOT be used.
+- **Live baseline:** `/` 303 to `/market`; `tools/reload_ui.sh --verify-only 8766` = VERIFY OK. The new F-142 check on live `63d741d` FAILS as expected (Search Now above the sliders), `docs/receipts/f142-preflight-rehearsal/live-63d741d-baseline-live-check.json`, so it discriminates.
+- **Release script identity:** `tools/reload_ui.sh` has an empty `git diff` against the reviewed `7c0fbbb`; sha256 `1acf3e9075ed443f5ca14dae5a12c3761623b4b57b581cdc0b679c5c9ade4488`. Re-check byte identity at execution. `tests/unit/test_reload_ui.py`: **13 passed**.
+- **Script markers vs the new build (rehearsal):** the exact clean `8524689` served on a loopback ephemeral port (stub store, copy of the cache; the stub gets an empty `action_requests` in the harness only) gives `tools/reload_ui.sh --verify-only <port>` = **VERIFY OK**. FACT: against an unmodified stub the check fails on `/queue` (stub lacks `action_requests`); live :8766 passes `/queue`, so that is a stub limit, not a build defect.
+- **F-142 behaviour check (new, read-only):** `tools/f142_live_check.py PORT [OUTDIR]` (GET navigation only; no Save, no PIN). On the staged `8524689`: exit 0, order OK desktop/mobile/Enter, results 145 to 108 after Min 5 / Max 25. Evidence: `docs/receipts/f142-preflight-rehearsal/staging-8524689-live-check.json`.
+- **Backup / rollback:** the script verifies a `diff -r`-clean backup `var/lanes/agent-06.prev-<UTC>` BEFORE stopping anything and rolls back automatically on any failed check (rollback judged against a baseline; unverified recovery exits 3). Live tree is 1.5 MB; disk free 48 GB (79% used); six earlier backups exist, the newest `prev-20261011T045228Z` is the `63d741d` predecessor-of-record. Manual rollback is the text under "Historical sections" and is unchanged. Not touched by the reload: database, workers, dispatcher, pickup, watchdog, other projects. Expected UI downtime ~13 s (A56 measured; not a guarantee).
+- **Coordinator worktree:** `agent-01-coordinator` is in sync with origin and clean at the time of this packet (the old "behind 33 / uncommitted change" blocker is resolved).
+- **UNKNOWN:** card counts differ between live (134 lots) and staging (145 lots) for the same start query; it may be data or code. The post-reload check compares live against itself, so it does not depend on this.
+
+### The one command (needs one explicit owner authorization naming `8524689`)
+`cd ~/business-os-worktrees/agent-01-coordinator && tools/reload_ui.sh 85246899debf5c9b8af418dc5560f3b01273d5ee`
+
+### Fresh live checks after the reload (Agent 01 runs; evidence to GitHub)
+1. `tools/reload_ui.sh --verify-only 8766` must say VERIFY OK; read `var/lanes/agent-06/ARTIFACT` and confirm `sha=85246899…`.
+2. `~/business-os-worktrees/agent-06-communications/.venv/bin/python tools/f142_live_check.py 8766 docs/receipts/f142-live-verification` must exit 0 (Search Now last after every filter on desktop 1648x1000 and mobile 390x844; Min/Max change results by click and by Enter), with its screenshots read by Agent 01.
+3. Record the artifact tree hash, `/health`, cache sha256, loaded SHA and timestamps. Live Save with the owner PIN stays an owner action; the PIN is never read.
+4. If any check fails: the script's automatic rollback applies; otherwise run the manual rollback from the backup path it prints and record the result.
+
+### Owner NEED (single decision)
+Authorize ONE UI-only reload of :8766 to `85246899debf5c9b8af418dc5560f3b01273d5ee` by naming that SHA. Recommended default: approve; low risk (UI only, verified backup, automatic rollback). Not blocked meanwhile: all other queue work. Until the owner says yes, :8766 keeps serving `63d741d` with Search Now above the sliders.
+
+---
+## SUPERSEDED: previous packet text (audit history; the target `eda3eee` and its command are obsolete)
+
 **Refreshed 2026-10-10 ~19:55Z for ARYA-20261010-1951.** This packet is a decision aid only. **It is NOT approval to deploy.** No release is executed until a new explicit owner approval arrives through the parent. The earlier A56 approval is spent.
 
 ## CURRENT FACTS (supersede the 07:55Z sections below, which are kept as audit history)

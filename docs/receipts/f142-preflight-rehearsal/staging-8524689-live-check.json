@@ -1,0 +1,48 @@
+{
+ "port": "35835",
+ "pass": true,
+ "rows": [
+  {
+   "view": "desktop",
+   "submit_by": "click",
+   "order": {
+    "ok": true,
+    "controls_below_button": [],
+    "below_both_sliders": true
+   },
+   "results_before": 145,
+   "results_after": 108,
+   "changed": true,
+   "shot": "live-desktop-click.png",
+   "at": "2026-10-11T21:08:51+00:00"
+  },
+  {
+   "view": "mobile",
+   "submit_by": "click",
+   "order": {
+    "ok": true,
+    "controls_below_button": [],
+    "below_both_sliders": true
+   },
+   "results_before": 145,
+   "results_after": 108,
+   "changed": true,
+   "shot": "live-mobile-click.png",
+   "at": "2026-10-11T21:08:52+00:00"
+  },
+  {
+   "view": "desktop",
+   "submit_by": "enter",
+   "order": {
+    "ok": true,
+    "controls_below_button": [],
+    "below_both_sliders": true
+   },
+   "results_before": 145,
+   "results_after": 108,
+   "changed": true,
+   "shot": "live-desktop-enter.png",
+   "at": "2026-10-11T21:08:53+00:00"
+  }
+ ]
+}

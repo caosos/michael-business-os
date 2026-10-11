@@ -1,0 +1,78 @@
+{
+ "port": "8766",
+ "pass": false,
+ "rows": [
+  {
+   "view": "desktop",
+   "submit_by": "click",
+   "order": {
+    "ok": false,
+    "controls_below_button": [
+     "min_price",
+     "max_price",
+     "min_r",
+     "max_r",
+     "cat",
+     "cat",
+     "cat",
+     "cat",
+     "cat"
+    ],
+    "below_both_sliders": false
+   },
+   "results_before": 134,
+   "results_after": 97,
+   "changed": true,
+   "shot": "live-desktop-click.png",
+   "at": "2026-10-11T21:08:56+00:00"
+  },
+  {
+   "view": "mobile",
+   "submit_by": "click",
+   "order": {
+    "ok": false,
+    "controls_below_button": [
+     "min_price",
+     "max_price",
+     "min_r",
+     "max_r",
+     "cat",
+     "cat",
+     "cat",
+     "cat",
+     "cat"
+    ],
+    "below_both_sliders": false
+   },
+   "results_before": 134,
+   "results_after": 97,
+   "changed": true,
+   "shot": "live-mobile-click.png",
+   "at": "2026-10-11T21:08:57+00:00"
+  },
+  {
+   "view": "desktop",
+   "submit_by": "enter",
+   "order": {
+    "ok": false,
+    "controls_below_button": [
+     "min_price",
+     "max_price",
+     "min_r",
+     "max_r",
+     "cat",
+     "cat",
+     "cat",
+     "cat",
+     "cat"
+    ],
+    "below_both_sliders": false
+   },
+   "results_before": 134,
+   "results_after": 97,
+   "changed": true,
+   "shot": "live-desktop-enter.png",
+   "at": "2026-10-11T21:08:58+00:00"
+  }
+ ]
+}
