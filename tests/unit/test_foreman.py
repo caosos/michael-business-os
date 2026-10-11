@@ -175,3 +175,14 @@ def test_a53_launch_and_exec_refuse_a_queue_with_a_malformed_row_and_name_it(mon
     monkeypatch.setattr(f, "survey", lambda repo: ([{"lane": "06", "state": "CLOSED", "claimed": "", "head": "abc", "idle_with_work": True,
                                                     "ready": [{"id": "F-10", "pri": "P0", "title": "t"}], "blocked": ""}], []))
     assert f.main(["--no-fetch", "--launch"]) == 2 and "LAUNCH" in capsys.readouterr().out      # a clean queue still launches (exit 2 = idle with work)
+
+
+def test_schema_flags_a_literal_pipe_inside_a_cell():
+    """A stray `|` in a cell (e.g. 'gsa | govdeals') adds columns: tools/worker.py splits on every pipe and mis-read F-145. The foreman reads from the
+    right and was blind to it, so schema_problems must report it."""
+    f = _load_foreman()
+    good = "| F-90 | P1 | task | none | READY | 06 | acceptance |"
+    bad = "| F-91 | P1 | source (gsa | govdeals) | none | READY | 06 | acceptance |"
+    assert f.schema_problems(good) == []
+    probs = f.schema_problems(bad)
+    assert probs and probs[0].startswith("F-91:") and "literal |" in probs[0]

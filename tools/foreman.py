@@ -74,6 +74,8 @@ def schema_problems(text: str | None) -> list[str]:
         status = re.sub(r"[*`]", "", c[-4]).strip()
         if len(c) < 9:
             out.append(f"{tid}: {len(c) - 2} columns, expected 7 (a cell is missing or fused; status may be read from the wrong cell)")
+        elif len(c) > 9:
+            out.append(f"{tid}: {len(c) - 2} columns, expected 7 (a literal | inside a cell? tools/worker.py splits on every pipe and would mis-read this row)")
         elif not re.search(r"P\d", c[2]):
             out.append(f"{tid}: priority cell {c[2][:20]!r} has no P0..P3")
         elif not any(status.upper().startswith(w) for w in STATUS_WORDS):
