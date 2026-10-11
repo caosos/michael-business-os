@@ -4,9 +4,9 @@
 - **Role:** Chief Coordinator / Core Platform / Integration (Lane A)
 - **Branch:** `research/agent-01-coordinator`
 - **Worktree:** `/home/michaelos/business-os-worktrees/agent-01-coordinator`
-- **State:** WAITING (hard dependency: F-142 live reload, run denied by the permission classifier 2026-10-11T21:17Z; NEED recorded in ack 2026-10-11-owner-f142-ui-reload-continue. No READY row exists for any lane; all 11 BLOCKED rows are owner/host-gated)
+- **State:** WAITING (no READY row for any lane; F-142 LIVE_VERIFIED, owner acceptance + PIN Save pending; blocked rows are owner/host-gated)
 - **Proposed:** (02) B-23 fixture adapter emits contract enum values (`ingestion_method` json/api, counterparty role `other`); then drop `auction_lot.conform`
-- **Done:** A-51 @ 12817e7; A-49 @ b2b3399; A-47 @ 6e6aa84; A-48 @ 8abbfa0; A-43 @ da6cf4a; A-44 @ 6440be3; A-42 @ 69402d9; A-41 @ 281cc74; A-40 @ 1160310; A-39 @ 6185927; A-38 @ 2198a74; A-37 @ b92683d
+- **Done:** F-142 live verification + protocol adoption (this wave, see ack 2026-10-11-owner-project-operating-protocol); A-51 @ 12817e7; A-49 @ b2b3399; A-47 @ 6e6aa84; A-48 @ 8abbfa0; A-43 @ da6cf4a; A-44 @ 6440be3; A-42 @ 69402d9; A-41 @ 281cc74; A-40 @ 1160310; A-39 @ 6185927; A-38 @ 2198a74; A-37 @ b92683d
 - **Done (reboot persistence):** five user units enabled+active, Linger=yes; `docs/operations/REBOOT_RECOVERY.md`; cold start proven only by the next reboot
 - **Claimed:** F-142 (dispatching one lane 06 worker), A-31, A-28, A-29
 - **Done (this wave, runtime migration):** ADR-0014; lanes 02-06 closed out and sessions closed after verification; `tools/worker.py`, `mbos.router`, `mbos.telemetry`; quota from `rate_limit_event` verified; Aria 1945 ack
@@ -15,7 +15,7 @@
 - **Current phase:** ROUND TWO. The Lane A spine is built and tested. Integration rulings R1–R11 are issued.
 - **Role:** foreman/dispatcher. I own `docs/status/READY_QUEUE.md` and `ACTIVE_WORK.md` (`docs/COORDINATION.md`).
 - **Started:** 2026-10-06
-- **Last updated:** 2026-10-11T21:25Z
+- **Last updated:** 2026-10-11T21:31:05Z
 
 ## Current objective
 Build the durable application spine DISCOVER → NORMALIZE → SCORE → RECOMMEND → APPROVE → DRY-RUN ACT → RECEIPT and integrate the specialist lanes. All external actions are DRY-RUN only.

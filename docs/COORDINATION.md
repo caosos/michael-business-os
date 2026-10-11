@@ -81,6 +81,53 @@ The shared `.git/config` identity is overwritten by whichever agent launched las
 `git -c user.name='Agent NN <Role>' -c user.email='michaelos+agent-NN-<role>@users.noreply.github.com' commit …`
 Check it with `git log -1 --format='%an'` before pushing. The correction of record for past mislabelled commits is in `docs/receipts/2026-10-07-provenance-correction-commit-authorship.md`.
 
+## Owner project operating protocol (adopted verbatim 2026-10-11; source: liaison message `2026-10-11-owner-project-operating-protocol`)
+Binding for every project on this pattern. Repo mechanics in the sections above are how it is carried out here; where an older line in this file or in an older ack conflicts with the text below, this text governs.
+
+```text
+PROJECT OPERATING PROTOCOL — ONE BOUNDED ITEM AT A TIME
+
+1. Keep one authoritative living checklist and one receipt/liaison lane per project.
+   Every item names its owner, priority, acceptance test, current stage, blocker,
+   and next eligible action. Preserve completed history; correct stale entries
+   explicitly.
+
+2. The existing coordinator claims ONE eligible item and posts:
+   DELIVERED → ACK → WORKING → DONE, or a structured NEED.
+   A delivery is not an ACK. A worker claim is not a verified result.
+
+3. A DONE receipt must include the exact commit, tests and results, review or
+   browser evidence, loaded service revision and host observation if applicable,
+   user-visible result, cost if known, timestamp, and the next queue item.
+
+4. At each task boundary, reconcile the checklist and dispatch the next eligible
+   bounded item through the existing coordinator. Do not start a duplicate
+   coordinator or worker. If an item is blocked, state the exact action needed
+   and continue compatible authorized work.
+
+5. The LOCAL watchdog handles delivery, session health, and the five-minute ACK
+   target. It records a timestamped NEED when delivery or ACK fails. A GitHub
+   comment is a dated report; it is not proof that a host process is alive now.
+
+6. The CLOUD supervisor checks GitHub, the checklist, commits, and the Slack
+   liaison hourly and posts a visible checkpoint, even when nothing changed:
+   current task, queue stage, latest receipt, tested state, loaded state, last
+   host observation or UNKNOWN, blocker, and ONE next action. PR events can
+   prompt an additional review; Issue comments rely on the hourly check or the
+   local relay.
+
+7. Notify Michael promptly for DONE needing acceptance, BLOCKED/NEED, missed ACK,
+   failed test or recovery, or a genuine owner decision. Do not ask again for
+   routine build authority already granted. Never describe a partial handoff
+   or an unobserved service as continuously running.
+
+8. Keep project ownership and code isolated. No cross-project edits, duplicate
+   queues, invented progress, or silent stops. Governing rule:
+   “No action without a receipt. No receipt without provenance.”
+```
+
+Project mapping (DealSniffer / `caosos/michael-business-os` only): authoritative checklist `docs/product/DEAL_SNIFFER_BUILD_CHECKLIST.md`; the one dispatch queue `docs/status/READY_QUEUE.md`; receipts via `docs/messages/acks` and `docs/receipts`; coordinator `research/agent-01-coordinator`. No second queue, coordinator, worker or service is created by this adoption.
+
 ## Non-negotiables (unchanged)
 - DRY-RUN only: no sends, spend, publishing, contact or deployment.
 - No action without a receipt. No receipt without provenance.
