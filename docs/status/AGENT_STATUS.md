@@ -4,7 +4,7 @@
 - **Role:** Chief Coordinator / Core Platform / Integration (Lane A)
 - **Branch:** `research/agent-01-coordinator`
 - **Worktree:** `/home/michaelos/business-os-worktrees/agent-01-coordinator`
-- **State:** CLOSED
+- **State:** COMPLETE (spine built; standing liaison A-69/A-70 need a live session)
 - **Proposed:** (02) B-23 fixture adapter emits contract enum values (`ingestion_method` json/api, counterparty role `other`); then drop `auction_lot.conform`
 - **Done:** A-51 @ 12817e7; A-49 @ b2b3399; A-47 @ 6e6aa84; A-48 @ 8abbfa0; A-43 @ da6cf4a; A-44 @ 6440be3; A-42 @ 69402d9; A-41 @ 281cc74; A-40 @ 1160310; A-39 @ 6185927; A-38 @ 2198a74; A-37 @ b92683d
 - **Claimed:** A-31 (first bounded worker end to end), A-28 (07's F-50), A-29 (foreman --launch)
@@ -48,7 +48,7 @@ Build the durable application spine DISCOVER → NORMALIZE → SCORE → RECOMME
 
 ## Test results (FACT; run on this branch)
 - Command: `.venv/bin/python -m pytest -q`
-- Result: **111 passed, 0 failed** (about 77 s).
+- Result: **598 passed, 0 failed** (349 s) at 2026-10-11 on rebased HEAD. (Earlier 111 figure was the first-wave count.) One test-isolation fix: `test_probe_and_state_contract_shape` read the real READY_QUEUE after the lane-01 READY wake check landed; it now uses a fixture queue.
   - A1–A10 acceptance: all pass. A5 uses a real `os._exit` crash and restart; A6 includes a hard-restart HOLD.
   - Unit tests: contract alignment, state-machine parity, `validate_contracts.py`, protocol conformance, scorer replay.
   - Integration tests: lane-C engine in the workflow, blocking-key dedup, step-up, MODIFY by full payload.

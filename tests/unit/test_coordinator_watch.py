@@ -100,6 +100,9 @@ def test_probe_and_state_contract_shape(tmp_path, monkeypatch):
     monkeypatch.setattr(cw, "git", lambda *a: type("R", (), {"returncode": 0, "stdout": ""})())
     monkeypatch.setattr(cw, "list_ids", lambda ref, path: ["MSG-9"] if "inbox" in path else [])
     monkeypatch.setattr(cw, "stalled_workers", lambda ps: [])
+    monkeypatch.syspath_prepend(str(Path(cw.__file__).resolve().parent))
+    import foreman
+    monkeypatch.setattr(foreman, "show", lambda *a, **k: "")                      # fixture queue: no READY rows for 01
     v = cw.probe_verdict(["origin/liaison/x"])
     assert v["verdict"] == "WAKE" and any("MSG-9" in r for r in v["reasons"])
     monkeypatch.setattr(cw, "list_ids", lambda ref, path: [])
