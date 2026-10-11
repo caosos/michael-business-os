@@ -34,7 +34,7 @@ AR_PLACES: dict[str, tuple[float, float]] = {
     "morrilton": (35.1509, -92.7435), "heber springs": (35.4917, -92.0332), "hot springs": (34.5037, -93.0552),
     "pine bluff": (34.2284, -92.0032), "jonesboro": (35.8423, -90.7043), "fort smith": (35.3859, -94.3985),
     "fayetteville": (36.0626, -94.1574), "texarkana": (33.4418, -94.0377), "el dorado": (33.2076, -92.6663),
-    "marianna": (34.7737, -90.7576), "greenbrier": (35.2326, -92.3912),
+    "marianna": (34.7737, -90.7576), "greenbrier": (35.2326, -92.3912), "perryville": (35.0001, -92.8), 
 }
 
 
@@ -103,6 +103,8 @@ HOUSES: dict[str, AuctionHouse] = {h.source: h for h in [
     AuctionHouse("allsurplus", "AllSurplus", "auctioneer_platform", 3, "https://www.allsurplus.com", categories=("vehicle", "equipment")),
     AuctionHouse("municibid", "Municibid", "municipal", 3, "https://municibid.com", categories=("vehicle", "equipment")),
     AuctionHouse("hibid", "HiBid (Arkansas auctioneers)", "estate_equipment", 3, "https://hibid.com", categories=("estate", "equipment", "vehicle")),
+    AuctionHouse("wooley_auctioneers", "Wooley Auctioneers", "estate_equipment", 3, "https://wooleyauctioneers.com/auctions/",
+                 categories=("estate", "equipment", "vehicle")),   # event level only; lot data is on HiBid (ToU forbids scraping)
     AuctionHouse("ar_state_surplus", "Arkansas state surplus", "government", 1, "https://www.transform.ar.gov", categories=("vehicle", "equipment")),
     AuctionHouse("vehicle_salvage_platforms", "Copart / IAA-type vehicle auctions", "vehicle", 5, "https://www.copart.com", categories=("vehicle",)),
 ]}

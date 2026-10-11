@@ -49,6 +49,8 @@ REGISTRY: dict[str, SourcePolicy] = {p.source: p for p in [
     _P("publicsurplus_email", Disposition.ALLOWED, 2, "low", "PublicSurplus alert emails in our own inbox"),
     _P("estatesales_net_email", Disposition.ALLOWED, 2, "low",
        "EstateSales.NET alert emails (site scraping stays FORBIDDEN; email is the sanctioned path)"),
+    _P("wooley_auctioneers", Disposition.ALLOWED, 3, "low",
+       "wooleyauctioneers.com auction EVENT pages (robots ok, Crawl-delay 10); owner P0 2026-10-11; lot data on hibid.com is NEVER fetched"),
     # Tier 5 — human-entered evidence (Michael / Operator UI), with human provenance
     _P("manual", Disposition.ALLOWED, 5, "low", "sold comps recorded by a human, with provenance"),
     # Tier 3/4 — gray zone, needs explicit per-source enablement (P2)
