@@ -65,7 +65,7 @@ def act(action: str, lot_id: str, title: str = "") -> str:
     if action not in ACTIONS:
         raise ValueError("unknown preference action")
     d = load()
-    lot_id = re.sub(r"[^A-Za-z0-9._-]", "", lot_id or "")[:60]
+    lot_id = re.sub(r"[^A-Za-z0-9._:-]", "", lot_id or "")[:60]
     if action == "reset":
         _store({"enabled": d["enabled"], "saved": [], "dismissed": [], "hidden": d["hidden"], "more": {}, "less": {}, "last": d.get("last") or {}})
         return "Suggestions reset: saves and likes were cleared. Hidden listings stay hidden; restore them one by one from the hidden list."

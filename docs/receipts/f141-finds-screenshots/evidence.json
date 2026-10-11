@@ -1,0 +1,14 @@
+{
+ "finds_file": "scratch tmp (MBOS_MARKET_FINDS_FILE)",
+ "inside_repo": false,
+ "n_finds": 3,
+ "chrome_requests_all_loopback": true,
+ "external_requests": [],
+ "duplicate_message": "Not saved. Already in your finds. Edit it instead; no duplicate was added.",
+ "gsa_heading_with_finds": "5 RESULTS WITHIN 150 MI OF CONWAY AR",
+ "finds_after_delete_undo": 3,
+ "network": "none: loopback only; links entered are text, never requested",
+ "code_sha": "0cb845998997d62fd9159103615cc9e5bef5a69a",
+ "captured_at_utc": "2026-10-11T04:49:36+00:00",
+ "data": "SYNTHETIC finds only"
+}

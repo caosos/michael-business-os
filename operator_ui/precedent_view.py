@@ -95,7 +95,7 @@ def for_cards(cards: list[dict]) -> tuple[dict, str]:
                 return {}, "Showing earlier decisions is switched off (you disabled learned use of your decision cases)."
             out = {}
             for c in cards:
-                b = block(dc.propose({"listing_id": str(c["id"]), "source": "gsa", "title": c["title"], "evidence": []}))
+                b = block(dc.propose({"listing_id": str(c["id"]), "source": c.get("source_key", "gsa"), "title": c["title"], "evidence": []}))
                 if b:
                     out[c["id"]] = b
             return out, ""

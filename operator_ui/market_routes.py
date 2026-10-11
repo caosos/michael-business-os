@@ -10,6 +10,8 @@ from . import landing_fix
 from . import market_search as ms
 from . import market_prefs as mp
 from . import market_view as mv
+from . import market_finds as mf
+from . import finds_view as fv
 from .ux import InputError
 
 
@@ -72,7 +74,11 @@ def page_body(app, qs: dict, now, errors=None, values=None) -> str:
     if q["hidden_n"]:
         hidden = {**hidden, "hidden by you (restore from the hidden list)": q["hidden_n"]}
     note = landing_fix.origin_note(q["base"], ms._origin(q["base"]) is not None, q["radius"] if q["loc_mode"] != "state" or q["also_radius"] else None) if ran else ""
-    return note + mv.render_page(q, data, results, hidden, saved, app.csrf, bool(app.operator_pin), edit if edit in ids else None, ran, errors, unchecked, prefs)
+    finds = ""
+    if ran and not q["errors"]:                       # F-141: owner-entered finds, their own section, never in the GSA results or counts
+        tok = lambda: f"<input type='hidden' name='csrf' value='{app.csrf}'><input type='hidden' name='nonce' value='{__import__('secrets').token_hex(8)}'>"  # noqa: E731
+        finds = fv.section(*mf.cards(q, prefs), tok, mv.pref_buttons)
+    return note + mv.render_page(q, data, results, hidden, saved, app.csrf, bool(app.operator_pin), edit if edit in ids else None, ran, errors, unchecked, prefs, finds)
 
 
 def post(app, parts: list[str], f: dict) -> tuple[str | None, list[str] | None]:
@@ -81,6 +87,9 @@ def post(app, parts: list[str], f: dict) -> tuple[str | None, list[str] | None]:
         if parts == ["market", "pref"]:
             app._check_csrf(f)                       # a local view preference: CSRF only, no PIN, no money or contact
             msg = mp.act(f.get("act", ""), f.get("lot", ""), f.get("title", ""))
+        elif parts == ["market", "find"]:
+            app._check_csrf(f)                       # owner-entered text kept in a local file: CSRF only, nothing is fetched, sent or spent
+            msg = mf.act(f.get("act", ""), f)
         elif parts == ["market", "save"]:
             msg = app.wanted_change(mv.save_form(f), None, "create")
         elif len(parts) == 3 and parts[2] in ("edit", "pause", "resume"):
