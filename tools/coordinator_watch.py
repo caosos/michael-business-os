@@ -40,6 +40,9 @@ COORD_BRANCH = "origin/research/agent-01-coordinator"
 MIN_WAKE_GAP_S, MAX_WAKES, ACK_DEADLINE_S, INGEST_WAIT_S = 600, 3, 900, 90
 PROBES = {"desktop_agent": ("caosos/Desktop-Agent", 3), "caoscare": ("caosos/CAOSCARE.COM", 117)}
 PANEL = "http://127.0.0.1:8477"
+WAKE_SESSION = "mbos-agent-01"          # the ONLY tmux session this watchdog may ever type into
+MAX_WAKES_PER_HOUR = 6
+_SAFE_TEXT = __import__("re").compile(r"^[A-Za-z0-9 _:,.;/()'\-]+$")
 
 
 def now() -> float:
@@ -85,6 +88,30 @@ def classify(*, session: Optional[dict], unacked_ids: list[str], per_msg: dict, 
     if not quota_ok:
         return "DEGRADED"
     return "HEALTHY"
+
+
+def lane01_ready_ids(queue_rows: list[dict]) -> list[str]:
+    """Pure. Approved queued work that is Agent 01's to do: rows that are READY (not BLOCKED / NEEDS OWNER / DONE) and owned by lane 01
+    (agent column starts with 01, or is a side-worktree task that Agent 01 launches and merges)."""
+    out = []
+    for r in queue_rows:
+        agent, status = (r.get("agent") or "").strip().lower(), (r.get("status") or "").strip()
+        if status.upper().startswith("READY") and (agent.startswith("01") or "side-worktree" in agent):
+            out.append("row:" + r["id"])
+    return sorted(out)
+
+
+def wake_text(ids: list[str], ref: str) -> str:
+    """Pure. Fixed template, ids only (never message bodies), restricted charset, one line, no authority beyond internal work."""
+    t = ("WATCHDOG WAKE: approved work is ready for Agent 01: " + ", ".join(ids) + " (inbox " + ref + "). Internal work only: run the inbox loop and "
+         "the READY_QUEUE per docs/COORDINATION.md. No purchases, sales, seller contact, spending or deployment.")
+    if not _SAFE_TEXT.match(t) or len(t) > 480 or "\n" in t:
+        raise ValueError("wake text rejected by the safety filter")
+    return t
+
+
+def hourly_cap_ok(wakes: list[dict], t: float) -> bool:
+    return sum(1 for w in wakes if t - w["at"] < 3600) < MAX_WAKES_PER_HOUR
 
 
 def dispatcher_action(*, ready: int, alive: bool, quota_ok: bool, last_start: float, t: float) -> str:
@@ -168,8 +195,14 @@ def send_wake(session: dict, text: str) -> bool:
     through tmux (2026-10-09), so this needs explicit owner approval. The sanctioned wake path is the central bridge's Claude peer-message relay."""
     if os.environ.get("MBOS_ALLOW_TMUX_WAKE") != "1":
         return False
-    target = (session.get("tmux") or "").split(".")[-1] or None   # pane id, e.g. %0
-    if not target:
+    reg = session.get("tmux") or ""
+    target = reg.split(".")[-1] or None   # pane id, e.g. %0
+    if not target or not reg.startswith(WAKE_SESSION + ":"):
+        return False                       # never any session other than mbos-agent-01
+    who = subprocess.run(["tmux", "display-message", "-p", "-t", target, "#S"], capture_output=True, text=True)
+    if who.returncode != 0 or who.stdout.strip() != WAKE_SESSION:
+        return False                       # the pane must really belong to mbos-agent-01
+    if not _SAFE_TEXT.match(text) or "\n" in text or len(text) > 480:
         return False
     a = subprocess.run(["tmux", "send-keys", "-t", target, "-l", text], capture_output=True)
     b = subprocess.run(["tmux", "send-keys", "-t", target, "Enter"], capture_output=True)
@@ -265,13 +298,20 @@ def cycle(inbox_refs, do_wake: bool, probe: bool = True) -> dict:
     acks = set(list_ids(COORD_BRANCH, "docs/messages/acks") or [])
     local_acks = {p.stem for p in (ROOT / "docs" / "messages" / "acks").glob("*.md")}   # own worktree, written before push
     need = unacked(inbox or [], acks | local_acks) if inbox is not None else []
+    try:  # approved queued work owned by Agent 01 (read from the PUSHED queue, the shared truth)
+        sys.path.insert(0, str(ROOT / "tools"))
+        import foreman
+        rows01 = lane01_ready_ids(foreman.parse_queue(foreman.show(ROOT, "research/agent-01-coordinator", "docs/status/READY_QUEUE.md")))
+    except Exception:  # noqa: BLE001
+        rows01 = []
+    need = need + rows01
     head = git("rev-parse", "--short", COORD_BRANCH).stdout.strip()
     sess, q = my_session(), quota_ok()
     # verify earlier wakes
     for w in st["wakes"]:
         if w.get("state") in ("ACKNOWLEDGED",):
             continue
-        done = all(i in (acks | local_acks) for i in w["ids"])
+        done = all((i in (acks | local_acks)) if not i.startswith("row:") else (i not in rows01) for i in w["ids"])
         new = verify_wake(w, sess, done, t)
         if new != w.get("state"):
             w["state"] = new
@@ -286,11 +326,12 @@ def cycle(inbox_refs, do_wake: bool, probe: bool = True) -> dict:
     except (OSError, ValueError):
         pass
     ok, why = wake_decision(needed=need, session=sess, quota_ok=q, per_msg=st["per_msg"], t=t)
+    if ok and not hourly_cap_ok(st["wakes"], t):
+        ok, why = False, f"hourly wake cap ({MAX_WAKES_PER_HOUR}) reached"
     woke = False
     if ok and do_wake:
         ids = [i for i in need if st["per_msg"][i]["wakes"] < MAX_WAKES and t - st["per_msg"][i].get("last_wake", 0) >= MIN_WAKE_GAP_S]
-        text = ("WATCHDOG WAKE: unacknowledged owner message(s) in " + inbox_ref + ": " + ", ".join(ids) +
-                ". Run the inbox loop in docs/COORDINATION.md (read, reconcile, write docs/messages/acks/<id>.md, push). No live actions.")
+        text = wake_text(ids, inbox_ref)
         if send_wake(sess, text):
             woke = True
             for i in ids:
