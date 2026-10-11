@@ -30,7 +30,7 @@
    "since": "2026-10-11T03:52:56Z"
   }
  ],
- "coordinator_head": "9270c20",
+ "coordinator_head": "cb6a36b",
  "counts": {
   "BLOCKED": [
    "ARYA-20261010-1954-authorized-ui-release",
@@ -99,10 +99,10 @@
    "ARYA-20261010-2133-engineering-proof",
    "ARYA-20261010-2154-owner-ledger-reservations",
    "ARYA-20261010-2208-a60-parsed-dependency",
-   "ARYA-20261010-2255-2203-delivery-disposition"
+   "ARYA-20261010-2255-2203-delivery-disposition",
+   "ARYA-20261011-0028-overnight-continuity"
   ],
   "RUNNING": [
-   "ARYA-20261011-0028-overnight-continuity",
    "ARYA-20261011-0137-owner-approved-a60-release",
    "ARYA-20261011-0150-existing-local-import"
   ]
@@ -113,11 +113,11 @@
  },
  "delivery_interface": {
   "claude_cli": true,
-  "quota": "session 37.0% / week 30.0% are under the limits",
+  "quota": "session 43.0% / week 31.0% are under the limits",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-11T05:29:52Z",
+ "generated_at": "2026-10-11T05:30:28Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "nothing needed",
@@ -129,7 +129,7 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-11T05:29:52Z",
+  "observed_at": "2026-10-11T05:30:28Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
   "status": "busy",
