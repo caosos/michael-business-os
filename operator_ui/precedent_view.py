@@ -11,17 +11,27 @@ from contextlib import contextmanager
 from pathlib import Path
 
 e = html.escape
-REPO_STORE = Path(__file__).resolve().parents[1] / "var" / "private" / "decision_cases"
 SCOPE = "This is about that ONE earlier listing, not a preference for a category. It changes no filter, ranking, hiding or save."
+
+
+def _default_store() -> Path | None:
+    """The owner-local store when MBOS_DECISION_CASES_DIR is unset: `<root>/var/private/decision_cases`, where <root> is MBOS_COORDINATOR_ROOT, else the
+    checkout this UI runs from in the live layout `<root>/var/lanes/<lane>/operator_ui`. None -> let mbos compute its own default."""
+    here = Path(__file__).resolve()
+    roots = [Path(os.environ["MBOS_COORDINATOR_ROOT"])] if os.environ.get("MBOS_COORDINATOR_ROOT") else []
+    if len(here.parents) > 4 and here.parents[2].name == "lanes" and here.parents[3].name == "var":
+        roots.append(here.parents[4])
+    return next((d for d in (r / "var" / "private" / "decision_cases" for r in roots) if d.is_dir()), None)
 
 
 @contextmanager
 def _store():
-    """mbos computes its default store path from its own install location; point it at this repo's private store unless the owner/test set one."""
-    if os.environ.get("MBOS_DECISION_CASES_DIR"):
+    """Use the owner/test-set MBOS_DECISION_CASES_DIR; else the live-layout store if found; else mbos's own default. Env is restored after."""
+    d = None if os.environ.get("MBOS_DECISION_CASES_DIR") else _default_store()
+    if d is None:
         yield
         return
-    os.environ["MBOS_DECISION_CASES_DIR"] = str(REPO_STORE)
+    os.environ["MBOS_DECISION_CASES_DIR"] = str(d)
     try:
         yield
     finally:

@@ -1,0 +1,10 @@
+# F-140 receipt: precedent store path fix (bug in F-139)
+
+- **Bug (found by 01 in staging):** `operator_ui/precedent_view.py` `REPO_STORE` was `parents[1]/var/private/decision_cases`, which resolves inside `var/lanes/agent-06/` when the UI runs live, so the owner-local store was never read.
+- **Fix:** `REPO_STORE` removed. Order: `MBOS_DECISION_CASES_DIR` (unchanged, wins) -> `<MBOS_COORDINATOR_ROOT>/var/private/decision_cases` if that dir exists -> `<root>/var/private/decision_cases` when this file sits at `<root>/var/lanes/<lane>/operator_ui` and the dir exists -> otherwise mbos's own default. The env var is set only for the call and restored.
+- **Which mbos:** the lane venv's mbos is a site-packages copy, whose own default (`parents[2]` of its file) is NOT the coordinator store, so the layout/root fallback is needed rather than relying on the mbos default alone. The live UI importing the coordinator's source tree gets the right default from mbos itself (nothing found by the fallback, so it is untouched).
+- **Tests (SYNTHETIC stores in tmp only):** `tests/test_market_f140.py`, 5 tests: block via live layout, via `MBOS_COORDINATOR_ROOT`, explicit dir wins, absent store in live layout = nothing, resolution + env restore.
+- **Staging proof:** synthetic store in `<tmp>/var/private/decision_cases`, copy of `operator_ui` at `<tmp>/var/lanes/agent-06/operator_ui`, no env set: block shown = True, note empty, env restored (output of the run: `module: .../var/lanes/agent-06/operator_ui/precedent_view.py`, `block shown: True`).
+- **Health:** reference 441 passed / 1 failed (known resale_f39); lane D+E 105 passed / 2 failed (tests/lane_d/test_inputs_f32.py, KeyError "value", does not touch precedent code; not investigated further).
+- **Note:** `test_filters_counts_and_prefs_unchanged_with_and_without_store` (F-139) failed once on a staleness-age text ("26.3 h" tick) between two renders and passed on rerun: a pre-existing time-boundary flake, not touched here.
+- **Provenance / safety:** no private content, no live change, no network, DRY-RUN. Files under 400 lines.
