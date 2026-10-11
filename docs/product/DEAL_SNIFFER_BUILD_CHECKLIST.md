@@ -56,3 +56,11 @@ Canonical owner intent: [DEAL_SNIFFER_START_HERE.md](DEAL_SNIFFER_START_HERE.md)
 - Never guess ETA or percentages. Publish estimates only with scope, dependencies, and evidence.
 - On every meaningful task completion: update this checklist AND queue atomically where authorized, preserve historical DONE entries, link receipt, and notify only for actionable change.
 - Governance: no bids, purchases, seller contact, provider/account changes, spend, service changes or deployment from this checklist.
+
+## Owner operating directive — 2026-10-10 22:07 CDT
+- Deal Sniffer supervisor owns communications and the authoritative phase/checklist reporting; do not conflate docs ACK with engineering START or completion.
+- Goal: no eligible authorized build task left idle more than five minutes after prior task completion. Implement five-minute *local* coordinator/watchdog detection and next-task recommendation/dispatch through the existing permitted path, with receipts; ChatGPT's hourly monitor alone cannot enforce this SLA. No new competing coordinator, process, or scheduler.
+- Builder completion must publish GitHub receipt with task ID, commit SHA, tests, browser screenshots where applicable, queue status, and next eligible task. Coordinator must update this checklist and queue without losing historical DONE rows.
+- Notify owner only for finished sections needing acceptance or genuine authority/permission blockers; preserve live release gates and no-spend/no-bid restrictions.
+- Any user-facing change requires actual browser interaction (desktop and mobile), not only code tests. Target source modules under 400 lines when practical; split by responsibility, avoid artificial fragmentation.
+- Current five-minute idle enforcement: NOT VERIFIED. Current direct cloud push notification to this chat: NOT VERIFIED. Current local worker liveness: NOT VERIFIED from GitHub alone.
