@@ -38,13 +38,6 @@
   },
   {
    "attempts": 1,
-   "id": "ARYA-20261011-0137-owner-approved-a60-release",
-   "needs": null,
-   "reason": "executor process died before finishing (will retry)",
-   "since": "2026-10-11T16:32:00Z"
-  },
-  {
-   "attempts": 1,
    "id": "ARYA-20261011-0150-existing-local-import",
    "needs": null,
    "reason": "executor process died before finishing (will retry)",
@@ -59,7 +52,6 @@
    "ARYA-20261010-2203-current-route-receipt",
    "ARYA-20261010-2223-a68-live-proof",
    "ARYA-20261011-0056-a69-continuity-check",
-   "ARYA-20261011-0137-owner-approved-a60-release",
    "ARYA-20261011-0150-existing-local-import"
   ],
   "COMPLETED": [
@@ -126,7 +118,8 @@
    "ARYA-20261010-2255-2203-delivery-disposition",
    "ARYA-20261011-0028-overnight-continuity",
    "ARYA-20261011-0030-a69-claim-and-execute",
-   "ARYA-20261011-0118-shared-slack-liaison"
+   "ARYA-20261011-0118-shared-slack-liaison",
+   "ARYA-20261011-0137-owner-approved-a60-release"
   ]
  },
  "currently_running": {
@@ -135,11 +128,11 @@
  },
  "delivery_interface": {
   "claude_cli": true,
-  "quota": "latest reading is 612 min old (older than 45)",
+  "quota": "session 69.0% / week 56.0% are under the limits",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-11T16:32:00Z",
+ "generated_at": "2026-10-11T16:32:12Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "session is 'busy', not idle (it will see the work on its own sync)",
@@ -151,7 +144,7 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-11T16:32:00Z",
+  "observed_at": "2026-10-11T16:32:12Z",
   "pid": 592613,
   "source": "inbox_pickup process",
   "status": "busy",
