@@ -115,17 +115,14 @@
    "ARYA-20261011-0150-existing-local-import"
   ]
  },
- "currently_running": {
-  "id": "ARYA-20261011-0150-existing-local-import",
-  "started_at": "2026-10-11T16:32:16Z"
- },
+ "currently_running": null,
  "delivery_interface": {
   "claude_cli": true,
   "quota": "session 69.0% / week 56.0% are under the limits",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-11T16:32:32Z",
+ "generated_at": "2026-10-11T16:32:34Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "session is 'busy', not idle (it will see the work on its own sync)",
@@ -137,11 +134,11 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-11T16:32:32Z",
+  "observed_at": "2026-10-11T16:32:34Z",
   "pid": 592613,
   "source": "inbox_pickup process",
-  "status": "busy",
-  "ttl_sec": 300
+  "status": "idle",
+  "ttl_sec": 1200
  },
  "watcher": {
   "ack_branch": "research/agent-01-coordinator",
