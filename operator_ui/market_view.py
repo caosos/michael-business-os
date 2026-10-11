@@ -198,8 +198,9 @@ def _side_filters(q: dict) -> str:
     cats = "".join(f"<label><input type='checkbox' form='mkform' name='cat' value='{e(k)}'{' checked' if k in q.get('cats', []) else ''}> {e(k.title())}</label>" for k in ms.ROW_CATS)
     return ("<div class='card' id='mkfilters'><b>Filters</b>"
             f"{location_panel(q)}"
-            f"<button class='mk-go' type='submit' form='mkform'>Search Now</button>{_slider(q, 'mkform')}"
-            f"<b>Categories</b>{cats}<p class='small mut'>None checked = your rows below (default trailers and equipment).</p></div>")
+            f"{_slider(q, 'mkform')}"
+            f"<b>Categories</b>{cats}<p class='small mut'>None checked = your rows below (default trailers and equipment).</p>"
+            "<button class='mk-go' type='submit' form='mkform'>Search Now</button></div>")
 
 
 def _sidebar(saved: list[dict], csrf: str, pin_html: str, tok, q: dict, save: str = "") -> str:

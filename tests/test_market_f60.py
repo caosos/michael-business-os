@@ -15,7 +15,7 @@ def prefs_file(tmp_path, monkeypatch):
 
 
 def _card(h: str) -> str:
-    return re.search(r"<div class='card' id='mkfilters'>.*?</p></div>", h, re.S).group(0)
+    return re.search(r"<div class='card' id='mkfilters'>.*?Search Now</button></div>", h, re.S).group(0)
 
 
 def test_search_now_is_in_filter_card_and_owned_by_the_search_form(ui):
@@ -53,7 +53,7 @@ def test_real_browser_click_and_enter_submit_current_values(ui):
             pg = b.new_page(viewport=vp)
             pg.goto(base + "/market?go=1&broad=1&radius=150")
             wide = ids(pg)
-            assert pg.evaluate("()=>{const r=document.querySelector('button.mk-go').getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight}"), vp
+            assert pg.evaluate("()=>{const r=document.querySelector('button.mk-go').getBoundingClientRect(),m=['min_price','max_price','min_r','max_r'].map(i=>document.getElementById(i).getBoundingClientRect().bottom);return m.every(b=>b<=r.top)}"), vp
             pg.fill("#max_price", "25")
             pg.click("button.mk-go")
             pg.wait_for_load_state()
@@ -75,3 +75,12 @@ def test_real_browser_click_and_enter_submit_current_values(ui):
             assert "radius=37.5" in pg.url and pg.input_value("input[name=radius]") == "37.5"
             pg.close()
         b.close()
+
+
+def test_f142_search_now_is_last_control_below_both_price_sliders(ui):
+    """F-142: owner correction: the primary submit sits below Min/Max and every other filter control, in the same real GET form."""
+    card = _card(get(ui))
+    pos = card.index("Search Now")
+    for needle in ("name='min_price'", "name='max_price'", "name='min_r'", "name='max_r'", "name='cat'", "name='base'", "name='radius'", "name='also_radius'"):
+        assert card.rindex(needle) < pos, needle
+    assert card.rstrip().endswith("Search Now</button></div>") and card.count("<button") == 1
