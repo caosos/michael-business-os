@@ -13,8 +13,11 @@ to the same session as a notification, with no new watchdog, credential, permiss
 from __future__ import annotations
 
 import argparse
+import atexit
 import json
+import os
 import re
+import signal
 import subprocess
 import sys
 import time
@@ -31,6 +34,9 @@ SLA_S = 300                                     # A-68: an eligible item must re
 RETRY_S = 300                                   # an unclaimed, still-eligible item is announced again after this long (A-65, tightened by A-68)
 POLL_S, POLL_MAX_S = 120, 240                   # default poll; never above POLL_MAX_S, so first announcement latency stays under SLA_S with margin for the fetch
 LOG = ROOT / "var" / "next_work_log.jsonl"
+ARM_LOG = ROOT / "var" / "next_work_arm.jsonl"   # A-69: one ARM line when a watch starts, one EXIT line when it ends (Monitor expiry sends SIGTERM)
+WATCH_LOCK = ROOT / "var" / "next_work_watch.pid"
+MAX_GAP_S = 300                                  # A-69: the feed may never be dark longer than this between an EXIT and the next ARM
 AWAITING = "AWAITING the interactive engineering session"
 ID_RE = re.compile(r"^(ARIA|ARYA|DA)-(\d{8})-(\d{4})-")
 CUTOFF = "20261010-0000"                         # same history cutoff as pickup: older or oddly named ids are never announced
@@ -164,6 +170,61 @@ def cycle(baseline: bool = False, now: float | None = None, blocked: str | None 
     return lines
 
 
+def _alive(pid: int) -> bool:
+    try:
+        os.kill(pid, 0)
+        with open(f"/proc/{pid}/cmdline", "rb") as f:
+            return b"next_work" in f.read()                      # a recycled pid that is not this tool is not a watcher
+    except OSError:
+        return False
+
+
+def arm_log(kind: str, now: float | None = None, path: Path | None = None, **extra) -> None:
+    t = now if now is not None else time.time()
+    rec = {"at": t, "host_time": time.strftime("%Y-%m-%dT%H:%M:%S%z", time.localtime(t)), "kind": kind, "pid": os.getpid(), **extra}
+    p = path or ARM_LOG
+    p.parent.mkdir(parents=True, exist_ok=True)
+    with p.open("a") as f:
+        f.write(json.dumps(rec) + "\n")
+
+
+def acquire_watch(lock: Path | None = None, pid: int | None = None) -> int | None:
+    """None = this process now holds the single watch lock; otherwise the pid of the live watcher that already holds it (duplicate suppressed)."""
+    lock = lock or WATCH_LOCK
+    me = pid or os.getpid()
+    try:
+        other = int(lock.read_text().strip())
+        if other != me and _alive(other):
+            return other
+    except (OSError, ValueError):
+        pass                                                     # no lock, unreadable lock, or a stale one: take it
+    lock.parent.mkdir(parents=True, exist_ok=True)
+    lock.write_text(str(me))
+    return None
+
+
+def release_watch(lock: Path | None = None, pid: int | None = None) -> None:
+    lock = lock or WATCH_LOCK
+    try:
+        if int(lock.read_text().strip()) == (pid or os.getpid()):
+            lock.unlink()
+    except (OSError, ValueError):
+        pass
+
+
+def max_gap(entries: list[dict]) -> float:
+    """Longest dark period: from an EXIT to the next ARM. 0 when there is no gap to measure."""
+    gap, last_end = 0.0, None
+    for e in sorted(entries, key=lambda x: x["at"]):
+        if e["kind"] == "ARM":
+            if last_end is not None:
+                gap = max(gap, e["at"] - last_end)
+            last_end = None
+        elif e["kind"] == "EXIT":
+            last_end = e["at"]
+    return gap
+
+
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--once", action="store_true")
@@ -171,6 +232,14 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--watch", type=int, metavar="SECONDS")
     a = ap.parse_args(argv)
     if a.watch:
+        other = acquire_watch()
+        if other is not None:                                    # A-69: one feed only; a second arm exits quietly instead of double-announcing
+            arm_log("DUPLICATE_SUPPRESSED", holder=other)
+            print(f"next_work watch already running (pid {other}); this duplicate exits", file=sys.stderr)
+            return 0
+        arm_log("ARM", interval=a.watch)
+        atexit.register(lambda: (arm_log("EXIT"), release_watch()))
+        signal.signal(signal.SIGTERM, lambda *_: sys.exit(0))    # Monitor expiry / TaskStop ends us: run the atexit EXIT line
         while True:
             for line in cycle():
                 print(line, flush=True)

@@ -143,3 +143,67 @@ def test_restart_recovery_and_the_latency_log_prove_the_handoff_time(tmp_path, m
 
 def test_a_watch_interval_above_the_cap_is_clamped_below_the_sla():
     assert max(60, min(10_000, nw.POLL_MAX_S)) == nw.POLL_MAX_S < nw.SLA_S
+
+
+# ---- A-69: continuity (single watcher, arm/exit log, gap measure)
+import json as _json
+import os
+
+
+def test_a69_stale_lock_taken_over(tmp_path):
+    lock = tmp_path / "w.pid"
+    assert nw.acquire_watch(lock, pid=111) is None and lock.read_text() == "111"
+    # pid 111 is not a live next_work process, so a later arm (restart / re-entry) takes the lock over
+    assert nw.acquire_watch(lock, pid=222) is None and lock.read_text() == "222"
+
+
+def test_a69_live_watcher_suppresses_duplicate(tmp_path, monkeypatch):
+    lock = tmp_path / "w.pid"
+    lock.write_text("4242")
+    monkeypatch.setattr(nw, "_alive", lambda pid: pid == 4242)
+    assert nw.acquire_watch(lock, pid=7) == 4242 and lock.read_text() == "4242"  # duplicate refused, holder untouched
+
+
+def test_a69_garbage_lock_is_taken_over(tmp_path):
+    lock = tmp_path / "w.pid"
+    lock.write_text("not-a-pid")
+    assert nw.acquire_watch(lock, pid=8) is None and lock.read_text() == "8"
+
+
+def test_a69_release_only_own_lock(tmp_path):
+    lock = tmp_path / "w.pid"
+    lock.write_text("5")
+    nw.release_watch(lock, pid=6)
+    assert lock.exists()                                                         # not ours: left alone
+    nw.release_watch(lock, pid=5)
+    assert not lock.exists()                                                     # session-closed safe: nothing lingers
+
+
+def test_a69_alive_rejects_non_watcher():
+    import subprocess
+    p = subprocess.Popen(["sleep", "5"])                                         # a live pid that is not next_work (e.g. a recycled pid)
+    try:
+        assert not nw._alive(p.pid)
+    finally:
+        p.kill()
+    assert not nw._alive(2 ** 22 + 12345)                                        # no such pid
+
+
+def test_a69_arm_log_and_gap(tmp_path):
+    log = tmp_path / "arm.jsonl"
+    for kind, t in (("ARM", 1000.0), ("EXIT", 2800.0), ("ARM", 2900.0), ("EXIT", 4700.0), ("ARM", 5200.0)):
+        nw.arm_log(kind, now=t, path=log)
+    rows = [_json.loads(x) for x in log.read_text().splitlines()]
+    assert rows[0]["kind"] == "ARM" and "host_time" in rows[0] and rows[0]["at"] == 1000.0
+    assert nw.max_gap(rows[:3]) == 100.0 < nw.MAX_GAP_S                          # re-armed 100 s after expiry
+    assert nw.max_gap(rows) == 500.0 > nw.MAX_GAP_S                              # 500 s dark would fail the live proof
+    assert nw.max_gap([]) == 0.0
+
+
+def test_a69_watch_exits_on_duplicate(tmp_path, monkeypatch):
+    monkeypatch.setattr(nw, "WATCH_LOCK", tmp_path / "l.pid")
+    monkeypatch.setattr(nw, "ARM_LOG", tmp_path / "a.jsonl")
+    (tmp_path / "l.pid").write_text("4242")
+    monkeypatch.setattr(nw, "_alive", lambda pid: True)
+    assert nw.main(["--watch", "120"]) == 0                                      # returns instead of looping
+    assert "DUPLICATE_SUPPRESSED" in (tmp_path / "a.jsonl").read_text()
