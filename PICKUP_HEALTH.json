@@ -102,19 +102,25 @@
    "ARYA-20261010-2255-2203-delivery-disposition",
    "ARYA-20261011-0028-overnight-continuity"
   ],
+  "FETCHED": [
+   "ARYA-20261011-0030-a69-claim-and-execute"
+  ],
   "RUNNING": [
    "ARYA-20261011-0137-owner-approved-a60-release",
    "ARYA-20261011-0150-existing-local-import"
   ]
  },
- "currently_running": null,
+ "currently_running": {
+  "id": "ARYA-20261011-0030-a69-claim-and-execute",
+  "started_at": "2026-10-11T05:31:36Z"
+ },
  "delivery_interface": {
   "claude_cli": true,
   "quota": "session 43.0% / week 31.0% are under the limits",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-11T05:30:31Z",
+ "generated_at": "2026-10-11T05:31:36Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "nothing needed",
@@ -126,11 +132,11 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-11T05:30:31Z",
+  "observed_at": "2026-10-11T05:31:36Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
-  "status": "idle",
-  "ttl_sec": 1200
+  "status": "busy",
+  "ttl_sec": 300
  },
  "watcher": {
   "ack_branch": "research/agent-01-coordinator",
