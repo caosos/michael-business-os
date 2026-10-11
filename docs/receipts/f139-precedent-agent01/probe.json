@@ -1,0 +1,12 @@
+{
+ "desktop": {
+  "blocks": 1,
+  "cards": 19,
+  "text": "Your earlier decision on a similar listing (proposal, for your review)\n\nYou decided PASS on \u201cSYN-1001\u201d (synthetic, 2026-01-01T00:00:00Z). Reason: synthetic reason: condition unclear and exit uncertain\n\nVerified facts then\n\ncondition: synthetic condition note\n\nYOUR ESTIMATES then (estimates, not facts)\n\nsynthetic estimate (placeholder)\ncost: synthetic cost note\n\nNot verified then\n\nphoto: synthetic photo note\n\nUncertainty then\n\nsynthetic uncertainty\n\nMissing evidence then\n\nsynthetic missing title\n\nEvidence that decision relied on and this listing lacks (nothing checked here yet)\n\ncondition\ncost\nphoto\n\nShared words: trailer, utility. This one listing only; not a category preference.\n\nThis is about that ONE earlier listing, not a preference for a category. It changes no filter, ranking, hiding or save. Not a bid, purchase or contact suggestion; hard filters and evidence checks still apply."
+ },
+ "mobile": {
+  "blocks": 1,
+  "cards": 19,
+  "text": "Your earlier decision on a similar listing (proposal, for your review)\n\nYou decided PASS on \u201cSYN-1001\u201d (synthetic, 2026-01-01T00:00:00Z). Reason: synthetic reason: condition unclear and exit uncertain\n\nVerified facts then\n\ncondition: synthetic condition note\n\nYOUR ESTIMATES then (estimates, not facts)\n\nsynthetic estimate (placeholder)\ncost: synthetic cost note\n\nNot verified then\n\nphoto: synthetic photo note\n\nUncertainty then\n\nsynthetic uncertainty\n\nMissing evidence then\n\nsynthetic missing title\n\nEvidence that decision relied on and this listing lacks (nothing checked here yet)\n\ncondition\ncost\nphoto\n\nShared words: trailer, utility. This one listing only; not a category preference.\n\nThis is about that ONE earlier listing, not a preference for a category. It changes no filter, ranking, hiding or save. Not a bid, purchase or contact suggestion; hard filters and evidence checks still apply."
+ }
+}
