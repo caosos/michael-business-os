@@ -116,17 +116,14 @@
    "ARYA-20261011-0150-existing-local-import"
   ]
  },
- "currently_running": {
-  "id": "ARYA-20261011-0056-a69-continuity-check",
-  "started_at": "2026-10-11T05:58:51Z"
- },
+ "currently_running": null,
  "delivery_interface": {
   "claude_cli": true,
   "quota": "session 61.0% / week 33.0% are under the limits",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-11T05:59:23Z",
+ "generated_at": "2026-10-11T05:59:25Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "no live Claude session (awaiting connection)",
@@ -138,11 +135,11 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-11T05:59:23Z",
+  "observed_at": "2026-10-11T05:59:25Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
-  "status": "busy",
-  "ttl_sec": 300
+  "status": "idle",
+  "ttl_sec": 1200
  },
  "watcher": {
   "ack_branch": "research/agent-01-coordinator",
