@@ -25,3 +25,9 @@ Recorded 2026-10-11T07:54:52Z by Agent 01 from the live session. FACT = observed
 - No duplicates: all five were started once while the sessions already ran; `tmux ls` was identical before and after, and the journal shows `mbos-watchdog already running; nothing to do`. Process ids unchanged (watchdog 370129, worker 358739, UI 358744).
 - **Not proven:** the cold-start path (an actual reboot). It is exercised only by the next reboot. Runbook: `docs/operations/REBOOT_RECOVERY.md`. Rollback: `install_user_units.sh --uninstall`.
 - The repo's earlier `ops/systemd/mbos-pickup.service` (direct python ExecStart) is replaced by the tmux-guard form so the unit cannot fight the running tmux watcher.
+
+## Cold-start test of the units (2026-10-11T16:32:24Z, owner: "reboot them" -> "Restart MBOS sessions only")
+Not a host reboot (that would also stop the CAOSCare sessions on this host and needs sudo). The four sessions `mbos-watchdog`, `mbos-dev-worker`, `mbos-dev-ui`, `mbos-pickup` were killed and brought back ONLY by `systemctl --user restart` of their units, so the ensure-script start path (not the already-running no-op) ran for real.
+- Result after 12 s: new processes watchdog 592572, worker 592589, UI 592603, pickup 592613; `:8479/health.json` 200; `:8766` 303 (login redirect); worker log shows it recovered and processing the comps inbox; all five units enabled/active; Postgres came up through the unit path.
+- Last step: `mbos-agent-01` is restarted by a detached helper (this ends the session that ran the test). The new session's evidence is the `mbos-agent-01` tmux creation time and the watchdog health, recorded in the next receipt.
+- Still untested: an actual host reboot (boot ordering, network-online, Linger at boot).
