@@ -1,7 +1,7 @@
 # Deal Sniffer — Living Product Build Checklist
-Updated: 2026-10-10 (owner direction). Planning baseline; NOT a release approval or worker dispatch.
+Updated: 2026-10-10 22:10 CDT (evidence reconciliation). Planning baseline; NOT a release approval or worker dispatch.
 Canonical owner intent: [DEAL_SNIFFER_START_HERE.md](DEAL_SNIFFER_START_HERE.md). Existing execution queue: [READY_QUEUE.md](../status/READY_QUEUE.md).
-**Do not mark a feature DONE solely from an agent claim.** Track IMPLEMENTED, TESTED, STAGING_ACCEPTED, LIVE_VERIFIED separately. Existing owner pause on new assignments and releases remains in effect until superseded explicitly.
+**Do not mark a feature DONE solely from an agent claim.** Track IMPLEMENTED, TESTED, STAGING_ACCEPTED, LIVE_VERIFIED separately. The earlier 05:28Z compute pause was explicitly cancelled at 05:30Z; ordinary no-extra-cost development is authorized by newer owner direction, but each live release retains its own gate. This status document does not dispatch work.
 
 ## Phase 1 — Core architecture and governance
 - [x] Seven specialist lanes, coordinator queue, receipts and provenance infrastructure — built (historical implementation; current operational liveness NOT VERIFIED).
@@ -17,14 +17,14 @@ Canonical owner intent: [DEAL_SNIFFER_START_HERE.md](DEAL_SNIFFER_START_HERE.md)
 
 ## Phase 3 — Marketplace usability (ACTIVE)
 - [x] Marketplace live on local :8766 with real GSA cached listings, strict location/state/distance and price filters (A-58 receipt).
-- [x] A-60 red X, stable-ID hide, hidden-items list, individual undo, persistence, learning separate: Agent 06 implementation + staging receipt at 4a818b97; **do not treat as live acceptance without owner interaction**.
-- [ ] Reconcile existing independent A-60 review and record final owner live Hide/Undo acceptance (do not duplicate review or worker).
+- [x] A-60 IMPLEMENTED / TESTED / STAGING_ACCEPTED: Agent 06 code afe269d; 9 focused tests passed; actual Chrome mouse/keyboard interaction, restart, undo and mobile/desktop screenshots on isolated staging (receipt 4a818b9 and `docs/receipts/2026-10-10-a60-hide-listing.md` on lane 06). Existing reviewer/owner-facing approval for the exact bounded artifact is recorded in liaison `ARYA-20261011-0137-owner-approved-a60-release.md`. No duplicate review needed.
+- [ ] A-60 LIVE_INTERACTION_ACCEPTED: bounded UI-only release :8766 was recorded at 2026-10-11T01:40:58Z (artifact a9be4e4, disk hash + restart + functional checks, original GSA cache, desktop/mobile screenshots; `docs/receipts/2026-10-11-live-8766-reload-a60.md`). Live X controls were observed, but live Hide/Undo on real owner preferences was deliberately NOT exercised. Wait for normal complete-section owner review; do not repeat staging independent review or release.
 - [ ] Move Search Now to **bottom of all search filters**: location, radius/state, price, category, condition, keywords, advanced; owner screenshot 2026-10-10.
 - [ ] Simplify New Search / Save Search / Saved Searches labels, spacing and visual hierarchy; show useful inventory first.
 - [ ] Verify saved search, PIN and preferences persist across restart without retrieving/publishing PIN.
 - [ ] Gallery/list real photographs, original descriptions/links, source, distance, freshness, and honest unknowns; responsive desktop/mobile.
 - [ ] Ensure red X never alters learning weights or saved owner bid/watch obligations.
-- [ ] Accurate opening/next minimum auction bid when verifiable, otherwise UNKNOWN plus original link (A-62 waits behind A-60).
+- [ ] Accurate opening/next minimum auction bid when verifiable, otherwise UNKNOWN plus original link (A-62 queue is BLOCKED on A-60 although A-60 is DONE; coordinator must safely reconcile that stale dependency before ordinary authorized engineering proceeds, without duplicate assignment).
 - [ ] No synthetic listings, fabricated replacements, hidden-out-of-filter substitutions, or silent zero-result misrepresentation.
 
 ## Phase 4 — Real local deal intelligence and end-to-end acceptance
@@ -39,7 +39,7 @@ Canonical owner intent: [DEAL_SNIFFER_START_HERE.md](DEAL_SNIFFER_START_HERE.md)
 - [ ] Morning Money Hunt with verified real opportunities, source freshness and meaningful alerts.
 - [ ] Owner-reported bids and obligations, reserved capital, protected principal, deployed capital, available capital; no double use of funds.
 - [ ] Intake owned asset photos, repair plan, materials, time, expenses, resale listing preparation, buyer/offers, actual sale and realized profit.
-- [ ] Private decision cases: A-61/A-64 code exists; owner-local import/readback and similarity proposal NOT VERIFIED; never publish private financial values.
+- [ ] Private decision cases: A-61/A-64/A-67 code and owner-local import/readback/hash verification recorded in coordinator receipts (36d6eab/fee0803, 2026-10-11T02:01Z); F-139 read-only card display + F-140 store-path correction IMPLEMENTED/TESTED with **synthetic staging only**, 8+5 focused tests (128f6c8/29fbf0e). Not integrated/live-accepted; no private decision values in GitHub. Coordinator queue still incorrectly marks F-140 READY although Agent 06 receipt/status say DONE: reconcile before any dispatch.
 - [ ] Reliable builder completion/blocked notifications and next eligible task recommendation, without duplicate workers or autonomous external actions.
 
 ## Phase 6 — Repeatable product and onboarding
@@ -49,9 +49,9 @@ Canonical owner intent: [DEAL_SNIFFER_START_HERE.md](DEAL_SNIFFER_START_HERE.md)
 
 ## Current build control / owner-facing reporting contract
 - Current phase: 3/6, Marketplace usability. Phase percentage: NOT MEASURED until acceptance cases mapped.
-- Current completed code: A-60 source afe269da; staging tool a9be4e4; receipt 4a818b97. Latest prior report says live release; owner Hide/Undo acceptance still pending.
-- Next engineering candidate: A-62 (bid accuracy) after A-60 review/acceptance and explicit resume of assignments.
-- Current blockers: insufficient live local sources, stale GSA cache, UI filter placement, owner pause on new assignments/releases.
+- Verified A-60: source afe269d / staging a9be4e4 / receipt 4a818b9; STAGING_ACCEPTED and bounded :8766 reload recorded at 01:40:58Z on October 11 UTC. Live X controls confirmed visible; owner-data Hide/Undo interactions and whole Marketplace section acceptance remain unverified.
+- Next engineering candidate: reconcile F-140 queue READY vs Agent 06 DONE and A-62 BLOCKED-on-A-60 vs A-60 DONE, using existing coordinator and receipts; A-62's narrow no-bid minimum label is then a candidate for ordinary authorized code work (no independent live release implied). No duplicate A-60 review.
+- Current blockers: insufficient real local connected sources, UI filter placement, A-62 stale blocked dependency and F-140 stale READY queue status. GSA cache refresh recorded at 2026-10-11T02:48:28Z (1167 records; commit 143aeed); inventory may age again. Five-minute host watchdog and direct GitHub-to-chat push remain NOT VERIFIED.
 - For each task record: owner requirement, task ID, lane, priority, dependency, implementation SHA, test receipt, staging browser proof, live acceptance, last updated, blocker, next action, ETA confidence.
 - Never guess ETA or percentages. Publish estimates only with scope, dependencies, and evidence.
 - On every meaningful task completion: update this checklist AND queue atomically where authorized, preserve historical DONE entries, link receipt, and notify only for actionable change.
