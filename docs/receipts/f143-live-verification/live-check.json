@@ -1,0 +1,48 @@
+{
+ "port": "8766",
+ "pass": true,
+ "rows": [
+  {
+   "view": "desktop",
+   "submit_by": "click",
+   "order": {
+    "ok": true,
+    "controls_below_button": [],
+    "below_price_and_radius": true
+   },
+   "results_before": 134,
+   "results_after": 97,
+   "changed": true,
+   "shot": "live-desktop-click.png",
+   "at": "2026-10-11T23:02:38+00:00"
+  },
+  {
+   "view": "mobile",
+   "submit_by": "click",
+   "order": {
+    "ok": true,
+    "controls_below_button": [],
+    "below_price_and_radius": true
+   },
+   "results_before": 134,
+   "results_after": 97,
+   "changed": true,
+   "shot": "live-mobile-click.png",
+   "at": "2026-10-11T23:02:40+00:00"
+  },
+  {
+   "view": "desktop",
+   "submit_by": "enter",
+   "order": {
+    "ok": true,
+    "controls_below_button": [],
+    "below_price_and_radius": true
+   },
+   "results_before": 134,
+   "results_after": 97,
+   "changed": true,
+   "shot": "live-desktop-enter.png",
+   "at": "2026-10-11T23:02:41+00:00"
+  }
+ ]
+}

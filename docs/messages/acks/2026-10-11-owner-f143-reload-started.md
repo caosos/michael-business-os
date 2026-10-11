@@ -1,0 +1,4 @@
+# ACK -> DONE — F-143 owner reload: completion observed and live-verified
+- ACK 2026-10-11T23:03:50Z. Read-only host check first (UI availability): no reload process still running; ARTIFACT sha=315ddfa98ff951e9da716f5b49c37f016153c466 (exported 22:50:49Z); new listener PID 793565 since 22:50:52Z; / 303, /market 200. The script completed (swap + restart 2 s after the pasted "stop" line); no rollback; no second reload launched; nothing killed.
+- Live verification: --verify-only OK; Search Now check OK (134 -> 97 by click and Enter, desktop + mobile); price sliders absent; radius slider 0/60/120 and typed 97.9 shown = submitted. Screenshot read. Receipt: docs/receipts/2026-10-11-f143-live-reload-verification.md.
+- **F-143 LIVE_VERIFIED (executed by the owner).** F-145 stays STAGING_ACCEPTED (3960e46); it ships with F-144 in one combined release. Cost UNKNOWN.

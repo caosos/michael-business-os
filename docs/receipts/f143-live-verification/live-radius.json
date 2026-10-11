@@ -1,0 +1,70 @@
+{
+ "desktop": {
+  "price_sliders_absent": true,
+  "radius_slider_visible": true,
+  "bounds": [
+   "0 miles",
+   "25,000 miles"
+  ],
+  "runs": [
+   [
+    "0",
+    "0 miles",
+    true,
+    0
+   ],
+   [
+    "60",
+    "60 miles",
+    true,
+    0
+   ],
+   [
+    "120",
+    "120 miles",
+    true,
+    6
+   ],
+   [
+    "typed 97.9",
+    "97.9 miles",
+    true,
+    null
+   ]
+  ]
+ },
+ "mobile": {
+  "price_sliders_absent": true,
+  "radius_slider_visible": true,
+  "bounds": [
+   "0 miles",
+   "25,000 miles"
+  ],
+  "runs": [
+   [
+    "0",
+    "0 miles",
+    true,
+    0
+   ],
+   [
+    "60",
+    "60 miles",
+    true,
+    0
+   ],
+   [
+    "120",
+    "120 miles",
+    true,
+    6
+   ],
+   [
+    "typed 97.9",
+    "97.9 miles",
+    true,
+    null
+   ]
+  ]
+ }
+}
