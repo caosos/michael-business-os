@@ -1,0 +1,42 @@
+{
+ "conway150": {
+  "cards": 12,
+  "hide_controls": 265,
+  "x_buttons": 106,
+  "hidden_list": true,
+  "err": "",
+  "chips": "Applied filters: Origin: Conway, AR (ZIP 72032)Radius: 150 mi (known distances only); Location mode: By Distance (states not applied)Mode: repairable trailers/equipment focus: trailer, equipment"
+ },
+ "price1000": {
+  "cards": 2,
+  "hide_controls": 240,
+  "x_buttons": 96,
+  "hidden_list": true,
+  "err": "",
+  "chips": "Applied filters: Origin: Conway, AR (ZIP 72032)Radius: 150 mi (known distances only); Location mode: By Distance (states not applied)Mode: repairable trailers/equipment focus: trailer, equipmentMax pr"
+ },
+ "radius10_36": {
+  "cards": 10,
+  "hide_controls": 255,
+  "x_buttons": 102,
+  "hidden_list": true,
+  "err": "",
+  "chips": "Applied filters: Origin: Conway, AR (ZIP 72032)Radius: 10.36 mi (known distances only); Location mode: By Distance (states not applied)Mode: repairable trailers/equipment focus: trailer, equipment"
+ },
+ "radius10_34": {
+  "cards": 0,
+  "hide_controls": 205,
+  "x_buttons": 82,
+  "hidden_list": true,
+  "err": "",
+  "chips": "Applied filters: Origin: Conway, AR (ZIP 72032)Radius: 10.34 mi (known distances only); Location mode: By Distance (states not applied)Mode: repairable trailers/equipment focus: trailer, equipment"
+ },
+ "radius_neg": {
+  "cards": 0,
+  "hide_controls": 0,
+  "x_buttons": 0,
+  "hidden_list": true,
+  "err": "",
+  "chips": ""
+ }
+}
