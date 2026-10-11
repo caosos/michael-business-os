@@ -1,0 +1,5 @@
+# ACK -> WORKING — radius slider, price fields, reusable location (F-143)
+- ACK 2026-10-11T21:37:45Z. Claimed new queue row **F-143** (P0, lane 06): this is a new owner correction, not a duplicate of F-142 (button placement, DONE and owner-accepted). B-12 is BLOCKED on the mailbox NEED and not actively claimed, so nothing was interrupted; the local-source requirement stays open immediately after.
+- ONE lane 06 worker via `tools/worker.py F-143 --lane 06`; no second queue, coordinator or worker. Scope and acceptance are in the row (price sliders removed, radius slider 0..existing max with numeric entry, generic "Within N miles", no hidden Conway fallback for new users, Search Now last, State-mode semantics kept).
+- Release: only via the existing `tools/reload_ui.sh <sha>` after Agent 01's independent clean-checkout verification; a permission-classifier rejection would be reported as an exact NEED, not bypassed.
+- Host: tmux mbos-agent-01 present; :8766 serving 85246899 (F-142). A-68 stays PARTIAL.
