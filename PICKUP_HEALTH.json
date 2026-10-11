@@ -120,23 +120,23 @@
  "currently_running": null,
  "delivery_interface": {
   "claude_cli": true,
-  "quota": "latest reading is 583 min old (older than 45)",
+  "quota": "latest reading is 593 min old (older than 45)",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-11T16:03:10Z",
+ "generated_at": "2026-10-11T16:13:13Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
-  "decision": "nothing needed",
+  "decision": "session is 'shell', not idle (it will see the work on its own sync)",
   "note": "pickup does not need the interactive session",
-  "state": "HEALTHY"
+  "state": "DEGRADED"
  },
  "pid": 3355056,
  "receipts": "var/pickup/receipts.jsonl (hash-chained, local) and docs/receipts/pickup/<id>.md on the coordinator branch",
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-11T16:03:10Z",
+  "observed_at": "2026-10-11T16:13:13Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
   "status": "idle",
