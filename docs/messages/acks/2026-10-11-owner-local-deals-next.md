@@ -1,0 +1,9 @@
+# ACK -> WORKING -> NEED — B-12 local-source readiness (owner: usable local deals)
+- ACK 2026-10-11T21:36:58Z. Claimed ONE item: existing **B-12** (reprioritized P2 -> P0). No second source task, coordinator, worker or service.
+- F-142: recorded OWNER_ACCEPTED for button placement only (Michael 16:32 CDT); history preserved; Agent 01 live proof 21:30Z, re-run 21:33Z.
+- Host check (presence only; no secret printed, no mail read): no discovery.toml, no IMAP settings in var/*.env, no IMAP env var, no var/mail/. **All four prerequisites absent**, so no live smoke was run and nothing is claimed connected.
+- Answer to the owner's question: only GSA (cached, stale) is connected. GovDeals/Public Surplus are built but NOT CONNECTED. **Craigslist NOT CONNECTED** (no authorized retrieval exists). eBay and Facebook NOT CONNECTED. F-141 is manual entry, not discovery.
+- **NEED (precise):** (1) existing DKIM-aware IMAP account + dedicated alerts-only folder; (2) genuine GovDeals/PublicSurplus Conway-area alerts routed there; (3) app password installed outside GitHub as MBOS_IMAP_PASSWORD (mode 0600) and imap.live=true for one bounded smoke. Alternative without a mailbox: forward real alert .eml files to var/mail/govdeals/ (parsing proof only, not a live connection).
+- Compatible work: Marketplace wiring; exact files and acceptance in docs/handoff/B12_LOCAL_SOURCE_WIRING_SPEC.md (market_search.py, market_routes.py, market_view.py + lane 02 EmailAlertAdapter), fixture-labelled only. Next check: next wake.
+- Stale wording corrected: direction to build local sources is given; MICHAEL #8 concerns only optional eBay Insights.
+- Active task: B-12. Commit: the one adding this file. Tests: none run (docs/readiness only); queue parser accepts the queue. Cost: UNKNOWN. Host: tmux mbos-agent-01 present; :8766 live 85246899. A-68 stays PARTIAL. Protocol adoption was already completed at 08af0af; nothing parallel claimed.
