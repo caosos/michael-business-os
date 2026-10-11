@@ -1,0 +1,87 @@
+{
+ "label": "BROADER BROWSING EXAMPLE (not the Conway acceptance search): broad inventory mode, 300 mi",
+ "code_sha": "0cb8459",
+ "url": "http://127.0.0.1:8766/market?go=1&source=gsa&base=Conway%2C+AR&radius=300&broad=1",
+ "port": 8766,
+ "viewport": "1648x1000",
+ "active_filters": {
+  "go": 1,
+  "source": "gsa",
+  "base": "Conway, AR",
+  "radius": 300,
+  "broad": 1
+ },
+ "captured_at_utc": "2026-10-11T04:21:45+00:00",
+ "source_cache": {
+  "path": "/home/michaelos/business-os-worktrees/agent-01-coordinator/var/cache/gsa-active-auctions.json",
+  "bytes": 3565410,
+  "sha256": "7eb8efd4b6d7be71bc932a8ef774e8b6bd8a932f2ddb56f2e8b109d829e9de7b",
+  "fetched_as_of": "2026-10-11T02:48:28Z",
+  "lots_in_file": 1167
+ },
+ "page_states_cache_time": true,
+ "page_says_cached_not_fresh": true,
+ "first_card_top_px": 530,
+ "horizontal_overflow": false,
+ "b19_comparison_with_cache": {
+  "checked_cards": 6,
+  "checked_all_match_cache": false,
+  "checked_mismatches": [
+   {
+    "id": "379280",
+    "title": "Traulsen Double Refrigerator SAVED",
+    "link_and_title_match_cache": false,
+    "photo_img": false,
+    "login_tile": true
+   }
+  ],
+  "optional_section_links": 266,
+  "optional_all_in_cache": true,
+  "optional_mismatches": [],
+  "listings": [
+   {
+    "id": "379280",
+    "title": "Traulsen Double Refrigerator SAVED",
+    "link_and_title_match_cache": false,
+    "photo_img": false,
+    "login_tile": true
+   },
+   {
+    "id": "379374",
+    "title": "Rolling Stainless-Steel Storage Cart Lot",
+    "link_and_title_match_cache": true,
+    "photo_img": false,
+    "login_tile": true
+   },
+   {
+    "id": "379295",
+    "title": "Wheelchair Lot",
+    "link_and_title_match_cache": true,
+    "photo_img": false,
+    "login_tile": true
+   },
+   {
+    "id": "379294",
+    "title": "Whirlpool Washing Machine",
+    "link_and_title_match_cache": true,
+    "photo_img": false,
+    "login_tile": true
+   },
+   {
+    "id": "379293",
+    "title": "Workbench with Pegboard Backing",
+    "link_and_title_match_cache": true,
+    "photo_img": false,
+    "login_tile": true
+   },
+   {
+    "id": "379279",
+    "title": "iPad Mini Lot",
+    "link_and_title_match_cache": true,
+    "photo_img": false,
+    "login_tile": true
+   }
+  ]
+ },
+ "fixture": "NONE: real cache file, real server code, no stub store"
+}

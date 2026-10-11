@@ -1,0 +1,47 @@
+{
+ "conway150": {
+  "cards": 1,
+  "precedent_blocks": 0,
+  "estimates_labelled": null,
+  "one_listing_scope": null,
+  "no_bids_cards": 22,
+  "unknown_min_label": 0,
+  "hide_buttons": 1
+ },
+ "broad300": {
+  "cards": 6,
+  "precedent_blocks": 0,
+  "estimates_labelled": null,
+  "one_listing_scope": null,
+  "no_bids_cards": 86,
+  "unknown_min_label": 3,
+  "hide_buttons": 6
+ },
+ "price1000": {
+  "cards": 1,
+  "precedent_blocks": 0,
+  "estimates_labelled": null,
+  "one_listing_scope": null,
+  "no_bids_cards": 22,
+  "unknown_min_label": 0,
+  "hide_buttons": 1
+ },
+ "radius10_36": {
+  "cards": 0,
+  "precedent_blocks": 0,
+  "estimates_labelled": null,
+  "one_listing_scope": null,
+  "no_bids_cards": 22,
+  "unknown_min_label": 0,
+  "hide_buttons": 0
+ },
+ "radius10_34": {
+  "cards": 0,
+  "precedent_blocks": 0,
+  "estimates_labelled": null,
+  "one_listing_scope": null,
+  "no_bids_cards": 22,
+  "unknown_min_label": 0,
+  "hide_buttons": 0
+ }
+}
