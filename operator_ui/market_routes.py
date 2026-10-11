@@ -61,11 +61,16 @@ def page_body(app, qs: dict, now, errors=None, values=None) -> str:
         {"status": "connected", "as_of": None, "age_h": 0, "stale": False, "in_scope": 0, "in_file": 0, "cards": [], "message": ""}
     results, unchecked, hidden = ms.partition(data["cards"], q) if ran and data["status"] == "connected" and not q["errors"] else ([], [], {})
     prefs = mp.load()
+    n_before = len(results) + len(unchecked)
+    results, g1 = mp.hide(results, prefs)             # a hidden listing stays hidden in BOTH sections, with suggestions on or off
+    unchecked, g2 = mp.hide(unchecked, prefs)
+    q["hidden_n"], q["hidden_checked"], q["matched_n"] = g1 + g2, g1, n_before
     if prefs["enabled"] and "sort" not in qs and (prefs["saved"] or prefs["more"] or prefs["less"]):
         q["sort"] = "suggested"                      # feedback exists and the owner chose no sort: use it; hard filters already ran
     if prefs["enabled"]:                              # dismissed lots are hidden and saved/why shown always; the ORDER follows the sort the owner chose
-        results, gone = mp.rank(results, prefs, lambda c: (c["closes"] or "9999", c["title"]), q["sort"] == "suggested")
-        hidden = {**hidden, "dismissed (reset suggestions to restore)": gone} if hidden or gone else hidden
+        results, _ = mp.rank(results, prefs, lambda c: (c["closes"] or "9999", c["title"]), q["sort"] == "suggested")
+    if q["hidden_n"]:
+        hidden = {**hidden, "hidden by you (restore from the hidden list)": q["hidden_n"]}
     note = landing_fix.origin_note(q["base"], ms._origin(q["base"]) is not None, q["radius"] if q["loc_mode"] != "state" or q["also_radius"] else None) if ran else ""
     return note + mv.render_page(q, data, results, hidden, saved, app.csrf, bool(app.operator_pin), edit if edit in ids else None, ran, errors, unchecked, prefs)
 

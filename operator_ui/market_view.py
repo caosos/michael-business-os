@@ -26,7 +26,7 @@ CSS = """<style>main{max-width:1900px}.banner{padding:3px 16px;font-size:13px}he
 .mk-sec2{font-size:13px}.mk-side .card button.mk-go{display:block;width:100%;margin-top:6px}.mk-sec{border-top:2px dashed var(--line);margin-top:16px}
 .mk-gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),1fr));gap:10px}.mk-g{border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--card);min-width:0}
 .mk-g .ph{height:110px;display:flex;align-items:center;justify-content:center;border:1px dashed var(--line);border-radius:6px;text-align:center;overflow:hidden}.mk-g img{width:100%;height:110px;object-fit:cover;border-radius:6px}
-.mk-g .pr{font-size:18px;font-weight:700;margin:4px 0 0}.mk-g .ti{font-size:14px;margin:2px 0;overflow-wrap:anywhere}.mk-g button,.mk-pref button{font-size:12px;padding:2px 6px;margin:1px;width:auto;background:var(--acc);color:var(--bg);opacity:1}.mk-pref button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.mk-g .pr{font-size:18px;font-weight:700;margin:4px 0 0}.mk-g .ti{font-size:14px;margin:2px 0;overflow-wrap:anywhere}.mk-g button,.mk-pref button{font-size:12px;padding:2px 6px;margin:1px;width:auto;background:var(--acc);color:var(--bg);opacity:1}.mk-acts{display:flex;justify-content:space-between;align-items:flex-end;gap:4px}.mk-xf{margin:0}.mk-g button.mk-x,.mk-x{background:transparent;color:var(--ink);border:1px solid var(--line);font-size:14px;line-height:1;padding:3px 7px}.mk-xt{font-size:11px}.mk-pref button:focus-visible,.mk-x:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
 .mk-side .mk-range input[type=range],.mk-side .mk-range input[type=number]{width:100%}.mk-side label{display:block}.mk-side .mk-range>label{display:inline-block;width:47%;margin:0 1% 4px 0}.mk-side .mk-range .small{margin:4px 0}.mk-side .mk-range div label{margin:0}.mk-side input[type=checkbox]{width:auto}
 .mk-bar{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:flex-end}.mk-bar label{display:block;margin:0;font-size:13px}.mk-bar input,.mk-bar select{width:auto;padding:4px 6px;margin:0;max-width:100%}.mk-bar details{flex:1 1 100%}.mk-bar button.mk-go{padding:6px 22px}.mk-main>.card{padding:8px 12px}.mk-main h2{margin:6px 0}.mk-side input[type=number],.mk-side input[type=text],.mk-side input:not([type]){padding:4px 6px}.mk-jump{display:none}.mk-form details,#save-search{margin:4px 0}
 @media(max-width:700px){header nav{flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px}.mk{flex-direction:column}.mk-main{order:2}.mk-side{order:1}.mk-jump{display:block}.mk-g .ph,.mk-g img{height:90px}.mk-side{position:static;flex:none;width:100%}.mk-res{flex-direction:column}.mk-form input,.mk-form select{max-width:100%}}</style>"""
@@ -49,11 +49,25 @@ def _money(v) -> str:
 
 
 def pref_buttons(c: dict, tok) -> str:
-    b = lambda a, lbl: f"<button name='act' value='{a}'>{lbl}</button>"  # noqa: E731
-    return (f"<form method='post' action='/market/pref' class='mk-pref'>{tok()}<input type='hidden' name='lot' value='{e(c['id'])}'>"
-            f"<input type='hidden' name='title' value='{e(c['title'])}'>{b('unsave', 'Unsave') if c.get('saved') else b('save', 'Save')}"
-            f"{b('dismiss', 'Not interested')}{b('more', 'More like this')}{b('less', 'Less like this')}</form>"
+    """Learning controls on the left (each labelled with its effect), the distinct X / Hide this listing control bottom-right (no learning)."""
+    b = lambda a, lbl, tip: f"<button name='act' value='{a}' title='{tip}'>{lbl}</button>"  # noqa: E731
+    hid = f"<input type='hidden' name='lot' value='{e(c['id'])}'><input type='hidden' name='title' value='{e(c['title'])}'>"
+    return (f"<div class='mk-acts'><form method='post' action='/market/pref' class='mk-pref'>{tok()}{hid}{b('unsave', 'Unsave', 'Remove from saved') if c.get('saved') else b('save', 'Save', 'Keep this listing')}"
+            f"{b('dismiss', 'Not interested', 'Hides this listing and counts its title words as less like this')}{b('more', 'More like this', 'Boosts its title words in ranking')}{b('less', 'Less like this', 'Lowers its title words in ranking')}</form>"
+            f"<form method='post' action='/market/pref' class='mk-xf'>{tok()}{hid}<button name='act' value='hide' class='mk-x' type='submit' aria-label='Hide this listing' "
+            "title='Hide this listing (this one only; nothing is learned; restore it from the hidden list)'>&#10005;<span class='mk-xt'> Hide</span></button></form></div>"
             + (f"<p class='small mut' data-why>{e(c['why'])}</p>" if c.get("why") else ""))
+
+
+def hidden_panel(d: dict, tok) -> str:
+    """Hidden listings, each restorable on its own. Restoring changes nothing else (saves, likes, filters)."""
+    h = d.get("hidden") or {}
+    if not h:
+        return "<details class='card small' id='hidden-list'><summary><b>Hidden listings: 0</b></summary>Nothing hidden. Use the X on a card to hide one listing.</details>"
+    rows = "".join(f"<li data-hidden='{e(i)}'>{e(t or 'title not recorded')} <span class='mut'>({e(i)})</span> <form method='post' action='/market/pref' style='display:inline' class='mk-pref'>{tok()}"
+                   f"<input type='hidden' name='lot' value='{e(i)}'><button name='act' value='restore' aria-label='Undo hide: {e(t or i)}'>Undo hide</button></form></li>" for i, t in sorted(h.items()))
+    return (f"<details class='card small' id='hidden-list'><summary><b>Hidden listings: {len(h)}</b> (hidden by you; kept across restarts)</summary><ul>{rows}</ul>"
+            "<span class='mut'>Undo restores only that listing, and only if it still passes your filters. Saves, likes and filters are untouched.</span></details>")
 
 
 def gallery_labels(c: dict) -> str:
@@ -323,12 +337,16 @@ def render_page(q: dict, d: dict, results: list[dict], hidden: dict, saved: list
         opt = ((f"<details class='mk-sec' id='unchecked-section'><summary><b>Optional: {len(unchecked)} lot(s) that could not be checked (not counted as local or in range). Click to open.</b></summary>"
                 "<p class='small mut'>Their location or state was not found or they have no bid yet, so the location scope or price range cannot be tested. They are shown only so nothing is hidden; "
                 "verify on the original listing.</p>" + wrap(unchecked) + "</details>") if unchecked else "")
+        n_hid = q.get("hidden_checked", 0)
+        if n_hid and not results:
+            zero = (f"<p class='mut' id='zero-results'><b>0 results left.</b> All {n_hid} cached listing(s) that match your filters" + scope + " are hidden by you. Nothing else was substituted and no new fetch was made; "
+                    "there is no guaranteed replacement. Undo a hide below, or loosen a filter.</p>")
         body = (chips(q) + f"<h2>{len(results)} result{'s' if len(results) != 1 else ''}{scope}</h2>" + "<p class='small mut' style='margin:2px 0'>Cached copy of the GSA list, not a fresh fetch (GSA surplus only). Price = current bid, not a sold price or final cost; all-in cost UNKNOWN."
                 + (f" Hidden: {e(hid)}." if hid else "") + "</p>"
                 + ((gallery(results, q, tok) if q.get("view") != "list" else "".join(render_card(c, tok) for c in results)) if results else zero) + opt
                 + distance_caveat(q, results + unchecked))
     return (CSS + "<h1 class='pagehead'>Michael's Marketplace</h1><div class='mk'>" + _sidebar(saved, csrf, pin_html, tok, q, _save(q, edit_id, tok, pin_html))
-            + f"<section class='mk-main' id='results-top'>{err}{verr}{_form(q, edit_id, tok, pin_html)}{render_status(d)}{body}{prefs_panel(prefs, tok) if prefs else ''}{working_capital()}{gsa_explainer()}</section></div>")
+            + f"<section class='mk-main' id='results-top'>{err}{verr}{_form(q, edit_id, tok, pin_html)}{render_status(d)}{body}{hidden_panel(prefs, tok) if prefs else ''}{prefs_panel(prefs, tok) if prefs else ''}{working_capital()}{gsa_explainer()}</section></div>")
 
 
 def save_form(f: dict) -> dict:

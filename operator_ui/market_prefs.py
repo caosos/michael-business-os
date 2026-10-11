@@ -11,9 +11,9 @@ import re
 import tempfile
 from pathlib import Path
 
-ACTIONS = ("save", "unsave", "dismiss", "more", "less", "reset", "disable", "enable")
+ACTIONS = ("save", "unsave", "hide", "restore", "dismiss", "more", "less", "reset", "disable", "enable")
 STOP = {"with", "from", "this", "that", "used", "lot", "item", "items", "unit", "units", "only", "each", "the", "and", "for", "set", "other"}
-EMPTY = {"enabled": True, "saved": [], "dismissed": [], "more": {}, "less": {}, "last": {}}
+EMPTY = {"enabled": True, "saved": [], "dismissed": [], "hidden": {}, "more": {}, "less": {}, "last": {}}
 
 
 def path() -> Path:
@@ -23,9 +23,15 @@ def path() -> Path:
 def load() -> dict:
     try:
         d = json.loads(path().read_text())
-        return {**EMPTY, **d} if isinstance(d, dict) else dict(EMPTY, saved=[], dismissed=[], more={}, less={}, last={})
+        d = {**EMPTY, **d} if isinstance(d, dict) else {}
     except (OSError, ValueError):
-        return {"enabled": True, "saved": [], "dismissed": [], "more": {}, "less": {}, "last": {}}
+        d = {}
+    d = {**{k: (type(v)() if isinstance(v, (list, dict)) else v) for k, v in EMPTY.items()}, **d}
+    if not isinstance(d["hidden"], dict):
+        d["hidden"] = {}
+    d["hidden"] = {**{i: "" for i in d["dismissed"]}, **d["hidden"]}      # older files kept hidden ids in `dismissed`
+    d["dismissed"] = []
+    return d
 
 
 def _store(d: dict) -> None:
@@ -61,8 +67,8 @@ def act(action: str, lot_id: str, title: str = "") -> str:
     d = load()
     lot_id = re.sub(r"[^A-Za-z0-9._-]", "", lot_id or "")[:60]
     if action == "reset":
-        _store({"enabled": d["enabled"], "saved": [], "dismissed": [], "more": {}, "less": {}, "last": d.get("last") or {}})
-        return "Suggestions reset: saves, dismissals and likes were cleared."
+        _store({"enabled": d["enabled"], "saved": [], "dismissed": [], "hidden": d["hidden"], "more": {}, "less": {}, "last": d.get("last") or {}})
+        return "Suggestions reset: saves and likes were cleared. Hidden listings stay hidden; restore them one by one from the hidden list."
     if action in ("disable", "enable"):
         d["enabled"] = action == "enable"
         _store(d)
@@ -71,12 +77,18 @@ def act(action: str, lot_id: str, title: str = "") -> str:
         raise ValueError("no lot given")
     if action == "save":
         d["saved"] = sorted(set(d["saved"]) | {lot_id})
-        d["dismissed"] = [x for x in d["dismissed"] if x != lot_id]
+        d["hidden"].pop(lot_id, None)
     elif action == "unsave":
         d["saved"] = [x for x in d["saved"] if x != lot_id]
-    elif action == "dismiss":
-        d["dismissed"] = sorted(set(d["dismissed"]) | {lot_id})
-        d["saved"] = [x for x in d["saved"] if x != lot_id]
+    elif action == "hide":                           # X: this exact listing only; no learning weights, saved records untouched
+        d["hidden"][lot_id] = (title or "")[:120]
+    elif action == "restore":                        # only this listing; saves, likes and learned words stay as they are
+        d["hidden"].pop(lot_id, None)
+    elif action == "dismiss":                        # Not interested: hides this listing AND counts as 'less like this' for its title words
+        d["hidden"][lot_id] = (title or "")[:120]
+        for t in terms(title):
+            d["less"][t] = min(d["less"].get(t, 0) + 1, 5)
+            d["more"].pop(t, None)
     else:
         tgt = d["more" if action == "more" else "less"]
         other = d["less" if action == "more" else "more"]
@@ -84,20 +96,28 @@ def act(action: str, lot_id: str, title: str = "") -> str:
             tgt[t] = min(tgt.get(t, 0) + 1, 5)
             other.pop(t, None)
     _store(d)
-    return {"save": "Saved.", "unsave": "Removed from saved.", "dismiss": "Dismissed; it stays hidden until you reset.",
+    return {"save": "Saved.", "unsave": "Removed from saved.", "hide": "Hidden. Only this listing; nothing was learned. Restore it from the hidden list.",
+            "restore": "Restored: this listing can appear again if it still matches your filters.",
+            "dismiss": "Not interested: hidden, and its title words count as 'less like this'. Restoring it later does not undo that.",
             "more": "Noted: more like this.", "less": "Noted: less like this."}[action]
 
 
 def summary(d: dict) -> str:
-    return f"{len(d['saved'])} saved · {len(d['dismissed'])} dismissed · liked words: {', '.join(sorted(d['more'])) or 'none'} · disliked words: {', '.join(sorted(d['less'])) or 'none'}"
+    return f"{len(d['saved'])} saved · {len(d['hidden'])} hidden · liked words: {', '.join(sorted(d['more'])) or 'none'} · disliked words: {', '.join(sorted(d['less'])) or 'none'}"
+
+
+def hide(results: list[dict], d: dict) -> tuple[list[dict], int]:
+    """Exact-ID hide, applied to every result section whether or not suggestions are on. Removes only; never adds or reorders."""
+    keep = [c for c in results if c["id"] not in d["hidden"]]
+    return keep, len(results) - len(keep)
 
 
 def rank(results: list[dict], d: dict, key, reorder: bool = True) -> tuple[list[dict], int]:
     """-> (results, reordered only when `reorder`, with a visible `why` on each, number hidden as dismissed). Disabled: unchanged order, no why, nothing hidden."""
     if not d.get("enabled"):
         return results, 0
-    keep = [c for c in results if c["id"] not in d["dismissed"]]
     out = []
+    keep = results
     for c in keep:
         up = [t for t in terms(c["title"]) if t in d["more"]]
         dn = [t for t in terms(c["title"]) if t in d["less"]]
@@ -107,4 +127,4 @@ def rank(results: list[dict], d: dict, key, reorder: bool = True) -> tuple[list[
         out.append((score, {**c, "why": "Why suggested: " + "; ".join(why) if why else None, "saved": c["id"] in d["saved"]}))
     if reorder:
         out.sort(key=lambda t: (-t[0], key(t[1])))
-    return [c for _, c in out], len(results) - len(keep)
+    return [c for _, c in out], 0

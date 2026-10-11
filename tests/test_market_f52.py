@@ -97,11 +97,11 @@ def test_dismiss_hides_until_reset_and_disable_turns_ranking_off(ui):
     post(ui, "/market/pref", act="dismiss", lot=first["id"], title=first["title"])
     assert f"data-lot='{first['id']}'" not in get(ui, go=1, keywords="trailer")
     post(ui, "/market/pref", act="disable")
-    assert f"data-lot='{first['id']}'" in get(ui, go=1, keywords="trailer") and "Suggestions: OFF" in get(ui, go=1)
+    assert f"data-lot='{first['id']}'" not in get(ui, go=1, keywords="trailer") and "Suggestions: OFF" in get(ui, go=1)      # A-60: hide is independent of the toggle
     post(ui, "/market/pref", act="enable")
     post(ui, "/market/pref", act="reset")
     d = mp.load()
-    assert d["dismissed"] == [] and d["saved"] == [] and d["more"] == {} and d["enabled"]
+    assert first["id"] in d["hidden"] and d["saved"] == [] and d["more"] == {} and d["enabled"]
 
 
 def test_pref_post_needs_csrf_and_rejects_unknown_actions(ui):
@@ -118,6 +118,6 @@ def test_rank_only_reorders_and_hides_dismissed():
     d = {"enabled": True, "saved": [], "dismissed": [], "more": {"trailer": 2}, "less": {"chair": 1}}
     out, gone = mp.rank([b, a], d, lambda c: (c["closes"], c["title"]))
     assert [c["id"] for c in out] == ["1", "2"] and gone == 0 and "liked" in out[0]["why"] and "disliked" in out[1]["why"]
-    d["dismissed"] = ["1"]
-    out, gone = mp.rank([b, a], d, lambda c: (c["closes"], c["title"]))
+    d["hidden"] = {"1": ""}
+    out, gone = mp.hide([b, a], d)
     assert [c["id"] for c in out] == ["2"] and gone == 1
