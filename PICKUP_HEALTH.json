@@ -35,16 +35,32 @@
    "needs": "interactive coordinator or owner (see the ack)",
    "reason": "A-69 needs the interactive engineering session (code, tests, live feed re-arm; feed process absent at check time) and a localhost-capable session for port checks; see docs/receipts/pickup/ARYA-2026101",
    "since": "2026-10-11T05:59:23Z"
+  },
+  {
+   "attempts": 1,
+   "id": "ARYA-20261011-0137-owner-approved-a60-release",
+   "needs": null,
+   "reason": "executor process died before finishing (will retry)",
+   "since": "2026-10-11T16:32:00Z"
+  },
+  {
+   "attempts": 1,
+   "id": "ARYA-20261011-0150-existing-local-import",
+   "needs": null,
+   "reason": "executor process died before finishing (will retry)",
+   "since": "2026-10-11T16:32:00Z"
   }
  ],
- "coordinator_head": "132001b",
+ "coordinator_head": "196fdf6",
  "counts": {
   "BLOCKED": [
    "ARYA-20261010-1954-authorized-ui-release",
    "ARYA-20261010-2142-a63-sustained-progression",
    "ARYA-20261010-2203-current-route-receipt",
    "ARYA-20261010-2223-a68-live-proof",
-   "ARYA-20261011-0056-a69-continuity-check"
+   "ARYA-20261011-0056-a69-continuity-check",
+   "ARYA-20261011-0137-owner-approved-a60-release",
+   "ARYA-20261011-0150-existing-local-import"
   ],
   "COMPLETED": [
    "ARYA-20261010-0328-f49-verification",
@@ -111,42 +127,41 @@
    "ARYA-20261011-0028-overnight-continuity",
    "ARYA-20261011-0030-a69-claim-and-execute",
    "ARYA-20261011-0118-shared-slack-liaison"
-  ],
-  "RUNNING": [
-   "ARYA-20261011-0137-owner-approved-a60-release",
-   "ARYA-20261011-0150-existing-local-import"
   ]
  },
- "currently_running": null,
+ "currently_running": {
+  "id": "ARYA-20261011-0137-owner-approved-a60-release",
+  "started_at": "2026-10-11T16:32:00Z"
+ },
  "delivery_interface": {
   "claude_cli": true,
-  "quota": "latest reading is 603 min old (older than 45)",
+  "quota": "latest reading is 612 min old (older than 45)",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-11T16:23:15Z",
+ "generated_at": "2026-10-11T16:32:00Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
-  "decision": "session is 'shell', not idle (it will see the work on its own sync)",
+  "decision": "session is 'busy', not idle (it will see the work on its own sync)",
   "note": "pickup does not need the interactive session",
   "state": "DEGRADED"
  },
- "pid": 3355056,
+ "pid": 592613,
  "receipts": "var/pickup/receipts.jsonl (hash-chained, local) and docs/receipts/pickup/<id>.md on the coordinator branch",
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-11T16:23:15Z",
-  "pid": 3355056,
+  "observed_at": "2026-10-11T16:32:00Z",
+  "pid": 592613,
   "source": "inbox_pickup process",
-  "status": "idle",
-  "ttl_sec": 1200
+  "status": "busy",
+  "ttl_sec": 300
  },
  "watcher": {
   "ack_branch": "research/agent-01-coordinator",
   "inbox_ref": "origin/liaison/aria-to-agent-01",
   "interval_s": 60,
-  "started_at": "2026-10-10T21:33:11Z",
+  "started_at": "2026-10-11T16:31:59Z",
   "status": "running"
  }
 }
