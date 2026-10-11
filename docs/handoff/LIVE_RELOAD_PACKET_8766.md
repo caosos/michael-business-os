@@ -1,6 +1,6 @@
 # Live :8766 reload and rollback packet (PREPARED, NOT APPROVED, NOT RUN)
 
-**EXECUTED (observed 2026-10-11T21:30:30Z by Agent 01; executor UNKNOWN):** the reload to `85246899…` happened at `exported_utc=20261011T212259Z` (PID 725190); verification in `docs/receipts/2026-10-11-f142-live-reload-verification.md`. The packet below is now audit history; do not rerun it. The 21:17Z attempt by Agent 01 was denied by the permission classifier and did not run.
+**EXECUTED (executed by the owner at 21:23:00-21:23:12Z per his screenshot; observed by Agent 01, listener PID 725190):** the reload to `85246899…` happened at `exported_utc=20261011T212259Z` (PID 725190); verification in `docs/receipts/2026-10-11-f142-live-reload-verification.md`. The packet below is now audit history; do not rerun it. The 21:17Z attempt by Agent 01 was denied by the permission classifier and did not run.
 
 ## F-142 REFRESH (2026-10-11T21:09:44Z): THIS SECTION IS THE CURRENT PACKET. Everything below it is audit history.
 **NOT approval to deploy. NOT RUN.** Nothing on :8766 was changed to prepare this. Earlier approvals (A56, A58) are spent and do not cover this artifact.

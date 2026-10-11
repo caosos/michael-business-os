@@ -1,0 +1,6 @@
+# ACK -> DONE — F-142 live acceptance (reload executed by the owner)
+- ACK 2026-10-11T21:34:20Z. The reload was NOT rerun. Already verified at 08af0af (21:29Z) and re-verified now; one task, no duplicates.
+- Fresh host observation 2026-10-11T21:34:20Z: ARTIFACT sha=85246899debf5c9b8af418dc5560f3b01273d5ee; listener PID 725190 started 21:23:02Z; `reload_ui.sh --verify-only 8766` OK; `tools/f142_live_check.py 8766` exit 0 (desktop click, mobile click, desktop Enter all order OK; Min 5 / Max 25: 134 -> 97 lots); GSA cache sha256 prefix 7eb8efd4b6d7be71 unchanged; :8479 HTTP 200. I read the live desktop screenshot: Search Now last, below BOTH sliders and every filter.
+- Records corrected, history preserved: executor was the owner (replaces "UNKNOWN"); the 21:17Z denial is history, not a blocker. Receipt: docs/receipts/2026-10-11-f142-live-reload-verification.md. Tests: the live check above; no code changed. Cost: UNKNOWN.
+- Ordering note: the protocol adoption was completed first (08af0af) before this message arrived; the message asked for the reverse order, but nothing was double-claimed and both are DONE with receipts.
+- Not verified: live PIN Save (owner action) and the owner's own acceptance. Next eligible item: none READY (all BLOCKED rows are owner/host-gated); next check at the next wake.
