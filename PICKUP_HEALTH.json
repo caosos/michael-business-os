@@ -21,14 +21,22 @@
    "needs": "interactive coordinator or owner (see the ack)",
    "reason": "current Monitor ID, start/expiry, last feed notification and claim time are not in repo truth and need the live engineering session; A-60 dependency reconciled (see docs/receipts/pickup/ARYA-20261010-",
    "since": "2026-10-10T22:06:26Z"
+  },
+  {
+   "attempts": 1,
+   "id": "ARYA-20261010-2223-a68-live-proof",
+   "needs": "interactive coordinator or owner (see the ack)",
+   "reason": "no eligible READY task (A-62 already DONE) and no measured READY-to-handoff log entry; A-68 stays PARTIAL; coordinator-branch queue/checklist reconciliation pending (see receipts/pickup)",
+   "since": "2026-10-11T03:52:56Z"
   }
  ],
- "coordinator_head": "37fa860",
+ "coordinator_head": "dd7960f",
  "counts": {
   "BLOCKED": [
    "ARYA-20261010-1954-authorized-ui-release",
    "ARYA-20261010-2142-a63-sustained-progression",
-   "ARYA-20261010-2203-current-route-receipt"
+   "ARYA-20261010-2203-current-route-receipt",
+   "ARYA-20261010-2223-a68-live-proof"
   ],
   "COMPLETED": [
    "ARYA-20261010-0328-f49-verification",
@@ -94,7 +102,6 @@
    "ARYA-20261010-2255-2203-delivery-disposition"
   ],
   "RUNNING": [
-   "ARYA-20261010-2223-a68-live-proof",
    "ARYA-20261011-0137-owner-approved-a60-release",
    "ARYA-20261011-0150-existing-local-import"
   ]
@@ -109,7 +116,7 @@
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-11T03:52:26Z",
+ "generated_at": "2026-10-11T03:52:56Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "no live Claude session (awaiting connection)",
@@ -121,7 +128,7 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-11T03:52:26Z",
+  "observed_at": "2026-10-11T03:52:56Z",
   "pid": 3355056,
   "source": "inbox_pickup process",
   "status": "busy",
