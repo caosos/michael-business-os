@@ -172,6 +172,9 @@ def _amt(v):
     return float(v) if isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v) and v >= 0 else None
 
 
+OPENING_MIN_FIELDS = ("openingBidAmount", "minBidAmount", "startingBidAmount")     # A-62: explicit source fields only; none is known to exist in the GSA cache today
+
+
 def auction_labels(p: dict, asof=None) -> dict:
     """F-61/F-137: current bid, ESTIMATED next bid and reserve, only from GSA fields in the cache (`highBidAmount`, `aucIncrement`, `reserve`).
     Estimated next bid = cached current bid + cached `aucIncrement`, only when both are finite (as of the cache time; the live minimum is unverified and
@@ -190,7 +193,17 @@ def auction_labels(p: dict, asof=None) -> dict:
         nxt_txt = "UNKNOWN (the GSA cache has no usable bid increment for this lot: field aucIncrement; live minimum unverified)"
     res_txt = {"Yes": "Yes, reserve amount undisclosed (the GSA cache has no reserve amount field)", "No": "No",
                "Unknown": "UNKNOWN (the GSA cache has no usable reserve field for this lot: field reserve)"}[reserve]
-    return {"current_bid": bid, "est_next_bid": nxt, "next_min_text": nxt_txt, "reserve": reserve, "reserve_text": res_txt, "asof": asof}
+    opening, ofield = None, None
+    if bid is None:                  # A-62: never 0, aucIncrement, retail, reserve or a guess; only an explicit positive source field
+        for f in OPENING_MIN_FIELDS:
+            v = _amt(p.get(f))
+            if v is not None and v > 0:
+                opening, ofield = v, f
+                break
+    open_txt = (f"Opening/minimum bid ${opening:,.2f} (source field {ofield}, {when}; live rules unverified)" if opening is not None
+                else "Opening/minimum bid unknown \u2014 check original listing" if bid is None else "")
+    return {"current_bid": bid, "est_next_bid": nxt, "next_min_text": nxt_txt, "reserve": reserve, "reserve_text": res_txt, "asof": asof,
+            "opening_min": opening, "opening_field": ofield, "opening_text": open_txt}
 
 
 def _card(adapter, rec, now, asof, origin) -> dict:

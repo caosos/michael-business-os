@@ -84,7 +84,7 @@ def gallery_card(c: dict, tok) -> str:
     """F-52 (B): dense card: photo (or an honest placeholder), price attached, short title, town, closing; details on the original listing."""
     img = _photo(c["image"], c["url"])
     ph = img if img.startswith("<img") else f"<div class='ph small mut'>{img}</div>"      # the honest tile/placeholder; never a faked picture
-    price = "<div class='pr'>No bids yet</div><div class='small mut'>price UNKNOWN</div>" if c["bid"] is None else f"<div class='pr'>${c['bid']:,.0f}</div><div class='small mut'>current bid</div>"
+    price = f"<div class='pr'>No bids yet</div><div class='small mut' data-opening>{e((c.get('labels') or ms.auction_labels({}))['opening_text'])}</div>" if c["bid"] is None else f"<div class='pr'>${c['bid']:,.0f}</div><div class='small mut'>current bid</div>"
     town = e(c["city"] or "town UNKNOWN") + (f" · {round(c['distance'], 1):g} mi" if c["distance"] is not None else " · distance UNKNOWN")
     ti = c["title"] if len(c["title"]) <= 60 else c["title"][:59] + "…"
     flag = " <span class='badge'>SAVED</span>" if c.get("saved") else ""
@@ -121,6 +121,8 @@ def render_card(c: dict, tok=None) -> str:
             f"<p><span class='lbl'>AUCTION</span> Current bid <b>{_money(c['bid'])}</b> (a bid, not a sold price or final cost) · Asking price: none (auction) · closes {e(c['closes'] or 'UNKNOWN')} · {where} · "
             f"condition (seller says): {e(c['condition'] or 'UNKNOWN')}</p>"
             f"<p class='small' id='auction-labels'>Next bid: {e(L['next_min_text'])} · Reserve: {e(L['reserve_text'])} · source GSA Auctions cache</p>"
+            + (f"<p class='small' id='opening-min'>No bids yet. {e(L['opening_text'])}" + ("" if L["opening_min"] is not None else f" {link_html(c['url'])}") + "</p>" if c["bid"] is None else "")
+            + "<p class='small mut' id='valuation-note'>Valuation: a gross scrap/component estimate is not a net yard pickup offer. Pickup, deductions, towing, disposal, fees, title, condition and recoverable weight: UNKNOWN.</p>"
             f"<p class='small'>Price math: bid {_money(c['bid'])} + buyer premium UNKNOWN + transport UNKNOWN + repair UNKNOWN "
             f"= all-in cost UNKNOWN (never the final cost) · sold comp: none on file</p>{('<p>' + tags + '</p>') if tags else ''}{('<p class=small><b>Not checked against your filters:</b> ' + e('; '.join(c['unchecked'])) + '</p>') if c.get('unchecked') else ''}"
             f"<p>Original listing: {link_html(c['url'])}</p>{pref_buttons(c, tok) if tok else ''}"
