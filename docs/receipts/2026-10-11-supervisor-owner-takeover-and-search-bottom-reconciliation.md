@@ -12,3 +12,10 @@ Provenance: owner screenshot showed `Search Now` above Min/Max; F-60 (`63d741d`)
 
 ## :8766 live verification: NEED
 No already-authorized release gate for a :8766 reload exists in the queue for this task, and live probing was not done. NEED: owner/Agent 01 authorizes the one consolidated reload of :8766 at this commit; then record artifact hash, `/health`, cache sha256 and a fresh screenshot. Not claimed live.
+
+## F-142 correction (re-dispatch, same row): Search Now is now last across ALL filter controls
+Provenance: the first F-142 pass (`410d7ca`) only moved the button below the sliders and categories inside the sidebar card; keywords, Broad, condition and the advanced "More filters" still lived in the separate search bar after it, so the button was not last.
+- `operator_ui/market_view.py`: new `_more_filters`/`_sel` render keywords (any/all), Broad, and the "More filters" details (condition, must/nice/exclude, source, type, closing-by, gallery rows) inside `#mkfilters`, every control tied to the real GET form with `form='mkform'`; `Search Now` is the final element of the card. The bar form keeps only Sort/View. List values still join with ", " (a first attempt rendered `[]` and zeroed results; caught by the existing browser test). Module now 383 lines.
+- Tests: `tests/test_market_f60.py` +1 order test (location, min/max, categories, keywords, More filters, condition, closing-by, Search Now); f56 selector updated for the `form` attribute. f60 5 passed. Real Chrome click + Enter, desktop 1648x1000 and mobile 390x844: Min 5 / Max 25 changed results 11 -> 0 (and f60 test 6 -> 4 with Max 25); `below_all_filter_controls`, `below_both_sliders`, `inside_filter_card` all true. Fresh screenshots in `docs/receipts/f142-search-bottom-screenshots/`.
+- Full health: reference 459 passed / 2 failed before the f56 selector fix (f56 + known resale_f39 timeout); f56 now 3 passed; lane D+E 105 passed / 2 failed (known F-32).
+- NEED: live `:8766` shows this only after the owner-gated reload; not performed (DRY-RUN, no deploy).

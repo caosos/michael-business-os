@@ -84,3 +84,13 @@ def test_f142_search_now_is_last_control_below_both_price_sliders(ui):
     for needle in ("name='min_price'", "name='max_price'", "name='min_r'", "name='max_r'", "name='cat'", "name='base'", "name='radius'", "name='also_radius'"):
         assert card.rindex(needle) < pos, needle
     assert card.rstrip().endswith("Search Now</button></div>") and card.count("<button") == 1
+
+
+def test_f142_search_now_is_last_after_every_filter_control(ui):
+    card = _card(get(ui))
+    pos = lambda s: card.index(s)  # noqa: E731
+    order = ["Origin", "name='min_price'", "name='max_price'", "name='cat'", "name='keywords'", "More filters", "name='condition'", "name='closing_by'", "Search Now"]
+    idx = [pos(t) for t in order if t in card]
+    assert len(idx) >= 8 and idx == sorted(idx)
+    assert card.rindex("name='") < pos("Search Now") and "<form" not in card
+    assert card.count("form='mkform'") >= 10

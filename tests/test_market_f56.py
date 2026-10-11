@@ -33,7 +33,7 @@ class _Forms(HTMLParser):
 
 def _row(h, i):
     import re
-    m = re.search(rf"<select name='row{i}'>(.*?)</select>", h)
+    m = re.search(rf"<select form='mkform' name='row{i}'>(.*?)</select>", h)
     return re.search(r"<option value='([^']*)' selected>", m.group(1)).group(1)
 
 

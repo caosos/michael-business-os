@@ -192,6 +192,30 @@ def location_panel(q: dict) -> str:
             f"<p class='small mut' id='location-scope'>{e(scope_text(q))}. A lot with no known state or distance is never counted as local; it is listed as not checked.</p></fieldset>")
 
 
+def _sel(name: str, opts, cur) -> str:
+    return f"<select form='mkform' name='{name}'>" + "".join(f"<option value='{e(o)}'{' selected' if str(cur) == o else ''}>{e(lbl)}</option>" for o, lbl in opts) + "</select>"
+
+
+def _more_filters(q: dict) -> str:
+    """F-142: condition, keywords and advanced filters live in the filter card (owned by the real GET form) so Search Now can be last."""
+    v = lambda k: e(", ".join(q[k]) if isinstance(q.get(k), list) else q.get(k) if q.get(k) is not None else "")  # noqa: E731
+    sel = _sel
+    return (f"<label>Category / keywords, any of <input form='mkform' name='any' size='24' value='{v('any')}'></label>"
+            f"<label><input type='checkbox' form='mkform' name='broad' value='1'{' checked' if q.get('broad') else ''}> Broad (all categories)</label>"
+            f"<label>Keywords, all of <input form='mkform' name='keywords' size='22' value='{v('keywords')}'></label>"
+            f"<details id='more-filters'><summary>More filters</summary>"
+            f"<label>Condition (seller text) <input form='mkform' name='condition' size='10' value='{v('condition')}'></label>"
+            f"<label>Must include <input form='mkform' name='required' size='14' value='{v('required')}'></label>"
+            f"<label>Nice to include <input form='mkform' name='preferred' size='14' value='{v('preferred')}'></label>"
+            f"<label>Exclude <input form='mkform' name='exclude' size='14' value='{v('exclude')}'></label>"
+            f"<label>Source {sel('source', [('gsa', 'GSA Auctions')] + [(n.lower(), n + ' (not connected)') for n in ms.NOT_CONNECTED], q.get('source', 'gsa'))}</label>"
+            f"<label>Type {sel('kind', [('any', 'Any'), ('auction', 'Auction'), ('fixed', 'Fixed price')], q.get('kind', 'any'))}</label>"
+            f"<label>Closing by <input type='date' form='mkform' name='closing_by' value='{v('closing_by')}'></label>"
+            f"<p class='small'><b>Gallery rows</b> (top to bottom; leave blank for fewer than 4)</p>"
+            + "".join(f"<label>Row {i} {sel(f'row{i}', [('', '(none)')] + [(k, k.title()) for k in ms.ROW_CATS], (q.get('rows') or ms.DEFAULT_ROWS)[i - 1])}</label>" for i in range(1, 5))
+            + "</details>")
+
+
 def _side_filters(q: dict) -> str:
     """F-52 (B): origin/ZIP, radius, price and category checkboxes live in the narrow left sidebar; they belong to the search form (form='mkform')."""
     v = lambda k: e(q.get(k) if q.get(k) is not None else "")  # noqa: E731
@@ -200,6 +224,7 @@ def _side_filters(q: dict) -> str:
             f"{location_panel(q)}"
             f"{_slider(q, 'mkform')}"
             f"<b>Categories</b>{cats}<p class='small mut'>None checked = your rows below (default trailers and equipment).</p>"
+            f"{_more_filters(q)}"
             "<button class='mk-go' type='submit' form='mkform'>Search Now</button></div>")
 
 
@@ -273,26 +298,12 @@ def _save(q: dict, cid: str | None, tok, pin_html: str) -> str:
 
 
 def _form(q: dict, cid: str | None, tok, pin_html: str) -> str:
-    v = lambda k: e(", ".join(q[k]) if isinstance(q.get(k), list) else q.get(k) if q.get(k) is not None else "")  # noqa: E731
     sel = lambda name, opts, cur: f"<select name='{name}'>" + "".join(  # noqa: E731
         f"<option value='{e(o)}'{' selected' if str(cur) == o else ''}>{e(lbl)}</option>" for o, lbl in opts) + "</select>"
     return ("<div class='card'><form method='get' action='/market' class='mk-form mk-bar' id='mkform' novalidate><input type='hidden' name='go' value='1'>"
             f"<label>Sort {sel('sort', [(s, s.title()) for s in ms.SORTS], q.get('sort', 'closing'))}</label>"
             f"<label>View {sel('view', [('gallery', 'Gallery'), ('list', 'List')], q.get('view', 'gallery'))}</label>"
-            f"<label>Category / keywords, any of <input name='any' size='24' value='{v('any')}'></label>"
-            f"<label><input type='checkbox' name='broad' value='1'{' checked' if q.get('broad') else ''}> Broad (all categories)</label>"
-            f"<label>Keywords, all of <input name='keywords' size='22' value='{v('keywords')}'></label>"
-            f"<details><summary>More filters</summary>"
-            f"<label>Condition (seller text) <input name='condition' size='10' value='{v('condition')}'></label>"
-            f"<label>Must include <input name='required' size='14' value='{v('required')}'></label>"
-            f"<label>Nice to include <input name='preferred' size='14' value='{v('preferred')}'></label>"
-            f"<label>Exclude <input name='exclude' size='14' value='{v('exclude')}'></label>"
-            f"<label>Source {sel('source', [('gsa', 'GSA Auctions')] + [(n.lower(), n + ' (not connected)') for n in ms.NOT_CONNECTED], q.get('source', 'gsa'))}</label>"
-            f"<label>Type {sel('kind', [('any', 'Any'), ('auction', 'Auction'), ('fixed', 'Fixed price')], q.get('kind', 'any'))}</label>"
-            f"<label>Closing by <input type='date' name='closing_by' value='{v('closing_by')}'></label>"
-            f"<p class='small'><b>Gallery rows</b> (top to bottom; leave blank for fewer than 4)</p>"
-            + "".join(f"<label>Row {i} {sel(f'row{i}', [('', '(none)')] + [(k, k.title()) for k in ms.ROW_CATS], (q.get('rows') or ms.DEFAULT_ROWS)[i - 1])}</label>" for i in range(1, 5))
-            + "</details></form></div>")
+            "</form></div>")
 
 
 def working_capital(verified=None) -> str:

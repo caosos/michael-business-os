@@ -3,9 +3,9 @@
   "view": "desktop-1648x1000",
   "submit_by": "initial load",
   "step": "before",
-  "url": "http://127.0.0.1:40759/market?go=1&base=Conway+AR&broad=1&radius=37.5",
+  "url": "http://127.0.0.1:36771/market?go=1&base=Conway+AR&broad=1&radius=37.5",
   "viewport": "1648x1000",
-  "port": 40759,
+  "port": 36771,
   "filters_chips": "Applied filters: Origin: Conway AR (ZIP 72032)Radius: 37.5 mi (known distances only); Location mode: By Distance (states not applied)Mode: BROAD inventory (all categories)",
   "known_result_ids": [
    "3-1-QSC-I-27-019-010",
@@ -163,8 +163,8 @@
    "radius": "37.5"
   },
   "search_now": {
-   "button_top": 1244,
-   "button_bottom": 1282,
+   "button_top": 1471,
+   "button_bottom": 1509,
    "below_all_filter_controls": true,
    "below_both_sliders": true,
    "inside_filter_card": true,
@@ -177,12 +177,12 @@
    "Saved Deals",
    "Auctions Closing Soon"
   ],
-  "code_sha": "63d741d3cf0d3df72fc8a672f4c84256356c15c3",
+  "code_sha": "5b2fadcfde24d96847881665acc37f82407a6859",
   "operator_ui_tests_tools_dirty": true,
   "store": "STUB (no database)",
   "cache_sha256": "7eb8efd4b6d7be71bc932a8ef774e8b6bd8a932f2ddb56f2e8b109d829e9de7b",
   "cache_as_of_utc": "2026-10-11T02:48:28Z",
-  "captured_at_utc": "2026-10-11T16:37:30+00:00",
+  "captured_at_utc": "2026-10-11T18:14:43+00:00",
   "browser": "155.0.8059.39",
   "files": [
    "desktop-1648x1000-click-before-first-viewport.png",
@@ -193,9 +193,9 @@
   "view": "desktop-1648x1000",
   "submit_by": "click",
   "step": "after",
-  "url": "http://127.0.0.1:40759/market?loc_mode=distance&base=Conway+AR&radius=37.5&state_find=&min_price=5&max_price=25&min_r=1&max_r=20000&prev_min=1&prev_max=20000&go=1&sort=closing&view=gallery&any=&broad=1&keywords=&condition=&required=&preferred=&exclude=&source=gsa&kind=any&closing_by=&row1=trailers&row2=equipment&row3=vehicles&row4=",
+  "url": "http://127.0.0.1:36771/market?loc_mode=distance&base=Conway+AR&radius=37.5&state_find=&min_price=5&max_price=25&min_r=1&max_r=20000&prev_min=1&prev_max=20000&any=&broad=1&keywords=&condition=&required=&preferred=&exclude=&source=gsa&kind=any&closing_by=&row1=trailers&row2=equipment&row3=vehicles&row4=&go=1&sort=closing&view=gallery",
   "viewport": "1648x1000",
-  "port": 40759,
+  "port": 36771,
   "filters_chips": "Applied filters: Origin: Conway AR (ZIP 72032)Radius: 37.5 mi (known distances only); Location mode: By Distance (states not applied)Mode: BROAD inventory (all categories)Min price: $5Max price: $25",
   "known_result_ids": [],
   "known_count": 0,
@@ -315,8 +315,8 @@
    "radius": "37.5"
   },
   "search_now": {
-   "button_top": 1244,
-   "button_bottom": 1282,
+   "button_top": 1471,
+   "button_bottom": 1509,
    "below_all_filter_controls": true,
    "below_both_sliders": true,
    "inside_filter_card": true,
@@ -329,12 +329,12 @@
    "Saved Deals",
    "Auctions Closing Soon"
   ],
-  "code_sha": "63d741d3cf0d3df72fc8a672f4c84256356c15c3",
+  "code_sha": "5b2fadcfde24d96847881665acc37f82407a6859",
   "operator_ui_tests_tools_dirty": true,
   "store": "STUB (no database)",
   "cache_sha256": "7eb8efd4b6d7be71bc932a8ef774e8b6bd8a932f2ddb56f2e8b109d829e9de7b",
   "cache_as_of_utc": "2026-10-11T02:48:28Z",
-  "captured_at_utc": "2026-10-11T16:37:31+00:00",
+  "captured_at_utc": "2026-10-11T18:14:44+00:00",
   "browser": "155.0.8059.39",
   "files": [
    "desktop-1648x1000-click-after-first-viewport.png",
@@ -345,9 +345,9 @@
   "view": "mobile-390x844",
   "submit_by": "initial load",
   "step": "before",
-  "url": "http://127.0.0.1:40759/market?go=1&base=Conway+AR&broad=1&radius=37.5",
+  "url": "http://127.0.0.1:36771/market?go=1&base=Conway+AR&broad=1&radius=37.5",
   "viewport": "390x844",
-  "port": 40759,
+  "port": 36771,
   "filters_chips": "Applied filters: Origin: Conway AR (ZIP 72032)Radius: 37.5 mi (known distances only); Location mode: By Distance (states not applied)Mode: BROAD inventory (all categories)",
   "known_result_ids": [
    "3-1-QSC-I-27-019-010",
@@ -505,8 +505,8 @@
    "radius": "37.5"
   },
   "search_now": {
-   "button_top": 1055,
-   "button_bottom": 1093,
+   "button_top": 1239,
+   "button_bottom": 1276,
    "below_all_filter_controls": true,
    "below_both_sliders": true,
    "inside_filter_card": true,
@@ -519,12 +519,12 @@
    "Saved Deals",
    "Auctions Closing Soon"
   ],
-  "code_sha": "63d741d3cf0d3df72fc8a672f4c84256356c15c3",
+  "code_sha": "5b2fadcfde24d96847881665acc37f82407a6859",
   "operator_ui_tests_tools_dirty": true,
   "store": "STUB (no database)",
   "cache_sha256": "7eb8efd4b6d7be71bc932a8ef774e8b6bd8a932f2ddb56f2e8b109d829e9de7b",
   "cache_as_of_utc": "2026-10-11T02:48:28Z",
-  "captured_at_utc": "2026-10-11T16:37:32+00:00",
+  "captured_at_utc": "2026-10-11T18:14:45+00:00",
   "browser": "155.0.8059.39",
   "files": [
    "mobile-390x844-click-before-first-viewport.png",
@@ -535,9 +535,9 @@
   "view": "mobile-390x844",
   "submit_by": "click",
   "step": "after",
-  "url": "http://127.0.0.1:40759/market?loc_mode=distance&base=Conway+AR&radius=37.5&state_find=&min_price=5&max_price=25&min_r=1&max_r=20000&prev_min=1&prev_max=20000&go=1&sort=closing&view=gallery&any=&broad=1&keywords=&condition=&required=&preferred=&exclude=&source=gsa&kind=any&closing_by=&row1=trailers&row2=equipment&row3=vehicles&row4=",
+  "url": "http://127.0.0.1:36771/market?loc_mode=distance&base=Conway+AR&radius=37.5&state_find=&min_price=5&max_price=25&min_r=1&max_r=20000&prev_min=1&prev_max=20000&any=&broad=1&keywords=&condition=&required=&preferred=&exclude=&source=gsa&kind=any&closing_by=&row1=trailers&row2=equipment&row3=vehicles&row4=&go=1&sort=closing&view=gallery",
   "viewport": "390x844",
-  "port": 40759,
+  "port": 36771,
   "filters_chips": "Applied filters: Origin: Conway AR (ZIP 72032)Radius: 37.5 mi (known distances only); Location mode: By Distance (states not applied)Mode: BROAD inventory (all categories)Min price: $5Max price: $25",
   "known_result_ids": [],
   "known_count": 0,
@@ -657,8 +657,8 @@
    "radius": "37.5"
   },
   "search_now": {
-   "button_top": 1055,
-   "button_bottom": 1093,
+   "button_top": 1239,
+   "button_bottom": 1276,
    "below_all_filter_controls": true,
    "below_both_sliders": true,
    "inside_filter_card": true,
@@ -671,12 +671,12 @@
    "Saved Deals",
    "Auctions Closing Soon"
   ],
-  "code_sha": "63d741d3cf0d3df72fc8a672f4c84256356c15c3",
+  "code_sha": "5b2fadcfde24d96847881665acc37f82407a6859",
   "operator_ui_tests_tools_dirty": true,
   "store": "STUB (no database)",
   "cache_sha256": "7eb8efd4b6d7be71bc932a8ef774e8b6bd8a932f2ddb56f2e8b109d829e9de7b",
   "cache_as_of_utc": "2026-10-11T02:48:28Z",
-  "captured_at_utc": "2026-10-11T16:37:32+00:00",
+  "captured_at_utc": "2026-10-11T18:14:45+00:00",
   "browser": "155.0.8059.39",
   "files": [
    "mobile-390x844-click-after-first-viewport.png",
@@ -687,9 +687,9 @@
   "view": "desktop-1648x1000",
   "submit_by": "initial load",
   "step": "before",
-  "url": "http://127.0.0.1:40759/market?go=1&base=Conway+AR&broad=1&radius=37.5",
+  "url": "http://127.0.0.1:36771/market?go=1&base=Conway+AR&broad=1&radius=37.5",
   "viewport": "1648x1000",
-  "port": 40759,
+  "port": 36771,
   "filters_chips": "Applied filters: Origin: Conway AR (ZIP 72032)Radius: 37.5 mi (known distances only); Location mode: By Distance (states not applied)Mode: BROAD inventory (all categories)",
   "known_result_ids": [
    "3-1-QSC-I-27-019-010",
@@ -847,8 +847,8 @@
    "radius": "37.5"
   },
   "search_now": {
-   "button_top": 1244,
-   "button_bottom": 1282,
+   "button_top": 1471,
+   "button_bottom": 1509,
    "below_all_filter_controls": true,
    "below_both_sliders": true,
    "inside_filter_card": true,
@@ -861,12 +861,12 @@
    "Saved Deals",
    "Auctions Closing Soon"
   ],
-  "code_sha": "63d741d3cf0d3df72fc8a672f4c84256356c15c3",
+  "code_sha": "5b2fadcfde24d96847881665acc37f82407a6859",
   "operator_ui_tests_tools_dirty": true,
   "store": "STUB (no database)",
   "cache_sha256": "7eb8efd4b6d7be71bc932a8ef774e8b6bd8a932f2ddb56f2e8b109d829e9de7b",
   "cache_as_of_utc": "2026-10-11T02:48:28Z",
-  "captured_at_utc": "2026-10-11T16:37:33+00:00",
+  "captured_at_utc": "2026-10-11T18:14:46+00:00",
   "browser": "155.0.8059.39",
   "files": [
    "desktop-1648x1000-enter-before-first-viewport.png",
@@ -877,9 +877,9 @@
   "view": "desktop-1648x1000",
   "submit_by": "enter",
   "step": "after",
-  "url": "http://127.0.0.1:40759/market?loc_mode=distance&base=Conway+AR&radius=37.5&state_find=&min_price=5&max_price=25&min_r=1&max_r=20000&prev_min=1&prev_max=20000&go=1&sort=closing&view=gallery&any=&broad=1&keywords=&condition=&required=&preferred=&exclude=&source=gsa&kind=any&closing_by=&row1=trailers&row2=equipment&row3=vehicles&row4=",
+  "url": "http://127.0.0.1:36771/market?loc_mode=distance&base=Conway+AR&radius=37.5&state_find=&min_price=5&max_price=25&min_r=1&max_r=20000&prev_min=1&prev_max=20000&any=&broad=1&keywords=&condition=&required=&preferred=&exclude=&source=gsa&kind=any&closing_by=&row1=trailers&row2=equipment&row3=vehicles&row4=&go=1&sort=closing&view=gallery",
   "viewport": "1648x1000",
-  "port": 40759,
+  "port": 36771,
   "filters_chips": "Applied filters: Origin: Conway AR (ZIP 72032)Radius: 37.5 mi (known distances only); Location mode: By Distance (states not applied)Mode: BROAD inventory (all categories)Min price: $5Max price: $25",
   "known_result_ids": [],
   "known_count": 0,
@@ -999,8 +999,8 @@
    "radius": "37.5"
   },
   "search_now": {
-   "button_top": 1244,
-   "button_bottom": 1282,
+   "button_top": 1471,
+   "button_bottom": 1509,
    "below_all_filter_controls": true,
    "below_both_sliders": true,
    "inside_filter_card": true,
@@ -1013,12 +1013,12 @@
    "Saved Deals",
    "Auctions Closing Soon"
   ],
-  "code_sha": "63d741d3cf0d3df72fc8a672f4c84256356c15c3",
+  "code_sha": "5b2fadcfde24d96847881665acc37f82407a6859",
   "operator_ui_tests_tools_dirty": true,
   "store": "STUB (no database)",
   "cache_sha256": "7eb8efd4b6d7be71bc932a8ef774e8b6bd8a932f2ddb56f2e8b109d829e9de7b",
   "cache_as_of_utc": "2026-10-11T02:48:28Z",
-  "captured_at_utc": "2026-10-11T16:37:34+00:00",
+  "captured_at_utc": "2026-10-11T18:14:47+00:00",
   "browser": "155.0.8059.39",
   "files": [
    "desktop-1648x1000-enter-after-first-viewport.png",
