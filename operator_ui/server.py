@@ -1062,7 +1062,7 @@ def make_handler(app):
             if u.path == "/static/market_radius.js":
                 return self._send(200, (Path(__file__).parent / "static" / "market_radius.js").read_text(encoding="utf-8"), "text/javascript; charset=utf-8")
             if u.path == "/market":
-                return self._send(200, page("Michael's Marketplace", market_routes.page_body(app, qs, now), app.state(), flash))
+                return self._send(200, page("DealSniffer Marketplace", market_routes.page_body(app, qs, now), app.state(), flash))
             if u.path == "/wanted":
                 return self._wanted_page(flash or err, bool(err))
             if u.path == "/numbers":
@@ -1485,7 +1485,7 @@ def make_handler(app):
                 f = {k: v[0] for k, v in parse_qs(self.rfile.read(n).decode("utf-8", "replace"), keep_blank_values=True).items()}
                 loc, errs = market_routes.post(app, parts, f)
                 if errs:
-                    return self._send(200, page("Michael's Marketplace", market_routes.page_body(app, {}, utcnow(), errs, {k: v for k, v in f.items() if k not in ("pin", "csrf")}), app.state()))
+                    return self._send(200, page("DealSniffer Marketplace", market_routes.page_body(app, {}, utcnow(), errs, {k: v for k, v in f.items() if k not in ("pin", "csrf")}), app.state()))
                 self.send_response(303)
                 self.send_header("Location", loc)
                 self.send_header("Content-Length", "0")

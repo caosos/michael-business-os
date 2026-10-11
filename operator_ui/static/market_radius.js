@@ -3,9 +3,11 @@
   var n = document.getElementById("radius"), r = document.getElementById("radius_r"), o = document.getElementById("radius-out"), box = document.getElementById("radius-slide");
   if (!n || !r || !o || !box) return;
   box.hidden = false;
-  var max = Number(r.max);
+  var base = 500, mx = document.getElementById("radius-max");
   function show() { o.textContent = n.value === "" ? "no limit" : Number(n.value) + " miles"; }
+  function range(x) { var m = Math.max(base, Math.ceil(x)); r.max = m; if (mx) mx.textContent = m.toLocaleString("en-US") + " miles"; }  /* F-144: widen, never clamp */
   r.addEventListener("input", function () { n.value = r.value; show(); });
-  n.addEventListener("input", function () { var x = Number(n.value); if (n.value !== "" && isFinite(x)) r.value = Math.min(Math.max(x, 0), max); show(); });
+  n.addEventListener("input", function () { var x = Number(n.value); if (n.value !== "" && isFinite(x) && x >= 0) { range(x); r.value = x; } show(); });
+  if (n.value !== "" && isFinite(Number(n.value))) { range(Number(n.value)); r.value = Number(n.value); }
   show();
 })();

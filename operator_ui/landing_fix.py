@@ -89,6 +89,8 @@ def origin_note(base: str, located: bool, radius) -> str:
     """Said out loud when the typed origin cannot be located, instead of silently ignoring the radius."""
     if located:
         return ""
+    if not (base or "").strip():      # F-144: a first visit has no origin yet; that is a prompt, not an error
+        return "<div class='card small mut' id='origin-prompt'>Enter a ZIP or city to search by distance.</div>"
     return (f"<div class='card'><b>Origin '{e(base)}' accepted but not located.</b> Distances are UNKNOWN"
             + (f" and the {radius:g} mi radius is not applied: every lot is listed as not checked" if radius is not None else "")
             + ". Type a US ZIP or city in the local gazetteer (operator_ui/data/gazetteer_us.csv, or MBOS_GAZETTEER_FILE), or 'latitude, longitude'. No network lookup is made.</div>")

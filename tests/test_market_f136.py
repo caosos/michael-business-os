@@ -156,7 +156,8 @@ def test_state_choice_persists_across_navigation_and_restart_via_prefs(ui):
 
 def test_fresh_visit_has_no_hidden_origin_and_michaels_saved_origin_is_kept(ui):
     h = get(ui)                                                     # F-143: a new user sees an EMPTY origin field and no applied radius
-    assert "name='base' size='12' value=''" in h and "Radius: none" in h and "Conway" not in h.split("<main")[1] if "<main" in h else True
+    assert "name='base' size='12' value=''" in h and "Radius: none" in h
+    assert "Conway" not in (h.split("<main", 1)[1] if "<main" in h else h)
     get(ui, go=1, broad=1, base="Conway AR", radius="150")          # Michael's saved origin/radius come back from his prefs
     h = get(ui)
     assert "value='Conway AR'" in h and "value='150'" in h and "Radius: 150 mi (known distances only); Location mode: By Distance" in h

@@ -4,6 +4,7 @@ with category `marketplace` (written through App.wanted_change, so CSRF + PIN + 
 from __future__ import annotations
 
 import html
+import math
 import secrets
 from urllib.parse import quote, urlsplit
 
@@ -15,6 +16,7 @@ from . import precedent_view as pv
 from . import market_source_view as msv
 
 CATEGORY = "marketplace"
+SLIDER_MAX = 500          # F-144: normal slider scale (miles); control usability, not a travel limit
 e = lambda v: html.escape("" if v is None else str(v))  # noqa: E731
 
 CSS = """<style>main{max-width:1900px}.banner{padding:3px 16px;font-size:13px}header{padding:4px 16px;flex-wrap:nowrap}header b{display:none}header nav{display:flex;gap:2px 12px;flex-wrap:wrap}header nav a{margin:0;white-space:nowrap}main{padding:8px 16px}.pagehead{margin:4px 0 8px;font-size:20px}.mk-row>h2{margin:8px 0 4px}.mk-gal>p{grid-column:1/-1;margin:2px 0}.mk{display:flex;gap:18px;align-items:flex-start}.mk-side{flex:0 0 210px}
@@ -198,14 +200,15 @@ def location_panel(q: dict) -> str:
 
 
 def _radius(q: dict) -> str:
-    """F-143: a radius slider (0 to the existing validation maximum, miles) coupled by /static/market_radius.js to the numeric `radius` field, which alone is submitted.
+    """F-143: a radius slider (0 to 500 miles, expanding to a larger value; the field accepts up to MAX_RADIUS) coupled by /static/market_radius.js to the numeric `radius` field, which alone is submitted.
     The slider is hidden until the script runs, so without scripts only the numeric field shows."""
-    hi, r = landing_fix.MAX_RADIUS, q.get("radius")
+    r = q.get("radius")
+    hi = max(SLIDER_MAX, math.ceil(r)) if r is not None else SLIDER_MAX      # F-144: normal scale 0-500; a larger saved/typed value expands the range, never clamps
     return ("<div id='radius-ctl'><label>Radius (miles) <input form='mkform' type='number' id='radius' name='radius' min='0' max='%d' step='any' inputmode='decimal' value='%s'></label> "
             "<span class='small'>Selected: <output id='radius-out' for='radius'>%s</output></span>"
             "<div id='radius-slide' hidden><input type='range' id='radius_r' min='0' max='%d' step='1' value='%s' aria-label='Radius in miles' data-for='radius'>"
             "<div class='small mut' style='display:flex;justify-content:space-between'><span id='radius-min'>0 miles</span><span id='radius-max'>%s miles</span></div></div></div>"
-            ) % (hi, e("" if r is None else f"{r:g}"), "no limit" if r is None else f"{r:g} miles", hi, "%g" % (hi if r is None else min(r, hi)), f"{hi:,}")
+            ) % (landing_fix.MAX_RADIUS, e("" if r is None else f"{r:g}"), "no limit" if r is None else f"{r:g} miles", hi, "%g" % (hi if r is None else r), f"{hi:,}")
 
 
 def _sel(name: str, opts, cur) -> str:
@@ -373,7 +376,7 @@ def render_page(q: dict, d: dict, results: list[dict], hidden: dict, saved: list
                 + (f"<p class='small mut' id='precedent-note'>{e(prec_note)}</p>" if prec_note and results else "")
                 + ((gallery(results, q, tok, prec) if q.get("view") != "list" else "".join(pv.inject(render_card(c, tok), prec.get(c["id"], "")) for c in results)) if results else zero) + opt
                 + distance_caveat(q, results + unchecked))
-    return (CSS + "<script src='/static/market_radius.js' defer></script><h1 class='pagehead'>Michael's Marketplace</h1><div class='mk'>" + _sidebar(saved, csrf, pin_html, tok, q, _save(q, edit_id, tok, pin_html))
+    return (CSS + "<script src='/static/market_radius.js' defer></script><h1 class='pagehead'>DealSniffer Marketplace</h1><div class='mk'>" + _sidebar(saved, csrf, pin_html, tok, q, _save(q, edit_id, tok, pin_html))
             + f"<section class='mk-main' id='results-top'>{err}{verr}{_form(q, edit_id, tok, pin_html)}{render_status(d)}{body}{finds}{hidden_panel(prefs, tok) if prefs else ''}{prefs_panel(prefs, tok) if prefs else ''}{working_capital()}{gsa_explainer()}</section></div>")
 
 

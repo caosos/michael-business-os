@@ -53,9 +53,9 @@ def test_fresh_visit_for_a_new_user_shows_empty_origin_and_no_conway(ui):
 
 def test_radius_control_markup_and_scope_text(ui):
     h = get(ui, go=1, base="72032", radius="37.5", broad=1)
-    assert f"id='radius_r' min='0' max='{landing_fix.MAX_RADIUS}' step='1' value='37.5'" in h
+    assert f"id='radius_r' min='0' max='500' step='1' value='37.5'" in h
     assert f"max='{landing_fix.MAX_RADIUS}' step='any'" in h and "<output id='radius-out' for='radius'>37.5 miles</output>" in h
-    assert "0 miles</span>" in h and f"{landing_fix.MAX_RADIUS:,} miles</span>" in h
+    assert "0 miles</span>" in h and f"500 miles</span>" in h
     assert "name='radius_r'" not in h and "within 37.5 miles" in h and "of 72032" not in h.split("<h2>")[1].split("</h2>")[0]
 
 
@@ -91,7 +91,7 @@ def test_real_chrome_slider_and_numeric_entry_submit_the_displayed_miles(ui):
             pg = b.new_page(viewport=vp)
             pg.goto(base + "/market?go=1&broad=1&base=Conway+AR&radius=150")
             assert pg.is_visible("#radius_r")
-            for target in ("0", "4321", "25000"):                                   # boundary, intermediate, maximum via the slider
+            for target in ("0", "321", "500"):                                   # boundary, intermediate, maximum via the slider
                 pg.eval_on_selector("#radius_r", "(e,v)=>{e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}))}", target)
                 assert pg.input_value("#radius") == target and pg.inner_text("#radius-out") == f"{target} miles"
                 pg.click("button.mk-go"); pg.wait_for_load_state()

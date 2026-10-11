@@ -44,8 +44,8 @@ with sync_playwright() as p:
         pg.goto(base + "/market?go=1&broad=1&base=Conway+AR&radius=150")
         check(f"{vname}: price sliders absent", pg.evaluate("()=>!document.getElementById('min_r')&&!document.getElementById('max_r')&&!document.querySelector('[name=min_r],[name=max_r],[name=prev_min],[name=prev_max]')"))
         check(f"{vname}: Search Now last after every filter", pg.evaluate(LAST))
-        check(f"{vname}: radius slider visible with min/max labels", pg.is_visible("#radius_r") and pg.inner_text("#radius-min") == "0 miles" and pg.inner_text("#radius-max") == "25,000 miles")
-        for how, val in (("slider", "0"), ("slider", "60"), ("slider", "120"), ("slider", "25000"), ("typed", "97.9"), ("typed", "0")):
+        check(f"{vname}: radius slider visible with min/max labels", pg.is_visible("#radius_r") and pg.inner_text("#radius-min") == "0 miles" and pg.inner_text("#radius-max") == "500 miles")
+        for how, val in (("slider", "0"), ("slider", "60"), ("slider", "120"), ("slider", "500"), ("typed", "97.9"), ("typed", "750"), ("typed", "25000"), ("typed", "0")):
             if how == "slider":
                 pg.eval_on_selector("#radius_r", "(e,v)=>{e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}))}", val)
             else:
