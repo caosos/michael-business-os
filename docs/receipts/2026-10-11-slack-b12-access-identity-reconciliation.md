@@ -37,3 +37,7 @@ The current writes and Slack replies are being made by the present Work-mode Dea
 **Owner action:** name the existing IMAP mailbox/service account and dedicated folder to reuse, confirm that persistent read-only access is allowed, and have the operator install its app password/secret outside GitHub. No source-strategy decision is being re-asked.
 
 **Safe next step after access exists:** Agent 02 runs `--dry`, then one bounded read-only GovDeals or PublicSurplus live smoke against the dedicated folder, verifies DKIM and `\\Seen` remains unset, records scrubbed fixtures and a privacy-safe receipt, and leaves deployment/release unchanged.
+
+## Slack ACKs
+- B-12 access-boundary ACK: `1791722563.391199` — https://ask-aria.slack.com/archives/C0C81K9QNGK/p1791722563391199?thread_ts=1791699888.459229&cid=C0C81K9QNGK
+- Supervisor-identity ACK: `1791722564.078439` — https://ask-aria.slack.com/archives/C0C81K9QNGK/p1791722564078439?thread_ts=1791699888.459229&cid=C0C81K9QNGK
