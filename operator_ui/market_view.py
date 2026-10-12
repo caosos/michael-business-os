@@ -345,7 +345,7 @@ def gsa_explainer() -> str:
 
 
 def render_page(q: dict, d: dict, results: list[dict], hidden: dict, saved: list[dict], csrf: str, pin_set: bool,
-                edit_id: str | None = None, ran: bool = True, errors: list[str] | None = None, unchecked: list[dict] | None = None, prefs: dict | None = None, finds: str = "", bids: str = "") -> str:
+                edit_id: str | None = None, ran: bool = True, errors: list[str] | None = None, unchecked: list[dict] | None = None, prefs: dict | None = None, finds: str = "", bids: str = "", suggest: str = "") -> str:
     tok = lambda: f"<input type='hidden' name='csrf' value='{e(csrf)}'><input type='hidden' name='nonce' value='{secrets.token_hex(8)}'>"  # noqa: E731
     pin_html = "<input type='password' name='pin' placeholder='PIN' autocomplete='off' required>" if pin_set else "<span class='bad'>PIN not set: saving refused</span>"
     err = f"<div class='flash err'><b>Not saved.</b> {e('; '.join(errors))}</div>" if errors else ""
@@ -381,7 +381,7 @@ def render_page(q: dict, d: dict, results: list[dict], hidden: dict, saved: list
                 + ((gallery(results, q, tok, prec) if q.get("view") != "list" else "".join(pv.inject(render_card(c, tok), prec.get(c["id"], "")) for c in results)) if results else zero) + opt
                 + distance_caveat(q, results + unchecked))
     return (CSS + "<script src='/static/market_radius.js' defer></script><h1 class='pagehead'>DealSniffer Marketplace</h1><div class='mk'>" + _sidebar(saved, csrf, pin_html, tok, q, _save(q, edit_id, tok, pin_html), bids)
-            + f"<section class='mk-main' id='results-top'>{err}{verr}{_form(q, edit_id, tok, pin_html)}{render_status(d)}{body}{finds}{hidden_panel(prefs, tok) if prefs else ''}{prefs_panel(prefs, tok) if prefs else ''}{working_capital()}{gsa_explainer()}</section></div>")
+            + f"<section class='mk-main' id='results-top'>{err}{verr}{_form(q, edit_id, tok, pin_html)}{render_status(d)}{suggest}{body}{finds}{hidden_panel(prefs, tok) if prefs else ''}{prefs_panel(prefs, tok) if prefs else ''}{working_capital()}{gsa_explainer()}</section></div>")
 
 
 def save_form(f: dict) -> dict:
