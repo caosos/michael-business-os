@@ -1,0 +1,10 @@
+From: GovDeals <noreply@govdeals.com>
+To: owner@example.invalid
+Subject: You have been outbid: Utility Trailer 5x10
+Date: Sun, 11 Oct 2026 09:00:00 -0500
+Message-ID: <syn-gd-2@govdeals.com>
+Authentication-Results: mx.example.invalid; dkim=pass header.d=govdeals.com; spf=pass
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body><p>You have been outbid.</p><p><a href="https://www.govdeals.com/asset/1234/5678">Utility Trailer 5x10, Single Axle</a></p><p>Current bid: $450.00 &middot; Closes: 2026-10-14</p></body></html>
