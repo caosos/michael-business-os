@@ -176,3 +176,24 @@ def test_offline_guarantee(monkeypatch):
         raise AssertionError("network used")
     monkeypatch.setattr(socket, "socket", deny)
     assert _ad().fetch(P).ok
+
+
+def test_b31_every_live_simulcast_event_has_parsed_start_and_explicit_unknown_end_reason():
+    ad = _ad()
+    live = [r.payload for r in ad.fetch(P).records if "live" in r.payload["sale_type"].lower()]
+    assert len(live) == 11
+    for p in live:
+        lot = ad.lot(p, NOW)
+        assert lot.get("begins_at") != A.UNKNOWN and lot.fields["begins_at"].basis == "INFERENCE"
+        assert lot.get("closes_at") == A.UNKNOWN
+        assert "no end time" in lot.get("date_unknown_reason") and "begins_at" not in lot.get("date_unknown_reason")
+    assert ad.summary["requests"] == 0
+
+
+def test_b31_unparseable_or_absent_dates_stay_unknown_with_reason():
+    assert W.date_reasons({"sale_type": "Live / Simulcast", "starts_text": "Oct 14 2026 – 11:00am CST"}).keys() == {"closes_at"}
+    r = W.date_reasons({"sale_type": "Live / Simulcast", "starts_text": "Oct 14 Live / Simulcast"})
+    assert "not parseable" in r["begins_at"]
+    assert "no date line" in W.date_reasons({"sale_type": "Live"})["begins_at"]
+    assert "Active" in W.date_reasons({"sale_type": "Online Only", "starts_text": "Active", "ends_text": "Oct 13 2026 – 7:00pm CST"})["begins_at"]
+    assert W.date_reasons({"sale_type": "Online Only", "starts_text": "Oct 12 2026 – 2:00pm CST", "ends_text": "Oct 14 2026 – 2:00pm CST"}) == {}

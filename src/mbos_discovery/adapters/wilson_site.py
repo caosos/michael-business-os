@@ -69,6 +69,24 @@ def parse_when(s: str) -> str | None:
         return None
 
 
+def date_reasons(p: dict) -> dict[str, str]:
+    """Why begins_at / closes_at are UNKNOWN for one event (empty when both are parsed). Live/Simulcast states only a start."""
+    online = "online" in (p.get("sale_type") or "").lower()
+    out: dict[str, str] = {}
+    for key, text in (("begins_at", p.get("starts_text")), ("closes_at", p.get("ends_text"))):
+        if parse_when(text or "") and (key == "begins_at" or online):
+            continue
+        if key == "closes_at" and not online:
+            out[key] = "live/simulcast card states one start time only; no end time is published"
+        elif not text:
+            out[key] = "card has no date line"
+        elif text.strip().lower() == "active":
+            out[key] = "card says 'Active': already open, no start stated"
+        else:
+            out[key] = f"date line not parseable (no date+time+zone): {text[:60]!r}"
+    return out
+
+
 def _site_url(url: str) -> str | None:
     p = urlsplit(url)
     return url if p.scheme == "https" and p.hostname == SITE_HOST and not is_bidwrangler(url) else None
@@ -201,6 +219,7 @@ class WilsonSiteAdapter(SourceAdapter):
             "sale_type": fld(p.get("sale_type")),
             # online: 'Active' means already open (no date); live/simulcast: the single date is the event start
             "begins_at": fld(starts, "INFERENCE"), "closes_at": fld(ends if online else None, "INFERENCE"),
+            "date_unknown_reason": fld("; ".join(f"{k}: {v}" for k, v in date_reasons(p).items()) or None),
             "buyer_premium_pct": fld(None), "sales_tax_pct": fld(None), "pickup": fld(None), "preview": fld(None),
             "address": fld(address), "location": fld(loc or None), "category_tags": fld([pc.replace("-", " ")] if pc else []),
             "highlights": fld([p["details"]] if p.get("details") else []),
