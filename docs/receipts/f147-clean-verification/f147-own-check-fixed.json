@@ -1,0 +1,47 @@
+{
+ "pass": true,
+ "res": {
+  "desktop": {
+   "gsa_removed": true,
+   "wooley_removed": true,
+   "window": [
+    "3-1-QSC-I-27-006-005",
+    "wooley:t-j-bruck-estate-heavy-equipment-machinery-auction-perryville-arkansas"
+   ],
+   "count_note": "2 in My bids (left out of the results below)",
+   "window_text": "My bids (2)\n\nYou told us you bid. We do not place bids or check your account; bid fields show only what the source gave us.\n\nTrailer, Utility\nGSA Auctions \u00b7 closes in 1d 3h (2026-10-12, date only)\ncurrent bid $171 \u00b7 bids 2 \u00b7 as of 2026-10-11T02:48 \u00b7\noriginal listing\n\nStop tracking Set max\nT.J. Bruck Estate Heavy Equipment & Machinery Auction | Perryville, Arkansas\nWooley Auctioneers \u00b7 closes in 1d",
+   "under_other_filters": [
+    "3-1-QSC-I-27-006-005",
+    "wooley:t-j-bruck-estate-heavy-equipment-machinery-auction-perryville-arkansas"
+   ],
+   "after_reload": [
+    "3-1-QSC-I-27-006-005",
+    "wooley:t-j-bruck-estate-heavy-equipment-machinery-auction-perryville-arkansas"
+   ],
+   "wooley_back": true,
+   "gsa_back": true,
+   "window_end": []
+  },
+  "mobile": {
+   "gsa_removed": true,
+   "wooley_removed": true,
+   "window": [
+    "3-1-QSC-I-27-006-005",
+    "wooley:t-j-bruck-estate-heavy-equipment-machinery-auction-perryville-arkansas"
+   ],
+   "count_note": "2 in My bids (left out of the results below)",
+   "window_text": "My bids (2)\n\nYou told us you bid. We do not place bids or check your account; bid fields show only what the source gave us.\n\nTrailer, Utility\nGSA Auctions \u00b7 closes in 1d 3h (2026-10-12, date only)\ncurrent bid $171 \u00b7 bids 2 \u00b7 as of 2026-10-11T02:48 \u00b7\noriginal listing\n\nStop tracking Set max\nT.J. Bruck Estate Heavy Equipment & Machinery Auction | Perryville, Arkansas\nWooley Auctioneers \u00b7 closes in 1d",
+   "under_other_filters": [
+    "3-1-QSC-I-27-006-005",
+    "wooley:t-j-bruck-estate-heavy-equipment-machinery-auction-perryville-arkansas"
+   ],
+   "after_reload": [
+    "3-1-QSC-I-27-006-005",
+    "wooley:t-j-bruck-estate-heavy-equipment-machinery-auction-perryville-arkansas"
+   ],
+   "wooley_back": true,
+   "gsa_back": true,
+   "window_end": []
+  }
+ }
+}
