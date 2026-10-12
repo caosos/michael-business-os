@@ -524,3 +524,14 @@ Proposed by closed lanes and accepted here:
 - **ETA / next_check_at:** A-73 ETA UNKNOWN; next_check_at MISSING. F-165's 5:15 PM timestamp is transport-only and host-unverified.
 - **Blocker / next action:** stale watchdog completion state and missing current Agent 01/A-73 process provenance; Agent 01 must publish host-backed A-73 ACK/WORKING or exact NEED, reconcile the five false NEED states, then permit one serial dispatch.
 - **Canonical evidence:** `docs/receipts/2026-10-12-supervisor-visible-check-1621.md`.
+
+
+## Supervisor reconciliation — Monday, October 12, 2026 — 5:15 PM America/Chicago
+- **ONE current bounded item:** A-73 existing-watchdog completion-state repair; existing Agent 01; P0; NEED — ACK MISSED.
+- **Observed defect:** false NEEDs now cover ten DONE/superseded tasks: A-74, B-36, B-38, F-159, D-37, F-163, D-35, B-39, D-38 and B-41. Do not re-dispatch them.
+- **Loaded boundary:** fb84d0c released Monday, October 12, 2026 — 4:58:46 PM America/Chicago; ARTIFACT verification passed; Claude Chrome desktop showed 16 results within 150 miles. Mobile/detail/source-link/My Bids/Suggestions acceptance remains missing.
+- **Compatible artifacts:** F-165 staged 38/0 focused, 600/2 known environment failures. B-43 adapter 570888a passed 451/0, but the live smoke is blocked by Bright Data HTTP 400 'Customer is not active'; cost $0.
+- **Next eligible preserved work:** F-161 genuine alert-source UI after serial reconciliation; B-44 only after owner Bright Data activation.
+- **ETA / next_check_at:** A-73 UNKNOWN / MISSING. F-161 6:10 PM is transport-only and unverified.
+- **ONE next action:** Agent 01 publishes host-backed A-73 ACK/WORKING or exact NEED, reconciles the ten false NEED states, then permits one serial dispatch.
+- **Canonical evidence:** docs/receipts/2026-10-12-supervisor-visible-check-1715.md.
