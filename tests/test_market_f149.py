@@ -1,4 +1,4 @@
-"""F-149: the generalized auction-house events source (Wooley + Wilson) on /market, offline, from lane 02's archived pages (a05aae8). No network."""
+"""F-149: the generalized auction-house events source (Wooley + Wilson + Blackmon) on /market, offline, from lane 02's archived pages (0a71a9d). No network."""
 from __future__ import annotations
 
 import json
@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
+from mbos_discovery.adapters.blackmon_site import BlackmonSiteAdapter
 from mbos_discovery.adapters.wilson_site import WilsonSiteAdapter
 from mbos_discovery.adapters.wooley_site import WooleySiteAdapter
 
@@ -17,6 +18,7 @@ from tools import refresh_auction_events as rae, refresh_wooley_cache as rw
 FIX = Path(__file__).parent / "fixtures"
 AS_OF = datetime(2026, 10, 11, 23, 0, tzinfo=timezone.utc)
 NOW = AS_OF + timedelta(hours=1)
+BM_AS_OF = datetime(2026, 10, 12, 4, 0, tzinfo=timezone.utc)   # lane 02 B-29 test clock: the archived event date is still upcoming
 
 
 @pytest.fixture(autouse=True)
@@ -42,10 +44,11 @@ def write(path: Path, ad) -> Path:
 def caches(tmp_path, monkeypatch):
     monkeypatch.setenv("MBOS_WOOLEY_CACHE", str(write(tmp_path / "w.json", WooleySiteAdapter(FIX / "wooley", clock=lambda: AS_OF))))
     monkeypatch.setenv("MBOS_WILSON_CACHE", str(write(tmp_path / "i.json", WilsonSiteAdapter(FIX / "wilson", clock=lambda: AS_OF))))
+    monkeypatch.setenv("MBOS_BLACKMON_CACHE", str(write(tmp_path / "b.json", BlackmonSiteAdapter(FIX / "blackmon", clock=lambda: BM_AS_OF))))
 
 
 def test_registry_and_local_time():
-    assert set(msrc.AUCTION_SITES) == {"wooley", "wilson"}
+    assert set(msrc.AUCTION_SITES) == {"wooley", "wilson", "blackmon"}
     assert msrc.local_when("2026-10-13T18:00:00-05:00") == "Tue Oct 13, 6:00 PM CDT"
     assert msrc.local_when("2026-10-13T23:00:00Z") == "Tue Oct 13, 6:00 PM CDT"
     assert msrc.local_when("2026-12-01T12:00:00Z") == "Tue Dec 1, 6:00 AM CST"
@@ -111,3 +114,39 @@ def test_no_platform_request_anywhere():
     for f in ("tools/refresh_auction_events.py", "operator_ui/market_sources.py", "operator_ui/market_source_view.py"):
         src = (Path(__file__).parent.parent / f).read_text()
         assert not re.search(r"(urlopen|requests\.|http\.client|UrllibTransport)\([^)]*(hibid|bidwrangler|proxibid)", src)
+
+
+def test_blackmon_cards_proxibid_link_for_human_only(caches, cache):
+    d = ms.load_source("blackmon", NOW, ms._origin("Conway AR"))
+    assert d["status"] == "connected" and d["fixture"] is False and d["cards"]
+    for c in d["cards"]:
+        assert c["event"] and c["source"] == "Blackmon Auctions" and c["id"].startswith("blackmon:")
+        assert c["lot_number"] is None and c["current_bid"] is None and c["bid_count"] is None and c["price"] is None
+        assert c["platform"] == "Proxibid" and c["url"].startswith("https://www.blackmonauctions.com/")
+        assert "proxibid.com" in (c["platform_url"] or "")
+    h = msv._platform(d["cards"][0])
+    assert "View and bid on Proxibid" in h and "nofollow" in h
+
+
+def test_page_includes_blackmon_in_all_houses_and_all_sources(ui, caches, cache):
+    h = get(ui, go=1, source="auctions", broad=1, view="list")
+    assert "Blackmon Auctions</option>" in h and "Blackmon Auctions: connected (cached file)" in h and "View and bid on Proxibid" in h
+    a = get(ui, go=1, source="all", broad=1)
+    assert "Blackmon Auctions: connected" in a
+    assert "Census 2023 ZIP and place gazetteer" in a and "limited coverage" not in a
+
+
+def test_blackmon_refresh_refuses_without_live_and_is_hourly_capped(tmp_path):
+    out = tmp_path / "b.json"
+    assert rae.main(["--only", "blackmon", "--out", str(out)]) == 2 and not out.exists()
+    site = msrc.AUCTION_SITES["blackmon"]
+    assert site.min_interval_s == 3600.0 and site.env == "MBOS_BLACKMON_CACHE" and site.platform_field == "proxibid_url"
+    assert rae.refresh(site, out, BlackmonSiteAdapter(FIX / "blackmon", clock=lambda: BM_AS_OF)) == 0
+    doc = json.loads(out.read_text())
+    assert doc["requests"] == 0 and doc["records"]
+
+    class Boom:
+        def __init__(self, *a, **k):
+            raise AssertionError("adapter built")
+    capped = msrc.AuctionSite("blackmon", "Blackmon Auctions", "X", "b.json", Boom, "proxibid_url", "Proxibid", 3600.0)
+    assert rae.refresh(capped, out, None, now=BM_AS_OF + timedelta(minutes=10)) == 0

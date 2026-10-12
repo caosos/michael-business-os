@@ -1,0 +1,1 @@
+Renamed from the archive's event-bank-repo.html to the name the adapter reads (event-<slug>.html); content unchanged.

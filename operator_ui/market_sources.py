@@ -13,6 +13,7 @@ from zoneinfo import ZoneInfo
 from pathlib import Path
 
 from mbos_discovery.adapter import NormalizationError, SearchProfile
+from mbos_discovery.adapters.blackmon_site import BlackmonSiteAdapter
 from mbos_discovery.adapters.wilson_site import WilsonSiteAdapter
 from mbos_discovery.adapters.wooley_site import WooleySiteAdapter
 from mbos_discovery.auctions import UNKNOWN
@@ -43,7 +44,8 @@ class AuctionSite:
 AUCTION_SITES = {s.key: s for s in (
     AuctionSite("wooley", "Wooley Auctioneers", "MBOS_WOOLEY_CACHE", "wooley-events.json", WooleySiteAdapter, "hibid_catalog_url", "HiBid"),
     AuctionSite("wilson", "Wilson Auctioneers", "MBOS_WILSON_CACHE", "wilson-events.json", WilsonSiteAdapter, "bidwrangler_url", "BidWrangler", 3600.0),
-)}                                     # later: blackmon (Proxibid)
+    AuctionSite("blackmon", "Blackmon Auctions", "MBOS_BLACKMON_CACHE", "blackmon-events.json", BlackmonSiteAdapter, "proxibid_url", "Proxibid", 3600.0),
+)}
 ALL_HOUSES = "auctions"
 ENV_WOOLEY = AUCTION_SITES["wooley"].env
 WOOLEY_NAME = AUCTION_SITES["wooley"].name

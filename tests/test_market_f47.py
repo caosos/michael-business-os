@@ -187,7 +187,7 @@ def test_price_radius_sort_filters(cache):
 
 def test_distance_caveat_is_plain_and_names_located_and_unlocated_places(ui):  # F-50
     h = get(ui, go=1, keywords="trailer", base="Conway AR")
-    assert "id='distance-caveat'" in h and "approximate town centroids" in h and "small local gazetteer with limited coverage" in h
+    assert "id='distance-caveat'" in h and "approximate town centroids" in h and "Census 2023 ZIP and place gazetteer" in h
     assert "Your base &#x27;Conway AR&#x27; is located." in h or "Your base 'Conway AR' is located." in h
     assert "Lot towns located:" in h and "Marianna, AR" in h and "Lot towns NOT located" in h
     h = get(ui, go=1, keywords="trailer", base="Atlantis", view="list")

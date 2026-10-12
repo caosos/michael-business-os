@@ -147,8 +147,8 @@ def distance_caveat(q: dict, results: list[dict]) -> str:
     got, miss = towns(lambda c: c["distance"] is not None), towns(lambda c: c["distance"] is None)
     origin = f"Your base '{e(base)}' is located." if ms._origin(base) else f"Your base '{e(base)}' is NOT located, so no distance can be shown."
     lots = f"Lot towns located: {e(', '.join(got)) or 'none'}. Lot towns NOT located (distance UNKNOWN, not 'far away'): {e(', '.join(miss)) or 'none'}."
-    return ("<details class='card small' id='distance-caveat'><summary><b>About distances</b> (approximate; unknown is not far)</summary>Place coordinates are approximate town centroids from a small local "
-            "gazetteer with limited coverage (mostly Arkansas and a few nearby cities). Distances are rough straight-line miles, good to a few miles at best. "
+    return ("<details class='card small' id='distance-caveat'><summary><b>About distances</b> (approximate; unknown is not far)</summary>Place coordinates are approximate town centroids from the "
+            "Census 2023 ZIP and place gazetteer (Arkansas and neighbouring states). Distances are rough straight-line miles, good to a few miles at best. "
             "A town missing from the gazetteer shows 'distance UNKNOWN' because we cannot place it, not because it is far; out-of-state lots are often in that group. "
             f"{origin} {lots} No online lookup is made.</details>")
 
