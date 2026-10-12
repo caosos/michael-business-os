@@ -40,8 +40,10 @@ BID_ORIGINS = {o.source: o for o in [
 _RULES = [
     ("outbid", re.compile(r"\bout-?bid\b|no longer the (?:high|winning) bidder", re.I)),
     ("lost", re.compile(r"did not win|not the winning|lost this auction|you lost|were not successful", re.I)),
-    ("won", re.compile(r"\byou won\b|you have won|congratulations|you are the winning bidder|won this auction", re.I)),
-    ("winning", re.compile(r"currently (?:the )?(?:high|winning) bidder|you are the high bidder|you are winning", re.I)),
+    ("won", re.compile(r"\byou won\b|you have won|congratulations[,!.]?\s+you (?:have )?won|won this auction", re.I)),
+    # "you are the winning bidder" is only a win once the platform says the auction is over.
+    ("won", re.compile(r"(?=[\s\S]*you are the winning bidder)(?=[\s\S]*(?:auction (?:has )?(?:closed|ended)|has closed))", re.I)),
+    ("winning", re.compile(r"currently (?:the )?(?:high|winning) bidder|you are the (?:high|winning) bidder|you are winning", re.I)),
     ("closed", re.compile(r"auction (?:has )?(?:closed|ended)|has closed|bidding (?:has )?closed", re.I)),
     ("bid_placed", re.compile(r"bid (?:has been |was )?(?:placed|received|confirmed|accepted)|bid confirmation", re.I)),
 ]
@@ -66,8 +68,8 @@ def _closes_at(text: str) -> str | None:
     if hm and tz:                                   # a stated instant with an explicit offset
         tz = "+00:00" if tz.upper() == "Z" else (tz if ":" in tz else tz[:3] + ":" + tz[3:])
         dt = datetime.fromisoformat(f"{day}T{hm}:00{tz}")
-    else:                                           # date only: end-of-day UTC upper bound (INFERENCE, as B-06)
-        dt = datetime.fromisoformat(f"{day}T23:59:59+00:00")
+    else:                                           # date only: the platform's local zone is not stated -> UNKNOWN
+        return None
     return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 

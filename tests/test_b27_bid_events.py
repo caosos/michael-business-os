@@ -29,7 +29,7 @@ def test_every_event_type_and_source_parsed():
     assert a["amount"] == 425.0 and a["closes_at"] == "2026-10-14T20:00:00Z" and a["title"].startswith("Utility Trailer")
     assert a["provenance"] == {"kind": "email", "message_id": "<syn-gd-1@govdeals.com>"}
     assert (a["visibility"], a["origin"], a["observed_at"]) == ("owner_local", "auto_detected", "2026-10-11T20:00:00Z")
-    assert by[("govdeals", "1234/5678", "outbid")]["closes_at"] == "2026-10-14T23:59:59Z"
+    assert "closes_at" not in by[("govdeals", "1234/5678", "outbid")]   # date only: zone unstated -> UNKNOWN
     assert by[("govdeals", "2222/5678", "won")]["amount"] == 1310.5
     assert by[("publicsurplus", "4455667", "winning")]["amount"] == 210.0
     assert "amount" not in by[("publicsurplus", "4455667", "lost")]
@@ -85,3 +85,13 @@ def test_off_platform_links_and_foreign_senders_ignored(tmp_path):
                                      b"Message-ID: <x@evil.example>\nSubject: You won\n\n<a href=\"https://evil.example/lot/1\">x</a>")
     recs, rej = read_bid_events(EmlDirReader(tmp_path), clock=lambda: NOW)
     assert recs == [] and len(rej) == 1
+
+
+def test_classifier_negatives_and_open_vs_closed_winning():
+    from mbos_discovery.bid_events import classify_event, _closes_at
+    assert classify_event("Congratulations to this week's featured sellers", "Congratulations! See new lots.") is None
+    assert classify_event("Auction update", "You are the winning bidder. Bidding is open until Friday.") == "winning"
+    assert classify_event("Auction update", "The auction has closed. You are the winning bidder.") == "won"
+    assert classify_event("Congratulations", "Congratulations, you won lot 5.") == "won"
+    assert _closes_at("Ends: 2026-10-14") is None
+    assert _closes_at("Ends: 2026-10-14 15:00 -05:00") == "2026-10-14T20:00:00Z"
