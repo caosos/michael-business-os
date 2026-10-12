@@ -413,3 +413,11 @@ This section is part of the existing living checklist and is the authoritative r
 - **ONE next action:** existing Agent 01 ACKs A-73 and begins the bounded repair, or publishes command-specific NEED/BLOCKED.
 - **Michael:** NOTHING now; a later explicit approval of the exact release command/target is required before loading.
 - **Canonical evidence:** `docs/receipts/2026-10-12-supervisor-visible-check-1332.md`.
+
+
+## Supervisor reconciliation — Monday, October 12, 2026 — 1:53 PM America/Chicago
+- [ ] **A-73 CURRENT / ACK MISSED:** existing Agent 01 owns the existing-watchdog wake-gap repair. The 1:37 PM ACK deadline and 300-second watchdog window elapsed without ACK/WORKING or exact NEED/BLOCKED. ETA UNKNOWN; next_check_at MISSING. **APPEARS STALE — HOST STATE UNVERIFIED.**
+- [x] **B-12 local mailbox prerequisites partially satisfied:** receipt [6130595898](https://github.com/caosos/michael-business-os/pull/1#issuecomment-6130595898) reports mode-600 app password, read-only IMAP login, `DealSniffer` and `DealSniffer/Alerts` labels, unchanged Seen state, and unopened general inbox.
+- [ ] **B-12 genuine-alert acceptance:** alerts folder is empty. Owner must create/confirm the Craigslist saved-search alert and Gmail filter. Then Agent 02 runs a read-only smoke and Agent 01 proves a real card/original link in loaded Claude Chrome desktop/mobile. ETA within 15 minutes of first qualifying alert; next check Tuesday, October 13, 2026 — 9:00 AM America/Chicago.
+- [ ] **F-157/F-158 LIVE_VERIFIED:** unchanged; tested `112fce4`, loaded `a0ee240`, F-158 NOT LOADED, browser proof MISSING, exact-target release approval not granted.
+- **Canonical evidence:** `docs/receipts/2026-10-12-supervisor-visible-check-1353.md`.
