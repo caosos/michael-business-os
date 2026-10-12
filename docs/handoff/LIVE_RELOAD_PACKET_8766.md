@@ -1,5 +1,12 @@
 # Live :8766 reload and rollback packet (PREPARED, NOT APPROVED, NOT RUN)
 
+## NEXT RELEASE (2026-10-12T07:56:45Z): CURRENT. Live is `bbc80ec`; this adds F-154 closing-soon badges and F-155 ranked DealSniffer Suggestions with the owner resale-price input.
+- **Artifact:** lane 06 `bb512d9a743aa53635926d006ba113dce7bcd4ed` with lane 02 `a186ca6e29f785e7bbb705ce6eb44482558f26da` (unchanged).
+- **Verified:** lane suite 550/1 (known f39); real-cache Suggestions behaviour checked; staging under the coordinator python verify-only OK; release script dry run OK.
+- **One command (owner-run):** `cd ~/business-os-worktrees/agent-01-coordinator && tools/release_marketplace.sh bbc80ec851b75aec52af1f8b0838dd56ccc714ef a186ca6e29f785e7bbb705ce6eb44482558f26da` is SUPERSEDED by `tools/release_marketplace.sh bb512d9a743aa53635926d006ba113dce7bcd4ed a186ca6e29f785e7bbb705ce6eb44482558f26da`.
+
+---
+
 ## COMBINED MARKETPLACE RELEASE, REVISED AGAIN (2026-10-12T05:37:58Z): CURRENT. Supersedes the 85d293a section below.
 - **Artifact:** lane 06 `bbc80ec851b75aec52af1f8b0838dd56ccc714ef` (85d293a + F-152 auto-detected bids in My bids (live: 'not connected (no mailbox)' until B-12) + F-153 ended rows/display names) with lane 02 `a186ca6e29f785e7bbb705ce6eb44482558f26da`.
 - **Verified:** lane 06 suite 533/1 (known f39); staging under the coordinator python: verify-only OK; release script dry run OK; coordinator suite 619/0 with a186ca6 (lane 02 unchanged since).
