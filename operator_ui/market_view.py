@@ -14,6 +14,7 @@ from .deal_ui import classify_url
 from .live_demo import link_html
 from . import precedent_view as pv
 from . import market_source_view as msv
+from . import market_browse as mb
 
 CATEGORY = "marketplace"
 SLIDER_MAX = 500          # F-144: normal slider scale (miles); control usability, not a travel limit
@@ -167,7 +168,7 @@ def render_status(d: dict) -> str:
 def chip_url(q: dict, drop: str | None = None) -> str:
     """F-136: a GET link that re-runs the current filters without one state (the chip's remove button). No script, no write."""
     j = lambda k: ", ".join(q[k]) if isinstance(q.get(k), list) else q.get(k)  # noqa: E731
-    pairs = [(k, j(k)) for k in ("keywords", "base", "radius", "min_price", "max_price", "any", "condition", "required", "preferred", "exclude", "source", "kind", "closing_by", "sort", "view")]
+    pairs = [(k, j(k)) for k in ("keywords", "base", "radius", "min_price", "max_price", "any", "condition", "required", "preferred", "exclude", "source", "kind", "closing_by", "sort", "view", "ltype", "quick", "cat_find")]
     pairs += [("broad", "1")] * bool(q.get("broad")) + [("cat", c) for c in (['all'] if q.get('cat_all') else [] if q.get('cat_default') else q.get('cats') or [])] + [(f"row{i}", r) for i, r in enumerate(q.get("rows") or [], 1) if i <= 4]
     pairs += [("loc_mode", q.get("loc_mode", "distance"))] + [("also_radius", "1")] * bool(q.get("also_radius")) + [("state", s) for s in q.get("states") or [] if s != drop]
     return "/market?go=1&amp;" + "&amp;".join(f"{k}={quote(str(v))}" for k, v in pairs if v not in (None, ""))
@@ -181,13 +182,14 @@ def scope_text(q: dict) -> str:
     return f"By Distance: " + (f"within {q['radius']:g} miles (known distances only)" if q["radius"] is not None else "no radius") + "; states are NOT applied"
 
 
-def location_panel(q: dict) -> str:
+def location_panel(q: dict, counts: dict | None = None) -> str:
     """F-136: compact Location panel: By State / By Distance modes, searchable state list, multi-select checkboxes, removable chips (all inside the search form, no script)."""
     v = lambda k: e(q.get(k) if q.get(k) is not None else "")  # noqa: E731
     by_state, sel, find = q.get("loc_mode") == "state", q.get("states") or [], (q.get("state_find") or "").strip().lower()
     mode = lambda val, lbl: f"<label><input form='mkform' type='radio' name='loc_mode' value='{val}'{' checked' if (val == 'state') == by_state else ''}> {lbl}</label> "  # noqa: E731
     shown = [(c, n) for c, n in ms.US_STATES.items() if c in sel or not find or find in n.lower() or find == c.lower()]
-    boxes = "".join(f"<label class='st'><input form='mkform' type='checkbox' name='state' value='{c}'{' checked' if c in sel else ''}> {c} {e(n)}</label>" for c, n in shown) \
+    cnt = lambda c: "" if counts is None else f" <span class='mk-n'>({counts.get(c, 0)})</span>"  # noqa: E731
+    boxes = "".join(f"<label class='st{' mut' if counts is not None and not counts.get(c) and c not in sel else ''}' data-count='{'' if counts is None else counts.get(c, 0)}'><input form='mkform' type='checkbox' name='state' value='{c}'{' checked' if c in sel else ''}> {c} {e(n)}{cnt(c)}</label>" for c, n in shown) \
         or "<span class='small mut'>No state matches that search.</span>"
     hide = "".join(f"<input form='mkform' type='hidden' name='state' value='{c}'>" for c in sel if c not in {c2 for c2, _ in shown})
     chip = "".join(f"<span class='chip'>{c} <a href='{chip_url(q, c)}' aria-label='Remove {c}' title='Remove {c}'>×</a></span>" for c in sel) or "<span class='small mut'>No states selected</span>"
@@ -195,7 +197,7 @@ def location_panel(q: dict) -> str:
             f"<div role='radiogroup' aria-label='Location mode'>{mode('distance', 'By Distance')}{mode('state', 'By State')}</div>"
             f"<label>ZIP or city <input form='mkform' name='base' size='12' value='{v('base')}'></label>"
             f"{_radius(q)}"
-            f"<details id='state-picker'{' open' if find else ''}><summary>States <span class='small'>({len(sel)} selected)</span></summary>"
+            f"<details id='state-picker' open><summary>States <span class='small'>({len(sel)} selected)</span></summary>"
             f"<label>Find a state <input form='mkform' name='state_find' size='10' value='{e(q.get('state_find') or '')}'></label>"
             f"<div class='st-list' style='max-height:130px;overflow:auto'>{boxes}</div>{hide}"
             f"<label><input form='mkform' type='checkbox' name='also_radius' value='1'{' checked' if q.get('also_radius') else ''}> In By State mode, also keep the radius</label></details>"
@@ -204,15 +206,12 @@ def location_panel(q: dict) -> str:
 
 
 def _radius(q: dict) -> str:
-    """F-143: a radius slider (0 to 500 miles, expanding to a larger value; the field accepts up to MAX_RADIUS) coupled by /static/market_radius.js to the numeric `radius` field, which alone is submitted.
-    The slider is hidden until the script runs, so without scripts only the numeric field shows."""
+    """F-159: a radius dropdown (10 / 25 / 50 / 100 / 250 miles / Any). A saved or typed value that is not a preset is kept as an extra option, never clamped."""
     r = q.get("radius")
-    hi = max(SLIDER_MAX, math.ceil(r)) if r is not None else SLIDER_MAX      # F-144: normal scale 0-500; a larger saved/typed value expands the range, never clamps
-    return ("<div id='radius-ctl'><label>Radius (miles) <input form='mkform' type='number' id='radius' name='radius' min='0' max='%d' step='any' inputmode='decimal' value='%s'></label> "
-            "<span class='small'>Selected: <output id='radius-out' for='radius'>%s</output></span>"
-            "<div id='radius-slide' hidden><input type='range' id='radius_r' min='0' max='%d' step='1' value='%s' aria-label='Radius in miles' data-for='radius'>"
-            "<div class='small mut' style='display:flex;justify-content:space-between'><span id='radius-min'>0 miles</span><span id='radius-max'>%s miles</span></div></div></div>"
-            ) % (landing_fix.MAX_RADIUS, e("" if r is None else f"{r:g}"), "no limit" if r is None else f"{r:g} miles", hi, "%g" % (hi if r is None else r), f"{hi:,}")
+    cur = "" if r is None else f"{r:g}"
+    opts = [(x, "Any" if x == "" else f"{x} miles") for x in mb.RADII] + ([(cur, f"{cur} miles")] if cur not in mb.RADII else [])
+    return ("<div id='radius-ctl'><label>Radius <select form='mkform' id='radius' name='radius'>"
+            + "".join(f"<option value='{e(v)}'{' selected' if v == cur else ''}>{e(lbl)}</option>" for v, lbl in opts) + "</select></label></div>")
 
 
 def _sel(name: str, opts, cur) -> str:
@@ -220,40 +219,29 @@ def _sel(name: str, opts, cur) -> str:
 
 
 def _more_filters(q: dict) -> str:
-    """F-142: condition, keywords and advanced filters live in the filter card (owned by the real GET form) so Search Now can be last."""
+    """F-142/F-159: the advanced filters (the search box, source, type and condition now have their own controls)."""
     v = lambda k: e(", ".join(q[k]) if isinstance(q.get(k), list) else q.get(k) if q.get(k) is not None else "")  # noqa: E731
-    sel = _sel
-    return (f"<label>Category / keywords, any of <input form='mkform' name='any' size='24' value='{v('any')}'></label>"
+    return (f"<details id='more-filters'><summary><b>More filters</b></summary>"
+            f"<label>Category / keywords, any of <input form='mkform' name='any' size='20' value='{v('any')}'></label>"
             f"<label><input type='checkbox' form='mkform' name='broad' value='1'{' checked' if q.get('broad') else ''}> Broad (all categories)</label>"
-            f"<label>Keywords, all of <input form='mkform' name='keywords' size='22' value='{v('keywords')}'></label>"
-            f"<details id='more-filters'><summary>More filters</summary>"
-            f"<label>Condition (seller text) <input form='mkform' name='condition' size='10' value='{v('condition')}'></label>"
             f"<label>Must include <input form='mkform' name='required' size='14' value='{v('required')}'></label>"
             f"<label>Nice to include <input form='mkform' name='preferred' size='14' value='{v('preferred')}'></label>"
             f"<label>Exclude <input form='mkform' name='exclude' size='14' value='{v('exclude')}'></label>"
-            f"<label>Source {sel('source', msv.source_options(), q.get('source', 'gsa'))}</label>"
-            f"<label>Type {sel('kind', [('any', 'Any'), ('auction', 'Auction'), ('fixed', 'Fixed price')], q.get('kind', 'any'))}</label>"
             f"<label>Closing by <input type='date' form='mkform' name='closing_by' value='{v('closing_by')}'></label>"
-            f"<p class='small'><b>Gallery rows</b> (top to bottom; leave blank for fewer than 4)</p>"
-            + "".join(f"<label>Row {i} {sel(f'row{i}', [('', '(none)')] + [(k, ms.CAT_LABELS.get(k, k)) for k in ms.ROW_CATS], (q.get('rows') or ms.DEFAULT_ROWS)[i - 1])}</label>" for i in range(1, 5))
-            + "</details>")
+            "</details>")
 
 
-def _side_filters(q: dict) -> str:
-    """F-52 (B): origin/ZIP, radius, price and category checkboxes live in the narrow left sidebar; they belong to the search form (form='mkform')."""
-    v = lambda k: e(q.get(k) if q.get(k) is not None else "")  # noqa: E731
-    on = set(q.get("cats") or [])
-    box = lambda k, lab, ck: f"<label class='mk-cat'><input type='checkbox' form='mkform' name='cat' value='{e(k)}'{' checked' if ck else ''}> {e(lab)}</label>"  # noqa: E731
-    cats = f"<div id='mkcats'>{box('all', 'All categories', q.get('cat_all'))}" + "".join(box(k, ms.CAT_LABELS[k], k in on) for k in ms.CONTROL_CATS) + "</div>"
-    return ("<div class='card' id='mkfilters'><b>Filters</b>"
-            f"{location_panel(q)}"
-            f"{_slider(q, 'mkform')}"
-            f"<b>Categories</b>{cats}<p class='small mut'>Only ticked categories are shown (All = everything, including land). Land/Real Estate starts unticked; a lot that also matches a ticked category stays. None ticked = the defaults.</p>"
-            f"{_more_filters(q)}"
-            "<button class='mk-go' type='submit' form='mkform'>Search Now</button></div>")
+def _side_filters(q: dict, fc: dict, now) -> str:
+    """F-159: the GSA-style filter sections (Category, Source, Location, Price, Listing type, Condition); every input belongs to the top-bar search form (form='mkform')."""
+    return ("<div class='card' id='mkfilters'><label class='mk-fbtn mk-fm' for='mkdrawer'>Close filters</label><b>Filters</b>"
+            f"{mb.category_section(q, fc)}{mb.source_section(q, fc, now)}"
+            f"<details open class='mk-sect' id='sec-location'><summary><b>Location</b></summary>{location_panel(q, fc['states'])}</details>"
+            f"<details open class='mk-sect' id='sec-price'><summary><b>Price range</b></summary>{_slider(q, 'mkform')}</details>"
+            f"{mb.ltype_section(q, fc)}{mb.condition_section(q, fc)}{_more_filters(q)}"
+            "<button class='mk-apply' type='submit' form='mkform'>Apply filters</button></div>")
 
 
-def _sidebar(saved: list[dict], csrf: str, pin_html: str, tok, q: dict, save: str = "", bids: str = "") -> str:
+def _sidebar(saved: list[dict], csrf: str, pin_html: str, tok, q: dict, save: str = "", bids: str = "", fc: dict | None = None, now=None, folded: bool = False) -> str:
     rows = []
     for r in saved:
         d = r["doc"]
@@ -264,7 +252,7 @@ def _sidebar(saved: list[dict], csrf: str, pin_html: str, tok, q: dict, save: st
         rows.append(f"<li><b>{e(d['title'])}</b> <span class='badge'>{'ON' if on else e(d['status'])}</span><br>"
                     f"<a style='display:inline' href='/market?run={cid}'>Run</a> · <a style='display:inline' href='/market?edit={cid}'>Edit</a> {toggle}</li>")
     saved_html = f"<ul style='padding-left:16px;margin:4px 0'>{''.join(rows)}</ul>" if rows else "<p class='small mut'>No saved searches yet.</p>"
-    return ("<aside class='mk-side'>" + bids + _side_filters(q) + "<div class='card'><nav aria-label='Marketplace'>"
+    return (f"<aside class='mk-side{' folded' if folded else ''}' id='filters-side'>" + bids + (_side_filters(q, fc, now) if fc else "") + "<div class='card'><nav aria-label='Marketplace'>"
             "<p class='small mut' style='margin:0 0 4px'>More</p><a class='mk-sec2' href='/market?new=1'>New Search</a>"
             f"{save}<details><summary>My Campaigns / Saved Searches ({len(rows)})</summary>{saved_html}</details>"
             "<a class='mk-sec2' href='/resale'>Saved Deals</a><a class='mk-sec2' href='/market?go=1&amp;sort=closing&amp;closing_by=soon'>Auctions Closing Soon</a>"
@@ -347,7 +335,7 @@ def gsa_explainer() -> str:
 
 
 def render_page(q: dict, d: dict, results: list[dict], hidden: dict, saved: list[dict], csrf: str, pin_set: bool,
-                edit_id: str | None = None, ran: bool = True, errors: list[str] | None = None, unchecked: list[dict] | None = None, prefs: dict | None = None, finds: str = "", bids: str = "", suggest: str = "") -> str:
+                edit_id: str | None = None, ran: bool = True, errors: list[str] | None = None, unchecked: list[dict] | None = None, prefs: dict | None = None, finds: str = "", bids: str = "", suggest: str = "", browse: dict | None = None) -> str:
     tok = lambda: f"<input type='hidden' name='csrf' value='{e(csrf)}'><input type='hidden' name='nonce' value='{secrets.token_hex(8)}'>"  # noqa: E731
     pin_html = "<input type='password' name='pin' placeholder='PIN' autocomplete='off' required>" if pin_set else "<span class='bad'>PIN not set: saving refused</span>"
     err = f"<div class='flash err'><b>Not saved.</b> {e('; '.join(errors))}</div>" if errors else ""
@@ -367,9 +355,12 @@ def render_page(q: dict, d: dict, results: list[dict], hidden: dict, saved: list
         scope = (f" within {q['radius']:g} miles" if q["radius"] is not None else "") if q.get("loc_mode") != "state" else f" in {e(', '.join(q['states']))}" + (f" and within {q['radius']:g} miles" if q.get("also_radius") and q["radius"] is not None else "")
         zero = ("<p class='mut' id='zero-results'><b>0 results</b> match every filter" + scope + ". Nothing is padded in"
                 + (f"; {len(unchecked)} lot(s) could not be checked and are listed below, not counted" if unchecked else "") + ". Loosen a filter or widen the radius.</p>")
-        prec, prec_note = pv.for_cards(results)          # F-139: read-only, checked results only
-        render = (lambda c: gallery_card(c, tok)) if q.get("view") != "list" else (lambda c: render_card(c, tok))
-        wrap = (lambda cs: f"<div class='mk-gal'>{''.join(map(render, cs))}</div>") if q.get("view") != "list" else (lambda cs: "".join(map(render, cs)))
+        browse = browse or {}
+        now = browse.get("now") or __import__("datetime").datetime.now(__import__("datetime").timezone.utc)
+        page_rows, page, pages = mb.paginate(results, q.get("page", 1))
+        prec, prec_note = pv.for_cards(page_rows)          # F-139: read-only, checked results only
+        render = (lambda c: mb.card(c, tok, now, pref_buttons)) if q.get("view") != "list" else (lambda c: render_card(c, tok))
+        wrap = (lambda cs: f"<div class='mk-grid'>{''.join(map(render, cs))}</div>") if q.get("view") != "list" else (lambda cs: "".join(map(render, cs)))
         opt = ((f"<details class='mk-sec' id='unchecked-section'><summary><b>Optional: {len(unchecked)} lot(s) that could not be checked (not counted as local or in range). Click to open.</b></summary>"
                 "<p class='small mut'>Their location or state was not found or they have no bid yet, so the location scope or price range cannot be tested. They are shown only so nothing is hidden; "
                 "verify on the original listing.</p>" + wrap(unchecked) + "</details>") if unchecked else "")
@@ -380,10 +371,16 @@ def render_page(q: dict, d: dict, results: list[dict], hidden: dict, saved: list
         body = (chips(q) + f"<h2>{len(results)} result{'s' if len(results) != 1 else ''}{scope}</h2>" + f"<p class='small mut' style='margin:2px 0'>{e(msv.scope_line(d))}"
                 + (f" Hidden: {e(hid)}." if hid else "") + "</p>"
                 + (f"<p class='small mut' id='precedent-note'>{e(prec_note)}</p>" if prec_note and results else "")
-                + ((gallery(results, q, tok, prec) if q.get("view") != "list" else "".join(pv.inject(render_card(c, tok), prec.get(c["id"], "")) for c in results)) if results else zero) + opt
+                + ((f"<div class='mk-grid' id='result-grid'>{''.join(pv.inject(render(c), prec.get(c['id'], '')) for c in page_rows)}</div>" if q.get("view") != "list" else "".join(pv.inject(render_card(c, tok), prec.get(c["id"], "")) for c in page_rows)) if results else zero)
+                + mb.pager(q, page, pages, len(results)) + opt
                 + distance_caveat(q, results + unchecked))
-    return (CSS + "<script src='/static/market_radius.js' defer></script><h1 class='pagehead'>DealSniffer Marketplace</h1><div class='mk'>" + _sidebar(saved, csrf, pin_html, tok, q, _save(q, edit_id, tok, pin_html), bids)
-            + f"<section class='mk-main' id='results-top'>{err}{verr}{_form(q, edit_id, tok, pin_html)}{render_status(d)}{suggest}{body}{finds}{hidden_panel(prefs, tok) if prefs else ''}{prefs_panel(prefs, tok) if prefs else ''}{working_capital()}{gsa_explainer()}</section></div>")
+    fc = browse.get("fc") if browse else None
+    folded = mb.collapsed()
+    back = browse.get("back", "/market") if browse else "/market"
+    bar = mb.top_bar(q, len(results) if ran and not bad and d["status"] in ("connected", "fixture") else 0, q.get("sort", "closing"), q.get("view", "gallery"), tok, mb.active_filters(q), back, (fc or {}).get("quick"), folded) if fc else _form(q, edit_id, tok, pin_html)
+    return (CSS + mb.CSS + "<script src='/static/market_radius.js' defer></script><h1 class='pagehead'>DealSniffer Marketplace</h1><input type='checkbox' id='mkdrawer' class='mk-drawer-t' aria-label='Show filters'><div class='mk'>"
+            + _sidebar(saved, csrf, pin_html, tok, q, _save(q, edit_id, tok, pin_html), bids, fc, browse.get("now") if browse else None, folded)
+            + f"<section class='mk-main' id='results-top'>{bar}{err}{verr}{render_status(d)}{suggest}{body}{finds}{hidden_panel(prefs, tok) if prefs else ''}{prefs_panel(prefs, tok) if prefs else ''}{working_capital()}{gsa_explainer()}</section></div>")
 
 
 def save_form(f: dict) -> dict:

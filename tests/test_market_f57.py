@@ -17,9 +17,9 @@ def prefs_file(tmp_path, monkeypatch):
 def test_market_uses_width_and_compact_chrome(ui):
     h = get(ui, go=1, keywords="trailer")
     assert "main{max-width:1900px}" in h and "header b{display:none}" in h
-    assert re.search(r"\.mk-gal\{display:grid;grid-template-columns:repeat\(auto-fill,minmax\(min\(230px,100%\),1fr\)\)", h)
+    assert ".mk-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))" in h and "@media(max-width:600px){.mk-grid{grid-template-columns:minmax(0,1fr)}}" in h
     assert ".mk-gal>p{grid-column:1/-1" in h
-    assert "mk-g' data-lot" in h and "behind GSA" in h and "<img" not in h.split("mk-g' data-lot", 1)[1].split("</div>", 1)[0]  # photo tiles stay honest
+    assert "mk-g mk-card' data-lot" in h and "behind GSA" in h and "<img" not in h.split("mk-g mk-card' data-lot", 1)[1].split("</div>", 1)[0]  # photo tiles stay honest
 
 
 def test_mobile_nav_scrolls_instead_of_stacking(ui):

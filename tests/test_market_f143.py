@@ -12,6 +12,12 @@ from tests.test_market_f47 import cache, get, req, ui  # noqa: F401
 @pytest.fixture(autouse=True)
 def prefs_file(tmp_path, monkeypatch):
     monkeypatch.setenv("MBOS_MARKET_PREFS_FILE", str(tmp_path / "prefs.json"))
+    return tmp_path / "prefs.json"
+
+
+def new_user(path):
+    """F-159: this owner starts at home (AR, 72032); a user with no home set in prefs `ui.home` starts with nothing preselected."""
+    path.write_text(__import__("json").dumps({"ui": {"home": {"state": "", "zip": ""}}}))
 
 
 def test_price_sliders_are_gone_and_numeric_fields_stay(ui):
@@ -45,18 +51,18 @@ def test_new_user_must_give_an_origin_and_blank_origin_is_not_located():
     assert ms._origin("72032") and ms._origin("Conway AR")
 
 
-def test_fresh_visit_for_a_new_user_shows_empty_origin_and_no_conway(ui):
+def test_fresh_visit_for_a_new_user_shows_empty_origin_and_no_conway(ui, prefs_file):
+    new_user(prefs_file)
     h = get(ui)
     assert "name='base' size='12' value=''" in h and "Radius: none" in h
     assert "Conway" not in h
 
 
 def test_radius_control_markup_and_scope_text(ui):
-    h = get(ui, go=1, base="72032", radius="37.5", broad=1)
-    assert f"id='radius_r' min='0' max='500' step='1' value='37.5'" in h
-    assert f"max='{landing_fix.MAX_RADIUS}' step='any'" in h and "<output id='radius-out' for='radius'>37.5 miles</output>" in h
-    assert "0 miles</span>" in h and f"500 miles</span>" in h
-    assert "name='radius_r'" not in h and "within 37.5 miles" in h and "of 72032" not in h.split("<h2>")[1].split("</h2>")[0]
+    h = get(ui, go=1, base="72032", radius="37.5", broad=1)               # F-159: the slider became a 10/25/50/100/250/Any dropdown; an off-preset value is kept, never clamped
+    sel = re.search(r"<select form='mkform' id='radius' name='radius'>.*?</select>", h, re.S).group(0)
+    assert re.findall(r"<option value='([^']*)'", sel) == ["10", "25", "50", "100", "250", "", "37.5"] and "value='37.5' selected" in sel
+    assert "id='radius_r'" not in h and "within 37.5 miles" in h and "of 72032" not in h.split("<h2>")[1].split("</h2>")[0]
 
 
 def test_script_is_same_origin_and_only_market_gets_script_src(ui):
@@ -79,7 +85,7 @@ def test_state_mode_radius_not_applied_unless_also_radius():
     assert __import__("operator_ui.market_view", fromlist=["x"]).scope_text(q) == "By State: AR AND within 10 miles"
 
 
-def test_real_chrome_slider_and_numeric_entry_submit_the_displayed_miles(ui):
+def test_real_chrome_radius_dropdown_submits_the_displayed_miles(ui):
     pw = pytest.importorskip("playwright.sync_api")
     base = f"http://127.0.0.1:{ui.port}"
     with pw.sync_playwright() as p:
@@ -90,19 +96,16 @@ def test_real_chrome_slider_and_numeric_entry_submit_the_displayed_miles(ui):
         for vp in ({"width": 1648, "height": 1000}, {"width": 390, "height": 844}):
             pg = b.new_page(viewport=vp)
             pg.goto(base + "/market?go=1&broad=1&base=Conway+AR&radius=150")
-            assert pg.is_visible("#radius_r")
-            for target in ("0", "321", "500"):                                   # boundary, intermediate, maximum via the slider
-                pg.eval_on_selector("#radius_r", "(e,v)=>{e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}))}", target)
-                assert pg.input_value("#radius") == target and pg.inner_text("#radius-out") == f"{target} miles"
-                pg.click("button.mk-go"); pg.wait_for_load_state()
-                assert f"radius={target}" in pg.url and pg.input_value("#radius") == target and pg.input_value("#radius_r") == target
-            pg.fill("#radius", "37.5")                                              # exact typed value moves the slider and the label
-            assert pg.input_value("#radius_r") == "38" or pg.input_value("#radius_r") == "37.5" or pg.input_value("#radius_r") == "37"
-            assert pg.inner_text("#radius-out") == "37.5 miles"
-            with pg.expect_navigation():
-                pg.focus("#radius"); pg.keyboard.press("Enter")
-            assert "radius=37.5" in pg.url and "radius_r" not in pg.url
-            pg.reload()
-            assert pg.input_value("#radius") == "37.5" and "base=Conway+AR" in pg.url
+            side = lambda: pg.click("#filters-btn-m") if vp["width"] < 700 else None  # noqa: E731  phone: the filters are a drawer
+            side()
+            assert pg.is_visible("#radius") and pg.input_value("#radius") == "150"
+            for target in ("10", "250", ""):
+                if pg.is_hidden("#radius"):
+                    side()
+                pg.select_option("#radius", target)
+                with pg.expect_navigation():
+                    pg.click("#mkfilters button.mk-apply")
+                assert (f"radius={target}" in pg.url) if target else "radius=" not in pg.url.replace("radius=&", "")
+                assert pg.input_value("#radius") == target
             pg.close()
         b.close()

@@ -12,6 +12,7 @@ from . import market_source_panel as msp
 from . import market_suggest as msug
 from . import market_prefs as mp
 from . import market_view as mv
+from . import market_browse as mbr
 from . import market_finds as mf
 from . import market_autobids as mba
 from . import market_bids as mb
@@ -29,7 +30,7 @@ def _saved(app) -> list[dict]:
 
 
 FILTER_KEYS = ("keywords", "base", "radius", "min_price", "max_price", "any", "broad", "condition", "required", "preferred", "exclude", "source",
-               "kind", "closing_by", "sort", "cat", "row1", "row2", "row3", "row4", "view", "state", "loc_mode", "also_radius", "state_find")
+               "kind", "closing_by", "sort", "cat", "row1", "row2", "row3", "row4", "view", "state", "loc_mode", "also_radius", "state_find", "ltype", "quick", "cat_find")
 
 
 def _remembered(app, qs: dict) -> dict:
@@ -52,6 +53,8 @@ def _remembered(app, qs: dict) -> dict:
 
 def page_body(app, qs: dict, now, errors=None, values=None) -> str:
     qs = _remembered(app, qs) if values is None else qs
+    page_qs = qs
+    qs = mbr.with_home(qs) if values is None else qs        # F-159: no location named -> this owner's home (By State, their state, their ZIP)
     saved = _saved(app)
     ids = {r["doc"]["campaign_id"]: r["doc"] for r in saved}
     pick = (qs.get("run") or qs.get("edit") or [None])[0]
@@ -65,19 +68,22 @@ def page_body(app, qs: dict, now, errors=None, values=None) -> str:
     ran = not qs.get("new") and not qs.get("edit")
     data = ms.load_source(q["source"], now, ms._origin(q["base"]), os.environ.get("MBOS_GSA_CACHE") or None) if ran else \
         {"status": "connected", "as_of": None, "age_h": 0, "stale": False, "in_scope": 0, "in_file": 0, "cards": [], "message": ""}
-    results, unchecked, hidden = ms.partition(data["cards"], q) if ran and data["status"] in ("connected", "fixture") and not q["errors"] else ([], [], {})
+    allcards = (data["cards"] if q["source"] == "all" else ms.load_source("all", now, ms._origin(q["base"]), os.environ.get("MBOS_GSA_CACHE") or None)["cards"]) if ran else []
     prefs = mp.load()
-    b1 = b2 = 0
-    n_before = len(results) + len(unchecked)
-    results, g1 = mp.hide(results, prefs)             # a hidden listing stays hidden in BOTH sections, with suggestions on or off
-    unchecked, g2 = mp.hide(unchecked, prefs)
     auto, auto_note = mba.load(now, prefs)             # F-152: bid e-mails read from the staging fixture directory only; else a one-line not-connected note
     au = mba.urls(auto)
-    results, b1 = mb.exclude(results, prefs, au)           # F-147: tracked ("I bid on this") items leave the lineup; they live in the My bids window
-    unchecked, b2 = mb.exclude(unchecked, prefs, au)
-    for c in results + unchecked:                      # F-154: closing-soon badge on cards of items the owner keeps (saved); display only
-        if c.get("saved"):
-            c["closing_badge"] = mb.badge(c, now)
+    live = ran and data["status"] in ("connected", "fixture") and not q["errors"]
+
+    def chain(qq, relax=()):                           # F-159: ONE filter chain for the grid and for every facet count, so a count always equals the rows you get
+        res, unch, hid = ms.partition(allcards, qq) if live else ([], [], {})
+        n0 = len(res) + len(unch)
+        res, g1 = mp.hide(res, prefs)                  # a hidden listing stays hidden in BOTH sections, with suggestions on or off
+        unch, g2 = mp.hide(unch, prefs)
+        res, x1 = mb.exclude(res, prefs, au)           # F-147: tracked ("I bid on this") items leave the lineup; they live in the My bids window
+        unch, x2 = mb.exclude(unch, prefs, au)
+        return mbr.post(res, qq, now, relax), mbr.post(unch, qq, now, relax), hid, (n0, g1, g2, x1, x2)
+
+    results, unchecked, hidden, (n_before, g1, g2, b1, b2) = chain(q)
     q["hidden_n"], q["hidden_checked"], q["matched_n"] = g1 + g2, g1, n_before - b1 - b2
     if prefs["enabled"] and "sort" not in qs and (prefs["saved"] or prefs["more"] or prefs["less"]):
         q["sort"] = "suggested"                      # feedback exists and the owner chose no sort: use it; hard filters already ran
@@ -97,7 +103,10 @@ def page_body(app, qs: dict, now, errors=None, values=None) -> str:
     tok = lambda: f"<input type='hidden' name='csrf' value='{app.csrf}'><input type='hidden' name='nonce' value='{__import__('secrets').token_hex(8)}'>"  # noqa: E731
     mine = mb.window(prefs, data["cards"] if ran else [], now, tok, (auto, auto_note)) + (f"<p class='small mut' id='bids-count'>{b1 + b2} in My bids (left out of the results below)</p>" if b1 + b2 else "")
     sug = msug.render(msug.suggest(results + unchecked, prefs), tok) if ran and results + unchecked and not q["errors"] and data["status"] == "connected" else ""   # F-155: engine-ranked panel, display only
-    return note + mv.render_page(q, data, results, hidden, saved, app.csrf, bool(app.operator_pin), edit if edit in ids else None, ran, errors, unchecked, prefs, finds, mine, sug + msp.render(now))
+    fc = mbr.facets(lambda qq, relax: chain(qq, relax)[0], q, now) if live else None
+    back = "/market?" + "&".join(f"{k}={quote(str(v))}" for k, vs in page_qs.items() if k in FILTER_KEYS + ("page", "go") for v in (vs if isinstance(vs, list) else [vs])) if page_qs else "/market"
+    return note + mv.render_page(q, data, results, hidden, saved, app.csrf, bool(app.operator_pin), edit if edit in ids else None, ran, errors, unchecked, prefs, finds, mine, sug + msp.render(now),
+                                 {"fc": fc, "now": now, "back": back} if fc else None)
 
 
 def post(app, parts: list[str], f: dict) -> tuple[str | None, list[str] | None]:
@@ -109,6 +118,12 @@ def post(app, parts: list[str], f: dict) -> tuple[str | None, list[str] | None]:
         elif parts == ["market", "bid"]:
             app._check_csrf(f)                       # owner-reported bid tracking in the local prefs file: CSRF only, nothing is placed, fetched or sent
             msg = mb.act(f.get("act", ""), f, __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(timespec="seconds"))
+        elif parts == ["market", "ui"]:
+            app._check_csrf(f)                       # F-159: the remembered filters-sidebar state (local prefs file): CSRF only
+            msg = mbr.set_collapsed(f.get("act") == "collapse")
+            back = f.get("back") or ""
+            if back.startswith("/market?") and all(32 <= ord(ch) < 127 for ch in back) and "\\" not in back:
+                return back, None
         elif parts == ["market", "resale"]:
             app._check_csrf(f)                       # F-155: owner-set resale price in the local prefs file: CSRF only, nothing is sent or spent
             msg = msug.act_resale(f)

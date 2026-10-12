@@ -81,7 +81,7 @@ def test_page_shows_unknown_lot_fields_links_and_connected_label(ui, wcache):
 
 def test_selector_option_and_all_sources_merge(ui, wcache, cache):
     h = get(ui, go=1, source="all", broad=1)
-    assert "Wooley Auctioneers</option>" in h and "T.J. Bruck" in h and "GSA Auctions: connected" in h and "Wooley Auctioneers: connected" in h
+    assert "value='wooley'" in h and "T.J. Bruck" in h and "GSA Auctions: connected" in h and "Wooley Auctioneers: connected" in h
     d = msrc.load_source("all", str(cache), NOW, None)
     assert {c["source"] for c in d["cards"]} == {"GSA Auctions", "Wooley Auctioneers"} and d["status"] == "connected" and d["fixture"] is False
 

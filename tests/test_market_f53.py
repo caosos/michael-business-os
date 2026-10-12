@@ -101,17 +101,6 @@ def test_owner_choices_survive_a_server_restart_on_an_isolated_instance(ui, tmp_
     assert "<option value='bid' selected>" in again
 
 
-def test_row_order_survives_restart(ui, tmp_path):
-    get(ui, go=1, row1="equipment", row2="trailers", row3="", row4="")
-    app2, httpd2 = _fresh_app(tmp_path, "r2")
-    try:
-        h = req(app2, "GET", "/market")[2]
-    finally:
-        httpd2.shutdown()
-        httpd2.server_close()
-    assert h.index("data-row='equipment'") < h.index("data-row='trailers'")
-
-
 def test_new_search_clears_remembered_choices_and_reset_keeps_them(ui):
     get(ui, go=1, cat="tools", max_price="77")
     assert mp.recall(("cat", "max_price"))

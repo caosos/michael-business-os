@@ -98,7 +98,7 @@ def _card(ad, rec, now, origin, name: str) -> dict | None:
     return {"id": f"{ad.source}:{n.source_listing_id}", "title": d["title"], "description": desc, "text": f"{d['title']} {desc}".lower(), "url": n.url, "image": None,
             "bid": bid, "price": float(amt) if isinstance(amt, (int, float)) else None, "price_type": price.get("type"), "bidders": None,
             "closes": str(d.get("ends_at") or "")[:10] or None, "city": f"{loc['city']}, {loc['state']}" if loc.get("city") and loc.get("state") else None,
-            "state": state if state in ms.US_STATES else None, "distance": dist, "category": n.category, "condition": None, "labels": labels, "source": name,
+            "state": state if state in ms.US_STATES else None, "zip": str(loc.get("zip") or "")[:5] or None, "posted": None, "distance": dist, "category": n.category, "condition": None, "labels": labels, "source": name,
             "fetched_at": facts["date"], "kind": "auction", "stale": ms._age_h(facts["date"], now) > ms.STALE_H, "fixture": True}
 
 
@@ -164,7 +164,7 @@ def _event_card(site: AuctionSite, ad, payload, as_of: str, now, origin) -> dict
             "price": None, "price_type": None, "bidders": None, "closes": day, "closes_at": closes_at, "begins_at": begins_at,
             "closes_local": local_when(closes_at), "left": _left(closes_at, now), "begins_local": local_when(begins_at),
             "city": f"{loc['city']}, {loc['state']}" if loc.get("city") and loc.get("state") else None,
-            "state": loc.get("state") if loc.get("state") in ms.US_STATES else None, "distance": dist, "category": g("category"), "condition": None,
+            "state": loc.get("state") if loc.get("state") in ms.US_STATES else None, "zip": str(loc.get("zip") or "")[:5] or None, "posted": None, "distance": dist, "category": g("category"), "condition": None,
             "labels": ms.auction_labels({}, as_of), "source": site.name, "fetched_at": as_of, "kind": "auction event", "stale": ms._age_h(as_of, now) > ms.STALE_H,
             "fixture": False, "event": True, "auctioneer": g("auctioneer"), "buyer_premium_pct": g("buyer_premium_pct"), "tags": tags, "event_tags": tags,
             "address": g("address"), "lot_number": None, "current_bid": None, "bid_count": None}

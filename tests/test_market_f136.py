@@ -154,7 +154,9 @@ def test_state_choice_persists_across_navigation_and_restart_via_prefs(ui):
     assert "Location: By State: OK" in h
 
 
-def test_fresh_visit_has_no_hidden_origin_and_michaels_saved_origin_is_kept(ui):
+def test_fresh_visit_has_no_hidden_origin_and_michaels_saved_origin_is_kept(ui, tmp_path):
+    from tests.test_market_f143 import new_user
+    new_user(tmp_path / "prefs.json")                               # F-159: a user with no home set (this owner starts at AR / 72032)
     h = get(ui)                                                     # F-143: a new user sees an EMPTY origin field and no applied radius
     assert "name='base' size='12' value=''" in h and "Radius: none" in h
     assert "Conway" not in (h.split("<main", 1)[1] if "<main" in h else h)

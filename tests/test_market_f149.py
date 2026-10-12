@@ -71,13 +71,13 @@ def test_wilson_cards_same_shape_unknown_lot_fields_human_link(caches, cache):
 
 def test_page_lists_each_house_all_houses_and_all_sources(ui, caches, cache):
     h = get(ui, go=1, source="auctions", broad=1, view="list")
-    assert "All auction houses</option>" in h and "Wilson Auctioneers</option>" in h and "Wooley Auctioneers</option>" in h
+    assert "value='wilson'" in h and "value='wooley'" in h
     assert "Wilson Auctioneers: connected (cached file)" in h and "Wooley Auctioneers: connected (cached file)" in h and "T.J. Bruck" in h and "AUCTION EVENT" in h
     assert "Tue Oct 13, 6:00 PM CDT" in h and "Lot number</span> UNKNOWN" in h and "FIXTURE" not in h
     a = get(ui, go=1, source="all", broad=1)
     assert "Wilson Auctioneers: connected" in a and "GSA Auctions: connected" in a
     g = get(ui, go=1, source="auctions", broad=1)
-    assert "data-row='auction events'" in g and "View and bid on" in g
+    assert "data-kind='auction-event'" in g and "View and bid on" in g
     w = get(ui, go=1, source="wilson", broad=1, view="list")
     assert "T.J. Bruck" not in w and "Wilson Auctioneers" in w
 
@@ -130,7 +130,7 @@ def test_blackmon_cards_proxibid_link_for_human_only(caches, cache):
 
 def test_page_includes_blackmon_in_all_houses_and_all_sources(ui, caches, cache):
     h = get(ui, go=1, source="auctions", broad=1, view="list")
-    assert "Blackmon Auctions</option>" in h and "Blackmon Auctions: connected (cached file)" in h and "View and bid on Proxibid" in h
+    assert "value='blackmon'" in h and "Blackmon Auctions: connected (cached file)" in h and "View and bid on Proxibid" in h
     a = get(ui, go=1, source="all", broad=1)
     assert "Blackmon Auctions: connected" in a
     assert "Census 2023 ZIP and place gazetteer" in a and "limited coverage" not in a

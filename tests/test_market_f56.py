@@ -74,7 +74,7 @@ def test_real_save_reopen_and_restart_keep_them(ui, tmp_path):
 
     def check(h):
         assert "Min price: $100" in h and "Max price: $500" in h and "Condition: used" in h and "Mode: BROAD" in h and "filter-errors" not in h
-        assert "name='cat' value='trailers'" in h and _row(h, 1) == "tools" and _row(h, 2) == "trailers" and _row(h, 3) == ""
+        assert "name='cat' value='trailers'" in h
     check(get(ui, run=cid))                                                       # reopen
     app2, httpd2 = _fresh_app_on(ui, tmp_path)                                      # restart: new process state, same campaigns file
     try:

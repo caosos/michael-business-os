@@ -48,30 +48,25 @@ def test_unchecked_section_is_a_closed_optional_disclosure(ui):
 
 
 # ---- (B) gallery
-def test_gallery_is_default_with_price_on_card_rows_and_placeholders(ui):
+def test_grid_is_default_with_price_on_card_and_placeholders(ui):
     h = get(ui, go=1)
-    assert "class='mk-g'" in h and "data-row='trailers'" in h and "data-row='equipment'" in h
-    assert "current bid" in h and "posted age: not given" in h and "Cached copy of the GSA list, not a fresh fetch" in h
+    assert "class='mk-g mk-card'" in h and "id='result-grid'" in h and "data-row=" not in h      # F-159: one uniform grid replaces the category rows
+    assert "current bid" in h and "Cached copy of the GSA list, not a fresh fetch" in h
     assert "Craigslist</a>" not in h and "<img" not in h.split("mk-main")[1]          # GSA photos need a login: tile, never a fake picture
 
 
-def test_empty_category_row_says_no_matching_known_inventory(ui):
-    h = get(ui, go=1, row1="trailers", row2="electronics", row3="", row4="", broad="1", keywords="trailer")
-    assert "data-row='electronics'" in h and "No matching known inventory" in h
-
-
-def test_owner_chooses_and_orders_rows_and_checked_category_replaces_focus(ui):
-    h = get(ui, go=1, row1="equipment", row2="trailers", row3="", row4="")
-    assert h.index("data-row='equipment'") < h.index("data-row='trailers'")
+def test_checked_category_replaces_focus(ui):
     only = get(ui, go=1, cat="trailers", radius="")
-    assert "data-row='trailers'" in only and "data-row='equipment'" not in only
+    assert "Utility" in only and "result-grid" in only
+    assert "data-lot" in only
 
 
 def test_sidebar_holds_filters_and_list_view_is_available(ui):
     h = get(ui, go=1)
     side = h.split("<aside")[1].split("</aside>")[0]
-    for name in ("base", "radius", "min_price", "max_price", "cat"):
+    for name in ("base", "min_price", "max_price", "cat"):
         assert f"form='mkform' name='{name}'" in side or f"form='mkform' type='number' id='{name}'" in side
+    assert "form='mkform' id='radius' name='radius'" in side
     assert "form='mkform'" in side and "id='mkform'" in h
     assert "class='card mk-res'" in get(ui, go=1, view="list")
 

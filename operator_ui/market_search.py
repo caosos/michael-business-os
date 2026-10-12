@@ -21,7 +21,7 @@ from mbos_discovery.normalize import haversine_miles
 DEFAULT_CACHE = "/home/michaelos/business-os-worktrees/agent-01-coordinator/var/cache/gsa-active-auctions.json"
 SOURCES = {"gsa": "GSA Auctions"}
 NOT_CONNECTED = ("GovDeals", "Public Surplus", "eBay", "Craigslist", "Facebook Marketplace")
-SORTS = ("closing", "bid", "distance", "title", "suggested")
+SORTS = ("closing", "new", "bid", "price_desc", "distance", "title", "suggested")      # F-159: closing = Ending soonest, new = Newest, bid = Price low to high
 # F-52 (B): gallery row categories. Matched against the seller's text and the system's category guess; a row name is a label, not a claim.
 ROW_CATS = {"trailers": ("trailer",), "equipment": ("equipment", "tractor", "mower", "loader", "generator", "compressor", "forklift", "backhoe"),
             "vehicles": ("truck", "pickup", "van", "suv", "sedan", "vehicle", "car"), "electronics": ("computer", "laptop", "monitor", "electronic", "phone", "radio", "camera", "printer", "server"),
@@ -38,6 +38,9 @@ DEFAULT_CATS = tuple(c for c in CONTROL_CATS if c != "land_real_estate")
 DEFAULT_ROWS = ("trailers", "equipment", "vehicles", "")
 CONDITIONS = ("", "new", "used", "salvage", "parts", "for parts", "not working", "working", "as is")
 STALE_H = 6
+LTYPES = ("auction", "fixed", "event")      # F-159: Auction / Buy now or fixed price / Auction event
+QUICK = ("new", "today", "soon")
+PAGE_SIZE = 24
 META = ("min:", "cat:", "rows:", "broad:", "cond:", "any:", "locmode:", "states:", "alsorad:")   # F-54: other saved-search criteria ride in nice_to_have the same way (the frozen schema has no field)
 EXCLUDE_PREFIX = "exclude:"            # saved inside the campaign's nice_to_have, the only free-text list the frozen schema allows
 # F-136: state names for the By State picker (50 states + DC). A lot's state is the 2-letter code the GSA cache gives; anything else stays unknown.
@@ -118,12 +121,13 @@ def parse_query(qs: dict) -> dict:
     radius_used = (mode == "distance" or g("also_radius") == "1") and g("radius") != ""
     errs = validate(g) + (["Enter your ZIP or city (the origin the radius is measured from); no search was run without it."] if radius_used and not g("base") else []) + [f"'{t}' is not a US state code; it was ignored and no search was run with it." for t in bad_states] \
         + (["By State is selected but no state is ticked; pick at least one state (or switch to By Distance). No search was run."] if mode == "state" and not states and not bad_states else [])
-    return {"loc_mode": mode, "states": states, "also_radius": g("also_radius") == "1", "state_find": g("state_find")[:30], "keywords": g("keywords")[:120], "base": g("base")[:60],
+    return {"loc_mode": mode, "states": states, "also_radius": g("also_radius") == "1", "state_find": g("state_find")[:30], "cat_find": g("cat_find")[:30], "keywords": g("keywords")[:120], "base": g("base")[:60],
             "radius": (DEFAULT_RADIUS if g("base") else None) if fresh else _num(g("radius"), landing_fix.MAX_RADIUS),
             "min_price": _num(g("min_price")), "max_price": _num(g("max_price")), "errors": errs, "cats": cats, "cat_all": cat_all, "cat_default": cat_default, "rows": rows,
             "view": "list" if g("view") == "list" else "gallery",
             "any": _terms(DEFAULT_ANY if ("any" not in qs and not g("broad")) else g("any")), "broad": g("broad") == "1", "condition": g("condition").lower()[:30], "required": _terms(g("required")),
-            "preferred": _terms(g("preferred")), "exclude": _terms(g("exclude")), "source": g("source") or "gsa",
+            "preferred": _terms(g("preferred")), "exclude": _terms(g("exclude")), "source": g("source") or "all",
+            "ltype": g("ltype") if g("ltype") in LTYPES else "", "quick": g("quick") if g("quick") in QUICK else "", "page": max(1, int(g("page"))) if g("page").isdigit() and int(g("page")) < 10**6 else 1,
             "kind": g("kind") or "any", "closing_by": closing if re.fullmatch(r"\d{4}-\d{2}-\d{2}", closing) else "",
             "sort": sort if sort in SORTS else "closing"}
 
@@ -222,6 +226,7 @@ def _card(adapter, rec, now, asof, origin) -> dict:
             "bid": bid if isinstance(bid, float) else None, "bidders": lot.get("bid_count"), "closes": str(p.get("aucEndDt") or "")[:10] or None,
             "city": f"{loc.get('city')}, {loc.get('state')}" if loc.get("city") else None,
             "state": str(loc.get("state")).strip().upper() if str(loc.get("state") or "").strip().upper() in US_STATES else None,   # F-136: only a real 2-letter code from the cache; else unknown
+            "zip": re.sub(r"\D", "", str(loc.get("zip") or ""))[:5] or None, "posted": str(p.get("aucStartDt") or "")[:10] or None,      # F-159: ZIP for the card, listing start date for Newest / New today
              "distance": dist, "category": lot.get("category"),
             "condition": None, "labels": auction_labels(p, asof), "source": "GSA Auctions", "fetched_at": asof, "kind": "auction", "stale": _age_h(asof, now) > STALE_H}
 
@@ -338,8 +343,19 @@ def partition(lots: list[dict], q: dict) -> tuple[list[dict], list[dict], dict]:
             why = (["state not known (not in the cache)"] if by_state and c.get("state") is None else []) + (["location not found (distance unknown)"] if radius_on and c["distance"] is None else []) + (["no bid yet (price unknown)"] if pok is None else [])
             (unchecked if why else out).append({**c, "tags": tags, "unchecked": why})
     key = {"closing": lambda c: (c["closes"] or "9999", c["title"]), "bid": lambda c: (c["bid"] is None, c["bid"] or 0, c["title"]),
-           "distance": lambda c: (c["distance"] is None, c["distance"] or 0, c["title"]), "title": lambda c: c["title"].lower(), "suggested": lambda c: (c["closes"] or "9999", c["title"])}[q["sort"]]
-    return sorted(out, key=key), sorted(unchecked, key=key), hidden
+           "distance": lambda c: (c["distance"] is None, c["distance"] or 0, c["title"]), "title": lambda c: c["title"].lower(), "suggested": lambda c: (c["closes"] or "9999", c["title"]), "new": None, "price_desc": None}[q["sort"]]
+    return order(out, q["sort"], key), order(unchecked, q["sort"], key), hidden
+
+
+def order(rows: list[dict], sort: str, key) -> list[dict]:
+    """F-159: Newest (listing start date, unknown last) and Price high to low (no bid last) need a descending key; the rest use the ascending key."""
+    if sort == "new":
+        base = sorted(rows, key=lambda c: c["title"].lower())
+        return sorted([c for c in base if c.get("posted")], key=lambda c: c["posted"], reverse=True) + [c for c in base if not c.get("posted")]
+    if sort == "price_desc":
+        base = sorted(rows, key=lambda c: c["title"].lower())
+        return sorted([c for c in base if c["bid"] is not None], key=lambda c: c["bid"], reverse=True) + [c for c in base if c["bid"] is None]
+    return sorted(rows, key=key)
 
 
 def decision(card: dict, comp: dict | None = None) -> tuple[str, str]:
