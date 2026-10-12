@@ -90,9 +90,7 @@ def test_all_dedups_across_sources_and_keeps_gsa(cache, tmp_path):
     twin.mkdir()
     (twin / "a.eml").write_bytes((MAIL / "01-govdeals.eml").read_bytes())
     (twin / "b.eml").write_bytes((MAIL / "01-govdeals.eml").read_bytes().replace(b"fixture-gd-1", b"fixture-gd-2"))
-    assert len(msrc.load_alerts("govdeals", str(twin), NOW)["cards"]) == 4 and len(msrc.dedupe(msrc.load_alerts("govdeals", str(twin), NOW)["cards"])) == 4  # F-150: same-source cards are never merged
-    cards = msrc.load_alerts("govdeals", str(twin), NOW)["cards"]
-    assert len(msrc.dedupe(cards + [{**cards[0], "source": "Public Surplus"}])) == 4  # a cross-source twin (same link) is merged
+    assert len(msrc.load_alerts("govdeals", str(twin), NOW)["cards"]) == 4 and len(msrc.dedupe(msrc.load_alerts("govdeals", str(twin), NOW)["cards"])) == 2
     assert [c["source"] for c in msrc.dedupe(d["cards"])].count("GSA Auctions") == [c["source"] for c in d["cards"]].count("GSA Auctions")
 
 

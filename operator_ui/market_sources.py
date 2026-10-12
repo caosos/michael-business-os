@@ -209,11 +209,15 @@ def load_wooley(path: str | None, now: datetime, origin=None) -> dict:
 
 
 def dedupe(cards: list[dict]) -> list[dict]:
-    """Merge across sources: the same source link, or near-identical title in the same place with the same close date, is one listing (first source wins). Two cards from the SAME source are never merged.
+    """Same source: merge only an identical link or card id (never by title). Different sources: identical link, or title similarity >= 0.9 AND same city AND same close date (first source wins).
     lane 02's pinned install has no Deduper class; this uses its `dedup.title_similarity`."""
+    def same(c: dict, k: dict) -> bool:
+        if c.get("source") == k.get("source"):
+            return bool((c["url"] and c["url"] == k["url"]) or (c.get("id") and c.get("id") == k.get("id")))
+        return bool((c["url"] and c["url"] == k["url"]) or (title_similarity(c["title"], k["title"]) >= 0.9 and c.get("city") == k.get("city") and c.get("closes") == k.get("closes")))
     out: list[dict] = []
     for c in cards:
-        if not any(c.get("source") != k.get("source") and ((c["url"] and c["url"] == k["url"]) or (title_similarity(c["title"], k["title"]) >= 0.9 and c.get("city") == k.get("city") and c.get("closes") == k.get("closes"))) for k in out):
+        if not any(same(c, k) for k in out):
             out.append(c)
     return out
 

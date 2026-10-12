@@ -41,3 +41,10 @@ def test_dedupe_same_source_never_merged_cross_source_rules():
     assert len(msrc.dedupe([a, {**a, "source": "GSA", "url": "u3"}])) == 1
     assert len(msrc.dedupe([a, {**a, "source": "GSA", "url": "u3", "closes": "2026-10-21"}])) == 2
     assert len(msrc.dedupe([a, {**b, "source": "GSA", "title": "Totally different", "url": "u1"}])) == 1
+
+
+def test_dedupe_same_source_same_link_or_id_merges():
+    a = {"title": "Residential Estate Auction West Little Rock", "url": "u1", "city": "Little Rock, AR", "closes": "2026-10-20", "source": "Wilson", "id": "wilson:1"}
+    assert len(msrc.dedupe([a, {**a, "title": "Other title"}])) == 1  # same link
+    assert len(msrc.dedupe([a, {**a, "url": "u2"}])) == 1  # same card id
+    assert len(msrc.dedupe([a, {**a, "url": "u2", "id": "wilson:2"}])) == 2  # similar title, different link and id
