@@ -1,5 +1,12 @@
 # Live :8766 reload and rollback packet (PREPARED, NOT APPROVED, NOT RUN)
 
+## COMBINED MARKETPLACE RELEASE, REVISED AGAIN (2026-10-12T05:37:58Z): CURRENT. Supersedes the 85d293a section below.
+- **Artifact:** lane 06 `bbc80ec851b75aec52af1f8b0838dd56ccc714ef` (85d293a + F-152 auto-detected bids in My bids (live: 'not connected (no mailbox)' until B-12) + F-153 ended rows/display names) with lane 02 `a186ca6e29f785e7bbb705ce6eb44482558f26da`.
+- **Verified:** lane 06 suite 533/1 (known f39); staging under the coordinator python: verify-only OK; release script dry run OK; coordinator suite 619/0 with a186ca6 (lane 02 unchanged since).
+- **One command (owner-run):** `cd ~/business-os-worktrees/agent-01-coordinator && tools/release_marketplace.sh bbc80ec851b75aec52af1f8b0838dd56ccc714ef a186ca6e29f785e7bbb705ce6eb44482558f26da`
+
+---
+
 ## COMBINED MARKETPLACE RELEASE, REVISED (2026-10-12T04:43:43Z): CURRENT. Supersedes the 3dcbb86/a05aae8 section below (kept as history).
 - **Artifact:** lane 06 `85d293ada4133153cc3efe5492757020ab5950e8` (everything in 3dcbb86 + F-151 Blackmon Auctions + Census distances copy) with lane 02 `a186ca6e29f785e7bbb705ce6eb44482558f26da` (Wooley, Wilson incl. live-auction dates, Blackmon incl. B-33 locations).
 - **Verified by Agent 01 with exactly this pair:** coordinator suite 619/0 with lane 02 a186ca6; lane 06 suite 525/1 (known f39 flake); focused 51/0; staging under the COORDINATOR python: reload_ui --verify-only OK, Search Now check OK, headless Chrome desktop+mobile PASS (Blackmon 10 events, 6 located, 3 within 50 mi; Wilson 17/17; 0 hibid/bidwrangler/proxibid requests); release script dry run OK.
