@@ -151,3 +151,13 @@ All other lanes: CLOSED, nothing READY (all open rows BLOCKED on owner/host). La
 - **ETA / next_check_at:** A-73 ETA UNKNOWN; next_check_at MISSING.
 - **ONE next action:** Agent 01 publishes host-backed A-73 ACK/WORKING or exact NEED and reconciles the five false NEED states before one serial dispatch.
 - **Canonical log:** `docs/receipts/2026-10-12-supervisor-visible-check-1621.md`.
+
+
+## Current checkpoint — Monday, October 12, 2026 — 5:15 PM America/Chicago
+- **ONE current bounded task:** A-73 existing-watchdog completion-state repair; existing Agent 01; P0; NEED — ACK MISSED.
+- **Defect:** ten completed/superseded tasks have emitted false NEEDs. Current A-73 process state remains UNKNOWN.
+- **Tested / loaded / browser:** fb84d0c / fb84d0c; loaded desktop Claude Chrome shows the new search layout and 16 results within 150 miles; mobile/detail/source-link/My Bids/Suggestions proof MISSING.
+- **Source blockers:** F-161 host state UNKNOWN; B-43 fixture adapter 451/0 but B-44 live smoke requires Bright Data customer activation; B-12 still lacks label/filter/first genuine alert.
+- **ETA / next_check_at:** A-73 UNKNOWN / MISSING.
+- **ONE next action:** Agent 01 publishes host-backed A-73 ACK/WORKING or exact NEED and reconciles the ten false NEED states before one serial dispatch.
+- **Canonical log:** docs/receipts/2026-10-12-supervisor-visible-check-1715.md.
