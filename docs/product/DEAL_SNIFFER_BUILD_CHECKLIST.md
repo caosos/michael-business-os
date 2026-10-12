@@ -361,3 +361,17 @@ This section is part of the existing living checklist and is the authoritative r
 - **One next action:** existing Agent 01 completes clean-checkout review and publishes exact tests plus Claude Chrome desktop/mobile STAGING_ACCEPTED/DONE or structured NEED/BLOCKED.
 - **Upcoming operational fix:** A-73 closes the proven wake gap inside the existing watchdog, serial after F-157 acceptance, with no duplicate service.
 - **Michael:** NOTHING.
+
+
+## Supervisor reconciliation — Monday, October 12, 2026 — 12:28 PM America/Chicago
+
+- **Canonical receipt:** `DS-CHECKIN-20261012-1228-CDT@2026-10-12T12:28:26-05:00` / [docs/receipts/2026-10-12-supervisor-visible-check-1228.md](../receipts/2026-10-12-supervisor-visible-check-1228.md).
+- **Transition:** WORKING progress. Existing Agent 01 resumed at 12:26 PM America/Chicago; [PR #1 comment 6129248011](https://github.com/caosos/michael-business-os/pull/1#issuecomment-6129248011).
+- **Host / loaded state:** live `:8766` ARTIFACT `a0ee24051fb06dcab8f04306bcb7da54504c5ece`, exported 2026-10-12T17:22:00Z. This supersedes the prior loaded baseline `bbc80ec` from the 12:18 check-in. F-157 remains NOT LOADED.
+- **Current bounded task:** F-157 independent Agent 01 acceptance; stage `WORKING — CLEAN DETACHED REVIEW`. Review location `var/review-f157`; exact target `498fcb3`, which descends from `a0ee240`. Completed lane 06 worker remains closed.
+- **Tests/browser:** worker evidence 8/0 focused; reference 575/1 known `resale_f39`; lane D+E 104/3 documented unrelated failures. Independent rerun and golden review in progress. New Claude Chrome desktop/mobile evidence MISSING.
+- **ETA / next_check_at:** about 40 minutes from the 12:26 PM resume; Monday, October 12, 2026 — 1:10 PM America/Chicago.
+- **Blocker:** NONE.
+- **One next action:** existing Agent 01 completes exact-revision tests and Claude Chrome desktop/mobile review, then publishes STAGING_ACCEPTED/DONE or structured NEED/BLOCKED.
+- **Upcoming operational fix:** A-73 closes the proven wake gap inside the existing watchdog after F-157 acceptance, with no duplicate service.
+- **Michael:** NOTHING.
