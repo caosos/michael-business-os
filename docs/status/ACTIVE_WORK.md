@@ -100,3 +100,16 @@ All other lanes: CLOSED, nothing READY (all open rows BLOCKED on owner/host). La
 - **Blocker:** prepared owner-gated release command has not run; live browser acceptance cannot begin.
 - **Exact release command:** `tools/release_marketplace.sh 112fce4 a186ca6e29f785e7bbb705ce6eb44482558f26da`.
 - **Canonical log:** `docs/receipts/2026-10-12-supervisor-visible-check-1259.md`.
+
+
+## Current checkpoint — Monday, October 12, 2026 — 1:32 PM America/Chicago
+- **Task boundary:** F-157/F-158 is STAGING_ACCEPTED at `112fce4` / Agent 01 `e37a53a`; focused 22/0 and full 573/2 with both failures reproduced on loaded `a0ee240`. Real caches hide 16/16 property events by default and keep genuine mixed/equipment/vehicle/liquidation events.
+- **Release state:** exact command `tools/release_marketplace.sh 112fce4 a186ca6e29f785e7bbb705ce6eb44482558f26da` is NOT RUN. Earlier accepted-artifact authority does not explicitly cover this later combined target; no actual attempt or classifier denial for `112fce4` was observed. Exact-target approval is unverified/not granted, and Slack `1791828705.264649` explicitly says do not release on this request.
+- **Tested / loaded / browser:** tested `112fce4`; loaded `a0ee24051fb06dcab8f04306bcb7da54504c5ece`; F-158 NOT LOADED; loaded Claude Chrome desktop/mobile acceptance MISSING.
+- **Host:** last timestamped observation Monday, October 12, 2026 — 12:26 PM America/Chicago. Current host state UNKNOWN.
+- **ONE current bounded task:** A-73 existing-watchdog finished-artifact wake repair. Owner: existing Agent 01. Priority: P0. Stage: DELIVERED IN REPOSITORY / ACK UNVERIFIED. Do not create a duplicate coordinator, worker, queue, watchdog, monitor, service or automation.
+- **Acceptance:** one wake for a completed specialist artifact awaiting Agent 01 review; deduplication; project isolation; finished-artifact provenance; ACK/WORKING checkpoint within 300 seconds; no duplicate process/service.
+- **ETA / next_check_at:** ETA UNKNOWN until ACK; Monday, October 12, 2026 — 1:37 PM America/Chicago.
+- **Blocker:** NONE for A-73 implementation; host delivery/liveness unverified. Exact-target approval separately blocks F-157/F-158 live acceptance.
+- **ONE next action:** existing Agent 01 ACKs A-73 with host evidence and begins the bounded existing-watchdog repair, or publishes command-specific NEED/BLOCKED.
+- **Canonical log:** `docs/receipts/2026-10-12-supervisor-visible-check-1332.md`.
