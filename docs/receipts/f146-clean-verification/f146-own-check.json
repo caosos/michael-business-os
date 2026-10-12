@@ -1,0 +1,58 @@
+{
+ "pass": true,
+ "res": {
+  "desktop": {
+   "r50": [
+    "wooley:t-j-bruck-estate-heavy-equipment-machinery-auction-perryville-arkansas"
+   ],
+   "status": "Wooley Auctioneers: connected (cached file) \u00b7 last fetched 2026-10-12 00:30 UTC (0 h ago) \u00b7 2 auction events (not lots)\nCraigslist: NOT CONNECTED\neBay: NOT CONNECTED\nFacebook Marketplace: NOT CONNECTE",
+   "card_text": "No lot image (event)\nAuction event\nlot / bid / bid count UNKNOWN\nT.J. Bruck Estate Heavy Equipment & Machinery Auction | Per\u2026\nPerryville, AR \u00b7 21.2 mi\nWooley Auctioneers \u00b7 closes 2026-10-13T18:00:00-05:00\nView original listing (wooleyauctioneers.com) \u00b7 View and bid on HiBid\nSaveNot interestedMore like thisLess like this\n\u2715 Hide",
+   "hibid_links": 1,
+   "r10": [],
+   "r150": [
+    "wooley:t-j-bruck-estate-heavy-equipment-machinery-auction-perryville-arkansas",
+    "wooley:sh-systems-inc-chapter-7-bankruptcy-asset-liquidation-phase-ii-jonesboro-ar"
+   ],
+   "kw_dozer": [],
+   "kw_none": [],
+   "price_filter": [],
+   "all_r50_wooley": [
+    "wooley:t-j-bruck-estate-heavy-equipment-machinery-auction-perryville-arkansas"
+   ],
+   "all_r50_total": 10,
+   "search_now_select": [
+    true,
+    [
+     "wooley:t-j-bruck-estate-heavy-equipment-machinery-auction-perryville-arkansas"
+    ]
+   ]
+  },
+  "mobile": {
+   "r50": [
+    "wooley:t-j-bruck-estate-heavy-equipment-machinery-auction-perryville-arkansas"
+   ],
+   "status": "Wooley Auctioneers: connected (cached file) \u00b7 last fetched 2026-10-12 00:30 UTC (0 h ago) \u00b7 2 auction events (not lots)\nCraigslist: NOT CONNECTED\neBay: NOT CONNECTED\nFacebook Marketplace: NOT CONNECTE",
+   "card_text": "No lot image (event)\nAuction event\nlot / bid / bid count UNKNOWN\nT.J. Bruck Estate Heavy Equipment & Machinery Auction | Per\u2026\nPerryville, AR \u00b7 21.2 mi\nWooley Auctioneers \u00b7 closes 2026-10-13T18:00:00-05:00\nView original listing (wooleyauctioneers.com) \u00b7 View and bid on HiBid\nSaveNot interestedMore like thisLess like this\n\u2715 Hide",
+   "hibid_links": 1,
+   "r10": [],
+   "r150": [
+    "wooley:t-j-bruck-estate-heavy-equipment-machinery-auction-perryville-arkansas",
+    "wooley:sh-systems-inc-chapter-7-bankruptcy-asset-liquidation-phase-ii-jonesboro-ar"
+   ],
+   "kw_dozer": [],
+   "kw_none": [],
+   "price_filter": [],
+   "all_r50_wooley": [
+    "wooley:t-j-bruck-estate-heavy-equipment-machinery-auction-perryville-arkansas"
+   ],
+   "all_r50_total": 10,
+   "search_now_select": [
+    true,
+    [
+     "wooley:t-j-bruck-estate-heavy-equipment-machinery-auction-perryville-arkansas"
+    ]
+   ]
+  },
+  "hibid_requests": []
+ }
+}
