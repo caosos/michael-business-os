@@ -5,7 +5,7 @@ Role: ROUND TWO — QA / End-to-End Integration / Manual-Assist Outputs (lane G)
 Branch: research/agent-07-marketing
 Worktree: /home/michaelos/business-os-worktrees/agent-07-marketing
 State: CLOSED
-Done: B-42 @ PENDING — Facebook Marketplace routes b+c doc docs/handoff/B42_FACEBOOK_MARKETPLACE_ROUTES.md; RC 105/0
+Done: B-42 @ 632947d — Facebook Marketplace routes b+c doc docs/handoff/B42_FACEBOOK_MARKETPLACE_ROUTES.md; RC 105/0
 Done: B-38 @ 1334450 — source matrix docs/handoff/B38_SOURCE_MATRIX.md; next 3: AuctionZip alerts, AR State Surplus E-News+GovDeals alerts, Trash Nothing API; RC 105/0
 Done: G-01 @ 9cbce70
 Done: G-02 @ a1700d9
