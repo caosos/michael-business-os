@@ -1,0 +1,10 @@
+# Receipt: D-37 — source registry + user item interest (ADR-0015 P-74-3)
+- **Provenance:** READY_QUEUE row D-37; ADR-0015 (lane 04 `3094eca`, accepted by Agent 01 2026-10-12). FACT: files and tests below. All DRY-RUN.
+- **Change:**
+  - `config/sources.v1.json` (new; it did not exist on the coordinator branch) and `config/sources.schema.json` (JSON Schema 2020-12: required `policy_ref`, non-blank; metro/point need center+radius; states scope needs states).
+  - Rows: `gsa` (national/api/connected), `ebay` (national/api), `craigslist_{littlerock,fayar,fortsmith,jonesboro}` (metro, subdomain, alert_email, 100 mi), `govdeals`/`publicsurplus`/`auctionzip` (alert_email), `ar_local_auction_houses` (states AR, manual), `fb_marketplace`/`offerup` (manual, blocked). Craigslist/FB policy_ref and terms_checked_at come from the B-12 source-status doc; OfferUp/AR houses cite that doc.
+  - `state/migrations/0031_source_registry.sql`: `mbos.source_registry` (CHECK `policy_ref` non-blank; readable by all roles; written only by `upsert_source`, owner_channel), `mbos.user_item_interest` (no table grants; `record_user_item_interest` for ingest roles, `get_user_item_interest` only for the caller's own user id).
+  - `state/mbos_state/sources.py`: `load_config` (validates against the schema, rejects duplicate ids) and `load_sources` (idempotent upsert).
+- **Tests:** `state/tests/test_source_registry.py` (3): schema validation incl. missing/blank policy_ref and metro without center; seed loader idempotent, DB refuses blank policy_ref, only owner_channel writes; interest rows disjoint per user, cross-user and direct table reads refused (42501), unknown source refused (FK).
+- **UNK:** policy_ref for GSA, eBay, GovDeals, PublicSurplus and AuctionZip is the site/API-terms landing URL with `terms_checked_at` null; the actual terms were not reviewed here. Craigslist center coordinates are approximate city centroids. INFER: the owner login is the owner_channel session that runs the loader.
+- **Health:** `cd state && .venv/bin/python -m pytest` → 338 passed, 1 skipped (economics src), 0 failed (exit 0).

@@ -1,0 +1,188 @@
+{
+  "version": "1.0.0",
+  "sources": [
+    {
+      "source_id": "gsa",
+      "display_name": "GSA Auctions",
+      "coverage": {
+        "scope": "national"
+      },
+      "access_mode": "api",
+      "status": "connected",
+      "policy_ref": "https://gsaauctions.gov/",
+      "terms_checked_at": null,
+      "note": "Connected adapter; terms date not recorded (UNK)."
+    },
+    {
+      "source_id": "ebay",
+      "display_name": "eBay",
+      "coverage": {
+        "scope": "national"
+      },
+      "access_mode": "api",
+      "status": "not_connected",
+      "policy_ref": "https://developer.ebay.com/join/api-license-agreement",
+      "terms_checked_at": null,
+      "note": "Official API route only; no adapter yet."
+    },
+    {
+      "source_id": "govdeals",
+      "display_name": "GovDeals",
+      "coverage": {
+        "scope": "national"
+      },
+      "access_mode": "alert_email",
+      "status": "not_connected",
+      "policy_ref": "https://www.govdeals.com/",
+      "terms_checked_at": null,
+      "note": "Owner/user saved-search alert e-mail only."
+    },
+    {
+      "source_id": "publicsurplus",
+      "display_name": "PublicSurplus",
+      "coverage": {
+        "scope": "national"
+      },
+      "access_mode": "alert_email",
+      "status": "not_connected",
+      "policy_ref": "https://www.publicsurplus.com/",
+      "terms_checked_at": null,
+      "note": "Owner/user saved-search alert e-mail only."
+    },
+    {
+      "source_id": "auctionzip",
+      "display_name": "AuctionZip",
+      "coverage": {
+        "scope": "national"
+      },
+      "access_mode": "alert_email",
+      "status": "not_connected",
+      "policy_ref": "https://www.auctionzip.com/",
+      "terms_checked_at": null,
+      "note": "Owner/user saved-search alert e-mail only."
+    },
+    {
+      "source_id": "craigslist_littlerock",
+      "display_name": "Craigslist Little Rock",
+      "coverage": {
+        "scope": "metro",
+        "states": [
+          "AR"
+        ],
+        "center": {
+          "lat": 34.7465,
+          "lng": -92.2896
+        },
+        "radius_mi": 100,
+        "subdomain": "littlerock"
+      },
+      "access_mode": "alert_email",
+      "status": "not_connected",
+      "policy_ref": "https://www.craigslist.org/about/terms.of.use",
+      "terms_checked_at": "2026-10-11",
+      "note": "Official saved-search alert e-mail only; no scraping (B12 ruling)."
+    },
+    {
+      "source_id": "craigslist_fayar",
+      "display_name": "Craigslist Northwest Arkansas",
+      "coverage": {
+        "scope": "metro",
+        "states": [
+          "AR"
+        ],
+        "center": {
+          "lat": 36.0626,
+          "lng": -94.1574
+        },
+        "radius_mi": 100,
+        "subdomain": "fayar"
+      },
+      "access_mode": "alert_email",
+      "status": "not_connected",
+      "policy_ref": "https://www.craigslist.org/about/terms.of.use",
+      "terms_checked_at": "2026-10-11",
+      "note": "Official saved-search alert e-mail only; no scraping (B12 ruling)."
+    },
+    {
+      "source_id": "craigslist_fortsmith",
+      "display_name": "Craigslist Fort Smith",
+      "coverage": {
+        "scope": "metro",
+        "states": [
+          "AR"
+        ],
+        "center": {
+          "lat": 35.3859,
+          "lng": -94.3985
+        },
+        "radius_mi": 100,
+        "subdomain": "fortsmith"
+      },
+      "access_mode": "alert_email",
+      "status": "not_connected",
+      "policy_ref": "https://www.craigslist.org/about/terms.of.use",
+      "terms_checked_at": "2026-10-11",
+      "note": "Official saved-search alert e-mail only; no scraping (B12 ruling)."
+    },
+    {
+      "source_id": "craigslist_jonesboro",
+      "display_name": "Craigslist Jonesboro",
+      "coverage": {
+        "scope": "metro",
+        "states": [
+          "AR"
+        ],
+        "center": {
+          "lat": 35.8423,
+          "lng": -90.7043
+        },
+        "radius_mi": 100,
+        "subdomain": "jonesboro"
+      },
+      "access_mode": "alert_email",
+      "status": "not_connected",
+      "policy_ref": "https://www.craigslist.org/about/terms.of.use",
+      "terms_checked_at": "2026-10-11",
+      "note": "Official saved-search alert e-mail only; no scraping (B12 ruling)."
+    },
+    {
+      "source_id": "ar_local_auction_houses",
+      "display_name": "Arkansas local auction houses",
+      "coverage": {
+        "scope": "states",
+        "states": [
+          "AR"
+        ]
+      },
+      "access_mode": "manual",
+      "status": "not_connected",
+      "policy_ref": "docs/handoff/B12_CRAIGSLIST_FACEBOOK_SOURCE_STATUS.md",
+      "terms_checked_at": "2026-10-12",
+      "note": "Placeholder for individually registered houses; owner relays or alerts only."
+    },
+    {
+      "source_id": "fb_marketplace",
+      "display_name": "Facebook Marketplace",
+      "coverage": {
+        "scope": "national"
+      },
+      "access_mode": "manual",
+      "status": "blocked",
+      "policy_ref": "https://www.facebook.com/apps/site_scraping_tos_terms.php",
+      "terms_checked_at": "2026-10-11",
+      "note": "Automated collection needs Meta's written permission; no unattended fetch."
+    },
+    {
+      "source_id": "offerup",
+      "display_name": "OfferUp",
+      "coverage": {
+        "scope": "national"
+      },
+      "access_mode": "manual",
+      "status": "blocked",
+      "policy_ref": "docs/handoff/B12_CRAIGSLIST_FACEBOOK_SOURCE_STATUS.md",
+      "terms_checked_at": "2026-10-12",
+      "note": "Not readable (HTTP 403); owner-shared items only."
+    }
+  ]
+}
