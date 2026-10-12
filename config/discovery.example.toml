@@ -107,3 +107,11 @@ id = "kb-nhtsa"
 source = "nhtsa"
 vehicles = [{ make = "ACURA", model = "RDX", year = 2012 }]   # explicit; never parsed from listing text
 live = false
+
+# ---- per-user alerts mailbox (B-40/B-41). Tags are `<base_local>+<handle>@gmail.com`. ------------------------------------
+# untagged_user: alerts to the plain address (many sites reject '+') go to this user; omit it to quarantine them.
+# Unknown tags and unauthenticated senders are always quarantined. Never the owner's personal Gmail.
+[peruser_alerts]
+base_local = "dealsniffer2026"
+untagged_user = "owner"
+handles = { owner = "owner" }

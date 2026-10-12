@@ -63,6 +63,21 @@ def plus_tag(msg, base_local: str = "alerts") -> Optional[str]:
     return None
 
 
+def addressed_untagged(msg, base_local: str) -> bool:
+    """True when a recipient is the plain mailbox address `base_local@...` (no plus tag)."""
+    for h in _RECIPIENT_HEADERS:
+        for _, addr in getaddresses([str(v) for v in msg.get_all(h, []) or []]):
+            if addr.lower().rsplit("@", 1)[0] == base_local:
+                return True
+    return False
+
+
+def ingest_from_config(reader: MailboxReader, cfg: dict, **kw) -> IngestResult:
+    """`cfg` is the `[peruser_alerts]` table: base_local, untagged_user (optional), handles {tag: user_id}."""
+    return ingest(reader, cfg.get("handles", {}), base_local=cfg["base_local"],
+                  untagged_user=cfg.get("untagged_user"), **kw)
+
+
 def _origin_for(sender_domain: str):
     for o in ORIGINS.values():
         if sender_domain == o.domain or sender_domain.endswith("." + o.domain):
@@ -70,9 +85,13 @@ def _origin_for(sender_domain: str):
     return None
 
 
-def ingest(reader: MailboxReader, handles: dict[str, str], *, base_local: str = "alerts", lookback_days: int = 7,
+def ingest(reader: MailboxReader, handles: dict[str, str], *, base_local: str = "alerts", untagged_user: Optional[str] = None,
+           lookback_days: int = 7,
            clock: Callable[[], datetime] = lambda: datetime.now(timezone.utc)) -> IngestResult:
-    """`handles` maps plus tag -> user_id. Newest alert wins for a repeated posting's shared facts."""
+    """`handles` maps plus tag -> user_id. Newest alert wins for a repeated posting's shared facts.
+
+    `untagged_user` (default None: quarantine) receives alerts sent to the plain `base_local@` address, but only
+    from authenticated alert senders (parse_alert still DKIM-gates); unknown tags are always quarantined."""
     res = IngestResult()
     handles = {k.lower(): v for k, v in handles.items()}
     newest: dict[tuple[str, str], str] = {}
@@ -87,7 +106,8 @@ def ingest(reader: MailboxReader, handles: dict[str, str], *, base_local: str = 
         origin = _origin_for(domain)
         if origin is None:
             continue                                    # not an alert sender: not ours to read or retain
-        if tag is None or tag not in handles:
+        untagged_ok = tag is None and untagged_user is not None and addressed_untagged(msg, base_local)
+        if not untagged_ok and (tag is None or tag not in handles):
             res.quarantine.append(QuarantinedMail("no plus tag" if tag is None else "unknown plus tag",
                                                   str(msg.get("Date", ""))[:60], mid, tag or ""))
             continue                                    # body never parsed
@@ -95,9 +115,9 @@ def ingest(reader: MailboxReader, handles: dict[str, str], *, base_local: str = 
             facts, listings = parse_alert(origin, raw)
         except Exception as e:  # noqa: BLE001
             res.quarantine.append(QuarantinedMail(f"unauthenticated or unparsable: {str(e)[:80]}",
-                                                  str(msg.get("Date", ""))[:60], mid, tag))
+                                                  str(msg.get("Date", ""))[:60], mid, tag or ""))
             continue
-        user, received = handles[tag], facts["date"]
+        user, received = untagged_user if untagged_ok else handles[tag], facts["date"]
         res.alert_state[(user, origin.source)] = max(res.alert_state.get((user, origin.source), ""), received)
         for l in listings:
             key = (origin.source, l.listing_id)
