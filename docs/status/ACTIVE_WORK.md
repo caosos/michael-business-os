@@ -64,3 +64,15 @@ All other lanes: CLOSED, nothing READY (all open rows BLOCKED on owner/host). La
 - **ETA / next_check_at:** review about 40 minutes after restart; Monday, October 12, 2026 — 1:01 PM America/Chicago.
 - **Blocker / Michael:** NONE / NOTHING.
 - **Canonical log:** `docs/receipts/2026-10-12-supervisor-visible-check-1218.md`.
+
+
+## Current checkpoint — Monday, October 12, 2026 — 12:28 PM America/Chicago
+
+- **Current bounded task:** F-157 independent Agent 01 acceptance. Completed lane 06 artifact `498fcb3eb04d5e1a4d281a5ade2cac306141bda4` remains closed; do not re-dispatch it.
+- **Transition:** WORKING progress. Existing Agent 01 resumed at 12:26 PM America/Chicago and opened clean detached checkout `var/review-f157`.
+- **Host observation:** PR #1 comment `6129248011`; live `:8766` ARTIFACT `a0ee24051fb06dcab8f04306bcb7da54504c5ece`, exported 2026-10-12T17:22:00Z. F-157 descends from `a0ee240` but is NOT LOADED.
+- **Current action:** exact-diff review, focused/full tests, golden review, category/persistence/isolation verification and Claude Chrome desktop/mobile acceptance.
+- **Tests:** worker evidence 8/0 focused; prior reference 575/1 known `resale_f39`; lane D+E 104/3 documented unrelated failures. Independent Agent 01 rerun is in progress.
+- **ETA / next_check_at:** about 40 minutes from resume; Monday, October 12, 2026 — 1:10 PM America/Chicago.
+- **Blocker / Michael:** NONE / NOTHING.
+- **Canonical log:** `docs/receipts/2026-10-12-supervisor-visible-check-1228.md`.
