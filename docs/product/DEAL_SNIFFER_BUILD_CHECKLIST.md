@@ -267,3 +267,14 @@ This section is part of the existing living checklist and is the authoritative r
 - **ETA / next_check_at:** ETA UNKNOWN; Monday, October 12, 2026 — 5:44 AM America/Chicago.
 - **One next action:** existing Agent 01 accepts and reviews the completed artifact, then publishes exact-revision tests plus Claude Chrome desktop/mobile STAGING_ACCEPTED/DONE or structured NEED/BLOCKED. Do not re-dispatch lane 06.
 - **Michael:** NOTHING.
+
+## Supervisor reconciliation — Monday, October 12, 2026 — 6:40 AM America/Chicago
+
+- **Canonical receipt:** `DS-CHECKIN-20261012-0640-CDT` / [docs/receipts/2026-10-12-supervisor-visible-check-0640.md](../receipts/2026-10-12-supervisor-visible-check-0640.md).
+- **F-157 repeated exception:** implementation remains complete at `498fcb3eb04d5e1a4d281a5ade2cac306141bda4`, but the Monday, October 12, 2026 — 5:44 AM America/Chicago recovery checkpoint also passed without ACK/WORKING, independent review, browser receipt, loaded revision change, or current host observation.
+- **Current bounded task:** F-157 Agent 01 independent acceptance; stage `NEED — REPEATED ACCEPTANCE CHECKPOINT MISSED`. **APPEARS STALE — HOST STATE UNVERIFIED.**
+- **Evidence:** focused 8/0, reference 575/1 known `resale_f39`, lane D+E 104/3 documented unrelated failures; tested `498fcb3`, loaded `bbc80ec851b75aec52af1f8b0838dd56ccc714ef`; Claude Chrome desktop/mobile evidence MISSING. Latest exception [PR #1 comment 6123547638](https://github.com/caosos/michael-business-os/pull/1#issuecomment-6123547638); queue reconciliation `2f518a88919ac09b331517e7253ba6fa6274785f`.
+- **ETA / next_check_at:** ETA UNKNOWN; Monday, October 12, 2026 — 6:45 AM America/Chicago.
+- **One next action:** existing Agent 01 accepts and reviews the completed artifact, then publishes exact-revision tests plus Claude Chrome desktop/mobile STAGING_ACCEPTED/DONE or structured NEED/BLOCKED. Do not re-dispatch lane 06.
+- **Michael:** NOTHING.
+
