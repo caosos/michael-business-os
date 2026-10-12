@@ -402,3 +402,14 @@ This section is part of the existing living checklist and is the authoritative r
 - [ ] **Current bounded task:** run `tools/release_marketplace.sh 112fce4 a186ca6e29f785e7bbb705ce6eb44482558f26da` once through the established owner-gated host path, then complete loaded browser acceptance. ETA UNKNOWN; next_check_at MISSING; current host state UNKNOWN. **APPEARS STALE — HOST STATE UNVERIFIED.**
 - **Timestamp correction:** Agent 01 commit `e37a53a` is 12:57:50 PM CDT and PR receipt `6129725258` is 12:58:22 PM CDT; these supersede the impossible future `~13:35 CDT` acceptance timestamp previously written in the queue.
 - Canonical evidence: `docs/receipts/2026-10-12-supervisor-visible-check-1259.md`.
+
+
+## Supervisor reconciliation — Monday, October 12, 2026 — 1:32 PM America/Chicago
+- [x] **F-157/F-158 STAGING_ACCEPTED:** implementation `112fce4eaebf867f43196a3b38d1545f8614fafd`; Agent 01 acceptance `e37a53a2137f1b05df698a8585b5352a6f429ba1`; focused 22/0; full 573/2 with both failures reproduced on loaded `a0ee240`; 16/16 property events hidden by default, mixed/equipment/vehicle/liquidation retained, zero GSA false positives.
+- [ ] **F-157/F-158 LIVE_VERIFIED:** tested `112fce4`; loaded remains `a0ee24051fb06dcab8f04306bcb7da54504c5ece`. F-158 is NOT LOADED and loaded Claude Chrome desktop/mobile evidence is MISSING.
+- [ ] **Exact release gate clarified:** required action is one established-path execution of `tools/release_marketplace.sh 112fce4 a186ca6e29f785e7bbb705ce6eb44482558f26da`, followed by exact loaded/service observation and live browser acceptance. Existing F-144 authority did not explicitly cover this later combined target. No attempt or classifier denial for `112fce4` was observed; exact-target approval is unverified/not granted. Slack directive `1791828705.264649` says not to release on this request, and no release was performed.
+- [ ] **A-73 CURRENT / DELIVERED IN REPOSITORY, ACK UNVERIFIED:** existing Agent 01 owns the P0 repair to the existing watchdog's specialist-finished-to-Agent-01 wake path. Compatible internal no-extra-cost work is authorized while release is blocked; no duplicate service/process is allowed. ETA UNKNOWN until ACK; next_check_at Monday, October 12, 2026 — 1:37 PM America/Chicago. Current host state UNKNOWN.
+- **A-73 acceptance:** exactly one wake; deduplication; project isolation; finished-artifact provenance; ACK/WORKING within 300 seconds; no duplicate process/service.
+- **ONE next action:** existing Agent 01 ACKs A-73 and begins the bounded repair, or publishes command-specific NEED/BLOCKED.
+- **Michael:** NOTHING now; a later explicit approval of the exact release command/target is required before loading.
+- **Canonical evidence:** `docs/receipts/2026-10-12-supervisor-visible-check-1332.md`.
