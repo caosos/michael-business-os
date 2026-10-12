@@ -46,7 +46,7 @@ def test_bruck_event_fields():
     assert "4 Wagon Track Road" in b.get("address") and "Perryville" in b.get("address")
     assert b.get("location")["city"] == "Perryville" and b.get("location")["state"] == "AR" and b.get("location")["zip"] == "72126"
     assert "Monday, October 12" in b.get("preview") and "10:00 a.m." in b.get("preview")
-    assert "Heavy Equipment" in b.get("highlights") and "Tractors" in b.get("highlights")
+    assert "Heavy Equipment" in b.get("category_headline") and "Tractors" in b.get("category_headline")
     assert {"Vehicle", "Truck", "RV", "Equipment"} <= set(b.get("category_tags")) and "Active Auctions" not in b.get("category_tags")
     assert b.get("rules_url") == f"https://wooleyauctioneers.com/{BRUCK}/"
     assert b.get("hibid_catalog_url").startswith("https://wooleyauctioneers.hibid.com/catalog/")   # link text only
@@ -204,3 +204,19 @@ def test_normalize_premium_only_when_stated_and_no_invented_price_or_condition()
     for x in (b, s):
         assert "type" not in x["price"] and "amount" not in x["price"] and x["condition"] == "unknown"
         assert "zero_bid" not in x["flags"]
+
+
+def test_b30_highlights_list_headline_and_event_category():
+    ad = _ad()
+    recs = {r.payload["slug"]: r for r in ad.fetch(P).records}
+    hl = recs[BRUCK].payload["highlights"]
+    assert "John Deere 750 crawler dozer" in hl and isinstance(hl, list)
+    b = ad.lot(recs[BRUCK].payload, NOW)
+    text = " ".join(b.get("highlights")).lower()
+    assert "dozer" in text and "john deere" in text
+    assert b.get("category_headline").startswith("Heavy Equipment")
+    assert b.get("event_category") == "auction event: heavy equipment"
+    assert b.get("category") != "trailers"
+    n = ad.normalize(recs[BRUCK].payload, NOW)
+    assert n.category != "trailers" and "John Deere 750" in n.normalized["description"]
+    assert ad.http.log == []                                        # no request at all, so none to hibid

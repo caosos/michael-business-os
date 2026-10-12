@@ -78,6 +78,12 @@ def parse_when(s: str) -> tuple[str | None, bool]:
     return dt.isoformat(), zone in _FIXED_TZ
 
 
+def event_category(headline: str | None) -> str | None:
+    """Coarse event category from the page headline's first segment: 'Heavy Equipment • Tractors ...' -> 'auction event: heavy equipment'."""
+    first = re.split(r"[•|;]", headline or "")[0].strip().lower()
+    return f"auction event: {first}" if first else None
+
+
 def _slug(url: str) -> str:
     return urlsplit(url).path.strip("/").rsplit("/", 1)[-1]
 
@@ -121,7 +127,12 @@ def parse_detail(page: str, url: str) -> dict:
         if m:
             h = re.search(r"<h3><strong>(.*?)</strong></h3>", page[info.end():], re.S)
             if h:
-                out["highlights"] = _text(h.group(1))
+                out["category_headline"] = _text(h.group(1))
+        body = page[info.end():]
+        body = body.split("selected highlights only", 1)[0]       # B-30: the page's own "selected highlights" list items
+        items = [_text(li) for li in re.findall(r"<li>(.*?)</li>", body, re.S)]
+        if items:
+            out["highlights"] = [i for i in items if i]
     for href in re.findall(r'href="(https?://[^"]*hibid\.com[^"]*)"', page):
         out["hibid_catalog_url"] = html.unescape(href)          # link text only; never requested
         break
@@ -243,7 +254,10 @@ class WooleySiteAdapter(SourceAdapter):
         c = place_coords(loc) if loc else None
         dist = round(haversine_miles(HOME_BASE, c), 1) if c else None
         cats = p.get("categories") or [s.replace("-", " ").title() for s in p.get("category_slugs", [])]
-        category, _ = classify("flip", match_text(f"{p['title']} {p.get('highlights') or ''}"))
+        hl = p.get("highlights")
+        hl = hl if isinstance(hl, list) else ([hl] if hl else [])
+        headline = p.get("category_headline") or (hl[0] if isinstance(p.get("highlights"), str) else None)
+        category, _ = classify("flip", match_text(p["title"]))        # title only: the headline lists many types (trailers is not the event)
         f = {
             "title": fld(clean_text(p["title"], 300)), "auctioneer": fld("Wooley Auctioneers"),
             "sale_type": fld(p.get("sale_type") or (p.get("excerpt") or "").split(" Begin")[0].split(" Began")[0] or None),
@@ -251,7 +265,8 @@ class WooleySiteAdapter(SourceAdapter):
             "closes_at": fld(ends, "FACT" if ends_exact else "INFERENCE"),
             "buyer_premium_pct": fld(p.get("buyer_premium_pct")), "sales_tax_pct": fld(None),
             "pickup": fld(None), "preview": fld(p.get("preview")), "address": fld(address),
-            "location": fld(loc or None, loc_basis), "category_tags": fld(cats), "highlights": fld(p.get("highlights")),
+            "location": fld(loc or None, loc_basis), "category_tags": fld(cats), "highlights": fld(hl),
+            "category_headline": fld(headline), "event_category": fld(event_category(headline), "INFERENCE"),
             "rules_url": fld(p.get("url")), "hibid_catalog_url": fld(p.get("hibid_catalog_url")),
             "category": fld(category, "INFERENCE"),
             "lot_number": Field(UNKNOWN, url, seen, "UNKNOWN", 0), "current_bid": Field(UNKNOWN, url, seen, "UNKNOWN", 0),
@@ -272,14 +287,14 @@ class WooleySiteAdapter(SourceAdapter):
                    "counterparty": {"role": "auction_house", "name": "Wooley Auctioneers"},
                    "listing_status": "active", "images": []}
         if lot.get("highlights") != UNKNOWN:
-            n["description"] = lot.get("highlights")
+            n["description"] = clean_text("; ".join(lot.get("highlights")), 4000)
         if ends:
             n["ends_at"] = ends
         if loc:
             n["location"] = {**loc, **({"geo_tier": geo_tier(lot.distance_miles)} if lot.distance_miles is not None else {})}
         category = lot.get("category")
         flags = base_flags(price=price, bid_count=None, ends_at=ends, fetched_at=fetched_at, matched=category != "other_asset",
-                           tier=None, texts=(lot.get("title"), lot.get("highlights")))
+                           tier=None, texts=(lot.get("title"), " ".join(lot.get("highlights")) if lot.get("highlights") != UNKNOWN else None))
         flags = sorted(set(flags) | {"needs_review"})              # event card only: no lot, bid or image data exists
         n["flags"] = flags
         return Normalized(source_listing_id=lot.lot_id, url=lot.get("rules_url"), type="flip", category=category,
