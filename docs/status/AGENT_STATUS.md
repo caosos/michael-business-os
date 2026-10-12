@@ -4,18 +4,18 @@
 - **Role:** Chief Coordinator / Core Platform / Integration (Lane A)
 - **Branch:** `research/agent-01-coordinator`
 - **Worktree:** `/home/michaelos/business-os-worktrees/agent-01-coordinator`
-- **State:** STAGING_ACCEPTED / RELEASE BLOCKED — F-157/F-158 accepted at `112fce4` by Agent 01 commit `e37a53a`: focused 22/0; full 573/2 with both failures reproduced on `a0ee240`; real caches hide all 16 property events by default, retain mixed/equipment events and hide zero GSA lots; copied owner preferences remembered tools+trailers and live preferences stayed untouched. Loaded remains `a0ee240`; F-158 is NOT LIVE and loaded Claude Chrome desktop/mobile acceptance is MISSING. Owner-gated release command prepared. Current host observation UNKNOWN. **APPEARS STALE — HOST STATE UNVERIFIED.**
+- **State:** A-73 DELIVERED IN REPOSITORY / ACK UNVERIFIED — F-157/F-158 is STAGING_ACCEPTED at `112fce4` by Agent 01 `e37a53a`, but the exact combined release was not performed. No release attempt or classifier denial for `112fce4` is observed; exact-target approval is not granted/unverified, and Slack directive `1791828705.264649` says not to release on this request. Loaded remains `a0ee240`; loaded Claude Chrome desktop/mobile acceptance is MISSING. Current host state UNKNOWN. GitHub delivery is not host liveness.
 - **Proposed:** (02) B-23 fixture adapter emits contract enum values (`ingestion_method` json/api, counterparty role `other`); then drop `auction_lot.conform`
 - **Done:** F-142 live verification + protocol adoption (this wave, see ack 2026-10-11-owner-project-operating-protocol); A-51 @ 12817e7; A-49 @ b2b3399; A-47 @ 6e6aa84; A-48 @ 8abbfa0; A-43 @ da6cf4a; A-44 @ 6440be3; A-42 @ 69402d9; A-41 @ 281cc74; A-40 @ 1160310; A-39 @ 6185927; A-38 @ 2198a74; A-37 @ b92683d
 - **Done (reboot persistence):** five user units enabled+active, Linger=yes; `docs/operations/REBOOT_RECOVERY.md`; cold start proven only by the next reboot
-- **Current bounded claim (Monday, October 12, 2026 — 12:59 PM America/Chicago):** one existing-path combined release of `112fce4` with lane 02 pin `a186ca6e29f785e7bbb705ce6eb44482558f26da`, then Agent 01 firsthand Claude Chrome desktop/mobile acceptance on the actually loaded page. Stage STAGING_ACCEPTED / RELEASE BLOCKED — NOT LIVE, NOT DONE. Command: `tools/release_marketplace.sh 112fce4 a186ca6e29f785e7bbb705ce6eb44482558f26da`. Canonical log: `docs/receipts/2026-10-12-supervisor-visible-check-1259.md`.
+- **Current bounded claim (Monday, October 12, 2026 — 1:32 PM America/Chicago):** A-73 existing-watchdog wake-gap repair, priority P0, owner existing Agent 01. Stage DELIVERED IN REPOSITORY / ACK UNVERIFIED. Acceptance: exactly one wake for a finished specialist artifact awaiting Agent 01 review; deduplication; project isolation; finished-artifact provenance; ACK/WORKING within 300 seconds; no duplicate process/service. ETA UNKNOWN until ACK; next_check_at Monday, October 12, 2026 — 1:37 PM America/Chicago. Blocker NONE for implementation; host delivery/liveness unverified. Canonical log: `docs/receipts/2026-10-12-supervisor-visible-check-1332.md`.
 - **Done (this wave, runtime migration):** ADR-0014; lanes 02-06 closed out and sessions closed after verification; `tools/worker.py`, `mbos.router`, `mbos.telemetry`; quota from `rate_limit_event` verified; Aria 1945 ack
 - **Done (this wave):** A-24, A-25, A-26, A-27, A-12; Aria 1840 ack (ADR-0012, card capital-velocity fields) @ 292adae; Aria 1905 ack (ADR-0013, 20 tasks queued) @ e20d6af; A-23 mission schema @ a704e84 (+ principal_impairment @ 7b42c05); A-22 `tools/foreman.py`; release gate 285 passed (stale lane installs refreshed)
 - **Done:** A-00 (ADR-0010), A-01 phase 1 (`Pg04Ledger`), A-07 (`notify_decision`), A-09 (R12), A-11 (interop tool)
 - **Current phase:** ROUND TWO. The Lane A spine is built and tested. Integration rulings R1–R11 are issued.
 - **Role:** foreman/dispatcher. I own `docs/status/READY_QUEUE.md` and `ACTIVE_WORK.md` (`docs/COORDINATION.md`).
 - **Started:** 2026-10-06
-- **Last updated:** Monday, October 12, 2026 — 12:59 PM America/Chicago
+- **Last updated:** Monday, October 12, 2026 — 1:32 PM America/Chicago
 
 ## Current objective
 Build the durable application spine DISCOVER → NORMALIZE → SCORE → RECOMMEND → APPROVE → DRY-RUN ACT → RECEIPT and integrate the specialist lanes. All external actions are DRY-RUN only.
@@ -209,3 +209,16 @@ None new. MICHAEL_DECISIONS #1–#5 are unchanged; none blocks the dry-run MVP.
 ## Proposed tasks
 - (01/04) `spine_d.record_human_input`'s "same input again is a no-op" check no longer matches the entry stored after lane D 0027 (D-32), so a repeated quote writes a new entry (test_a40 human-input test red on base e1f73bd). Compare against the stored shape.
 - (01) ResearchWatcher can absorb a real input as "its own re-check's growth" when the input lands in the round after a re-check (seen in A-49: round 2 queued nothing; round 3 caught up). Absorb only entries written by the re-check (e.g. count non-human entries).
+
+
+## Current checkpoint — Monday, October 12, 2026 — 1:32 PM America/Chicago
+- **Boundary result:** F-157/F-158 STAGING_ACCEPTED at `112fce4eaebf867f43196a3b38d1545f8614fafd`; Agent 01 acceptance `e37a53a2137f1b05df698a8585b5352a6f429ba1`. Focused 22/0; full 573/2 with both failures reproduced on loaded `a0ee240`; all 16 property events hidden by default, mixed/equipment/vehicle/liquidation retained, zero GSA false positives.
+- **Release clarification:** exact action is `tools/release_marketplace.sh 112fce4 a186ca6e29f785e7bbb705ce6eb44482558f26da` once on the established host path. Earlier F-144 authority did not explicitly cover this later combined target. No attempt or classifier denial for `112fce4` is observed. Approval is unverified/not granted; Slack `1791828705.264649` says do not release on this request. No release was performed.
+- **Tested / loaded / browser:** tested `112fce4`; loaded `a0ee24051fb06dcab8f04306bcb7da54504c5ece`; F-158 NOT LOADED; loaded Claude Chrome desktop/mobile acceptance MISSING.
+- **Host:** last timestamped host observation Monday, October 12, 2026 — 12:26 PM America/Chicago; current state UNKNOWN.
+- **Current bounded task:** A-73 existing-watchdog wake-gap repair, owned by existing Agent 01, priority P0. Stage DELIVERED IN REPOSITORY / ACK UNVERIFIED. This compatible internal no-extra-cost work may proceed while release is blocked.
+- **ETA / next_check_at:** ETA UNKNOWN until ACK; Monday, October 12, 2026 — 1:37 PM America/Chicago.
+- **Blocker:** NONE for A-73 implementation; host ACK unverified. Exact-target approval separately blocks live F-157/F-158 acceptance.
+- **ONE next action:** existing Agent 01 ACKs A-73 and begins the bounded repair, or publishes command-specific NEED/BLOCKED.
+- **Michael:** NOTHING now; exact release approval is required later.
+- **Canonical log:** `docs/receipts/2026-10-12-supervisor-visible-check-1332.md`.
