@@ -1,0 +1,7 @@
+# Receipt B-33: Blackmon event locations and multi-day dates
+
+- **Action (DRY-RUN, offline):** `adapters/blackmon_site.py` now parses the Squarespace `eventitem-meta-address-line` spans ("United States" dropped) with `parse_address` ('City, ST, ZIP' or full state name, any state; coordinates and distance only for AR). 'Multiple Locations' stays UNKNOWN with `location_unknown_reason`. Multi-day pages (two `event-date` elements) set `end_date` from the last one.
+- **Dates:** the Arkansas Contractors page does carry times (8:00 AM / 9:00 AM in a plain `event-time-localized` element), so those are used (2026-10-27T08:00 to 2026-10-29T09:00 America/Chicago, INFERENCE). When a multi-day page has no times, begins_at = first day 00:00 and closes_at = last day 23:59 (INFERENCE; tested by stripping the time spans). This differs from the task text ("no times") because the real page has them.
+- **Schema.org:** the page's JSON-LD is only a bare `{"@type":"Event"}` stub (FACT, archived page), so the address lines are the sole source.
+- **Provenance:** three new scrubbed pages copied from `origin/research/agent-01-coordinator:docs/receipts/b29-blackmon-archive/` with the updated `ORIGINAL_SHA256.txt`. No network call; no proxibid URL fetched (test asserts the request log).
+- **Results:** Lonoke AR 72086; West Plains MO 65775; Union Pacific and bank-repo 'Multiple Locations' UNKNOWN with reason. `.venv/bin/python -m pytest -q`: 412 passed, 0 failed (405 before, 7 new).

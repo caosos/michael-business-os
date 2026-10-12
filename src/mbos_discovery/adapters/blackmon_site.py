@@ -40,7 +40,25 @@ MAX_EVENTS = 40
 LOT_LEVEL_UNKNOWN = ("lot_number", "current_bid", "bid_count", "lot_image")
 _CENTRAL = ZoneInfo("America/Chicago")
 _TAG = re.compile(r"<[^>]+>")
-_ADDR = re.compile(r"^(?:.*?,\s*)?([^,]+?),\s*(?:AR|Arkansas)\s+(\d{5})\s*$", re.I)
+_ADDR = re.compile(r"([^,]+?),\s*([A-Za-z][A-Za-z ]+?)[,\s]+(\d{5})(?:-\d{4})?\s*$")     # 'City, ST, ZIP' / 'City, State, ZIP'
+_STATES = {n.lower(): a for a, n in (
+    ("AL", "Alabama"), ("AK", "Alaska"), ("AZ", "Arizona"), ("AR", "Arkansas"), ("CA", "California"), ("CO", "Colorado"),
+    ("CT", "Connecticut"), ("DE", "Delaware"), ("FL", "Florida"), ("GA", "Georgia"), ("HI", "Hawaii"), ("ID", "Idaho"),
+    ("IL", "Illinois"), ("IN", "Indiana"), ("IA", "Iowa"), ("KS", "Kansas"), ("KY", "Kentucky"), ("LA", "Louisiana"),
+    ("ME", "Maine"), ("MD", "Maryland"), ("MA", "Massachusetts"), ("MI", "Michigan"), ("MN", "Minnesota"), ("MS", "Mississippi"),
+    ("MO", "Missouri"), ("MT", "Montana"), ("NE", "Nebraska"), ("NV", "Nevada"), ("NH", "New Hampshire"), ("NJ", "New Jersey"),
+    ("NM", "New Mexico"), ("NY", "New York"), ("NC", "North Carolina"), ("ND", "North Dakota"), ("OH", "Ohio"), ("OK", "Oklahoma"),
+    ("OR", "Oregon"), ("PA", "Pennsylvania"), ("RI", "Rhode Island"), ("SC", "South Carolina"), ("SD", "South Dakota"),
+    ("TN", "Tennessee"), ("TX", "Texas"), ("UT", "Utah"), ("VT", "Vermont"), ("VA", "Virginia"), ("WA", "Washington"),
+    ("WV", "West Virginia"), ("WI", "Wisconsin"), ("WY", "Wyoming"))}
+_STATES.update({a.lower(): a for a in _STATES.values()})
+
+
+def parse_address(text: str) -> dict:
+    """'425 Blackmon Road, Lonoke, AR, 72086' -> {city, state, zip}; full state names accepted; {} when not parseable."""
+    m = _ADDR.search(re.sub(r",?\s*United States\s*$", "", text or "").strip())
+    st = _STATES.get(m.group(2).strip().lower()) if m else None
+    return {"city": clean_text(m.group(1)), "state": st, "zip": m.group(3)} if st else {}
 _TIME = re.compile(r"(\d{1,2}):(\d{2})\s*([ap]m)", re.I)
 _DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 
@@ -113,8 +131,15 @@ def parse_event_page(page: str) -> dict:
             ev[f"{key}_date"] = m.group(1)
             ev[f"{key}_time"] = _text(m.group(2))
     lines = [_text(x) for x in re.findall(r'<span class="eventitem-meta-address-line[^"]*">(.*?)</span>', body, re.S)]
-    if any(lines):
-        ev["location_text"] = ", ".join(x for x in lines if x)
+    lines = [x for x in lines if x and x.lower() != "united states"]
+    if lines:
+        ev["location_text"] = ", ".join(lines)
+    dates = re.findall(r'<time class="event-date" datetime="(\d{4}-\d{2}-\d{2})"', body)
+    if len(dates) > 1:
+        ev["end_date"] = dates[-1]                                # multi-day: first and last <time class="event-date">
+        times = [_text(x) for x in re.findall(r'<time class="event-time-localized"[^>]*>(.*?)</time>', body, re.S)]
+        if "start_time" not in ev and times:
+            ev["start_time"], ev["end_time"] = times[0], times[-1]
     txt = _text(re.sub(r"<br\s*/?>", ". ", body))
     ty = re.search(r"Type Auction:\s*([^.]+)", txt)
     if ty:
@@ -238,17 +263,18 @@ class BlackmonSiteAdapter(SourceAdapter):
 
         starts = parse_local(p.get("start_date", ""), p.get("start_time", ""))
         ends = parse_local(p.get("end_date", ""), p.get("end_time", ""))
+        if p.get("end_date") and p["end_date"] != p.get("start_date"):          # multi-day without parseable times: whole days
+            starts = starts or parse_local(p["start_date"], "12:00 am")
+            ends = ends or parse_local(p["end_date"], "11:59 pm")
         reasons = {k: "event page states no parseable date+time" for k, v in (("begins_at", starts), ("closes_at", ends)) if not v}
         text = p.get("location_text") or ""
         multi = "multiple locations" in text.lower()
         loc: dict = {}
-        am = None if multi else _ADDR.match(text)
-        if am:
-            loc = {"city": clean_text(am.group(1)), "state": "AR", "zip": am.group(2)}
-        c = place_coords(loc) if loc else None
+        loc = {} if multi else parse_address(text)
+        c = place_coords(loc) if loc.get("state") == "AR" else None     # city table is Arkansas-only
         dist = round(haversine_miles(HOME_BASE, c), 1) if c else None
         loc_reason = ("event page location reads 'Multiple Locations'" if multi else
-                      None if loc else "event page location is absent or not a parseable Arkansas address")
+                      None if loc else "event page location is absent or not a parseable 'City, ST, ZIP' address")
         category, _ = classify("flip", match_text(p["title"]), "")
         f = {
             "title": fld(clean_text(p["title"], 300)), "auctioneer": fld("Blackmon Auctions"),

@@ -217,3 +217,51 @@ def test_offline_guarantee(monkeypatch, pages):
         raise AssertionError("network used")
     monkeypatch.setattr(socket, "socket", deny)
     assert _ad(pages).fetch(P).ok
+
+
+# ---- B-33: locations (Squarespace address lines) and multi-day dates -------------------------------------------------------------
+def _page(name):
+    return (ARCHIVE / f"event-{name}.html").read_text()
+
+
+def _lot(page, slug="x"):
+    ad = B.BlackmonSiteAdapter(None, clock=lambda: NOW)
+    return ad.lot({"slug": slug, "title": "T", "url": f"https://www.blackmonauctions.com/auctions/{slug}", **B.parse_event_page(page)}, NOW)
+
+
+def test_b33_lonoke_ar_address_parsed():
+    e = _lot(_page("arkansas-contractors-auction-oct-2026"))
+    assert e.get("location") == {"city": "Lonoke", "state": "AR", "zip": "72086"}
+    assert e.get("address") == "425 Blackmon Road, Lonoke, AR, 72086" and e.get("location_unknown_reason") == A.UNKNOWN
+
+
+def test_b33_west_plains_missouri_full_state_name():
+    e = _lot(_page("crown-manufacturing-liquidation-auction"))
+    assert e.get("location") == {"city": "West Plains", "state": "MO", "zip": "65775"}
+    assert e.get("address") == "6468 U.S. 63, West Plains, Missouri, 65775" and e.distance_miles is None
+
+
+@pytest.mark.parametrize("name", ["union-pacific-railroad-surplus-equipment-auction-oct-2026", "bank-repo"])
+def test_b33_multiple_locations_stays_unknown_with_reason(name):
+    e = _lot(_page(name))
+    assert e.get("location") == A.UNKNOWN and e.get("address") == A.UNKNOWN
+    assert "Multiple Locations" in e.get("location_unknown_reason")
+
+
+def test_b33_multi_day_is_inference_in_chicago_time():
+    e = _lot(_page("arkansas-contractors-auction-oct-2026"))
+    assert e.get("begins_at") == "2026-10-27T08:00:00-05:00" and e.get("closes_at") == "2026-10-29T09:00:00-05:00"
+    assert e.fields["begins_at"].basis == e.fields["closes_at"].basis == "INFERENCE"
+
+
+def test_b33_multi_day_without_times_is_whole_days():
+    page = re.sub(r'<span class="eventitem-meta-time">.*?</span>', "", _page("arkansas-contractors-auction-oct-2026"), flags=re.S)
+    e = _lot(page)
+    assert e.get("begins_at") == "2026-10-27T00:00:00-05:00" and e.get("closes_at") == "2026-10-29T23:59:00-05:00"
+    assert e.fields["begins_at"].basis == e.fields["closes_at"].basis == "INFERENCE"
+
+
+def test_b33_no_proxibid_request(pages):
+    ad = _ad(pages)
+    ad.fetch(P)
+    assert not any(B.is_proxibid(str(x)) for x in ad.http.log)
