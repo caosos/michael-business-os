@@ -222,3 +222,13 @@ None new. MICHAEL_DECISIONS #1–#5 are unchanged; none blocks the dry-run MVP.
 - **ONE next action:** existing Agent 01 ACKs A-73 and begins the bounded repair, or publishes command-specific NEED/BLOCKED.
 - **Michael:** NOTHING now; exact release approval is required later.
 - **Canonical log:** `docs/receipts/2026-10-12-supervisor-visible-check-1332.md`.
+
+
+## Current checkpoint — Monday, October 12, 2026 — 1:53 PM America/Chicago
+- **A-73:** existing Agent 01 remains responsible; stage **DELIVERED IN REPOSITORY / ACK MISSED**. The 1:37 PM ACK deadline and 300-second watchdog window elapsed with no ACK/WORKING or exact NEED/BLOCKED. ETA UNKNOWN; next_check_at MISSING.
+- **B-12:** independent NEED receipt [6130595898](https://github.com/caosos/michael-business-os/pull/1#issuecomment-6130595898) reports mailbox credentials installed mode 600, read-only IMAP login OK, required labels present, alerts folder empty, Seen unchanged, and general inbox unopened. Stage **NEED / PARTIAL PREREQUISITES SATISFIED**; it is not the current bounded task.
+- **B-12 blocker / acceptance:** owner saved-search alert plus Gmail filter into `DealSniffer/Alerts`; then Agent 02 performs one read-only smoke and existing Agent 01 validates a genuine card/original link in Claude Chrome desktop/mobile. ETA within 15 minutes after first alert; next_check_at Tuesday, October 13, 2026 — 9:00 AM America/Chicago.
+- **Tested / loaded:** B-12 parser NOT RUN. F-157/F-158 tested `112fce4`; loaded `a0ee240`; F-158 NOT LOADED; loaded browser acceptance MISSING.
+- **Host:** receipt explicitly says host observation UNKNOWN; no Agent 01/watchdog/process liveness proof. **APPEARS STALE — HOST STATE UNVERIFIED.**
+- **Michael:** configure/confirm the Craigslist saved-search alert and Gmail filter only; do not expose credentials or authorize release.
+- **Canonical log:** `docs/receipts/2026-10-12-supervisor-visible-check-1353.md`.
