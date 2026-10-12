@@ -132,3 +132,13 @@ All other lanes: CLOSED, nothing READY (all open rows BLOCKED on owner/host). La
 - **ETA / next_check_at:** ETA UNKNOWN; Monday, October 12, 2026 — 2:40 PM America/Chicago.
 - **ONE next action:** existing Agent 01 publishes current host evidence and A-73 ACK/WORKING or command-specific NEED, then reconciles the conflicting parallel claims.
 - **Canonical log:** `docs/receipts/2026-10-12-supervisor-visible-check-1435.md`.
+
+
+## Current checkpoint — Monday, October 12, 2026 — 3:21 PM America/Chicago
+- **ONE current bounded task:** A-73 existing-watchdog finished-artifact wake repair; owner existing Agent 01; priority P0; stage **NEED — ACK MISSED**.
+- **Acceptance / blocker:** one deduplicated provenance-bearing wake and ACK/WORKING within 300 seconds, with no duplicate process; blocked by missing current host/process evidence. **APPEARS STALE — HOST STATE UNVERIFIED.**
+- **Boundary evidence:** F-163 implementation `478bfc0` and review `8707103` establish staged desktop acceptance and phone-layout failure. F-164 remains READY pending serial ownership reconciliation; its transport says WORKING but host observation is UNKNOWN. D-37 also claims WORKING, so neither claim establishes the one real worker.
+- **Tested / loaded / browser:** tested `478bfc0`; loaded `a0ee24051fb06dcab8f04306bcb7da54504c5ece`; loaded Claude Chrome desktop/mobile proof NONE.
+- **ETA / next_check_at:** ETA UNKNOWN; A-73 next_check_at MISSING.
+- **ONE next action:** Agent 01 publishes timestamped host evidence plus A-73 ACK/WORKING or exact NEED, then reconciles F-164 versus D-37 before one serial dispatch.
+- **Canonical log:** `docs/receipts/2026-10-12-supervisor-visible-check-1521.md`.
