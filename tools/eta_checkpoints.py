@@ -88,7 +88,7 @@ def decide(rec: dict, *, now: datetime, done_ref: Optional[str], worker_alive: O
     missed = f"next_check_at {rec['next_check_at']} reached without a DONE record"
     if worker_alive:
         nxt = fmt_chicago(now + timedelta(seconds=REVISE_S))
-        return {**base, "stage": "WORKING", "evidence": f"worker process observed alive at {observed_at}; {missed}", "eta": f"revised: past {rec['eta']}",
+        return {**base, "stage": "WORKING", "evidence": f"responsible process observed alive at {observed_at}; {missed}", "eta": f"revised: past {rec['eta']}",
                 "next_check_at": nxt, "blocker": "NONE", "exception": "missed ETA"}
     if worker_alive is False:
         return {**base, "stage": "NEED", "evidence": f"no worker process for {rec['task']} at {observed_at}; {missed}",
@@ -190,6 +190,17 @@ def worker_alive(task: str, ps_lines: list[str]) -> bool:
     return any(pat.search(x) for x in ps_lines)
 
 
+def agent01_alive(ps_lines: list[str]) -> bool:
+    """Coordinator-owned checkpoints (responsible 'Agent 01'): liveness is the persistent Agent 01 Claude session, not a worker process.
+    Matches only a `claude ...` process whose prompt names this project's Agent 01 (other projects' coordinators do not count)."""
+    pat = re.compile(r"^\s*\d+\s+\S*claude\s.*MICHAEL BUSINESS OS.*AGENT 01")
+    return any(pat.search(x) for x in ps_lines)
+
+
+def alive_for(rec: dict, ps_lines: list[str]) -> bool:
+    return agent01_alive(ps_lines) if str(rec.get("responsible", "")).lower().startswith("agent 01") else worker_alive(rec["task"], ps_lines)
+
+
 class Checkpoints:
     def __init__(self, wd: Path):
         self.path = Path(wd) / "checkpoints.json"
@@ -234,7 +245,7 @@ def tick(wd: Path, now: datetime, ps_lines: list[str], observed_at: str, post: O
     for task, rec in sorted(d.items()):
         if rec.get("closed") or not rec.get("next_check_at"):
             continue
-        out = decide(rec, now=now, done_ref=rec.get("done_ref"), worker_alive=worker_alive(task, ps_lines) if ps_lines is not None else None, observed_at=observed_at)
+        out = decide(rec, now=now, done_ref=rec.get("done_ref"), worker_alive=alive_for(rec, ps_lines) if ps_lines is not None else None, observed_at=observed_at)
         if not out:
             continue
         ob.add(out, at=observed_at)

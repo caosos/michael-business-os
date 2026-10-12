@@ -130,3 +130,13 @@ def test_tick_publishes_one_outcome_then_stays_quiet_and_never_launches(tmp_path
     assert launched == []
     events = [json.loads(x) for x in (tmp_path / "events.jsonl").read_text().splitlines()]
     assert [e["seq"] for e in events] == list(range(1, len(events) + 1))
+
+
+def test_agent01_owned_checkpoints_use_the_agent01_session_not_a_worker(tmp_path):
+    ps = ["  594278 claude --permission-mode acceptEdits MICHAEL BUSINESS OS — ROUND TWO AGENT 01 — COORDINATOR",
+          "  481241 claude --model sonnet You are the persistent CAOSCare coordinator."]
+    assert eta.agent01_alive(ps) is True and eta.agent01_alive(ps[1:]) is False          # another project's coordinator does not count
+    c, ob = eta.Checkpoints(tmp_path), eta.Outbox(tmp_path)
+    c.record(cp(task="A-71", responsible="Agent 01"), ob, at="t")
+    r = eta.tick(tmp_path, T0 + timedelta(minutes=45), ps, "obs", post=None)
+    assert [o["stage"] for o in r["outcomes"]] == ["WORKING"] and "responsible process observed alive" in r["outcomes"][0]["evidence"]
