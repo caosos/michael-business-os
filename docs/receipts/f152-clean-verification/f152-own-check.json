@@ -1,0 +1,35 @@
+{
+ "pass": true,
+ "res": {
+  "desktop": {
+   "auto_rows": 5,
+   "words": [
+    "bid placed",
+    "closed",
+    "outbid",
+    "winning",
+    "won"
+   ],
+   "owner_local_label": true,
+   "no_conn_note_absent": true,
+   "after_stop": 4,
+   "live_like_note": true,
+   "live_like_auto_rows": 0
+  },
+  "mobile": {
+   "auto_rows": 4,
+   "words": [
+    "bid placed",
+    "closed",
+    "outbid",
+    "winning",
+    "won"
+   ],
+   "owner_local_label": true,
+   "no_conn_note_absent": true,
+   "after_stop": 3,
+   "live_like_note": true,
+   "live_like_auto_rows": 0
+  }
+ }
+}
