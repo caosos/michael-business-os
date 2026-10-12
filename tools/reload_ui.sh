@@ -20,9 +20,10 @@ verify_pages() {  # $1 = port; prints a reason and returns 1 on the first failed
   case "$redirect" in "303 "*"/market") ;; *) echo "GET / is '$redirect', expected a 303 to /market"; return 1;; esac
   body=$(curl -s -m 20 "$BASE:$port/market") || { echo "GET /market failed"; return 1; }
   case "$body" in *"Michael's Marketplace"*|*"DealSniffer Marketplace"*) ;; *) echo "/market is missing the marker: marketplace title (Michael's or DealSniffer Marketplace)"; return 1;; esac   # F-144 renamed the page
-  for m in "name='cat'" "name='row1'" "name='row4'" "name='condition'" "name='any'" "Save this search" "Gallery rows"; do
+  for m in "name='cat'" "name='row1'" "name='row4'" "name='condition'" "name='any'" "Save this search"; do
     case "$body" in *"$m"*) ;; *) echo "/market is missing the marker: $m"; return 1;; esac
   done
+  case "$body" in *"Gallery rows"*|*"id='result-grid'"*) ;; *) echo "/market is missing the marker: results layout (Gallery rows, or the F-159 id='result-grid')"; return 1;; esac   # F-159 replaced the rows with one grid
   body=$(curl -s -m 20 "$BASE:$port/market?go=1&source=gsa&radius=-1") || { echo "validation route failed"; return 1; }
   case "$body" in *filter-errors*) ;; *) echo "a negative radius did not show the validation message (filter-errors)"; return 1;; esac
   for route in /mission /queue; do
