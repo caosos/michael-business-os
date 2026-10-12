@@ -110,7 +110,56 @@ def start_events_refresh(root: Path, now: datetime, state: dict, ps_lines: list[
     return {"source": "auction_houses", "result": "started", "pid": pid, "log": str(log)}
 
 
-def tick(root: Path, now: datetime, state: dict, ps_lines: list[str], *, gsa_fetch=None, spawn=None) -> list[dict]:
+ALERTS_EVERY = timedelta(hours=1)
+MAILBOX_CONFIG = Path.home() / ".config" / "mbos" / "discovery-alerts.toml"
+MAILBOX_SECRET = Path.home() / ".config" / "mbos" / "imap.env"
+
+
+def alerts_env(config: Path = MAILBOX_CONFIG, secret: Path = MAILBOX_SECRET) -> Optional[dict]:
+    """F-161 env for the release-installed refresh_alert_mail.py, or None when the dedicated mailbox is not set up.
+    The password goes only into the child's environment; it is never logged or put in a receipt."""
+    try:
+        import tomllib
+        imap = tomllib.loads(config.read_text())["profile"][0]["imap"]
+        pw = next((ln.split("=", 1)[1].strip() for ln in secret.read_text().splitlines() if ln.startswith("MBOS_IMAP_PASSWORD=")), "")
+    except (OSError, ValueError, KeyError, IndexError):
+        return None
+    user = imap.get("user") or ""
+    if not pw or "@" not in user or "SET-ME" in user:
+        return None
+    return {"MBOS_ALERT_IMAP_HOST": imap.get("host", "imap.gmail.com"), "MBOS_ALERT_IMAP_USER": user,
+            "MBOS_ALERT_IMAP_PASSWORD_ENV": "MBOS_IMAP_PASSWORD", "MBOS_IMAP_PASSWORD": pw,
+            "MBOS_ALERT_IMAP_FOLDER": imap.get("folder", "DealSniffer/Alerts")}
+
+
+def start_alerts_refresh(root: Path, now: datetime, state: dict, ps_lines: list[str],
+                         spawn: Optional[Callable[[list[str], dict], int]] = None, env: Optional[dict] = None) -> Optional[dict]:
+    """Start (never wait for) one background read-only alert-mailbox refresh per hour; None when not due, running or not set up."""
+    tool = root / "var" / "lanes" / "agent-06" / "tools" / "refresh_alert_mail.py"
+    if not tool.exists():
+        return None
+    if any("refresh_alert_mail.py" in x and "--live" in x and "grep" not in x for x in ps_lines):
+        return None
+    last = state.get("alerts_refresh_started")
+    if last and now - datetime.fromisoformat(last) < ALERTS_EVERY:
+        return None
+    env = env if env is not None else alerts_env()
+    if not env:
+        return None
+    cmd = [str(root / ".venv" / "bin" / "python"), str(tool), "--live"]
+    log = root / "var" / "watchdog" / "alerts-refresh.log"
+    if spawn is None:
+        def spawn(c, e):                                        # detached, output to a log; the watchdog does not wait
+            with open(log, "a") as f:
+                return subprocess.Popen(c, cwd=str(root / "var" / "lanes" / "agent-06"), stdout=f, stderr=subprocess.STDOUT,
+                                        env={**os.environ, **e}, start_new_session=True).pid
+    pid = spawn(cmd, env)
+    state["alerts_refresh_started"] = now.isoformat()
+    return {"source": "alert_mail", "result": "started", "pid": pid, "mailbox": env["MBOS_ALERT_IMAP_USER"], "log": str(log)}
+
+
+def tick(root: Path, now: datetime, state: dict, ps_lines: list[str], *, gsa_fetch=None, spawn=None, alerts_spawn=None,
+         alerts_env_=None) -> list[dict]:
     if off(root):
         return []
     if release_running(ps_lines):
@@ -122,4 +171,7 @@ def tick(root: Path, now: datetime, state: dict, ps_lines: list[str], *, gsa_fet
     e = start_events_refresh(root, now, state, ps_lines, spawn)
     if e:
         out.append(e)
+    m = start_alerts_refresh(root, now, state, ps_lines, alerts_spawn, alerts_env_)
+    if m:
+        out.append(m)
     return out

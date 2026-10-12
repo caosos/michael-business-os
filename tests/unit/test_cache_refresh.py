@@ -77,3 +77,34 @@ def test_release_guard_and_off_switch(tmp_path, monkeypatch):
     (r / "var/watchdog/refresh.off").unlink()
     monkeypatch.setenv("MBOS_AUTO_REFRESH", "0")
     assert cr.tick(r, NOW, {}, [], gsa_fetch=good_fetch()) == []
+
+
+def test_alerts_refresh_background_hourly_single_and_secret_free(tmp_path):
+    r = root_with_cache(tmp_path, NOW)
+    tool = r / "var/lanes/agent-06/tools/refresh_alert_mail.py"
+    tool.parent.mkdir(parents=True)
+    tool.write_text("# stub")
+    env = {"MBOS_ALERT_IMAP_HOST": "imap.gmail.com", "MBOS_ALERT_IMAP_USER": "alerts@example.com",
+           "MBOS_ALERT_IMAP_PASSWORD_ENV": "MBOS_IMAP_PASSWORD", "MBOS_IMAP_PASSWORD": "sekret-app-pw", "MBOS_ALERT_IMAP_FOLDER": "DealSniffer/Alerts"}
+    spawned, st = [], {}
+    sp = lambda c, e: spawned.append((c, e)) or 5151  # noqa: E731
+    a = cr.start_alerts_refresh(r, NOW, st, [], sp, env)
+    assert a["pid"] == 5151 and a["mailbox"] == "alerts@example.com" and "sekret" not in json.dumps(a)   # receipt never carries the password
+    assert spawned[0][0][-1] == "--live" and spawned[0][1]["MBOS_IMAP_PASSWORD"] == "sekret-app-pw"      # only the child env does
+    assert cr.start_alerts_refresh(r, NOW + timedelta(minutes=30), st, [], sp, env) is None              # hourly
+    running = ["  8 /x/.venv/bin/python /r/var/lanes/agent-06/tools/refresh_alert_mail.py --live"]
+    assert cr.start_alerts_refresh(r, NOW + timedelta(hours=2), st, running, sp, env) is None            # one at a time
+    assert cr.start_alerts_refresh(r, NOW + timedelta(hours=2), {}, [], sp, {}) is None                  # mailbox not set up: nothing
+    assert len(spawned) == 1
+
+
+def test_alerts_env_needs_a_real_address_and_password(tmp_path):
+    cfg, sec = tmp_path / "a.toml", tmp_path / "imap.env"
+    cfg.write_text('[[profile]]\nid = "x"\nimap = { host = "imap.gmail.com", user = "SET-ME-dedicated-alerts-address", folder = "DealSniffer/Alerts" }\n')
+    sec.write_text("MBOS_IMAP_PASSWORD=abcdefghijklmnop\n")
+    assert cr.alerts_env(cfg, sec) is None                                                               # placeholder address
+    cfg.write_text('[[profile]]\nid = "x"\nimap = { host = "imap.gmail.com", user = "alerts@example.com", folder = "DealSniffer/Alerts" }\n')
+    assert cr.alerts_env(cfg, sec)["MBOS_ALERT_IMAP_USER"] == "alerts@example.com"
+    sec.write_text("")
+    assert cr.alerts_env(cfg, sec) is None                                                               # no password
+    assert cr.alerts_env(tmp_path / "missing.toml", sec) is None

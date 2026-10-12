@@ -374,7 +374,9 @@ def cycle(inbox_refs, do_wake: bool, probe: bool = True) -> dict:
     except Exception as e:  # noqa: BLE001  never let checkpoint logic stop the watchdog
         extras["eta_error"] = f"{type(e).__name__}: {e}"
     try:                                   # A-72: hourly-at-most GSA + auction-house cache refresh, inside this same watchdog
+        import importlib
         import cache_refresh as crf
+        crf = importlib.reload(crf)        # pick up tools/cache_refresh.py edits without restarting the watchdog
         from datetime import datetime as _dt2, timezone as _tz2
         ps_all = subprocess.run(["ps", "-eo", "pid,args"], capture_output=True, text=True).stdout.splitlines()
         refresh_state = st.setdefault("refresh", {})
