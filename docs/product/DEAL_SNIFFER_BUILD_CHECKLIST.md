@@ -224,3 +224,13 @@ This section is part of the existing living checklist and is the authoritative r
 - **Loaded state:** `bbc80ec851b75aec52af1f8b0838dd56ccc714ef`; F-154/F-155/B-35/F-156 remain not proven loaded.
 - **Next action:** existing Agent 01 reviews and integrates B-35 while the already-running F-156 worker continues. F-157 remains READY and must not overlap lane 06 before F-156 closes.
 - **Michael:** NOTHING.
+
+
+## Supervisor reconciliation — Monday, October 12, 2026 — 3:38 AM America/Chicago
+
+- **Canonical receipt:** `DS-CHECKIN-20261012-0338-CDT` / [docs/receipts/2026-10-12-supervisor-visible-check-0338.md](../receipts/2026-10-12-supervisor-visible-check-0338.md).
+- **B-35 corrected state:** implementation exists at `94668801e77320d61f73be9e1e6f09c4d34d25b4` with 414 passed / 0 failed and lane status `22fc4647d0d378989158d83b977f0377a5a5f93f`. It is **WORKER_DONE / AWAITING AGENT 01 ACCEPTANCE**, not merely READY and not owner-connected DONE: fixtures are synthetic/offline; the genuine T.J. Bruck registration message, read-only mailbox ingestion, coordinator review and loaded integration remain missing.
+- **F-156 current bounded task:** WORKING — MISSED ETA through the existing Agent 01/lane 06 worker. The responsible process was observed alive Monday, October 12, 2026 — 3:38 AM America/Chicago; no F-156 implementation commit is visible. Revised `next_check_at`: Monday, October 12, 2026 — 4:08 AM America/Chicago; blocker NONE.
+- **Loaded/tested state:** loaded revision remains `bbc80ec851b75aec52af1f8b0838dd56ccc714ef`. F-155 staging head `bb512d9a743aa53635926d006ba113dce7bcd4ed` has 33 focused passes and 550 lane passes / 1 known `f39`; F-154/F-155/B-35/F-156 are not proven loaded. Current user-visible desktop/mobile Claude Chrome acceptance remains missing.
+- **One next action:** existing Agent 01 reviews/reconciles B-35 and checks the existing F-156 worker at Monday, October 12, 2026 — 4:08 AM America/Chicago; no new worker or monitor.
+- **Michael:** NOTHING.
