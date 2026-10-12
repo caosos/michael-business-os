@@ -255,3 +255,13 @@ None new. MICHAEL_DECISIONS #1–#5 are unchanged; none blocks the dry-run MVP.
 - **ETA / next_check_at / blocker:** ETA UNKNOWN; A-73 next_check_at MISSING; blocker is missing host-backed Agent 01/watchdog ACK and conflicting transport ownership.
 - **Next action:** publish A-73 ACK/WORKING or exact command-specific NEED with current host evidence; then dispatch only one reconciled item.
 - **Receipt:** `docs/receipts/2026-10-12-supervisor-visible-check-1521.md`.
+
+
+## DealSniffer reconciliation — Monday, October 12, 2026 — 4:21 PM America/Chicago
+- **Current:** A-73, existing Agent 01, P0, **NEED — ACK MISSED**.
+- **Fresh host evidence:** watchdog observed the host at 4:10:15 PM and 4:16:27 PM but emitted false NEEDs for already DONE/superseded A-74, B-36, B-38, F-159 and D-37. Current Agent 01/A-73/F-165 process state remains UNKNOWN. **APPEARS STALE — HOST STATE UNVERIFIED.**
+- **UI state:** F-164 STAGING_ACCEPTED `cb682ff`; F-160 PARTIAL `f6a399c`; F-165 preserved READY/transport-WORKING only. Loaded remains `a0ee240`; no loaded Claude Chrome desktop/mobile proof.
+- **Registry/account state:** D-37/D-38/B-39/B-40/B-41 artifacts are done, but B-40/B-41 are fixture/config evidence rather than genuine live mailbox or loaded-feed connection.
+- **ETA / next_check_at:** UNKNOWN / MISSING for A-73.
+- **Blocker / next action:** reconcile stale completion state and publish host-backed A-73 ACK/WORKING or exact NEED before one serial dispatch.
+- **Receipt:** `docs/receipts/2026-10-12-supervisor-visible-check-1621.md`.
