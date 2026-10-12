@@ -1,0 +1,10 @@
+From: HiBid <noreply@hibid.com>
+To: owner@example.invalid
+Subject: You've been outbid on lot 77
+Date: Sun, 11 Oct 2026 09:00:00 -0500
+Message-ID: <syn-hb-1@hibid.com>
+Authentication-Results: mx.example.invalid; dkim=pass header.d=hibid.com; spf=pass
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body><p>You have been outbid.</p><p><a href="https://hibid.com/lot/98765/pallet-jack">Pallet Jack 5500lb</a></p><p>Current bid: $95.00 &middot; Closes: 2026-10-15 19:00 -05:00</p></body></html>

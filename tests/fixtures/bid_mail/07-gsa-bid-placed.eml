@@ -1,0 +1,10 @@
+From: GSA Auctions <noreply@gsaauctions.gov>
+To: owner@example.invalid
+Subject: Bid received for sale 24QSCI
+Date: Sun, 11 Oct 2026 09:00:00 -0500
+Message-ID: <syn-gsa-1@gsaauctions.gov>
+Authentication-Results: mx.example.invalid; dkim=pass header.d=gsaauctions.gov; spf=pass
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body><p>Your bid was received.</p><p><a href="https://gsaauctions.gov/auctions/auction-details/24QSCI-001">2014 Ford F-150 pickup</a></p><p>Bid amount: $5,100.00 &middot; Closing: 2026-10-20 14:00 -04:00</p></body></html>

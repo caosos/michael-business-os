@@ -11,6 +11,7 @@ from datetime import date, datetime, time, timezone
 from zoneinfo import ZoneInfo
 from html import escape as e
 
+from . import market_autobids as mba
 from . import market_prefs as mp
 
 ACTS = ("bid", "unbid", "setmax")
@@ -46,6 +47,8 @@ def act(action: str, f: dict, now: str) -> str:
         msg = "In My bids: owner-reported, nothing was placed or sent. It no longer shows in the search results; stop tracking to bring it back."
     elif action == "unbid":
         bids.pop(lot, None)
+        if lot.startswith("auto:") and lot not in d["auto_stopped"]:      # F-152: hides an auto-detected item; the e-mail is never touched
+            d["auto_stopped"].append(lot)
         msg = "Stopped tracking. It can appear in search results again if it matches your filters."
     else:
         if lot not in bids:
@@ -56,8 +59,8 @@ def act(action: str, f: dict, now: str) -> str:
     return msg
 
 
-def exclude(cards: list[dict], d: dict) -> tuple[list[dict], int]:
-    keep = [c for c in cards if c["id"] not in d["bids"]]
+def exclude(cards: list[dict], d: dict, auto_urls: frozenset = frozenset()) -> tuple[list[dict], int]:
+    keep = [c for c in cards if c["id"] not in d["bids"] and mba.norm_url(c.get("url")) not in auto_urls]
     return keep, len(cards) - len(keep)
 
 
@@ -81,7 +84,7 @@ def countdown(r: dict, now: datetime) -> str:
     return f"closes in {dh} ({e((r.get('closes_at') or r['closes'])[:16])}{'' if r.get('closes_at') else ', date only'})"
 
 
-def window(d: dict, cards: list[dict], now: datetime, tok) -> str:
+def window(d: dict, cards: list[dict], now: datetime, tok, auto: tuple = ((), "")) -> str:
     """Compact window, closing-soonest first (unknown close last). Live source data (when this source was loaded) wins over the marking-time snapshot."""
     live = {c["id"]: c for c in cards}
     rows = []
@@ -91,7 +94,11 @@ def window(d: dict, cards: list[dict], now: datetime, tok) -> str:
         rows.append((_end(r) or datetime.max.replace(tzinfo=timezone.utc), i, r))
     rows.sort(key=lambda t: (t[0], t[1]))
     li = []
-    for _, i, r in rows:
+    mixed = sorted([(k, i, None, h) for k, i, h in mba.rows(auto[0], now, tok, countdown, _end)] + [(k, i, r, None) for k, i, r in rows], key=lambda t: (t[0], t[1]))
+    for _, i, r, html in mixed:
+        if html:
+            li.append(html)
+            continue
         bid = f"${r['bid']:,.0f}" if r.get("bid") is not None else "UNKNOWN"
         cnt = f"{r['bidders']:g}" if r.get("bidders") is not None else "UNKNOWN"
         link = f"<a href='{e(r['url'])}' target='_blank' rel='noopener noreferrer'>original listing</a>" if r.get("url", "").startswith(("http://", "https://")) else "no link"
@@ -104,7 +111,7 @@ def window(d: dict, cards: list[dict], now: datetime, tok) -> str:
                   "<button name='act' value='setmax'>Set max</button></form></li>")
     body = f"<ul style='padding-left:16px;margin:4px 0'>{''.join(li)}</ul>" if li else "<p class='small mut'>Nothing tracked. Use 'I bid on this' on a card after you place a bid yourself.</p>"
     return (f"<div class='card small' id='my-bids'><b>My bids ({len(li)})</b><p class='mut' style='margin:2px 0'>You told us you bid. We do not place bids or check your account; "
-            f"bid fields show only what the source gave us.</p>{body}</div>")
+            f"bid fields show only what the source gave us.</p>{auto[1]}{body}</div>")
 
 
 def button(c: dict, tok) -> str:

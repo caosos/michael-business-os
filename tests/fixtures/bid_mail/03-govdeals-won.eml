@@ -1,0 +1,10 @@
+From: GovDeals <noreply@govdeals.com>
+To: owner@example.invalid
+Subject: Congratulations, you won: Kubota Mower
+Date: Sun, 11 Oct 2026 09:00:00 -0500
+Message-ID: <syn-gd-3@govdeals.com>
+Authentication-Results: mx.example.invalid; dkim=pass header.d=govdeals.com; spf=pass
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body><p>Congratulations! You won this auction.</p><p><a href="https://www.govdeals.com/asset/2222/5678">Kubota Zero Turn Mower 60in</a></p><p>Winning bid: $1,310.50</p></body></html>

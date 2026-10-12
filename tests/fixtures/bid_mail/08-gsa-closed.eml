@@ -1,0 +1,10 @@
+From: GSA Auctions <noreply@gsaauctions.gov>
+To: owner@example.invalid
+Subject: Auction closed: 24QSCI-001
+Date: Sun, 11 Oct 2026 09:00:00 -0500
+Message-ID: <syn-gsa-2@gsaauctions.gov>
+Authentication-Results: mx.example.invalid; dkim=pass header.d=gsaauctions.gov; spf=pass
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body><p>The auction has closed.</p><p><a href="https://gsaauctions.gov/auctions/auction-details/24QSCI-001">2014 Ford F-150 pickup</a></p></body></html>

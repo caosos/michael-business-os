@@ -11,6 +11,7 @@ from . import market_search as ms
 from . import market_prefs as mp
 from . import market_view as mv
 from . import market_finds as mf
+from . import market_autobids as mba
 from . import market_bids as mb
 from . import finds_view as fv
 from .ux import InputError
@@ -68,8 +69,10 @@ def page_body(app, qs: dict, now, errors=None, values=None) -> str:
     n_before = len(results) + len(unchecked)
     results, g1 = mp.hide(results, prefs)             # a hidden listing stays hidden in BOTH sections, with suggestions on or off
     unchecked, g2 = mp.hide(unchecked, prefs)
-    results, b1 = mb.exclude(results, prefs)           # F-147: tracked ("I bid on this") items leave the lineup; they live in the My bids window
-    unchecked, b2 = mb.exclude(unchecked, prefs)
+    auto, auto_note = mba.load(now, prefs)             # F-152: bid e-mails read from the staging fixture directory only; else a one-line not-connected note
+    au = mba.urls(auto)
+    results, b1 = mb.exclude(results, prefs, au)           # F-147: tracked ("I bid on this") items leave the lineup; they live in the My bids window
+    unchecked, b2 = mb.exclude(unchecked, prefs, au)
     q["hidden_n"], q["hidden_checked"], q["matched_n"] = g1 + g2, g1, n_before - b1 - b2
     if prefs["enabled"] and "sort" not in qs and (prefs["saved"] or prefs["more"] or prefs["less"]):
         q["sort"] = "suggested"                      # feedback exists and the owner chose no sort: use it; hard filters already ran
@@ -82,12 +85,12 @@ def page_body(app, qs: dict, now, errors=None, values=None) -> str:
     if ran and not q["errors"]:                       # F-141: owner-entered finds, their own section, never in the GSA results or counts
         tok = lambda: f"<input type='hidden' name='csrf' value='{app.csrf}'><input type='hidden' name='nonce' value='{__import__('secrets').token_hex(8)}'>"  # noqa: E731
         fr, fu, *fr_rest = mf.cards(q, prefs)
-        fr, f1 = mb.exclude(fr, prefs)
-        fu, f2 = mb.exclude(fu, prefs)
+        fr, f1 = mb.exclude(fr, prefs, au)
+        fu, f2 = mb.exclude(fu, prefs, au)
         b1 += f1 + f2
         finds = fv.section(fr, fu, *fr_rest, tok, mv.pref_buttons)
     tok = lambda: f"<input type='hidden' name='csrf' value='{app.csrf}'><input type='hidden' name='nonce' value='{__import__('secrets').token_hex(8)}'>"  # noqa: E731
-    mine = mb.window(prefs, data["cards"] if ran else [], now, tok) + (f"<p class='small mut' id='bids-count'>{b1 + b2} in My bids (left out of the results below)</p>" if b1 + b2 else "")
+    mine = mb.window(prefs, data["cards"] if ran else [], now, tok, (auto, auto_note)) + (f"<p class='small mut' id='bids-count'>{b1 + b2} in My bids (left out of the results below)</p>" if b1 + b2 else "")
     return note + mv.render_page(q, data, results, hidden, saved, app.csrf, bool(app.operator_pin), edit if edit in ids else None, ran, errors, unchecked, prefs, finds, mine)
 
 

@@ -1,0 +1,10 @@
+From: Public Surplus <noreply@publicsurplus.com>
+To: owner@example.invalid
+Subject: Auction ended - you did not win: Welder
+Date: Sun, 11 Oct 2026 09:00:00 -0500
+Message-ID: <syn-ps-2@publicsurplus.com>
+Authentication-Results: mx.example.invalid; dkim=pass header.d=publicsurplus.com; spf=pass
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body><p>This auction has ended. Unfortunately you did not win.</p><p><a href="https://www.publicsurplus.com/sms/browse/auction/view?auc=4455667">Miller Welder 250</a></p></body></html>
