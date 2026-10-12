@@ -142,3 +142,12 @@ All other lanes: CLOSED, nothing READY (all open rows BLOCKED on owner/host). La
 - **ETA / next_check_at:** ETA UNKNOWN; A-73 next_check_at MISSING.
 - **ONE next action:** Agent 01 publishes timestamped host evidence plus A-73 ACK/WORKING or exact NEED, then reconciles F-164 versus D-37 before one serial dispatch.
 - **Canonical log:** `docs/receipts/2026-10-12-supervisor-visible-check-1521.md`.
+
+
+## Current checkpoint — Monday, October 12, 2026 — 4:21 PM America/Chicago
+- **ONE current bounded task:** A-73 existing-watchdog wake/completion-state repair; existing Agent 01; P0; **NEED — ACK MISSED**.
+- **Host evidence / defect:** watchdog host observations at 4:10:15 PM and 4:16:27 PM produced false NEEDs for completed/superseded A-74, B-36, B-38, F-159 and D-37. Current Agent 01/A-73/F-165 process state UNKNOWN. **APPEARS STALE — HOST STATE UNVERIFIED.**
+- **Tested / loaded / browser:** F-164 search `cb682ff` staged accepted; F-160 detail `f6a399c` partial; loaded `a0ee240`; loaded Claude Chrome desktop/mobile evidence NONE.
+- **ETA / next_check_at:** A-73 ETA UNKNOWN; next_check_at MISSING.
+- **ONE next action:** Agent 01 publishes host-backed A-73 ACK/WORKING or exact NEED and reconciles the five false NEED states before one serial dispatch.
+- **Canonical log:** `docs/receipts/2026-10-12-supervisor-visible-check-1621.md`.
