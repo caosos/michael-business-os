@@ -9,3 +9,9 @@ Messages: 2026-10-11-owner-eta-driven-checks, -eta-driven-checks-hardcoded, -use
 - **Expected acceptance:** the A-71 test list passes; the watchdog writes a WORKING/DONE/NEED outcome at a due next_check_at; events land once in the outbox; relay posts once when gh is authenticated (else a structured NEED).
 - **Blocker:** relay transport only: NEED `gh auth login` on this host (owner) or an equivalent already-authorized token; implementation itself is NOT blocked.
 - **Parallel product work:** B-29 Blackmon events READY for lane 02 (dispatcher); combined Marketplace release waits on the owner command recorded in LIVE_RELOAD_PACKET_8766.md.
+
+## UPDATE 2026-10-12T03:56:23Z — WORKING (implemented and loaded; due-check proof pending)
+- Commit 3882be4: tools/eta_checkpoints.py, watchdog integration in tools/coordinator_watch.py, README.md + docs/COORDINATION.md (addendum verbatim) + docs/integration/COORDINATOR_WATCHDOG.md (state machine); tests 26/0.
+- Loaded: watchdog reloaded via mbos-watchdog.service at 22:55:38 CDT (PID 1103557; :8479 HTTP 200). First cycle 03:55:40Z: outcomes 0 (none due), 2 events queued (A-71 WORKING, B-29 WORKING), one relay_need receipt.
+- ETA: due-check proof at 2026-10-11 23:15 CDT (B-29) and 23:20 CDT (A-71); next_check_at 2026-10-11 23:25 CDT.
+- Blocker: relay transport only. NEED: run `gh auth login` on this host (GitHub account with comment rights on caosos/michael-business-os); the queued events then post to PR #1 once each, in order.
