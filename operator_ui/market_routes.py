@@ -8,6 +8,7 @@ from urllib.parse import quote
 
 from . import landing_fix
 from . import market_search as ms
+from . import market_source_panel as msp
 from . import market_suggest as msug
 from . import market_prefs as mp
 from . import market_view as mv
@@ -96,7 +97,7 @@ def page_body(app, qs: dict, now, errors=None, values=None) -> str:
     tok = lambda: f"<input type='hidden' name='csrf' value='{app.csrf}'><input type='hidden' name='nonce' value='{__import__('secrets').token_hex(8)}'>"  # noqa: E731
     mine = mb.window(prefs, data["cards"] if ran else [], now, tok, (auto, auto_note)) + (f"<p class='small mut' id='bids-count'>{b1 + b2} in My bids (left out of the results below)</p>" if b1 + b2 else "")
     sug = msug.render(msug.suggest(results + unchecked, prefs), tok) if ran and results + unchecked and not q["errors"] and data["status"] == "connected" else ""   # F-155: engine-ranked panel, display only
-    return note + mv.render_page(q, data, results, hidden, saved, app.csrf, bool(app.operator_pin), edit if edit in ids else None, ran, errors, unchecked, prefs, finds, mine, sug)
+    return note + mv.render_page(q, data, results, hidden, saved, app.csrf, bool(app.operator_pin), edit if edit in ids else None, ran, errors, unchecked, prefs, finds, mine, sug + msp.render(now))
 
 
 def post(app, parts: list[str], f: dict) -> tuple[str | None, list[str] | None]:

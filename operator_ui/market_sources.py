@@ -255,3 +255,96 @@ def load_source(source: str, gsa_path: str | None, now: datetime, origin=None, d
     status = "connected" if live else "fixture" if any(a["cards"] for a in alerts) else "offline"
     return {**gsa, "status": status, "cards": cards, "in_scope": len(cards), "fixture": any(a["fixture"] for a in alerts),
             "message": gsa["message"] if status == "offline" else "", "coverage": coverage([{**gsa, "name": "GSA Auctions"}] + houses + alerts)}
+
+
+# ---- F-156: the source registry (the one place that knows every source; /market's Sources panel only displays it) ----
+STATES = ("LIVE CONNECTED", "IMPORTED", "MANUAL", "NOT CONNECTED", "BLOCKED")
+
+
+@dataclass(frozen=True)
+class SourceInfo:
+    """`path` is one of: official API / own site / RSS / e-mail alerts / owner import / none. `probe` says which cache is read for freshness
+    (gsa | site:<key> | alerts:<key> | finds | None). `intended` is the state when a read exists; a fixture or a missing cache never reaches LIVE CONNECTED."""
+    key: str
+    name: str
+    cls: str
+    geography: str
+    path: str
+    granularity: str
+    bidding: str
+    constraint: str
+    next_step: str
+    probe: str | None
+    intended: str
+
+
+REGISTRY = (
+    SourceInfo("gsa", "GSA Auctions", "government surplus", "US-wide (filtered by your distance)", "official API", "item (lot)", "bid on gsaauctions.gov with your own account; nothing is placed here",
+               "cached copy; refreshed only by an explicit command", "keep the refresh command scheduled", "gsa", "LIVE CONNECTED"),
+    SourceInfo("wooley", "Wooley Auctioneers", "auctioneer", "Arkansas", "own site", "auction event", "bids on HiBid (your account); this page never loads it",
+               "events only: HiBid terms forbid scraping, so lot numbers, bids and bid counts need written permission", "ask Wooley/HiBid for written permission before any lot-level read", "site:wooley", "LIVE CONNECTED"),
+    SourceInfo("wilson", "Wilson Auctioneers", "auctioneer", "Arkansas", "own site", "auction event", "bids on BidWrangler (your account); this page never loads it",
+               "events only; at most one refresh an hour", "none for events; lots need the platform's permission", "site:wilson", "LIVE CONNECTED"),
+    SourceInfo("blackmon", "Blackmon Auctions", "auctioneer", "Arkansas", "own site", "auction event", "bids on Proxibid (your account); this page never loads it",
+               "events only; at most one refresh an hour", "none for events; lots need the platform's permission", "site:blackmon", "LIVE CONNECTED"),
+    SourceInfo("govdeals", "GovDeals", "government surplus", "US-wide", "e-mail alerts", "item (lot)", "bid on govdeals.com with your own account",
+               "needs a mailbox read-only connection; test e-mails never count as live", "owner decision: connect a read-only alert mailbox", "alerts:govdeals", "LIVE CONNECTED"),
+    SourceInfo("publicsurplus", "Public Surplus", "government surplus", "US-wide", "e-mail alerts", "item (lot)", "bid on publicsurplus.com with your own account",
+               "needs a mailbox read-only connection; test e-mails never count as live", "owner decision: connect a read-only alert mailbox", "alerts:publicsurplus", "LIVE CONNECTED"),
+    SourceInfo("hibid_email", "HiBid e-mail alerts", "auction platform", "per your saved HiBid searches", "e-mail alerts", "item (lot)", "bid on hibid.com with your own account",
+               "HiBid terms forbid scraping: lots need written permission; only alert e-mails you receive may be read", "owner decision: connect a read-only alert mailbox; no adapter yet", None, "NOT CONNECTED"),
+    SourceInfo("hibid_site", "HiBid website (lot data)", "auction platform", "US-wide", "none", "item (lot)", "bid on hibid.com with your own account",
+               "HiBid terms forbid scraping: lots need written permission", "get written permission from HiBid; until then nothing is read", None, "BLOCKED"),
+    SourceInfo("craigslist", "Craigslist", "classifieds", "local", "owner import", "item", "none; contact sellers yourself",
+               "terms forbid automated access: owner pastes finds, the system never fetches", "paste a find on the Finds form", "finds", "MANUAL"),
+    SourceInfo("facebook", "Facebook Marketplace", "classifieds", "local", "owner import", "item", "none; contact sellers yourself",
+               "terms forbid automated access and a login is needed: owner pastes finds only", "paste a find on the Finds form", "finds", "MANUAL"),
+    SourceInfo("offerup", "OfferUp", "classifieds", "local", "owner import", "item", "none; contact sellers yourself",
+               "terms forbid automated access: owner pastes finds only", "paste a find on the Finds form", "finds", "MANUAL"),
+    SourceInfo("ebay", "eBay", "marketplace", "US-wide", "none", "item", "bid on ebay.com with your own account",
+               "an official API exists but needs developer credentials; none are configured", "owner decision: apply for eBay API credentials", None, "NOT CONNECTED"),
+    SourceInfo("owner_finds", "Owner-entered finds", "owner", "wherever you found it", "owner import", "item", "none",
+               "only what you typed; unverified until you check it", "add a find", "finds", "MANUAL"),
+)
+
+
+def _finds_count() -> int:
+    from . import market_finds
+    return sum(1 for v in market_finds.load().values() if not v.get("deleted"))
+
+
+def probe(info: SourceInfo, now: datetime) -> dict:
+    """Light read of the cache behind a source (no card building, no network) -> {status: connected|fixture|offline|manual, as_of, age_h, stale, n}."""
+    out = {"status": "offline", "as_of": None, "age_h": None, "stale": False, "n": None}
+    if info.probe is None:
+        return out
+    kind, _, key = info.probe.partition(":")
+    try:
+        if kind == "finds":
+            return {**out, "status": "manual", "n": _finds_count()}
+        if kind == "alerts":
+            d = fixture_dir()
+            return {**out, "status": "fixture" if d else "offline"}
+        if kind == "gsa":
+            asof = ms.GsaLiveAdapter(ms.cache_path(), live=False)._asof()
+            as_of = asof.isoformat() if asof else None
+        else:
+            as_of = str(json.loads(Path(cache_path(AUCTION_SITES[key])).read_text(encoding="utf-8"))["as_of"])
+            datetime.fromisoformat(as_of)
+    except (OSError, ValueError, KeyError, TypeError, AttributeError):
+        return out
+    if not as_of:
+        return out
+    age = round(ms._age_h(as_of, now), 1)
+    return {**out, "status": "connected", "as_of": as_of, "age_h": age, "stale": age > ms.STALE_H}
+
+
+def source_state(info: SourceInfo, pr: dict) -> str:
+    """Exactly one of STATES. LIVE CONNECTED only for a real cached read (probe status `connected`); a fixture, a missing cache or a stale-less guess never is."""
+    if info.intended == "BLOCKED":
+        return "BLOCKED"
+    if info.intended == "MANUAL":
+        return "MANUAL"
+    if info.intended == "IMPORTED":
+        return "IMPORTED" if pr["status"] == "imported" else "NOT CONNECTED"
+    return "LIVE CONNECTED" if pr["status"] == "connected" and info.intended == "LIVE CONNECTED" else "NOT CONNECTED"
