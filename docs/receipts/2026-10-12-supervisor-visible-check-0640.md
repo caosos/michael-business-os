@@ -13,6 +13,7 @@
   - Prior missed-checkpoint exception: [PR #1 comment 6122622035](https://github.com/caosos/michael-business-os/pull/1#issuecomment-6122622035).
   - Repeated missed-checkpoint exception: [PR #1 comment 6123547638](https://github.com/caosos/michael-business-os/pull/1#issuecomment-6123547638).
   - Queue reconciliation: [commit 2f518a8](https://github.com/caosos/michael-business-os/commit/2f518a88919ac09b331517e7253ba6fa6274785f).
+  - Stale Agent 01 status header corrected: [commit 1420896](https://github.com/caosos/michael-business-os/commit/14208960383ff6b004e025795b957324c73e2d2b); historical body preserved.
   - F-156 remains PARTIAL / STAGING_ACCEPTED at `a0ee240` with code `1c77a14`; F-155 remains tested at `bb512d9a743aa53635926d006ba113dce7bcd4ed`.
   - Latest loaded revision: `bbc80ec851b75aec52af1f8b0838dd56ccc714ef`; F-154/F-155/F-156/F-157 are not proven loaded.
   - Claude Chrome/browser evidence for F-157 and the combined revision: MISSING.
