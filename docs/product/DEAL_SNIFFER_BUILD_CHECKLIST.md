@@ -154,3 +154,13 @@ This section is part of the existing living checklist and is the authoritative r
 - **Loaded revision:** F-143 `315ddfa98ff951e9da716f5b49c37f016153c466`.
 - **Queue correction:** F-155 now includes pallet economics. B-34 captures the serial MULTIPLE VENDOR SOURCES/source-registry/live-feed expansion after F-155; it creates no parallel coordinator, queue or registry.
 - **Michael:** NOTHING.
+
+
+## Supervisor reconciliation — Monday, October 12, 2026 — 1:01 AM America/Chicago
+
+- **Canonical receipt:** `DS-CHECKIN-20261012-0101-CDT` / `docs/receipts/2026-10-12-supervisor-visible-check-0101.md`.
+- **F-154 PARTIAL/IMPLEMENTED:** code `917b7135cef103297029a93241720e06192c2d86`, status `a1325184acd10d3e4344fc084f5002c80826b71f`; worker focused 5/0, reference 547/1 known `resale_f39`, lane D+E 105/2 known F-32; Agent 01 focused 21/0. Full coordinator suite and desktop/mobile browser acceptance are MISSING. NOT LOADED.
+- **Current bounded task:** F-155 WORKING through existing Agent 01/lane 06, launch reported 1:00 AM. ETA about 60 minutes plus review; task `next_check_at` 2:00 AM; host observation UNKNOWN.
+- **Serial gate correction:** F-155 implementation may continue, but no further dispatch, release or DONE chain may bypass F-154 independent full-suite and firsthand desktop/mobile browser acceptance. Immediate gate check remains 1:08 AM.
+- **Loaded revision:** F-143 `315ddfa98ff951e9da716f5b49c37f016153c466`.
+- **Blocker:** missing F-154 independent acceptance evidence. **Michael:** NOTHING.
