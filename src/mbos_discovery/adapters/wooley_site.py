@@ -37,7 +37,7 @@ from ..normalize import HOME_BASE, base_flags, classify, clean_text, geo_tier, h
 SOURCE = "wooley_auctioneers"
 SITE_HOST = "wooleyauctioneers.com"
 LISTING_URL = f"https://{SITE_HOST}/auctions/"
-USER_AGENT = "MichaelBusinessOS-discovery/1.0 (read-only; auction events only; +mailto:mytaxicloud@gmail.com)"
+USER_AGENT = "DealSnifferBot/1.0 (read-only; auction events only)"
 CRAWL_DELAY_S = 10.0
 MAX_EVENTS = 10
 LOT_LEVEL_UNKNOWN = ("lot_number", "current_bid", "bid_count", "lot_image")
@@ -264,9 +264,11 @@ class WooleySiteAdapter(SourceAdapter):
         ends = lot.get("closes_at")
         ends = None if ends == UNKNOWN else datetime.fromisoformat(ends).astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         bp = lot.get("buyer_premium_pct")
-        price = {"currency": "USD", "type": "starting_bid", "buyer_premium_pct": bp if isinstance(bp, float) else 0}
+        price: dict = {"currency": "USD"}                          # no amount is known, so no price.type; premium only if stated
+        if isinstance(bp, float):
+            price["buyer_premium_pct"] = bp
         loc = lot.get("location") if isinstance(lot.get("location"), dict) else {}
-        n: dict = {"title": lot.get("title"), "condition": "used", "price": price,
+        n: dict = {"title": lot.get("title"), "condition": "unknown", "price": price,
                    "counterparty": {"role": "auction_house", "name": "Wooley Auctioneers"},
                    "listing_status": "active", "images": []}
         if lot.get("highlights") != UNKNOWN:

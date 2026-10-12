@@ -9,3 +9,9 @@
 - **Live path (OFF by default, `live=True`):** identifying User-Agent, >= 10 s between requests (floor; fake-clock tested), only pages linked from `/auctions/` on wooleyauctioneers.com, no redirects followed, HTTP/timeout/429/403 become a `SourceError` (honest offline status); a block signal stops the crawl; a failed detail page keeps the card record.
 - **Tests:** `tests/test_b26_wooley_site.py` 16 tests; full suite `pytest -q` = **353 passed, 0 failed** (337 before).
 - **Next (not this row):** Agent 01 bounded live smoke; lane 06 /market wiring.
+
+## Review fixes (Agent 01 review of 90672f2/fd05d1c)
+- FACT: USER_AGENT is now `DealSnifferBot/1.0 (read-only; auction events only)`, no e-mail/contact identity; test asserts no '@'.
+- FACT: `normalize` includes `price.buyer_premium_pct` only when the source states it (Bruck 10.0 present; S&H card-only absent, not 0).
+- FACT: `condition` is `unknown`; `price.type` omitted (no amount known); no `starting_bid` claim.
+- Tests: 355 passed / 0 failed (lane suite, +2 focused tests). No network used.

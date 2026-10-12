@@ -144,7 +144,7 @@ def test_crawl_delay_enforced_with_fake_clock_and_ua_sent():
     res = ad.fetch(P)
     assert res.ok and res.requests_made == 3 and [u for _, u in ct.calls][0] == W.LISTING_URL
     assert len(sleeps) == 2 and all(9.4 <= s <= 10.0 for s in sleeps)            # 10 s minus the 0.5 s the request itself took
-    assert all("MichaelBusinessOS" in h["User-Agent"] for h in seen)
+    assert all(h["User-Agent"] == W.USER_AGENT for h in seen)
     assert all(u.startswith("https://wooleyauctioneers.com/") and "hibid" not in u for _, u in ct.calls)
     assert {r.payload["slug"] for r in res.records} == {BRUCK, SH}
     assert _live(crawl_delay=1.0)[0].crawl_delay == 10.0                          # cannot be configured below robots.txt
@@ -188,3 +188,19 @@ def test_offline_guarantee(monkeypatch):
         raise AssertionError("network used")
     monkeypatch.setattr(socket, "socket", deny)
     assert _ad().fetch(P).ok
+
+
+def test_user_agent_has_no_personal_identity():
+    assert W.USER_AGENT == "DealSnifferBot/1.0 (read-only; auction events only)" and "@" not in W.USER_AGENT
+    assert "mailto" not in W.USER_AGENT
+
+
+def test_normalize_premium_only_when_stated_and_no_invented_price_or_condition():
+    ad = _ad()
+    n = {r.payload["slug"]: ad.normalize(r.payload, NOW) for r in ad.fetch(P).records}
+    b, s = n[BRUCK].normalized, n[SH].normalized
+    assert b["price"]["buyer_premium_pct"] == 10.0                  # stated on the archived Bruck page
+    assert "buyer_premium_pct" not in s["price"]                     # card only: absent, not 0
+    for x in (b, s):
+        assert "type" not in x["price"] and "amount" not in x["price"] and x["condition"] == "unknown"
+        assert "zero_bid" not in x["flags"]
