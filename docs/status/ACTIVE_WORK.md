@@ -87,3 +87,16 @@ All other lanes: CLOSED, nothing READY (all open rows BLOCKED on owner/host). La
 - **ETA / next_check_at:** ETA UNKNOWN until valid ACK; Monday, October 12, 2026 — 12:45 PM America/Chicago.
 - **Blocker:** internally impossible launch timestamp and no worker provenance beyond a READY commit.
 - **Canonical log:** `docs/receipts/2026-10-12-supervisor-visible-check-1243.md`.
+
+
+## Current checkpoint — Monday, October 12, 2026 — 12:59 PM America/Chicago
+- **Boundary result:** F-157/F-158 STAGING_ACCEPTED at `112fce4eaebf867f43196a3b38d1545f8614fafd`; Agent 01 acceptance commit `e37a53a2137f1b05df698a8585b5352a6f429ba1`.
+- **Tests / real data:** focused 22/0; full 573/2 with both failures identical on loaded baseline `a0ee240`. Real caches: 16/16 property events hidden by default; mixed/equipment/vehicle/liquidation retained; zero GSA false positives. Copied owner preferences remembered tools+trailers; live prefs untouched.
+- **Current bounded task:** existing owner-gated combined release, followed by existing Agent 01 firsthand Claude Chrome desktop/mobile acceptance.
+- **Exact stage:** STAGING_ACCEPTED / RELEASE BLOCKED — NOT LIVE, NOT DONE.
+- **Tested / loaded / browser:** tested `112fce4`; loaded `a0ee24051fb06dcab8f04306bcb7da54504c5ece`, exported 2026-10-12T17:22:00Z; loaded Claude Chrome proof MISSING.
+- **Host:** UNKNOWN. **APPEARS STALE — HOST STATE UNVERIFIED.**
+- **ETA / next_check_at:** ETA UNKNOWN; next_check_at MISSING in receipt `c5cbe8178290fad9`.
+- **Blocker:** prepared owner-gated release command has not run; live browser acceptance cannot begin.
+- **Exact release command:** `tools/release_marketplace.sh 112fce4 a186ca6e29f785e7bbb705ce6eb44482558f26da`.
+- **Canonical log:** `docs/receipts/2026-10-12-supervisor-visible-check-1259.md`.
