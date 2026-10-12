@@ -6,6 +6,18 @@ spec = importlib.util.spec_from_file_location("cw", Path(__file__).resolve().par
 cw = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(cw)
 
+import pytest  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def _no_live_side_effects(monkeypatch):
+    """Every test here may call cw.cycle(); it must NEVER refresh the live caches or start a real fetch (A-72). Found 2026-10-12:
+    a test run swapped the live GSA cache and started a real auction-house refresh before this fixture existed."""
+    import sys, types
+    monkeypatch.setenv("MBOS_AUTO_REFRESH", "0")
+    monkeypatch.setitem(sys.modules, "cache_refresh", types.SimpleNamespace(tick=lambda *a, **k: [], off=lambda root: True))
+
+
 IDLE = {"name": "agent-01", "status": "idle", "updatedAt": 1000, "tmux": "s:@0.%0"}
 
 
@@ -193,6 +205,8 @@ def test_cycle_survives_an_available_relay_and_keeps_the_unacked_ids(tmp_path, m
     fake = types.SimpleNamespace(CHICAGO=__import__("zoneinfo").ZoneInfo("America/Chicago"), gh_ready=lambda: True, gh_post=lambda b: "ok",
                                  tick=lambda *a, **k: {"outcomes": [], "relay": {"sent": 0, "pending": 0}})
     monkeypatch.setitem(sys.modules, "eta_checkpoints", fake)
+    monkeypatch.setitem(sys.modules, "cache_refresh", types.SimpleNamespace(tick=lambda *a, **k: [], off=lambda root: True))   # never touch the live caches from a test
+    monkeypatch.setenv("MBOS_AUTO_REFRESH", "0")
     out = cw.cycle(["origin/liaison/x"], do_wake=False, probe=False)
     assert "MSG-7" in json.dumps(out)
     assert cw.load_state().get("relay_need") is None

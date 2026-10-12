@@ -373,6 +373,17 @@ def cycle(inbox_refs, do_wake: bool, probe: bool = True) -> dict:
         extras["eta"] = {"outcomes": len(res["outcomes"]), "relay": res["relay"]}
     except Exception as e:  # noqa: BLE001  never let checkpoint logic stop the watchdog
         extras["eta_error"] = f"{type(e).__name__}: {e}"
+    try:                                   # A-72: hourly-at-most GSA + auction-house cache refresh, inside this same watchdog
+        import cache_refresh as crf
+        from datetime import datetime as _dt2, timezone as _tz2
+        ps_all = subprocess.run(["ps", "-eo", "pid,args"], capture_output=True, text=True).stdout.splitlines()
+        refresh_state = st.setdefault("refresh", {})
+        refresh_actions = crf.tick(ROOT, _dt2.now(_tz2.utc), refresh_state, ps_all)
+        for a in refresh_actions:
+            receipt(f"cache_refresh_{a.get('source')}_{a.get('result')}", a, ["tools/cache_refresh.py", "var/cache", "var/lanes/agent-06/var/cache"])
+        extras["cache_refresh"] = {"actions": len(refresh_actions), "off": crf.off(ROOT)}
+    except Exception as e:  # noqa: BLE001  a refresh problem never stops the watchdog
+        extras["cache_refresh_error"] = f"{type(e).__name__}: {e}"
     st["extras"] = extras
     st["last_check"] = t
     if probe and t - st.get("last_probe", 0) > 600:
