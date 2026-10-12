@@ -44,7 +44,7 @@
    "since": "2026-10-11T05:59:23Z"
   }
  ],
- "coordinator_head": "3a6ec72",
+ "coordinator_head": "d313724",
  "counts": {
   "BLOCKED": [
    "ARIA-20261012-0034-dealsniffer-morning-acceptance",
@@ -132,7 +132,7 @@
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-12T21:11:17Z",
+ "generated_at": "2026-10-12T21:21:20Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "nothing needed",
@@ -144,7 +144,7 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-12T21:11:17Z",
+  "observed_at": "2026-10-12T21:21:20Z",
   "pid": 592613,
   "source": "inbox_pickup process",
   "status": "idle",
