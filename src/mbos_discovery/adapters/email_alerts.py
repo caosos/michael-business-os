@@ -50,6 +50,7 @@ class Origin:
     listing_path: re.Pattern        # matches a listing URL path; group 1 = listing id
     opportunity_kind: str
     event_sale: bool = False        # a sale EVENT (estate sale), not one item: never keyword-classified
+    regional: bool = False          # listing host is <region>.<domain>; the subdomain is the region (Craigslist)
 
 
 ORIGINS = {o.source: o for o in [
@@ -58,7 +59,15 @@ ORIGINS = {o.source: o for o in [
            "auction_lot"),
     Origin("estatesales_net_email", "estatesales.net", re.compile(r"/[A-Z]{2}/[^/]+/[0-9]{5}/([0-9]+)"), "buy_item",
            event_sale=True),
+    # B-36: Craigslist saved-search alerts (our own inbox only; craigslist.org pages are never fetched).
+    # Path forms: /<cat>/d/<slug>/<id>.html (current) and /<cat>/<id>.html (older). INFERENCE: real layout UNKNOWN until
+    # the first genuine alert is in DealSniffer/Alerts.
+    Origin("craigslist_email", "craigslist.org", re.compile(r"/(?:[a-z]{3}/d/[^/]+|[a-z]{3})/([0-9]{8,})\.html"),
+           "buy_item", regional=True),
 ]}
+
+# Craigslist subdomain -> state. INFERENCE from geography; absent = UNKNOWN (texarkana spans AR/TX, so it is left out).
+REGION_STATE = {"littlerock": "AR", "fayar": "AR", "fortsmith": "AR", "jonesboro": "AR", "memphis": "TN"}
 
 
 # ---------------------------------------------------------------- mailbox readers (read-only)
@@ -116,7 +125,7 @@ class ImapReader:
 
 # ---------------------------------------------------------------- parsing (pure)
 class _Anchors(HTMLParser):
-    """Collect (href, anchor text, text after the anchor up to the next anchor)."""
+    """Collect (href, anchor text, text after the anchor up to the next anchor, first <img src> inside the anchor)."""
 
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
@@ -125,8 +134,10 @@ class _Anchors(HTMLParser):
 
     def handle_starttag(self, tag, attrs):
         if tag == "a":
-            self.links.append([dict(attrs).get("href") or "", "", ""])
+            self.links.append([dict(attrs).get("href") or "", "", "", ""])
             self._in_a = True
+        elif tag == "img" and self._in_a and self.links and not self.links[-1][3]:
+            self.links[-1][3] = dict(attrs).get("src") or ""
 
     def handle_endtag(self, tag):
         if tag == "a":
@@ -145,6 +156,8 @@ class ParsedListing:
     url: str
     title: str
     context: str
+    thumb: str = ""         # https image URL found in the e-mail, else "" (UNKNOWN)
+    region: str = ""        # host subdomain for regional origins (Craigslist), else ""
 
 
 def _authenticated(msg, domain: str) -> bool:
@@ -171,13 +184,14 @@ def parse_alert(origin: Origin, source_bytes: bytes) -> tuple[dict, list[ParsedL
     part = msg.get_body(preferencelist=("html", "plain"))
     body = part.get_content() if part else ""
     if part is not None and part.get_content_type() == "text/plain":
-        links = [(u, "", "") for u in re.findall(r"https://[^\s<>\"]+", body)]
+        links = [(u, "", "", "") for u in re.findall(r"https://[^\s<>\"]+", body)]
     else:
         p = _Anchors()
         p.feed(body)
         links = [tuple(x) for x in p.links]
     seen: dict[str, ParsedListing] = {}
-    for href, text, tail in links:
+    thumbs: dict[str, str] = {}
+    for href, text, tail, img in links:
         u = urlsplit(href or "")
         host = (u.hostname or "").lower()
         if u.scheme != "https" or not (host == origin.domain or host.endswith("." + origin.domain)):
@@ -186,10 +200,18 @@ def parse_alert(origin: Origin, source_bytes: bytes) -> tuple[dict, list[ParsedL
         if not m:
             continue
         lid = next(g for g in m.groups() if g)
+        iu = urlsplit(img or "")
+        if (origin.regional and iu.scheme == "https" and (iu.hostname or "").lower().endswith("." + origin.domain)
+                and lid not in thumbs):
+            thumbs[lid] = f"https://{iu.hostname.lower()}{iu.path}"       # tracking query dropped
         title = clean_text(text, 300)
         if lid not in seen and title:
+            region = host[: -len(origin.domain) - 1] if origin.regional and host != origin.domain else ""
             seen[lid] = ParsedListing(lid, f"https://{host}{u.path}" + (f"?{u.query}" if u.query else ""),
-                                      title, clean_text(tail, 600))
+                                      title, clean_text(tail, 600), region=region)
+    for lid, lst in list(seen.items()):
+        if lid in thumbs:
+            seen[lid] = ParsedListing(lst.listing_id, lst.url, lst.title, lst.context, thumbs[lid], lst.region)
     facts = {"from": sender, "subject": clean_text(str(msg.get("Subject", "")), 200), "date": sent.isoformat(),
              "message_id": clean_text(str(msg.get("Message-ID", "")), 200)}
     return facts, [seen[k] for k in seen]           # document order
@@ -197,6 +219,8 @@ def parse_alert(origin: Origin, source_bytes: bytes) -> tuple[dict, list[ParsedL
 
 _PRICE = re.compile(r"(current bid|high bid|bid|price|starting at|opening bid)\s*:?\s*\$\s?([0-9][0-9,]*(?:\.[0-9]{2})?)",
                     re.IGNORECASE)
+_BARE_PRICE = re.compile(r"(?<![\w$])\$\s?([0-9][0-9,]*(?:\.[0-9]{2})?)")
+_NEIGHBORHOOD = re.compile(r"\(([^()]{2,60})\)")
 _ENDS = re.compile(r"(?:ends|closes|closing|end date)\s*:?\s*(20[0-9]{2}-[0-9]{2}-[0-9]{2})", re.IGNORECASE)
 _PLACE = re.compile(r"\b([A-Z][a-zA-Z .'-]{1,30}),\s*([A-Z]{2})\b(?:\s+([0-9]{5}))?")
 
@@ -230,17 +254,26 @@ class EmailAlertAdapter(SourceAdapter):
             res.error = SourceError("network", f"mailbox: {type(e).__name__}: {e}")
             return res
         res.requests_made = len(messages)
+        parsed: list[tuple[bytes, list | None, str]] = []
         for raw in messages:
             if not self._from_origin(raw):
                 continue                                # another sender's mail: not ours to read or retain
-            src = raw.decode("utf-8", "replace")
             try:
-                _, listings = parse_alert(self.origin, raw)
-            except NormalizationError:
-                listings = [None]                       # keep one record so the message is retained + quarantined
-            except Exception:  # noqa: BLE001
-                listings = [None]
-            for i, _ in enumerate(listings):
+                facts, listings = parse_alert(self.origin, raw)
+            except Exception:  # noqa: BLE001           # NormalizationError or malformed: keep one record, quarantined
+                facts, listings = {"date": ""}, [None]
+            parsed.append((raw, listings, facts["date"]))
+        newest: dict[str, tuple[str, int]] = {}         # repeated alerts: one record per posting ID, from the newest alert
+        if self.origin.regional:
+            for mi, (_, listings, date) in enumerate(parsed):
+                for l in listings:
+                    if l is not None and (l.listing_id not in newest or (date, mi) >= newest[l.listing_id]):
+                        newest[l.listing_id] = (date, mi)
+        for mi, (raw, listings, date) in enumerate(parsed):
+            src = raw.decode("utf-8", "replace")
+            for i, l in enumerate(listings):
+                if self.origin.regional and l is not None and newest[l.listing_id] != (date, mi):
+                    continue
                 payload = {"origin": self.source, "email_source": src, "listing_index": i}
                 try:
                     res.records.append(RawRecord(raw_json_bytes(payload), payload, now, f"mailbox://{self.source}"))
@@ -269,8 +302,8 @@ class EmailAlertAdapter(SourceAdapter):
             category, matched = "other_asset", False        # an estate sale is an event; needs_review
         else:
             category, matched = classify("flip", match_text(lst.title), match_text(lst.title, ctx))
-        pm = _PRICE.search(ctx)
-        amount = money(pm.group(2)) if pm else None
+        pm = _PRICE.search(ctx) or (_BARE_PRICE.search(ctx) if self.origin.regional else None)
+        amount = money(pm.group(pm.lastindex)) if pm else None
         if self.origin.opportunity_kind == "auction_lot":
             kind_word = (pm.group(1).lower() if pm else "")
             ptype = "auction_current" if "current" in kind_word or "high" in kind_word else "starting_bid"
@@ -289,11 +322,25 @@ class EmailAlertAdapter(SourceAdapter):
                       "counterparty": {"role": "agency" if self.origin.opportunity_kind == "auction_lot" else "seller",
                                        "contact_method": "platform"},
                       "listing_status": "active", "images": []}
-        if ctx:
+        if self.origin.regional:
+            # The frozen Item has no region/neighborhood/thumbnail fields (no contract change without an ADR), so they are
+            # carried as labelled lines in the description. Absent in the e-mail = UNKNOWN, never guessed.
+            nb = _NEIGHBORHOOD.search(ctx)
+            st = REGION_STATE.get(lst.region)
+            if st:
+                loc["state"] = st
+                normalized["location"] = loc
+            lines = [clean_text(ctx, MAX_DESCRIPTION - 400) if ctx else "",
+                     f"Craigslist region: {lst.region or 'UNKNOWN'}",
+                     f"Neighborhood/location text (as shown, unverified): {clean_text(nb.group(1), 60) if nb else 'UNKNOWN'}",
+                     f"Thumbnail: {lst.thumb or 'UNKNOWN'}",
+                     f"Alert received: {facts['date']}"]
+            normalized["description"] = "\n".join(x for x in lines if x)
+        elif ctx:
             normalized["description"] = clean_text(ctx, MAX_DESCRIPTION)
         if ends_at:
             normalized["ends_at"] = ends_at
-        if loc:
+        if loc and not self.origin.regional:
             normalized["location"] = loc
         flags = base_flags(price=price, bid_count=None, ends_at=ends_at, fetched_at=fetched_at, matched=matched,
                            tier=None, texts=(lst.title, ctx, facts["subject"]))

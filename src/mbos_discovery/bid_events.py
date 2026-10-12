@@ -109,7 +109,7 @@ def parse_bid_notification(source_bytes: bytes, observed_at: datetime) -> list[d
     else:
         p = _Anchors()
         p.feed(body)
-        links = [tuple(x) for x in p.links]
+        links = [tuple(x[:3]) for x in p.links]
         text = re.sub(r"<[^>]+>", " ", body)
     subject = clean_text(str(msg.get("Subject", "")), 200)
     plain = clean_text(text, 4000)
@@ -182,7 +182,7 @@ def parse_registration(source_bytes: bytes, observed_at: datetime) -> dict:
     else:
         p = _Anchors()
         p.feed(body)
-        links = [tuple(x) for x in p.links]
+        links = [tuple(x[:3]) for x in p.links]
         text = re.sub(r"<[^>]+>", " ", body)
     subject = clean_text(str(msg.get("Subject", "")), 200)
     plain = clean_text(text, 4000)

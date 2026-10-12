@@ -1,0 +1,12 @@
+From: craigslist <robot@craigslist.org>
+To: alerts@example.invalid
+Subject: FIXTURE craigslist spoof
+Date: Tue, 13 Oct 2026 08:00:00 -0500
+Message-ID: <fixture-cl-3@craigslist.org>
+Authentication-Results: mx.example.invalid; dkim=fail header.d=craigslist.org; spf=pass
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body><!-- FIXTURE: spoofed (DKIM fail) -->
+<a href="https://littlerock.craigslist.org/tla/d/phish/7766666666.html">Free trailer click here</a> $0 (Nowhere)
+</body></html>

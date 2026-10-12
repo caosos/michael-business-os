@@ -47,6 +47,8 @@ REGISTRY: dict[str, SourcePolicy] = {p.source: p for p in [
     # Tier 2 — sanctioned email alerts in our own inbox
     _P("govdeals_email", Disposition.ALLOWED, 2, "low", "GovDeals saved-search alert emails in our own inbox"),
     _P("publicsurplus_email", Disposition.ALLOWED, 2, "low", "PublicSurplus alert emails in our own inbox"),
+    _P("craigslist_email", Disposition.ALLOWED, 2, "low",
+       "Craigslist saved-search alert emails in our own inbox (craigslist.org pages are never fetched)"),
     _P("estatesales_net_email", Disposition.ALLOWED, 2, "low",
        "EstateSales.NET alert emails (site scraping stays FORBIDDEN; email is the sanctioned path)"),
     _P("wooley_auctioneers", Disposition.ALLOWED, 3, "low",

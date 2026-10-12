@@ -1,0 +1,15 @@
+From: craigslist <robot@craigslist.org>
+To: alerts@example.invalid
+Subject: FIXTURE craigslist alert: utility trailer (repeat)
+Date: Tue, 13 Oct 2026 07:00:00 -0500
+Message-ID: <fixture-cl-2@craigslist.org>
+Authentication-Results: mx.example.invalid; dkim=pass header.d=craigslist.org; spf=pass
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body><!-- FIXTURE: synthetic, scrubbed -->
+<table>
+<tr><td><a href="https://littlerock.craigslist.org/tla/d/conway-utility-trailer-5x10/7712345001.html">Utility trailer 5x10 single axle</a> $650 (Conway)</td></tr>
+<tr><td><a href="https://texarkana.craigslist.org/tla/d/texarkana-car-hauler/7712345004.html">Car hauler trailer</a> $2,900 (Texarkana)</td></tr>
+<tr><td><a href="https://memphis.craigslist.org/tla/d/olive-branch-enclosed-trailer/7712345005.html">Enclosed trailer 7x14</a> $3,500 (Olive Branch)</td></tr>
+</table></body></html>

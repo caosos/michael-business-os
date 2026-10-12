@@ -35,11 +35,11 @@ from .rawstore import FileRawStore
 from .store import ItemStore, load_json, save_json_atomic
 
 ITEM_SOURCES = ("ebay", "gsa_auctions", "samgov", "trashnothing", "website_lead", "referral", "govdeals_email",
-                "publicsurplus_email", "estatesales_net_email")
+                "publicsurplus_email", "estatesales_net_email", "craigslist_email")
 COMP_SOURCES = ("manual", "ebay_marketplace_insights", "ebay_browse_asking")
 KNOWLEDGE_SOURCES = ("cpsc_recalls", "nhtsa")
 ALL_SOURCES = ITEM_SOURCES + COMP_SOURCES + KNOWLEDGE_SOURCES
-EMAIL_SOURCES = ("govdeals_email", "publicsurplus_email", "estatesales_net_email")
+EMAIL_SOURCES = ("govdeals_email", "publicsurplus_email", "estatesales_net_email", "craigslist_email")
 DRY_KEY = "DRY-RUN-PLACEHOLDER"
 
 
@@ -171,7 +171,7 @@ def build_plan(cfg: dict, base: Path, fixtures: Path | None, dry: bool, only: se
         elif src in EMAIL_SOURCES:
             imap = p.get("imap") or {}
             if fixtures:
-                reader = EmlDirReader(fixtures / "email")
+                reader = EmlDirReader(fixtures / ("craigslist_mail" if src == "craigslist_email" else "email"))
             elif dry and imap:
                 log: list[str] = []
                 reader = ImapReader(imap["host"], imap["user"], imap.get("password_env", "MBOS_IMAP_PASSWORD"),

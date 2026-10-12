@@ -73,6 +73,12 @@ source = "estatesales_net_email"
 lane = "flip"
 mail_dir = "var/mail/estatesales"
 
+[[profile]]
+id = "flip-craigslist-alerts"            # B-36: Craigslist saved-search alerts; label DealSniffer/Alerts; no craigslist.org fetch
+source = "craigslist_email"
+lane = "flip"
+mail_dir = "var/mail/craigslist"
+
 # ---- sold comps / asking comps (evidence for Agent 03; never Items) -------------------------------------------------
 [[profile]]
 id = "comps-manual"
