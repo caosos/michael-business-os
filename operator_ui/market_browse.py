@@ -268,7 +268,7 @@ def source_section(q: dict, fc: dict, now: datetime) -> str:
     for r in msp.rows(now):
         i, st = r["info"], r["state"]
         n = fc["source"].get(i.key, 0)
-        state = {"LIVE CONNECTED": "connected", "MANUAL": "manual: paste finds", "BLOCKED": "blocked"}.get(st, "not connected")
+        state = {"LIVE CONNECTED": "connected", "CONNECTED, WAITING FOR ALERTS": "connected, waiting for alerts", "MANUAL": "manual: paste finds", "BLOCKED": "blocked"}.get(st, "not connected")
         if r["probe"]["status"] == "fixture":
             state = "FIXTURE, not live"
         pick = i.key in _names()

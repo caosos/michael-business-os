@@ -70,7 +70,7 @@ def test_radius_applies_with_a_resolved_distance():
 
 def test_filters_apply_to_parser_backed_records():
     d = ms.load_source("all", NOW, ms._origin("Conway AR"), directory=str(MAIL))
-    cards = [c for c in d["cards"] if c.get("fixture")]
+    cards = [c for c in d["cards"] if c.get("fixture") and c["source"] != "Craigslist"]
     run = lambda **k: ms.partition(cards, ms.parse_query({"base": ["Conway AR"], "broad": ["1"], **{a: [b] for a, b in k.items()}}))   # noqa: E731
     assert {c["title"] for c in run()[0] + run()[1]} >= {"Utility Trailer 5x10, Single Axle", "Lincoln AC225 Stick Welder"}
     assert [c["title"] for c in run(max_price="300")[0]] == ["Lincoln AC225 Stick Welder"] and run(max_price="300")[2]["price"] == 1      # 350 > 300 hidden by price
@@ -85,7 +85,7 @@ def test_all_dedups_across_sources_and_keeps_gsa(cache, tmp_path):
     d = msrc.load_source("all", str(cache), NOW, None, str(MAIL))
     assert d["status"] == "connected" and d["fixture"] is True
     names = {c["source"] for c in d["cards"]}
-    assert names == {"GSA Auctions", "GovDeals", "Public Surplus"}
+    assert names == {"GSA Auctions", "GovDeals", "Public Surplus", "Craigslist"}
     twin = tmp_path / "dup"
     twin.mkdir()
     (twin / "a.eml").write_bytes((MAIL / "01-govdeals.eml").read_bytes())
@@ -117,14 +117,14 @@ def test_fixture_page_is_labelled_and_never_connected(ui, staging):
     li = re.search(r"<li data-src='GovDeals'[^>]*>.*?</li>", h).group(0)
     assert "connected" not in li.lower().replace("not connected", "") and "FIXTURE / not live" in li
     assert "https://www.govdeals.com/asset/1234/5678" in h and "Conway, AR" in h and "$350" in h and "fetched 2026-10-07" in h
-    for off in ("Craigslist", "eBay", "Facebook Marketplace"):
+    for off in ("eBay", "Facebook Marketplace"):
         assert re.search(rf"<li data-src='{off}' data-status='not_connected'><b>{off}: NOT CONNECTED</b>", h)
     g = get(ui, go=1, source="govdeals", broad=1, base="Conway AR", radius="50")                   # gallery view carries the label per card
     assert g.count("FIXTURE / not live</span>") >= 1 and "data-lot='govdeals_email:1234/5678'" in g
 
 
 def test_source_with_no_read_stays_not_connected_even_on_staging(ui, staging):
-    for s in ("ebay", "craigslist", "facebook marketplace"):
+    for s in ("ebay", "facebook marketplace"):
         h = get(ui, go=1, source=s, broad=1)
         assert f"{s}: not connected.</b>" in h and "Utility Trailer" not in h and "id='fixture-banner'" not in h
     d = ms.load_source("all", NOW, None, directory=str(MAIL))

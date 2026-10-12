@@ -7,9 +7,11 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
+from functools import lru_cache
 from pathlib import Path
 
 from mbos_discovery.adapter import NormalizationError, SearchProfile
@@ -24,7 +26,7 @@ from mbos_discovery.normalize import haversine_miles
 
 from . import gazetteer, market_search as ms
 
-ALERT_SOURCES = {"govdeals": ("govdeals_email", "GovDeals"), "publicsurplus": ("publicsurplus_email", "Public Surplus")}
+ALERT_SOURCES = {"govdeals": ("govdeals_email", "GovDeals"), "publicsurplus": ("publicsurplus_email", "Public Surplus"), "craigslist": ("craigslist_email", "Craigslist")}
 CACHE_DIR = Path(__file__).resolve().parent.parent / "var" / "cache"
 
 
@@ -51,12 +53,17 @@ ENV_WOOLEY = AUCTION_SITES["wooley"].env
 WOOLEY_NAME = AUCTION_SITES["wooley"].name
 EVENT_NAMES = {s.name for s in AUCTION_SITES.values()}
 ENV_FLAG, ENV_DIR = "MBOS_STAGING_FIXTURES", "MBOS_MARKET_FIXTURE_MAIL_DIR"
+ENV_ALERTS = "MBOS_ALERT_CACHE"                   # F-161: the local file written by tools/refresh_alert_mail.py
+WAITING = "CONNECTED, WAITING FOR ALERTS"
 
 
 def fixture_dir() -> str | None:
     """The .eml fixture directory, only when BOTH the isolated-staging flag and the directory are set; otherwise None (not connected)."""
     d = os.environ.get(ENV_DIR)
     return d if os.environ.get(ENV_FLAG) == "1" and d and Path(d).is_dir() else None
+
+
+_HOOD = re.compile(r"Neighborhood/location text \(as shown, unverified\):\s*([^\n]{2,60})")
 
 
 def _coords(loc: dict):
@@ -76,7 +83,7 @@ def not_connected(source: str) -> dict:
     return _empty("not_connected", name, f"{name}: no mailbox read is configured on this host; nothing is shown rather than guessed.")
 
 
-def _card(ad, rec, now, origin, name: str) -> dict | None:
+def _card(ad, rec, now, origin, name: str, fixture: bool = True) -> dict | None:
     p = rec.payload
     try:
         n = ad.normalize(p, rec.fetched_at)
@@ -84,9 +91,12 @@ def _card(ad, rec, now, origin, name: str) -> dict | None:
     except NormalizationError:
         return None                                   # spoofed / unauthenticated / foreign mail: quarantined, never shown
     d = n.normalized
-    loc = d.get("location") or {}
+    loc = dict(d.get("location") or {})
+    hood = _HOOD.search(d.get("description") or "")
+    if hood and not loc.get("city") and loc.get("state"):                 # Craigslist: neighborhood text as shown (unverified) -> gazetteer, else unknown distance
+        loc["city"] = hood.group(1).strip()
     c = _coords(loc) if loc else None
-    dist = haversine_miles(origin, c) if (c and origin) else None          # unrounded, as for GSA
+    dist = haversine_miles(origin, c) if (c and origin) else None          # unrounded, as for GSA; unknown stays None (never local)
     price = d.get("price") or {}
     amt = price.get("amount")
     bid = float(amt) if price.get("type") == "auction_current" and isinstance(amt, (int, float)) else None
@@ -94,19 +104,73 @@ def _card(ad, rec, now, origin, name: str) -> dict | None:
     desc = ms._short(d.get("description") or "")
     labels = ms.auction_labels({"highBidAmount": bid}, facts["date"])
     if bid is None:
-        labels["opening_text"] = (f"Starting price ${amt:,.2f} (from the alert e-mail text; unverified)" if isinstance(amt, (int, float)) else "Price not stated in the alert — check original listing")
+        labels["opening_text"] = (f"Asking price ${amt:,.2f} (from the alert e-mail text; unverified)" if isinstance(amt, (int, float)) and price.get("type") == "fixed" else
+                                  f"Starting price ${amt:,.2f} (from the alert e-mail text; unverified)" if isinstance(amt, (int, float)) else "Price not stated in the alert — check original listing")
     return {"id": f"{ad.source}:{n.source_listing_id}", "title": d["title"], "description": desc, "text": f"{d['title']} {desc}".lower(), "url": n.url, "image": None,
             "bid": bid, "price": float(amt) if isinstance(amt, (int, float)) else None, "price_type": price.get("type"), "bidders": None,
             "closes": str(d.get("ends_at") or "")[:10] or None, "city": f"{loc['city']}, {loc['state']}" if loc.get("city") and loc.get("state") else None,
             "state": state if state in ms.US_STATES else None, "zip": str(loc.get("zip") or "")[:5] or None, "posted": None, "distance": dist, "category": n.category, "condition": None, "labels": labels, "source": name,
-            "fetched_at": facts["date"], "kind": "auction", "stale": ms._age_h(facts["date"], now) > ms.STALE_H, "fixture": True}
+            "fetched_at": facts["date"], "kind": "auction", "stale": ms._age_h(facts["date"], now) > ms.STALE_H, "fixture": fixture}
 
 
-def load_alerts(source: str, directory: str | None, now: datetime, origin=None) -> dict:
-    """-> the `load_gsa` dict with status `fixture` (parser-backed .eml fixtures, not live) or `not_connected`. Never `connected`."""
+class _TextReader:
+    """Read-only reader over the messages stored in the alert-mail cache (text -> bytes, exactly what the adapter keeps)."""
+    def __init__(self, messages: list[str]) -> None:
+        self.m = messages
+
+    def messages(self, since):
+        return (x.encode("utf-8") for x in self.m)
+
+
+def alert_cache_path() -> str:
+    return os.environ.get(ENV_ALERTS) or str(CACHE_DIR / "alert-mail.json")
+
+
+def read_alert_cache(path: str | None = None) -> dict | None:
+    """-> the cache doc ({as_of, mailbox_read, fixture, messages}) or None when absent/unreadable/malformed (= NOT CONNECTED)."""
+    try:
+        doc = json.loads(Path(path or alert_cache_path()).read_text(encoding="utf-8"))
+        datetime.fromisoformat(str(doc["as_of"]))
+        if not isinstance(doc["messages"], list) or not all(isinstance(m, str) for m in doc["messages"]):
+            return None
+        return doc
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+
+
+def _utc(v: str) -> datetime:
+    d = datetime.fromisoformat(v.replace("Z", "+00:00"))
+    return d if d.tzinfo else d.replace(tzinfo=timezone.utc)
+
+
+@lru_cache(maxsize=16)
+def _cached_records(path: str, mtime_ns: int, key: str, as_of: str):
+    doc = read_alert_cache(path)
+    ad = EmailAlertAdapter(key, _TextReader(doc["messages"] if doc else []), clock=lambda: _utc(as_of))
+    return ad, tuple(ad.fetch(SearchProfile("market", "flip")).records)
+
+
+def _from_cache(source: str, doc: dict, path: str, now: datetime, origin) -> dict:
+    key, name = ALERT_SOURCES[source]
+    as_of = str(doc["as_of"])
+    fixture = bool(doc.get("fixture")) or not doc.get("mailbox_read")          # only a flagged real mailbox read is ever live
+    ad, recs = _cached_records(path, Path(path).stat().st_mtime_ns, key, as_of)
+    cards = [c for c in (_card(ad, r, now, origin, name, fixture) for r in recs if isinstance(r.payload, dict)) if c]
+    age = round(ms._age_h(as_of, now), 1)
+    base = {**_empty("fixture" if fixture else "connected", name, ""), "as_of": as_of, "age_h": age, "stale": age > ms.STALE_H, "in_file": len(recs), "fixture": fixture}
+    if not cards:
+        return {**base, "status": "fixture" if fixture else "waiting", "message": f"{name}: connected, waiting for alerts (the mailbox was read {age:g} h ago; no {name} alert has arrived)."}
+    return {**base, "in_scope": len(cards), "cards": cards}
+
+
+def load_alerts(source: str, directory: str | None, now: datetime, origin=None, cache: str | None = None) -> dict:
+    """-> the `load_gsa` dict. Status: `fixture` (parser-backed .eml fixtures, never live), `connected` (a REAL mailbox read stored in the alert-mail
+    cache returned items for this source), `waiting` (real read ok, no alert from this source yet) or `not_connected` (no usable read)."""
     key, name = ALERT_SOURCES[source]
     if not directory:
-        return not_connected(source)
+        path = cache or alert_cache_path()
+        doc = read_alert_cache(path)
+        return _from_cache(source, doc, path, now, origin) if doc else not_connected(source)
     ad = EmailAlertAdapter(key, EmlDirReader(directory), clock=lambda: now)
     res = ad.fetch(SearchProfile("market", "flip"))
     if res.error:
@@ -251,14 +315,14 @@ def load_source(source: str, gsa_path: str | None, now: datetime, origin=None, d
     alerts = [load_alerts(s, directory, now, origin) for s in ALERT_SOURCES]
     houses = [load_events(x, None, now, origin) for x in AUCTION_SITES.values()]
     cards = dedupe(gsa["cards"] + [c for h in houses for c in h["cards"]] + [c for a in alerts for c in a["cards"]])
-    live = "connected" in [gsa["status"]] + [h["status"] for h in houses]
+    live = "connected" in [gsa["status"]] + [h["status"] for h in houses] + [a["status"] for a in alerts]
     status = "connected" if live else "fixture" if any(a["cards"] for a in alerts) else "offline"
-    return {**gsa, "status": status, "cards": cards, "in_scope": len(cards), "fixture": any(a["fixture"] for a in alerts),
+    return {**gsa, "status": status, "cards": cards, "in_scope": len(cards), "fixture": any(a["fixture"] and a["cards"] for a in alerts),
             "message": gsa["message"] if status == "offline" else "", "coverage": coverage([{**gsa, "name": "GSA Auctions"}] + houses + alerts)}
 
 
 # ---- F-156: the source registry (the one place that knows every source; /market's Sources panel only displays it) ----
-STATES = ("LIVE CONNECTED", "IMPORTED", "MANUAL", "NOT CONNECTED", "BLOCKED")
+STATES = ("LIVE CONNECTED", "CONNECTED, WAITING FOR ALERTS", "IMPORTED", "MANUAL", "NOT CONNECTED", "BLOCKED")
 
 
 @dataclass(frozen=True)
@@ -288,15 +352,15 @@ REGISTRY = (
     SourceInfo("blackmon", "Blackmon Auctions", "auctioneer", "Arkansas", "own site", "auction event", "bids on Proxibid (your account); this page never loads it",
                "events only; at most one refresh an hour", "none for events; lots need the platform's permission", "site:blackmon", "LIVE CONNECTED"),
     SourceInfo("govdeals", "GovDeals", "government surplus", "US-wide", "e-mail alerts", "item (lot)", "bid on govdeals.com with your own account",
-               "needs a mailbox read-only connection; test e-mails never count as live", "owner decision: connect a read-only alert mailbox", "alerts:govdeals", "LIVE CONNECTED"),
+               "needs a read-only mailbox connection; test e-mails never count as live", "owner decision: connect a read-only alert mailbox", "alerts:govdeals", "LIVE CONNECTED"),
     SourceInfo("publicsurplus", "Public Surplus", "government surplus", "US-wide", "e-mail alerts", "item (lot)", "bid on publicsurplus.com with your own account",
-               "needs a mailbox read-only connection; test e-mails never count as live", "owner decision: connect a read-only alert mailbox", "alerts:publicsurplus", "LIVE CONNECTED"),
+               "needs a read-only mailbox connection; test e-mails never count as live", "owner decision: connect a read-only alert mailbox", "alerts:publicsurplus", "LIVE CONNECTED"),
     SourceInfo("hibid_email", "HiBid e-mail alerts", "auction platform", "per your saved HiBid searches", "e-mail alerts", "item (lot)", "bid on hibid.com with your own account",
                "HiBid terms forbid scraping: lots need written permission; only alert e-mails you receive may be read", "owner decision: connect a read-only alert mailbox; no adapter yet", None, "NOT CONNECTED"),
     SourceInfo("hibid_site", "HiBid website (lot data)", "auction platform", "US-wide", "none", "item (lot)", "bid on hibid.com with your own account",
                "HiBid terms forbid scraping: lots need written permission", "get written permission from HiBid; until then nothing is read", None, "BLOCKED"),
-    SourceInfo("craigslist", "Craigslist", "classifieds", "local", "owner import", "item", "none; contact sellers yourself",
-               "terms forbid automated access: owner pastes finds, the system never fetches", "paste a find on the Finds form", "finds", "MANUAL"),
+    SourceInfo("craigslist", "Craigslist", "classifieds", "local (your saved-search regions)", "e-mail alerts", "item", "none; contact sellers yourself",
+               "only saved-search alert e-mails you receive are read (never craigslist.org); a test e-mail never counts as live; owner can still paste finds", "owner decision: connect a read-only alert mailbox", "alerts:craigslist", "LIVE CONNECTED"),
     SourceInfo("facebook", "Facebook Marketplace", "classifieds", "local", "owner import", "item", "none; contact sellers yourself",
                "terms forbid automated access and a login is needed: owner pastes finds only", "paste a find on the Finds form", "finds", "MANUAL"),
     SourceInfo("offerup", "OfferUp", "classifieds", "local", "owner import", "item", "none; contact sellers yourself",
@@ -323,8 +387,11 @@ def probe(info: SourceInfo, now: datetime) -> dict:
         if kind == "finds":
             return {**out, "status": "manual", "n": _finds_count()}
         if kind == "alerts":
-            d = fixture_dir()
-            return {**out, "status": "fixture" if d else "offline"}
+            if fixture_dir():
+                return {**out, "status": "fixture"}
+            d = load_alerts(key, None, now)
+            return {**out, "status": d["status"] if d["status"] in ("connected", "fixture", "waiting") else "offline", "as_of": d["as_of"], "age_h": d["age_h"], "stale": d["stale"],
+                    "n": d["in_scope"]}
         if kind == "gsa":
             asof = ms.GsaLiveAdapter(ms.cache_path(), live=False)._asof()
             as_of = asof.isoformat() if asof else None
@@ -347,4 +414,6 @@ def source_state(info: SourceInfo, pr: dict) -> str:
         return "MANUAL"
     if info.intended == "IMPORTED":
         return "IMPORTED" if pr["status"] == "imported" else "NOT CONNECTED"
+    if pr["status"] == "waiting" and info.intended == "LIVE CONNECTED":
+        return WAITING
     return "LIVE CONNECTED" if pr["status"] == "connected" and info.intended == "LIVE CONNECTED" else "NOT CONNECTED"

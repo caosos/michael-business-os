@@ -4,6 +4,7 @@ Only GSA (cached file) is ever called connected. A parser-backed .eml fixture is
 from __future__ import annotations
 
 import html
+from datetime import datetime, timezone
 
 from . import market_search as ms
 from . import market_sources as msrc
@@ -12,12 +13,14 @@ from .deal_ui import classify_url
 e = lambda v: html.escape("" if v is None else str(v))  # noqa: E731
 FIXTURE_BANNER = ("FIXTURE / not live: scrubbed test e-mails read from a local directory on an isolated staging server. These are not Michael's real deals, "
                   "no mailbox is read, and nothing here counts as a connected source.")
-ALWAYS_OFF = ("Craigslist", "eBay", "Facebook Marketplace")
+ALWAYS_OFF = ("eBay", "Facebook Marketplace")
 
 
 def source_options() -> list[tuple[str, str]]:
     fx = msrc.fixture_dir() is not None
-    alerts = [(k, f"{n} (FIXTURE, not live)" if fx else f"{n} (not connected)") for k, (_, n) in msrc.ALERT_SOURCES.items()]
+    now = datetime.now(timezone.utc)
+    tag = lambda k, n: f"{n} (FIXTURE, not live)" if fx else {"connected": n, "waiting": f"{n} (connected, waiting for alerts)"}.get(msrc.load_alerts(k, None, now)["status"], f"{n} (not connected)")  # noqa: E731
+    alerts = [(k, tag(k, n)) for k, (_, n) in msrc.ALERT_SOURCES.items()]
     return [("gsa", "GSA Auctions")] + [(k, x.name) for k, x in msrc.AUCTION_SITES.items()] + [(msrc.ALL_HOUSES, "All auction houses")] + alerts + [("all", "All sources (merged)")] + [(n.lower(), n + " (not connected)") for n in ALWAYS_OFF]
 
 
@@ -26,10 +29,13 @@ def _row(c: dict) -> str:
     if c["status"] == "offline":
         return f"<li data-src='{n}' data-status='offline'><b class='bad'>{n}: offline</b> · {e(c.get('message') or 'no cached read; nothing is shown')}</li>"
     if c["status"] == "connected":
-        unit = "auction events (not lots)" if c["name"] in msrc.EVENT_NAMES else "lots"
+        unit = "auction events (not lots)" if c["name"] in msrc.EVENT_NAMES else "listings" if c["name"] == "Craigslist" else "lots"
         note = f" · {e(c['message'])}" if c.get("message") else ""
         age = f" · last fetched {e(str(c['as_of'])[:16].replace('T', ' '))} UTC ({c['age_h']:g} h ago){' · <b class=bad>STALE</b>' if c['stale'] else ''} · {c['in_scope']} {unit}{note}"
-        return f"<li data-src='{n}' data-status='connected'><b>{n}: connected (cached file)</b>{age}</li>"
+        how = "mailbox read, cached" if c["name"] in {v[1] for v in msrc.ALERT_SOURCES.values()} else "cached file"
+        return f"<li data-src='{n}' data-status='connected'><b>{n}: connected ({how})</b>{age}</li>"
+    if c["status"] == "waiting":
+        return f"<li data-src='{n}' data-status='waiting'><b>{n}: connected, waiting for alerts</b> · mailbox last read {e(str(c['as_of'])[:16].replace('T', ' '))} UTC ({c['age_h']:g} h ago){' · <b class=bad>STALE</b>' if c['stale'] else ''} · no {n} alert yet</li>"
     if c["status"] == "fixture":
         return (f"<li data-src='{n}' data-status='fixture'><b class='bad'>{n}: FIXTURE / not live</b> · {c['in_scope']} test listing(s) · newest test e-mail dated "
                 f"{e(str(c['as_of'])[:16].replace('T', ' '))} UTC{' · STALE' if c['stale'] else ''}</li>")
@@ -49,8 +55,10 @@ def gate(q: dict, d: dict) -> str | None:
     s = q["source"]
     if s in ("gsa", "all", msrc.ALL_HOUSES) or s in msrc.AUCTION_SITES:
         return None
-    if s in msrc.ALERT_SOURCES and d["status"] == "fixture":
+    if s in msrc.ALERT_SOURCES and d["status"] in ("fixture", "connected"):
         return None
+    if s in msrc.ALERT_SOURCES and d["status"] == "waiting":
+        return f"<div class='card'><b>{e(msrc.ALERT_SOURCES[s][1])}: connected, waiting for alerts.</b> The alerts mailbox was read, but no alert from this source has arrived yet.</div>"
     return f"<div class='card'><b>{e(msrc.ALERT_SOURCES[s][1] if s in msrc.ALERT_SOURCES else s)}: not connected.</b> No results are shown for a source that is not wired; nothing is mocked.</div>"
 
 

@@ -1,0 +1,20 @@
+From: craigslist <robot@craigslist.org>
+To: alerts@example.invalid
+Subject: FIXTURE craigslist alert: utility trailer
+Date: Mon, 12 Oct 2026 07:00:00 -0500
+Message-ID: <fixture-cl-1@craigslist.org>
+Authentication-Results: mx.example.invalid; dkim=pass header.d=craigslist.org; spf=pass
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body><!-- FIXTURE: synthetic, scrubbed; not a real Craigslist e-mail -->
+<p>New results for your search "utility trailer":</p>
+<table>
+<tr><td><a href="https://littlerock.craigslist.org/tla/d/conway-utility-trailer-5x10/7712345001.html"><img src="https://images.craigslist.org/00a0a_fixture_300x300.jpg?t=trk"></a></td>
+<td><a href="https://littlerock.craigslist.org/tla/d/conway-utility-trailer-5x10/7712345001.html">Utility trailer 5x10 single axle</a> $650 (Conway)</td></tr>
+<tr><td><a href="https://littlerock.craigslist.org/tla/d/cabot-flatbed-trailer/7712345002.html">Flatbed trailer, title in hand</a> (Cabot)</td></tr>
+<tr><td><a href="https://fayar.craigslist.org/tla/d/springdale-dump-trailer/7712345003.html"><img src="https://images.craigslist.org/00b0b_fixture_300x300.jpg"></a>
+<a href="https://fayar.craigslist.org/tla/d/springdale-dump-trailer/7712345003.html">Dump trailer 6x12</a> $4,200 (Springdale)</td></tr>
+<tr><td><a href="https://evil.example.com/tla/d/x/7799999999.html">Fake offsite trailer</a> $1</td></tr>
+</table>
+<p><a href="https://accounts.craigslist.org/login/home">manage alerts</a></p></body></html>

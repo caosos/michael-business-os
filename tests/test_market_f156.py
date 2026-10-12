@@ -50,9 +50,10 @@ def test_not_connected_without_caches():
 def test_manual_blocked_and_imported_labels(tmp_path, monkeypatch):
     monkeypatch.setenv("MBOS_MARKET_FINDS_FILE", str(tmp_path / "f.json"))
     r = by(msp.rows(NOW))
-    for k in ("craigslist", "facebook", "offerup", "owner_finds"):
+    for k in ("facebook", "offerup", "owner_finds"):
         assert r[k]["state"] == "MANUAL"
     assert r["hibid_site"]["state"] == "BLOCKED"
+    assert r["craigslist"]["state"] == "NOT CONNECTED"      # F-161: e-mail alerts, no mailbox read in this test
     imp = msrc.SourceInfo("x", "X", "c", "g", "owner import", "item", "none", "", "", None, "IMPORTED")
     assert msrc.source_state(imp, {"status": "imported"}) == "IMPORTED"
     assert msrc.source_state(imp, {"status": "offline"}) == "NOT CONNECTED"

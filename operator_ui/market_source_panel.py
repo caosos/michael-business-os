@@ -25,6 +25,8 @@ def _fresh(pr: dict) -> str:
         return f"last success {e(str(pr['as_of'])[:16].replace('T', ' '))} UTC ({pr['age_h']:g} h ago){' · STALE' if pr['stale'] else ''}"
     if pr["status"] == "fixture":
         return "FIXTURE / not live: test e-mails only, no real read"
+    if pr["status"] == "waiting":
+        return f"mailbox read {e(str(pr['as_of'])[:16].replace('T', ' '))} UTC ({pr['age_h']:g} h ago); no alert from this source yet"
     if pr["status"] == "manual":
         return f"{pr['n']} owner-entered find(s)"
     return "never read on this machine"

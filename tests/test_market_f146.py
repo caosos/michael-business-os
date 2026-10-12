@@ -76,7 +76,7 @@ def test_page_shows_unknown_lot_fields_links_and_connected_label(ui, wcache):
     assert f"https://wooleyauctioneers.com/{BRUCK}/" in h and "View and bid on HiBid" in h and "mi from your base" in h
     g = get(ui, go=1, source="wooley", broad=1)
     assert "data-kind='auction-event'" in g and "View and bid on HiBid" in g
-    assert "Craigslist: NOT CONNECTED" in h and "eBay: NOT CONNECTED" in h and "Facebook Marketplace: NOT CONNECTED" in h
+    assert "eBay: NOT CONNECTED" in h and "Facebook Marketplace: NOT CONNECTED" in h
 
 
 def test_selector_option_and_all_sources_merge(ui, wcache, cache):
@@ -89,7 +89,7 @@ def test_selector_option_and_all_sources_merge(ui, wcache, cache):
 def test_all_sources_with_fixture_alerts_only_on_flag(wcache, cache):
     mail = Path(__file__).parent / "fixtures" / "alerts"
     d = msrc.load_source("all", str(cache), NOW, None, str(mail))
-    assert {c["source"] for c in d["cards"]} == {"GSA Auctions", "Wooley Auctioneers", "GovDeals", "Public Surplus"}
+    assert {c["source"] for c in d["cards"]} == {"GSA Auctions", "Wooley Auctioneers", "GovDeals", "Public Surplus", "Craigslist"}
     assert not any(c.get("fixture") for c in msrc.load_source("all", str(cache), NOW, None)["cards"])
 
 

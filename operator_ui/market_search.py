@@ -20,7 +20,7 @@ from mbos_discovery.normalize import haversine_miles
 
 DEFAULT_CACHE = "/home/michaelos/business-os-worktrees/agent-01-coordinator/var/cache/gsa-active-auctions.json"
 SOURCES = {"gsa": "GSA Auctions"}
-NOT_CONNECTED = ("GovDeals", "Public Surplus", "eBay", "Craigslist", "Facebook Marketplace")
+NOT_CONNECTED = ("eBay", "Facebook Marketplace")
 SORTS = ("closing", "new", "bid", "price_desc", "distance", "title", "suggested")      # F-159: closing = Ending soonest, new = Newest, bid = Price low to high
 # F-52 (B): gallery row categories. Matched against the seller's text and the system's category guess; a row name is a label, not a claim.
 ROW_CATS = {"trailers": ("trailer",), "equipment": ("equipment", "tractor", "mower", "loader", "generator", "compressor", "forklift", "backhoe"),
@@ -294,9 +294,10 @@ def _price_ok(c: dict, q: dict):
         return True
     if c.get("event"):
         return False           # F-146 rule: an auction EVENT has no price at all, so any min/max price filter excludes it (counted under 'hidden by price')
-    if c["bid"] is None:
+    amt = c["bid"] if c["bid"] is not None else c.get("price") if c.get("price_type") == "fixed" else None     # F-161: a stated asking price is testable
+    if amt is None:
         return None
-    return (q.get("min_price") is None or c["bid"] >= q["min_price"]) and (q["max_price"] is None or c["bid"] <= q["max_price"])
+    return (q.get("min_price") is None or amt >= q["min_price"]) and (q["max_price"] is None or amt <= q["max_price"])
 
 
 def search(lots: list[dict], q: dict) -> tuple[list[dict], dict]:
