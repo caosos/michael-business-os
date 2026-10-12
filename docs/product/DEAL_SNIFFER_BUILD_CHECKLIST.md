@@ -432,3 +432,11 @@ This section is part of the existing living checklist and is the authoritative r
 - [ ] **F-157/F-158 LIVE_VERIFIED:** unchanged; tested `112fce4`, loaded `a0ee240`, F-158 NOT LOADED, loaded desktop/mobile proof MISSING.
 - **ONE next action:** existing Agent 01 publishes current host evidence and A-73 ACK/WORKING or exact NEED, then reconciles the conflicting parallel claims.
 - **Canonical evidence:** `docs/receipts/2026-10-12-supervisor-visible-check-1435.md`.
+
+
+## Supervisor reconciliation — Monday, October 12, 2026 — 3:21 PM America/Chicago
+- [ ] **A-73 remains the ONE authoritative bounded task:** owner/responsible coordinator: existing Agent 01; worker: NONE until host-backed ACK/dispatch; priority P0; stage **NEED — ACK MISSED**. Acceptance: one deduplicated finished-artifact wake with project isolation, provenance and ACK/WORKING within 300 seconds, without a duplicate process/service. Blocker: current Agent 01/watchdog host evidence is missing. Next action: Agent 01 publishes timestamped host/process evidence plus A-73 ACK/WORKING, or an exact command-specific NEED. **APPEARS STALE — HOST STATE UNVERIFIED.**
+- [x] **F-163 desktop layout artifact preserved:** implementation `478bfc00006e4257f68cb93317b2f573f3b21d2f`; coordinator review `87071031f0c73a753f8d0cb390e9e8b6196345c4`; F-163 3/0, F-159 21/0, reference 602/1 known timeout, lane D+E 105/2 known F-32 failures. This is staged headless-Chrome evidence, not loaded Claude Chrome acceptance.
+- [ ] **F-163 remains PARTIAL / F-164 READY:** desktop hierarchy is accepted, but 390px phone overflow clips Search, Sort, Filters, quick views and banner; state text is duplicated in locations. F-164 transport claims WORKING with host UNKNOWN and therefore does not displace A-73 or prove a live worker. ETA for authoritative work UNKNOWN; A-73 next_check_at MISSING. Preserve F-164 for serial dispatch after ownership reconciliation.
+- [ ] **Tested versus loaded:** tested UI `478bfc0` based on `64ce371` / `112fce4`; loaded revision remains `a0ee24051fb06dcab8f04306bcb7da54504c5ece`. Firsthand loaded Claude Chrome desktop/mobile proof: NONE.
+- **Canonical evidence:** `docs/receipts/2026-10-12-supervisor-visible-check-1521.md`.
