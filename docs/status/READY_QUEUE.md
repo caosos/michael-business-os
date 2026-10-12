@@ -535,3 +535,14 @@ Proposed by closed lanes and accepted here:
 - **ETA / next_check_at:** A-73 UNKNOWN / MISSING. F-161 6:10 PM is transport-only and unverified.
 - **ONE next action:** Agent 01 publishes host-backed A-73 ACK/WORKING or exact NEED, reconciles the ten false NEED states, then permits one serial dispatch.
 - **Canonical evidence:** docs/receipts/2026-10-12-supervisor-visible-check-1715.md.
+
+
+## Supervisor reconciliation — Monday, October 12, 2026 — 6:31 PM America/Chicago
+- **ONE current bounded item:** A-73 existing-watchdog finished-artifact wake/completion-state repair; existing Agent 01; P0; **NEED — ACK MISSED**.
+- **Control-plane defect:** false/stale NEEDs now cover at least fifteen completed or superseded tasks: A-74, B-36, B-38, F-159, D-37, F-163, D-35, B-39, D-38, B-41, B-40, D-36, B-42, F-160 and F-161. Do not re-dispatch them. B-43 remains a genuine blocked/partial item and must wait for provider activation.
+- **F-161 boundary:** STAGING_ACCEPTED at dc0e804 (coordinator 24fd172) with lane 02 62a1bb0; 613 passed / 2 documented known f140/f145 failures and release VERIFY passed. Existing watchdog refresh wiring is 1edd604. F-161 is not loaded and no genuine alert listing has been proven.
+- **Tested / loaded / browser:** F-161 tested dc0e804 + lane 02 62a1bb0; loaded marketplace fb84d0c, exact loaded lane 02 revision unproven. Prior desktop Claude Chrome showed 16 results within 150 miles; mobile/detail/source-link/My Bids/Suggestions and genuine-alert proof remain MISSING.
+- **Host / ETA / next_check_at:** latest timestamped host observation Monday, October 12, 2026 — 6:20 PM America/Chicago is limited to the B-43 watchdog checkpoint; current Agent 01/A-73/F-161 state UNKNOWN. **APPEARS STALE — HOST STATE UNVERIFIED.** A-73 ETA UNKNOWN; next_check_at MISSING.
+- **Blocker:** stale completion state; missing host-backed A-73 ACK/WORKING; dedicated alert label/filter and first genuine alert absent; B-44 waits for Bright Data customer activation.
+- **ONE next action:** Agent 01 publishes current host/process evidence plus A-73 ACK/WORKING or exact NEED, reconciles the false completion-state set, then permits one serial dispatch.
+- **Canonical evidence:** docs/receipts/2026-10-12-supervisor-visible-check-1831.md.
