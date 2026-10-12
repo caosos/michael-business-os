@@ -95,3 +95,33 @@ def test_panel_has_resale_form_on_research_and_ranked(monkeypatch):
     h = ms.render(run([lot("a", bid=40), lot("b", bid=40)], {"a": 1500}), tok)
     assert h.count("action='/market/resale'") == 2 and "name='csrf'" in h
     assert "your resale price (owner-set, not a sold comp)" in h
+
+
+def test_reset_keeps_resale_targets_and_load_guards_type(tmp_path, monkeypatch):
+    monkeypatch.setenv("MBOS_MARKET_PREFS_FILE", str(tmp_path / "p.json"))
+    from operator_ui import market_prefs as mp
+    ms.act_resale({"lot": "a", "resale": "900"})
+    mp.act("save", "a")
+    mp.act("reset", "")
+    d = mp.load()
+    assert d["resale_targets"] == {"a": 900.0} and d["saved"] == []
+    (tmp_path / "p.json").write_text('{"resale_targets": [1]}')
+    assert mp.load()["resale_targets"] == {}
+
+
+def test_outside_rows_always_say_why(monkeypatch):
+    s = run([lot("a", bid=40)], {"a": 1500})                              # default repair rule: outside
+    why = s["outside"][0]["why_not"]
+    assert why and any(w.startswith("engine verdict ") for w in why)
+    assert any("your cap is $500" in w and "repair rule allows" in w for w in why)
+    h = ms.render(s)
+    assert "engine verdict" in h and "repair rule allows" in h
+
+
+def test_repair_estimate_label_and_rule_statement(monkeypatch):
+    monkeypatch.setenv("MBOS_SUGGEST_REPAIR_MAX", "1000")
+    r = run([lot("a", bid=40)], {"a": 1500})["ranked"][0]
+    assert not r["numbers"]["repair_known"]
+    monkeypatch.setenv("MBOS_SUGGEST_REPAIR_MAX", "1")                    # rule tighter than the engine's allowance
+    h = ms.render_ranked(r)
+    assert "estimate (repair scope unknown)" in h and "exceeds your 'little or no repair' rule" in h

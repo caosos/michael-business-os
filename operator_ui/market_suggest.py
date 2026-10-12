@@ -155,7 +155,10 @@ def suggest(cards: list[dict], prefs: dict | None = None, asof: str | None = Non
         if (x["ev_net"] or 0) <= 0:
             why.append("the engine's expected profit is not positive")
         row["max_bid"] = None if ceiling is None else min(float(ceiling), cap)
-        if why:
+        if why:                          # always say WHY: the engine's own verdict and reason text, then the cap and the repair rule
+            days = "UNKNOWN" if x["days"] is None else f"{x['days']:g}"
+            why.append(f"engine verdict {x['verdict']}: {'; '.join(x['reasons']) or 'no reason text given'} (net {_m(x['net'])}, {days} days to cash)")
+            why.append(f"your cap is ${cap:,.0f} (owner SETTING); your repair rule allows ${rmax:,.0f}; the engine's repair allowance is ${x['repair']:,.0f}")
             out["outside"].append({**row, "why_not": why})
         else:
             out["ranked"].append(row)
@@ -216,12 +219,13 @@ def render_ranked(r: dict, tok=lambda: "") -> str:
     tgt = r["owner_target"]
     resale = (f"{_m(tgt)} your resale price (owner-set, not a sold comp){_tag('OWNER-SET')}" if tgt is not None else "")
     rng = f"low {_m(x['resale_low'])} / likely {_m(x['resale_likely'])} / optimistic {_m(x['resale_high'])}"
+    over = f" <b>exceeds your 'little or no repair' rule (${_repair_max():,.0f})</b>" if x["repair"] > _repair_max() else ""
     link = f" <a href='{e(c['url'])}' rel='noopener noreferrer' target='_blank'>Original listing</a>" if c.get("url") else ""
     dist = f"{c['distance']:.0f} mi{_tag('ESTIMATE: straight-line, from the cached location')}" if c.get("distance") is not None else "distance UNKNOWN"
     return ("<li class='card sg-row'>"
             f"<b>{e(c['title'])}</b> <span class='mut small'>{e(c.get('source') or '')}</span>{link}<table>"
             f"<tr><th>Max bid (engine walk-away, capped at {_capl(_cap())})</th><td>{_m(r['max_bid'])}{_tag('ENGINE')} <span class='small mut'>{e(x['ceiling_basis'])}</span></td></tr>"
-            f"<tr><th>Repair allowance</th><td>{_m(x['repair'])}{_tag('ESTIMATE' if not x['repair_known'] else 'ENGINE')} {'category prior, not a diagnosis' if not x['repair_known'] else ''}</td></tr>"
+            f"<tr><th>Repair allowance</th><td>{_m(x['repair'])}{_tag('estimate (repair scope unknown)' if not x['repair_known'] else 'ENGINE')} {'category prior, not a diagnosis' if not x['repair_known'] else ''}{over}</td></tr>"
             f"<tr><th>Resale</th><td>{resale or rng}{_tag('OWNER-SET' if tgt is not None else 'ENGINE')}"
             f"{'<br><span class=small>engine range: ' + rng + '</span>' if tgt is not None else ''}</td></tr>"
             f"<tr><th>Net profit if it goes as planned</th><td>{_m(x['net'])}{_tag('ESTIMATE')} (probability-weighted {_m(x['ev_net'])})</td></tr>"
