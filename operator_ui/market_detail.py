@@ -21,7 +21,7 @@ from . import market_suggest as msug
 from .deal_ui import classify_url
 
 OSM = "https://www.openstreetmap.org/search?query="
-SIMILAR_N = 6
+SIMILAR_N = 8
 
 
 def slug(c: dict) -> str:
@@ -32,10 +32,32 @@ def href(c: dict) -> str:
     return f"/market/item/{slug(c)}/{quote(str(c['id']), safe='')}"
 
 
-def all_cards(now: datetime, gsa_path: str | None = None) -> list[dict]:
-    cards = list(ms.load_source("all", now, None, gsa_path)["cards"])
+def search_query() -> dict:
+    """The owner's current search scope, resolved exactly as the Marketplace page does (last remembered filters, else their home)."""
+    from . import market_browse as mbr, market_routes as mr
+    return ms.parse_query(mbr.with_home(mp.recall(mr.FILTER_KEYS)))
+
+
+def all_cards(now: datetime, gsa_path: str | None = None, origin=None) -> list[dict]:
+    cards = list(ms.load_source("all", now, origin, gsa_path)["cards"])
     cards += [mf.card(r, None) for r in mf.load().values() if not r.get("deleted")]
     return cards
+
+
+def in_scope(o: dict, q: dict) -> bool:
+    """Inside the owner's current location mode: By State -> a known matching state (radius too when ticked); By Distance -> a KNOWN distance within the radius."""
+    by_state = q.get("loc_mode") == "state"
+    if by_state and o.get("state") not in (q.get("states") or []):
+        return False
+    if q["radius"] is not None and (not by_state or q.get("also_radius")):
+        return o.get("distance") is not None and o["distance"] <= q["radius"]
+    return True
+
+
+def place_line(c: dict) -> str:
+    """'City, ST ZIP · N mi' as the search card shows it; 'distance unknown' only when the distance truly is."""
+    where = " ".join(x for x in (c.get("city"), c.get("zip")) if x) or "town UNKNOWN"
+    return where + (f" · {round(c['distance'], 1):g} mi" if c.get("distance") is not None else " · distance unknown")
 
 
 def raw_gsa(card_id: str, path: str | None = None) -> dict | None:
@@ -134,7 +156,7 @@ def _address(c: dict, raw: dict | None) -> str:
     return line or _txt(c.get("address")) or _txt(c.get("city")) or ""
 
 
-def _photos(c: dict) -> str:
+def _photos(c: dict) -> str | None:
     img = c.get("image")
     if img and landing_fix.is_gsa_image(img):
         main = landing_fix.photo_tile(img, c.get("url"))
@@ -143,11 +165,11 @@ def _photos(c: dict) -> str:
         main = f"<a href='{e(img)}' target='_blank' rel='noopener noreferrer nofollow' title='Full screen'><img src='{e(img)}' alt='Listing photo' referrerpolicy='no-referrer' style='max-width:100%'></a>"
         thumbs = f"<div class='small'><a href='{e(img)}' target='_blank' rel='noopener noreferrer nofollow'><img src='{e(img)}' alt='Thumbnail 1' width='60' referrerpolicy='no-referrer'></a> <a href='{e(img)}' target='_blank' rel='noopener noreferrer nofollow'>Full screen</a></div>"
     else:
-        main, thumbs = "<div class='mk-nophoto small mut'>No photo</div>", ""
+        return None
     return f"<div class='dt-photos'>{main}{thumbs}</div>"
 
 
-def _similar(c: dict, pool: list[dict], now: datetime) -> str:
+def _similar(c: dict, pool: list[dict], now: datetime, q: dict | None = None) -> str:
     cat = c.get("category")
     rows = []
     if cat:
@@ -156,12 +178,14 @@ def _similar(c: dict, pool: list[dict], now: datetime) -> str:
                 continue
             if not ms.cat_ok(o, ms.DEFAULT_CATS):         # Land / Real Estate is off by default here too
                 continue
+            if q is not None and not in_scope(o, q):
+                continue
             rows.append(o)
-        rows.sort(key=lambda o: (o["distance"] is None, o["distance"] if o["distance"] is not None else 0, o["title"]))
+        rows.sort(key=lambda o: (o["distance"] is None, o["distance"] if o["distance"] is not None else 0, o.get("closes") or "9999", o["title"]))
     if not rows:
         return "<h2>Similar listings</h2><p class='small mut'>None in the cached lists with the same category" + (" (category UNKNOWN for this listing)" if not cat else "") + ".</p>"
     li = "".join(f"<li><a href='{e(href(o))}'>{e(o['title'])}</a> <span class='small mut'>{e(o['source'])} · "
-                 f"{e(o['city'] or 'town UNKNOWN')} · " + (f"{round(o['distance'], 1):g} mi" if o["distance"] is not None else "distance UNKNOWN")
+                 f"{e(o['city'] or 'town UNKNOWN')} · " + (f"{round(o['distance'], 1):g} mi" if o["distance"] is not None else "distance unknown")
                  + f" · {'$' + format(o['bid'], ',.0f') + ' bid' if o['bid'] is not None else 'no bids yet'}</span></li>" for o in rows[:SIMILAR_N])
     return f"<h2>Similar listings</h2><p class='small mut'>Same category ({e(str(cat))}), nearest first.</p><ul id='similar'>{li}</ul>"
 
@@ -196,13 +220,13 @@ def event_page(c: dict, now: datetime) -> str:
             f"<p>{_live_link(c.get('url'), 'Auctioneer page')} {_live_link(plat, 'View and bid on ' + (c.get('platform') or 'the platform')) if plat else ''}</p>")
 
 
-def render(c: dict, raw: dict | None, pool: list[dict], prefs: dict, now: datetime, tok) -> str:
+def render(c: dict, raw: dict | None, pool: list[dict], prefs: dict, now: datetime, tok, q: dict | None = None) -> str:
     kind = "Auction event" if c.get("event") else "Listing"
     stale = " <b class='bad'>STALE: cached data may be out of date</b>" if c.get("stale") else ""
     head = (f"<p class='small'><a href='/market'>&larr; Back to Marketplace</a></p><h1>{e(c['title'])}</h1>"
             f"<p class='small mut'>{e(c['source'])} · {kind} · cached {e(str(c.get('fetched_at') or 'UNKNOWN'))}{stale} · DRY-RUN, nothing is bid, sent or bought here</p>")
     if c.get("event"):
-        return head + event_page(c, now) + _similar(c, pool, now)
+        return head + event_page(c, now) + _similar(c, pool, now, q)
     L = c.get("labels") or ms.auction_labels({})
     st = status_of(c, raw, now)
     cd = countdown_parts(c, now)
@@ -214,7 +238,7 @@ def render(c: dict, raw: dict | None, pool: list[dict], prefs: dict, now: dateti
     box = ("<table id='dt-status'>" + kv("Status", st) + kv("Current bid", f"${c['bid']:,.2f}" if c["bid"] is not None else None, "" if c["bid"] is not None else " <span class='small mut'>(no bids yet)</span>")
            + f"<tr><th>Time left</th><td>{cd_html}</td></tr>" + kv("Next minimum bid", nxt, " <span class='small mut'>(cached bid + increment; live minimum unverified)</span>" if nxt else " <span class='small mut'>" + e(L.get("next_min_text", "")) + "</span>")
            + kv("Bid increment", f"${inc:,.2f}" if inc is not None else None) + kv("Bidders", bd if isinstance(bd, int) and not isinstance(bd, bool) else None)
-           + kv("Reserve", L.get("reserve_text")) + kv("Closes", c.get("closes")) + kv("Opened", c.get("posted")) + "</table>")
+           + kv("Location", place_line(c)) + kv("Reserve", L.get("reserve_text")) + kv("Closes", c.get("closes")) + kv("Opened", c.get("posted")) + "</table>")
     r = raw or {}
     sec = sections(r.get("lotInfo"))
     cond = next((v for k, v in sec.items() if k.lower().startswith("condition")), None)
@@ -234,25 +258,28 @@ def render(c: dict, raw: dict | None, pool: list[dict], prefs: dict, now: dateti
     cust = "<table>" + kv("Custodian / sales office", _txt(r.get("locationOrg"))) + kv("Office address", ", ".join(x for x in (_txt(r.get("locationStAddr")), _txt(r.get("locationCity")), _txt(r.get("locationST")), _txt(r.get("locationZip"))) if x) or None) \
         + kv("Sale location", _txt(r.get("saleLocation"))) + kv("Contracting officer (as published)", _txt(r.get("contractOfficer"))) + kv("Contact e-mail (as published)", _txt(r.get("coEmail"))) \
         + kv("Contact phone (as published)", _txt(r.get("coPhone"))) + "</table>"
-    return (head + f"<div class='dt-grid'>{_photos(c)}<div>{box}<p>{_live_link(c.get('url') or r.get('itemDescURL'), 'Bid on the original site')}</p>"
+    ph = _photos(c)
+    nop = "" if ph else "<p class='mk-nophoto small mut' id='dt-nophoto'>No photo (open the original listing)</p>"
+    return (head + nop + f"<div class='dt-grid'>{ph or ''}<div>{box}<p>{_live_link(c.get('url') or r.get('itemDescURL'), 'Bid on the original site')}</p>"
             "<p class='small mut'>Bidding happens only on the original site. This page never places a bid.</p></div></div>"
             f"<h2>Description</h2><div id='dt-desc'>{desc}</div>{spec}<h2>Condition</h2>{cond_html}<h2>Inspection and removal</h2>{insp_html}{dates}"
             f"<h2>Property address</h2><p id='dt-addr'>{e(addr) if addr else '<span class=lbl>UNKNOWN</span>'}{osm}</p><h2>Custodian and contacts</h2>{cust}"
-            + _helpers(c, prefs, tok, str(c.get("fetched_at") or now.isoformat())) + _similar(c, pool, now))
+            + _helpers(c, prefs, tok, str(c.get("fetched_at") or now.isoformat())) + _similar(c, pool, now, q))
 
 
 CSS = ("<style>.dt-grid{display:flex;gap:16px;flex-wrap:wrap}.dt-grid>*{flex:1 1 300px;min-width:0}.dt-photos img{max-width:100%}"
        "#dt-desc,#dt-cond{overflow-wrap:anywhere}main table th{text-align:left;padding-right:12px;vertical-align:top}"
-       "@media(max-width:700px){.dt-grid{flex-direction:column}}</style>")
+       "@media(max-width:700px){.dt-grid{flex-direction:column}header{padding:6px 12px}header nav{display:flex;flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;max-width:100%}main h1{font-size:20px;margin:6px 0}main>p{margin:4px 0}}</style>")
 
 
 def page_body(app, source: str, item: str, now: datetime) -> str | None:
     """-> the page HTML, or None when no cached listing matches (-> 404)."""
     gsa = os.environ.get("MBOS_GSA_CACHE") or None
-    pool = all_cards(now, gsa)
+    q = search_query()
+    pool = all_cards(now, gsa, ms._origin(q["base"]))
     c = next((x for x in pool if x["id"] == item and slug(x) == source), None)
     if c is None:
         return None
     raw = raw_gsa(item, gsa) if c.get("source") == "GSA Auctions" else None
     tok = lambda: f"<input type='hidden' name='csrf' value='{app.csrf}'><input type='hidden' name='nonce' value='{__import__('secrets').token_hex(8)}'>"  # noqa: E731
-    return CSS + render(c, raw, pool, mp.load(), now, tok) + "<script src='/static/market_detail.js'></script>"
+    return CSS + render(c, raw, pool, mp.load(), now, tok, q) + "<script src='/static/market_detail.js'></script>"
