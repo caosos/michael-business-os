@@ -51,3 +51,16 @@ All other lanes: CLOSED, nothing READY (all open rows BLOCKED on owner/host). La
 - **Exception receipt:** PR #1 comment `6128060271`.
 - **ETA / next_check_at:** ETA UNKNOWN; Monday, October 12, 2026 — 11:14 AM America/Chicago.
 - **Michael:** NOTHING unless the host check proves an interactive credential action is actually required.
+
+
+## Current checkpoint — Monday, October 12, 2026 — 12:18 PM America/Chicago
+
+- **Current bounded task:** F-157 independent Agent 01 acceptance. Completed lane 06 artifact `498fcb3eb04d5e1a4d281a5ade2cac306141bda4` remains closed; do not re-dispatch it.
+- **Transition:** RECOVERY / ACK / WORKING. Host-verified ACK commit `05e99389fa132833a02611112fa0f8b0476c5b59`; PR #1 comment `6129093549`.
+- **Host observation (2026-10-12T17:16:44Z):** existing `mbos-agent-01`, watchdog, pickup, dispatcher, UI and worker sessions present; `gh auth` logged in as `caosos`; live `:8766` ARTIFACT `bbc80ec851b75aec52af1f8b0838dd56ccc714ef`.
+- **Root cause:** the existing watchdog did not wake Agent 01 when the specialist worker finished F-157 and the artifact awaited coordinator review. No wake was emitted, so Agent 01 remained idle.
+- **Current action:** existing Agent 01 session restart, then clean-checkout review of `498fcb3`, focused/full tests, category/persistence/isolation verification, and Claude Chrome desktop/mobile acceptance.
+- **Tested / loaded:** worker evidence focused 8/0; prior reference 575/1 known `resale_f39`; lane D+E 104/3 documented unrelated failures. Loaded `bbc80ec`; F-157 NOT LOADED; new browser acceptance pending.
+- **ETA / next_check_at:** review about 40 minutes after restart; Monday, October 12, 2026 — 1:01 PM America/Chicago.
+- **Blocker / Michael:** NONE / NOTHING.
+- **Canonical log:** `docs/receipts/2026-10-12-supervisor-visible-check-1218.md`.
