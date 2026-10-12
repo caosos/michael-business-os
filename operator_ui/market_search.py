@@ -29,7 +29,7 @@ ROW_CATS = {"trailers": ("trailer",), "equipment": ("equipment", "tractor", "mow
             "lawn_garden": ("lawn", "garden", "tiller", "trimmer", "chainsaw", "blower", "mulcher", "sprayer"),
             "machinery": ("machinery", "excavator", "bulldozer", "dozer", "skid steer", "lathe", "crane", "grader", "paver", "roller", "hoist"),
             "pallets_wholesale": ("pallet", "wholesale", "bulk", "truckload", "liquidation"),
-            "land_real_estate": ("land", "acre", "real estate", "real property", "parcel", "house", "home", "residence", "residential", "cabin", "building lot")}
+            "land_real_estate": ("land", "acre", "real estate", "real property", "parcel", "house", "home", "residence", "residential", "cabin", "building lot", "commercial building")}
 # F-157: owner-facing category controls. `other` = matches none of the named categories; `all` = every category incl. land. Land / Real Estate is off by default.
 CAT_LABELS = {"tools": "Tools", "equipment": "Equipment", "trailers": "Trailers", "vehicles": "Vehicles", "lawn_garden": "Lawn & Garden", "machinery": "Machinery",
               "pallets_wholesale": "Pallets/Wholesale", "land_real_estate": "Land/Real Estate", "other": "Other/Unknown", "electronics": "Electronics"}
@@ -353,6 +353,8 @@ def decision(card: dict, comp: dict | None = None) -> tuple[str, str]:
 def card_cats(c: dict) -> set[str]:
     """F-157: every category a lot matches (title + category guess); `other` is added when it matches no control category."""
     got = {k for k in ROW_CATS if in_cat(c, k)}
+    if "land_real_estate" in got and in_cat(c, "land_real_estate", title_only=True):      # F-158: a land/real-estate TITLE is the seller's word; the system guess (e.g. commercial_equipment) must not keep it
+        got = {k for k in ROW_CATS if in_cat(c, k, title_only=True)}
     return got if got & set(CONTROL_CATS) else got | {"other"}
 
 
@@ -360,12 +362,14 @@ def cat_ok(c: dict, selected) -> bool:
     return bool(card_cats(c) & set(selected))
 
 
-def in_cat(c: dict, cat: str) -> bool:
+def in_cat(c: dict, cat: str, title_only: bool = False) -> bool:
     if cat == "other":
         return "other" in card_cats(c)
-    text = f"{c['title']} {c.get('category') or ''}".lower().replace("_", " ")          # title + category guess: the long description is boilerplate
+    text = (c["title"] if title_only else f"{c['title']} {c.get('category') or ''}").lower().replace("_", " ")          # title + category guess: the long description is boilerplate
     if cat == "land_real_estate":
         text = re.sub(r"\bland rover\b|\bhome depot\b|\bhomemade\b", " ", text)
+    if cat == "land_real_estate" and re.search(r"\bbuilding\b", text) and re.search(r"\bauction\b", text):       # F-158: 'commercial building' / 'building ... auction' titles are property
+        return True
     return any(re.search(rf"\b{re.escape(t)}s?\b", text) for t in ROW_CATS[cat])
 
 

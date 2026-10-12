@@ -95,3 +95,28 @@ def test_isolation_owner_prefs_untouched(ui, tmp_path, monkeypatch):
     before = owner.read_bytes()
     get(ui, go=1, cat=["tools"])
     assert owner.read_bytes() == before
+
+
+# F-158: commercial real-estate titles must not be kept by the system category guess
+COMM = [lot(t, "commercial_equipment") for t in (
+    "CENTRAL AVENUE NO RESERVE COMMERCIAL REAL ESTATE AUCTION", "MALVERN AVENUE COMMERCIAL REAL ESTATE AUCTION",
+    "MCGEHEE MULTI-PARCEL COMMERCIAL BUILDING AUCTION")]
+CAMPERS = lot("ONLINE ONLY NO RESERVE FALL CONSIGNMENT CAMPERS, VEHICLES, TRAILERS, TRACTOR & IMPLEMENTS", "commercial_equipment")
+
+
+@pytest.mark.parametrize("cats", [None, ["equipment"], ["equipment", "tools", "other"]])
+def test_f158_commercial_real_estate_hidden(cats):
+    q = ms.parse_query({"cat": cats} if cats else {})
+    assert not any(ms.cat_ok(c, q["cats"]) for c in COMM)
+
+
+def test_f158_shown_with_land_or_all():
+    q = ms.parse_query({"cat": ["land_real_estate"]})
+    assert all(ms.cat_ok(c, q["cats"]) for c in COMM)
+    assert ms.parse_query({"cat": ["all"]})["cat_all"]
+
+
+def test_f158_building_auction_is_land_and_mixed_kept():
+    assert ms.in_cat(lot("Downtown building auction"), "land_real_estate")
+    q = ms.parse_query({})
+    assert ms.cat_ok(CAMPERS, q["cats"])
