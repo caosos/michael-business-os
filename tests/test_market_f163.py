@@ -90,3 +90,27 @@ def test_desktop_layout(ui, caches):
         pill = pg.evaluate("""()=>{const a=document.querySelector('.mk-q.cur .mk-n');if(!a)return null;return [getComputedStyle(a).color,getComputedStyle(a.parentElement).backgroundColor]}""")
         assert pill == ["rgb(255, 255, 255)", "rgb(29, 78, 216)"], pill
         b.close()
+
+
+def test_no_duplicate_state_in_card_location(ui, caches):
+    import re
+    h = get(ui, go=1, loc_mode="state", state="AR", broad=1)
+    assert "class='mk-g mk-card'" in h and not re.search(r", ([A-Z]{2}), \1\b", h)
+    from operator_ui.market_browse import _where
+    assert _where({"city": "Fayetteville, AR", "state": "AR", "zip": "72701"}) == "Fayetteville, AR 72701"
+    assert _where({"city": "Conway", "state": "AR", "zip": None}) == "Conway, AR" and _where({"city": None}) == "town UNKNOWN"
+
+
+@pytest.mark.parametrize("w,h", [(390, 900), (360, 800), (1440, 900)])
+def test_no_horizontal_overflow(ui, caches, w, h):
+    from playwright.sync_api import sync_playwright
+    with sync_playwright() as p:
+        b = _browser(p)
+        pg = b.new_page(viewport={"width": w, "height": h})
+        pg.goto(f"http://127.0.0.1:{ui.port}/market?go=1&loc_mode=state&state=AR&broad=1")
+        assert pg.evaluate("document.scrollingElement.scrollWidth") == w
+        for sel in (".mk-go", "#topbar .mk-fm" if w < 700 else "#filters-btn"):
+            r = pg.evaluate("s=>{const r=document.querySelector(s).getBoundingClientRect();return [r.left,r.right]}", sel)
+            assert r[0] >= 0 and r[1] <= w, (sel, r)
+        assert top(pg, ".mk-card") < h
+        b.close()

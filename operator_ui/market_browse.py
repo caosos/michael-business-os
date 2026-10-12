@@ -5,6 +5,7 @@ numbered pagination and the sticky top bar. Reuses market_search filters and the
 from __future__ import annotations
 
 import html
+import re
 from datetime import datetime, timedelta
 from urllib.parse import quote
 from zoneinfo import ZoneInfo
@@ -219,7 +220,7 @@ def card(c: dict, tok, now: datetime, pref_buttons) -> str:
     ph = img if img.startswith("<img") else f"<div class='ph small mut'>{img if 'Photo' in img else 'No photo'}</div>"
     txt, red = countdown(c, now)
     cd = f"<span class='mk-cd{' red' if red else ''}'>{e(txt)}</span>" if txt else ""
-    place = e(c["city"] or "town UNKNOWN") + (f", {e(c['state'])}" if c.get("state") else "") + (f" · {round(c['distance'], 1):g} mi" if c.get("distance") is not None else " · distance UNKNOWN")
+    place = e(_where(c)) + (f" · {round(c['distance'], 1):g} mi" if c.get("distance") is not None else " · distance UNKNOWN")
     ti = c["title"] if len(c["title"]) <= 70 else c["title"][:69] + "…"
     closes = c.get("closes_local") or msrc.local_when(c.get("closes")) or "closes UNKNOWN"
     if c.get("event"):
@@ -298,6 +299,16 @@ def condition_section(q: dict, fc: dict) -> str:
     return f"<details class='mk-sect' id='sec-condition'><summary><b>Condition</b> <span class='small mut'>(seller text)</span></summary>{rows}</details>"
 
 
+def _where(c: dict) -> str:
+    """F-164: 'City, ST ZIP' once. The cache city can already end in ', ST', so the state is appended only when it is missing."""
+    city, st, z = (c.get("city") or "").strip(), (c.get("state") or "").strip(), (c.get("zip") or "").strip()
+    if not city:
+        return "town UNKNOWN"
+    if st and not re.search(r",\s*" + re.escape(st) + r"$", city, re.I):
+        city += f", {st}"
+    return city + (f" {z}" if z and z not in city else "")
+
+
 def top_bar(q: dict, total: int, sort_sel: str, view: str, csrf_tok, n_active: int, back: str, quick_counts: dict | None, folded: bool) -> str:
     """The sticky bar: one large search box (title + description), result count, Filters button with the active count, Sort, and the quick views."""
     opts = "".join(f"<option value='{k}'{' selected' if sort_sel == k else ''}>{e(lbl)}</option>" for k, lbl in SORT_LABELS)
@@ -336,5 +347,6 @@ CSS = """<style>
 .mk-main>h2{margin:2px 0;font-size:16px}
 @media(max-width:1400px){.mk-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:1000px){.mk-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:600px){.mk-grid{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:700px){.mk-top .mk-bar{flex-wrap:wrap;gap:6px}.mk-top .mk-bar .mk-search{flex:1 1 60%}.mk-top{gap:4px 8px;padding:2px 0}.mk-quick{gap:4px}.mk-q{padding:2px 9px;font-size:13px}.pagehead{display:none}.mk-fd{display:none}.mk-fm,.mk-side .mk-fm{display:inline-block}.mk-side,.mk-side.folded{display:none;position:fixed;inset:0 20% 0 0;z-index:40;overflow:auto;background:var(--bg);padding:10px;box-shadow:4px 0 16px rgba(0,0,0,.4);width:auto}
+.mk{align-items:stretch}.mk-main,.mk-side{min-width:0;max-width:100%}header{min-width:0}header nav{min-width:0;max-width:100%;overflow-x:auto}.mk-top{max-width:100%;box-sizing:border-box}.mk-top .mk-bar{display:contents}#topbar .mk-search{order:1;flex:1 1 100%;width:100%;box-sizing:border-box}#topbar .mk-go{order:2;flex:1 1 40%}#topbar .mk-fm{order:3;flex:1 1 40%;text-align:center;box-sizing:border-box}#topbar .mk-count{order:4;flex:1 1 100%;white-space:normal}#topbar .mk-bar label:not(.mk-fm){order:5;flex:1 1 40%}#topbar .mk-quick{order:6;flex:1 1 100%;flex-wrap:nowrap;overflow-x:auto;max-width:100%}.mk-q{white-space:nowrap;flex:0 0 auto}#fixture-banner{white-space:normal;overflow-wrap:anywhere}.mk-chips{flex-wrap:wrap;white-space:normal}.mk-card,.mk-grid>*{min-width:0;overflow-wrap:anywhere}
 #mkdrawer:checked~.mk .mk-side{display:block}.mk-side.folded #mkfilters{display:block}.mk-top{position:static}.mk-search{font-size:16px}}
 </style>"""
