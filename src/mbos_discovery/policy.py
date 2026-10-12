@@ -53,6 +53,9 @@ REGISTRY: dict[str, SourcePolicy] = {p.source: p for p in [
        "wooleyauctioneers.com auction EVENT pages (robots ok, Crawl-delay 10); owner P0 2026-10-11; lot data on hibid.com is NEVER fetched"),
     _P("wilson_auctioneers", Disposition.ALLOWED, 3, "low",
        "wilsonauctioneers.com /auctions/ list page, EVENT level (robots ok, Crawl-delay 10); lot data on bidwrangler.com is NEVER fetched"),
+    _P("blackmon_auctions", Disposition.ALLOWED, 3, "low",
+       "blackmonauctions.com RSS feed + event pages, EVENT level (robots ok); lot data on proxibid.com is NEVER fetched"),
+    _P("proxibid", Disposition.FORBIDDEN, 3, "high", "blackmon.proxibid.com robots.txt Disallow: /; link for the human only"),
     _P("bidwrangler", Disposition.FORBIDDEN, 3, "high", "BidWrangler Terms of Use forbid data mining; link for the human only"),
     # Tier 5 — human-entered evidence (Michael / Operator UI), with human provenance
     _P("manual", Disposition.ALLOWED, 5, "low", "sold comps recorded by a human, with provenance"),

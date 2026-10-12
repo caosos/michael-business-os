@@ -1,0 +1,10 @@
+# B-29 receipt: Blackmon Auctions event adapter (DRY-RUN, no live call made)
+
+- **What:** `src/mbos_discovery/adapters/blackmon_site.py` (`blackmon_auctions`): auction EVENTS from the Squarespace RSS feed `www.blackmonauctions.com/auctions?format=rss` plus the event page of each feed item. Registered in `auctions.py` (house) and `policy.py` (`blackmon_auctions` ALLOWED tier 3; `proxibid` FORBIDDEN).
+- **Provenance:** archived real responses by Agent 01 (2026-10-12T03:52:34Z, HTTP 200, scrubbed), `docs/receipts/b29-blackmon-archive/` (`auctions.rss` 29 items, `event-bank-repo.html`; original sha256 in `ORIGINAL_SHA256.txt`). robots allows the feed and event pages (Agent 01 FACT).
+- **Boundary:** `*.proxibid.com` is never fetched (`_get` raises `ProxibidRefused` before a request is built; `ReadOnlyTransport` is pinned to the two blackmonauctions.com hosts). The event's Proxibid catalog link (from the feed body) is stored as text for the human only (`proxibid_url`).
+- **Dates:** feed `pubDate` is kept only as `published_at`. begins_at/closes_at come from the event page (e.g. `Tuesday, October 13, 2026 9:00 AM – 11:30 PM` -> `2026-10-13T09:00-05:00` / `23:30-05:00`), America/Chicago local time, basis INFERENCE (the page names no zone). Events whose page end date is before today (Chicago) are dropped; no parseable date -> dropped and counted (`summary.skipped`).
+- **Location:** 'Multiple Locations' -> `location`/`address` UNKNOWN with `location_unknown_reason`. Buyer premium parsed from terms text (14%, FACT). Lot number, current bid, bid count, lot image: UNKNOWN.
+- **Live:** OFF by default; anonymous User-Agent; feed + pages >= 10 s apart (floor); at most one live run per hour; a 429/403-type block stops the run; a failing event page skips only that event.
+- **Tests:** `tests/test_b29_blackmon_site.py` (21; offline, archived pages). Full lane suite: 405 passed, 0 failed (was 383).
+- **Unverified:** only one event page was archived, so multi-day, address-bearing and non-online event layouts are untested against real pages (synthetic only). No live request was made by this task.

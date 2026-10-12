@@ -107,6 +107,8 @@ HOUSES: dict[str, AuctionHouse] = {h.source: h for h in [
                  categories=("estate", "equipment", "vehicle")),   # event level only; lot data is on HiBid (ToU forbids scraping)
     AuctionHouse("wilson_auctioneers", "Wilson Auctioneers", "estate_equipment", 3, "https://wilsonauctioneers.com/auctions/",
                  categories=("estate", "equipment", "vehicle")),   # event level only; lot data is on BidWrangler (ToU forbids data mining)
+    AuctionHouse("blackmon_auctions", "Blackmon Auctions", "estate_equipment", 3, "https://www.blackmonauctions.com/auctions",
+                 categories=("estate", "equipment", "vehicle")),   # event level only; lot data is on Proxibid (robots Disallow: /)
     AuctionHouse("ar_state_surplus", "Arkansas state surplus", "government", 1, "https://www.transform.ar.gov", categories=("vehicle", "equipment")),
     AuctionHouse("vehicle_salvage_platforms", "Copart / IAA-type vehicle auctions", "vehicle", 5, "https://www.copart.com", categories=("vehicle",)),
 ]}
