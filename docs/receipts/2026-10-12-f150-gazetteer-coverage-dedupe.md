@@ -5,3 +5,7 @@ Provenance: queue row F-150 (owner goal "all auctions and listings within the ra
 - Tests `tests/test_market_f150.py` (15): the named ZIPs/towns resolve; override file works; all 17 archived Wilson events get a distance; Wilson-only count = Wilson part of All auction houses (17); both West Little Rock estates (1069, 1089) appear; dedupe rules.
 - Agent 01 browser verification desktop + mobile: NEED; then ONE combined release command.
 - FIX (Agent 01 review of 0c60193): dedupe regression corrected. Same source: merge only identical link or card id, never by title; different sources: identical link, or title >= 0.9 AND same city AND same close date. `tests/test_market_f145.py` restored to the original expectation (4 -> 2); the F-150 distinct-estates test kept; new test that same-link/same-id Wilson cards merge. Reference 529 passed / 1 failed (known f39 flake); lane D+E 105 passed / 2 failed (known F-32).
+
+## Second fix (GSA cards)
+- FACT: `operator_ui/market_search.py::_card` used only lane 02 `place_coords`; when it returned None it now falls back to `gazetteer.locate(zip)` then `gazetteer.locate("City, ST")`. Dry-run, local files only, no network.
+- Tests: `tests/test_market_f150b.py` (Houston, Laredo, Oak Ridge, Oklahoma City, Muskogee, El Paso get a distance by ZIP and by city; all fall outside a 150-mile radius from Conway and none is 'not checked').

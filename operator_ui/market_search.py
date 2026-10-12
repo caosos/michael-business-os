@@ -14,6 +14,7 @@ from pathlib import Path
 from . import landing_fix
 from mbos_discovery.adapter import SearchProfile
 from mbos_discovery.auctions import UNKNOWN, place_coords
+from . import gazetteer
 from mbos_discovery.gsa_live import GsaLiveAdapter, _text
 from mbos_discovery.normalize import haversine_miles
 
@@ -199,6 +200,8 @@ def _card(adapter, rec, now, asof, origin) -> dict:
     loc = lot.get("location") if isinstance(lot.get("location"), dict) else {}
     desc = _text(p.get("lotInfo"))
     c = place_coords(loc) if loc else None
+    if c is None and loc:                                              # F-150: lane 02's table is small; fall back to the Census gazetteer (ZIP first, then 'City, ST')
+        c = gazetteer.locate(loc.get("zip")) or (gazetteer.locate(f"{loc.get('city')}, {loc.get('state')}") if loc.get("city") and loc.get("state") else None)
     dist = haversine_miles(origin, c) if (c and origin) else None      # grounded only; UNROUNDED: the radius test uses it, only the display rounds (F-54)
     bid = lot.get("current_bid")
     return {"id": lot.lot_id, "title": lot.get("title"), "description": _short(desc), "text": f"{lot.get('title')} {desc}".lower(),

@@ -73,7 +73,8 @@ def test_unlocated_place_has_no_invented_distance(ui):
     known = ms.place_coords.__globals__["AR_PLACES"]
     assert cards and any(c["distance"] is not None for c in cards)
     for c in cards:
-        located = c["city"] and c["city"].split(",")[0].lower() in known
+        from operator_ui import gazetteer       # F-150: a lot is located when lane 02's table or the Census gazetteer knows the place
+        located = c["city"] and (c["city"].split(",")[0].lower() in known or gazetteer.locate(c["city"]))
         assert (c["distance"] is not None) == bool(located)
 
 

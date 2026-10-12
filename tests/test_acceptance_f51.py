@@ -36,7 +36,7 @@ def test_radius_constrains_known_distance_and_unknown_goes_to_optional(cache):
     cs = cards(cache)
     res, unchecked, hidden = ms.partition(cs, q(radius=100))
     assert names(res) == ["Trailer, Utility"] and hidden["radius"] >= 5        # 97.9 mi is in, 117.6 mi is out
-    assert all("distance unknown" in " ".join(c["unchecked"]) for c in unchecked) and any("Blackhawk" in c["title"] for c in unchecked)
+    assert all("distance unknown" in " ".join(c["unchecked"]) for c in unchecked) and not any("Blackhawk" in c["title"] for c in unchecked)   # F-150: El Paso now resolves via the gazetteer -> outside the radius, not unchecked
     assert not any(c["distance"] is None for c in res)                         # an unlocated lot is never counted as local
     assert ms.partition(cs, q(radius=50))[0] == []
     assert len(ms.partition(cs, q(radius=150))[0]) == 6
@@ -53,10 +53,8 @@ def test_default_view_is_trailer_equipment_near_conway_and_broad_is_explicit(ui)
 def test_http_min_max_radius_change_results_and_chips(ui):
     h = get(ui, go=1, broad=1, base="Conway AR", radius="100", min_price="20", max_price="30")
     assert "Min price: $20" in h and "Max price: $30" in h and "Radius: 100 mi" in h
-    assert "Trailer, Utility" in h and "iPad Mini" not in h and "id='unchecked-section'" in h and "Blackhawk" in h
-    sec = h.split("id='unchecked-section'")[1]
-    assert "Blackhawk" in sec and "Trailer, Utility" not in sec
-    assert "1 result" in h.split("unchecked-section")[0]                       # the unchecked lots are not in the count
+    assert "Trailer, Utility" in h and "iPad Mini" not in h and "Blackhawk" not in h   # F-150: El Paso resolves -> outside the radius, hidden by radius, not unchecked
+    assert "1 result" in h.split("unchecked-section")[0]
     z = get(ui, go=1, broad=1, base="Conway AR", radius="10", min_price="20")
     assert "id='zero-results'" in z and "0 results" in z
 
