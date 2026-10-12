@@ -36,6 +36,8 @@ class SearchProfile:
     max_price: float | None = None
     limit: int = 50
     max_pages: int = 2
+    # eBay Browse buyingOptions subset; local-pickup page passes ("AUCTION",) or ("FIXED_PRICE",)
+    buying_options: tuple[str, ...] = ("FIXED_PRICE", "AUCTION", "BEST_OFFER")
 
 
 @dataclass(frozen=True)

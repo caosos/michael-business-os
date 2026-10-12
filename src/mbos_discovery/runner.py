@@ -118,7 +118,8 @@ class DryLog:
 def _profile(p: Mapping[str, Any]) -> SearchProfile:
     return SearchProfile(profile_id=p["id"], lane=p["lane"], keywords=tuple(p.get("keywords", [])),
                          postal_code=str(p.get("postal_code", "72034")), radius_miles=int(p.get("radius_miles", 100)),
-                         max_price=p.get("max_price"), limit=int(p.get("limit", 50)), max_pages=int(p.get("max_pages", 2)))
+                         max_price=p.get("max_price"), limit=int(p.get("limit", 50)), max_pages=int(p.get("max_pages", 2)),
+                         **({"buying_options": tuple(p["buying_options"])} if p.get("buying_options") else {}))
 
 
 def _vehicles(p: Mapping[str, Any]) -> list[VehicleQuery]:

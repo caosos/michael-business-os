@@ -91,3 +91,41 @@ def test_parts_condition_and_unclassified():
     assert ad.normalize(items[0], T0).normalized["condition"] == "parts"
     lamp = ad.normalize(items[3], T0)
     assert lamp.category == "other_asset" and "needs_review" in lamp.normalized["flags"]
+
+
+def _filter_for(profile):
+    seen = []
+
+    def handler(m, u, h, b):
+        seen.append(u)
+        return HttpResponse(200, TOKEN) if m == "POST" else HttpResponse(200, b'{"itemSummaries":[]}')
+
+    _adapter(handler).fetch(profile)
+    return parse_qs(urlsplit(seen[1]).query)["filter"][0]
+
+
+def test_local_pickup_filter_conway_auction_only():
+    from dataclasses import replace
+    f = _filter_for(replace(FLIP, postal_code="72032", radius_miles=25, buying_options=("AUCTION",)))
+    for part in ("buyingOptions:{AUCTION}", "deliveryOptions:{SELLER_ARRANGED_LOCAL_PICKUP}", "pickupCountry:US",
+                 "pickupPostalCode:72032", "pickupRadius:25", "pickupRadiusUnit:mi"):
+        assert part in f
+    assert "FIXED_PRICE" not in f
+
+
+def test_default_buying_options_unchanged_and_invalid_rejected():
+    from dataclasses import replace
+    import pytest
+    assert "buyingOptions:{FIXED_PRICE|AUCTION|BEST_OFFER}" in _filter_for(FLIP)
+    with pytest.raises(ValueError):
+        _filter_for(replace(FLIP, buying_options=("EVIL",)))
+
+
+def test_local_auction_card_fields_from_fixture():
+    ad = EbayBrowseAdapter.from_fixture(FIX / "ebay")
+    items = json.loads((FIX / "ebay" / "search-utility-trailer.json").read_text())["itemSummaries"]
+    auc = next(s for s in items if "AUCTION" in (s.get("buyingOptions") or []))
+    n = ad.normalize(auc, T0)
+    assert n.opportunity_kind == "auction_lot" and n.normalized["price"]["type"] in ("auction_current", "starting_bid")
+    assert n.normalized.get("ends_at") and n.normalized["location"]["state"] == "AR"
+    assert n.url.startswith("https://www.ebay.com/itm/")

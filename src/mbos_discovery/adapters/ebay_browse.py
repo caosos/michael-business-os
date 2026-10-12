@@ -137,10 +137,18 @@ class EbayBrowseAdapter(SourceAdapter):
                 url = nxt if nxt and urlsplit(nxt).hostname == urlsplit(self.base).hostname else None
         return res
 
+    @staticmethod
+    def _buying(p: SearchProfile) -> tuple[str, ...]:
+        allowed = ("FIXED_PRICE", "AUCTION", "BEST_OFFER", "CLASSIFIED_AD")
+        opts = tuple(o for o in p.buying_options if o in allowed)
+        if not opts:
+            raise ValueError(f"buying_options must be a subset of {allowed}")
+        return opts
+
     def _search_url(self, q: str, p: SearchProfile) -> str:
         filters = [
             "conditions:{USED}",
-            "buyingOptions:{FIXED_PRICE|AUCTION|BEST_OFFER}",
+            "buyingOptions:{" + "|".join(self._buying(p)) + "}",
             "deliveryOptions:{SELLER_ARRANGED_LOCAL_PICKUP}",
             "pickupCountry:US",
             f"pickupPostalCode:{p.postal_code}",
