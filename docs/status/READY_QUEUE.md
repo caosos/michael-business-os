@@ -458,3 +458,12 @@ Proposed by closed lanes and accepted here:
 - **Current bounded task:** F-155 Suggestions remains WORKING through existing Agent 01/lane 06 after corrected relaunch event `45ba39d0fbf94777 #16`. Its receipt estimates about 60 minutes from 1:01 AM plus review; `next_check_at` 2:01 AM. Current PID/service proof is UNKNOWN.
 - **Serial recovery:** Agent 01 must close F-154's independent acceptance using the existing coordinator path; do not create another worker. F-155 may continue, but no further dispatch or combined release may bypass that gate.
 - **Blocker:** F-154 independent suite and live desktop/mobile Claude Chrome acceptance are missing. **Michael:** NOTHING.
+
+
+## Supervisor reconciliation — Monday, October 12, 2026 — 1:53 PM America/Chicago
+- **A-73 remains the ONE current bounded task:** existing Agent 01; stage **DELIVERED IN REPOSITORY / ACK MISSED**. The 1:37 PM ACK deadline and 300-second watchdog window elapsed without ACK/WORKING or command-specific NEED/BLOCKED. ETA UNKNOWN; next_check_at MISSING. **APPEARS STALE — HOST STATE UNVERIFIED.**
+- **B-12 NEED / partial prerequisites satisfied:** independent receipt [6130595898](https://github.com/caosos/michael-business-os/pull/1#issuecomment-6130595898) reports mode-600 app password installed, read-only IMAP login OK, labels `DealSniffer` and `DealSniffer/Alerts` present, empty alerts folder, unchanged Seen state, and general inbox unopened. This does not replace A-73 as current work.
+- **B-12 remaining blocker:** owner must create/confirm a Craigslist saved-search alert and Gmail filter into `DealSniffer/Alerts`; one genuine alert is required before the read-only parser smoke. ETA within 15 minutes after first alert; arrival UNKNOWN; next_check_at Tuesday, October 13, 2026 — 9:00 AM America/Chicago.
+- **B-12 acceptance evidence:** genuine Craigslist alert; Seen unchanged; privacy-safe parser smoke; real Marketplace card opening the original listing; Agent 01 desktop/mobile Claude Chrome validation. No fixture counts as live.
+- **Tested / loaded:** B-12 parser NOT RUN; F-157/F-158 tested `112fce4`, loaded `a0ee240`; F-158 NOT LOADED; live browser proof MISSING.
+- **Canonical evidence:** `docs/receipts/2026-10-12-supervisor-visible-check-1353.md`.
