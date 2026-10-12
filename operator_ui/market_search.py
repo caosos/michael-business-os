@@ -25,7 +25,16 @@ SORTS = ("closing", "bid", "distance", "title", "suggested")
 # F-52 (B): gallery row categories. Matched against the seller's text and the system's category guess; a row name is a label, not a claim.
 ROW_CATS = {"trailers": ("trailer",), "equipment": ("equipment", "tractor", "mower", "loader", "generator", "compressor", "forklift", "backhoe"),
             "vehicles": ("truck", "pickup", "van", "suv", "sedan", "vehicle", "car"), "electronics": ("computer", "laptop", "monitor", "electronic", "phone", "radio", "camera", "printer", "server"),
-            "tools": ("tool", "welder", "saw", "drill", "grinder", "wrench")}
+            "tools": ("tool", "welder", "saw", "drill", "grinder", "wrench"),
+            "lawn_garden": ("lawn", "garden", "tiller", "trimmer", "chainsaw", "blower", "mulcher", "sprayer"),
+            "machinery": ("machinery", "excavator", "bulldozer", "dozer", "skid steer", "lathe", "crane", "grader", "paver", "roller", "hoist"),
+            "pallets_wholesale": ("pallet", "wholesale", "bulk", "truckload", "liquidation"),
+            "land_real_estate": ("land", "acre", "real estate", "real property", "parcel", "house", "home", "residence", "residential", "cabin", "building lot")}
+# F-157: owner-facing category controls. `other` = matches none of the named categories; `all` = every category incl. land. Land / Real Estate is off by default.
+CAT_LABELS = {"tools": "Tools", "equipment": "Equipment", "trailers": "Trailers", "vehicles": "Vehicles", "lawn_garden": "Lawn & Garden", "machinery": "Machinery",
+              "pallets_wholesale": "Pallets/Wholesale", "land_real_estate": "Land/Real Estate", "other": "Other/Unknown", "electronics": "Electronics"}
+CONTROL_CATS = ("tools", "equipment", "trailers", "vehicles", "lawn_garden", "machinery", "pallets_wholesale", "land_real_estate", "other")
+DEFAULT_CATS = tuple(c for c in CONTROL_CATS if c != "land_real_estate")
 DEFAULT_ROWS = ("trailers", "equipment", "vehicles", "")
 CONDITIONS = ("", "new", "used", "salvage", "parts", "for parts", "not working", "working", "as is")
 STALE_H = 6
@@ -97,7 +106,11 @@ def parse_query(qs: dict) -> dict:
     closing = g("closing_by")
     if closing == "soon":
         closing = (datetime.now(timezone.utc) + timedelta(days=7)).strftime("%Y-%m-%d")
-    cats = [c for c in (qs.get("cat") if isinstance(qs.get("cat"), list) else [qs.get("cat")] if qs.get("cat") else []) if c in ROW_CATS]
+    raw = [x.strip() for c in (qs.get("cat") if isinstance(qs.get("cat"), list) else [qs.get("cat")] if qs.get("cat") else []) for x in str(c).split(",")]
+    cat_all = "all" in raw
+    cats = list(CONTROL_CATS) if cat_all else [c for c in dict.fromkeys(raw) if c in ROW_CATS or c == "other"]
+    cat_default = not cats
+    cats = cats or list(DEFAULT_CATS)
     rows = [g(f"row{i}") if g(f"row{i}") in ROW_CATS else "" for i in range(1, 5)] if any(f"row{i}" in qs for i in range(1, 5)) else list(DEFAULT_ROWS)
     fresh = not any(k in qs for k in ("keywords", "base", "radius", "max_price", "min_price", "any", "run", "edit", "cat", "state", "loc_mode"))
     states, bad_states = _states(qs)
@@ -107,7 +120,7 @@ def parse_query(qs: dict) -> dict:
         + (["By State is selected but no state is ticked; pick at least one state (or switch to By Distance). No search was run."] if mode == "state" and not states and not bad_states else [])
     return {"loc_mode": mode, "states": states, "also_radius": g("also_radius") == "1", "state_find": g("state_find")[:30], "keywords": g("keywords")[:120], "base": g("base")[:60],
             "radius": (DEFAULT_RADIUS if g("base") else None) if fresh else _num(g("radius"), landing_fix.MAX_RADIUS),
-            "min_price": _num(g("min_price")), "max_price": _num(g("max_price")), "errors": errs, "cats": cats, "rows": rows,
+            "min_price": _num(g("min_price")), "max_price": _num(g("max_price")), "errors": errs, "cats": cats, "cat_all": cat_all, "cat_default": cat_default, "rows": rows,
             "view": "list" if g("view") == "list" else "gallery",
             "any": _terms(DEFAULT_ANY if ("any" not in qs and not g("broad")) else g("any")), "broad": g("broad") == "1", "condition": g("condition").lower()[:30], "required": _terms(g("required")),
             "preferred": _terms(g("preferred")), "exclude": _terms(g("exclude")), "source": g("source") or "gsa",
@@ -302,8 +315,10 @@ def partition(lots: list[dict], q: dict) -> tuple[list[dict], list[dict], dict]:
             hidden["terms"] += 1
             continue
         tags = tag_terms(c, q)
-        if q.get("cats"):
-            focus = not any(in_cat(c, k) for k in q["cats"])
+        if q.get("cat_all"):
+            focus = False
+        elif q.get("cats") and not (q.get("any") and q["any"] != _terms(DEFAULT_ANY) and not q.get("broad")):
+            focus = not cat_ok(c, q["cats"])          # F-157: the ticked categories control the feed; pure land is hidden when Land/Real Estate is off, mixed lots stay
         else:
             focus = q.get("any") and not q.get("broad") and not any(t in c["text"] or t in (c.get("category") or "").lower().replace("_", " ") for t in q["any"])
         pok = _price_ok(c, q)
@@ -335,15 +350,30 @@ def decision(card: dict, comp: dict | None = None) -> tuple[str, str]:
     return "WATCH", "A sold comp exists; send it to the decision queue to judge. Search results never say BUY"
 
 
+def card_cats(c: dict) -> set[str]:
+    """F-157: every category a lot matches (title + category guess); `other` is added when it matches no control category."""
+    got = {k for k in ROW_CATS if in_cat(c, k)}
+    return got if got & set(CONTROL_CATS) else got | {"other"}
+
+
+def cat_ok(c: dict, selected) -> bool:
+    return bool(card_cats(c) & set(selected))
+
+
 def in_cat(c: dict, cat: str) -> bool:
+    if cat == "other":
+        return "other" in card_cats(c)
     text = f"{c['title']} {c.get('category') or ''}".lower().replace("_", " ")          # title + category guess: the long description is boilerplate
+    if cat == "land_real_estate":
+        text = re.sub(r"\bland rover\b|\bhome depot\b|\bhomemade\b", " ", text)
     return any(re.search(rf"\b{re.escape(t)}s?\b", text) for t in ROW_CATS[cat])
 
 
 def gallery_rows(cards: list[dict], q: dict) -> list[tuple[str, list[dict]]]:
     """F-52 (B): the owner's chosen rows (checked categories first, else row slots) then 'other'. A lot sits in the first row it matches.
     An empty chosen row is kept, so the page can say 'no matching known inventory' instead of hiding the row."""
-    names = [n for n in dict.fromkeys(list(q.get("cats", [])) or [r for r in q.get("rows", DEFAULT_ROWS) if r])]
+    chosen = [] if q.get("cat_all") or q.get("cat_default") else list(q.get("cats", []))
+    names = [n for n in dict.fromkeys(chosen or [r for r in q.get("rows", DEFAULT_ROWS) if r])]
     events = [c for c in cards if c.get("event")]                    # F-149: auction events never sit in a guessed lot row
     cards = [c for c in cards if not c.get("event")]
     seen, out = set(), []

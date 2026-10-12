@@ -27,7 +27,7 @@ CSS = """<style>main{max-width:1900px}.banner{padding:3px 16px;font-size:13px}he
 .mk-form button:focus-visible,.mk-form input:focus-visible,.mk-side a:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
 .mk-form button.mk-add,.mk-form button.mk-go{font-size:16px;padding:10px 28px}.mk-chips .chip{background:var(--card);font-size:12px;padding:1px 8px}.mk-chips{margin:4px 0}
 .mk-range input[type=range]{width:46%;display:inline-block;margin:0;padding:0}.mk-range input[type=number]{width:110px;display:inline-block}
-.mk-sec2{font-size:13px}.mk-side .card button.mk-go{display:block;width:100%;margin-top:6px}.mk-sec{border-top:2px dashed var(--line);margin-top:16px}
+#mkcats{display:flex;flex-wrap:wrap;gap:6px}#mkcats label.mk-cat{display:flex;align-items:center;gap:8px;min-height:44px;padding:6px 12px;border:1px solid var(--line);border-radius:8px;font-size:16px;margin:0}#mkcats input[type=checkbox]{width:24px;height:24px;margin:0}.mk-sec2{font-size:13px}.mk-side .card button.mk-go{display:block;width:100%;margin-top:6px}.mk-sec{border-top:2px dashed var(--line);margin-top:16px}
 .mk-gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),1fr));gap:10px}.mk-g{border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--card);min-width:0}
 .mk-g .ph{height:110px;display:flex;align-items:center;justify-content:center;border:1px dashed var(--line);border-radius:6px;text-align:center;overflow:hidden}.mk-g img{width:100%;height:110px;object-fit:cover;border-radius:6px}
 .mk-g .pr{font-size:18px;font-weight:700;margin:4px 0 0}.mk-g .ti{font-size:14px;margin:2px 0;overflow-wrap:anywhere}.mk-g button,.mk-pref button{font-size:12px;padding:2px 6px;margin:1px;width:auto;background:var(--acc);color:var(--bg);opacity:1}.mk-acts{display:flex;justify-content:space-between;align-items:flex-end;gap:4px}.mk-xf{margin:0}.mk-g button.mk-x,.mk-x{background:transparent;color:var(--ink);border:1px solid var(--line);font-size:14px;line-height:1;padding:3px 7px}.mk-xt{font-size:11px}.mk-pref button:focus-visible,.mk-x:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
@@ -168,7 +168,7 @@ def chip_url(q: dict, drop: str | None = None) -> str:
     """F-136: a GET link that re-runs the current filters without one state (the chip's remove button). No script, no write."""
     j = lambda k: ", ".join(q[k]) if isinstance(q.get(k), list) else q.get(k)  # noqa: E731
     pairs = [(k, j(k)) for k in ("keywords", "base", "radius", "min_price", "max_price", "any", "condition", "required", "preferred", "exclude", "source", "kind", "closing_by", "sort", "view")]
-    pairs += [("broad", "1")] * bool(q.get("broad")) + [("cat", c) for c in q.get("cats") or []] + [(f"row{i}", r) for i, r in enumerate(q.get("rows") or [], 1) if i <= 4]
+    pairs += [("broad", "1")] * bool(q.get("broad")) + [("cat", c) for c in (['all'] if q.get('cat_all') else [] if q.get('cat_default') else q.get('cats') or [])] + [(f"row{i}", r) for i, r in enumerate(q.get("rows") or [], 1) if i <= 4]
     pairs += [("loc_mode", q.get("loc_mode", "distance"))] + [("also_radius", "1")] * bool(q.get("also_radius")) + [("state", s) for s in q.get("states") or [] if s != drop]
     return "/market?go=1&amp;" + "&amp;".join(f"{k}={quote(str(v))}" for k, v in pairs if v not in (None, ""))
 
@@ -235,18 +235,20 @@ def _more_filters(q: dict) -> str:
             f"<label>Type {sel('kind', [('any', 'Any'), ('auction', 'Auction'), ('fixed', 'Fixed price')], q.get('kind', 'any'))}</label>"
             f"<label>Closing by <input type='date' form='mkform' name='closing_by' value='{v('closing_by')}'></label>"
             f"<p class='small'><b>Gallery rows</b> (top to bottom; leave blank for fewer than 4)</p>"
-            + "".join(f"<label>Row {i} {sel(f'row{i}', [('', '(none)')] + [(k, k.title()) for k in ms.ROW_CATS], (q.get('rows') or ms.DEFAULT_ROWS)[i - 1])}</label>" for i in range(1, 5))
+            + "".join(f"<label>Row {i} {sel(f'row{i}', [('', '(none)')] + [(k, ms.CAT_LABELS.get(k, k)) for k in ms.ROW_CATS], (q.get('rows') or ms.DEFAULT_ROWS)[i - 1])}</label>" for i in range(1, 5))
             + "</details>")
 
 
 def _side_filters(q: dict) -> str:
     """F-52 (B): origin/ZIP, radius, price and category checkboxes live in the narrow left sidebar; they belong to the search form (form='mkform')."""
     v = lambda k: e(q.get(k) if q.get(k) is not None else "")  # noqa: E731
-    cats = "".join(f"<label><input type='checkbox' form='mkform' name='cat' value='{e(k)}'{' checked' if k in q.get('cats', []) else ''}> {e(k.title())}</label>" for k in ms.ROW_CATS)
+    on = set(q.get("cats") or [])
+    box = lambda k, lab, ck: f"<label class='mk-cat'><input type='checkbox' form='mkform' name='cat' value='{e(k)}'{' checked' if ck else ''}> {e(lab)}</label>"  # noqa: E731
+    cats = f"<div id='mkcats'>{box('all', 'All categories', q.get('cat_all'))}" + "".join(box(k, ms.CAT_LABELS[k], k in on) for k in ms.CONTROL_CATS) + "</div>"
     return ("<div class='card' id='mkfilters'><b>Filters</b>"
             f"{location_panel(q)}"
             f"{_slider(q, 'mkform')}"
-            f"<b>Categories</b>{cats}<p class='small mut'>None checked = your rows below (default trailers and equipment).</p>"
+            f"<b>Categories</b>{cats}<p class='small mut'>Only ticked categories are shown (All = everything, including land). Land/Real Estate starts unticked; a lot that also matches a ticked category stays. None ticked = the defaults.</p>"
             f"{_more_filters(q)}"
             "<button class='mk-go' type='submit' form='mkform'>Search Now</button></div>")
 
@@ -283,7 +285,7 @@ def chips(q: dict) -> str:
     c = []
     c.append(f"Origin: {q['base']}" + (" (ZIP 72032)" if q["base"].strip().lower() in ("", "conway", "conway ar", "conway, ar") else ""))
     c.append("Location: " + scope_text(q)) if q.get("loc_mode") == "state" else c.append((f"Radius: {q['radius']:g} mi (known distances only)" if q["radius"] is not None else "Radius: none") + "; Location mode: By Distance (states not applied)")
-    c.append("Mode: BROAD inventory (all categories)" if q.get("broad") else "Mode: repairable trailers/equipment focus: " + (", ".join(q["any"]) or "none"))
+    c.append("Mode: BROAD inventory (all categories)" if q.get("broad") else "Categories: " + ("all" if q.get("cat_all") else "default (all except Land/Real Estate)" if q.get("cat_default") else ", ".join(ms.CAT_LABELS.get(k, k) for k in q["cats"])) + (f"; keyword focus: {', '.join(q['any'])}" if q.get("any") and q["any"] != ms._terms(ms.DEFAULT_ANY) else ""))
     if q.get("min_price") is not None:
         c.append(f"Min price: ${q['min_price']:,.0f}")
     if q.get("max_price") is not None:
@@ -304,7 +306,7 @@ def _save(q: dict, cid: str | None, tok, pin_html: str) -> str:
     keep = "".join(f"<input type='hidden' name='{k}' value='{v(k)}'>" for k in ("keywords", "base", "radius", "min_price", "max_price", "any", "required", "preferred", "exclude", "condition"))
     keep += f"<input type='hidden' name='loc_mode' value='{q.get('loc_mode', 'distance')}'>" + (f"<input type='hidden' name='state' value='{e(','.join(q['states']))}'>" if q.get("states") else "") \
         + ("<input type='hidden' name='also_radius' value='1'>" if q.get("also_radius") else "")      # F-136
-    keep += f"<input type='hidden' name='cat' value='{e(','.join(q.get('cats') or []))}'>" if q.get("cats") else ""        # F-56: these were dropped, so a real Save lost them
+    keep += f"<input type='hidden' name='cat' value='{'all' if q.get('cat_all') else e(','.join(q.get('cats') or []))}'>" if q.get("cats") and not q.get("cat_default") else ""        # F-56: these were dropped, so a real Save lost them
     keep += "".join(f"<input type='hidden' name='row{i}' value='{e(r)}'>" for i, r in enumerate(q.get("rows") or [], 1) if i <= 4)
     keep += "<input type='hidden' name='broad' value='1'>" if q.get("broad") else ""
     return (f"<details id='save-search'{' open' if cid else ''}><summary>{'Edit saved search' if cid else 'Save this search'}</summary>"
@@ -388,7 +390,7 @@ def save_form(f: dict) -> dict:
     """Marketplace form -> the Wanted campaign form fields (exclude terms ride in nice_to_have as `exclude:word`)."""
     q = ms.parse_query({k: ([c for c in v.split(",") if c.strip()] if k in ("cat", "state") else [v]) for k, v in f.items()})   # F-56: `cat` is posted comma-joined (a form keeps one value per name)
     nice = list(q["preferred"]) + [ms.EXCLUDE_PREFIX + t for t in q["exclude"]]
-    nice += ([f"min:{q['min_price']:g}"] if q["min_price"] is not None else []) + ([f"cat:{'>'.join(q['cats'])}"] if q["cats"] else []) \
+    nice += ([f"min:{q['min_price']:g}"] if q["min_price"] is not None else []) + ([f"cat:{'all' if q['cat_all'] else '>'.join(q['cats'])}"] if q["cats"] and not q["cat_default"] else []) \
         + ([f"rows:{'>'.join(q['rows'])}"] if q["rows"] != list(ms.DEFAULT_ROWS) else []) + ([f"any:{'>'.join(t.replace('>', ' ') for t in q['any'])}"] if q["any"] else []) + (["broad:1"] if q["broad"] else []) + ([f"locmode:state"] if q["loc_mode"] == "state" else []) + ([f"states:{'>'.join(q['states'])}"] if q["states"] else []) + (["alsorad:1"] if q["also_radius"] else []) + ([f"cond:{q['condition']}"] if q["condition"] else [])
     return {**{k: f[k] for k in ("csrf", "pin", "nonce") if k in f}, "title": (f.get("title") or q["keywords"]).strip() or "Marketplace search",
             "category": CATEGORY, "keywords": q["keywords"].replace(" ", ", "), "max_price_usd": "" if q["max_price"] is None else str(q["max_price"]),

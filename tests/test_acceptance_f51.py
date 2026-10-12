@@ -44,8 +44,10 @@ def test_radius_constrains_known_distance_and_unknown_goes_to_optional(cache):
 
 def test_default_view_is_trailer_equipment_near_conway_and_broad_is_explicit(ui):
     h = get(ui, go=1, base="Conway AR", radius="150")                          # F-143: the origin is the user's own, never a hidden default
-    assert "Mode: repairable trailers/equipment focus: trailer, equipment" in h and "Radius: 150 mi" in h and "Origin: Conway AR (ZIP 72032)" in h
-    assert "Trailer, Utility" in h and "iPad Mini" not in h and "Whirlpool" not in h
+    assert "Categories: default (all except Land/Real Estate)" in h and "Radius: 150 mi" in h and "Origin: Conway AR (ZIP 72032)" in h
+    assert "Trailer, Utility" in h and "iPad Mini" in h      # F-157: the default is every category except Land/Real Estate; trailers/equipment is no longer a hidden focus
+    ht = get(ui, go=1, base="Conway AR", radius="150", cat="trailers")
+    assert "Trailer, Utility" in ht and "iPad Mini" not in ht and "Categories: Trailers" in ht
     hb = get(ui, go=1, broad=1, base="Conway AR", radius="")
     assert "Mode: BROAD inventory" in hb and "iPad Mini" in hb and "Broad (all categories)" in hb
 

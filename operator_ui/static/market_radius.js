@@ -11,3 +11,11 @@
   if (n.value !== "" && isFinite(Number(n.value))) { range(Number(n.value)); r.value = Number(n.value); }
   show();
 })();
+/* F-157: "All categories" ticks/unticks every category box; unticking any one box unticks All. Without this script the server treats All as everything. */
+(function () {
+  var box = document.getElementById("mkcats");
+  if (!box) return;
+  var all = box.querySelector("input[value=all]"), rest = box.querySelectorAll("input:not([value=all])");
+  all.addEventListener("change", function () { for (var i = 0; i < rest.length; i++) rest[i].checked = all.checked; });
+  for (var i = 0; i < rest.length; i++) rest[i].addEventListener("change", function () { if (!this.checked) all.checked = false; });
+})();
