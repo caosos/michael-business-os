@@ -5,11 +5,14 @@ real read stays NOT CONNECTED. Pure functions; everything is DRY-RUN."""
 
 from __future__ import annotations
 
+import json
 import os
 from datetime import datetime, timezone
 from pathlib import Path
 
 from mbos_discovery.adapter import NormalizationError, SearchProfile
+from mbos_discovery.adapters.wooley_site import WooleySiteAdapter
+from mbos_discovery.auctions import UNKNOWN
 from mbos_discovery.adapters.email_alerts import EmailAlertAdapter, EmlDirReader, ORIGINS, parse_alert
 from mbos_discovery.auctions import place_coords
 from mbos_discovery.dedup import title_similarity
@@ -18,6 +21,9 @@ from mbos_discovery.normalize import haversine_miles
 from . import gazetteer, market_search as ms
 
 ALERT_SOURCES = {"govdeals": ("govdeals_email", "GovDeals"), "publicsurplus": ("publicsurplus_email", "Public Surplus")}
+ENV_WOOLEY = "MBOS_WOOLEY_CACHE"
+DEFAULT_WOOLEY = str(Path(__file__).resolve().parent.parent / "var" / "cache" / "wooley-events.json")
+WOOLEY_NAME = "Wooley Auctioneers"
 ENV_FLAG, ENV_DIR = "MBOS_STAGING_FIXTURES", "MBOS_MARKET_FIXTURE_MAIL_DIR"
 
 
@@ -86,6 +92,57 @@ def load_alerts(source: str, directory: str | None, now: datetime, origin=None) 
             "cards": cards, "fixture": True}
 
 
+def _wooley_card(ad, payload, as_of: str, now, origin) -> dict:
+    """One Wooley auction EVENT (not a lot). Lot number / current bid / bid count are UNKNOWN by construction (lane 02 B-26; HiBid ToU)."""
+    lot = ad.lot(payload, datetime.fromisoformat(as_of))
+    g = lambda k: None if lot.get(k) == UNKNOWN else lot.get(k)  # noqa: E731
+    loc = g("location") or {}
+    c = _coords(loc) if loc else None
+    dist = haversine_miles(origin, c) if (c and origin) else None
+    tags = [str(t) for t in (g("category_tags") or [])]
+    desc = ms._short(" · ".join(x for x in (g("sale_type"), g("highlights")) if x))
+    prem = g("buyer_premium_pct")
+    return {"id": f"wooley:{lot.lot_id}", "title": g("title"), "description": desc, "text": f"{g('title')} {desc} {' '.join(tags)} {g('address') or ''}".lower(),
+            "url": g("rules_url"), "hibid_url": g("hibid_catalog_url"), "image": None, "bid": None, "price": None, "price_type": None, "bidders": None,
+            "closes": str(g("closes_at") or "")[:10] or None, "closes_at": g("closes_at"), "city": f"{loc['city']}, {loc['state']}" if loc.get("city") and loc.get("state") else None,
+            "state": loc.get("state") if loc.get("state") in ms.US_STATES else None, "distance": dist, "category": g("category"), "condition": None,
+            "labels": ms.auction_labels({}, as_of), "source": WOOLEY_NAME, "fetched_at": as_of, "kind": "auction event", "stale": ms._age_h(as_of, now) > ms.STALE_H,
+            "fixture": False, "event": True, "auctioneer": g("auctioneer"), "buyer_premium_pct": prem, "tags": tags, "event_tags": tags, "address": g("address"),
+            "lot_number": None, "current_bid": None, "bid_count": None}
+
+
+def wooley_path() -> str:
+    return os.environ.get(ENV_WOOLEY) or DEFAULT_WOOLEY
+
+
+def load_wooley(path: str | None, now: datetime, origin=None) -> dict:
+    """-> the `load_gsa` dict from the cache written by `tools/refresh_wooley_cache.py --live`. REAL source: connected (cached file), never fixture.
+    A missing/unreadable/empty-of-time cache is `offline` with an honest message. Never fetches."""
+    path = path or wooley_path()
+    off = lambda m: {**_empty("offline", WOOLEY_NAME, m), "coverage": None}  # noqa: E731
+    try:
+        doc = json.loads(Path(path).read_text(encoding="utf-8"))
+        as_of = str(doc["as_of"])
+        datetime.fromisoformat(as_of)
+        recs = doc["records"]
+        assert isinstance(recs, list)
+    except (OSError, ValueError, KeyError, TypeError, AssertionError):
+        return off(f"{WOOLEY_NAME}: no readable cached event file with an as-of time on this machine; nothing is shown rather than guessed.")
+    err = doc.get("error")
+    if err and not recs:
+        return off(f"{WOOLEY_NAME}: the last refresh failed ({(err.get('message') if isinstance(err, dict) else err)}); no events cached.")
+    ad = WooleySiteAdapter()
+    cards = []
+    for p in recs:
+        try:
+            cards.append(_wooley_card(ad, p, as_of, now, origin))
+        except Exception:  # noqa: BLE001  one malformed event never breaks the page
+            continue
+    age = round(ms._age_h(as_of, now), 1)
+    return {**_empty("connected", WOOLEY_NAME, f"last refresh reported: {err.get('message') if isinstance(err, dict) else err}" if err else ""),
+            "as_of": as_of, "age_h": age, "stale": age > ms.STALE_H, "in_scope": len(cards), "in_file": len(recs), "cards": cards, "requests": doc.get("requests")}
+
+
 def dedupe(cards: list[dict]) -> list[dict]:
     """Merge across sources: the same source link, or near-identical title in the same place, is one listing (first source wins).
     lane 02's pinned install has no Deduper class; this uses its `dedup.title_similarity`."""
@@ -105,6 +162,9 @@ def load_source(source: str, gsa_path: str | None, now: datetime, origin=None, d
     directory = directory if directory is not None else fixture_dir()
     if source == "gsa":
         return ms.load_gsa(gsa_path, now, origin)
+    if source == "wooley":
+        d = load_wooley(None, now, origin)
+        return {**d, "coverage": coverage([d])}
     if source in ALERT_SOURCES:
         d = load_alerts(source, directory, now, origin)
         return {**d, "coverage": coverage([d])}
@@ -112,8 +172,9 @@ def load_source(source: str, gsa_path: str | None, now: datetime, origin=None, d
         return not_connected(source)
     gsa = ms.load_gsa(gsa_path, now, origin)
     alerts = [load_alerts(s, directory, now, origin) for s in ALERT_SOURCES]
-    cards = dedupe(gsa["cards"] + [c for a in alerts for c in a["cards"]])
-    live = gsa["status"] == "connected"
+    woo = load_wooley(None, now, origin)
+    cards = dedupe(gsa["cards"] + woo["cards"] + [c for a in alerts for c in a["cards"]])
+    live = "connected" in (gsa["status"], woo["status"])
     status = "connected" if live else "fixture" if any(a["cards"] for a in alerts) else "offline"
     return {**gsa, "status": status, "cards": cards, "in_scope": len(cards), "fixture": any(a["fixture"] for a in alerts),
-            "message": gsa["message"] if status == "offline" else "", "coverage": coverage([{**gsa, "name": "GSA Auctions"}] + alerts)}
+            "message": gsa["message"] if status == "offline" else "", "coverage": coverage([{**gsa, "name": "GSA Auctions"}, woo] + alerts)}

@@ -15,7 +15,7 @@ from urllib.parse import parse_qsl, quote, urlsplit
 e = lambda v: html.escape("" if v is None else str(v), quote=True)  # noqa: E731
 
 LISTING_HOSTS = ("govdeals.com", "publicsurplus.com", "gsaauctions.gov", "ebay.com", "craigslist.org", "facebook.com", "proxibid.com",
-                 "bidspotter.com", "auctionzip.com", "hibid.com", "ritchiebros.com", "iaai.com", "copart.com")  # override: MBOS_LISTING_HOSTS=a.com,b.com
+                 "bidspotter.com", "auctionzip.com", "hibid.com", "ritchiebros.com", "iaai.com", "copart.com", "wooleyauctioneers.com")  # override: MBOS_LISTING_HOSTS=a.com,b.com
 DEMO_SUFFIXES = (".invalid", ".example", ".test", ".localhost", ".example.com", ".example.org", ".example.net")
 MAX_URL = 2048
 

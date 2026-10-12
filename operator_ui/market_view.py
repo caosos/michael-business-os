@@ -85,6 +85,8 @@ def gallery_labels(c: dict) -> str:
 
 def gallery_card(c: dict, tok) -> str:
     """F-52 (B): dense card: photo (or an honest placeholder), price attached, short title, town, closing; details on the original listing."""
+    if c.get("event"):
+        return msv.event_gallery(c, tok, pref_buttons, link_html)
     img = _photo(c["image"], c["url"])
     ph = img if img.startswith("<img") else f"<div class='ph small mut'>{img}</div>"      # the honest tile/placeholder; never a faked picture
     price = f"<div class='pr'>No bids yet</div><div class='small mut' data-opening>{e((c.get('labels') or ms.auction_labels({}))['opening_text'])}</div>" if c["bid"] is None else f"<div class='pr'>${c['bid']:,.0f}</div><div class='small mut'>current bid</div>"
@@ -113,6 +115,8 @@ def prefs_panel(d: dict, tok) -> str:
 
 
 def render_card(c: dict, tok=None) -> str:
+    if c.get("event"):
+        return msv.event_card(c, tok, pref_buttons, link_html)
     verdict, why = ms.decision(c)
     tags = "".join(f"<span class='mk-tag'>{e(k)}: {e(t)} ({e(tag)})</span>" for k in ("required", "preferred") for t, tag in (c.get("tags") or {}).get(k, []))
     where = e(c["city"] or "UNKNOWN") + (f" · {round(c['distance'], 1):g} mi from your base" if c["distance"] is not None else " · distance UNKNOWN (place not in our small local gazetteer; see the note above)")

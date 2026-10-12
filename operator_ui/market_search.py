@@ -271,6 +271,8 @@ def _price_ok(c: dict, q: dict):
     """True / False against the min/max range, or None when the lot has no bid yet (price unknown: cannot be tested)."""
     if q.get("min_price") is None and q.get("max_price") is None:
         return True
+    if c.get("event"):
+        return False           # F-146 rule: an auction EVENT has no price at all, so any min/max price filter excludes it (counted under 'hidden by price')
     if c["bid"] is None:
         return None
     return (q.get("min_price") is None or c["bid"] >= q["min_price"]) and (q["max_price"] is None or c["bid"] <= q["max_price"])
