@@ -7,7 +7,7 @@ Worktree: /home/michaelos/business-os-worktrees/agent-02-opportunity
 State: CLOSED
 Handoff: docs/handoff/LANE_02.md (closed out at Agent 01's request, ADR-0014; session to be closed by Agent 01)
 Blocked: B-12 on MICHAEL_DECISIONS #8 + operator credentials (prep DONE: docs/runbooks/first-live-run-checklist.md; SAM.gov added to the CLI)
-Done: B-26 @ 90672f2 (see fix commit below) (Wooley event adapter wooleyauctioneers.com, live OFF by default, hibid.com never fetched, lot fields UNKNOWN; 353 tests)
+Done: B-26 @ 2f81a7e (review fixes; earlier 90672f2) (Wooley event adapter wooleyauctioneers.com, live OFF by default, hibid.com never fetched, lot fields UNKNOWN; 353 tests)
 Done: B-01 @ 7c9da45
 Done: B-02 @ cadfdae
 Done: B-03 @ 8ff5476
