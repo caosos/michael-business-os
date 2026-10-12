@@ -421,3 +421,14 @@ This section is part of the existing living checklist and is the authoritative r
 - [ ] **B-12 genuine-alert acceptance:** alerts folder is empty. Owner must create/confirm the Craigslist saved-search alert and Gmail filter. Then Agent 02 runs a read-only smoke and Agent 01 proves a real card/original link in loaded Claude Chrome desktop/mobile. ETA within 15 minutes of first qualifying alert; next check Tuesday, October 13, 2026 — 9:00 AM America/Chicago.
 - [ ] **F-157/F-158 LIVE_VERIFIED:** unchanged; tested `112fce4`, loaded `a0ee240`, F-158 NOT LOADED, browser proof MISSING, exact-target release approval not granted.
 - **Canonical evidence:** `docs/receipts/2026-10-12-supervisor-visible-check-1353.md`.
+
+
+## Supervisor reconciliation — Monday, October 12, 2026 — 2:35 PM America/Chicago
+- [ ] **A-73 CURRENT / NEED — ACK MISSED:** existing Agent 01 owns the P0 existing-watchdog wake repair. Repository delivery exists, but current host ACK/WORKING or command-specific NEED does not. ETA UNKNOWN; next_check_at Monday, October 12, 2026 — 2:40 PM America/Chicago. **APPEARS STALE — HOST STATE UNVERIFIED.**
+- [ ] **One-item protocol correction:** parallel transport comments for F-159, B-36, B-38, A-74, D-35 and B-37 all report Host observation UNKNOWN and include future-dated launch/acceptance claims. Preserve proven artifact commits/tests, but do not accept those comments as current host liveness or valid serial ownership. Acceptance time is UNKNOWN until Agent 01 corrects it.
+- [x] **Offline artifacts preserved:** B-36 `27aa922` fixture parser 421/0; B-38 `1334450` research matrix; A-74 `3094eca` ADR artifact; B-37 `b54cf9a` fixture adapter 424/0. None is live-connected or loaded-browser proof.
+- [ ] **B-12 exact owner step:** create/use a dedicated DealSniffer alerts mailbox; in Craigslist's Little Rock region save a narrow trailer search centered on Conway 72032 within 50 miles and enable e-mail alerts. The subscription is not enabled/proven because the alerts folder has zero genuine messages. Do not use personal Gmail.
+- [ ] **B-12 exact filter remains evidence-gated:** real sender address and subject are UNKNOWN until the first genuine alert. After arrival, filter exact observed `craigslist.org` sender + exact observed saved-search subject prefix + dedicated recipient into `DealSniffer/Alerts`. Parser additionally requires `dkim=pass`, HTTPS Craigslist links, EXAMINE/BODY.PEEK and unchanged Seen state.
+- [ ] **F-157/F-158 LIVE_VERIFIED:** unchanged; tested `112fce4`, loaded `a0ee240`, F-158 NOT LOADED, loaded desktop/mobile proof MISSING.
+- **ONE next action:** existing Agent 01 publishes current host evidence and A-73 ACK/WORKING or exact NEED, then reconciles the conflicting parallel claims.
+- **Canonical evidence:** `docs/receipts/2026-10-12-supervisor-visible-check-1435.md`.
