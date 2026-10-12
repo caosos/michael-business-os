@@ -16,7 +16,7 @@ import threading
 from pathlib import Path
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from urllib.parse import parse_qs, quote, urlparse
+from urllib.parse import parse_qs, quote, unquote, urlparse
 
 from mbos.clock import iso, utcnow
 from mbos.spine import DecisionRefused
@@ -26,7 +26,7 @@ try:  # lane C's package is optional: without it the notes form is simply unavai
 except ImportError:  # pragma: no cover
     NOTE_CATEGORIES, NOTE_KINDS = frozenset(), frozenset()
 
-from . import deal_ui, landing_fix, live_demo, market_routes, resale_view, attest_view, bought_view, card_view, comps_view, glance_view, inputs_view, ux, views, wanted_view
+from . import deal_ui, landing_fix, live_demo, market_detail, market_routes, resale_view, attest_view, bought_view, card_view, comps_view, glance_view, inputs_view, ux, views, wanted_view
 from .digest import figures as digest_figures, dollars as _dollars
 from .card_view import ec
 from .backend import AlreadyClosed, FollowupRefused, ItemNotFound, NoteRefused, NumbersRefused, ProfileUnavailable
@@ -960,7 +960,7 @@ def make_handler(app):
 
         def _send(self, status, body, ctype="text/html; charset=utf-8", headers=None):
             data = body.encode("utf-8")
-            scripts = "script-src 'self'; " if getattr(_CUR, "path", "") == "/market" else ""     # F-143: only /market may load the one same-origin radius script
+            scripts = "script-src 'self'; " if getattr(_CUR, "path", "") == "/market" or getattr(_CUR, "path", "").startswith("/market/item/") else ""     # F-143: only /market may load the one same-origin radius script
             self.send_response(status)
             self.send_header("Content-Type", ctype)
             self.send_header("Content-Length", str(len(data)))
@@ -1061,6 +1061,14 @@ def make_handler(app):
                 return self._send(200, page("Demo / training data", live_demo.DEMO_PAGE, app.state()))
             if u.path == "/static/market_radius.js":
                 return self._send(200, (Path(__file__).parent / "static" / "market_radius.js").read_text(encoding="utf-8"), "text/javascript; charset=utf-8")
+            if u.path == "/static/market_detail.js":
+                return self._send(200, (Path(__file__).parent / "static" / "market_detail.js").read_text(encoding="utf-8"), "text/javascript; charset=utf-8")
+            if u.path.startswith("/market/item/"):                                    # F-160: listing detail page, cached record only
+                seg = u.path.split("/")
+                body = market_detail.page_body(app, seg[3], unquote(seg[4]), now) if len(seg) == 5 else None
+                if body is None:
+                    return self._send(404, page("Listing not found", "<p>No cached listing matches this address. <a href='/market'>Back to Marketplace</a></p>", app.state()))
+                return self._send(200, page("Listing detail", body, app.state(), flash))
             if u.path == "/market":
                 return self._send(200, page("DealSniffer Marketplace", market_routes.page_body(app, qs, now), app.state(), flash))
             if u.path == "/wanted":

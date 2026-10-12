@@ -43,7 +43,7 @@ def find_card(c: dict, tok, pref_buttons) -> str:
     return (f"<div class='mk-g' data-lot='{e(c['id'])}' data-find='1'><div class='ph small mut'>No photo (owner-entered)</div>{price}<div class='ti'><b>{e(c['title'])}</b>{saved}</div>"
             f"<div class='small'><b>{e(c['source'])}</b> · {where}</div><div class='small'>Condition: {e(c['condition'] or 'not stated')}</div>"
             + (f"<div class='small mut'>{e(c['description'])}</div>" if c["description"] else "") + f"<div class='small'>{TAG}</div>"
-            f"<div class='small'>{link_html(c['url']) if c['url'] else 'No link entered'}</div>"
+            f"<div class='small'><a class='mk-detail' href='{e(__import__('operator_ui.market_detail', fromlist=['x']).href(c))}'>View details</a> · {link_html(c['url']) if c['url'] else 'No link entered'}</div>"
             f"<div class='small mut'>added {e(r.get('created_at', ''))} by {e(r.get('created_by', ''))}" + (f" · edited {e(r.get('updated_at', ''))}" if r.get("updated_at") != r.get("created_at") else "") + f"</div>"
             f"{pref_buttons(c, tok)}{edit}</div>")
 

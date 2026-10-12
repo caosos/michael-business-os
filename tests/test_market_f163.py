@@ -9,6 +9,8 @@ from pathlib import Path
 
 import pytest
 
+pytest.importorskip("playwright.sync_api")
+
 from operator_ui import market_bids as mbids, market_sources as msrc
 from tests.test_market_f47 import cache, get, ui  # noqa: F401
 from tests.test_market_f149 import caches  # noqa: F401

@@ -15,6 +15,7 @@ from .live_demo import link_html
 from . import precedent_view as pv
 from . import market_source_view as msv
 from . import market_browse as mb
+from . import market_detail as md
 from . import market_source_panel as msp
 
 CATEGORY = "marketplace"
@@ -48,6 +49,10 @@ def _photo(url, listing=None) -> str:
     if url and classify_url(url, hosts=[host])[0] == "live":
         return f"<img src='{e(url)}' alt='Original listing photo' loading='lazy' referrerpolicy='no-referrer'>"
     return "<div class='mut small' style='width:120px'>No photo from the seller</div>"
+
+
+def vlink(c: dict) -> str:
+    return f"<a class='mk-detail' href='{html.escape(md.href(c))}'>View details</a>"       # F-160
 
 
 def _money(v) -> str:
@@ -88,7 +93,7 @@ def gallery_labels(c: dict) -> str:
 def gallery_card(c: dict, tok) -> str:
     """F-52 (B): dense card: photo (or an honest placeholder), price attached, short title, town, closing; details on the original listing."""
     if c.get("event"):
-        return msv.event_gallery(c, tok, pref_buttons, link_html)
+        return msv.event_gallery(c, tok, pref_buttons, lambda u: f"{vlink(c)} · {link_html(u)}")
     img = _photo(c["image"], c["url"])
     ph = img if img.startswith("<img") else f"<div class='ph small mut'>{img}</div>"      # the honest tile/placeholder; never a faked picture
     price = f"<div class='pr'>No bids yet</div><div class='small mut' data-opening>{e((c.get('labels') or ms.auction_labels({}))['opening_text'])}</div>" if c["bid"] is None else f"<div class='pr'>${c['bid']:,.0f}</div><div class='small mut'>current bid</div>"
@@ -97,7 +102,7 @@ def gallery_card(c: dict, tok) -> str:
     flag = " <span class='badge'>SAVED</span>" if c.get("saved") else ""
     return (f"<div class='mk-g' data-lot='{e(c['id'])}'>{ph}{price}<div class='ti'><b>{e(ti)}</b>{flag}</div><div class='small'>{town}</div>{msv.card_note(c)}"
             f"<div class='small mut'>closes {e(c['closes'] or 'UNKNOWN')}{c.get('closing_badge', '')} · posted age: not given · auction, all-in cost unknown</div>"
-            f"<div class='small mut gal-lbl'>{gallery_labels(c)}</div><div class='small'>{link_html(c['url'])} · <span class='lbl'>WATCH</span></div>{pref_buttons(c, tok)}</div>")
+            f"<div class='small mut gal-lbl'>{gallery_labels(c)}</div><div class='small'>{vlink(c)} · {link_html(c['url'])} · <span class='lbl'>WATCH</span></div>{pref_buttons(c, tok)}</div>")
 
 
 def gallery(cards: list[dict], q: dict, tok, prec: dict | None = None) -> str:
@@ -125,7 +130,7 @@ def prefs_panel(d: dict, tok) -> str:
 
 def render_card(c: dict, tok=None) -> str:
     if c.get("event"):
-        return msv.event_card(c, tok, pref_buttons, link_html)
+        return msv.event_card(c, tok, pref_buttons, lambda u: f"{vlink(c)} · {link_html(u)}")
     verdict, why = ms.decision(c)
     tags = "".join(f"<span class='mk-tag'>{e(k)}: {e(t)} ({e(tag)})</span>" for k in ("required", "preferred") for t, tag in (c.get("tags") or {}).get(k, []))
     where = e(c["city"] or "UNKNOWN") + (f" · {round(c['distance'], 1):g} mi from your base" if c["distance"] is not None else " · distance UNKNOWN (place not in our small local gazetteer; see the note above)")
@@ -143,7 +148,7 @@ def render_card(c: dict, tok=None) -> str:
             + "<p class='small mut' id='valuation-note'>Valuation: a gross scrap/component estimate is not a net yard pickup offer. Pickup, deductions, towing, disposal, fees, title, condition and recoverable weight: UNKNOWN.</p>"
             f"<p class='small'>Price math: bid {_money(c['bid'])} + buyer premium UNKNOWN + transport UNKNOWN + repair UNKNOWN "
             f"= all-in cost UNKNOWN (never the final cost) · sold comp: none on file</p>{('<p>' + tags + '</p>') if tags else ''}{('<p class=small><b>Not checked against your filters:</b> ' + e('; '.join(c['unchecked'])) + '</p>') if c.get('unchecked') else ''}"
-            f"<p>Original listing: {link_html(c['url'])}</p>{pref_buttons(c, tok) if tok else ''}"
+            f"<p>{vlink(c)} · Original listing: {link_html(c['url'])}</p>{pref_buttons(c, tok) if tok else ''}"
             f"<p class='small mut'>{e(why)}<br>Source {e(c['source'])} · fetched {e(c['fetched_at'])} · {e(c['kind'])}{stale}</p></div></div>")
 
 

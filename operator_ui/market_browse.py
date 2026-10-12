@@ -208,10 +208,9 @@ def countdown(c: dict, now: datetime) -> tuple[str, bool]:
     return (f"{s // 60} min left" if s < 3600 else f"{s // 3600} h {s % 3600 // 60} min left"), True
 
 
-def _view(url) -> str:
-    if url and classify_url(url)[0] == "live":
-        return f"<a class='mk-view' href='{e(url)}' rel='noopener noreferrer nofollow' target='_blank'>View</a>"
-    return f"<span class='mk-view mk-off' aria-disabled='true' title='No verified live link: {e('fixture or missing link' if url else 'no link given')}'>No live link</span>"
+def _view(c) -> str:
+    from . import market_detail                   # F-160: View opens OUR detail page; the original listing link lives there
+    return f"<a class='mk-view' href='{e(market_detail.href(c))}'>View</a>"
 
 
 def card(c: dict, tok, now: datetime, pref_buttons) -> str:
@@ -239,7 +238,7 @@ def card(c: dict, tok, now: datetime, pref_buttons) -> str:
     more = f"<details class='mk-more'><summary title='Details and actions' aria-label='More: details and actions'>&#8943;</summary>{lbl}{pref_buttons(c, tok)}</details>"
     return (f"<div class='mk-g mk-card' data-lot='{e(c['id'])}'{kind}><div class='mk-ph'>{ph}{cd}<span class='badge mk-src'>{e(c['source'])}</span></div>"
             f"<div class='ti'><b>{e(ti)}</b>{flag}</div><div class='small'>{place}</div>{note}<div class='small mut'>Closes {e(closes)}{c.get('closing_badge', '')}</div>{money}"
-            f"<div class='mk-vw'>{_view(c.get('url'))}{more}</div></div>")
+            f"<div class='mk-vw'>{_view(c)}{more}</div></div>")
 
 
 # ---- sidebar sections / top bar ----

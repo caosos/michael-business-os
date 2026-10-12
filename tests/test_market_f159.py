@@ -201,4 +201,4 @@ def test_phone_drawer_markup_and_card_shape(ui):
     assert "id='mkdrawer'" in h and "for='mkdrawer' id='filters-btn-m'" in h and "@media(max-width:600px){.mk-grid{grid-template-columns:minmax(0,1fr)}}" in h
     card = re.search(r"<div class='mk-g mk-card'.*?<div class='mk-vw'>.*?</div>", h, re.S).group(0)
     assert "mk-src'>GSA Auctions<" in card and "Closes " in card and ("current bid" in card or "bidders UNKNOWN" in card)
-    assert "class='mk-view' href='https://" in card or "no link" in card
+    assert "class='mk-view' href='/market/item/" in card              # F-160: View opens our detail page; the original link is on it
