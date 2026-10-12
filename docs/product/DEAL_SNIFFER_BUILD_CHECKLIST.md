@@ -440,3 +440,13 @@ This section is part of the existing living checklist and is the authoritative r
 - [ ] **F-163 remains PARTIAL / F-164 READY:** desktop hierarchy is accepted, but 390px phone overflow clips Search, Sort, Filters, quick views and banner; state text is duplicated in locations. F-164 transport claims WORKING with host UNKNOWN and therefore does not displace A-73 or prove a live worker. ETA for authoritative work UNKNOWN; A-73 next_check_at MISSING. Preserve F-164 for serial dispatch after ownership reconciliation.
 - [ ] **Tested versus loaded:** tested UI `478bfc0` based on `64ce371` / `112fce4`; loaded revision remains `a0ee24051fb06dcab8f04306bcb7da54504c5ece`. Firsthand loaded Claude Chrome desktop/mobile proof: NONE.
 - **Canonical evidence:** `docs/receipts/2026-10-12-supervisor-visible-check-1521.md`.
+
+
+## Supervisor reconciliation — Monday, October 12, 2026 — 4:21 PM America/Chicago
+- [ ] **A-73 remains the ONE current bounded task:** existing Agent 01; P0; **NEED — ACK MISSED**. Fresh watchdog host observations at 4:10:15 PM and 4:16:27 PM emitted false NEEDs for already DONE/superseded A-74, B-36, B-38, F-159 and D-37. This proves stale completion/checkpoint state and must be fixed without re-dispatching those items.
+- [x] **F-164 STAGING_ACCEPTED:** `cb682ff` / Agent 01 `4607865`; 42 layout/browser tests passed at 390×900, 360×800 and 1440×900; full 594/7 with documented environment failures. It is not loaded and has no firsthand loaded Claude Chrome proof.
+- [ ] **F-160 PARTIAL / F-165 preserved:** `f6a399c` renders the detail page but needs compact no-photo layout, card-consistent distance and radius-limited similar listings. F-165 transport says WORKING with host UNKNOWN; it does not supersede A-73.
+- [x] **Registry/account artifacts preserved:** D-37 `c729a2c`, D-38 `b0cb55e`, B-39 `43a24e5`, B-40 `b318842`, B-41 `bff57c6`. B-40/B-41 remain fixture/config proof, not genuine mailbox or loaded-feed connection.
+- [ ] **Tested / loaded:** search `cb682ff`, detail `f6a399c`; loaded `a0ee24051fb06dcab8f04306bcb7da54504c5ece`; loaded Claude Chrome desktop/mobile evidence NONE. Latest host observation Monday, October 12, 2026 — 4:16:27 PM America/Chicago is limited to the D-37 watchdog check; current A-73/F-165 process state UNKNOWN. **APPEARS STALE — HOST STATE UNVERIFIED.**
+- **ONE next action:** Agent 01 publishes host-backed A-73 ACK/WORKING or exact NEED and reconciles the five false NEED states before one serial dispatch.
+- **Canonical evidence:** `docs/receipts/2026-10-12-supervisor-visible-check-1621.md`.
