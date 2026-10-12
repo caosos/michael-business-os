@@ -1,5 +1,16 @@
 # Live :8766 reload and rollback packet (PREPARED, NOT APPROVED, NOT RUN)
 
+## COMBINED MARKETPLACE RELEASE (2026-10-12T03:50:21Z): CURRENT PACKET. Everything below is audit history.
+- **Artifact:** lane 06 `3dcbb86094e60b1b847e43b0f26babeb3dc30738` (F-144 title + 0-500 radius slider, F-145 source seam, F-146/F-149 auction houses Wooley + Wilson, F-147 My bids, F-150 Census gazetteer + dedupe), with lane 02 `a05aae84b72f0d9c7e8d6e4242c7f5f8491176b9` (Wooley + Wilson adapters).
+- **Live now:** F-143 `315ddfa` (listener PID 725190 lineage; verify-only OK at 2026-10-12T03:50:21Z).
+- **Verified by Agent 01:** lane 06 suites (522/1 known f39 flake), focused suites, headless-Chrome desktop+mobile for F-145..F-150; staging under the COORDINATOR python with lane 02 a05aae8 on the path: reload_ui --verify-only OK, GSA 150 mi 0 not-checked (was 134), 17/17 Wilson + 2 Wooley located; coordinator suite with lane 02 a05aae8: 607/0; offline install of lane 02 rehearsed in a throwaway venv (package hash identical to lane 06's).
+- **Prerequisites found and handled:** (1) the coordinator venv (used by the live UI) lacked the auction adapters -> the release installs lane 02 first and restores the old package if the reload fails; (2) `tools/reload_ui.sh` required the old title and would have rolled back every new release -> fixed at `4b12ed0` (tests 14/0).
+- **One command (owner-run):** `cd ~/business-os-worktrees/agent-01-coordinator && tools/release_marketplace.sh 3dcbb86094e60b1b847e43b0f26babeb3dc30738 a05aae84b72f0d9c7e8d6e4242c7f5f8491176b9` (`--dry` as a third argument changes nothing).
+- **Then Agent 01:** reload marker check, `--verify-only 8766`, `tools/f142_live_check.py 8766`, and Claude in Chrome on the live page (desktop + mobile): auction houses within the chosen radius, My bids, Search Now last.
+- **Rollback:** reload_ui.sh restores the previous UI automatically on a failed check; the release script restores the previous `mbos_discovery` package; manual: backups under `var/lanes/agent-06.prev-<UTC>` and `var/release-backups/`.
+
+---
+
 **EXECUTED (executed by the owner at 21:23:00-21:23:12Z per his screenshot; observed by Agent 01, listener PID 725190):** the reload to `85246899…` happened at `exported_utc=20261011T212259Z` (PID 725190); verification in `docs/receipts/2026-10-11-f142-live-reload-verification.md`. The packet below is now audit history; do not rerun it. The 21:17Z attempt by Agent 01 was denied by the permission classifier and did not run.
 
 ## F-142 REFRESH (2026-10-11T21:09:44Z): THIS SECTION IS THE CURRENT PACKET. Everything below it is audit history.
