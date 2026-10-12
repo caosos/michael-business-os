@@ -44,7 +44,7 @@
    "since": "2026-10-11T05:59:23Z"
   }
  ],
- "coordinator_head": "093ffe8",
+ "coordinator_head": "aeb4711",
  "counts": {
   "BLOCKED": [
    "ARIA-20261012-0034-dealsniffer-morning-acceptance",
@@ -128,23 +128,23 @@
  "currently_running": null,
  "delivery_interface": {
   "claude_cli": true,
-  "quota": "latest reading is 481 min old (older than 45)",
+  "quota": "latest reading is 491 min old (older than 45)",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-12T17:20:14Z",
+ "generated_at": "2026-10-12T17:30:16Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "nothing needed",
   "note": "pickup does not need the interactive session",
-  "state": "HEALTHY"
+  "state": "STOPPED"
  },
  "pid": 592613,
  "receipts": "var/pickup/receipts.jsonl (hash-chained, local) and docs/receipts/pickup/<id>.md on the coordinator branch",
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-12T17:20:14Z",
+  "observed_at": "2026-10-12T17:30:16Z",
   "pid": 592613,
   "source": "inbox_pickup process",
   "status": "idle",
