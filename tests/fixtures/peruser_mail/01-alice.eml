@@ -1,0 +1,14 @@
+From: craigslist <robot@craigslist.org>
+To: Alice <alerts+alice@example.invalid>
+Subject: FIXTURE craigslist alert
+Date: Mon, 12 Oct 2026 07:00:00 -0500
+Message-ID: <pu-1@craigslist.org>
+Authentication-Results: mx.example.invalid; dkim=pass header.d=craigslist.org; spf=pass
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body><!-- FIXTURE: synthetic -->
+<table>
+<tr><td><a href="https://littlerock.craigslist.org/tla/d/x-7720000001/7720000001.html">Utility trailer 5x10</a> $650 (Conway)</td></tr>
+<tr><td><a href="https://littlerock.craigslist.org/tla/d/x-7720000002/7720000002.html">Flatbed trailer</a> $900 (Cabot)</td></tr>
+</table></body></html>

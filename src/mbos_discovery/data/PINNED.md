@@ -1,3 +1,3 @@
 # Pinned data (B-39, ADR-0015)
 - `zcta_centroids.csv`: US Census Bureau 2023 Gazetteer ZCTA internal points (public domain), zip,lat,lng, 33,791 rows. Source zip sha256 75191ab2d3df4b668fb511d2726d97c521d6d1ff555725704a5d9bb3bc2077ce (https://www2.census.gov/geo/docs/maps-data/data/gazetteer/2023_Gazetteer/2023_Gaz_zcta_national.zip). Centroid of a ZCTA approximates a USPS ZIP; distances are approximate.
-- `sources.v1.json`: copy of `config/sources.v1.json` from lane 04 commit `c729a2c` (D-37). Re-vendor with `git show <sha>:config/sources.v1.json` when D-38 lands.
+- `sources.v1.json`: copy of `config/sources.v1.json` from lane 04 commit `b0cb55e` (D-38). sha256 bd0f4d20f65a5de374f777282c00970e80140739a5020531f9ff333d4a965df3. Re-vendor with `git show <sha>:config/sources.v1.json`.

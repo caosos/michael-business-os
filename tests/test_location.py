@@ -18,6 +18,9 @@ def test_zip_table_size_and_known_points():
     assert len(loc._zcta()) > 33000
 
 
+AR_HOUSES = {"wooley_auctioneers", "wilson_auctioneers", "blackmon_auctions", "ar_state_surplus"}  # D-38 registry
+
+
 def test_owner_output_is_arkansas_everything():
     got = sources_for(OWNER)
     ids = {c.source_id for c in got if c.active}
@@ -28,16 +31,16 @@ def test_owner_output_is_arkansas_everything():
 def test_ohio_user_sees_no_arkansas():
     ohio = User(home_zip="43215", home_state="OH", default_radius_mi=50)
     ids = active(ohio)
-    assert not (ids & CL) and "ar_local_auction_houses" not in ids
+    assert not (ids & CL) and not (ids & AR_HOUSES)
     assert NATIONAL <= ids
-    assert {c.source_id for c in sources_for(ohio) if not c.active} == CL | {"ar_local_auction_houses"}
+    assert {c.source_id for c in sources_for(ohio) if not c.active} == CL | AR_HOUSES
 
 
 def test_distance_match_without_state():
     fs = User(home_zip="72901")  # Fort Smith, no state given
     ids = active(fs)
     assert "craigslist_fortsmith" in ids and "craigslist_fayar" in ids
-    assert "ar_local_auction_houses" not in ids  # states-scope needs a state
+    assert not (ids & AR_HOUSES)  # states-scope needs a state
 
 
 def test_border_user_in_missouri_reaches_nw_arkansas_only():
