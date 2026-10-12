@@ -76,3 +76,14 @@ All other lanes: CLOSED, nothing READY (all open rows BLOCKED on owner/host). La
 - **ETA / next_check_at:** about 40 minutes from resume; Monday, October 12, 2026 — 1:10 PM America/Chicago.
 - **Blocker / Michael:** NONE / NOTHING.
 - **Canonical log:** `docs/receipts/2026-10-12-supervisor-visible-check-1228.md`.
+
+
+## Current checkpoint — Monday, October 12, 2026 — 12:43 PM America/Chicago
+- **Boundary result:** F-157 is NEED / NOT ACCEPTED. Clean `498fcb3` review passed focused 17/0; full suite 571/3, where f39 is known and f140/f145 reproduce on loaded baseline `a0ee240`. Real Wilson cache exposed three commercial-property auctions incorrectly retained as equipment.
+- **Current bounded task:** F-158 launch/ACK verification through existing Agent 01 and lane 06 only.
+- **Exact stage:** READY / DISPATCH REPORTED, ACK UNVERIFIED. PR comment `6129442998` was created at 12:40:05 PM CDT but says launch occurred at 12:55 PM; its cited `fac3437` commit proves only the READY queue row. Lane 06 branch remains on F-157 status `d44b7f9`. Do not duplicate.
+- **Tested / loaded / browser:** tested `498fcb3`; loaded `a0ee24051fb06dcab8f04306bcb7da54504c5ece`, exported 2026-10-12T17:22:00Z. F-157/F-158 NOT LOADED; Claude Chrome desktop/mobile acceptance MISSING.
+- **Host:** current worker/dispatcher observation UNKNOWN. **APPEARS STALE — HOST STATE UNVERIFIED.**
+- **ETA / next_check_at:** ETA UNKNOWN until valid ACK; Monday, October 12, 2026 — 12:45 PM America/Chicago.
+- **Blocker:** internally impossible launch timestamp and no worker provenance beyond a READY commit.
+- **Canonical log:** `docs/receipts/2026-10-12-supervisor-visible-check-1243.md`.
