@@ -8,6 +8,9 @@ Trust (reused from B-06): From domain must be the origin's AND `Authentication-R
 Output record (provenance = the e-mail's Message-ID; amounts are OWNER-LOCAL, never for sharing):
   {source, listing_id, title, url, event, amount?, closes_at?, observed_at, provenance, visibility, origin}
 event: bid_placed | outbid | winning | won | lost | closed.
+Registration confirmations ("you are registered") are NOT bids: `parse_registration` / `read_registrations` yield a
+separate `registered` record {source, auction_id, title, auctioneer?, url, closes_at?, observed_at, provenance, kind,
+visibility, origin}; `read_bid_events` never returns one. HiBid catalog pages only (/catalog/<id>); nothing is fetched.
 UNKNOWN: real notification wording; the keyword rules are generic and fixtures are synthetic. Re-record on the first
 real notification.
 """
@@ -51,6 +54,13 @@ _AMOUNT = re.compile(r"(?:your bid|bid amount|winning bid|high bid|final bid|cur
                      r"([0-9][0-9,]*(?:\.[0-9]{2})?)", re.I)
 _CLOSES = re.compile(r"(?:ends|closes|closing|end date)\s*:?\s*(20[0-9]{2}-[0-9]{2}-[0-9]{2})"
                      r"(?:[ T]([0-9]{2}:[0-9]{2})(?::[0-9]{2})?\s?(Z|[+-][0-9]{2}:?[0-9]{2}))?", re.I)
+
+
+# A registration confirmation: an explicit statement, not the bare word "registered" (newsletters say that).
+_REGISTERED = re.compile(r"you(?:'| a)re (?:now )?registered|you have (?:been |successfully )?registered|"
+                         r"registration (?:is |has been )?(?:approved|confirmed|complete)|thank you for registering", re.I)
+_CATALOG = re.compile(r"/catalog/([0-9]+)")
+_AUCTIONEER = re.compile(r"(?:auctioneer|registered with)\s*:?\s*([A-Z][A-Za-z0-9&'.,\- ]{2,80}?)(?=\s*(?:&middot;|[·|<])|\s+(?:Closes|Ends)\b|\s*$)", re.I)
 
 
 def classify_event(subject: str, text: str) -> str | None:
@@ -149,4 +159,67 @@ def read_bid_events(reader: MailboxReader, *, lookback_days: int = 30,
             continue
         for r in recs:
             records.setdefault((r["provenance"]["message_id"], r["listing_id"]), r)
+    return list(records.values()), rejected
+
+
+def parse_registration(source_bytes: bytes, observed_at: datetime) -> dict:
+    """One `registered` record. Raises NormalizationError unless a DKIM-verified registration confirmation
+    (never a bid notification) with a catalog link on the platform's domain."""
+    msg = email.message_from_bytes(source_bytes, policy=email.policy.default)
+    sender = parseaddr(str(msg.get("From", "")))[1].lower()
+    origin = BID_ORIGINS["hibid"]
+    if sender.rsplit("@", 1)[-1] != origin.domain and not sender.endswith("." + origin.domain):
+        raise NormalizationError("sender is not a supported auction platform")
+    if not _authenticated(msg, origin.domain):
+        raise NormalizationError("notification not DKIM-authenticated for its domain (possible spoof); rejected")
+    mid = clean_text(str(msg.get("Message-ID", "")), 200)
+    if not mid:
+        raise NormalizationError("no Message-ID: provenance impossible")
+    part = msg.get_body(preferencelist=("html", "plain"))
+    body = part.get_content() if part else ""
+    if part is not None and part.get_content_type() == "text/plain":
+        links, text = [(u, "", "") for u in re.findall(r"https://[^\s<>\"]+", body)], body
+    else:
+        p = _Anchors()
+        p.feed(body)
+        links = [tuple(x) for x in p.links]
+        text = re.sub(r"<[^>]+>", " ", body)
+    subject = clean_text(str(msg.get("Subject", "")), 200)
+    plain = clean_text(text, 4000)
+    if classify_event(subject, plain) is not None:
+        raise NormalizationError("bid notification, not a registration")
+    if not (_REGISTERED.search(subject) or _REGISTERED.search(plain)):
+        raise NormalizationError("not a registration confirmation")
+    for href, atext, tail in links:
+        u = urlsplit(href or "")
+        host = (u.hostname or "").lower()
+        m = _CATALOG.search(u.path)
+        title = clean_text(atext, 300)
+        if u.scheme != "https" or not (host == origin.domain or host.endswith("." + origin.domain)) or not m or not title:
+            continue
+        rec = {"kind": "registered", "source": origin.source, "auction_id": m.group(1), "title": title,
+               "url": f"https://{host}{u.path}"}
+        if (a := _AUCTIONEER.search(plain)):
+            rec["auctioneer"] = clean_text(a.group(1), 120)
+        if (c := _closes_at(plain)):
+            rec["closes_at"] = c
+        rec.update(observed_at=observed_at.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                   provenance={"kind": "email", "message_id": mid}, visibility="owner_local", origin="auto_detected")
+        return rec
+    raise NormalizationError("no catalog link on the platform's domain")
+
+
+def read_registrations(reader: MailboxReader, *, lookback_days: int = 30,
+                       clock: Callable[[], datetime] = lambda: datetime.now(timezone.utc)) -> tuple[list[dict], list[dict]]:
+    """(registered records, rejected). Same read-only readers; idempotent per (Message-ID, auction)."""
+    now = clock()
+    records: dict[tuple[str, str], dict] = {}
+    rejected: list[dict] = []
+    for raw in reader.messages(now - timedelta(days=lookback_days)):
+        try:
+            r = parse_registration(raw, now)
+        except NormalizationError as e:
+            rejected.append({"reason": str(e)})
+            continue
+        records.setdefault((r["provenance"]["message_id"], r["auction_id"]), r)
     return list(records.values()), rejected

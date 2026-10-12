@@ -95,3 +95,30 @@ def test_classifier_negatives_and_open_vs_closed_winning():
     assert classify_event("Congratulations", "Congratulations, you won lot 5.") == "won"
     assert _closes_at("Ends: 2026-10-14") is None
     assert _closes_at("Ends: 2026-10-14 15:00 -05:00") == "2026-10-14T20:00:00Z"
+
+
+# ---- B-35: registration confirmations are `registered` records, never bid events
+def test_registration_email_yields_registered_record_only(tmp_path):
+    from mbos_discovery.bid_events import read_registrations
+    reg = FIX / "registration_mail"
+    recs, rej = read_registrations(EmlDirReader(reg), clock=lambda: NOW)
+    assert len(recs) == 1 and len(rej) == 2
+    r = recs[0]
+    assert (r["kind"], r["source"], r["auction_id"]) == ("registered", "hibid", "445566")
+    assert r["title"] == "Synthetic Farm & Shop Auction" and r["auctioneer"] == "Example Auction Co"
+    assert r["url"] == "https://hibid.com/catalog/445566/synthetic-farm-shop-auction"
+    assert r["closes_at"] == "2026-10-24T23:00:00Z" and r["observed_at"] == "2026-10-11T20:00:00Z"
+    assert r["provenance"] == {"kind": "email", "message_id": "<syn-reg-1@hibid.com>"}
+    assert any("DKIM" in x["reason"] for x in rej)               # spoof rejected
+    bids, _ = read_bid_events(EmlDirReader(reg), clock=lambda: NOW)
+    assert bids == []                                            # never a bid event
+
+
+def test_bid_email_yields_no_registration_and_newsletter_nothing():
+    from mbos_discovery.bid_events import read_registrations
+    recs, _ = read_registrations(EmlDirReader(DIR), clock=lambda: NOW)
+    assert recs == []
+    bids, _ = _all()
+    assert len(bids) == 9 and all(b["event"] in EVENTS for b in bids)
+    recs, rej = read_registrations(EmlDirReader(FIX / "registration_mail"), clock=lambda: NOW)
+    assert not any(r["auction_id"] == "77" for r in recs)

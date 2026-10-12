@@ -1,0 +1,10 @@
+From: HiBid <noreply@hibid.com>
+To: owner@example.invalid
+Subject: You are registered for X
+Date: Sun, 11 Oct 2026 09:00:00 -0500
+Message-ID: <syn-reg-2@hibid.com>
+Authentication-Results: mx.example.invalid; dkim=fail header.d=hibid.com; spf=pass
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body><p>You are registered.</p><a href="https://hibid.com/catalog/1/x">X</a></body></html>

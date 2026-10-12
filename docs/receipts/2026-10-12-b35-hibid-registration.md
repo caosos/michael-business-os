@@ -1,0 +1,6 @@
+# Receipt B-35: HiBid registration confirmations are `registered` records, not bids
+
+- **Action (DRY-RUN, offline):** `bid_events.py` gains `parse_registration` / `read_registrations` over the same read-only readers (EXAMINE, BODY.PEEK). A DKIM-verified hibid.com message with an explicit confirmation phrase ('you are registered', 'registration approved/confirmed', 'thank you for registering') and a `/catalog/<id>` link yields `{kind: registered, source, auction_id, title, auctioneer?, url, closes_at?, observed_at, provenance Message-ID, visibility owner_local}`. A message that also classifies as a bid event is refused here; `read_bid_events` never returns a registration. No HiBid fetch, no new connector.
+- **Fixtures:** synthetic, scrubbed (`tests/fixtures/registration_mail/`: registration, DKIM-fail spoof, newsletter saying 'registered bidders'). UNKNOWN: real wording; the owner's real T.J. Bruck confirmation is not in the repo. When supplied, scrub and add it, then re-check the phrases and the auctioneer/closes extraction.
+- **Provenance:** the e-mail Message-ID; closes_at only with an explicit UTC offset (date-only stays absent).
+- **Results:** `.venv/bin/python -m pytest -q`: 414 passed, 0 failed (412 before, 2 new tests).
