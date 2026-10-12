@@ -214,3 +214,13 @@ This section is part of the existing living checklist and is the authoritative r
 - Acceptance requires focused tests plus firsthand Agent 01 Claude Chrome interaction on the actually loaded desktop and mobile page.
 - Authoritative queue ID: **F-157**. The existing **F-156** remains the B-34 Sources-panel task; this non-colliding ID corrects the earlier local naming conflict.
 
+
+
+## Supervisor reconciliation — Monday, October 12, 2026 — 3:40 AM America/Chicago
+
+- **B-35 worker result recovered:** watchdog event `95648594e36113d5 #26` reported no process/no DONE at 3:38 AM, but lane 02 already contained implementation commit `94668801e77320d61f73be9e1e6f09c4d34d25b4`, receipt `docs/receipts/2026-10-12-b35-hibid-registration.md`, and a worker status naming 414 passed / 0 failed. Treat the watchdog NEED as a reporting/reconciliation miss; do not re-dispatch.
+- **B-35 exact state:** WORKER_DONE / AWAITING AGENT 01 ACCEPTANCE. Synthetic registration, spoof, newsletter, and bid-vs-registration coverage exists. Genuine owner HiBid mail, coordinator integration tests, loaded UI, My Bids/registered-auction presentation, and Claude Chrome desktop/mobile acceptance remain unproven.
+- **F-156 exact state:** WORKING. Existing lane 06 dispatcher process was observed alive at 3:38 AM; original estimate elapsed; revised `next_check_at` is Monday, October 12, 2026 — 4:08 AM America/Chicago; blocker NONE. No implementation commit, test result, or browser evidence has been delivered yet.
+- **Loaded state:** `bbc80ec851b75aec52af1f8b0838dd56ccc714ef`; F-154/F-155/B-35/F-156 remain not proven loaded.
+- **Next action:** existing Agent 01 reviews and integrates B-35 while the already-running F-156 worker continues. F-157 remains READY and must not overlap lane 06 before F-156 closes.
+- **Michael:** NOTHING.
