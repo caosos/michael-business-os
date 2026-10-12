@@ -47,7 +47,7 @@ def test_owner_resale_wins(monkeypatch):
     r = run([lot("a", bid=40)], {"a": 1500})["ranked"][0]
     assert r["owner_target"] == 1500 and r["numbers"]["resale_likely"] == 1500
     h = ms.render_ranked(r)
-    assert "owner target $1,500" in h and "OWNER-SET" in h and "overrides the engine" in h
+    assert "$1,500 your resale price (owner-set, not a sold comp)" in h and "OWNER-SET" in h
 
 
 def test_events_excluded_and_unknown_heavy_go_to_research():
@@ -62,7 +62,7 @@ def test_everything_labelled_and_escaped(monkeypatch):
     monkeypatch.setenv("MBOS_SUGGEST_REPAIR_MAX", "1000")
     h = ms.render(run([lot("a", "Trailer <script>x</script>", bid=40)], {"a": 1500}))
     assert "<script>" not in h and "ESTIMATE" in h and "ENGINE" in h and "straight-line" in h
-    assert "Display only" in h and "<form" not in h and "<button" not in h      # no bid, contact or spend control
+    assert "Display only" in h and "/market/bid" not in h      # only the local resale-price form; no bid, contact or spend control
 
 
 def test_pallet_rows_labelled_not_ranked():
@@ -72,3 +72,26 @@ def test_pallet_rows_labelled_not_ranked():
     for w in ("Pallet price", "Testing / sort burden", "Expected recovery", "Sell-through speed", "Storage / handling", "Downside"):
         assert w in h
     assert h.count("not estimated") >= 5 and "40 stated in the title" in h
+
+
+def test_resale_form_save_and_clear(tmp_path, monkeypatch):
+    monkeypatch.setenv("MBOS_MARKET_PREFS_FILE", str(tmp_path / "p.json"))
+    from operator_ui import market_prefs as mp
+    assert "saved on this computer only" in ms.act_resale({"lot": "a", "resale": "$1,500"})
+    assert mp.load()["resale_targets"] == {"a": 1500.0}
+    assert "cleared" in ms.act_resale({"lot": "a", "resale": ""})
+    assert mp.load()["resale_targets"] == {}
+    for bad in ("abc", "0", "-5", "nan"):
+        try:
+            ms.act_resale({"lot": "a", "resale": bad})
+        except ValueError:
+            continue
+        raise AssertionError(bad)
+
+
+def test_panel_has_resale_form_on_research_and_ranked(monkeypatch):
+    monkeypatch.setenv("MBOS_SUGGEST_REPAIR_MAX", "1000")
+    tok = lambda: "<input type='hidden' name='csrf' value='T'>"  # noqa: E731
+    h = ms.render(run([lot("a", bid=40), lot("b", bid=40)], {"a": 1500}), tok)
+    assert h.count("action='/market/resale'") == 2 and "name='csrf'" in h
+    assert "your resale price (owner-set, not a sold comp)" in h

@@ -102,7 +102,7 @@ def score_lot(c: dict, owner_target: float | None, asof: str) -> dict:
     d, econ = card["derived"], it["economics"]
     ceiling, ceil_basis = card.get("walk_away_price"), "engine walk-away (YES level)"
     if ceiling is None:                  # YES needs more sold comps than an owner target gives; use the engine's own bisect for the highest bid it does not call PASS
-        from mbos_economics.engine import _bisect_int, _with, compute
+        from mbos_economics.engine import _bisect_int, _with, compute   # PRIVATE engine functions: no public max-bid-below-PASS API exists yet (lane 03 to expose one)
         from mbos_economics.inputs import build_engine_input
         inp = build_engine_input(it)
         ceiling = _bisect_int(0, int(owner_target), lambda a: compute(_with(inp, lambda e: e["acquisition"].__setitem__("expected_buy_price", a)), cfg)["decision"] != "PASS", want_max=True)
@@ -177,11 +177,44 @@ def _tag(basis: str) -> str:
     return f" <span class='tag'>{e(basis)}</span>"
 
 
-def render_ranked(r: dict) -> str:
+def act_resale(f: dict) -> str:
+    """Owner-set resale price for one lot, kept in the local market prefs (`resale_targets`). Empty value clears it. Nothing is sent."""
+    from . import market_prefs as mp
+    lot = re.sub(r"[^A-Za-z0-9._:-]", "", f.get("lot") or "")[:200]
+    if not lot:
+        raise ValueError("no lot given")
+    raw = str(f.get("resale") or "").strip().lstrip("$").replace(",", "")
+    d = mp.load()
+    t = d.get("resale_targets") if isinstance(d.get("resale_targets"), dict) else {}
+    if not raw:
+        t.pop(lot, None)
+        msg = "Your resale price was cleared."
+    else:
+        try:
+            v = float(raw)
+        except ValueError:
+            raise ValueError("resale price must be a plain number") from None
+        if not 0 < v < 10**7 or v != v:
+            raise ValueError("resale price must be more than 0 and under 10,000,000")
+        t[lot] = v
+        msg = "Resale price saved on this computer only (owner-set, not a sold comp). The lot is now scored with it."
+    d["resale_targets"] = t
+    mp._store(d)
+    return msg
+
+
+def resale_form(c: dict, tgt, tok) -> str:
+    cur = "" if tgt is None else f"{tgt:g}"
+    return (f"<form method='post' action='/market/resale' style='display:inline'>{tok()}<input type='hidden' name='lot' value='{e(c['id'])}'>"
+            f"<label class='small'>My resale price $ <input name='resale' size='6' inputmode='decimal' value='{e(cur)}' placeholder='e.g. 120' aria-label='My resale price in dollars'></label>"
+            "<button>Save</button></form>")
+
+
+def render_ranked(r: dict, tok=lambda: "") -> str:
     c, x = r["card"], r["numbers"]
     days = "UNKNOWN" if x["days"] is None else f"{x['days']:g} days"
     tgt = r["owner_target"]
-    resale = (f"owner target {_m(tgt)}{_tag('OWNER-SET')} (overrides the engine)" if tgt is not None else "")
+    resale = (f"{_m(tgt)} your resale price (owner-set, not a sold comp){_tag('OWNER-SET')}" if tgt is not None else "")
     rng = f"low {_m(x['resale_low'])} / likely {_m(x['resale_likely'])} / optimistic {_m(x['resale_high'])}"
     link = f" <a href='{e(c['url'])}' rel='noopener noreferrer' target='_blank'>Original listing</a>" if c.get("url") else ""
     dist = f"{c['distance']:.0f} mi{_tag('ESTIMATE: straight-line, from the cached location')}" if c.get("distance") is not None else "distance UNKNOWN"
@@ -194,6 +227,7 @@ def render_ranked(r: dict) -> str:
             f"<tr><th>Net profit if it goes as planned</th><td>{_m(x['net'])}{_tag('ESTIMATE')} (probability-weighted {_m(x['ev_net'])})</td></tr>"
             f"<tr><th>Time to cash</th><td>{days}{_tag('ESTIMATE')}</td></tr>"
             f"<tr><th>Distance</th><td>{dist}</td></tr>"
+            f"<tr><th>My resale price</th><td>{resale_form(c, tgt, tok)}</td></tr>"
             f"<tr><th>Why</th><td>{e('; '.join(x['reasons']) or 'engine verdict ' + str(x['verdict']))}</td></tr></table>"
             + (f"<p class='small mut'>Inputs the engine assumed: {e('; '.join(str(a.get('field', '')) + ' (' + str(a.get('basis', '')) + ')' for a in x['assumed']))}</p>" if x["assumed"] else "")
             + "</li>")
@@ -209,18 +243,18 @@ def render_pallet(c: dict) -> str:
             + "</table><p class='small mut'>The engine has no pallet model, so none of these are estimated here. Not ranked.</p></li>")
 
 
-def render(s: dict) -> str:
+def render(s: dict, tok=lambda: "") -> str:
     """The panel. Display only."""
     top = (f"<h2>DealSniffer Suggestions</h2><p class='small mut'>Ranked by the economics engine's capital velocity. Rules applied: about {_capl(s['cap'])} per purchase, "
            f"repair allowance up to ${s['repair_max']:,.0f}, your own resale target overrides the engine's. Display only: nothing here bids, contacts or spends.</p>")
-    body = ("<ol class='sg-list'>" + "".join(render_ranked(r) for r in s["ranked"]) + "</ol>") if s["ranked"] else \
+    body = ("<ol class='sg-list'>" + "".join(render_ranked(r, tok) for r in s["ranked"]) + "</ol>") if s["ranked"] else \
         "<p class='mut' id='sg-none'>No listing passes the engine and your rules right now. Nothing is ranked on a guess.</p>"
     if s["research"]:
         body += (f"<details class='mk-sec' id='sg-research'><summary><b>Needs research ({len(s['research'])}): too many unknowns to rank</b></summary><ul>"
-                 + "".join(f"<li>{e(r['card']['title'])}: <span class='unk'>UNKNOWN: {e('; '.join(r['unknown']))}</span></li>" for r in s["research"][:25]) + "</ul></details>")
+                 + "".join(f"<li>{e(r['card']['title'])}: <span class='unk'>UNKNOWN: {e('; '.join(r['unknown']))}</span> {resale_form(r['card'], r['owner_target'], tok)}</li>" for r in s["research"][:25]) + "</ul></details>")
     if s["outside"]:
         body += (f"<details class='mk-sec' id='sg-outside'><summary><b>Scored but outside your rules ({len(s['outside'])})</b></summary><ul>"
-                 + "".join(f"<li>{e(r['card']['title'])}: {e('; '.join(r['why_not']))}</li>" for r in s["outside"][:25]) + f"<li class='small mut'>Per-purchase cap: {_capl(s['cap'])}</li>" + "</ul></details>")
+                 + "".join(f"<li>{e(r['card']['title'])}: {e('; '.join(r['why_not']))} {resale_form(r['card'], r['owner_target'], tok)}</li>" for r in s["outside"][:25]) + f"<li class='small mut'>Per-purchase cap: {_capl(s['cap'])}</li>" + "</ul></details>")
     if s["pallets"]:
         body += (f"<details class='mk-sec' id='sg-pallets'><summary><b>Pallet / wholesale ({len(s['pallets'])}): not ranked</b></summary><ul>"
                  + "".join(render_pallet(c) for c in s["pallets"][:10]) + "</ul></details>")

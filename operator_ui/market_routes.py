@@ -95,7 +95,7 @@ def page_body(app, qs: dict, now, errors=None, values=None) -> str:
         finds = fv.section(fr, fu, *fr_rest, tok, mv.pref_buttons)
     tok = lambda: f"<input type='hidden' name='csrf' value='{app.csrf}'><input type='hidden' name='nonce' value='{__import__('secrets').token_hex(8)}'>"  # noqa: E731
     mine = mb.window(prefs, data["cards"] if ran else [], now, tok, (auto, auto_note)) + (f"<p class='small mut' id='bids-count'>{b1 + b2} in My bids (left out of the results below)</p>" if b1 + b2 else "")
-    sug = msug.render(msug.suggest(results + unchecked, prefs)) if ran and results + unchecked and not q["errors"] and data["status"] == "connected" else ""   # F-155: engine-ranked panel, display only
+    sug = msug.render(msug.suggest(results + unchecked, prefs), tok) if ran and results + unchecked and not q["errors"] and data["status"] == "connected" else ""   # F-155: engine-ranked panel, display only
     return note + mv.render_page(q, data, results, hidden, saved, app.csrf, bool(app.operator_pin), edit if edit in ids else None, ran, errors, unchecked, prefs, finds, mine, sug)
 
 
@@ -108,6 +108,9 @@ def post(app, parts: list[str], f: dict) -> tuple[str | None, list[str] | None]:
         elif parts == ["market", "bid"]:
             app._check_csrf(f)                       # owner-reported bid tracking in the local prefs file: CSRF only, nothing is placed, fetched or sent
             msg = mb.act(f.get("act", ""), f, __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(timespec="seconds"))
+        elif parts == ["market", "resale"]:
+            app._check_csrf(f)                       # F-155: owner-set resale price in the local prefs file: CSRF only, nothing is sent or spent
+            msg = msug.act_resale(f)
         elif parts == ["market", "find"]:
             app._check_csrf(f)                       # owner-entered text kept in a local file: CSRF only, nothing is fetched, sent or spent
             msg = mf.act(f.get("act", ""), f)
