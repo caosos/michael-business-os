@@ -9,9 +9,21 @@
       },
       "access_mode": "api",
       "status": "connected",
-      "policy_ref": "https://gsaauctions.gov/",
+      "policy_ref": "docs/receipts/2026-10-09-gsa-api-smoke.md",
       "terms_checked_at": null,
-      "note": "Connected adapter; terms date not recorded (UNK)."
+      "note": "Connected adapter; terms date not recorded (UNK). Terms page: https://gsaauctions.gov/"
+    },
+    {
+      "source_id": "trashnothing",
+      "display_name": "Trash Nothing",
+      "coverage": {
+        "scope": "national"
+      },
+      "access_mode": "api",
+      "status": "not_connected",
+      "policy_ref": "https://trashnothing.com/terms",
+      "terms_checked_at": null,
+      "note": "Trash Nothing terms: personal-use clause pending written confirmation; do not connect until confirmed."
     },
     {
       "source_id": "ebay",
@@ -146,19 +158,64 @@
       "note": "Official saved-search alert e-mail only; no scraping (B12 ruling)."
     },
     {
-      "source_id": "ar_local_auction_houses",
-      "display_name": "Arkansas local auction houses",
+      "source_id": "ar_state_surplus",
+      "display_name": "Arkansas state surplus",
       "coverage": {
         "scope": "states",
         "states": [
           "AR"
         ]
       },
-      "access_mode": "manual",
+      "access_mode": "alert_email",
       "status": "not_connected",
       "policy_ref": "docs/handoff/B12_CRAIGSLIST_FACEBOOK_SOURCE_STATUS.md",
+      "terms_checked_at": null,
+      "note": "Owner/user alert e-mail only; not connected."
+    },
+    {
+      "source_id": "wooley_auctioneers",
+      "display_name": "Wooley Auctioneers",
+      "coverage": {
+        "scope": "states",
+        "states": [
+          "AR"
+        ]
+      },
+      "access_mode": "site_feed",
+      "status": "connected",
+      "policy_ref": "docs/receipts/2026-10-12-b26-wooley-source-verification.md",
       "terms_checked_at": "2026-10-12",
-      "note": "Placeholder for individually registered houses; owner relays or alerts only."
+      "note": "Auction EVENTS only from the auctioneer's own site pages; robots/crawl-delay respected; no lots. Receipt B-26."
+    },
+    {
+      "source_id": "wilson_auctioneers",
+      "display_name": "Wilson Auctioneers",
+      "coverage": {
+        "scope": "states",
+        "states": [
+          "AR"
+        ]
+      },
+      "access_mode": "site_feed",
+      "status": "connected",
+      "policy_ref": "docs/receipts/b28-live-smoke/live-smoke.json",
+      "terms_checked_at": "2026-10-12",
+      "note": "Auction EVENTS only from the auctioneer's own site pages; robots/crawl-delay respected; no lots. Receipt B-28."
+    },
+    {
+      "source_id": "blackmon_auctions",
+      "display_name": "Blackmon Auctions",
+      "coverage": {
+        "scope": "states",
+        "states": [
+          "AR"
+        ]
+      },
+      "access_mode": "site_feed",
+      "status": "connected",
+      "policy_ref": "docs/receipts/b29-live-smoke/live-smoke.json",
+      "terms_checked_at": "2026-10-12",
+      "note": "Auction EVENTS only from the auctioneer's own site pages; robots/crawl-delay respected; no lots. Receipt B-29."
     },
     {
       "source_id": "fb_marketplace",

@@ -132,8 +132,10 @@
             "api",
             "alert_email",
             "manual",
-            "excluded"
-          ]
+            "excluded",
+            "site_feed"
+          ],
+          "description": "site_feed: the publisher's own pages, robots/crawl-delay respected, auction EVENTS only, no lots."
         },
         "status": {
           "enum": [

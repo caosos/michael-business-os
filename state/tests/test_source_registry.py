@@ -24,7 +24,15 @@ def test_config_validates_and_every_row_has_policy_ref():
     assert cl and all(r["coverage"]["scope"] == "metro" and r["coverage"]["subdomain"] and r["access_mode"] == "alert_email" for r in cl)
     assert all(by[s]["access_mode"] == "alert_email" for s in ("govdeals", "publicsurplus", "auctionzip"))
     assert all(by[s]["status"] == "blocked" and by[s]["access_mode"] == "manual" for s in ("fb_marketplace", "offerup"))
-    assert by["ar_local_auction_houses"]["coverage"]["states"] == ["AR"]
+    assert "ar_local_auction_houses" not in by
+    for s in ("wooley_auctioneers", "wilson_auctioneers", "blackmon_auctions"):
+        assert by[s]["coverage"] == {"scope": "states", "states": ["AR"]}
+        assert by[s]["access_mode"] == "site_feed" and by[s]["status"] == "connected"
+    assert by["trashnothing"]["status"] == "not_connected" and by["trashnothing"]["access_mode"] == "api"
+    assert by["ar_state_surplus"]["access_mode"] == "alert_email" and by["ar_state_surplus"]["status"] == "not_connected"
+    assert by["ar_state_surplus"]["coverage"]["states"] == ["AR"]
+    # nothing claims connected without a receipt policy_ref
+    assert all(r["policy_ref"].startswith("docs/receipts/") for r in rows if r["status"] == "connected")
     schema = json.loads((sources.CONFIG_DIR / "sources.schema.json").read_text())
     bad = {"version": "1.0.0", "sources": [{**rows[0], "policy_ref": ""}]}
     with pytest.raises(jsonschema.ValidationError):
