@@ -11,3 +11,9 @@
   - Possible route needing owner/legal judgement, NOT claimed: HiBid's own e-mail notifications to Michael's bidder account (watch list, followed auctioneer) delivered to the DealSniffer/Alerts label and parsed like B-12. Their terms limit extracting reports "other than records relating to your auction or bid history", so I am not treating this as permitted.
 - Ordered source queue recorded (not started): HiBid Conway/Central AR houses (same HiBid restriction applies), Wilson Auctioneers (check their own site), Blackmon Auctions, AuctionZip Arkansas index, Craigslist (written license), Facebook (Meta written permission).
 - Cost UNKNOWN. Live still 315ddfa; F-145+F-144 release NEED (179bd62) unchanged.
+
+## UPDATE 2026-10-12T00:02:44Z — real Wooley source live-verified (event level); Marketplace wiring dispatched
+- B-26 DONE at auction-event level: lane 02 5c1aaa5 (review fixes 2f81a7e: removed a personal e-mail from the User-Agent; no fabricated premium/condition/price type). Tests 18/0 focused, 355/0 lane.
+- ONE live smoke 00:01:29-00:01:50Z: 3 requests to wooleyauctioneers.com, 0 to hibid.com, 2 real events: T.J. Bruck Estate (Perryville AR 72126, 21.2 mi from Conway, closes 2026-10-13 6:00 PM CDT, buyer premium 10%) and S&H Systems Phase II (Jonesboro, 110.8 mi, closes 2026-10-21 2:00 PM Central). Receipt: docs/receipts/2026-10-12-b26-wooley-source-verification.md.
+- WORKING: F-146 (lane 06) wires these real events into /market from a cache written only by an explicit refresh; then I verify in Claude in Chrome (desktop + mobile).
+- Lot 34 / bids: NEED unchanged (Wooley feed or HiBid written permission).

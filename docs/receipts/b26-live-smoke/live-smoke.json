@@ -1,0 +1,286 @@
+{
+ "started_utc": "2026-10-12T00:01:29+00:00",
+ "finished_utc": "2026-10-12T00:01:50+00:00",
+ "user_agent": "DealSnifferBot/1.0 (read-only; auction events only)",
+ "error": null,
+ "requests_made": 3,
+ "request_log": [
+  {
+   "method": "GET",
+   "url": "https://wooleyauctioneers.com/auctions/"
+  },
+  {
+   "method": "GET",
+   "url": "https://wooleyauctioneers.com/t-j-bruck-estate-heavy-equipment-machinery-auction-perryville-arkansas/"
+  },
+  {
+   "method": "GET",
+   "url": "https://wooleyauctioneers.com/sh-systems-inc-chapter-7-bankruptcy-asset-liquidation-phase-ii-jonesboro-ar/"
+  }
+ ],
+ "any_hibid_request": false,
+ "summary": {
+  "as_of": "2026-10-12T00:01:29Z",
+  "live": true,
+  "events": 2,
+  "requests": 3,
+  "detail_errors": {}
+ },
+ "ids": [
+  "t-j-bruck-estate-heavy-equipment-machinery-auction-perryville-arkansas",
+  "sh-systems-inc-chapter-7-bankruptcy-asset-liquidation-phase-ii-jonesboro-ar"
+ ],
+ "duplicate_ids": false,
+ "records": [
+  {
+   "source_listing_id": "t-j-bruck-estate-heavy-equipment-machinery-auction-perryville-arkansas",
+   "url": "https://wooleyauctioneers.com/t-j-bruck-estate-heavy-equipment-machinery-auction-perryville-arkansas/",
+   "normalized": {
+    "title": "T.J. Bruck Estate Heavy Equipment & Machinery Auction | Perryville, Arkansas",
+    "condition": "unknown",
+    "price": {
+     "currency": "USD",
+     "buyer_premium_pct": 10.0
+    },
+    "counterparty": {
+     "role": "auction_house",
+     "name": "Wooley Auctioneers"
+    },
+    "listing_status": "active",
+    "images": [],
+    "description": "Heavy Equipment \u2022 Tractors \u2022 Farm & Hay Equipment \u2022 Machine Tools \u2022 Metalworking & Fabrication Equipment \u2022 Blacksmithing & Knife-Making Equipment \u2022 Vehicles \u2022 Trailers \u2022 Tools",
+    "ends_at": "2026-10-13T23:00:00Z",
+    "location": {
+     "city": "Perryville",
+     "state": "AR",
+     "zip": "72126",
+     "geo_tier": 0
+    },
+    "flags": [
+     "needs_review"
+    ]
+   },
+   "fields": {
+    "title": {
+     "value": "T.J. Bruck Estate Heavy Equipment & Machinery Auction | Perryville, Arkansas",
+     "basis": "FACT"
+    },
+    "auctioneer": {
+     "value": "Wooley Auctioneers",
+     "basis": "FACT"
+    },
+    "sale_type": {
+     "value": "ONLINE BIDDING ONLY",
+     "basis": "FACT"
+    },
+    "begins_at": {
+     "value": "2026-10-01T10:00:00-05:00",
+     "basis": "FACT"
+    },
+    "closes_at": {
+     "value": "2026-10-13T18:00:00-05:00",
+     "basis": "FACT"
+    },
+    "buyer_premium_pct": {
+     "value": 10.0,
+     "basis": "FACT"
+    },
+    "sales_tax_pct": {
+     "value": "UNKNOWN",
+     "basis": "UNKNOWN"
+    },
+    "pickup": {
+     "value": "UNKNOWN",
+     "basis": "UNKNOWN"
+    },
+    "preview": {
+     "value": "Monday, October 12 from 10:00 a.m. \u2013 2:00 p.m.",
+     "basis": "FACT"
+    },
+    "address": {
+     "value": "4 Wagon Track Road Perryville, Arkansas 72126",
+     "basis": "FACT"
+    },
+    "location": {
+     "value": {
+      "city": "Perryville",
+      "state": "AR",
+      "zip": "72126"
+     },
+     "basis": "FACT"
+    },
+    "category_tags": {
+     "value": [
+      "Agricultural",
+      "Antiques",
+      "Engine",
+      "Equipment",
+      "Farming Equipment",
+      "Firearms",
+      "Industrial Equipment",
+      "RV",
+      "Shop Equipment",
+      "Truck",
+      "Truck Parts",
+      "Vehicle",
+      "Woodworking Machinery"
+     ],
+     "basis": "FACT"
+    },
+    "highlights": {
+     "value": "Heavy Equipment \u2022 Tractors \u2022 Farm & Hay Equipment \u2022 Machine Tools \u2022 Metalworking & Fabrication Equipment \u2022 Blacksmithing & Knife-Making Equipment \u2022 Vehicles \u2022 Trailers \u2022 Tools",
+     "basis": "FACT"
+    },
+    "rules_url": {
+     "value": "https://wooleyauctioneers.com/t-j-bruck-estate-heavy-equipment-machinery-auction-perryville-arkansas/",
+     "basis": "FACT"
+    },
+    "hibid_catalog_url": {
+     "value": "https://wooleyauctioneers.hibid.com/catalog/781761/t-j--bruck-estate-heavy-equipment-and-machinery-auction?force=True",
+     "basis": "FACT"
+    },
+    "category": {
+     "value": "trailer",
+     "basis": "INFERENCE"
+    },
+    "lot_number": {
+     "value": "UNKNOWN",
+     "basis": "UNKNOWN"
+    },
+    "current_bid": {
+     "value": "UNKNOWN",
+     "basis": "UNKNOWN"
+    },
+    "bid_count": {
+     "value": "UNKNOWN",
+     "basis": "UNKNOWN"
+    },
+    "lot_image": {
+     "value": "UNKNOWN",
+     "basis": "UNKNOWN"
+    }
+   },
+   "distance_miles": 21.2,
+   "detail_page": true
+  },
+  {
+   "source_listing_id": "sh-systems-inc-chapter-7-bankruptcy-asset-liquidation-phase-ii-jonesboro-ar",
+   "url": "https://wooleyauctioneers.com/sh-systems-inc-chapter-7-bankruptcy-asset-liquidation-phase-ii-jonesboro-ar/",
+   "normalized": {
+    "title": "S&H SYSTEMS, INC. \u2013 CHAPTER 7 BANKRUPTCY ASSET LIQUIDATION \u2013 PHASE II \u2013 JONESBORO, AR",
+    "condition": "unknown",
+    "price": {
+     "currency": "USD"
+    },
+    "counterparty": {
+     "role": "auction_house",
+     "name": "Wooley Auctioneers"
+    },
+    "listing_status": "active",
+    "images": [],
+    "ends_at": "2026-10-21T19:00:00Z",
+    "location": {
+     "city": "Jonesboro",
+     "state": "AR",
+     "geo_tier": 2
+    },
+    "flags": [
+     "needs_review"
+    ]
+   },
+   "fields": {
+    "title": {
+     "value": "S&H SYSTEMS, INC. \u2013 CHAPTER 7 BANKRUPTCY ASSET LIQUIDATION \u2013 PHASE II \u2013 JONESBORO, AR",
+     "basis": "FACT"
+    },
+    "auctioneer": {
+     "value": "Wooley Auctioneers",
+     "basis": "FACT"
+    },
+    "sale_type": {
+     "value": "ONLINE BIDDING ONLY",
+     "basis": "FACT"
+    },
+    "begins_at": {
+     "value": "2026-10-07T10:00:00-05:00",
+     "basis": "INFERENCE"
+    },
+    "closes_at": {
+     "value": "2026-10-21T14:00:00-05:00",
+     "basis": "INFERENCE"
+    },
+    "buyer_premium_pct": {
+     "value": "UNKNOWN",
+     "basis": "UNKNOWN"
+    },
+    "sales_tax_pct": {
+     "value": "UNKNOWN",
+     "basis": "UNKNOWN"
+    },
+    "pickup": {
+     "value": "UNKNOWN",
+     "basis": "UNKNOWN"
+    },
+    "preview": {
+     "value": "UNKNOWN",
+     "basis": "UNKNOWN"
+    },
+    "address": {
+     "value": "UNKNOWN",
+     "basis": "UNKNOWN"
+    },
+    "location": {
+     "value": {
+      "city": "Jonesboro",
+      "state": "AR"
+     },
+     "basis": "INFERENCE"
+    },
+    "category_tags": {
+     "value": [
+      "Bankruptcy",
+      "Equipment",
+      "Fixtures",
+      "Industrial Equipment",
+      "Shelving"
+     ],
+     "basis": "FACT"
+    },
+    "highlights": {
+     "value": "UNKNOWN",
+     "basis": "UNKNOWN"
+    },
+    "rules_url": {
+     "value": "https://wooleyauctioneers.com/sh-systems-inc-chapter-7-bankruptcy-asset-liquidation-phase-ii-jonesboro-ar/",
+     "basis": "FACT"
+    },
+    "hibid_catalog_url": {
+     "value": "https://wooleyauctioneers.hibid.com/catalog/784546/sandh-systems-chapter-7-bankruptcy-liquidatio---phase-2?force=True",
+     "basis": "FACT"
+    },
+    "category": {
+     "value": "other_asset",
+     "basis": "INFERENCE"
+    },
+    "lot_number": {
+     "value": "UNKNOWN",
+     "basis": "UNKNOWN"
+    },
+    "current_bid": {
+     "value": "UNKNOWN",
+     "basis": "UNKNOWN"
+    },
+    "bid_count": {
+     "value": "UNKNOWN",
+     "basis": "UNKNOWN"
+    },
+    "lot_image": {
+     "value": "UNKNOWN",
+     "basis": "UNKNOWN"
+    }
+   },
+   "distance_miles": 110.8,
+   "detail_page": true
+  }
+ ]
+}
