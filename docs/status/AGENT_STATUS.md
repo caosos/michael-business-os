@@ -4,7 +4,7 @@
 - **Role:** Chief Coordinator / Core Platform / Integration (Lane A)
 - **Branch:** `research/agent-01-coordinator`
 - **Worktree:** `/home/michaelos/business-os-worktrees/agent-01-coordinator`
-- **State:** F-146 STAGING_ACCEPTED at `6c2ac71` / NOT LOADED; current single bounded item is F-147 fix step READY at lane 06 status `568e2ca` after browser-found Wooley long-ID truncation bug. B-30 DONE; B-28 READY but not active. A-71 event transport PARTIAL/WORKING via PR #1; executable adoption remains missing. Current host/worker liveness UNKNOWN.
+- **State:** F-147 STAGING_ACCEPTED at `ba45957` / NOT LOADED. Current single bounded item: F-149 DELIVERED at lane 06 `0af3177` / status `fd7828a`, awaiting independent Agent 01 clean verification, isolated live refresh and Claude Chrome desktop/mobile acceptance. Five-minute ACK missed: APPEARS STALE — HOST STATE UNVERIFIED. B-12 Craigslist official-alert correction queued after F-149; B-31 Facebook remains blocked on a lawful readable route.
 - **Proposed:** (02) B-23 fixture adapter emits contract enum values (`ingestion_method` json/api, counterparty role `other`); then drop `auction_lot.conform`
 - **Done:** F-142 live verification + protocol adoption (this wave, see ack 2026-10-11-owner-project-operating-protocol); A-51 @ 12817e7; A-49 @ b2b3399; A-47 @ 6e6aa84; A-48 @ 8abbfa0; A-43 @ da6cf4a; A-44 @ 6440be3; A-42 @ 69402d9; A-41 @ 281cc74; A-40 @ 1160310; A-39 @ 6185927; A-38 @ 2198a74; A-37 @ b92683d
 - **Done (reboot persistence):** five user units enabled+active, Linger=yes; `docs/operations/REBOOT_RECOVERY.md`; cold start proven only by the next reboot
