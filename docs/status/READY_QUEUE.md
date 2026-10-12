@@ -510,3 +510,14 @@ Proposed by closed lanes and accepted here:
 - **Evidence:** `478bfc00006e4257f68cb93317b2f573f3b21d2f`, `87071031f0c73a753f8d0cb390e9e8b6196345c4`, PR comment 6131957899, and `docs/receipts/2026-10-12-supervisor-visible-check-1521.md`.
 - **Tested / loaded / browser:** tested `478bfc0`; loaded `a0ee24051fb06dcab8f04306bcb7da54504c5ece`; loaded Claude Chrome desktop/mobile evidence NONE.
 - **ETA / next_check_at:** authoritative ETA UNKNOWN; A-73 next_check_at MISSING. F-164 transport's Monday, October 12, 2026 — 4:10 PM America/Chicago is retained only as an unverified claim.
+
+
+## Supervisor reconciliation — Monday, October 12, 2026 — 4:21 PM America/Chicago
+- **ONE current bounded item:** A-73 existing-watchdog finished-artifact wake/completion-state repair; existing Agent 01; P0; **NEED — ACK MISSED**.
+- **Observed defect:** at 4:10:15 PM and 4:16:27 PM America/Chicago, the existing watchdog emitted false NEEDs for completed/superseded A-74, B-36, B-38, F-159 and D-37. Do not re-dispatch them.
+- **Acceptance:** exactly one deduplicated provenance-bearing wake; DONE/superseded items cannot emit missed-DONE NEED; ACK/WORKING within 300 seconds; no duplicate process/service.
+- **Next eligible preserved item:** F-165 detail-page fixes after serial reconciliation. F-164 is STAGING_ACCEPTED at `cb682ff`; F-160 is PARTIAL at `f6a399c`.
+- **Tested / loaded / browser:** search `cb682ff` (42 layout/browser pass; full 594/7 documented environment failures), detail `f6a399c` (reference 612/1 known; lane D+E 105/2 known); loaded `a0ee240`; loaded Claude Chrome proof NONE.
+- **ETA / next_check_at:** A-73 ETA UNKNOWN; next_check_at MISSING. F-165's 5:15 PM timestamp is transport-only and host-unverified.
+- **Blocker / next action:** stale watchdog completion state and missing current Agent 01/A-73 process provenance; Agent 01 must publish host-backed A-73 ACK/WORKING or exact NEED, reconcile the five false NEED states, then permit one serial dispatch.
+- **Canonical evidence:** `docs/receipts/2026-10-12-supervisor-visible-check-1621.md`.
