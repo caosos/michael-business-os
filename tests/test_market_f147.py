@@ -77,3 +77,24 @@ def test_csrf_required(ui):
     from tests.test_operator_ui import req
     st = req(ui, "POST", "/market/bid", {"act": "bid", "lot": "z", "title": "t"})[0]
     assert "z" not in mp.load()["bids"] and st in (200, 400, 403)
+
+
+LONG = "wooley:t-j-bruck-estate-heavy-equipment-machinery-auction-perryville-arkansas"
+
+
+def test_long_wooley_id_is_not_truncated_and_date_only_close_is_end_of_day_chicago(ui):
+    from datetime import datetime, timezone
+
+    from operator_ui import market_bids as mb
+    assert len(LONG) > 60
+    mark(ui, LONG, source="Wooley Auctioneers", closes="2026-10-14")
+    assert LONG in mp.load()["bids"]                                          # full id stored, not cut
+    d = mp.load()
+    cards = [{"id": LONG, "title": "t"}, {"id": "other", "title": "o"}]
+    assert [c["id"] for c in mb.exclude(cards, d)[0]] == ["other"]            # absent from results (both sections use exclude)
+    h = get(ui, new=1)
+    assert f"data-bid='{LONG}'" in h
+    post(ui, "/market/bid", act="unbid", lot=LONG)
+    assert LONG not in mp.load()["bids"] and len(mb.exclude(cards, mp.load())[0]) == 2   # back in results
+    end = mb._end({"closes": "2026-10-14"})
+    assert end.astimezone(timezone.utc) == datetime(2026, 10, 15, 4, 59, 59, tzinfo=timezone.utc)   # 23:59:59 CDT

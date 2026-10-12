@@ -7,7 +7,8 @@ committed) and is never shown outside this page. Current bid / bid count come fr
 from __future__ import annotations
 
 import re
-from datetime import date, datetime, timezone
+from datetime import date, datetime, time, timezone
+from zoneinfo import ZoneInfo
 from html import escape as e
 
 from . import market_prefs as mp
@@ -30,7 +31,7 @@ def _num(v):
 def act(action: str, f: dict, now: str) -> str:
     if action not in ACTS:
         raise ValueError("unknown bid action")
-    lot = re.sub(r"[^A-Za-z0-9._:-]", "", f.get("lot") or "")[:60]
+    lot = re.sub(r"[^A-Za-z0-9._:-]", "", f.get("lot") or "")[:200]
     if not lot:
         raise ValueError("no lot given")
     d = mp.load()
@@ -63,7 +64,7 @@ def exclude(cards: list[dict], d: dict) -> tuple[list[dict], int]:
 def _end(r: dict):
     s = r.get("closes_at") or r.get("closes") or ""
     try:
-        t = datetime.fromisoformat(s.replace("Z", "+00:00")) if "T" in s else datetime.combine(date.fromisoformat(s[:10]), datetime.max.time())
+        t = datetime.fromisoformat(s.replace("Z", "+00:00")) if "T" in s else datetime.combine(date.fromisoformat(s[:10]), time(23, 59, 59), ZoneInfo("America/Chicago"))
     except ValueError:
         return None
     return t if t.tzinfo else t.replace(tzinfo=timezone.utc)
