@@ -4,7 +4,7 @@
 - **Role:** Chief Coordinator / Core Platform / Integration (Lane A)
 - **Branch:** `research/agent-01-coordinator`
 - **Worktree:** `/home/michaelos/business-os-worktrees/agent-01-coordinator`
-- **State:** A-73 DELIVERED IN REPOSITORY / ACK UNVERIFIED — F-157/F-158 is STAGING_ACCEPTED at `112fce4` by Agent 01 `e37a53a`, but the exact combined release was not performed. No release attempt or classifier denial for `112fce4` is observed; exact-target approval is not granted/unverified, and Slack directive `1791828705.264649` says not to release on this request. Loaded remains `a0ee240`; loaded Claude Chrome desktop/mobile acceptance is MISSING. Current host state UNKNOWN. GitHub delivery is not host liveness.
+- **State:** A-73 NEED — ACK MISSED / HOST STATE UNVERIFIED. Multiple transport-only parallel WORKING claims with Host observation UNKNOWN do not displace the ONE bounded task. F-157/F-158 remains STAGING_ACCEPTED at `112fce4`, loaded remains `a0ee240`, and live browser proof is missing.
 - **Proposed:** (02) B-23 fixture adapter emits contract enum values (`ingestion_method` json/api, counterparty role `other`); then drop `auction_lot.conform`
 - **Done:** F-142 live verification + protocol adoption (this wave, see ack 2026-10-11-owner-project-operating-protocol); A-51 @ 12817e7; A-49 @ b2b3399; A-47 @ 6e6aa84; A-48 @ 8abbfa0; A-43 @ da6cf4a; A-44 @ 6440be3; A-42 @ 69402d9; A-41 @ 281cc74; A-40 @ 1160310; A-39 @ 6185927; A-38 @ 2198a74; A-37 @ b92683d
 - **Done (reboot persistence):** five user units enabled+active, Linger=yes; `docs/operations/REBOOT_RECOVERY.md`; cold start proven only by the next reboot
@@ -15,7 +15,7 @@
 - **Current phase:** ROUND TWO. The Lane A spine is built and tested. Integration rulings R1–R11 are issued.
 - **Role:** foreman/dispatcher. I own `docs/status/READY_QUEUE.md` and `ACTIVE_WORK.md` (`docs/COORDINATION.md`).
 - **Started:** 2026-10-06
-- **Last updated:** Monday, October 12, 2026 — 1:32 PM America/Chicago
+- **Last updated:** Monday, October 12, 2026 — 2:35 PM America/Chicago
 
 ## Current objective
 Build the durable application spine DISCOVER → NORMALIZE → SCORE → RECOMMEND → APPROVE → DRY-RUN ACT → RECEIPT and integrate the specialist lanes. All external actions are DRY-RUN only.
@@ -232,3 +232,16 @@ None new. MICHAEL_DECISIONS #1–#5 are unchanged; none blocks the dry-run MVP.
 - **Host:** receipt explicitly says host observation UNKNOWN; no Agent 01/watchdog/process liveness proof. **APPEARS STALE — HOST STATE UNVERIFIED.**
 - **Michael:** configure/confirm the Craigslist saved-search alert and Gmail filter only; do not expose credentials or authorize release.
 - **Canonical log:** `docs/receipts/2026-10-12-supervisor-visible-check-1353.md`.
+
+
+## Current checkpoint — Monday, October 12, 2026 — 2:35 PM America/Chicago
+- **ONE current bounded task:** A-73 existing-watchdog wake-gap repair, existing Agent 01, priority P0. Stage **NEED — ACK MISSED**. No current host-observed ACK/WORKING or command-specific NEED exists.
+- **Protocol conflict:** transport comments claim F-159, B-36, B-38, A-74, D-35 and B-37 as parallel WORKING with Host observation UNKNOWN and impossible future launch/acceptance times. Their artifact evidence is preserved; their current host claims and future timestamps are not accepted.
+- **B-12:** first genuine route is Craigslist saved-search e-mail, Little Rock region, narrow trailer search centered on 72032 within 50 miles, through a dedicated DealSniffer mailbox. Subscription not enabled/proven; sender address and subject are UNKNOWN until the first genuine alert. Do not guess a filter or use personal Gmail.
+- **Tested / loaded / browser:** F-157/F-158 tested `112fce4`; loaded `a0ee240`; F-158 NOT LOADED; loaded Chrome desktop/mobile proof MISSING. B-36 fixture parser 421/0 and B-37 fixture adapter 424/0 are NOT LIVE.
+- **Host:** UNKNOWN. **APPEARS STALE — HOST STATE UNVERIFIED.**
+- **ETA / next_check_at:** ETA UNKNOWN; Monday, October 12, 2026 — 2:40 PM America/Chicago.
+- **Blocker:** A-73 ACK/current host provenance missing; parallel claims conflict with one-item protocol.
+- **Michael:** NOTHING for A-73. For B-12, create/use the dedicated alerts mailbox and enable the stated Craigslist saved search; wait for a genuine alert before creating an exact-header filter.
+- **ONE next action:** Agent 01 publishes current host evidence and A-73 ACK/WORKING or exact NEED, then reconciles conflicting parallel claims.
+- **Canonical log:** `docs/receipts/2026-10-12-supervisor-visible-check-1435.md`.
