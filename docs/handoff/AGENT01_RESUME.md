@@ -2,6 +2,10 @@
 
 Written 2026-10-12 ~04:05 CDT by the previous Agent 01 session (restarted to save usage). Read this first, then verify against the repo; repo truth wins over this note.
 
+## FIRST TASK AFTER THIS RESTART (added 12:2x CDT)
+- **F-157 (category controls)** was delivered by a lane 06 worker at artifact `498fcb3` while Agent 01 was idle; the supervisor recorded SEVEN missed acceptance checkpoints. Review it now from a clean checkout (focused + full suites, golden diffs token by token, categories incl. Land/Real Estate off by default for Michael, mixed auctions kept, prefs persisted per owner and NEVER overwritten by tests/staging), then record DONE/NEED with tools/eta_checkpoints.py and, if accepted, give the owner ONE release command that contains it (it should descend from a0ee240).
+- **Fix the wake gap (A-73, Agent 01):** the watchdog does not wake Agent 01 when a specialist worker finishes and its result awaits Agent 01 review; add that wake (and an ETA checkpoint) inside the existing watchdog, with tests.
+
 ## First 5 minutes
 1. `git fetch -q origin && git status -sb` (branch research/agent-01-coordinator; fast-forward if behind).
 2. Read `docs/status/AGENT_STATUS.md`, then the rows marked READY / PARTIAL in `docs/status/READY_QUEUE.md`.
