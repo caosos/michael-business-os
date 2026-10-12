@@ -4,8 +4,9 @@ Agent: 04
 Role: Postgres / State / Receipts (lane D: durable business state, receipts, provenance; sole ledger owner per ADR-0010)
 Branch: research/agent-04-state
 Worktree: /home/michaelos/business-os-worktrees/agent-04-state
-State: CLOSED (A-74 done; handoff: docs/handoff/LANE_04.md)
+State: CLOSED (D-35 done; handoff: docs/handoff/LANE_04.md)
 Claimed: none
+Done: D-35 @ COMMIT (0029 mbos.app_user + owner seed; member refused on all owner paths; docs/receipts/2026-10-12-d35-app-user.md)
 Done: A-74 @ 3094eca (ADR-0015 accounts + location-scoped sources, PROPOSED; docs/receipts/2026-10-12-a74-accounts-location-adr.md)
 Done: D-01 @ a0d1fbe
 Done: D-02 @ a0d1fbe
