@@ -15,6 +15,7 @@ from .live_demo import link_html
 from . import precedent_view as pv
 from . import market_source_view as msv
 from . import market_browse as mb
+from . import market_source_panel as msp
 
 CATEGORY = "marketplace"
 SLIDER_MAX = 500          # F-144: normal slider scale (miles); control usability, not a travel limit
@@ -107,6 +108,13 @@ def gallery(cards: list[dict], q: dict, tok, prec: dict | None = None) -> str:
     return "".join(out)
 
 
+def suggest_strip(sug: str, n: int = 0) -> str:
+    """F-163: the Suggestions panel as a one-line collapsed strip above the grid ('Suggestions (N)' = engine-ranked rows)."""
+    if not sug:
+        return ""
+    return f"<details class='mk-strip' id='suggestions-strip'><summary><b>Suggestions ({n})</b> <span class='small mut'>ranked by the engine, display only</span></summary>{sug}</details>"
+
+
 def prefs_panel(d: dict, tok) -> str:
     f = lambda a, lbl: f"<form method='post' action='/market/pref' style='display:inline' class='mk-pref'>{tok()}<button name='act' value='{a}'>{lbl}</button></form>"  # noqa: E731
     state = "ON" if d["enabled"] else "OFF"
@@ -154,9 +162,9 @@ def distance_caveat(q: dict, results: list[dict]) -> str:
             f"{origin} {lots} No online lookup is made.</details>")
 
 
-def render_status(d: dict) -> str:
+def render_status(d: dict, banner_inline: bool = True) -> str:
     if d.get("name") or d.get("coverage"):             # F-145: a non-GSA source page (govdeals | publicsurplus | all): per-source coverage
-        return msv.coverage(d)
+        return msv.coverage(d, banner_inline)
     if d["status"] != "connected":
         return f"<div class='flash err' id='source-status'><b>GSA Auctions: offline.</b> {e(d['message'])}</div>"
     warn = (f" <b class='bad'>STALE ({d['age_h']:g} h old): current bids may have changed.</b>" if d["stale"] else "")
@@ -252,7 +260,7 @@ def _sidebar(saved: list[dict], csrf: str, pin_html: str, tok, q: dict, save: st
         rows.append(f"<li><b>{e(d['title'])}</b> <span class='badge'>{'ON' if on else e(d['status'])}</span><br>"
                     f"<a style='display:inline' href='/market?run={cid}'>Run</a> · <a style='display:inline' href='/market?edit={cid}'>Edit</a> {toggle}</li>")
     saved_html = f"<ul style='padding-left:16px;margin:4px 0'>{''.join(rows)}</ul>" if rows else "<p class='small mut'>No saved searches yet.</p>"
-    return (f"<aside class='mk-side{' folded' if folded else ''}' id='filters-side'>" + bids + (_side_filters(q, fc, now) if fc else "") + "<div class='card'><nav aria-label='Marketplace'>"
+    return (f"<aside class='mk-side{' folded' if folded else ''}' id='filters-side'>" + (_side_filters(q, fc, now) if fc else "") + bids + "<div class='card'><nav aria-label='Marketplace'>"
             "<p class='small mut' style='margin:0 0 4px'>More</p><a class='mk-sec2' href='/market?new=1'>New Search</a>"
             f"{save}<details><summary>My Campaigns / Saved Searches ({len(rows)})</summary>{saved_html}</details>"
             "<a class='mk-sec2' href='/resale'>Saved Deals</a><a class='mk-sec2' href='/market?go=1&amp;sort=closing&amp;closing_by=soon'>Auctions Closing Soon</a>"
@@ -375,12 +383,16 @@ def render_page(q: dict, d: dict, results: list[dict], hidden: dict, saved: list
                 + mb.pager(q, page, pages, len(results)) + opt
                 + distance_caveat(q, results + unchecked))
     fc = browse.get("fc") if browse else None
+    offline = d["status"] not in ("connected", "fixture") and not d.get("name") and not d.get("coverage")
+    banner = f"<div class='flash err' id='fixture-banner' role='note' title='{e(msv.FIXTURE_BANNER)}'><b>{e(msv.FIXTURE_BANNER)}</b></div>" if fc and d.get("fixture") else ""
+    status = render_status(d, not fc) if not fc or offline else ""          # F-163: on the browse page the per-source status lives in the collapsed Sources panel
+    sources = msp.render(browse.get("now") if browse else None, render_status(d, False) if fc and not offline else "")
     folded = mb.collapsed()
     back = browse.get("back", "/market") if browse else "/market"
     bar = mb.top_bar(q, len(results) if ran and not bad and d["status"] in ("connected", "fixture") else 0, q.get("sort", "closing"), q.get("view", "gallery"), tok, mb.active_filters(q), back, (fc or {}).get("quick"), folded) if fc else _form(q, edit_id, tok, pin_html)
     return (CSS + mb.CSS + "<script src='/static/market_radius.js' defer></script><h1 class='pagehead'>DealSniffer Marketplace</h1><input type='checkbox' id='mkdrawer' class='mk-drawer-t' aria-label='Show filters'><div class='mk'>"
             + _sidebar(saved, csrf, pin_html, tok, q, _save(q, edit_id, tok, pin_html), bids, fc, browse.get("now") if browse else None, folded)
-            + f"<section class='mk-main' id='results-top'>{bar}{err}{verr}{render_status(d)}{suggest}{body}{finds}{hidden_panel(prefs, tok) if prefs else ''}{prefs_panel(prefs, tok) if prefs else ''}{working_capital()}{gsa_explainer()}</section></div>")
+            + f"<section class='mk-main' id='results-top'>{bar}{err}{verr}{banner}{status}{suggest}{body}{finds}{hidden_panel(prefs, tok) if prefs else ''}{prefs_panel(prefs, tok) if prefs else ''}{sources}{working_capital()}{gsa_explainer()}</section></div>")
 
 
 def save_form(f: dict) -> dict:

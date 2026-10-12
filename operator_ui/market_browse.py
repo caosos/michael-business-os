@@ -208,10 +208,9 @@ def countdown(c: dict, now: datetime) -> tuple[str, bool]:
 
 
 def _view(url) -> str:
-    from .live_demo import link_html
     if url and classify_url(url)[0] == "live":
         return f"<a class='mk-view' href='{e(url)}' rel='noopener noreferrer nofollow' target='_blank'>View</a>"
-    return link_html(url)
+    return f"<span class='mk-view mk-off' aria-disabled='true' title='No verified live link: {e('fixture or missing link' if url else 'no link given')}'>No live link</span>"
 
 
 def card(c: dict, tok, now: datetime, pref_buttons) -> str:
@@ -220,7 +219,7 @@ def card(c: dict, tok, now: datetime, pref_buttons) -> str:
     ph = img if img.startswith("<img") else f"<div class='ph small mut'>{img if 'Photo' in img else 'No photo'}</div>"
     txt, red = countdown(c, now)
     cd = f"<span class='mk-cd{' red' if red else ''}'>{e(txt)}</span>" if txt else ""
-    place = e(c["city"] or "town UNKNOWN") + (f" {e(c['zip'])}" if c.get("zip") else "") + (f" · {round(c['distance'], 1):g} mi" if c.get("distance") is not None else " · distance UNKNOWN")
+    place = e(c["city"] or "town UNKNOWN") + (f", {e(c['state'])}" if c.get("state") else "") + (f" · {round(c['distance'], 1):g} mi" if c.get("distance") is not None else " · distance UNKNOWN")
     ti = c["title"] if len(c["title"]) <= 70 else c["title"][:69] + "…"
     closes = c.get("closes_local") or msrc.local_when(c.get("closes")) or "closes UNKNOWN"
     if c.get("event"):
@@ -231,13 +230,15 @@ def card(c: dict, tok, now: datetime, pref_buttons) -> str:
         cur = f"<div class='pr'>${c['bid']:,.0f}</div><div class='small mut'>current bid · {e(bidders)}</div>" if c["bid"] is not None else f"<div class='pr'>No bids yet</div><div class='small mut'>{e(bidders)}</div>"
         money = cur
     flag = " <span class='badge'>SAVED</span>" if c.get("saved") else ""
-    note = __import__("operator_ui.market_source_view", fromlist=["x"]).card_note(c)
+    msvm = __import__("operator_ui.market_source_view", fromlist=["x"])
+    note = msvm.card_note(c)
     kind = " data-kind='auction-event'" if c.get("event") else ""
-    plat = __import__("operator_ui.market_source_view", fromlist=["x"])._platform(c) if c.get("event") else ""
+    plat = msvm._platform(c) if c.get("event") else ""
     lbl = (f"<div class='small'>{plat}</div>" if plat else "") if c.get("event") else "<div class='small mut gal-lbl'>" + mv.gallery_labels(c) + "</div>"
+    more = f"<details class='mk-more'><summary title='Details and actions' aria-label='More: details and actions'>&#8943;</summary>{lbl}{pref_buttons(c, tok)}</details>"
     return (f"<div class='mk-g mk-card' data-lot='{e(c['id'])}'{kind}><div class='mk-ph'>{ph}{cd}<span class='badge mk-src'>{e(c['source'])}</span></div>"
-            f"<div class='ti'><b>{e(ti)}</b>{flag}</div><div class='small'>{place}</div>{note}<div class='small mut'>Closes {e(closes)}{c.get('closing_badge', '')}</div>{money}{lbl}"
-            f"<div class='mk-vw'>{_view(c.get('url'))}</div>{pref_buttons(c, tok)}</div>")
+            f"<div class='ti'><b>{e(ti)}</b>{flag}</div><div class='small'>{place}</div>{note}<div class='small mut'>Closes {e(closes)}{c.get('closing_badge', '')}</div>{money}"
+            f"<div class='mk-vw'>{_view(c.get('url'))}{more}</div></div>")
 
 
 # ---- sidebar sections / top bar ----
@@ -310,10 +311,10 @@ def top_bar(q: dict, total: int, sort_sel: str, view: str, csrf_tok, n_active: i
             f"<a class='mk-q{' cur' if (q.get('quick') or '') == k else ''}' data-quick='{k or 'all'}' href='{href(q, quick=k)}'>{e(lbl)} <span class='mk-n'>({quick_counts[k]})</span></a>" for k, lbl in QUICK_LABELS) + "</div>"
     return ("<div class='mk-top' id='topbar'><form method='get' action='/market' class='mk-form mk-bar' id='mkform' novalidate><input type='hidden' name='go' value='1'>"
             f"<input class='mk-search' type='search' name='keywords' form='mkform' aria-label='Search title and description' placeholder='Search title and description' value='{e(q.get('keywords') or '')}'>"
-            "<button class='mk-go' type='submit'>Search Now</button>"
+            "<button class='mk-go' type='submit'>Search</button>"
             f"<span id='result-count' class='mk-count'>{total:,} result{'s' if total != 1 else ''} found</span>"
             f"<label>Sort <select name='sort'>{opts}</select></label><label>View <select name='view'>{views}</select></label>"
-            "<button type='submit' class='mk-apply'>Apply</button></form>"
+            "</form>"
             f"{toggle}{quick}</div>")
 
 
@@ -321,14 +322,19 @@ CSS = """<style>
 .mk-top{position:sticky;top:0;z-index:20;background:var(--bg);padding:6px 0;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center}
 .mk-top .mk-bar{flex:1 1 560px;align-items:center}.mk-search{flex:1 1 320px;font-size:18px;padding:10px 12px;min-width:0}.mk-count{font-weight:700;white-space:nowrap}
 .mk-fbtn{background:var(--acc);color:var(--bg);border:0;border-radius:8px;padding:8px 14px;font-size:15px;width:auto;opacity:1;cursor:pointer}.mk-fd{margin:0}.mk-fm,.mk-side .mk-fm{display:none}
-.mk-quick{flex:1 1 100%;display:flex;flex-wrap:wrap;gap:6px}.mk-q{border:1px solid var(--line);border-radius:16px;padding:4px 12px;font-size:14px;text-decoration:none}.mk-q.cur{background:var(--acc);color:var(--bg)}
+.mk-quick{flex:1 1 100%;display:flex;flex-wrap:wrap;gap:6px}.mk-q{border:1px solid var(--line);border-radius:16px;padding:4px 12px;font-size:14px;text-decoration:none}.mk-q.cur{background:#1d4ed8;color:#fff;border-color:#1d4ed8}.mk-q.cur .mk-n{color:#fff}
 .mk-n{color:var(--mut,#777);font-size:12px}.mk-sect{border:1px solid var(--line);border-radius:8px;padding:4px 8px;margin:0 0 8px}.mk-sect label{display:block;padding:2px 0}.mk-side .mk-cat.mut,.mk-sect label.mut{opacity:.55}
 .mk-side.folded #mkfilters{display:none}.mk-drawer-t{position:absolute;opacity:0;pointer-events:none}
 .mk-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.mk-card{display:flex;flex-direction:column;gap:2px}.mk-ph{position:relative}.mk-ph .ph{height:130px}.mk-ph img{height:130px}
 .mk-cd{position:absolute;left:6px;bottom:6px;background:#444;color:#fff;border-radius:6px;padding:2px 8px;font-size:12px;font-weight:700}.mk-cd.red{background:#c0222c}.mk-src{position:absolute;right:6px;top:6px}
-.mk-view{display:inline-block;background:var(--acc);color:var(--bg);border-radius:6px;padding:6px 18px;font-weight:700;text-decoration:none}.mk-vw{margin:4px 0}
-.mk-pages{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:14px 0}.mk-pg{border:1px solid var(--line);border-radius:6px;padding:4px 10px;text-decoration:none}.mk-pg.cur{background:var(--acc);color:var(--bg)}
+.mk-view{display:inline-block;background:var(--acc);color:var(--bg);border-radius:6px;padding:6px 18px;font-weight:700;text-decoration:none}.mk-vw{margin:4px 0}.mk-off{background:transparent;color:var(--mut,#777);border:1px dashed var(--line);font-weight:400}
+.mk-pages{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:14px 0}.mk-pg{border:1px solid var(--line);border-radius:6px;padding:4px 10px;text-decoration:none}.mk-pg.cur{background:#1d4ed8;color:#fff}
+.mk-top .mk-bar{flex-wrap:nowrap;gap:10px}.mk-top .mk-bar label{margin:0;white-space:nowrap}.mk-top select{width:auto}.mk-go{width:auto;padding:10px 18px;white-space:nowrap}
+.mk-quick{padding:0}.mk-chips{display:flex;flex-wrap:nowrap;gap:4px;overflow:hidden;margin:2px 0;white-space:nowrap}.mk-chips .chip{flex:0 0 auto}
+.mk-strip{margin:2px 0;border:1px solid var(--line);border-radius:8px;padding:2px 10px}.mk-strip>summary{cursor:pointer}#fixture-banner{margin:2px 0;padding:2px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}
+.mk-more{display:inline-block;margin-left:8px;vertical-align:middle}.mk-more>summary{display:inline-block;cursor:pointer;border:1px solid var(--line);border-radius:6px;padding:2px 10px;font-weight:700;list-style:none}.mk-more[open]{display:block;margin:6px 0 0}
+.mk-main>h2{margin:2px 0;font-size:16px}
 @media(max-width:1400px){.mk-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:1000px){.mk-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:600px){.mk-grid{grid-template-columns:minmax(0,1fr)}}
-@media(max-width:700px){.mk-fd{display:none}.mk-fm,.mk-side .mk-fm{display:inline-block}.mk-side,.mk-side.folded{display:none;position:fixed;inset:0 20% 0 0;z-index:40;overflow:auto;background:var(--bg);padding:10px;box-shadow:4px 0 16px rgba(0,0,0,.4);width:auto}
+@media(max-width:700px){.mk-top .mk-bar{flex-wrap:wrap;gap:6px}.mk-top .mk-bar .mk-search{flex:1 1 60%}.mk-top{gap:4px 8px;padding:2px 0}.mk-quick{gap:4px}.mk-q{padding:2px 9px;font-size:13px}.pagehead{display:none}.mk-fd{display:none}.mk-fm,.mk-side .mk-fm{display:inline-block}.mk-side,.mk-side.folded{display:none;position:fixed;inset:0 20% 0 0;z-index:40;overflow:auto;background:var(--bg);padding:10px;box-shadow:4px 0 16px rgba(0,0,0,.4);width:auto}
 #mkdrawer:checked~.mk .mk-side{display:block}.mk-side.folded #mkfilters{display:block}.mk-top{position:static}.mk-search{font-size:16px}}
 </style>"""

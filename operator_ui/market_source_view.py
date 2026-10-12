@@ -36,11 +36,11 @@ def _row(c: dict) -> str:
     return f"<li data-src='{n}' data-status='{e(c['status'])}'><b>{n}: NOT CONNECTED</b> · no mailbox read, nothing shown</li>"
 
 
-def coverage(d: dict) -> str:
+def coverage(d: dict, banner_inline: bool = True) -> str:
     """Status block for a non-GSA source page (govdeals | publicsurplus | all)."""
     rows = "".join(_row(c) for c in d.get("coverage") or [{k: d.get(k) for k in ("name", "status", "as_of", "age_h", "stale", "in_scope")}])
     off = "".join(f"<li data-src='{e(n)}' data-status='not_connected'><b>{e(n)}: NOT CONNECTED</b></li>" for n in ALWAYS_OFF)
-    banner = f"<div class='flash err' id='fixture-banner' role='note'><b>{e(FIXTURE_BANNER)}</b></div>" if d.get("fixture") else ""
+    banner = f"<div class='flash err' id='fixture-banner' role='note'><b>{e(FIXTURE_BANNER)}</b></div>" if d.get("fixture") and banner_inline else ""
     return f"{banner}<ul class='small' id='source-status' style='margin:6px 0;padding-left:18px'>{rows}{off}</ul>"
 
 

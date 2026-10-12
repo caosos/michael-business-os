@@ -19,3 +19,8 @@
   all.addEventListener("change", function () { for (var i = 0; i < rest.length; i++) rest[i].checked = all.checked; });
   for (var i = 0; i < rest.length; i++) rest[i].addEventListener("change", function () { if (!this.checked) all.checked = false; });
 })();
+/* F-163: Sort and View apply on change (the Search button does the same without script). */
+(function () {
+  var s = document.querySelectorAll("select[name=sort],select[name=view]");
+  for (var i = 0; i < s.length; i++) s[i].addEventListener("change", function () { if (this.form) this.form.submit(); });
+})();

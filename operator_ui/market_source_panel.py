@@ -30,14 +30,18 @@ def _fresh(pr: dict) -> str:
     return "never read on this machine"
 
 
-def render(now: datetime | None = None) -> str:
+def render(now: datetime | None = None, status: str = "") -> str:
+    """`status`: the per-source status block (F-163: shown here, collapsed, on the browse page). The summary says how many sources are connected."""
     body = ""
-    for r in rows(now):
+    rs = rows(now)
+    n_on = sum(1 for r in rs if r["state"] == "LIVE CONNECTED")
+    for r in rs:
         i, pr, st = r["info"], r["probe"], r["state"]
         cls = "" if st == "LIVE CONNECTED" else " class='mut'"
         body += (f"<tr data-src='{e(i.key)}' data-state='{e(st)}'{cls}><td><b>{e(i.name)}</b><br><span class='small'>{e(i.cls)}</span></td><td>{e(i.geography)}</td>"
                  f"<td>{e(i.path)}<br><span class='small'>{e(i.granularity)}</span></td><td class='small'>{e(i.bidding)}</td><td class='small'>{_fresh(pr)}</td>"
                  f"<td class='small'>{e(i.constraint)}</td><td><span class='badge'>{e(st)}</span></td><td class='small'>{e(i.next_step)}</td></tr>")
     head = "".join(f"<th>{h}</th>" for h in ("Source", "Geography", "Retrieval / granularity", "Account / bid", "Freshness", "Constraints", "State", "Next step"))
-    return (f"<details class='card' id='sources-panel'><summary><b>Sources</b> <span class='small mut'>(what this page can and cannot see; fixtures never count as live)</span></summary>"
-            f"<table class='small' style='width:100%'><thead><tr>{head}</tr></thead><tbody>{body}</tbody></table></details>")
+    one = f"<span class='small' id='sources-summary'>{n_on} connected, {len(rs) - n_on} not connected</span> "
+    return (f"<details class='card' id='sources-panel'><summary><b>Sources</b> {one}<span class='small mut'>(what this page can and cannot see; fixtures never count as live)</span></summary>"
+            f"{status}<table class='small' style='width:100%'><thead><tr>{head}</tr></thead><tbody>{body}</tbody></table></details>")

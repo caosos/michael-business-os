@@ -130,8 +130,8 @@ def window(d: dict, cards: list[dict], now: datetime, tok, auto: tuple = ((), ""
                   f"<form method='post' action='/market/bid' style='display:inline'>{hid}<input name='max_bid' size='6' inputmode='decimal' aria-label='Your max bid' placeholder='max $'>"
                   "<button name='act' value='setmax'>Set max</button></form></li>")
     body = f"<ul style='padding-left:16px;margin:4px 0'>{''.join(li)}</ul>" if li else "<p class='small mut'>Nothing tracked. Use 'I bid on this' on a card after you place a bid yourself.</p>"
-    return (f"<div class='card small' id='my-bids'><b>My bids ({len(li)})</b><p class='mut' style='margin:2px 0'>You told us you bid. We do not place bids or check your account; "
-            f"bid fields show only what the source gave us.</p>{auto[1]}{body}</div>")
+    return (f"<details class='card small' id='my-bids'><summary><b>My bids ({len(li)})</b> <span class='mut'>(collapsed; click to open)</span></summary><p class='mut' style='margin:2px 0'>You told us you bid. We do not place bids or check your account; "
+            f"bid fields show only what the source gave us.</p>{auto[1]}{body}</details>")
 
 
 def button(c: dict, tok) -> str:

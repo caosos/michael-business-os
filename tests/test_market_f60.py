@@ -24,7 +24,7 @@ def test_search_now_is_in_filter_card_and_owned_by_the_search_form(ui):
     assert card.count("Apply filters") == 1 and "type='submit' form='mkform'>Apply filters" in card      # F-159: Search Now is the top-bar button; the filter card ends with Apply filters
     for name in ("min_price", "max_price", "radius", "base"):
         assert re.search(rf"<(input|select)[^>]*form='mkform'[^>]*name='{name}'", card)
-    assert h.count("Search Now") == 1 and h.count("mk-go' type='submit'") == 1
+    assert h.count("type='submit'>Search</button>") == 1 and h.count("mk-go' type='submit'") == 1
     assert "Find Deals Now" not in h and "<form method='get' action='/market' class='mk-form mk-bar' id='mkform'" in h
 
 
