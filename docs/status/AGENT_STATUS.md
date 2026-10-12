@@ -6,7 +6,7 @@ Branch: research/agent-04-state
 Worktree: /home/michaelos/business-os-worktrees/agent-04-state
 State: CLOSED (D-38 done; handoff: docs/handoff/LANE_04.md)
 Claimed: none
-Done: D-38 @ COMMIT (0032 site_feed access_mode; registry seed: 3 AR auction houses connected; docs/receipts/2026-10-12-d38-registry-seed-truth.md)
+Done: D-38 @ b0cb55e (0032 site_feed access_mode; registry seed: 3 AR auction houses connected; docs/receipts/2026-10-12-d38-registry-seed-truth.md)
 Done: D-37 @ c729a2c (0031 source_registry + user_item_interest + config/sources.v1.json loader; docs/receipts/2026-10-12-d37-source-registry.md)
 Done: D-36 @ 7a5c19e (0030 user_pref/user_item_state/set_user_pref + per-user watches; docs/receipts/2026-10-12-d36-user-state.md)
 Done: D-35 @ 44a9535 (0029 mbos.app_user + owner seed; member refused on all owner paths; docs/receipts/2026-10-12-d35-app-user.md)
