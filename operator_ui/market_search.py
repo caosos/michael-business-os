@@ -341,10 +341,12 @@ def gallery_rows(cards: list[dict], q: dict) -> list[tuple[str, list[dict]]]:
     """F-52 (B): the owner's chosen rows (checked categories first, else row slots) then 'other'. A lot sits in the first row it matches.
     An empty chosen row is kept, so the page can say 'no matching known inventory' instead of hiding the row."""
     names = [n for n in dict.fromkeys(list(q.get("cats", [])) or [r for r in q.get("rows", DEFAULT_ROWS) if r])]
+    events = [c for c in cards if c.get("event")]                    # F-149: auction events never sit in a guessed lot row
+    cards = [c for c in cards if not c.get("event")]
     seen, out = set(), []
     for n in names:
         row = [c for c in cards if c["id"] not in seen and in_cat(c, n)]
         seen |= {c["id"] for c in row}
         out.append((n, row))
     rest = [c for c in cards if c["id"] not in seen]
-    return out + ([("other", rest)] if rest else [])
+    return out + ([("auction events", events)] if events else []) + ([("other", rest)] if rest else [])
