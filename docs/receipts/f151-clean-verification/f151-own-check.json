@@ -1,0 +1,68 @@
+{
+ "pass": true,
+ "res": {
+  "desktop": {
+   "blackmon_checked": [
+    "blackmon:crown-manufacturing-liquidation-auction",
+    "blackmon:west-plains-real-estate",
+    "blackmon:mountain-view-real-estate-auction",
+    "blackmon:arkansas-contractors-auction-oct-2026",
+    "blackmon:ar-dot-auction-2026",
+    "blackmon:sweetser-construction-retirement-auction"
+   ],
+   "blackmon_unchecked": [
+    "blackmon:bank-repo-auction-logging-equip-trucks-trailers",
+    "blackmon:union-pacific-railroad-surplus-equipment-auction-oct-2026",
+    "blackmon:liquidation-auction-of-rental-equipment",
+    "blackmon:union-pacific-railroad-surplus-equipment-auction-dec-2026"
+   ],
+   "status": [
+    "Blackmon Auctions: connected (cached file) \u00b7 last fetched 2026-10-12 04:31 UTC (0.1 h ago) \u00b7 10 auction events (not lots)"
+   ],
+   "proxibid_links": 3,
+   "blackmon_r50": [
+    "blackmon:mountain-view-real-estate-auction",
+    "blackmon:arkansas-contractors-auction-oct-2026",
+    "blackmon:ar-dot-auction-2026"
+   ],
+   "auctions_by_house": {
+    "wooley": 2,
+    "wilson": 17,
+    "blackmon": 6
+   },
+   "caveat": "About distances (approximate; unknown is not far)"
+  },
+  "mobile": {
+   "blackmon_checked": [
+    "blackmon:crown-manufacturing-liquidation-auction",
+    "blackmon:west-plains-real-estate",
+    "blackmon:mountain-view-real-estate-auction",
+    "blackmon:arkansas-contractors-auction-oct-2026",
+    "blackmon:ar-dot-auction-2026",
+    "blackmon:sweetser-construction-retirement-auction"
+   ],
+   "blackmon_unchecked": [
+    "blackmon:bank-repo-auction-logging-equip-trucks-trailers",
+    "blackmon:union-pacific-railroad-surplus-equipment-auction-oct-2026",
+    "blackmon:liquidation-auction-of-rental-equipment",
+    "blackmon:union-pacific-railroad-surplus-equipment-auction-dec-2026"
+   ],
+   "status": [
+    "Blackmon Auctions: connected (cached file) \u00b7 last fetched 2026-10-12 04:31 UTC (0.1 h ago) \u00b7 10 auction events (not lots)"
+   ],
+   "proxibid_links": 3,
+   "blackmon_r50": [
+    "blackmon:mountain-view-real-estate-auction",
+    "blackmon:arkansas-contractors-auction-oct-2026",
+    "blackmon:ar-dot-auction-2026"
+   ],
+   "auctions_by_house": {
+    "wooley": 2,
+    "wilson": 17,
+    "blackmon": 6
+   },
+   "caveat": "About distances (approximate; unknown is not far)"
+  },
+  "platform_requests": []
+ }
+}

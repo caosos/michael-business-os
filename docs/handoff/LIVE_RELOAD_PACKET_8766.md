@@ -1,5 +1,13 @@
 # Live :8766 reload and rollback packet (PREPARED, NOT APPROVED, NOT RUN)
 
+## COMBINED MARKETPLACE RELEASE, REVISED (2026-10-12T04:43:43Z): CURRENT. Supersedes the 3dcbb86/a05aae8 section below (kept as history).
+- **Artifact:** lane 06 `85d293ada4133153cc3efe5492757020ab5950e8` (everything in 3dcbb86 + F-151 Blackmon Auctions + Census distances copy) with lane 02 `a186ca6e29f785e7bbb705ce6eb44482558f26da` (Wooley, Wilson incl. live-auction dates, Blackmon incl. B-33 locations).
+- **Verified by Agent 01 with exactly this pair:** coordinator suite 619/0 with lane 02 a186ca6; lane 06 suite 525/1 (known f39 flake); focused 51/0; staging under the COORDINATOR python: reload_ui --verify-only OK, Search Now check OK, headless Chrome desktop+mobile PASS (Blackmon 10 events, 6 located, 3 within 50 mi; Wilson 17/17; 0 hibid/bidwrangler/proxibid requests); release script dry run OK.
+- **One command (owner-run):** `cd ~/business-os-worktrees/agent-01-coordinator && tools/release_marketplace.sh 85d293ada4133153cc3efe5492757020ab5950e8 a186ca6e29f785e7bbb705ce6eb44482558f26da`
+- Note: the release refresh fetches Wooley (3 requests), Wilson (1) and Blackmon (about 31, about 5 minutes) once.
+
+---
+
 ## COMBINED MARKETPLACE RELEASE (2026-10-12T03:50:21Z): CURRENT PACKET. Everything below is audit history.
 - **Artifact:** lane 06 `3dcbb86094e60b1b847e43b0f26babeb3dc30738` (F-144 title + 0-500 radius slider, F-145 source seam, F-146/F-149 auction houses Wooley + Wilson, F-147 My bids, F-150 Census gazetteer + dedupe), with lane 02 `a05aae84b72f0d9c7e8d6e4242c7f5f8491176b9` (Wooley + Wilson adapters).
 - **Live now:** F-143 `315ddfa` (listener PID 725190 lineage; verify-only OK at 2026-10-12T03:50:21Z).
