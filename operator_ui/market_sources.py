@@ -209,11 +209,11 @@ def load_wooley(path: str | None, now: datetime, origin=None) -> dict:
 
 
 def dedupe(cards: list[dict]) -> list[dict]:
-    """Merge across sources: the same source link, or near-identical title in the same place, is one listing (first source wins).
+    """Merge across sources: the same source link, or near-identical title in the same place with the same close date, is one listing (first source wins). Two cards from the SAME source are never merged.
     lane 02's pinned install has no Deduper class; this uses its `dedup.title_similarity`."""
     out: list[dict] = []
     for c in cards:
-        if not any((c["url"] and c["url"] == k["url"]) or (title_similarity(c["title"], k["title"]) >= 0.9 and c.get("city") == k.get("city")) for k in out):
+        if not any(c.get("source") != k.get("source") and ((c["url"] and c["url"] == k["url"]) or (title_similarity(c["title"], k["title"]) >= 0.9 and c.get("city") == k.get("city") and c.get("closes") == k.get("closes"))) for k in out):
             out.append(c)
     return out
 

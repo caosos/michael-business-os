@@ -1,0 +1,6 @@
+# F-150 receipt: Census gazetteer coverage + same-source dedupe
+Provenance: queue row F-150 (owner goal "all auctions and listings within the radius I choose"; found in F-149 verification). Data copied unchanged from `origin/research/agent-01-coordinator:docs/data/census-gazetteer-2023/` (`zcta_ar_region.csv`, `places_ar_region.csv`; US Census 2023 Gazetteer, public domain; README there has source URLs and sha256). DRY-RUN: no network, no contact.
+- `operator_ui/gazetteer.py`: default lookup = existing small CSV, then Census ZIPs, then Census places. `locate` resolves a 5-digit ZIP first, then 'City ST' / 'City, ST' / bare city (Arkansas preferred), case-insensitive, 'St.'/'St' = 'Saint'. `MBOS_GAZETTEER_FILE` still replaces the data entirely. Distances stay centroid to centroid, labelled approximate (INFER).
+- `operator_ui/market_sources.py` `dedupe`: never merges two cards of the SAME source; across sources merges by identical link, or title similarity >= 0.9 AND same city AND same close date.
+- Tests `tests/test_market_f150.py` (15): the named ZIPs/towns resolve; override file works; all 17 archived Wilson events get a distance; Wilson-only count = Wilson part of All auction houses (17); both West Little Rock estates (1069, 1089) appear; dedupe rules.
+- Agent 01 browser verification desktop + mobile: NEED; then ONE combined release command.
