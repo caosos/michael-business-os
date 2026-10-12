@@ -200,3 +200,17 @@ This section is part of the existing living checklist and is the authoritative r
 - **Loaded revision:** `bbc80ec851b75aec52af1f8b0838dd56ccc714ef`; F-154/F-155 are NOT LOADED.
 - **ETA / next_check_at:** about 30 minutes plus Agent 01 review; Monday, October 12, 2026 — 2:59 AM America/Chicago.
 - **Blocker:** no owner decision; acceptance gates remain open. **Michael:** NOTHING.
+
+## Owner category-filter correction — F-157
+
+- **Owner wording preserved:** the category controls must let Michael choose what he wants to see; Land/Real Estate must be independently switchable and off by default for his profile.
+- Enlarge category controls for practical desktop/mobile use.
+- Support multi-select plus **All**.
+- Required categories: Tools, Equipment, Trailers, Vehicles, Lawn & Garden, Machinery, Pallets/Wholesale, Land/Real Estate, and Other/Unknown.
+- **All** means every category; otherwise return only checked categories.
+- Hide pure land/home auctions when Land/Real Estate is unchecked. Retain mixed auctions when they contain a selected equipment/tool category.
+- Persist category choices per owner account. Automated tests and isolated staging must never overwrite Michael's saved preferences.
+- Reuse the current Marketplace filter and preference path; no parallel settings store.
+- Acceptance requires focused tests plus firsthand Agent 01 Claude Chrome interaction on the actually loaded desktop and mobile page.
+- Authoritative queue ID: **F-157**. The existing **F-156** remains the B-34 Sources-panel task; this non-colliding ID corrects the earlier local naming conflict.
+
