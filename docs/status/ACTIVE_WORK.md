@@ -39,3 +39,15 @@ All other lanes: CLOSED, nothing READY (all open rows BLOCKED on owner/host). La
 - Current bounded implementation: F-155 Suggestions, existing lane 06 worker path; corrected relaunch receipt `45ba39d0fbf94777 #16`; current host liveness UNKNOWN; next_check_at 2026-10-12 02:01 America/Chicago.
 - F-154 acceptance gate: NEED after missed 01:08 checkpoint; no F-154 worker observed at 2026-10-12T06:09:33Z. Code exists, but full coordinator suite and live desktop/mobile Claude Chrome acceptance are missing. **APPEARS STALE — HOST STATE UNVERIFIED.**
 - No duplicate worker, queue, coordinator, watchdog or monitor. Michael must do NOTHING.
+
+
+## Current checkpoint — Monday, October 12, 2026 — 11:09 AM America/Chicago
+
+- **Current bounded task:** F-157 independent Agent 01 acceptance. Completed lane 06 artifact `498fcb3eb04d5e1a4d281a5ade2cac306141bda4` remains closed; do not re-dispatch it.
+- **Delivery / ACK truth:** repository delivery is proven by PR #1 comment `6121789517` and the authoritative queue row. Host/process delivery is unverified. No Agent 01 ACK/WORKING receipt exists after that handoff.
+- **Root-cause state:** UNKNOWN. Current `mbos-agent-01`, `mbos-pickup`, `mbos-watchdog`, pickup/watchdog logs, and `gh auth status` were not observable from this cloud check. A-71 historically named `gh auth login` as relay NEED, but current persistence is unverified. **APPEARS STALE — HOST STATE UNVERIFIED.**
+- **Exact recovery:** inspect only the existing sessions/services and logs plus `gh auth status`; restore/wake only the existing path if needed; consume the existing F-157 row; publish ACK/WORKING or a command-specific host/permission NEED. Do not create a worker, coordinator, queue, watchdog, monitor or service.
+- **Tested / loaded:** tested `498fcb3` (8/0 focused; 575/1 known `resale_f39`; lane D+E 104/3 documented unrelated failures); loaded `bbc80ec851b75aec52af1f8b0838dd56ccc714ef`; F-157 NOT LOADED; Claude Chrome desktop/mobile acceptance MISSING.
+- **Exception receipt:** PR #1 comment `6128060271`.
+- **ETA / next_check_at:** ETA UNKNOWN; Monday, October 12, 2026 — 11:14 AM America/Chicago.
+- **Michael:** NOTHING unless the host check proves an interactive credential action is actually required.
