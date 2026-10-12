@@ -188,3 +188,15 @@ This section is part of the existing living checklist and is the authoritative r
 - **Open serial gate:** F-154 is PARTIAL at code `917b7135cef103297029a93241720e06192c2d86`; full coordinator suite and firsthand desktop/mobile Claude Chrome acceptance are missing. The watchdog observed no F-154 worker at 1:09:33 AM. **APPEARS STALE — HOST STATE UNVERIFIED.**
 - **Loaded/browser evidence:** live desktop Claude Chrome at 1:03:14 AM showed four connected source lines, 9 auction-event results within 30 miles, remembered radius and Search Now last. Live mobile-width interaction, representative original-link traversal, non-empty My Bids and accepted Suggestions remain missing.
 - **Michael:** NOTHING.
+
+
+## Supervisor reconciliation — Monday, October 12, 2026 — 2:31 AM America/Chicago
+
+- **Canonical check for this run:** `DS-CHECKIN-20261012-0231-CDT`.
+- **Current bounded task:** F-155 DealSniffer Suggestions remains WORKING through the existing Agent 01/lane 06 path.
+- **Material progress:** first-step implementation is committed on lane 06 at code `c2813dd` with owner-local resale targets; the second-step status commit is `423903c55b918e5d5d812e4a1a521b16a1a82426`. Agent 01 reviewed the real-data path: owner resale values can produce scores, but reset persistence, empty not-ranked reasons, and repair-estimate labeling required a third narrow step.
+- **Third step:** coordinator commit `9a7ee6d4d1ac38779e26d232488247d920b19232`; local event `461152c85f819867 #20` reports the existing worker launched at Monday, October 12, 2026 — 2:29 AM America/Chicago and was alive 15 seconds later. Current PID/service proof remains UNKNOWN.
+- **Tests/browser:** second step reports 22 focused tests passing. F-155 independent full-suite and firsthand desktop/mobile Claude Chrome acceptance are still missing. F-154 also remains PARTIAL at `917b713`, with its full coordinator suite and browser gate unresolved.
+- **Loaded revision:** `bbc80ec851b75aec52af1f8b0838dd56ccc714ef`; F-154/F-155 are NOT LOADED.
+- **ETA / next_check_at:** about 30 minutes plus Agent 01 review; Monday, October 12, 2026 — 2:59 AM America/Chicago.
+- **Blocker:** no owner decision; acceptance gates remain open. **Michael:** NOTHING.
