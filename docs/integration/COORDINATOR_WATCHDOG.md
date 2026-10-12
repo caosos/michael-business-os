@@ -31,3 +31,15 @@ The Claude Code permission classifier denied arming a watcher that types into th
 
 ## Update (2026-10-09, after ARIA-20261008-2209)
 The Desktop-Agent central monitor now reads the liaison inbox and the acks directory (every 120 s, no model) and shows RECEIVED then ACKNOWLEDGED on :8477, so inbox visibility is solved centrally. It also states it cannot deliver a peer message to this session because it runs as a different Linux user, which means the peer-relay wake described above cannot cross accounts. The wake question is therefore an owner decision between a narrowly scoped tmux self-wake (needs Michael's explicit permission), running the relay as the `michaelos` user (host change), or no automatic wake. See the ack for the recommendation.
+
+## A-71 checkpoint state machine (inside this watchdog)
+
+| Checkpoint state | Trigger | Outcome published (exactly one) |
+|---|---|---|
+| open (ACK/WORKING recorded, schema valid) | DONE recorded before next_check_at | DONE (early=true), checkpoint closed |
+| open | next_check_at reached, worker process observed alive | WORKING, exception 'missed ETA', new next_check_at = now + 30 min |
+| open | next_check_at reached, no worker process observed | NEED/BLOCKED with the host evidence, checkpoint closed |
+| open | next_check_at reached, no host evidence available | NEED: APPEARS STALE — HOST STATE UNVERIFIED, checkpoint closed |
+| closed | any | nothing (no repeat) |
+
+Every outcome is a hash-chained watchdog receipt (`eta_checkpoint_<stage>`) and one outbox event; the relay posts outbox events to PR #1 in order, once each. Events for another project are quarantined. The watchdog never launches or kills a worker for a checkpoint.

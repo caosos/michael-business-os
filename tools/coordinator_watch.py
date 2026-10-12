@@ -358,6 +358,21 @@ def cycle(inbox_refs, do_wake: bool, probe: bool = True) -> dict:
             st["per_msg"][key] = {"first_seen": t, "wakes": 0, "informational": True}
             receipt("worker_stalled", w, ["ps -eo etimes,args"])
     extras = {"approved_ready_rows_for_specialist_lanes": ready, "dispatcher_running": alive, "dispatcher_action": act, "stalled_workers": stalled}
+    try:                                   # A-71: ETA checkpoints + once-only event outbox, inside this same watchdog (no new monitor)
+        sys.path.insert(0, str(ROOT / "tools"))
+        import eta_checkpoints as ec
+        from datetime import datetime as _dt
+        ps_pid = subprocess.run(["ps", "-eo", "pid,args"], capture_output=True, text=True).stdout.splitlines()
+        res = ec.tick(WD, _dt.now(ec.CHICAGO), ps_pid, iso(t), post=ec.gh_post if ec.gh_ready() else None)
+        for o in res["outcomes"]:
+            receipt(f"eta_checkpoint_{o['stage'].lower()}", o, ["var/watchdog/checkpoints.json", "ps -eo pid,args"])
+        need = res["relay"].get("need")
+        if need and st.get("relay_need") != need:
+            receipt("relay_need", {"need": need, "pending_events": res["relay"].get("pending")}, ["gh auth status"])
+        st["relay_need"] = need
+        extras["eta"] = {"outcomes": len(res["outcomes"]), "relay": res["relay"]}
+    except Exception as e:  # noqa: BLE001  never let checkpoint logic stop the watchdog
+        extras["eta_error"] = f"{type(e).__name__}: {e}"
     st["extras"] = extras
     st["last_check"] = t
     if probe and t - st.get("last_probe", 0) > 600:
