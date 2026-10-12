@@ -16,6 +16,8 @@ from mbos_discovery.bid_events import read_bid_events
 ENV_FLAG, ENV_DIR = "MBOS_STAGING_FIXTURES", "MBOS_BID_MAIL_DIR"
 NOT_CONNECTED = "Automatic bid detection is not connected (no mailbox)."
 WORDS = {"bid_placed": "bid placed", "outbid": "you were OUTBID", "winning": "you are winning (for now)", "won": "you WON", "lost": "you did not win", "closed": "auction closed"}
+NAMES = {"govdeals": "GovDeals", "publicsurplus": "Public Surplus", "gsa_auctions": "GSA Auctions", "gsa": "GSA Auctions", "hibid": "HiBid"}
+ENDED = frozenset({"won", "lost", "closed"})
 _RANK = {"bid_placed": 0, "outbid": 1, "winning": 1, "closed": 2, "won": 3, "lost": 3}   # later lifecycle stage wins; a tie keeps the later message in the directory
 
 
@@ -60,13 +62,14 @@ def urls(items) -> frozenset:
 def rows(items, now, tok, countdown, end):
     out = []
     for r in items:
+        when = "ended (per your e-mail, %s)" % e(str(r.get("observed_at") or "date UNKNOWN")[:10]) if r["event"] in ENDED else None
         rr = {"closes_at": r.get("closes_at") or "", "closes": ""}
         amt = f"amount in the e-mail: ${r['amount']:,.2f} <span class='mut'>(owner-local, this page only)</span>" if r.get("amount") is not None else "amount not stated"
         link = f"<a href='{e(r['url'])}' target='_blank' rel='noopener noreferrer'>original listing</a>" if r["url"].startswith(("http://", "https://")) else "no link"
         hid = f"{tok()}<input type='hidden' name='lot' value='{e(r['id'])}'>"
         out.append((end(rr) or __import__("datetime").datetime.max.replace(tzinfo=__import__("datetime").timezone.utc), r["id"],
-                    f"<li data-bid='{e(r['id'])}' data-auto='1'><b>{e(r['title'])}</b><br><span class='mut'>{e(r['source'])} · auto-detected from your e-mail</span> · "
-                    f"<b>{WORDS[r['event']]}</b> · {countdown(rr, now)}<br>"
+                    f"<li data-bid='{e(r['id'])}' data-auto='1'><b>{e(r['title'])}</b><br><span class='mut'>{e(NAMES.get(r['source'], r['source']))} · auto-detected from your e-mail</span> · "
+                    f"<b>{WORDS[r['event']]}</b> · {when or countdown(rr, now)}<br>"
                     + (f"earlier e-mails: {e(', '.join(WORDS[x] for x in r['earlier']))}<br>" if r.get("earlier") else "") + f"{amt} · {link}<br><span class='mut'>e-mail Message-ID {e(r['provenance']['message_id'])}</span><br>"
                     f"<form method='post' action='/market/bid' style='display:inline'>{hid}<button name='act' value='unbid'>Stop tracking</button></form></li>"))
     return out

@@ -50,7 +50,7 @@ def test_every_event_rendered_with_wording_amount_provenance(ui, on):
         assert word in w, word
     assert "e-mail Message-ID &lt;syn-gd-3@govdeals.com&gt;" in w
     assert "$1,310.50" in w and "(owner-local, this page only)" in w
-    assert "closes UNKNOWN" in w and ("closes in" in w or "closed (was" in w)
+    assert "ended (per your e-mail, 2026-10-12)" in w   # F-153: won/lost/closed rows; the outbid listing keeps its countdown
     assert "amount not stated" in w
 
 
@@ -91,3 +91,16 @@ def test_auto_urls_normalised():
     assert mba.norm_url("https://WWW.example.com/a/b/") == mba.norm_url("http://example.com/a/b")
     keep, n = mb.exclude([{"id": "i", "url": "https://gsaauctions.gov/x/"}], {"bids": {}}, frozenset({mba.norm_url("https://www.gsaauctions.gov/x")}))
     assert keep == [] and n == 1
+
+
+def test_f153_ended_rows_and_display_names(ui, on):
+    w = window(get(ui, go=1))
+    lis = re.findall(r"<li data-bid=.*?</li>", w, re.S)
+    ended = [x for x in lis if any(k in x for k in ("you WON", "you did not win", "auction closed"))]
+    assert len(ended) == 4
+    for x in ended:
+        assert "ended (per your e-mail, 2026-10-12)" in x and "closes in" not in x and "closed (was" not in x
+    for name in ("GovDeals", "Public Surplus", "GSA Auctions", "HiBid"):
+        assert f"{name} · auto-detected" in w
+    for raw in ("govdeals ·", "gsa_auctions ·", "hibid ·", "publicsurplus ·"):
+        assert raw not in w
