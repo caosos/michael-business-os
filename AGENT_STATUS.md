@@ -265,3 +265,13 @@ None new. MICHAEL_DECISIONS #1–#5 are unchanged; none blocks the dry-run MVP.
 - **ETA / next_check_at:** UNKNOWN / MISSING for A-73.
 - **Blocker / next action:** reconcile stale completion state and publish host-backed A-73 ACK/WORKING or exact NEED before one serial dispatch.
 - **Receipt:** `docs/receipts/2026-10-12-supervisor-visible-check-1621.md`.
+
+
+## DealSniffer reconciliation — Monday, October 12, 2026 — 5:15 PM America/Chicago
+- **Current:** A-73, existing Agent 01, P0, NEED — ACK MISSED. False NEED state now affects ten DONE/superseded tasks.
+- **Loaded UI:** fb84d0c released at 4:58:46 PM; verify-only OK; Claude Chrome desktop showed the new layout and 16 results within 150 miles. Mobile, detail, representative link, My Bids and Suggestions acceptance remain missing.
+- **Sources:** F-161 transport WORKING with host UNKNOWN. B-43 Facebook adapter 570888a fixture-tests 451/0; live smoke blocked by inactive Bright Data customer account, $0 charged. B-12 still lacks label/filter/first genuine alert.
+- **Host:** latest watchdog observation 5:01:18 PM is limited to the false B-41 NEED. Current Agent 01/A-73/F-161 state UNKNOWN. APPEARS STALE — HOST STATE UNVERIFIED.
+- **ETA / next_check_at:** UNKNOWN / MISSING for A-73.
+- **Next action:** publish host-backed A-73 ACK/WORKING or exact NEED and reconcile false completion state before one serial dispatch.
+- **Receipt:** docs/receipts/2026-10-12-supervisor-visible-check-1715.md.
