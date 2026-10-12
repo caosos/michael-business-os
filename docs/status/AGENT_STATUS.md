@@ -4,18 +4,18 @@
 - **Role:** Chief Coordinator / Core Platform / Integration (Lane A)
 - **Branch:** `research/agent-01-coordinator`
 - **Worktree:** `/home/michaelos/business-os-worktrees/agent-01-coordinator`
-- **State:** NEED / READY — F-157 is NOT ACCEPTED after clean review of `498fcb3`: focused 17/0; full 571/3, with f39 known and f140/f145 reproducing on `a0ee240`; three real Wilson commercial-property events leak through the default category filter. F-158 is the bounded rework. A PR transport comment reports WORKING, but its 12:55 PM launch time is later than its 12:40:05 PM GitHub creation time and `fac3437` proves only READY. Worker ACK and current host state are unverified. **APPEARS STALE — HOST STATE UNVERIFIED.**
+- **State:** STAGING_ACCEPTED / RELEASE BLOCKED — F-157/F-158 accepted at `112fce4` by Agent 01 commit `e37a53a`: focused 22/0; full 573/2 with both failures reproduced on `a0ee240`; real caches hide all 16 property events by default, retain mixed/equipment events and hide zero GSA lots; copied owner preferences remembered tools+trailers and live preferences stayed untouched. Loaded remains `a0ee240`; F-158 is NOT LIVE and loaded Claude Chrome desktop/mobile acceptance is MISSING. Owner-gated release command prepared. Current host observation UNKNOWN. **APPEARS STALE — HOST STATE UNVERIFIED.**
 - **Proposed:** (02) B-23 fixture adapter emits contract enum values (`ingestion_method` json/api, counterparty role `other`); then drop `auction_lot.conform`
 - **Done:** F-142 live verification + protocol adoption (this wave, see ack 2026-10-11-owner-project-operating-protocol); A-51 @ 12817e7; A-49 @ b2b3399; A-47 @ 6e6aa84; A-48 @ 8abbfa0; A-43 @ da6cf4a; A-44 @ 6440be3; A-42 @ 69402d9; A-41 @ 281cc74; A-40 @ 1160310; A-39 @ 6185927; A-38 @ 2198a74; A-37 @ b92683d
 - **Done (reboot persistence):** five user units enabled+active, Linger=yes; `docs/operations/REBOOT_RECOVERY.md`; cold start proven only by the next reboot
-- **Current bounded claim (Monday, October 12, 2026 — 12:43 PM America/Chicago):** F-158 launch/ACK verification through existing Agent 01 and lane 06 only. Do not duplicate the worker. Require a timestamp-consistent ACK/WORKING with worker provenance by 12:45 PM. Loaded `:8766` remains `a0ee24051fb06dcab8f04306bcb7da54504c5ece`; F-157/F-158 are not loaded and Claude Chrome acceptance is missing. Canonical log: `docs/receipts/2026-10-12-supervisor-visible-check-1243.md`.
+- **Current bounded claim (Monday, October 12, 2026 — 12:59 PM America/Chicago):** one existing-path combined release of `112fce4` with lane 02 pin `a186ca6e29f785e7bbb705ce6eb44482558f26da`, then Agent 01 firsthand Claude Chrome desktop/mobile acceptance on the actually loaded page. Stage STAGING_ACCEPTED / RELEASE BLOCKED — NOT LIVE, NOT DONE. Command: `tools/release_marketplace.sh 112fce4 a186ca6e29f785e7bbb705ce6eb44482558f26da`. Canonical log: `docs/receipts/2026-10-12-supervisor-visible-check-1259.md`.
 - **Done (this wave, runtime migration):** ADR-0014; lanes 02-06 closed out and sessions closed after verification; `tools/worker.py`, `mbos.router`, `mbos.telemetry`; quota from `rate_limit_event` verified; Aria 1945 ack
 - **Done (this wave):** A-24, A-25, A-26, A-27, A-12; Aria 1840 ack (ADR-0012, card capital-velocity fields) @ 292adae; Aria 1905 ack (ADR-0013, 20 tasks queued) @ e20d6af; A-23 mission schema @ a704e84 (+ principal_impairment @ 7b42c05); A-22 `tools/foreman.py`; release gate 285 passed (stale lane installs refreshed)
 - **Done:** A-00 (ADR-0010), A-01 phase 1 (`Pg04Ledger`), A-07 (`notify_decision`), A-09 (R12), A-11 (interop tool)
 - **Current phase:** ROUND TWO. The Lane A spine is built and tested. Integration rulings R1–R11 are issued.
 - **Role:** foreman/dispatcher. I own `docs/status/READY_QUEUE.md` and `ACTIVE_WORK.md` (`docs/COORDINATION.md`).
 - **Started:** 2026-10-06
-- **Last updated:** Monday, October 12, 2026 — 12:43 PM America/Chicago
+- **Last updated:** Monday, October 12, 2026 — 12:59 PM America/Chicago
 
 ## Current objective
 Build the durable application spine DISCOVER → NORMALIZE → SCORE → RECOMMEND → APPROVE → DRY-RUN ACT → RECEIPT and integrate the specialist lanes. All external actions are DRY-RUN only.
