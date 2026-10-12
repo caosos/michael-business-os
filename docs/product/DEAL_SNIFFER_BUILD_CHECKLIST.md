@@ -450,3 +450,14 @@ This section is part of the existing living checklist and is the authoritative r
 - [ ] **Tested / loaded:** search `cb682ff`, detail `f6a399c`; loaded `a0ee24051fb06dcab8f04306bcb7da54504c5ece`; loaded Claude Chrome desktop/mobile evidence NONE. Latest host observation Monday, October 12, 2026 — 4:16:27 PM America/Chicago is limited to the D-37 watchdog check; current A-73/F-165 process state UNKNOWN. **APPEARS STALE — HOST STATE UNVERIFIED.**
 - **ONE next action:** Agent 01 publishes host-backed A-73 ACK/WORKING or exact NEED and reconciles the five false NEED states before one serial dispatch.
 - **Canonical evidence:** `docs/receipts/2026-10-12-supervisor-visible-check-1621.md`.
+
+
+## Supervisor reconciliation — Monday, October 12, 2026 — 5:15 PM America/Chicago
+- [ ] **A-73 remains the ONE current bounded task:** existing Agent 01; P0; NEED — ACK MISSED. False NEEDs now cover ten DONE/superseded tasks: A-74, B-36, B-38, F-159, D-37, F-163, D-35, B-39, D-38 and B-41. Current A-73 process state UNKNOWN.
+- [x] **F-165 loaded desktop evidence:** fb84d0c was released Monday, October 12, 2026 — 4:58:46 PM America/Chicago; ARTIFACT verify-only passed; loaded Claude Chrome showed the search layout and 16 results within 150 miles. Staged tests: 38/0 focused and 600/2 known environment failures.
+- [ ] **F-165 full live acceptance:** mobile interaction, listing-detail interaction, representative source links, My Bids and Suggestions proof remain MISSING. Formal release receipt host observation is UNKNOWN.
+- [ ] **B-43 PARTIAL / B-44 BLOCKED:** Facebook adapter 570888a passed 451/0 fixtures; bounded live smoke returned HTTP 400 'Customer is not active', cost $0. Michael must finish Bright Data customer activation before B-44.
+- [ ] **F-161 connected-alert UI:** transport claims WORKING with host UNKNOWN. B-12 dedicated mailbox read-only login exists, but the DealSniffer/Alerts label/filter and first genuine alert remain absent.
+- **Tested / loaded:** fb84d0c / fb84d0c. Latest separate watchdog observation Monday, October 12, 2026 — 5:01:18 PM America/Chicago; current Agent 01/A-73/F-161 state UNKNOWN. APPEARS STALE — HOST STATE UNVERIFIED.
+- **ONE next action:** Agent 01 publishes host-backed A-73 ACK/WORKING or exact NEED and reconciles the ten false NEED states before one serial dispatch.
+- **Canonical evidence:** docs/receipts/2026-10-12-supervisor-visible-check-1715.md.
