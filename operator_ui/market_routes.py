@@ -73,6 +73,9 @@ def page_body(app, qs: dict, now, errors=None, values=None) -> str:
     au = mba.urls(auto)
     results, b1 = mb.exclude(results, prefs, au)           # F-147: tracked ("I bid on this") items leave the lineup; they live in the My bids window
     unchecked, b2 = mb.exclude(unchecked, prefs, au)
+    for c in results + unchecked:                      # F-154: closing-soon badge on cards of items the owner keeps (saved); display only
+        if c.get("saved"):
+            c["closing_badge"] = mb.badge(c, now)
     q["hidden_n"], q["hidden_checked"], q["matched_n"] = g1 + g2, g1, n_before - b1 - b2
     if prefs["enabled"] and "sort" not in qs and (prefs["saved"] or prefs["more"] or prefs["less"]):
         q["sort"] = "suggested"                      # feedback exists and the owner chose no sort: use it; hard filters already ran

@@ -94,7 +94,7 @@ def gallery_card(c: dict, tok) -> str:
     ti = c["title"] if len(c["title"]) <= 60 else c["title"][:59] + "…"
     flag = " <span class='badge'>SAVED</span>" if c.get("saved") else ""
     return (f"<div class='mk-g' data-lot='{e(c['id'])}'>{ph}{price}<div class='ti'><b>{e(ti)}</b>{flag}</div><div class='small'>{town}</div>{msv.card_note(c)}"
-            f"<div class='small mut'>closes {e(c['closes'] or 'UNKNOWN')} · posted age: not given · auction, all-in cost unknown</div>"
+            f"<div class='small mut'>closes {e(c['closes'] or 'UNKNOWN')}{c.get('closing_badge', '')} · posted age: not given · auction, all-in cost unknown</div>"
             f"<div class='small mut gal-lbl'>{gallery_labels(c)}</div><div class='small'>{link_html(c['url'])} · <span class='lbl'>WATCH</span></div>{pref_buttons(c, tok)}</div>")
 
 
@@ -127,7 +127,7 @@ def render_card(c: dict, tok=None) -> str:
     return (f"<div class='card mk-res'>{_photo(c['image'], c['url'])}<div style='min-width:0'><h3 style='margin:0 0 4px'>{e(c['title'])} "
             f"<span class='badge'>{verdict}</span> <span class='lbl'>RESEARCH NEEDED</span></h3>"
             f"<p class='small'>{e(c['description']) or '<span class=mut>No description from the seller</span>'}</p>"
-            f"<p><span class='lbl'>AUCTION</span> Current bid <b>{_money(c['bid'])}</b> (a bid, not a sold price or final cost) · Asking price: none (auction) · closes {e(c['closes'] or 'UNKNOWN')} · {where} · "
+            f"<p><span class='lbl'>AUCTION</span> Current bid <b>{_money(c['bid'])}</b> (a bid, not a sold price or final cost) · Asking price: none (auction) · closes {e(c['closes'] or 'UNKNOWN')}{c.get('closing_badge', '')} · {where} · "
             f"condition (seller says): {e(c['condition'] or 'UNKNOWN')}</p>"
             f"{auction_line}"
             + (f"<p class='small' id='opening-min'>No bids yet. {e(L['opening_text'])}" + ("" if L["opening_min"] is not None else f" {link_html(c['url'])}") + "</p>" if c["bid"] is None else "")

@@ -7,7 +7,7 @@ committed) and is never shown outside this page. Current bid / bid count come fr
 from __future__ import annotations
 
 import re
-from datetime import date, datetime, time, timezone
+from datetime import date, datetime, time, timedelta, timezone
 from zoneinfo import ZoneInfo
 from html import escape as e
 
@@ -73,6 +73,26 @@ def _end(r: dict):
     return t if t.tzinfo else t.replace(tzinfo=timezone.utc)
 
 
+def closing(r: dict, now: datetime) -> str:
+    """F-154 (display only): 'closing within 2 h' (0 < left <= 2 h) else 'closing today' (the close falls on today's America/Chicago date, still ahead). '' otherwise or when the close is UNKNOWN."""
+    t = _end(r)
+    if t is None or t <= now:
+        return ""
+    if t - now <= timedelta(hours=2):
+        return "closing within 2 h"
+    tz = ZoneInfo("America/Chicago")
+    return "closing today" if t.astimezone(tz).date() == now.astimezone(tz).date() else ""
+
+
+def badge(r: dict, now: datetime) -> str:
+    b = closing(r, now)
+    return f" <span class='badge' data-closing='{b}'>{b.upper()}</span>" if b else ""
+
+
+def _rank(r: dict, now: datetime) -> int:
+    return {"closing within 2 h": 0, "closing today": 1}.get(closing(r, now), 2)
+
+
 def countdown(r: dict, now: datetime) -> str:
     t = _end(r)
     if t is None:
@@ -92,10 +112,10 @@ def window(d: dict, cards: list[dict], now: datetime, tok, auto: tuple = ((), ""
         c = live.get(i)
         r = {**r, **({"bid": c["bid"], "bidders": c.get("bidders"), "fetched_at": c.get("fetched_at") or r["fetched_at"]} if c and c.get("kind") != "auction event" else {})}
         rows.append((_end(r) or datetime.max.replace(tzinfo=timezone.utc), i, r))
-    rows.sort(key=lambda t: (t[0], t[1]))
+    rows.sort(key=lambda t: (_rank(t[2], now), t[0], t[1]))
     li = []
-    mixed = sorted([(k, i, None, h) for k, i, h in mba.rows(auto[0], now, tok, countdown, _end)] + [(k, i, r, None) for k, i, r in rows], key=lambda t: (t[0], t[1]))
-    for _, i, r, html in mixed:
+    mixed = sorted([(k, i, None, h, rk) for k, i, h, rk in mba.rows(auto[0], now, tok, countdown, _end, badge, _rank)] + [(k, i, r, None, _rank(r, now)) for k, i, r in rows], key=lambda t: (t[4], t[0], t[1]))
+    for _, i, r, html, _rk in mixed:
         if html:
             li.append(html)
             continue
@@ -104,7 +124,7 @@ def window(d: dict, cards: list[dict], now: datetime, tok, auto: tuple = ((), ""
         link = f"<a href='{e(r['url'])}' target='_blank' rel='noopener noreferrer'>original listing</a>" if r.get("url", "").startswith(("http://", "https://")) else "no link"
         hid = f"{tok()}<input type='hidden' name='lot' value='{e(i)}'>"
         mx = f"<br>your max: ${r['max_bid']:,.0f} <span class='mut'>(this computer only)</span>" if r.get("max_bid") is not None else ""
-        li.append(f"<li data-bid='{e(i)}'><b>{e(r['title'] or i)}</b><br><span class='mut'>{e(r['source'] or 'source UNKNOWN')}</span> · {countdown(r, now)}<br>"
+        li.append(f"<li data-bid='{e(i)}'><b>{e(r['title'] or i)}</b><br><span class='mut'>{e(r['source'] or 'source UNKNOWN')}</span> · {countdown(r, now)}{badge(r, now)}<br>"
                   f"current bid {bid} · bids {cnt} · as of {e(r.get('fetched_at') or 'marking time')[:16]} · {link}{mx}<br>"
                   f"<form method='post' action='/market/bid' style='display:inline'>{hid}<button name='act' value='unbid'>Stop tracking</button></form> "
                   f"<form method='post' action='/market/bid' style='display:inline'>{hid}<input name='max_bid' size='6' inputmode='decimal' aria-label='Your max bid' placeholder='max $'>"
