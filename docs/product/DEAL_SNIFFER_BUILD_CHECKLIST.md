@@ -244,3 +244,15 @@ This section is part of the existing living checklist and is the authoritative r
 - **Next bounded task:** F-157 owner category controls, delivered through existing Agent 01/lane 06 via PR #1 transport comment [6120953444](https://github.com/caosos/michael-business-os/pull/1#issuecomment-6120953444). ACK/WORKING is required by Monday, October 12, 2026 — 3:58 AM America/Chicago. No duplicate worker or monitor.
 - **Final gate remains combined loaded acceptance:** exact tested/loaded revision, actual service state, and firsthand Claude Chrome desktop/mobile for Sources, category persistence/land exclusion, My Bids, Suggestions, multiple real listings, and representative source links.
 - **Michael:** NOTHING.
+
+
+## Supervisor reconciliation — Monday, October 12, 2026 — 4:46 AM America/Chicago
+
+- **Canonical receipt:** `DS-CHECKIN-20261012-0446-CDT` / [docs/receipts/2026-10-12-supervisor-visible-check-0446.md](../receipts/2026-10-12-supervisor-visible-check-0446.md).
+- **F-157 material transition:** worker implementation is complete at `498fcb3eb04d5e1a4d281a5ade2cac306141bda4`; lane status `d44b7f95a0aeadac75d51eece0cfca90d3686ffe`. Tests: focused 8/0, reference 575/1 known `resale_f39`, lane D+E 104/3 (two known F-32 plus documented f25 flake). Queue delivery ACK was not recorded, but the lane result exists; do not re-dispatch.
+- **Current bounded task:** F-157 Agent 01 independent acceptance. Stage `WORKER_DONE / AGENT 01 ACCEPTANCE PENDING`; exact review delivery [PR #1 comment 6121789517](https://github.com/caosos/michael-business-os/pull/1#issuecomment-6121789517).
+- **Tested versus loaded:** F-157 tested at `498fcb3`; combined loaded revision remains `bbc80ec851b75aec52af1f8b0838dd56ccc714ef`. F-154/F-155/F-156/F-157 remain unproven loaded.
+- **Browser/host:** Agent 01 firsthand Claude Chrome desktop/mobile evidence for F-157 is MISSING. Current host/process state UNKNOWN; lane commits are not host-liveness proof.
+- **ETA / next_check_at:** ETA UNKNOWN; Monday, October 12, 2026 — 4:51 AM America/Chicago.
+- **Blocker:** missing independent Agent 01 test/browser receipt and combined loaded acceptance. **Michael:** NOTHING.
+- **One next action:** existing Agent 01 publishes ACK/WORKING, then STAGING_ACCEPTED/DONE with exact evidence or structured NEED/BLOCKED. No new worker.
