@@ -1,3 +1,4 @@
+import json
 import importlib.util
 from pathlib import Path
 
@@ -175,3 +176,23 @@ def test_send_wake_refuses_any_other_session_or_text(monkeypatch):
     assert cw.send_wake({"tmux": "mbos-agent-01:@0.%0"}, "x && $(z) `y`") is False
     assert cw.send_wake({"tmux": "mbos-agent-01:@0.%0"}, "fine text") is True
     assert any("send-keys" in a for a in calls)
+
+
+def test_cycle_survives_an_available_relay_and_keeps_the_unacked_ids(tmp_path, monkeypatch):
+    """Regression (2026-10-12): the A-71 block reused the name `need` for the relay NEED; once `gh` was logged in it became None and
+    classify() crashed every cycle (watchdog down right after the owner's gh login). The cycle must complete and still see unacked ids."""
+    import sys, types
+    monkeypatch.setattr(cw, "WD", tmp_path)
+    monkeypatch.setattr(cw, "git", lambda *a: type("R", (), {"returncode": 0, "stdout": ""})())
+    monkeypatch.setattr(cw, "list_ids", lambda ref, path: ["MSG-7"] if "inbox" in path else [])
+    monkeypatch.setattr(cw, "my_session", lambda: None)
+    monkeypatch.setattr(cw, "quota_ok", lambda: True)
+    monkeypatch.setattr(cw, "ready_rows", lambda: 0)
+    monkeypatch.setattr(cw, "dispatcher_alive", lambda: True)
+    monkeypatch.setattr(cw, "probe_issue", lambda *a: {})
+    fake = types.SimpleNamespace(CHICAGO=__import__("zoneinfo").ZoneInfo("America/Chicago"), gh_ready=lambda: True, gh_post=lambda b: "ok",
+                                 tick=lambda *a, **k: {"outcomes": [], "relay": {"sent": 0, "pending": 0}})
+    monkeypatch.setitem(sys.modules, "eta_checkpoints", fake)
+    out = cw.cycle(["origin/liaison/x"], do_wake=False, probe=False)
+    assert "MSG-7" in json.dumps(out)
+    assert cw.load_state().get("relay_need") is None

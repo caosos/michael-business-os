@@ -366,10 +366,10 @@ def cycle(inbox_refs, do_wake: bool, probe: bool = True) -> dict:
         res = ec.tick(WD, _dt.now(ec.CHICAGO), ps_pid, iso(t), post=ec.gh_post if ec.gh_ready() else None)
         for o in res["outcomes"]:
             receipt(f"eta_checkpoint_{o['stage'].lower()}", o, ["var/watchdog/checkpoints.json", "ps -eo pid,args"])
-        need = res["relay"].get("need")
-        if need and st.get("relay_need") != need:
-            receipt("relay_need", {"need": need, "pending_events": res["relay"].get("pending")}, ["gh auth status"])
-        st["relay_need"] = need
+        relay_need = res["relay"].get("need")     # NOT `need`: that name holds the unacknowledged message ids used by classify() below
+        if relay_need and st.get("relay_need") != relay_need:
+            receipt("relay_need", {"need": relay_need, "pending_events": res["relay"].get("pending")}, ["gh auth status"])
+        st["relay_need"] = relay_need
         extras["eta"] = {"outcomes": len(res["outcomes"]), "relay": res["relay"]}
     except Exception as e:  # noqa: BLE001  never let checkpoint logic stop the watchdog
         extras["eta_error"] = f"{type(e).__name__}: {e}"
