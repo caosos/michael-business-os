@@ -6,7 +6,7 @@ Branch: research/agent-04-state
 Worktree: /home/michaelos/business-os-worktrees/agent-04-state
 State: CLOSED (A-74 done; handoff: docs/handoff/LANE_04.md)
 Claimed: none
-Done: A-74 @ COMMIT (ADR-0015 accounts + location-scoped sources, PROPOSED; docs/receipts/2026-10-12-a74-accounts-location-adr.md)
+Done: A-74 @ 3094eca (ADR-0015 accounts + location-scoped sources, PROPOSED; docs/receipts/2026-10-12-a74-accounts-location-adr.md)
 Done: D-01 @ a0d1fbe
 Done: D-02 @ a0d1fbe
 Done: D-03 @ ca59e3c
