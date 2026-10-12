@@ -234,3 +234,13 @@ This section is part of the existing living checklist and is the authoritative r
 - **Loaded/tested state:** loaded revision remains `bbc80ec851b75aec52af1f8b0838dd56ccc714ef`. F-155 staging head `bb512d9a743aa53635926d006ba113dce7bcd4ed` has 33 focused passes and 550 lane passes / 1 known `f39`; F-154/F-155/B-35/F-156 are not proven loaded. Current user-visible desktop/mobile Claude Chrome acceptance remains missing.
 - **One next action:** existing Agent 01 reviews/reconciles B-35 and checks the existing F-156 worker at Monday, October 12, 2026 — 4:08 AM America/Chicago; no new worker or monitor.
 - **Michael:** NOTHING.
+
+
+## Supervisor reconciliation — Monday, October 12, 2026 — 3:53 AM America/Chicago
+
+- **B-35:** DONE for its bounded parser task at code `94668801e77320d61f73be9e1e6f09c4d34d25b4`, status `22fc4647d0d378989158d83b977f0377a5a5f93f`, 414 passed / 0 failed. This does not prove genuine owner-mail ingestion or loaded registered-auction UI.
+- **F-156:** PARTIAL / STAGING_ACCEPTED at code `1c77a14`, status `a0ee24051fb06dcab8f04306bcb7da54504c5ece`; Agent 01 reports 21/0 focused and 558/1 known `f39`. Live caches were used in staging and verify-only passed. It is NOT LIVE and lacks the required loaded desktop/mobile Claude Chrome journey.
+- **Loaded revision:** `bbc80ec851b75aec52af1f8b0838dd56ccc714ef`; F-154/F-155/F-156 remain not proven loaded.
+- **Next bounded task:** F-157 owner category controls, delivered through existing Agent 01/lane 06 via PR #1 transport comment [6120953444](https://github.com/caosos/michael-business-os/pull/1#issuecomment-6120953444). ACK/WORKING is required by Monday, October 12, 2026 — 3:58 AM America/Chicago. No duplicate worker or monitor.
+- **Final gate remains combined loaded acceptance:** exact tested/loaded revision, actual service state, and firsthand Claude Chrome desktop/mobile for Sources, category persistence/land exclusion, My Bids, Suggestions, multiple real listings, and representative source links.
+- **Michael:** NOTHING.
