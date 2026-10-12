@@ -345,3 +345,19 @@ This section is part of the existing living checklist and is the authoritative r
 - **Blocker:** missing current Agent 01 session/pickup/watchdog/auth evidence and resulting ACK/WORKING.
 - **One next action:** existing host pickup path proves its state and publishes F-157 ACK/WORKING, or a structured host/permission NEED naming the failed command and evidence. Do not launch a duplicate.
 - **Michael:** NOTHING unless that host check proves an interactive credential action is actually required.
+
+
+## Supervisor reconciliation — Monday, October 12, 2026 — 12:18 PM America/Chicago
+
+- **Canonical receipt:** `DS-CHECKIN-20261012-1218-CDT@2026-10-12T12:18:52-05:00` / [docs/receipts/2026-10-12-supervisor-visible-check-1218.md](../receipts/2026-10-12-supervisor-visible-check-1218.md).
+- **Transition:** RECOVERY / ACK / WORKING. Existing Agent 01 host ACK [`05e9938`](https://github.com/caosos/michael-business-os/commit/05e99389fa132833a02611112fa0f8b0476c5b59); [PR #1 comment 6129093549](https://github.com/caosos/michael-business-os/pull/1#issuecomment-6129093549).
+- **Host proof:** at 2026-10-12T17:16:44Z the existing Agent 01, watchdog, pickup, dispatcher, UI and worker sessions were present; `gh auth` was logged in; live `:8766` served `bbc80ec`.
+- **Root cause:** the existing watchdog had no wake path for a finished specialist artifact awaiting Agent 01 acceptance. F-157 arrived while Agent 01 was idle, no wake was emitted, and review did not start.
+- **Correction:** comment 6129093549's generated `Host observation: UNKNOWN` field is superseded by its timestamped ACK file and commit.
+- **Current bounded task:** F-157 independent Agent 01 acceptance; stage `WORKING — HOST-VERIFIED ACK / SESSION RESTART / INDEPENDENT REVIEW`. Completed lane 06 artifact `498fcb3` remains closed and is not re-dispatched.
+- **Tested / loaded:** worker evidence 8/0 focused, reference 575/1 known `resale_f39`, lane D+E 104/3 documented unrelated failures; loaded `bbc80ec`; F-157 NOT LOADED; new Claude Chrome desktop/mobile evidence pending.
+- **ETA / next_check_at:** restart about 5 minutes from the 12:16 PM ACK; review about 40 minutes after restart; Monday, October 12, 2026 — 1:01 PM America/Chicago.
+- **Blocker:** NONE for review.
+- **One next action:** existing Agent 01 completes clean-checkout review and publishes exact tests plus Claude Chrome desktop/mobile STAGING_ACCEPTED/DONE or structured NEED/BLOCKED.
+- **Upcoming operational fix:** A-73 closes the proven wake gap inside the existing watchdog, serial after F-157 acceptance, with no duplicate service.
+- **Michael:** NOTHING.
