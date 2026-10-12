@@ -495,3 +495,15 @@ Proposed by closed lanes and accepted here:
 - **Tested / loaded:** F-157/F-158 tested `112fce4`; loaded `a0ee240`; F-158 NOT LOADED; loaded browser proof MISSING. No genuine B-12 smoke or live B-37 smoke.
 - **ONE next action:** existing Agent 01 publishes current host evidence and A-73 ACK/WORKING or exact NEED, then reconciles the conflicting parallel claims.
 - **Canonical evidence:** `docs/receipts/2026-10-12-supervisor-visible-check-1435.md`.
+
+
+## Supervisor reconciliation — Monday, October 12, 2026 — 3:21 PM America/Chicago
+- **ONE current bounded item:** A-73 existing-watchdog finished-artifact wake repair.
+- **Owner / priority / stage:** existing Agent 01 / P0 / **NEED — ACK MISSED**; no worker is validly current until timestamped host provenance and a serial ACK/dispatch exist.
+- **Acceptance:** exactly one wake, deduplication, project isolation, completed-artifact provenance, ACK/WORKING within 300 seconds, no duplicate coordinator/worker/service/watchdog/monitor.
+- **Blocker:** current Agent 01/watchdog host state is UNKNOWN; F-164 and D-37 transport claims conflict and cannot establish liveness.
+- **Next action:** Agent 01 publishes current host/process evidence and A-73 ACK/WORKING or exact command-specific NEED, then reconciles F-164 versus D-37 before one serial dispatch.
+- **Preserved next eligible UI item:** F-164 fixes 390×900 and 360×800 document overflow, keeps Search/Filters within the viewport, wraps or internally scrolls quick views, and renders location once as City, ST ZIP · distance. F-163 `478bfc0` is desktop-accepted in staged headless Chrome but PARTIAL overall.
+- **Evidence:** `478bfc00006e4257f68cb93317b2f573f3b21d2f`, `87071031f0c73a753f8d0cb390e9e8b6196345c4`, PR comment 6131957899, and `docs/receipts/2026-10-12-supervisor-visible-check-1521.md`.
+- **Tested / loaded / browser:** tested `478bfc0`; loaded `a0ee24051fb06dcab8f04306bcb7da54504c5ece`; loaded Claude Chrome desktop/mobile evidence NONE.
+- **ETA / next_check_at:** authoritative ETA UNKNOWN; A-73 next_check_at MISSING. F-164 transport's Monday, October 12, 2026 — 4:10 PM America/Chicago is retained only as an unverified claim.
