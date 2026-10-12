@@ -10,7 +10,7 @@ from pathlib import Path
 import pytest
 
 SCRIPT = Path(__file__).resolve().parents[2] / "tools" / "reload_ui.sh"
-GOOD_PAGES = {"market": "Michael's Marketplace name='cat' name='row1' name='row4' name='condition' name='any' Save this search Gallery rows",
+GOOD_PAGES = {"market": "Michael's Marketplace name='cat' name='row1' name='row4' name='condition' name='any' Save this search Gallery rows id='mkfilters'",
               "market_validation": "<div id='filter-errors'>Radius must not be negative</div>", "mission": "Weekly mission", "queue": "Operator queue"}
 
 
