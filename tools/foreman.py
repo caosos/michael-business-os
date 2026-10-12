@@ -83,6 +83,17 @@ def schema_problems(text: str | None) -> list[str]:
     return out
 
 
+def duplicate_ids(text: str | None) -> list[str]:
+    """Task ids used by more than one row. Reported as a WARN (not a launch refusal: F-20 is a historical pair); a new duplicate is a
+    coordinator error that sends a worker the wrong row (found when 01 added a second B-31 on 2026-10-12)."""
+    seen: dict[str, int] = {}
+    for line in (text or "").splitlines():
+        m = re.match(r"\|\s*([A-GX]-\d+)\s*\|", line)
+        if m:
+            seen[m.group(1)] = seen.get(m.group(1), 0) + 1
+    return sorted(k for k, v in seen.items() if v > 1)
+
+
 def deps_met(row: dict, rows: list[dict], done: set[str]) -> bool:
     """Every task id named in the row's deps must be DONE (lane's word or the queue row). Ids not in the queue at all count as met; text without ids ('none') too."""
     status = {r["id"]: r["status"] for r in rows}
@@ -130,6 +141,7 @@ def survey(repo: Path) -> tuple[list[dict], list[str]]:
     queue_text = show(repo, COORD, "docs/status/READY_QUEUE.md")
     rows = parse_queue(queue_text)
     warnings = [f"queue schema: {p}" for p in schema_problems(queue_text)]
+    warnings += [f"duplicate task id: {d} (rename the newer row)" for d in duplicate_ids(queue_text)]
     if queue_text is None:
         warnings.append("cannot read READY_QUEUE from origin/" + COORD)
     m = re.search(r"Last synced:.*", queue_text or "")

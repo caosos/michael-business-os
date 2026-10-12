@@ -186,3 +186,10 @@ def test_schema_flags_a_literal_pipe_inside_a_cell():
     assert f.schema_problems(good) == []
     probs = f.schema_problems(bad)
     assert probs and probs[0].startswith("F-91:") and "literal |" in probs[0]
+
+
+def test_duplicate_task_ids_are_reported():
+    f = _load_foreman()
+    q = "| B-31 | P1 | old | none | BLOCKED | 02 | a |\n| B-32 | P2 | x | none | READY | 02 | a |\n| B-31 | P2 | new | none | READY | 02 | a |"
+    assert f.duplicate_ids(q) == ["B-31"]
+    assert f.duplicate_ids(q.replace("| B-31 | P2 | new", "| B-33 | P2 | new")) == []
