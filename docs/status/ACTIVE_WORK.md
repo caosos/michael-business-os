@@ -113,3 +113,11 @@ All other lanes: CLOSED, nothing READY (all open rows BLOCKED on owner/host). La
 - **Blocker:** NONE for A-73 implementation; host delivery/liveness unverified. Exact-target approval separately blocks F-157/F-158 live acceptance.
 - **ONE next action:** existing Agent 01 ACKs A-73 with host evidence and begins the bounded existing-watchdog repair, or publishes command-specific NEED/BLOCKED.
 - **Canonical log:** `docs/receipts/2026-10-12-supervisor-visible-check-1332.md`.
+
+
+## Current checkpoint — Monday, October 12, 2026 — 1:53 PM America/Chicago
+- **ONE current bounded task:** A-73 existing-watchdog wake-gap repair, owned by existing Agent 01. Stage **DELIVERED IN REPOSITORY / ACK MISSED**; 1:37 PM plus the 300-second watchdog window elapsed. ETA UNKNOWN; next_check_at MISSING. No duplicate process/service/session/automation.
+- **Compatible blocked dependency update:** B-12 NEED receipt [6130595898](https://github.com/caosos/michael-business-os/pull/1#issuecomment-6130595898) reports read-only IMAP access and labels now present, but `DealSniffer/Alerts` has zero messages. Owner saved-search alert plus Gmail filter and first genuine alert remain required. This does not displace A-73.
+- **Acceptance:** after the genuine alert arrives, Agent 02 performs privacy-safe parser smoke with Seen unchanged; Agent 01 verifies the real card/original link in Claude Chrome desktop/mobile.
+- **Tested / loaded / host:** B-12 parser NOT RUN; F-157/F-158 tested `112fce4`, loaded `a0ee240`, not live accepted; current host/process state UNKNOWN. **APPEARS STALE — HOST STATE UNVERIFIED.**
+- **Canonical log:** `docs/receipts/2026-10-12-supervisor-visible-check-1353.md`.
