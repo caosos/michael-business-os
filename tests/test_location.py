@@ -53,7 +53,7 @@ def test_unknown_location_gets_national_only_and_blocked_status_is_reported():
     ids = active(User())
     assert ids == NATIONAL
     by = {c.source_id: c for c in sources_for(User())}
-    assert by["fb_marketplace"].status == "blocked" and by["fb_marketplace"].active
+    assert by["fb_marketplace"].status == "fixture" and by["fb_marketplace"].active
 
 
 def test_default_radius():

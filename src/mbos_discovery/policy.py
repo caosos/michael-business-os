@@ -59,6 +59,9 @@ REGISTRY: dict[str, SourcePolicy] = {p.source: p for p in [
        "blackmonauctions.com RSS feed + event pages, EVENT level (robots ok); lot data on proxibid.com is NEVER fetched"),
     _P("proxibid", Disposition.FORBIDDEN, 3, "high", "blackmon.proxibid.com robots.txt Disallow: /; link for the human only"),
     _P("bidwrangler", Disposition.FORBIDDEN, 3, "high", "BidWrangler Terms of Use forbid data mining; link for the human only"),
+    # Tier 4 — owner-accepted provider route (B-42/B-43); Meta compliance is UNKNOWN, not granted
+    _P("brightdata_fb", Disposition.ALLOWED, 4, "high",
+       "Facebook Marketplace via Bright Data Scraper API; source_compliance: UNKNOWN (no Meta permission; owner-accepted provider route); owner chose route (b) 2026-10-12"),
     # Tier 5 — human-entered evidence (Michael / Operator UI), with human provenance
     _P("manual", Disposition.ALLOWED, 5, "low", "sold comps recorded by a human, with provenance"),
     # Tier 3/4 — gray zone, needs explicit per-source enablement (P2)

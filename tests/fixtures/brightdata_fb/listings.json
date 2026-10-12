@@ -1,0 +1,12 @@
+[{"url": "https://www.facebook.com/marketplace/item/900000000000001/", "product_id": "900000000000001",
+  "title": "DeWalt cordless drill set", "description": "Two batteries and charger, works great.",
+  "initial_price": "$80", "final_price": "$65", "currency": "USD", "condition": "Used - Good",
+  "location": "Conway, AR", "country_code": "US", "listing_date": "2026-10-10T14:03:00.000Z",
+  "images": ["https://images.example.invalid/a.jpg", "http://insecure.example.invalid/b.jpg"],
+  "seller_description": "SELLERNAME-SYNTH Jane Seller", "profile_id": "PROFILEID-SYNTH-777", "brand": "DeWalt", "videos": []},
+ {"url": "https://www.facebook.com/marketplace/item/900000000000002/", "product_id": "900000000000002",
+  "title": "Utility trailer 5x8", "initial_price": 450, "final_price": null, "currency": "USD", "condition": "Used",
+  "location": {"name": "Vilonia, AR", "latitude": 35.0809, "longitude": -92.2149}, "listing_date": "2026-10-11T09:00:00.000Z",
+  "images": [], "profile_id": "PROFILEID-SYNTH-778", "seller_name": "SELLERNAME-SYNTH Bob"},
+ {"url": "https://www.facebook.com/marketplace/item/900000000000003/", "title": "Free pallets", "initial_price": 0,
+  "condition": "New", "location": "Little Rock, AR", "images": null}]

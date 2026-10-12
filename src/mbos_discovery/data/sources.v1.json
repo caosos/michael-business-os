@@ -223,11 +223,11 @@
       "coverage": {
         "scope": "national"
       },
-      "access_mode": "manual",
-      "status": "blocked",
+      "access_mode": "api",
+      "status": "fixture",
       "policy_ref": "https://www.facebook.com/apps/site_scraping_tos_terms.php",
       "terms_checked_at": "2026-10-11",
-      "note": "Automated collection needs Meta's written permission; no unattended fetch."
+      "note": "Via provider (Bright Data Scraper API, adapter brightdata_fb), owner-accepted route (b) 2026-10-12. source_compliance: UNKNOWN (no Meta permission; owner-accepted provider route). Status fixture until the live smoke passes."
     },
     {
       "source_id": "offerup",
