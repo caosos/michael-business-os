@@ -1,5 +1,12 @@
 # Live :8766 reload and rollback packet (PREPARED, NOT APPROVED, NOT RUN)
 
+## NEXT RELEASE (2026-10-12T08:50:44Z): CURRENT. Live is `bbc80ec`; adds F-154 closing-soon badges, F-155 ranked Suggestions + resale input, F-156 Sources panel.
+- **Artifact:** lane 06 `a0ee24051fb06dcab8f04306bcb7da54504c5ece` with lane 02 `a186ca6e29f785e7bbb705ce6eb44482558f26da` (unchanged; B-35 registrations are not wired into the UI yet).
+- **Verified:** lane suite 558/1 (known f39); staging under the coordinator python with the live caches: verify-only OK; dry run OK.
+- **One command (owner-run):** `cd ~/business-os-worktrees/agent-01-coordinator && tools/release_marketplace.sh a0ee24051fb06dcab8f04306bcb7da54504c5ece a186ca6e29f785e7bbb705ce6eb44482558f26da` (supersedes the bb512d9 command).
+
+---
+
 ## NEXT RELEASE (2026-10-12T07:56:45Z): CURRENT. Live is `bbc80ec`; this adds F-154 closing-soon badges and F-155 ranked DealSniffer Suggestions with the owner resale-price input.
 - **Artifact:** lane 06 `bb512d9a743aa53635926d006ba113dce7bcd4ed` with lane 02 `a186ca6e29f785e7bbb705ce6eb44482558f26da` (unchanged).
 - **Verified:** lane suite 550/1 (known f39); real-cache Suggestions behaviour checked; staging under the coordinator python verify-only OK; release script dry run OK.
