@@ -375,3 +375,15 @@ This section is part of the existing living checklist and is the authoritative r
 - **One next action:** existing Agent 01 completes exact-revision tests and Claude Chrome desktop/mobile review, then publishes STAGING_ACCEPTED/DONE or structured NEED/BLOCKED.
 - **Upcoming operational fix:** A-73 closes the proven wake gap inside the existing watchdog after F-157 acceptance, with no duplicate service.
 - **Michael:** NOTHING.
+
+
+### Supervisor check-in — Monday, October 12, 2026 — 12:30 PM America/Chicago
+
+- Canonical receipt: [`DS-CHECKIN-20261012-1230-CDT@2026-10-12T12:30:40-05:00`](../receipts/2026-10-12-supervisor-visible-check-1230.md).
+- **NO CHANGE since the 12:28 PM America/Chicago event-driven receipt.** F-157 remains the ONE current bounded item, owned by the existing Agent 01, at **WORKING — AGENT 01 RESUMED / CLEAN DETACHED REVIEW**.
+- Existing Agent 01 resumed at Monday, October 12, 2026 — 12:26 PM America/Chicago and is reviewing target `498fcb3` from clean detached checkout `var/review-f157`.
+- Tested versus loaded: worker evidence is focused 8/0, full lane 575/1 known unrelated failure, and lane D+E 104/3 known unrelated failures; Agent 01's independent rerun, golden review, and Claude Chrome desktop/mobile journey remain in progress. Loaded revision is `a0ee24051fb06dcab8f04306bcb7da54504c5ece`; F-157 is **NOT LOADED**.
+- Latest timestamped host observation: Monday, October 12, 2026 — 12:26 PM America/Chicago, with live `:8766` ARTIFACT `a0ee240` exported at `2026-10-12T17:22:00Z`; provenance [PR #1 comment 6129248011](https://github.com/caosos/michael-business-os/pull/1#issuecomment-6129248011).
+- Root-cause/ACK provenance: [`05e99389fa132833a02611112fa0f8b0476c5b59`](https://github.com/caosos/michael-business-os/commit/05e99389fa132833a02611112fa0f8b0476c5b59). The existing watchdog did not wake Agent 01 for a specialist-worker result awaiting coordinator acceptance; A-73 is queued serially after F-157 acceptance to repair that existing path without creating a duplicate service.
+- ETA: approximately 40 minutes from Monday, October 12, 2026 — 12:26 PM America/Chicago. next_check_at: Monday, October 12, 2026 — 1:10 PM America/Chicago. Blocker: **NONE**. Michael action: **NOTHING**.
+- ONE next action: Agent 01 completes independent F-157 tests, golden review, and Claude Chrome desktop/mobile acceptance, then publishes exactly STAGING_ACCEPTED/DONE or structured NEED/BLOCKED.
