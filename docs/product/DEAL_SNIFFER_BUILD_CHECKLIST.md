@@ -165,3 +165,15 @@ This section is part of the existing living checklist and is the authoritative r
 - **Serial gate correction:** F-155 implementation may continue, but no further dispatch, release or DONE chain may bypass F-154 independent full-suite and firsthand desktop/mobile browser acceptance. Immediate gate check remains 1:08 AM.
 - **Loaded revision:** F-143 `315ddfa98ff951e9da716f5b49c37f016153c466`.
 - **Blocker:** missing F-154 independent acceptance evidence. **Michael:** NOTHING.
+
+
+## Supervisor reconciliation — Monday, October 12, 2026 — 1:10 AM America/Chicago
+
+- **Canonical receipt:** `DS-CHECKIN-20261012-0110-CDT` / `docs/receipts/2026-10-12-supervisor-visible-check-0110.md`.
+- **Correction to `DS-CHECKIN-20261012-0101-CDT`:** the loaded revision is now F-153 artifact `bbc80ec851b75aec52af1f8b0838dd56ccc714ef`, not F-143. Owner-run release occurred at 12:51 AM; Agent 01 recorded live verification at 1:03:14 AM.
+- **Loaded proof:** listener PID 1233443; verify-only OK; live Claude in Chrome showed GSA, Wooley, Wilson and Blackmon connected, 9 results within 30 miles, remembered 30-mile selection and Search Now last. GSA refreshed at 1:02 AM (1,167 lots; 193 bid/bidder updates). Live phone-width interaction was NOT proven; staging mobile evidence does not replace it.
+- **Morning acceptance is not complete:** the 9 nearby results were auction events, not multiple current item-level trailer/tool listings; My Bids showed 0 and mailbox auto-detection remains NOT CONNECTED; ranked Suggestions is still F-155; representative source links and live mobile journey remain missing.
+- **F-154 NEED:** the 1:08 AM acceptance checkpoint passed without a DONE receipt. At 1:09:33 AM the watchdog found no F-154 worker. Implementation `917b7135cef103297029a93241720e06192c2d86` exists, but the full coordinator suite and firsthand Claude Chrome desktop/mobile acceptance remain missing. **APPEARS STALE — HOST STATE UNVERIFIED.**
+- **Current bounded task:** F-155 Suggestions remains WORKING through existing Agent 01/lane 06 after corrected relaunch event `45ba39d0fbf94777 #16`. Its receipt estimates about 60 minutes from 1:01 AM plus review; `next_check_at` 2:01 AM. Current PID/service proof is UNKNOWN.
+- **Serial recovery:** Agent 01 must close F-154's independent acceptance using the existing coordinator path; do not create another worker. F-155 may continue, but no further dispatch or combined release may bypass that gate.
+- **Blocker:** F-154 independent suite and live desktop/mobile Claude Chrome acceptance are missing. **Michael:** NOTHING.

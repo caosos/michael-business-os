@@ -31,3 +31,11 @@ All other lanes: CLOSED, nothing READY (all open rows BLOCKED on owner/host). La
 | **07** QA | CLOSED (fresh worker per release window) | G-14 `2e1e5f8` (RC READY, 0 residual xfails) | next release window | none |
 
 **RUN PAUSED ON QUOTA (5-hour window 97%, resets 19:20Z); see `docs/status/STATE_OF_PLAY.md`.** Previously: useful READY work was exhausted (2026-10-08, after the R14-in-the-database sequence D-23..D-28, G-16..G-19; gate green 443; 25+ bounded workers) except the owner-gated items above and the P-06-18 re-run. Next dispatch happens when Michael answers #9/#10/#11, supplies credentials, or a new gap is found.
+
+
+## Current checkpoint — 2026-10-12 01:10 America/Chicago
+
+- Loaded Marketplace artifact: `bbc80ec851b75aec52af1f8b0838dd56ccc714ef`; Agent 01 live verification recorded 2026-10-12T06:03:14Z, listener PID 1233443.
+- Current bounded implementation: F-155 Suggestions, existing lane 06 worker path; corrected relaunch receipt `45ba39d0fbf94777 #16`; current host liveness UNKNOWN; next_check_at 2026-10-12 02:01 America/Chicago.
+- F-154 acceptance gate: NEED after missed 01:08 checkpoint; no F-154 worker observed at 2026-10-12T06:09:33Z. Code exists, but full coordinator suite and live desktop/mobile Claude Chrome acceptance are missing. **APPEARS STALE — HOST STATE UNVERIFIED.**
+- No duplicate worker, queue, coordinator, watchdog or monitor. Michael must do NOTHING.
