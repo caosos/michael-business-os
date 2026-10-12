@@ -4,7 +4,7 @@
 - **Role:** Chief Coordinator / Core Platform / Integration (Lane A)
 - **Branch:** `research/agent-01-coordinator`
 - **Worktree:** `/home/michaelos/business-os-worktrees/agent-01-coordinator`
-- **State:** WORKING F-147 (My bids, lane 06) + B-30 (Wooley highlights, lane 02) in parallel; combined release NEED 6c2ac71 (F-144+F-145+F-146); B-12 mailbox NEED
+- **State:** F-146 STAGING_ACCEPTED at `6c2ac71` / NOT LOADED; current single bounded item is F-147 fix step READY at lane 06 status `568e2ca` after browser-found Wooley long-ID truncation bug. B-30 DONE; B-28 READY but not active. A-71 event transport PARTIAL/WORKING via PR #1; executable adoption remains missing. Current host/worker liveness UNKNOWN.
 - **Proposed:** (02) B-23 fixture adapter emits contract enum values (`ingestion_method` json/api, counterparty role `other`); then drop `auction_lot.conform`
 - **Done:** F-142 live verification + protocol adoption (this wave, see ack 2026-10-11-owner-project-operating-protocol); A-51 @ 12817e7; A-49 @ b2b3399; A-47 @ 6e6aa84; A-48 @ 8abbfa0; A-43 @ da6cf4a; A-44 @ 6440be3; A-42 @ 69402d9; A-41 @ 281cc74; A-40 @ 1160310; A-39 @ 6185927; A-38 @ 2198a74; A-37 @ b92683d
 - **Done (reboot persistence):** five user units enabled+active, Linger=yes; `docs/operations/REBOOT_RECOVERY.md`; cold start proven only by the next reboot
