@@ -121,3 +121,14 @@ All other lanes: CLOSED, nothing READY (all open rows BLOCKED on owner/host). La
 - **Acceptance:** after the genuine alert arrives, Agent 02 performs privacy-safe parser smoke with Seen unchanged; Agent 01 verifies the real card/original link in Claude Chrome desktop/mobile.
 - **Tested / loaded / host:** B-12 parser NOT RUN; F-157/F-158 tested `112fce4`, loaded `a0ee240`, not live accepted; current host/process state UNKNOWN. **APPEARS STALE — HOST STATE UNVERIFIED.**
 - **Canonical log:** `docs/receipts/2026-10-12-supervisor-visible-check-1353.md`.
+
+
+## Current checkpoint — Monday, October 12, 2026 — 2:35 PM America/Chicago
+- **ONE current bounded task:** A-73, existing Agent 01, priority P0, stage **NEED — ACK MISSED**. Repository delivery exists; current host ACK/WORKING does not.
+- **Conflicting transport activity:** F-159/B-36/B-38/A-74/D-35/B-37 parallel WORKING comments all report Host observation UNKNOWN and include future-dated launch/acceptance claims. Preserve artifacts; do not treat these comments as current host liveness or valid serial claims.
+- **B-12 dependency:** dedicated DealSniffer mailbox plus enabled Craigslist Little Rock-region trailer saved search (72032, 50 miles) and first genuine alert. Exact sender/subject filter waits for genuine headers; personal Gmail is out of scope.
+- **Tested / loaded / browser:** F-157/F-158 tested `112fce4`; loaded `a0ee240`; F-158 NOT LOADED; browser proof MISSING. B-36/B-37 are fixture-only.
+- **Host:** UNKNOWN. **APPEARS STALE — HOST STATE UNVERIFIED.**
+- **ETA / next_check_at:** ETA UNKNOWN; Monday, October 12, 2026 — 2:40 PM America/Chicago.
+- **ONE next action:** existing Agent 01 publishes current host evidence and A-73 ACK/WORKING or command-specific NEED, then reconciles the conflicting parallel claims.
+- **Canonical log:** `docs/receipts/2026-10-12-supervisor-visible-check-1435.md`.
