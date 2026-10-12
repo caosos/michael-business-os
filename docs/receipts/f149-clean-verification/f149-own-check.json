@@ -1,0 +1,76 @@
+{
+ "pass": false,
+ "res": {
+  "desktop": {
+   "auctions_r30": [
+    "wooley:t-j-bruck-estate-heavy-equipment-machinery-auction-perryville-arkansas",
+    "wilson:personal-property-1080",
+    "wilson:residential-1069",
+    "wilson:residential-1084",
+    "wilson:lakefront-1090"
+   ],
+   "status": "Wooley Auctioneers: connected (cached file) \u00b7 last fetched 2026-10-12 02:23 UTC (0 h ago) \u00b7 2 auction events (not lots)\nWilson Auctioneers: connected (cached file) \u00b7 last fetched 2026-10-12 02:23 UTC (0 h ago) \u00b7 17 auction events (not lots)\nCraigslist: NOT CON",
+   "auctions_r500_n": 10,
+   "wilson_n": 8,
+   "wooley_n": 2,
+   "wilson_only_n": 9,
+   "kw_dozer": [
+    "wooley:t-j-bruck-estate-heavy-equipment-machinery-auction-perryville-arkansas"
+   ],
+   "kw_boat": [
+    "wooley:t-j-bruck-estate-heavy-equipment-",
+    "wilson:personal-property-1080"
+   ],
+   "all_r100_n": 19,
+   "all_has_auction_events": true,
+   "row_titles": [
+    "Trailers (3)",
+    "Equipment (0)",
+    "Vehicles (6)",
+    "Auction Events (9)"
+   ],
+   "close_text": [
+    "closes Tue Oct 13, 6:00 PM CDT (closes in 1d 2",
+    "closes Wed Oct 14, 7:00 PM CDT (closes in 2d 2"
+   ],
+   "wilson_bid_removed": true,
+   "window_has_wilson": true
+  },
+  "mobile": {
+   "auctions_r30": [
+    "wooley:t-j-bruck-estate-heavy-equipment-machinery-auction-perryville-arkansas",
+    "wilson:personal-property-1080",
+    "wilson:residential-1069",
+    "wilson:residential-1084",
+    "wilson:lakefront-1090"
+   ],
+   "status": "Wooley Auctioneers: connected (cached file) \u00b7 last fetched 2026-10-12 02:23 UTC (0 h ago) \u00b7 2 auction events (not lots)\nWilson Auctioneers: connected (cached file) \u00b7 last fetched 2026-10-12 02:23 UTC (0 h ago) \u00b7 17 auction events (not lots)\nCraigslist: NOT CON",
+   "auctions_r500_n": 10,
+   "wilson_n": 8,
+   "wooley_n": 2,
+   "wilson_only_n": 9,
+   "kw_dozer": [
+    "wooley:t-j-bruck-estate-heavy-equipment-machinery-auction-perryville-arkansas"
+   ],
+   "kw_boat": [
+    "wooley:t-j-bruck-estate-heavy-equipment-",
+    "wilson:personal-property-1080"
+   ],
+   "all_r100_n": 19,
+   "all_has_auction_events": true,
+   "row_titles": [
+    "Trailers (3)",
+    "Equipment (0)",
+    "Vehicles (6)",
+    "Auction Events (9)"
+   ],
+   "close_text": [
+    "closes Tue Oct 13, 6:00 PM CDT (closes in 1d 2",
+    "closes Wed Oct 14, 7:00 PM CDT (closes in 2d 2"
+   ],
+   "wilson_bid_removed": true,
+   "window_has_wilson": true
+  },
+  "platform_requests": []
+ }
+}
