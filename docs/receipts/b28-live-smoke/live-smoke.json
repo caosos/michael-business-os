@@ -1,0 +1,232 @@
+{
+ "started_utc": "2026-10-12T01:23:49+00:00",
+ "finished_utc": "2026-10-12T01:23:50+00:00",
+ "user_agent": "DealSnifferBot/1.0 (read-only; auction events only)",
+ "requests_made": 1,
+ "error": null,
+ "events": 17,
+ "duplicate_ids": false,
+ "records": [
+  {
+   "id": "personal-property-1082",
+   "title": "ONLINE ONLY NO RESERVE FALL CONSIGNMENT CAMPERS, VEHICLES, TRAILERS, TRACTOR & IMPLEMENTS AUCTION | HOT SPRINGS, AR",
+   "closes_at": "2026-10-13T19:00:00-05:00",
+   "basis": "INFERENCE",
+   "location": {
+    "city": "Hot Springs",
+    "state": "AR",
+    "zip": "71913"
+   },
+   "distance_miles": 53.3,
+   "bidwrangler_link": null
+  },
+  {
+   "id": "residential-1069",
+   "title": "WEST LITTLE ROCK 11\u00b1 ACRE PRIVATE ESTATE NO RESERVE AUCTION | LITTLE ROCK, AR",
+   "closes_at": "UNKNOWN",
+   "basis": "UNKNOWN",
+   "location": {
+    "city": "Little Rock",
+    "state": "AR",
+    "zip": "72223"
+   },
+   "distance_miles": 25.2,
+   "bidwrangler_link": null
+  },
+  {
+   "id": "land-1076",
+   "title": "ONLINE ONLY COURT ORDERED LAND AUCTION | BEE BRANCH, AR",
+   "closes_at": "2026-10-14T14:00:00-05:00",
+   "basis": "INFERENCE",
+   "location": {
+    "city": "Bee Branch",
+    "state": "AR",
+    "zip": "72013"
+   },
+   "distance_miles": null,
+   "bidwrangler_link": null
+  },
+  {
+   "id": "personal-property-1080",
+   "title": "ONLINE ONLY CABINET SHOP LIQUIDATION, VEHICLE & BOAT NO RESERVE AUCTION | LITTLE ROCK, AR",
+   "closes_at": "2026-10-14T19:00:00-05:00",
+   "basis": "INFERENCE",
+   "location": {
+    "city": "Little Rock",
+    "state": "AR",
+    "zip": "72223"
+   },
+   "distance_miles": 25.2,
+   "bidwrangler_link": null
+  },
+  {
+   "id": "land-1065",
+   "title": "ONLINE ONLY NO RESERVE LAND AUCTION | HEBER SPRINGS, AR",
+   "closes_at": "2026-10-15T13:00:00-05:00",
+   "basis": "INFERENCE",
+   "location": {
+    "city": "Heber Springs",
+    "state": "AR",
+    "zip": "72543"
+   },
+   "distance_miles": 36.2,
+   "bidwrangler_link": null
+  },
+  {
+   "id": "commercial-1070",
+   "title": "CENTRAL AVENUE NO RESERVE COMMERCIAL REAL ESTATE AUCTION | HOT SPRINGS, AR",
+   "closes_at": "UNKNOWN",
+   "basis": "UNKNOWN",
+   "location": {
+    "city": "Hot Springs",
+    "state": "AR",
+    "zip": "71913"
+   },
+   "distance_miles": 53.3,
+   "bidwrangler_link": null
+  },
+  {
+   "id": "personal-property-1088",
+   "title": "ONLINE ONLY VEHICLE, EQUIPMENT & IMPLEMENT AUCTION | STAR CITY, AR",
+   "closes_at": "2026-10-20T19:00:00-05:00",
+   "basis": "INFERENCE",
+   "location": {
+    "city": "Star City",
+    "state": "AR",
+    "zip": "71667"
+   },
+   "distance_miles": null,
+   "bidwrangler_link": null
+  },
+  {
+   "id": "land-1074",
+   "title": "385\u00b1 ACRE ROW CROP FARM AUCTION | STUTTGART, AR",
+   "closes_at": "UNKNOWN",
+   "basis": "UNKNOWN",
+   "location": {
+    "city": "Stuttgart",
+    "state": "AR",
+    "zip": "72160"
+   },
+   "distance_miles": null,
+   "bidwrangler_link": null
+  },
+  {
+   "id": "residential-1075",
+   "title": "OUACHITA RIVERFRONT HOME AUCTION | MALVERN, AR",
+   "closes_at": "UNKNOWN",
+   "basis": "UNKNOWN",
+   "location": {
+    "city": "Malvern",
+    "state": "AR",
+    "zip": "72104"
+   },
+   "distance_miles": null,
+   "bidwrangler_link": null
+  },
+  {
+   "id": "land-1071",
+   "title": "CYPRESS CREEK PASTURE & HUNTING LAND AUCTION | PERRY, AR",
+   "closes_at": "UNKNOWN",
+   "basis": "UNKNOWN",
+   "location": {
+    "city": "Perry",
+    "state": "AR",
+    "zip": "72125"
+   },
+   "distance_miles": null,
+   "bidwrangler_link": null
+  },
+  {
+   "id": "commercial-1077",
+   "title": "MCGEHEE MULTI-PARCEL COMMERCIAL BUILDING AUCTION | MCGEHEE, AR",
+   "closes_at": "UNKNOWN",
+   "basis": "UNKNOWN",
+   "location": {
+    "city": "McGehee",
+    "state": "AR",
+    "zip": "71654"
+   },
+   "distance_miles": null,
+   "bidwrangler_link": null
+  },
+  {
+   "id": "commercial-1086",
+   "title": "MALVERN AVENUE COMMERCIAL REAL ESTATE AUCTION | HOT SPRINGS, AR",
+   "closes_at": "UNKNOWN",
+   "basis": "UNKNOWN",
+   "location": {
+    "city": "Hot Springs",
+    "state": "AR",
+    "zip": "71901"
+   },
+   "distance_miles": 53.3,
+   "bidwrangler_link": null
+  },
+  {
+   "id": "land-1083",
+   "title": "ONLINE ONLY 3 PROPERTY PERRY COUNTY LAND & BUILDINGS AUCTION | PLAINVIEW, AR",
+   "closes_at": "2026-10-29T14:00:00-05:00",
+   "basis": "INFERENCE",
+   "location": {
+    "city": "Plainview",
+    "state": "AR",
+    "zip": "72857"
+   },
+   "distance_miles": null,
+   "bidwrangler_link": null
+  },
+  {
+   "id": "residential-1084",
+   "title": "LITTLE ROCK HOME AUCTION | LITTLE ROCK, AR",
+   "closes_at": "UNKNOWN",
+   "basis": "UNKNOWN",
+   "location": {
+    "city": "Little Rock",
+    "state": "AR",
+    "zip": "72223"
+   },
+   "distance_miles": 25.2,
+   "bidwrangler_link": null
+  },
+  {
+   "id": "residential-1087",
+   "title": "RIVERVIEW NO RESERVE LUXURY HOME AUCTION | MAYFLOWER, AR",
+   "closes_at": "UNKNOWN",
+   "basis": "UNKNOWN",
+   "location": {
+    "city": "Mayflower",
+    "state": "AR",
+    "zip": "72106"
+   },
+   "distance_miles": null,
+   "bidwrangler_link": null
+  },
+  {
+   "id": "residential-1089",
+   "title": "WEST LITTLE ROCK NO RESERVE 10\u00b1 ACRE ESTATE AUCTION | LITTLE ROCK, AR",
+   "closes_at": "UNKNOWN",
+   "basis": "UNKNOWN",
+   "location": {
+    "city": "Little Rock",
+    "state": "AR",
+    "zip": "72210"
+   },
+   "distance_miles": 25.2,
+   "bidwrangler_link": null
+  },
+  {
+   "id": "lakefront-1090",
+   "title": "HARRIS BRAKE LAKEFRONT HOME AUCTION | PERRYVILLE, AR",
+   "closes_at": "UNKNOWN",
+   "basis": "UNKNOWN",
+   "location": {
+    "city": "Perryville",
+    "state": "AR",
+    "zip": "72126"
+   },
+   "distance_miles": 21.2,
+   "bidwrangler_link": null
+  }
+ ]
+}
