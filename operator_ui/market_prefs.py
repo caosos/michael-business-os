@@ -13,7 +13,7 @@ from pathlib import Path
 
 ACTIONS = ("save", "unsave", "hide", "restore", "dismiss", "more", "less", "reset", "disable", "enable")
 STOP = {"with", "from", "this", "that", "used", "lot", "item", "items", "unit", "units", "only", "each", "the", "and", "for", "set", "other"}
-EMPTY = {"enabled": True, "saved": [], "dismissed": [], "hidden": {}, "more": {}, "less": {}, "last": {}}
+EMPTY = {"enabled": True, "saved": [], "dismissed": [], "hidden": {}, "more": {}, "less": {}, "last": {}, "bids": {}}
 
 
 def path() -> Path:
@@ -29,6 +29,8 @@ def load() -> dict:
     d = {**{k: (type(v)() if isinstance(v, (list, dict)) else v) for k, v in EMPTY.items()}, **d}
     if not isinstance(d["hidden"], dict):
         d["hidden"] = {}
+    if not isinstance(d["bids"], dict):
+        d["bids"] = {}
     d["hidden"] = {**{i: "" for i in d["dismissed"]}, **d["hidden"]}      # older files kept hidden ids in `dismissed`
     d["dismissed"] = []
     return d
@@ -67,7 +69,7 @@ def act(action: str, lot_id: str, title: str = "") -> str:
     d = load()
     lot_id = re.sub(r"[^A-Za-z0-9._:-]", "", lot_id or "")[:60]
     if action == "reset":
-        _store({"enabled": d["enabled"], "saved": [], "dismissed": [], "hidden": d["hidden"], "more": {}, "less": {}, "last": d.get("last") or {}})
+        _store({"enabled": d["enabled"], "saved": [], "dismissed": [], "hidden": d["hidden"], "more": {}, "less": {}, "last": d.get("last") or {}, "bids": d["bids"]})
         return "Suggestions reset: saves and likes were cleared. Hidden listings stay hidden; restore them one by one from the hidden list."
     if action in ("disable", "enable"):
         d["enabled"] = action == "enable"

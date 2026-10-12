@@ -60,7 +60,7 @@ def pref_buttons(c: dict, tok) -> str:
             f"{b('dismiss', 'Not interested', 'Hides this listing and counts its title words as less like this')}{b('more', 'More like this', 'Boosts its title words in ranking')}{b('less', 'Less like this', 'Lowers its title words in ranking')}</form>"
             f"<form method='post' action='/market/pref' class='mk-xf'>{tok()}{hid}<button name='act' value='hide' class='mk-x' type='submit' aria-label='Hide this listing' "
             "title='Hide this listing (this one only; nothing is learned; restore it from the hidden list)'>&#10005;<span class='mk-xt'> Hide</span></button></form></div>"
-            + (f"<p class='small mut' data-why>{e(c['why'])}</p>" if c.get("why") else ""))
+            + __import__('operator_ui.market_bids', fromlist=['x']).button(c, tok) + (f"<p class='small mut' data-why>{e(c['why'])}</p>" if c.get("why") else ""))
 
 
 def hidden_panel(d: dict, tok) -> str:
@@ -251,7 +251,7 @@ def _side_filters(q: dict) -> str:
             "<button class='mk-go' type='submit' form='mkform'>Search Now</button></div>")
 
 
-def _sidebar(saved: list[dict], csrf: str, pin_html: str, tok, q: dict, save: str = "") -> str:
+def _sidebar(saved: list[dict], csrf: str, pin_html: str, tok, q: dict, save: str = "", bids: str = "") -> str:
     rows = []
     for r in saved:
         d = r["doc"]
@@ -262,7 +262,7 @@ def _sidebar(saved: list[dict], csrf: str, pin_html: str, tok, q: dict, save: st
         rows.append(f"<li><b>{e(d['title'])}</b> <span class='badge'>{'ON' if on else e(d['status'])}</span><br>"
                     f"<a style='display:inline' href='/market?run={cid}'>Run</a> · <a style='display:inline' href='/market?edit={cid}'>Edit</a> {toggle}</li>")
     saved_html = f"<ul style='padding-left:16px;margin:4px 0'>{''.join(rows)}</ul>" if rows else "<p class='small mut'>No saved searches yet.</p>"
-    return ("<aside class='mk-side'>" + _side_filters(q) + "<div class='card'><nav aria-label='Marketplace'>"
+    return ("<aside class='mk-side'>" + bids + _side_filters(q) + "<div class='card'><nav aria-label='Marketplace'>"
             "<p class='small mut' style='margin:0 0 4px'>More</p><a class='mk-sec2' href='/market?new=1'>New Search</a>"
             f"{save}<details><summary>My Campaigns / Saved Searches ({len(rows)})</summary>{saved_html}</details>"
             "<a class='mk-sec2' href='/resale'>Saved Deals</a><a class='mk-sec2' href='/market?go=1&amp;sort=closing&amp;closing_by=soon'>Auctions Closing Soon</a>"
@@ -345,7 +345,7 @@ def gsa_explainer() -> str:
 
 
 def render_page(q: dict, d: dict, results: list[dict], hidden: dict, saved: list[dict], csrf: str, pin_set: bool,
-                edit_id: str | None = None, ran: bool = True, errors: list[str] | None = None, unchecked: list[dict] | None = None, prefs: dict | None = None, finds: str = "") -> str:
+                edit_id: str | None = None, ran: bool = True, errors: list[str] | None = None, unchecked: list[dict] | None = None, prefs: dict | None = None, finds: str = "", bids: str = "") -> str:
     tok = lambda: f"<input type='hidden' name='csrf' value='{e(csrf)}'><input type='hidden' name='nonce' value='{secrets.token_hex(8)}'>"  # noqa: E731
     pin_html = "<input type='password' name='pin' placeholder='PIN' autocomplete='off' required>" if pin_set else "<span class='bad'>PIN not set: saving refused</span>"
     err = f"<div class='flash err'><b>Not saved.</b> {e('; '.join(errors))}</div>" if errors else ""
@@ -380,7 +380,7 @@ def render_page(q: dict, d: dict, results: list[dict], hidden: dict, saved: list
                 + (f"<p class='small mut' id='precedent-note'>{e(prec_note)}</p>" if prec_note and results else "")
                 + ((gallery(results, q, tok, prec) if q.get("view") != "list" else "".join(pv.inject(render_card(c, tok), prec.get(c["id"], "")) for c in results)) if results else zero) + opt
                 + distance_caveat(q, results + unchecked))
-    return (CSS + "<script src='/static/market_radius.js' defer></script><h1 class='pagehead'>DealSniffer Marketplace</h1><div class='mk'>" + _sidebar(saved, csrf, pin_html, tok, q, _save(q, edit_id, tok, pin_html))
+    return (CSS + "<script src='/static/market_radius.js' defer></script><h1 class='pagehead'>DealSniffer Marketplace</h1><div class='mk'>" + _sidebar(saved, csrf, pin_html, tok, q, _save(q, edit_id, tok, pin_html), bids)
             + f"<section class='mk-main' id='results-top'>{err}{verr}{_form(q, edit_id, tok, pin_html)}{render_status(d)}{body}{finds}{hidden_panel(prefs, tok) if prefs else ''}{prefs_panel(prefs, tok) if prefs else ''}{working_capital()}{gsa_explainer()}</section></div>")
 
 

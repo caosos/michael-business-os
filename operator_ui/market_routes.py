@@ -11,6 +11,7 @@ from . import market_search as ms
 from . import market_prefs as mp
 from . import market_view as mv
 from . import market_finds as mf
+from . import market_bids as mb
 from . import finds_view as fv
 from .ux import InputError
 
@@ -63,10 +64,13 @@ def page_body(app, qs: dict, now, errors=None, values=None) -> str:
         {"status": "connected", "as_of": None, "age_h": 0, "stale": False, "in_scope": 0, "in_file": 0, "cards": [], "message": ""}
     results, unchecked, hidden = ms.partition(data["cards"], q) if ran and data["status"] in ("connected", "fixture") and not q["errors"] else ([], [], {})
     prefs = mp.load()
+    b1 = b2 = 0
     n_before = len(results) + len(unchecked)
     results, g1 = mp.hide(results, prefs)             # a hidden listing stays hidden in BOTH sections, with suggestions on or off
     unchecked, g2 = mp.hide(unchecked, prefs)
-    q["hidden_n"], q["hidden_checked"], q["matched_n"] = g1 + g2, g1, n_before
+    results, b1 = mb.exclude(results, prefs)           # F-147: tracked ("I bid on this") items leave the lineup; they live in the My bids window
+    unchecked, b2 = mb.exclude(unchecked, prefs)
+    q["hidden_n"], q["hidden_checked"], q["matched_n"] = g1 + g2, g1, n_before - b1 - b2
     if prefs["enabled"] and "sort" not in qs and (prefs["saved"] or prefs["more"] or prefs["less"]):
         q["sort"] = "suggested"                      # feedback exists and the owner chose no sort: use it; hard filters already ran
     if prefs["enabled"]:                              # dismissed lots are hidden and saved/why shown always; the ORDER follows the sort the owner chose
@@ -77,8 +81,14 @@ def page_body(app, qs: dict, now, errors=None, values=None) -> str:
     finds = ""
     if ran and not q["errors"]:                       # F-141: owner-entered finds, their own section, never in the GSA results or counts
         tok = lambda: f"<input type='hidden' name='csrf' value='{app.csrf}'><input type='hidden' name='nonce' value='{__import__('secrets').token_hex(8)}'>"  # noqa: E731
-        finds = fv.section(*mf.cards(q, prefs), tok, mv.pref_buttons)
-    return note + mv.render_page(q, data, results, hidden, saved, app.csrf, bool(app.operator_pin), edit if edit in ids else None, ran, errors, unchecked, prefs, finds)
+        fr, fu, *fr_rest = mf.cards(q, prefs)
+        fr, f1 = mb.exclude(fr, prefs)
+        fu, f2 = mb.exclude(fu, prefs)
+        b1 += f1 + f2
+        finds = fv.section(fr, fu, *fr_rest, tok, mv.pref_buttons)
+    tok = lambda: f"<input type='hidden' name='csrf' value='{app.csrf}'><input type='hidden' name='nonce' value='{__import__('secrets').token_hex(8)}'>"  # noqa: E731
+    mine = mb.window(prefs, data["cards"] if ran else [], now, tok) + (f"<p class='small mut' id='bids-count'>{b1 + b2} in My bids (left out of the results below)</p>" if b1 + b2 else "")
+    return note + mv.render_page(q, data, results, hidden, saved, app.csrf, bool(app.operator_pin), edit if edit in ids else None, ran, errors, unchecked, prefs, finds, mine)
 
 
 def post(app, parts: list[str], f: dict) -> tuple[str | None, list[str] | None]:
@@ -87,6 +97,9 @@ def post(app, parts: list[str], f: dict) -> tuple[str | None, list[str] | None]:
         if parts == ["market", "pref"]:
             app._check_csrf(f)                       # a local view preference: CSRF only, no PIN, no money or contact
             msg = mp.act(f.get("act", ""), f.get("lot", ""), f.get("title", ""))
+        elif parts == ["market", "bid"]:
+            app._check_csrf(f)                       # owner-reported bid tracking in the local prefs file: CSRF only, nothing is placed, fetched or sent
+            msg = mb.act(f.get("act", ""), f, __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(timespec="seconds"))
         elif parts == ["market", "find"]:
             app._check_csrf(f)                       # owner-entered text kept in a local file: CSRF only, nothing is fetched, sent or spent
             msg = mf.act(f.get("act", ""), f)
