@@ -19,7 +19,8 @@ verify_pages() {  # $1 = port; prints a reason and returns 1 on the first failed
   redirect=$(curl -s -m 10 -o /dev/null -w '%{http_code} %{redirect_url}' "$BASE:$port/") || { echo "GET / failed"; return 1; }
   case "$redirect" in "303 "*"/market") ;; *) echo "GET / is '$redirect', expected a 303 to /market"; return 1;; esac
   body=$(curl -s -m 20 "$BASE:$port/market") || { echo "GET /market failed"; return 1; }
-  for m in "Michael's Marketplace" "name='cat'" "name='row1'" "name='row4'" "name='condition'" "name='any'" "Save this search" "Gallery rows"; do
+  case "$body" in *"Michael's Marketplace"*|*"DealSniffer Marketplace"*) ;; *) echo "/market is missing the marker: marketplace title (Michael's or DealSniffer Marketplace)"; return 1;; esac   # F-144 renamed the page
+  for m in "name='cat'" "name='row1'" "name='row4'" "name='condition'" "name='any'" "Save this search" "Gallery rows"; do
     case "$body" in *"$m"*) ;; *) echo "/market is missing the marker: $m"; return 1;; esac
   done
   body=$(curl -s -m 20 "$BASE:$port/market?go=1&source=gsa&radius=-1") || { echo "validation route failed"; return 1; }
@@ -65,7 +66,7 @@ if ps -eo args | grep -E '[t]ools/worker.py|[c]laude -p You are a fresh' | grep 
 
 # Baseline of the UI that is serving NOW (read-only GETs), so a rollback can be judged against what "healthy" meant before the change.
 BASE_CODE=$(curl -s -m 10 -o /dev/null -w '%{http_code}' "$BASE:$PORT/market" 2>/dev/null || echo 000)
-BASE_MARK=0; case "$(curl -s -m 20 "$BASE:$PORT/market" 2>/dev/null || true)" in *"Michael's Marketplace"*) BASE_MARK=1;; esac
+BASE_MARK=0; case "$(curl -s -m 20 "$BASE:$PORT/market" 2>/dev/null || true)" in *"Michael's Marketplace"*|*"DealSniffer Marketplace"*) BASE_MARK=1;; esac
 echo "baseline of the current UI: /market HTTP $BASE_CODE, marketplace marker $BASE_MARK"
 
 # ---- point of no return ----
@@ -74,7 +75,7 @@ rollback_ok() {  # the old UI must give the SAME healthy answer it gave before (
   local code body; code=$(curl -s -m 10 -o /dev/null -w '%{http_code}' "$BASE:$PORT/market" 2>/dev/null || echo 000)
   [ "$code" != "000" ] && [ "$code" -lt 500 ] 2>/dev/null || return 1
   [ "$BASE_CODE" = "200" ] && { [ "$code" = "200" ] || return 1; } || { [ "$code" = "$BASE_CODE" ] || return 1; }
-  if [ "$BASE_MARK" = "1" ]; then body=$(curl -s -m 20 "$BASE:$PORT/market" 2>/dev/null || true); case "$body" in *"Michael's Marketplace"*) ;; *) return 1;; esac; fi
+  if [ "$BASE_MARK" = "1" ]; then body=$(curl -s -m 20 "$BASE:$PORT/market" 2>/dev/null || true); case "$body" in *"Michael's Marketplace"*|*"DealSniffer Marketplace"*) ;; *) return 1;; esac; fi
   return 0
 }
 rollback() {

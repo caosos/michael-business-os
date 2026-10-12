@@ -222,3 +222,13 @@ def test_a_rollback_that_is_verified_requires_the_baseline_answer(env):
     (env.pages / "after_rollback_body").write_text("Michael's Marketplace (old UI healthy)")
     r = env.run(env.good_sha)
     assert r.returncode == 1 and "rollback done and verified" in r.stdout            # the same healthy answer as before: recovery accepted
+
+
+def test_verify_accepts_the_renamed_dealsniffer_title_and_still_requires_a_title(env):
+    """F-144 renamed the page 'DealSniffer Marketplace'; the release check must accept it (it rejected every new release before)."""
+    market = env.pages / "market"
+    market.write_text(market.read_text().replace("Michael's Marketplace", "DealSniffer Marketplace"))
+    assert env.run("--verify-only", "8767").returncode == 0
+    market.write_text(market.read_text().replace("DealSniffer Marketplace", "Some Other Page"))
+    r = env.run("--verify-only", "8767")
+    assert r.returncode == 1 and "marketplace title" in r.stdout
