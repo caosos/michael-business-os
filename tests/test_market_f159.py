@@ -78,6 +78,17 @@ def test_all_sources_checkbox_updates_every_source_immediately():
     js = (Path(__file__).parent.parent / "operator_ui/static/market_radius.js").read_text()
     assert 'getElementById("sec-source")' in js
     assert 'input[name=source][value=all]' in js
+
+
+def test_search_bar_submits_current_text_and_server_filters_it(ui, caches):
+    h = get(ui, **{**BASE, "keywords": "zzzz-no-listing-can-match"})
+    assert total(h) == 0
+    assert "value='zzzz-no-listing-can-match'" in h
+    js = (Path(__file__).parent.parent / "operator_ui/static/market_radius.js").read_text()
+    assert 'form.addEventListener("submit"' in js
+    assert 'new URLSearchParams(new FormData(form))' in js
+    assert 'params.set("go", "1")' in js
+    assert 'params.delete("go")' in js
     assert "rest[i].checked = all.checked" in js
     assert "requestSubmit" not in js                         # choose several, then apply once; no reload between ticks
 

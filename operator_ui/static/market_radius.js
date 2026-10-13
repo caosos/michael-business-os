@@ -48,3 +48,20 @@
   var s = document.querySelectorAll("select[name=sort],select[name=view]");
   for (var i = 0; i < s.length; i++) s[i].addEventListener("change", function () { if (this.form) this.form.submit(); });
 })();
+/* The filter controls live outside #mkform and point back to it with the HTML
+   form attribute.  Chromium normally serializes those controls correctly, but
+   an explicit submit path makes the large search box deterministic: clicking
+   Search or pressing Enter always sends its current text, while Apply Filters
+   does not request a paid provider refresh. */
+(function () {
+  var form = document.getElementById("mkform"), search = form && form.querySelector("input[name=keywords]");
+  if (!form || !search || !window.FormData || !window.URLSearchParams) return;
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+    var params = new URLSearchParams(new FormData(form));
+    var submitter = event.submitter;
+    if (!submitter || (submitter.classList && submitter.classList.contains("mk-go"))) params.set("go", "1");
+    else params.delete("go");
+    window.location.assign(form.action + "?" + params.toString());
+  });
+})();
