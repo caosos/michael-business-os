@@ -52,6 +52,57 @@ jobs:
           grep -q "^sha=$LANE06$" var/lanes/agent-06/ARTIFACT
           cp var/lanes/agent-06/ARTIFACT "$PROOF_DIR/ARTIFACT"
 
+          # Exercise the real Facebook path once after release. Keep Michael's
+          # remembered filters byte-for-byte unchanged and print configuration
+          # state only; the Bright Data key itself must never enter the log.
+          set +u
+          set -a
+          . var/dev.env
+          . var/owner.env
+          set +a
+          set -u
+          PREFS="${MBOS_MARKET_PREFS_FILE:-var/market_prefs.json}"
+          PREFS_COPY="$PROOF_DIR/market-prefs.before"
+          PREFS_EXISTED=0
+          if [ -f "$PREFS" ]; then
+            cp "$PREFS" "$PREFS_COPY"
+            PREFS_EXISTED=1
+          fi
+          restore_prefs() {
+            if [ "$PREFS_EXISTED" = 1 ]; then cp "$PREFS_COPY" "$PREFS"; else rm -f "$PREFS"; fi
+          }
+          trap restore_prefs EXIT
+          if [ -n "${BRIGHTDATA_API_KEY:-${BRIGHTDATA_TOKEN:-}}" ] || [ -s /home/michaelos/.config/mbos/secrets/BRIGHTDATA_API_KEY ] || [ -s /home/michaelos/.config/mbos/secrets/BRIGHTDATA_TOKEN ]; then
+            CREDENTIAL_CONFIGURED=true
+          else
+            CREDENTIAL_CONFIGURED=false
+          fi
+          printf 'credential_configured=%s\n' "$CREDENTIAL_CONFIGURED" > "$PROOF_DIR/facebook-proof.txt"
+          curl -fsS --max-time 180 'http://127.0.0.1:8766/market?go=1&keywords=trailer&base=72032&radius=30&source=facebook&cat=all' > "$PROOF_DIR/facebook-search.html"
+          restore_prefs
+          trap - EXIT
+          .venv/bin/python - <<'PY' >> "$PROOF_DIR/facebook-proof.txt"
+          import json
+          from pathlib import Path
+          p = Path("var/cache/facebook-marketplace.json")
+          try:
+              d = json.loads(p.read_text(encoding="utf-8"))
+              rows = d.get("records") if isinstance(d, dict) else None
+              rows = rows if isinstance(rows, list) else []
+              print("cache_exists=true")
+              print(f"cache_record_count={len(rows)}")
+              print(f"cache_as_of={d.get('as_of') or 'UNKNOWN'}")
+              print(f"cache_query={json.dumps(d.get('query'), sort_keys=True)}")
+              print(f"facebook_url_count={sum(isinstance(r, dict) and str(r.get('url', '')).startswith('https://www.facebook.com/') for r in rows)}")
+              print(f"photo_count={sum(isinstance(r, dict) and bool(r.get('images') or r.get('image') or r.get('image_url')) for r in rows)}")
+          except (OSError, ValueError):
+              print("cache_exists=false")
+              print("cache_record_count=0")
+              print("cache_as_of=UNKNOWN")
+              print("facebook_url_count=0")
+              print("photo_count=0")
+          PY
+
           CHROME="$(command -v google-chrome-stable || command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
           if [ -n "$CHROME" ]; then
             "$CHROME" --headless --disable-gpu --no-sandbox --window-size=1440,900 --screenshot="$PROOF_DIR/desktop.png" http://127.0.0.1:8766/market || true
@@ -63,6 +114,7 @@ jobs:
             ss -ltnp | grep ':8766'
             curl -fsS -o /dev/null -w 'http_status=%{http_code}\\n' --max-time 10 http://127.0.0.1:8766/market
             printf 'chrome=%s\n' "${CHROME:-NOT_FOUND}"
+            cat "$PROOF_DIR/facebook-proof.txt"
           } > "$PROOF_DIR/host-proof.txt"
 
       - name: Upload EliteDesk proof
