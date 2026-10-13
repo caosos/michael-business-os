@@ -212,6 +212,8 @@ jobs:
             "$CHROME" --headless --disable-gpu --no-sandbox --window-size=390,844 --screenshot="$PROOF_DIR/mobile.png" http://127.0.0.1:8766/market || true
             "$CHROME" --headless --disable-gpu --no-sandbox --window-size=1440,900 --screenshot="$PROOF_DIR/settings-desktop.png" http://127.0.0.1:8766/settings || true
             "$CHROME" --headless --disable-gpu --no-sandbox --window-size=390,844 --screenshot="$PROOF_DIR/bids-mobile.png" http://127.0.0.1:8766/market/bids || true
+            "$CHROME" --headless --disable-gpu --no-sandbox --window-size=1440,1000 --screenshot="$PROOF_DIR/vendor-deal-desktop.png" http://127.0.0.1:8766/sell/deal || true
+            "$CHROME" --headless --disable-gpu --no-sandbox --window-size=390,1200 --screenshot="$PROOF_DIR/vendor-deal-mobile.png" http://127.0.0.1:8766/sell/deal || true
           fi
           {
             date --iso-8601=seconds
