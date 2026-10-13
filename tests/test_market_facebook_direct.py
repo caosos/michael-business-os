@@ -8,8 +8,10 @@ import tempfile
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
+from unittest.mock import patch
 
 from operator_ui import market_facebook as fb
+from operator_ui import market_source_view as source_view
 
 
 NOW = datetime(2026, 10, 13, 1, 30, tzinfo=timezone.utc)
@@ -21,7 +23,7 @@ class FacebookDirectTests(unittest.TestCase):
 
         def request(method, url, headers, body, timeout):
             calls.append((method, url, headers, body, timeout))
-            if "discover_new" in url:
+            if len(calls) == 1:
                 return 200, {}, json.dumps([{"url": "https://www.facebook.com/marketplace/item/123/"}]).encode()
             return 200, {}, json.dumps([{"url": "https://www.facebook.com/marketplace/item/123/", "product_id": "123",
                                          "title": "5x8 utility trailer", "final_price": "$450", "location": "Conway, AR",
@@ -33,8 +35,13 @@ class FacebookDirectTests(unittest.TestCase):
         self.assertNotIn("seller_name", rows[0])
         self.assertNotIn("profile", rows[0])
         self.assertEqual(len(calls), 2)
-        self.assertIn("limit_per_input=20", calls[0][1])
+        self.assertNotIn("limit_per_input", calls[0][1])
+        self.assertNotIn("discover_by", calls[0][1])
+        self.assertNotIn("type=discover_new", calls[0][1])
         self.assertNotIn("secret-token", calls[0][1])
+        self.assertEqual(json.loads(calls[0][3]), {"input": [{"keyword": "utility trailer"}], "limit_per_input": 20})
+        self.assertEqual(json.loads(calls[1][3]),
+                         {"input": [{"url": "https://www.facebook.com/marketplace/item/123/"}], "limit_per_input": 1})
 
     def test_http_202_is_polled_and_downloaded(self):
         calls = []
@@ -66,6 +73,21 @@ class FacebookDirectTests(unittest.TestCase):
         self.assertEqual(cards[0]["kind"], "fixed")
         self.assertEqual(cards[0]["distance"], 0.0)
         self.assertEqual(cards[0]["zip"], "72032")
+
+    def test_town_without_provider_coordinates_uses_local_gazetteer(self):
+        rows = [{"url": "https://www.facebook.com/marketplace/item/1/", "title": "Mower",
+                 "location": "Conway, AR"}]
+        cards = fb.cards(rows, NOW.isoformat(), (35.0887, -92.4421))
+        self.assertIsNotNone(cards[0]["distance"])
+        self.assertLess(cards[0]["distance"], 5)
+
+    def test_documented_api_key_name_and_file_alias_are_supported(self):
+        with patch.dict(os.environ, {"BRIGHTDATA_API_KEY": "official-name", "BRIGHTDATA_TOKEN": ""}, clear=False):
+            self.assertEqual(fb.token(), "official-name")
+        with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, {"BRIGHTDATA_API_KEY": "", "BRIGHTDATA_TOKEN": ""}, clear=False):
+            key_file = Path(directory) / "BRIGHTDATA_API_KEY"
+            key_file.write_text("file-key\n", encoding="utf-8")
+            self.assertEqual(fb.token(key_file), "file-key")
 
     def test_failed_refresh_falls_back_to_last_successful_cache(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -117,6 +139,18 @@ class FacebookDirectTests(unittest.TestCase):
                              refresh=False, client=MustNotRun(), path=path)
             self.assertEqual(result["status"], "offline")
             self.assertFalse(path.exists())
+
+    def test_probe_distinguishes_configured_credential_from_successful_cache(self):
+        with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, {"BRIGHTDATA_API_KEY": "configured", "BRIGHTDATA_TOKEN": ""}, clear=False):
+            result = fb.probe(NOW, Path(directory) / "missing.json")
+            self.assertEqual(result["status"], "offline")
+            self.assertTrue(result["credential_configured"])
+            self.assertIn("No successful", result["message"])
+
+    def test_facebook_and_multi_source_filters_are_not_blocked_by_legacy_gate(self):
+        self.assertIsNone(source_view.gate({"source": "facebook"}, {}))
+        self.assertIsNone(source_view.gate({"source": "gsa,facebook"}, {}))
+        self.assertIsNotNone(source_view.gate({"source": "unknown-provider"}, {}))
 
 
 if __name__ == "__main__":

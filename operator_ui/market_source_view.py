@@ -13,7 +13,7 @@ from .deal_ui import classify_url
 e = lambda v: html.escape("" if v is None else str(v))  # noqa: E731
 FIXTURE_BANNER = ("FIXTURE / not live: scrubbed test e-mails read from a local directory on an isolated staging server. These are not Michael's real deals, "
                   "no mailbox is read, and nothing here counts as a connected source.")
-ALWAYS_OFF = ("eBay", "Facebook Marketplace")
+ALWAYS_OFF = ("eBay",)
 
 
 def source_options() -> list[tuple[str, str]]:
@@ -21,7 +21,9 @@ def source_options() -> list[tuple[str, str]]:
     now = datetime.now(timezone.utc)
     tag = lambda k, n: f"{n} (FIXTURE, not live)" if fx else {"connected": n, "waiting": f"{n} (connected, waiting for alerts)"}.get(msrc.load_alerts(k, None, now)["status"], f"{n} (not connected)")  # noqa: E731
     alerts = [(k, tag(k, n)) for k, (_, n) in msrc.ALERT_SOURCES.items()]
-    return [("gsa", "GSA Auctions")] + [(k, x.name) for k, x in msrc.AUCTION_SITES.items()] + [(msrc.ALL_HOUSES, "All auction houses")] + alerts + [("all", "All sources (merged)")] + [(n.lower(), n + " (not connected)") for n in ALWAYS_OFF]
+    facebook = msrc.probe(next(i for i in msrc.REGISTRY if i.key == "facebook"), now)
+    fb_label = "Facebook Marketplace" + ("" if facebook["status"] == "connected" else " (not connected)")
+    return [("gsa", "GSA Auctions")] + [(k, x.name) for k, x in msrc.AUCTION_SITES.items()] + [(msrc.ALL_HOUSES, "All auction houses")] + alerts + [("facebook", fb_label), ("all", "All sources (merged)")] + [(n.lower(), n + " (not connected)") for n in ALWAYS_OFF]
 
 
 def _row(c: dict) -> str:
@@ -51,15 +53,18 @@ def coverage(d: dict, banner_inline: bool = True) -> str:
 
 
 def gate(q: dict, d: dict) -> str | None:
-    """The body for a source that has no read to show, else None. A single alert source without the staging fixtures is NOT CONNECTED."""
-    s = q["source"]
-    if s in ("gsa", "all", msrc.ALL_HOUSES) or s in msrc.AUCTION_SITES:
+    """Refuse only unknown source keys.
+
+    The browse route always loads the unified pool and then applies its source
+    checkboxes.  The old single-source gate incorrectly hid Facebook and every
+    comma-separated multi-source selection, including genuinely cached rows.
+    """
+    selected = {v for v in str(q.get("source") or "all").split(",") if v}
+    known = {"all", msrc.ALL_HOUSES, *(i.key for i in msrc.REGISTRY)}
+    unknown = sorted(selected - known)
+    if not unknown:
         return None
-    if s in msrc.ALERT_SOURCES and d["status"] in ("fixture", "connected"):
-        return None
-    if s in msrc.ALERT_SOURCES and d["status"] == "waiting":
-        return f"<div class='card'><b>{e(msrc.ALERT_SOURCES[s][1])}: connected, waiting for alerts.</b> The alerts mailbox was read, but no alert from this source has arrived yet.</div>"
-    return f"<div class='card'><b>{e(msrc.ALERT_SOURCES[s][1] if s in msrc.ALERT_SOURCES else s)}: not connected.</b> No results are shown for a source that is not wired; nothing is mocked.</div>"
+    return f"<div class='card'><b>{e(', '.join(unknown))}: not connected.</b> No results are shown for an unknown source; nothing is mocked.</div>"
 
 
 def card_note(c: dict) -> str:

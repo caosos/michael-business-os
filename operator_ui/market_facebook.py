@@ -28,6 +28,7 @@ HARD_CAP = 20
 STALE_HOURS = 6
 REFRESH_MINUTES = 15
 TOKEN_FILE = Path("~/.config/mbos/secrets/BRIGHTDATA_TOKEN")
+API_KEY_FILE = Path("~/.config/mbos/secrets/BRIGHTDATA_API_KEY")
 DEFAULT_CACHE = Path(__file__).resolve().parent.parent / "var" / "cache" / "facebook-marketplace.json"
 COMPLIANCE = "UNKNOWN (owner-authorized Bright Data provider route; public listing data only)"
 _PRIVATE = re.compile(r"seller|profile|owner|user_?name|user_?id|poster|vendor|contact", re.I)
@@ -38,14 +39,26 @@ class BrightDataError(RuntimeError):
     pass
 
 
-def token(path: str | Path = TOKEN_FILE) -> str | None:
-    value = os.environ.get("BRIGHTDATA_TOKEN", "").strip()
-    if value:
-        return value
-    try:
-        return Path(path).expanduser().read_text(encoding="utf-8").strip() or None
-    except OSError:
-        return None
+def token(path: str | Path | None = None) -> str | None:
+    """Read the provider key without ever returning its location to the UI.
+
+    ``BRIGHTDATA_API_KEY`` is Bright Data's documented name.  Keep the older
+    ``BRIGHTDATA_TOKEN`` name and file for backward compatibility with the
+    first DealSniffer deployment.
+    """
+    for name in ("BRIGHTDATA_API_KEY", "BRIGHTDATA_TOKEN"):
+        value = os.environ.get(name, "").strip()
+        if value:
+            return value
+    paths = (Path(path),) if path is not None else (API_KEY_FILE, TOKEN_FILE)
+    for candidate in paths:
+        try:
+            value = candidate.expanduser().read_text(encoding="utf-8").strip()
+        except OSError:
+            continue
+        if value:
+            return value
+    return None
 
 
 def cache_path() -> Path:
@@ -177,10 +190,13 @@ class BrightDataClient:
                 return _rows(dbody)
         raise BrightDataError("Bright Data snapshot did not become ready before the polling limit")
 
-    def _scrape(self, inputs: list[dict], extra: dict | None = None) -> list[dict]:
+    def _scrape(self, inputs: list[dict], limit_per_input: int | None = None) -> list[dict]:
         query = {"dataset_id": os.environ.get("MBOS_BRIGHTDATA_FACEBOOK_DATASET") or DATASET_ID,
-                 "include_errors": "true", "format": "json", **(extra or {})}
-        status, _, body = self._call("POST", f"{API}/scrape?{urlencode(query)}", {"input": inputs})
+                 "include_errors": "true", "format": "json"}
+        payload = {"input": inputs}
+        if limit_per_input is not None:
+            payload["limit_per_input"] = min(max(int(limit_per_input), 1), HARD_CAP)
+        status, _, body = self._call("POST", f"{API}/scrape?{urlencode(query)}", payload)
         return self._finish(status, body)
 
     def search(self, keyword: str, city: str, radius_miles: float, limit: int = HARD_CAP) -> list[dict]:
@@ -188,12 +204,15 @@ class BrightDataClient:
         keyword, city = _clean(keyword, 120), _clean(city, 80)
         if not keyword or not city:
             raise BrightDataError("Facebook search needs both a keyword and a ZIP or city")
-        found = self._scrape([{"keyword": keyword, "city": city, "radius": int(radius_miles)}],
-                             {"type": "discover_new", "discover_by": "keyword", "limit_per_input": str(cap)})[:cap]
+        # Bright Data's documented Marketplace keyword-discovery schema accepts
+        # exactly ``keyword`` in each input object.  City/radius belong to
+        # DealSniffer's local filtering and cache identity; sending them to the
+        # provider makes an otherwise valid request fail schema validation.
+        found = self._scrape([{"keyword": keyword}], cap)[:cap]
         complete = [row for row in found if row.get("title")]
         urls = [{"url": row["url"]} for row in found if not row.get("title") and isinstance(row.get("url"), str)]
         if urls:
-            complete.extend(self._scrape(urls[:cap], {"limit_per_input": "1"}))
+            complete.extend(self._scrape(urls[:cap], 1))
         return [_public(row) for row in complete[:cap] if row.get("title")]
 
 
@@ -242,6 +261,14 @@ def cards(rows: list[dict], as_of: str, origin=None) -> list[dict]:
         if price is None:
             price = _number(row.get("initial_price", row.get("price")))
         city, state, zip_code, lat, lon = _loc(row)
+        point = (lat, lon) if lat is not None and lon is not None else None
+        if point is None and (zip_code or (city and state)):
+            # Provider rows commonly contain a town but no coordinates.  Use
+            # the same local gazetteer as the other Marketplace sources so the
+            # owner's radius can be applied instead of silently becoming
+            # UNKNOWN.
+            from . import gazetteer
+            point = gazetteer.locate(zip_code) or gazetteer.locate(f"{city}, {state}")
         description = _clean(row.get("description"), 600)
         condition = _clean(row.get("condition"), 60).lower() or None
         text = f"{title} {description} {condition or ''}".lower()
@@ -249,7 +276,7 @@ def cards(rows: list[dict], as_of: str, origin=None) -> list[dict]:
         out.append({"id": f"facebook:{ident}", "title": title, "description": description, "text": text, "url": url,
                     "image": _image(row), "bid": price, "price": price, "price_type": "fixed", "bidders": None,
                     "closes": None, "city": f"{city}, {state}" if city and state else city, "state": state, "zip": zip_code,
-                    "distance": _distance(origin, (lat, lon)), "category": _clean(row.get("category"), 80) or "other",
+                    "distance": _distance(origin, point), "category": _clean(row.get("category"), 80) or "other",
                     "condition": condition, "labels": {}, "source": "Facebook Marketplace", "fetched_at": as_of,
                     "kind": "fixed", "stale": False, "fixture": False, "posted": posted, "source_compliance": COMPLIANCE})
     return out
@@ -296,7 +323,8 @@ def load(now: datetime, origin=None, *, keyword: str = "", city: str = "", radiu
     if not cached:
         why = error or ("Bright Data token is not configured on this host" if not api_token else "No successful Facebook retrieval is cached")
         return {"status": "offline", "name": "Facebook Marketplace", "as_of": None, "age_h": None, "stale": False,
-                "in_scope": 0, "in_file": 0, "cards": [], "fixture": False, "message": why}
+                "in_scope": 0, "in_file": 0, "cards": [], "fixture": False, "message": why,
+                "credential_configured": bool(api_token)}
     as_of = str(cached["as_of"])
     try:
         age = max(0.0, (now - datetime.fromisoformat(as_of.replace("Z", "+00:00"))).total_seconds() / 3600)
@@ -308,10 +336,12 @@ def load(now: datetime, origin=None, *, keyword: str = "", city: str = "", radiu
     message = f"Live refresh failed; showing the last successful cache. {error}" if error else ""
     return {"status": "connected", "name": "Facebook Marketplace", "as_of": as_of, "age_h": round(age, 1),
             "stale": age > STALE_HOURS, "in_scope": len(result), "in_file": len(cached["records"]), "cards": result,
-            "fixture": False, "message": message, "query": cached.get("query")}
+            "fixture": False, "message": message, "query": cached.get("query"),
+            "credential_configured": bool(api_token)}
 
 
 def probe(now: datetime, path: Path | None = None) -> dict:
     data = load(now, path=path)
     return {"status": data["status"], "as_of": data["as_of"], "age_h": data["age_h"],
-            "stale": data["stale"], "n": data["in_scope"]}
+            "stale": data["stale"], "n": data["in_scope"], "message": data.get("message", ""),
+            "credential_configured": data.get("credential_configured", False)}
