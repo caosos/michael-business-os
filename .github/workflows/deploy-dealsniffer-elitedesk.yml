@@ -70,6 +70,14 @@ jobs:
           ! grep -q "id='gsa-explainer'" "$PROOF_DIR/market.html"
           ! grep -q "No photo" "$PROOF_DIR/market.html"
 
+          # Prove the large search bar's server path does not leave the old
+          # lineup visible when the query has no match.  No `go=1` here: this
+          # checks filtering without starting another paid provider job.
+          curl -fsS --max-time 30 'http://127.0.0.1:8766/market?keywords=zzzz-no-listing-can-match&base=72032&radius=30&source=all&cat=all' > "$PROOF_DIR/search-zero.html"
+          grep -q "value='zzzz-no-listing-can-match'" "$PROOF_DIR/search-zero.html"
+          grep -q "id='result-count' class='mk-count'>0 results found" "$PROOF_DIR/search-zero.html"
+          grep -q "id='zero-results'" "$PROOF_DIR/search-zero.html"
+
           # These are read-only customer journeys. They prove the deployed
           # account/delivery state and selling guardrails without saving a
           # preference, sending mail, creating an intake, or contacting anyone.
