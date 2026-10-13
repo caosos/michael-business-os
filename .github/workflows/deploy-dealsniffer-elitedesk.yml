@@ -81,6 +81,16 @@ jobs:
           curl -fsS --max-time 180 'http://127.0.0.1:8766/market?go=1&keywords=trailer&base=72032&radius=30&source=facebook&cat=all' > "$PROOF_DIR/facebook-search.html"
           restore_prefs
           trap - EXIT
+          PYTHONPATH="var/lanes/agent-06${PYTHONPATH:+:$PYTHONPATH}" .venv/bin/python - <<'PY' >> "$PROOF_DIR/facebook-proof.txt"
+          from datetime import datetime, timezone
+          from pathlib import Path
+          from operator_ui import market_facebook as fb
+          if not Path("var/cache/facebook-marketplace.json").is_file():
+              d = fb.load(datetime.now(timezone.utc), keyword="trailer", city="72032", radius=30, refresh=True)
+              message = " ".join(str(d.get("message") or "NONE").split())[:800]
+              print(f"provider_status={d.get('status') or 'UNKNOWN'}")
+              print(f"provider_message={message}")
+          PY
           .venv/bin/python - <<'PY' >> "$PROOF_DIR/facebook-proof.txt"
           import json
           from pathlib import Path
