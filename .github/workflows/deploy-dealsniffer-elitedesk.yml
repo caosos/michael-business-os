@@ -32,10 +32,13 @@ jobs:
           LANE02="$(printf '%s' "$MANIFEST" | .venv/bin/python -c 'import json,sys; print(json.load(sys.stdin)["lane02_sha"])')"
           [[ "$LANE06" =~ ^[0-9a-f]{40}$ ]]
           [[ "$LANE02" =~ ^[0-9a-f]{40}$ ]]
-          tools/release_marketplace.sh "$LANE06" "$LANE02"
-
           PROOF_DIR="$RUNNER_TEMP/dealsniffer-proof"
           mkdir -p "$PROOF_DIR"
+          if ! tools/release_marketplace.sh "$LANE06" "$LANE02"; then
+            tail -n 240 var/ui.log 2>/dev/null | tee "$PROOF_DIR/release-error.log" || true
+            exit 1
+          fi
+
           tools/reload_ui.sh --verify-only 8766 | tee "$PROOF_DIR/verify.txt"
           set +u
           set -a
