@@ -22,7 +22,7 @@ CT = ZoneInfo("America/Chicago")
 HOME = {"state": "AR", "zip": "72032", "label": "Conway"}        # this owner's default; whoever logs in later sets their own in prefs `ui.home`
 RADII = ("10", "25", "50", "100", "250", "")
 SORT_LABELS = (("closing", "Ending soonest"), ("new", "Newest"), ("bid", "Price: low to high"), ("price_desc", "Price: high to low"), ("distance", "Distance"), ("suggested", "Suggested"))
-QUICK_LABELS = (("", "All"), ("new", "New today"), ("today", "Closing today"), ("soon", "Closing soon"))
+QUICK_LABELS = (("", "All"), ("saved", "Saved"), ("new", "New today"), ("today", "Closing today"), ("soon", "Closing soon"))
 LTYPE_LABELS = (("auction", "Auction"), ("fixed", "Buy now or fixed price"), ("event", "Auction event"))
 CONDITION_OPTS = ("new", "used", "salvage", "for parts", "not working", "working", "as is")
 SOON_H = 72
@@ -105,6 +105,8 @@ def source_ok(c: dict, source: str) -> bool:
 def quick_ok(c: dict, quick: str, now: datetime) -> bool:
     if not quick:
         return True
+    if quick == "saved":
+        return bool(c.get("saved"))
     if quick == "new":
         return c.get("posted") == _today(now).isoformat()
     t = mbids._end(c)
@@ -223,7 +225,10 @@ def _view(c) -> str:
 def card(c: dict, tok, now: datetime, pref_buttons) -> str:
     from . import market_view as mv
     img = mv._photo(c.get("image"), c.get("url"))
-    ph = img if img.startswith("<img") else f"<div class='ph small mut'>{img if 'Photo' in img else 'No photo'}</div>"
+    # Empty photo data must not consume half the card.  Real source images are
+    # shown; otherwise this remains a compact text listing with no fake or
+    # broken placeholder.
+    media = f"<div class='mk-ph'>{img}<span class='badge mk-src'>{e(c['source'])}</span></div>" if img.startswith("<img") else f"<div class='mk-card-src'><span class='badge mk-src'>{e(c['source'])}</span></div>"
     txt, red = countdown(c, now)
     cd = f"<span class='mk-cd{' red' if red else ''}'>{e(txt)}</span>" if txt else ""
     place = e(_where(c)) + (f" · {round(c['distance'], 1):g} mi" if c.get("distance") is not None else " · distance UNKNOWN")
@@ -246,10 +251,16 @@ def card(c: dict, tok, now: datetime, pref_buttons) -> str:
     kind = " data-kind='auction-event'" if c.get("event") else ""
     plat = msvm._platform(c) if c.get("event") else ""
     lbl = (f"<div class='small'>{plat}</div>" if plat else "") if c.get("event") else "<div class='small mut gal-lbl'>" + mv.gallery_labels(c) + "</div>"
-    more = f"<details class='mk-more'><summary title='Details and actions' aria-label='More: details and actions'>&#8943;</summary>{lbl}{pref_buttons(c, tok)}</details>"
-    return (f"<div class='mk-g mk-card' data-lot='{e(c['id'])}'{kind}><div class='mk-ph'>{ph}{cd}<span class='badge mk-src'>{e(c['source'])}</span></div>"
+    save = mv.save_button(c, tok)
+    actions = pref_buttons(c, tok, include_save=False) if pref_buttons is mv.pref_buttons else pref_buttons(c, tok)
+    more = f"<details class='mk-more'><summary title='More actions' aria-label='More actions'>&#8943;</summary>{lbl}{actions}</details>"
+    if cd and img.startswith("<img"):
+        media = media.replace("</div>", f"{cd}</div>", 1)
+    elif cd:
+        media += cd
+    return (f"<div class='mk-g mk-card' data-lot='{e(c['id'])}'{kind}>{media}"
             f"<div class='ti'><b>{e(ti)}</b>{flag}</div><div class='small'>{place}</div>{note}<div class='small mut'>Closes {e(closes)}{c.get('closing_badge', '')}</div>{money}"
-            f"<div class='mk-vw'>{_view(c)}{more}</div></div>")
+            f"<div class='mk-vw'>{_view(c)}{save}{more}</div></div>")
 
 
 # ---- sidebar sections / top bar ----
@@ -296,7 +307,7 @@ def ltype_section(q: dict, fc: dict) -> str:
     rows = f"<label><input type='radio' form='mkform' name='ltype' value=''{' checked' if not cur else ''}> Any</label>"
     for k, lbl in LTYPE_LABELS:
         n = fc["ltype"][k]
-        rows += f"<label class='{'mut' if not n else ''}' data-count='{n}'><input type='radio' form='mkform' name='ltype' value='{k}'{' checked' if cur == k else ''}> {e(lbl)} <span class='mk-n'>({n})</span></label>"
+        rows += f"<label data-count='{n}'><input type='radio' form='mkform' name='ltype' value='{k}'{' checked' if cur == k else ''}> {e(lbl)} <span class='mk-n'>({n})</span></label>"
     return f"<details open class='mk-sect' id='sec-ltype'><summary><b>Listing type</b></summary>{rows}</details>"
 
 
@@ -305,7 +316,7 @@ def condition_section(q: dict, fc: dict) -> str:
     rows = f"<label><input type='radio' form='mkform' name='condition' value=''{' checked' if not cur else ''}> Any</label>"
     for k in CONDITION_OPTS:
         n = fc["cond"][k]
-        rows += f"<label class='{'mut' if not n else ''}' data-count='{n}'><input type='radio' form='mkform' name='condition' value='{e(k)}'{' checked' if cur == k else ''}> {e(k.capitalize())} <span class='mk-n'>({n})</span></label>"
+        rows += f"<label data-count='{n}'><input type='radio' form='mkform' name='condition' value='{e(k)}'{' checked' if cur == k else ''}> {e(k.capitalize())} <span class='mk-n'>({n})</span></label>"
     if cur and cur not in CONDITION_OPTS:
         rows += f"<label><input type='radio' form='mkform' name='condition' value='{e(cur)}' checked> {e(cur)}</label>"
     return f"<details class='mk-sect' id='sec-condition'><summary><b>Condition</b> <span class='small mut'>(seller text)</span></summary>{rows}</details>"
@@ -346,11 +357,11 @@ CSS = """<style>
 .mk-top .mk-bar{flex:1 1 560px;align-items:center}.mk-search{flex:1 1 320px;font-size:18px;padding:10px 12px;min-width:0}.mk-count{font-weight:700;white-space:nowrap}
 .mk-fbtn{background:var(--acc);color:var(--bg);border:0;border-radius:8px;padding:8px 14px;font-size:15px;width:auto;opacity:1;cursor:pointer}.mk-fd{margin:0}.mk-fm,.mk-side .mk-fm{display:none}
 .mk-quick{flex:1 1 100%;display:flex;flex-wrap:wrap;gap:6px}.mk-q{border:1px solid var(--line);border-radius:16px;padding:4px 12px;font-size:14px;text-decoration:none}.mk-q.cur{background:#1d4ed8;color:#fff;border-color:#1d4ed8}.mk-q.cur .mk-n{color:#fff}
-.mk-n{color:var(--mut,#777);font-size:12px}.mk-sect{border:1px solid var(--line);border-radius:8px;padding:4px 8px;margin:0 0 8px}.mk-sect label{display:block;padding:2px 0}.mk-side .mk-cat,.mk-sect label{opacity:1}
+.mk-n{color:var(--mut,#777);font-size:12px}.mk-sect{border:1px solid var(--line);border-radius:8px;padding:4px 8px;margin:0 0 8px}.mk-sect label{display:block;padding:2px 0}.mk-side .mk-cat,.mk-sect label{opacity:1;color:var(--ink)!important}.mk-cat,.mk-src-row{opacity:1!important;color:var(--ink)!important}.mk-src-row .small{color:var(--ink)}
 .mk-side.folded #mkfilters{display:none}.mk-drawer-t{position:absolute;opacity:0;pointer-events:none}
 .mk-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.mk-card{display:flex;flex-direction:column;gap:2px}.mk-ph{position:relative}.mk-ph .ph{height:130px}.mk-ph img{height:130px}
 .mk-cd{position:absolute;left:6px;bottom:6px;background:#444;color:#fff;border-radius:6px;padding:2px 8px;font-size:12px;font-weight:700}.mk-cd.red{background:#c0222c}.mk-src{position:absolute;right:6px;top:6px}
-.mk-view{display:inline-block;background:var(--acc);color:var(--bg);border-radius:6px;padding:6px 18px;font-weight:700;text-decoration:none}.mk-vw{margin:4px 0}.mk-off{background:transparent;color:var(--mut,#777);border:1px dashed var(--line);font-weight:400}
+.mk-view{display:inline-block;background:var(--acc);color:var(--bg);border-radius:6px;padding:6px 18px;font-weight:700;text-decoration:none}.mk-vw{margin:4px 0;display:flex;gap:7px;align-items:center}.mk-save{display:inline}.mk-save button{width:auto;padding:6px 12px;background:var(--card);color:var(--acc);border:1px solid var(--acc)}.mk-off{background:transparent;color:var(--mut,#777);border:1px dashed var(--line);font-weight:400}
 .mk-pages{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:14px 0}.mk-pg{border:1px solid var(--line);border-radius:6px;padding:4px 10px;text-decoration:none}.mk-pg.cur{background:#1d4ed8;color:#fff}
 .mk-top .mk-bar{flex-wrap:nowrap;gap:10px}.mk-top .mk-bar label{margin:0;white-space:nowrap}.mk-top select{width:auto}.mk-go{width:auto;padding:10px 18px;white-space:nowrap}
 .mk-quick{padding:0}.mk-chips{display:flex;flex-wrap:nowrap;gap:4px;overflow:hidden;margin:2px 0;white-space:nowrap}.mk-chips .chip{flex:0 0 auto}
