@@ -129,3 +129,43 @@ def test_read_token_strips_whitespace(tmp_path):
     f = tmp_path / "t"
     f.write_text(f"  {TOKEN}\n")
     assert read_token(f) == TOKEN and read_token(tmp_path / "missing") is None
+
+
+def _async_adapter(progress, fix=FIX / "brightdata_fb"):
+    """202 + snapshot id on both POSTs; progress answers come from the `progress` list (last one repeats)."""
+    seen, sleeps, now = [], [], [0.0]
+
+    def handler(method, url, headers, body):
+        seen.append((method, url.split("?")[0].rsplit("/", 2)[-2:] if "/v3/" in url else url))
+        if method == "POST":
+            return HttpResponse(202, b'{"snapshot_id": "s_abc123"}')
+        if "/progress/" in url:
+            return HttpResponse(200, json.dumps({"status": progress.pop(0) if len(progress) > 1 else progress[0]}).encode())
+        return HttpResponse(200, (fix / ("listings.json" if len(seen) > 6 else "discover.json")).read_bytes(),
+                            {"x-cost": "0.03"})
+
+    def sleep(d):
+        sleeps.append(d)
+        now[0] += d
+
+    a = BrightDataFbMarketplaceAdapter(TOKEN, live=True, transport=CallbackTransport(handler), sleep=sleep,
+                                       monotonic=lambda: now[0])
+    return a, seen, sleeps
+
+
+def test_async_202_polls_with_backoff_then_reads_snapshot():
+    a, seen, sleeps = _async_adapter(["running", "running", "ready"])
+    res = a.fetch(P)
+    assert res.error is None and len(res.records) <= HARD_CAP and res.records
+    assert sleeps[:2] == [5.0, 10.0]
+    assert any(m == "GET" for m, _ in seen) and a.last_cost == "0.03"
+    assert TOKEN not in repr(a)
+
+
+def test_async_wait_cap_and_failed_status_error_cleanly():
+    a, _, sleeps = _async_adapter(["running"])
+    res = a.fetch(P)
+    assert res.error and res.error.status == 504 and sum(sleeps) <= 300.0
+    assert TOKEN not in res.error.message
+    a, _, _ = _async_adapter(["failed"])
+    assert a.fetch(P).error.status == 502

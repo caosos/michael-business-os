@@ -5,6 +5,8 @@ Meta has NOT given us permission; every record is labelled `SOURCE_COMPLIANCE` a
 
 Bright Data API (docs.brightdata.com, read 2026-10-12):
     POST https://api.brightdata.com/datasets/v3/scrape?dataset_id=gd_lvt9iwuh6fbcwmx1a   Authorization: Bearer <token>
+    * async: a slow /scrape answers HTTP 202 {"snapshot_id"}; poll GET /datasets/v3/progress/<id> ("running" ->
+      "ready" | "failed") with back-off up to WAIT_CAP_S, then GET /datasets/v3/snapshot/<id>?format=json.
     * discovery:  &type=discover_new&discover_by=keyword&limit_per_input=N
                   body {"input": [{"keyword", "city", "radius", "date_listed"?}]}  -> rows with only "url"
     * by URL:     body {"input": [{"url": ".../marketplace/item/<id>"}]}  -> full listing records
@@ -22,6 +24,7 @@ from __future__ import annotations
 
 import json
 import re
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
@@ -36,7 +39,11 @@ from ..normalize import (HOME_BASE, MAX_DESCRIPTION, base_flags, classify, clean
 HOST = "api.brightdata.com"
 SCRAPE_URL = f"https://{HOST}/datasets/v3/scrape"
 DATASET_ID = "gd_lvt9iwuh6fbcwmx1a"
+PROGRESS_URL = f"https://{HOST}/datasets/v3/progress/"
+SNAPSHOT_URL = f"https://{HOST}/datasets/v3/snapshot/"
 HARD_CAP = 20
+WAIT_CAP_S = 300.0                               # total wait for an async (202) snapshot
+BACKOFF_S = (5.0, 10.0, 20.0, 30.0)              # then 30 s
 TOKEN_FILE = Path("~/.config/mbos/secrets/BRIGHTDATA_TOKEN")
 SOURCE_COMPLIANCE = "UNKNOWN (no Meta permission; owner-accepted provider route)"
 # Seller / profile fields never stored (B-42: drop at ingest). Matched on the lower-cased key.
@@ -82,8 +89,10 @@ class BrightDataFbMarketplaceAdapter(SourceAdapter):
 
     def __init__(self, token: str | None = None, *, live: bool = False, transport: Transport | None = None,
                  token_file: str | Path = TOKEN_FILE, city: str = "Conway, AR", center: tuple[float, float] = HOME_BASE,
-                 clock: Callable[[], datetime] = _utcnow) -> None:
+                 clock: Callable[[], datetime] = _utcnow, sleep: Callable[[float], None] = time.sleep,
+                 monotonic: Callable[[], float] = time.monotonic) -> None:
         self._token = token.strip() if token else None
+        self._sleep, self._mono = sleep, monotonic
         self._token_file, self.live, self.city, self.center, self.clock = token_file, live, city, center, clock
         self.http = ReadOnlyTransport(transport or UrllibTransport(), frozenset({HOST}),
                                       frozenset({SCRAPE_URL}))
@@ -112,6 +121,41 @@ class BrightDataFbMarketplaceAdapter(SourceAdapter):
         headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json",
                    "Accept": "application/json"}
         return self.http.request("POST", url, headers, json.dumps({"input": inputs}).encode(), timeout=120.0)
+
+    def _resolve(self, token: str, r: HttpResponse, res: FetchResult) -> HttpResponse:
+        """A 202 carries a snapshot id: poll progress with back-off (cap WAIT_CAP_S), then fetch the snapshot."""
+        if r.status != 202:
+            return r
+        try:
+            sid = str(json.loads(r.body.decode("utf-8", "replace")).get("snapshot_id") or "")
+        except (ValueError, AttributeError):
+            sid = ""
+        if not re.fullmatch(r"[A-Za-z0-9_\-]{3,64}", sid):
+            return HttpResponse(502, b"")          # 202 without a usable snapshot id -> http error
+        headers = {"Authorization": f"Bearer {token}", "Accept": "application/json"}
+        start, n = self._mono(), 0
+        while True:
+            p = self.http.request("GET", PROGRESS_URL + sid, headers, None, timeout=60.0)
+            res.requests_made += 1
+            if p.status != 200:
+                return p
+            try:
+                status = str(json.loads(p.body.decode("utf-8", "replace")).get("status", "")).lower()
+            except (ValueError, AttributeError):
+                status = ""
+            if status == "ready":
+                break
+            if status in ("failed", "error", "canceled", "cancelled"):
+                return HttpResponse(502, b"")
+            delay = BACKOFF_S[min(n, len(BACKOFF_S) - 1)]
+            n += 1
+            if self._mono() - start + delay > WAIT_CAP_S:
+                return HttpResponse(504, b"")      # wait cap reached
+            self._sleep(delay)
+        snap = self.http.request("GET", f"{SNAPSHOT_URL}{sid}?format=json", headers, None, timeout=120.0)
+        res.requests_made += 1
+        cost = snap.headers.get("x-cost") or r.headers.get("x-cost")
+        return HttpResponse(snap.status, snap.body, {**snap.headers, **({"x-cost": cost} if cost else {})})
 
     @staticmethod
     def _rows(body: bytes) -> list[dict]:
@@ -145,6 +189,7 @@ class BrightDataFbMarketplaceAdapter(SourceAdapter):
         try:
             r = self._post(token, f"&type=discover_new&discover_by=keyword&limit_per_input={cap}", inputs)
             res.requests_made += 1
+            r = self._resolve(token, r, res)
             err = self._error(r, token)
             if err:
                 res.error = err
@@ -155,6 +200,7 @@ class BrightDataFbMarketplaceAdapter(SourceAdapter):
             if urls:
                 r2 = self._post(token, "&limit_per_input=1", urls[:cap])
                 res.requests_made += 1
+                r2 = self._resolve(token, r2, res)
                 err = self._error(r2, token)
                 if err:
                     res.error = err
@@ -181,8 +227,8 @@ class BrightDataFbMarketplaceAdapter(SourceAdapter):
         return res
 
     def _error(self, r: HttpResponse, token: str) -> SourceError | None:
-        if r.status == 202:
-            return SourceError("http", "provider returned async snapshot (202); async collection not supported", 202)
+        if r.status == 504:
+            return SourceError("network", "Bright Data snapshot not ready within the wait cap", 504)
         if r.status == 401:
             return SourceError("auth", "Bright Data rejected the token (401)", 401)
         err = status_error(r, "Bright Data")
