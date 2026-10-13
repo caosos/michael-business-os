@@ -1,8 +1,8 @@
 {
-  "lane06_sha": "806a125f9006ebbf7981915e6bd368b5298d18b6",
+  "lane06_sha": "0278762675e38a94eb8407e1c639ae13b8d718e2",
   "lane02_sha": "cda867347505ac8e27945b2aa1ae6a3823939ae2",
   "requested_by": "Michael",
-  "purpose": "Publish and prove a dense real-listing marketplace, 24-card pages, top and bottom pagination, retained Facebook category searches, approved vendor cards, and receipt-backed bid states",
+  "purpose": "Publish and prove truthful source availability and matching counts, source-scoped hidden results, and one-click empty-result recovery",
   "refresh_marketplace": true,
-  "verification_attempt": 23
+  "verification_attempt": 24
 }
