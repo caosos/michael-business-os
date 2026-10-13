@@ -30,6 +30,7 @@ from ..normalize import HOME_BASE, base_flags, classify, clean_text, geo_tier, h
 
 SOURCE = "wilson_auctioneers"
 SITE_HOST = "wilsonauctioneers.com"
+IMAGE_HOST = "d37cbsn538t2ha.cloudfront.net"
 LISTING_URL = f"https://{SITE_HOST}/auctions/"
 USER_AGENT = "DealSnifferBot/1.0 (read-only; auction events only)"
 CRAWL_DELAY_S = 10.0
@@ -92,6 +93,17 @@ def _site_url(url: str) -> str | None:
     return url if p.scheme == "https" and p.hostname == SITE_HOST and not is_bidwrangler(url) else None
 
 
+def _event_image_url(value: str) -> str | None:
+    """Accept only Wilson's HTTPS event-gallery CDN URL. This is not a BidWrangler lot image."""
+    try:
+        url = html.unescape(value).strip()
+        p = urlsplit(url)
+        port = p.port
+    except (AttributeError, ValueError):
+        return None
+    return url if p.scheme == "https" and p.hostname == IMAGE_HOST and p.username is None and p.password is None and port in (None, 443) else None
+
+
 def parse_listing(page: str) -> list[dict]:
     """One dict per `auction-item` card. Anything absent stays out of the dict (UNKNOWN downstream)."""
     events: list[dict] = []
@@ -107,6 +119,10 @@ def parse_listing(page: str) -> list[dict]:
             continue
         ev: dict = {"url": url, "slug": "-".join(seg[1:]), "path_category": seg[1] if len(seg) > 2 else "",
                     "sale_type": _text(link.group(2)), "title": _text(link.group(3))}
+        image = re.search(r'<div class="auction-listing-gallery">.*?<img[^>]*\bsrc="([^"]+)"', block, re.S)
+        event_image_url = _event_image_url(image.group(1)) if image else None
+        if event_image_url:
+            ev["event_image_url"] = event_image_url
         times = re.findall(r'<p class="title-desc">\s*(Auction Start|Auction End)</p>\s*<p class="auction-datetime[^"]*">(.*?)</p>', block, re.S)
         for label, val in times:
             val = _text(val)
@@ -224,6 +240,7 @@ class WilsonSiteAdapter(SourceAdapter):
             "address": fld(address), "location": fld(loc or None), "category_tags": fld([pc.replace("-", " ")] if pc else []),
             "highlights": fld([p["details"]] if p.get("details") else []),
             "rules_url": fld(p.get("url")), "bidwrangler_url": fld(p.get("bidwrangler_url")),
+            "event_image_url": fld(p.get("event_image_url")),
             "category": fld(category, "INFERENCE"),
             "lot_number": Field(UNKNOWN, url, seen, "UNKNOWN", 0), "current_bid": Field(UNKNOWN, url, seen, "UNKNOWN", 0),
             "bid_count": Field(UNKNOWN, url, seen, "UNKNOWN", 0), "lot_image": Field(UNKNOWN, url, seen, "UNKNOWN", 0),
