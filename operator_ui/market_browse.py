@@ -254,8 +254,8 @@ def category_section(q: dict, fc: dict) -> str:
         if find and find not in lbl.lower() and not ck:
             continue
         n = fc["cats"].get(k, 0)
-        cnt, cls = _count(n)
-        rows += f"<label class='mk-cat{cls}' data-count='{n}'><input type='checkbox' form='mkform' name='cat' value='{e(k)}'{' checked' if ck else ''}> {e(lbl)}{cnt}</label>"
+        cnt, _ = _count(n)
+        rows += f"<label class='mk-cat' data-count='{n}'><input type='checkbox' form='mkform' name='cat' value='{e(k)}'{' checked' if ck else ''}> {e(lbl)}{cnt}</label>"
     hid = "".join(f"<input type='hidden' form='mkform' name='cat' value='{k}'>" for k in (q.get("cats") or []) if find and find not in ms.CAT_LABELS[k].lower() and not q.get("cat_all") and not q.get("cat_default"))
     return ("<details open class='mk-sect' id='sec-category'><summary><b>Category</b></summary>"
             f"<label class='small'>Filter categories <input form='mkform' name='cat_find' size='10' value='{e(q.get('cat_find') or '')}'></label>"
@@ -271,9 +271,8 @@ def source_section(q: dict, fc: dict, now: datetime) -> str:
         state = {"LIVE CONNECTED": "connected", "CONNECTED, WAITING FOR ALERTS": "connected, waiting for alerts", "MANUAL": "manual: paste finds", "BLOCKED": "blocked"}.get(st, "not connected")
         if r["probe"]["status"] == "fixture":
             state = "FIXTURE, not live"
-        pick = i.key in _names()
-        radio = f"<input type='radio' form='mkform' name='source' value='{e(i.key)}'{' checked' if sel == i.key else ''}{'' if pick else ' disabled'}>"
-        rows += (f"<label class='mk-src-row{' mut' if not n else ''}' data-src='{e(i.key)}' data-count='{n}'>{radio} {e(i.name)} <span class='mk-n'>({n})</span> "
+        radio = f"<input type='radio' form='mkform' name='source' value='{e(i.key)}'{' checked' if sel == i.key else ''}>"
+        rows += (f"<label class='mk-src-row' data-src='{e(i.key)}' data-count='{n}'>{radio} {e(i.name)} <span class='mk-n'>({n})</span> "
                  f"<span class='small {'' if state == 'connected' else 'mut'}'>{e(state)}</span></label>")
     return f"<details open class='mk-sect' id='sec-source'><summary><b>Source</b></summary>{rows}</details>"
 
@@ -333,7 +332,7 @@ CSS = """<style>
 .mk-top .mk-bar{flex:1 1 560px;align-items:center}.mk-search{flex:1 1 320px;font-size:18px;padding:10px 12px;min-width:0}.mk-count{font-weight:700;white-space:nowrap}
 .mk-fbtn{background:var(--acc);color:var(--bg);border:0;border-radius:8px;padding:8px 14px;font-size:15px;width:auto;opacity:1;cursor:pointer}.mk-fd{margin:0}.mk-fm,.mk-side .mk-fm{display:none}
 .mk-quick{flex:1 1 100%;display:flex;flex-wrap:wrap;gap:6px}.mk-q{border:1px solid var(--line);border-radius:16px;padding:4px 12px;font-size:14px;text-decoration:none}.mk-q.cur{background:#1d4ed8;color:#fff;border-color:#1d4ed8}.mk-q.cur .mk-n{color:#fff}
-.mk-n{color:var(--mut,#777);font-size:12px}.mk-sect{border:1px solid var(--line);border-radius:8px;padding:4px 8px;margin:0 0 8px}.mk-sect label{display:block;padding:2px 0}.mk-side .mk-cat.mut,.mk-sect label.mut{opacity:.55}
+.mk-n{color:var(--mut,#777);font-size:12px}.mk-sect{border:1px solid var(--line);border-radius:8px;padding:4px 8px;margin:0 0 8px}.mk-sect label{display:block;padding:2px 0}.mk-side .mk-cat,.mk-sect label{opacity:1}
 .mk-side.folded #mkfilters{display:none}.mk-drawer-t{position:absolute;opacity:0;pointer-events:none}
 .mk-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.mk-card{display:flex;flex-direction:column;gap:2px}.mk-ph{position:relative}.mk-ph .ph{height:130px}.mk-ph img{height:130px}
 .mk-cd{position:absolute;left:6px;bottom:6px;background:#444;color:#fff;border-radius:6px;padding:2px 8px;font-size:12px;font-weight:700}.mk-cd.red{background:#c0222c}.mk-src{position:absolute;right:6px;top:6px}
