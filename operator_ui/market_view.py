@@ -41,14 +41,14 @@ CSS = """<style>main{max-width:1900px}.banner{padding:3px 16px;font-size:13px}he
 
 def _photo(url, listing=None) -> str:
     if landing_fix.is_gsa_image(url):
-        return landing_fix.photo_tile(url, listing)
+        return ""
     try:
         host = urlsplit(url or "").hostname or ""
     except ValueError:
         host = ""
     if url and classify_url(url, hosts=[host])[0] == "live":
         return f"<img src='{e(url)}' alt='Original listing photo' loading='lazy' referrerpolicy='no-referrer'>"
-    return "<div class='mut small' style='width:120px'>No photo from the seller</div>"
+    return ""
 
 
 def vlink(c: dict) -> str:
@@ -59,11 +59,18 @@ def _money(v) -> str:
     return "UNKNOWN (no bids yet)" if v is None else f"${v:,.2f}"
 
 
-def pref_buttons(c: dict, tok) -> str:
+def save_button(c: dict, tok) -> str:
+    action, label = ("unsave", "Saved ✓") if c.get("saved") else ("save", "Save")
+    hid = f"<input type='hidden' name='lot' value='{e(c['id'])}'><input type='hidden' name='title' value='{e(c['title'])}'>"
+    return f"<form method='post' action='/market/pref' class='mk-save'>{tok()}{hid}<button name='act' value='{action}' type='submit'>{label}</button></form>"
+
+
+def pref_buttons(c: dict, tok, include_save: bool = True) -> str:
     """Learning controls on the left (each labelled with its effect), the distinct X / Hide this listing control bottom-right (no learning)."""
     b = lambda a, lbl, tip: f"<button name='act' value='{a}' title='{tip}'>{lbl}</button>"  # noqa: E731
     hid = f"<input type='hidden' name='lot' value='{e(c['id'])}'><input type='hidden' name='title' value='{e(c['title'])}'>"
-    return (f"<div class='mk-acts'><form method='post' action='/market/pref' class='mk-pref'>{tok()}{hid}{b('unsave', 'Unsave', 'Remove from saved') if c.get('saved') else b('save', 'Save', 'Keep this listing')}"
+    save = b('unsave', 'Unsave', 'Remove from saved') if c.get('saved') else b('save', 'Save', 'Keep this listing')
+    return (f"<div class='mk-acts'><form method='post' action='/market/pref' class='mk-pref'>{tok()}{hid}{save if include_save else ''}"
             f"{b('dismiss', 'Not interested', 'Hides this listing and counts its title words as less like this')}{b('more', 'More like this', 'Boosts its title words in ranking')}{b('less', 'Less like this', 'Lowers its title words in ranking')}</form>"
             f"<form method='post' action='/market/pref' class='mk-xf'>{tok()}{hid}<button name='act' value='hide' class='mk-x' type='submit' aria-label='Hide this listing' "
             "title='Hide this listing (this one only; nothing is learned; restore it from the hidden list)'>&#10005;<span class='mk-xt'> Hide</span></button></form></div>"
@@ -91,11 +98,11 @@ def gallery_labels(c: dict) -> str:
 
 
 def gallery_card(c: dict, tok) -> str:
-    """F-52 (B): dense card: photo (or an honest placeholder), price attached, short title, town, closing; details on the original listing."""
+    """F-52 (B): dense card: real photo when supplied, otherwise compact text; price, title, town and closing."""
     if c.get("event"):
         return msv.event_gallery(c, tok, pref_buttons, lambda u: f"{vlink(c)} · {link_html(u)}")
     img = _photo(c["image"], c["url"])
-    ph = img if img.startswith("<img") else f"<div class='ph small mut'>{img}</div>"      # the honest tile/placeholder; never a faked picture
+    ph = img if img.startswith("<img") else ""
     price = f"<div class='pr'>No bids yet</div><div class='small mut' data-opening>{e((c.get('labels') or ms.auction_labels({}))['opening_text'])}</div>" if c["bid"] is None else f"<div class='pr'>${c['bid']:,.0f}</div><div class='small mut'>current bid</div>"
     town = e(c["city"] or "town UNKNOWN") + (f" · {round(c['distance'], 1):g} mi" if c["distance"] is not None else " · distance UNKNOWN")
     ti = c["title"] if len(c["title"]) <= 60 else c["title"][:59] + "…"
@@ -202,7 +209,7 @@ def location_panel(q: dict, counts: dict | None = None) -> str:
     mode = lambda val, lbl: f"<label><input form='mkform' type='radio' name='loc_mode' value='{val}'{' checked' if (val == 'state') == by_state else ''}> {lbl}</label> "  # noqa: E731
     shown = [(c, n) for c, n in ms.US_STATES.items() if c in sel or not find or find in n.lower() or find == c.lower()]
     cnt = lambda c: "" if counts is None else f" <span class='mk-n'>({counts.get(c, 0)})</span>"  # noqa: E731
-    boxes = "".join(f"<label class='st{' mut' if counts is not None and not counts.get(c) and c not in sel else ''}' data-count='{'' if counts is None else counts.get(c, 0)}'><input form='mkform' type='checkbox' name='state' value='{c}'{' checked' if c in sel else ''}> {c} {e(n)}{cnt(c)}</label>" for c, n in shown) \
+    boxes = "".join(f"<label class='st' data-count='{'' if counts is None else counts.get(c, 0)}'><input form='mkform' type='checkbox' name='state' value='{c}'{' checked' if c in sel else ''}> {c} {e(n)}{cnt(c)}</label>" for c, n in shown) \
         or "<span class='small mut'>No state matches that search.</span>"
     hide = "".join(f"<input form='mkform' type='hidden' name='state' value='{c}'>" for c in sel if c not in {c2 for c2, _ in shown})
     chip = "".join(f"<span class='chip'>{c} <a href='{chip_url(q, c)}' aria-label='Remove {c}' title='Remove {c}'>×</a></span>" for c in sel) or "<span class='small mut'>No states selected</span>"
@@ -254,7 +261,7 @@ def _side_filters(q: dict, fc: dict, now) -> str:
             "<button class='mk-apply' type='submit' form='mkform'>Apply filters</button></div>")
 
 
-def _sidebar(saved: list[dict], csrf: str, pin_html: str, tok, q: dict, save: str = "", bids: str = "", fc: dict | None = None, now=None, folded: bool = False) -> str:
+def _sidebar(saved: list[dict], csrf: str, pin_html: str, tok, q: dict, save: str = "", bids: str = "", fc: dict | None = None, now=None, folded: bool = False, prefs: dict | None = None) -> str:
     rows = []
     for r in saved:
         d = r["doc"]
@@ -265,11 +272,13 @@ def _sidebar(saved: list[dict], csrf: str, pin_html: str, tok, q: dict, save: st
         rows.append(f"<li><b>{e(d['title'])}</b> <span class='badge'>{'ON' if on else e(d['status'])}</span><br>"
                     f"<a style='display:inline' href='/market?run={cid}'>Run</a> · <a style='display:inline' href='/market?edit={cid}'>Edit</a> {toggle}</li>")
     saved_html = f"<ul style='padding-left:16px;margin:4px 0'>{''.join(rows)}</ul>" if rows else "<p class='small mut'>No saved searches yet.</p>"
-    return (f"<aside class='mk-side{' folded' if folded else ''}' id='filters-side'>" + (_side_filters(q, fc, now) if fc else "") + bids + "<div class='card'><nav aria-label='Marketplace'>"
-            "<p class='small mut' style='margin:0 0 4px'>More</p><a class='mk-sec2' href='/market?new=1'>New Search</a>"
-            f"{save}<details><summary>My Campaigns / Saved Searches ({len(rows)})</summary>{saved_html}</details>"
-            "<a class='mk-sec2' href='/resale'>Saved Deals</a><a class='mk-sec2' href='/market?go=1&amp;sort=closing&amp;closing_by=soon'>Auctions Closing Soon</a>"
-            "</nav></div></aside>")
+    mine = ("<details class='mk-sect' id='my-marketplace'><summary><b>My Marketplace</b></summary>"
+            f"<a class='mk-sec2' href='{mb.href(q, quick='saved', page=1)}'>Saved listings</a><a class='mk-sec2' href='/market?new=1'>New search</a>"
+            f"{save}<details><summary>Saved searches ({len(rows)})</summary>{saved_html}</details>{bids}{hidden_panel(prefs, tok) if prefs else ''}</details>")
+    admin = ("<details class='mk-sect' id='admin-menu'><summary><b>Admin</b></summary><a href='/queue'>Queue</a><a href='/mission'>Weekly mission</a>"
+             "<a href='/numbers'>My numbers</a><a href='/wanted'>Wanted</a><a href='/intake'>Intake</a><a href='/assets'>My assets</a>"
+             "<a href='/resale'>Resale</a><a href='/sources'>Source health</a></details>")
+    return f"<aside class='mk-side{' folded' if folded else ''}' id='filters-side'>{_side_filters(q, fc, now) if fc else ''}{mine}{admin}</aside>"
 
 
 def _slider(q: dict, form: str = "") -> str:
@@ -363,41 +372,32 @@ def render_page(q: dict, d: dict, results: list[dict], hidden: dict, saved: list
     elif d["status"] not in ("connected", "fixture") or bad:
         body = ""
     else:
-        hid = ", ".join(f"{n} by {k}" for k, n in hidden.items() if n)
         unchecked = unchecked or []
-        scope = (f" within {q['radius']:g} miles" if q["radius"] is not None else "") if q.get("loc_mode") != "state" else f" in {e(', '.join(q['states']))}" + (f" and within {q['radius']:g} miles" if q.get("also_radius") and q["radius"] is not None else "")
-        zero = ("<p class='mut' id='zero-results'><b>0 results</b> match every filter" + scope + ". Nothing is padded in"
-                + (f"; {len(unchecked)} lot(s) could not be checked and are listed below, not counted" if unchecked else "") + ". Loosen a filter or widen the radius.</p>")
+        display_rows = results + unchecked
+        zero = "<p class='mut' id='zero-results'><b>0 listings</b> match these filters. Loosen a filter or widen the radius.</p>"
         browse = browse or {}
         now = browse.get("now") or __import__("datetime").datetime.now(__import__("datetime").timezone.utc)
-        page_rows, page, pages = mb.paginate(results, q.get("page", 1))
-        prec, prec_note = pv.for_cards(page_rows)          # F-139: read-only, checked results only
+        page_rows, page, pages = mb.paginate(display_rows, q.get("page", 1))
+        prec, _ = pv.for_cards(page_rows)
         render = (lambda c: mb.card(c, tok, now, pref_buttons)) if q.get("view") != "list" else (lambda c: render_card(c, tok))
-        wrap = (lambda cs: f"<div class='mk-grid'>{''.join(map(render, cs))}</div>") if q.get("view") != "list" else (lambda cs: "".join(map(render, cs)))
-        opt = ((f"<details class='mk-sec' id='unchecked-section'><summary><b>Optional: {len(unchecked)} lot(s) that could not be checked (not counted as local or in range). Click to open.</b></summary>"
-                "<p class='small mut'>Their location or state was not found or they have no bid yet, so the location scope or price range cannot be tested. They are shown only so nothing is hidden; "
-                "verify on the original listing.</p>" + wrap(unchecked) + "</details>") if unchecked else "")
         n_hid = q.get("hidden_checked", 0)
-        if n_hid and not results:
-            zero = (f"<p class='mut' id='zero-results'><b>0 results left.</b> All {n_hid} cached listing(s) that match your filters" + scope + " are hidden by you. Nothing else was substituted and no new fetch was made; "
-                    "there is no guaranteed replacement. Undo a hide below, or loosen a filter.</p>")
-        body = (chips(q) + f"<h2>{len(results)} result{'s' if len(results) != 1 else ''}{scope}</h2>" + f"<p class='small mut' style='margin:2px 0'>{e(msv.scope_line(d))}"
-                + (f" Hidden: {e(hid)}." if hid else "") + "</p>"
-                + (f"<p class='small mut' id='precedent-note'>{e(prec_note)}</p>" if prec_note and results else "")
-                + ((f"<div class='mk-grid' id='result-grid'>{''.join(pv.inject(render(c), prec.get(c['id'], '')) for c in page_rows)}</div>" if q.get("view") != "list" else "".join(pv.inject(render_card(c, tok), prec.get(c["id"], "")) for c in page_rows)) if results else zero)
-                + mb.pager(q, page, pages, len(results)) + opt
-                + distance_caveat(q, results + unchecked))
+        if n_hid and not display_rows:
+            zero = f"<p class='mut' id='zero-results'><b>0 listings left.</b> {n_hid} matching listing(s) are hidden. Open My Marketplace in the filters panel to restore them.</p>"
+        unknown = f" <span class='small mut'>({len(unchecked)} with distance or price not verified)</span>" if unchecked else ""
+        body = (f"<h2>{len(display_rows)} listing{'s' if len(display_rows) != 1 else ''}{unknown}</h2>"
+                + ((f"<div class='mk-grid' id='result-grid'>{''.join(pv.inject(render(c), prec.get(c['id'], '')) for c in page_rows)}</div>" if q.get("view") != "list" else "".join(pv.inject(render_card(c, tok), prec.get(c["id"], "")) for c in page_rows)) if display_rows else zero)
+                + mb.pager(q, page, pages, len(display_rows)))
     fc = browse.get("fc") if browse else None
     offline = d["status"] not in ("connected", "fixture") and not d.get("name") and not d.get("coverage")
     banner = f"<div class='flash err' id='fixture-banner' role='note' title='{e(msv.FIXTURE_BANNER)}'><b>{e(msv.FIXTURE_BANNER)}</b></div>" if fc and d.get("fixture") else ""
     status = render_status(d, not fc) if not fc or offline else ""          # F-163: on the browse page the per-source status lives in the collapsed Sources panel
-    sources = msp.render(browse.get("now") if browse else None, render_status(d, False) if fc and not offline else "")
     folded = mb.collapsed()
     back = browse.get("back", "/market") if browse else "/market"
-    bar = mb.top_bar(q, len(results) if ran and not bad and d["status"] in ("connected", "fixture") else 0, q.get("sort", "closing"), q.get("view", "gallery"), tok, mb.active_filters(q), back, (fc or {}).get("quick"), folded) if fc else _form(q, edit_id, tok, pin_html)
+    total = len(results) + len(unchecked or [])
+    bar = mb.top_bar(q, total if ran and not bad and d["status"] in ("connected", "fixture") else 0, q.get("sort", "closing"), q.get("view", "gallery"), tok, mb.active_filters(q), back, (fc or {}).get("quick"), folded) if fc else _form(q, edit_id, tok, pin_html)
     return (CSS + mb.CSS + "<script src='/static/market_radius.js' defer></script><h1 class='pagehead'>DealSniffer Marketplace</h1><input type='checkbox' id='mkdrawer' class='mk-drawer-t' aria-label='Show filters'><div class='mk'>"
-            + _sidebar(saved, csrf, pin_html, tok, q, _save(q, edit_id, tok, pin_html), bids, fc, browse.get("now") if browse else None, folded)
-            + f"<section class='mk-main' id='results-top'>{bar}{err}{verr}{banner}{status}{suggest}{body}{finds}{hidden_panel(prefs, tok) if prefs else ''}{prefs_panel(prefs, tok) if prefs else ''}{sources}{working_capital()}{gsa_explainer()}</section></div>")
+            + _sidebar(saved, csrf, pin_html, tok, q, _save(q, edit_id, tok, pin_html), bids, fc, browse.get("now") if browse else None, folded, prefs)
+            + f"<section class='mk-main' id='results-top'>{bar}{err}{verr}{banner}{status}{body}</section></div>")
 
 
 def save_form(f: dict) -> dict:
