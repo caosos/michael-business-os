@@ -75,7 +75,7 @@ jobs:
           curl -fsS --max-time 30 http://127.0.0.1:8766/settings > "$PROOF_DIR/settings.html"
           grep -q "id='product-header'" "$PROOF_DIR/settings.html"
           grep -q "id='deal-preferences'" "$PROOF_DIR/settings.html"
-          grep -q "Google sign-in: <b>NOT CONFIGURED</b>" "$PROOF_DIR/settings.html"
+          grep -q "Google sign-in: <b>NOT CONFIGURED" "$PROOF_DIR/settings.html"
           grep -q "Email notifications: <b>NOT ACTIVE</b>" "$PROOF_DIR/settings.html"
           ! grep -q "id='admin-menu'" "$PROOF_DIR/settings.html"
           ! grep -q "DRY-RUN · nothing leaves this machine" "$PROOF_DIR/settings.html"
