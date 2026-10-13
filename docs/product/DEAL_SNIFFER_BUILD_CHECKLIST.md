@@ -39,6 +39,39 @@ Loaded proof:
 - Focused account/OAuth/delivery/source/bid/sell/settings/market tests: 94 passed, 2 skipped
 - Search submission regression suite: 41 passed, 1 skipped
 
+## P0 — Marketplace acceptance (authoritative progress)
+
+Task: P0 Marketplace acceptance, run by Agent 01 (DealSniffer). Started Tuesday, October 13, 2026 — 5:46 PM America/Chicago.
+Tested against the LOADED app at `127.0.0.1:8766`: lane 06 `72d7a02721eaf728b6722ac58f4e846b72c2fa6a`, lane 02 `cda867347505ac8e27945b2aa1ae6a3823939ae2`.
+Evidence: real clicks and typing in Claude in Chrome on the owner's desktop, plus headless Google Chrome (Playwright) at 390×844 for mobile, because the desktop Chrome window cannot shrink to phone width.
+A checkpoint counts only when browser evidence proves it. Progress = verified PASS / 21.
+
+**Status: 20/21 PASS = 95.2% (initial assessment). First defect: 06.**
+
+- [x] 01 Marketplace loads: /market HTTP 200, the grid renders, and the remembered filters are restored.
+- [x] 02 Keyword search: typing `trailer` and pressing Enter gave 25 results, every title a trailer.
+- [x] 03 Multiple sources: All unticked, Wooley + Facebook ticked: 71 results; cards from Facebook (49) and Wooley (1) only.
+- [x] 04 Multiple categories: Tools + Trailers only: 48 results, all trailers or tools.
+- [x] 05 Combined source + category: Wooley + Facebook with Tools + Trailers: Facebook only (the Wooley event is neither).
+- [ ] 06 Distance filtering: **FAIL**. Conway AR, 10 mi: 16 results, of which 5 were 'distance UNKNOWN' Facebook listings (Hot Springs National Park ×3, Cleveland, Prim). At 25 mi, 1 of 13 was unknown. Cause: a listing whose town is not in the offline gazetteer has no distance, and the page appended these 'not verified' rows to the in-radius results.
+- [x] 07 Min/max price: $100–$1,000 gave 19 results, prices from $100 to $1,000.
+- [x] 08 Listing type: Auction event: 17 (Wooley 1, Wilson 10, Blackmon 6, all events). Fixed price: 127, all Facebook fixed price.
+- [x] 09 Rentals excluded: the default lineup (132 results, 3 pages) has no rental titles. The 4 rental listings in the Facebook cache appear only when the owner searches `rent` (deliberate: `wants_rentals`).
+- [x] 10 Fifty per page: 71 / 117 / 127 results show 50 cards on page 1; page 3 of 127 shows 27.
+- [x] 11 Top pagination: top `2` gave "51-100 of 127 · Page 2 of 3", with no overlap with page 1.
+- [x] 12 Bottom pagination: bottom `3` gave "101-127 of 127 · Page 3 of 3".
+- [x] 13 Page change keeps filters: Wooley + Facebook, 13 categories (Land off), max $5,000, 50 mi: identical on page 2 (116 results).
+- [x] 14 Photos: 50 of 50 cards rendered loaded images (Facebook 48, Wooley 1, Wilson 1); no 'No photo' placeholders.
+- [x] 15 Source attribution: each card's label matches its record id and detail route (facebook→Facebook Marketplace, wooley→Wooley Auctioneers, wilson→Wilson Auctioneers). The Sources panel labels GovDeals, Public Surplus, Craigslist and eBay `not connected`, HiBid website `blocked`, and OfferUp, Nahlen and finds `manual`.
+- [x] 16 Zero results: `qqzxnomatch` gave "0 results found" and the zero-results message, with no stale cards.
+- [x] 17 Persist after refresh: Facebook only, Trailers only, 25 mi, then F5: the same, 13 results.
+- [x] 18 Persist after navigation: Settings → Browse: the same filters.
+- [x] 19 Persist across sessions: closed the tab and opened a new tab group (no cookies): the same filters (server-side owner preferences).
+- [x] 20 Desktop layout: 1870 px window: 4-column grid, sidebar 253 px, no horizontal overflow.
+- [x] 21 Mobile layout: 390×844 touch: 1 column, page width 390 = viewport (no horizontal scroll). The Filters drawer opens with a tap; tapping a category and Apply filters works; the bottom pager fits.
+
+Note: one paid Bright Data job was started during testing. Clicking **Search** (rather than pressing Enter) sends `go=1`, which starts a provider search, for the test query `qqzxnomatch` at 6:07 PM. The Facebook cache is sharded per query, so existing listings were not affected. Later tests used Enter or Apply filters only.
+
 ## Current work — in order
 
 - [ ] **Public launch prerequisites:** point `dealsniffers.com` at an HTTPS host, add the Google Search Console TXT record, configure the OAuth brand/client/callback, and prove a real Google sign-in. The domain is registered but currently resolves to GoDaddy parking; no TXT record is present.
