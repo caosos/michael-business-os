@@ -31,6 +31,10 @@ jobs:
           LANE06="$(printf '%s' "$MANIFEST" | .venv/bin/python -c 'import json,sys; print(json.load(sys.stdin)["lane06_sha"])')"
           LANE02="$(printf '%s' "$MANIFEST" | .venv/bin/python -c 'import json,sys; print(json.load(sys.stdin)["lane02_sha"])')"
           REFRESH_MARKETPLACE="$(printf '%s' "$MANIFEST" | .venv/bin/python -c 'import json,sys; print(str(json.load(sys.stdin).get("refresh_marketplace", False)).lower())')"
+          BID_SEED_URL="$(printf '%s' "$MANIFEST" | .venv/bin/python -c 'import json,sys; print((json.load(sys.stdin).get("owner_bid_watch_seed") or {}).get("url", ""))')"
+          BID_SEED_CLOSE="$(printf '%s' "$MANIFEST" | .venv/bin/python -c 'import json,sys; print((json.load(sys.stdin).get("owner_bid_watch_seed") or {}).get("closes_at", ""))')"
+          BID_SEED_CURRENT="$(printf '%s' "$MANIFEST" | .venv/bin/python -c 'import json,sys; print((json.load(sys.stdin).get("owner_bid_watch_seed") or {}).get("current_bid", ""))')"
+          BID_SEED_STATUS="$(printf '%s' "$MANIFEST" | .venv/bin/python -c 'import json,sys; print((json.load(sys.stdin).get("owner_bid_watch_seed") or {}).get("status", "watching"))')"
           [[ "$LANE06" =~ ^[0-9a-f]{40}$ ]]
           [[ "$LANE02" =~ ^[0-9a-f]{40}$ ]]
           PROOF_DIR="$RUNNER_TEMP/dealsniffer-proof"
@@ -191,7 +195,12 @@ jobs:
           curl -fsS --max-time 30 http://127.0.0.1:8766/market/bids > "$PROOF_DIR/bids.html"
           grep -q "My Bids" "$PROOF_DIR/bids.html"
           grep -q "Add a bid to watch" "$PROOF_DIR/bids.html"
-          grep -q "DealSniffer never asks for or signs in to a source account" "$PROOF_DIR/bids.html"
+          grep -q "Paste a HiBid lot link" "$PROOF_DIR/bids.html"
+          grep -q "Watch this auction" "$PROOF_DIR/bids.html"
+          grep -q "src='/static/market_bids.js'" "$PROOF_DIR/bids.html"
+          curl -fsS --max-time 30 http://127.0.0.1:8766/static/market_bids.js > "$PROOF_DIR/market_bids.js"
+          grep -q "dealsniffer.bid-alert.v1" "$PROOF_DIR/market_bids.js"
+          grep -q "Notification.requestPermission" "$PROOF_DIR/market_bids.js"
           curl -fsS --max-time 30 http://127.0.0.1:8766/sell/submissions > "$PROOF_DIR/submissions.html"
           grep -q "My submissions" "$PROOF_DIR/submissions.html"
           grep -q "^sha=$LANE06$" var/lanes/agent-06/ARTIFACT
@@ -240,6 +249,33 @@ jobs:
           grep -q ".mk-cat:has(input:checked),.mk-src-row:has(input:checked)" "$PROOF_DIR/multi-source.html"
           restore_prefs
           trap - EXIT
+          # Seed tonight's owner-authorized watch once. The marker prevents a
+          # later deployment from resurrecting it if Michael stops tracking.
+          # No source site is fetched and no bid is placed.
+          if [ -n "$BID_SEED_URL" ]; then
+            SEED_KEY="$(printf '%s' "$BID_SEED_URL" | sha256sum | cut -c1-20)"
+            SEED_MARKER="var/deploy-seeds/bid-watch-$SEED_KEY.done"
+            if [ ! -f "$SEED_MARKER" ]; then
+              mkdir -p "$(dirname "$SEED_MARKER")"
+              PYTHONPATH="var/lanes/agent-06${PYTHONPATH:+:$PYTHONPATH}" .venv/bin/python - "$BID_SEED_URL" "$BID_SEED_CLOSE" "$BID_SEED_CURRENT" "$BID_SEED_STATUS" <<'PY' | tee "$PROOF_DIR/bid-watch-seed.txt"
+          import sys
+          from datetime import datetime, timezone
+          from operator_ui import market_bids
+
+          url, closes_at, current_bid, status = sys.argv[1:]
+          message = market_bids.act("add", {
+              "url": url, "closes_at": closes_at, "current_bid": current_bid,
+              "status": status, "next_action": "Refresh HiBid before bidding; the final-minute soft close can extend the lot.",
+          }, datetime.now(timezone.utc).isoformat(timespec="seconds"))
+          print(message)
+          PY
+              printf 'seeded_at=%s\nurl=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$BID_SEED_URL" > "$SEED_MARKER"
+            else
+              printf 'seed=SKIPPED_ALREADY_APPLIED\nmarker=%s\n' "$SEED_MARKER" | tee "$PROOF_DIR/bid-watch-seed.txt"
+            fi
+          else
+            printf 'seed=NONE\n' > "$PROOF_DIR/bid-watch-seed.txt"
+          fi
           set +e
           PYTHONPATH="var/lanes/agent-06${PYTHONPATH:+:$PYTHONPATH}" .venv/bin/python - <<'PY' >> "$PROOF_DIR/facebook-proof.txt"
           from datetime import datetime, timezone

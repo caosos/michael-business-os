@@ -24,10 +24,47 @@ def test_manual_bid_watch_has_required_fields_and_no_account_access(ui):
     assert record["origin"] == "MANUAL" and record["provenance"]["kind"] == "owner_entry"
     assert record["provenance"]["source_account_access"] == "NONE"
     assert record["status"] == "watching" and record["bid"] == 900 and record["max_bid"] == 1400
-    h = get(ui, new=1)
+    from tests.test_operator_ui import req
+
+    h = req(ui, "GET", "/market/bids")[2]
     for text in ("County tractor", "GovDeals · MANUAL", "current bid $900", "your max: $1,400", "Inspect hydraulic leak", "original listing"):
         assert text in h
     assert "entered by you; no source-account access" in h
+
+
+def test_hibid_link_only_add_is_canonical_stable_and_activates_nav_count(ui):
+    link = "https://wooleyauctioneers.hibid.com/lot/324232426/countyline-32-ton-towable-log-splitter?ref=lot-list"
+    status, _, _ = post(ui, "/market/bid", act="add", url=link,
+                        closes_at="2026-10-13T18:10:00-05:00")
+    assert status in (302, 303)
+    bids = mp.load()["bids"]
+    assert list(bids) == ["hibid:wooleyauctioneers.hibid.com:324232426"]
+    record = next(iter(bids.values()))
+    assert record["title"] == "CountyLine 32 Ton Towable Log Splitter"
+    assert record["source"] == "Wooley Auctioneers / HiBid"
+    assert record["url"] == "https://wooleyauctioneers.hibid.com/lot/324232426/countyline-32-ton-towable-log-splitter"
+    from tests.test_operator_ui import req
+
+    h = req(ui, "GET", "/market/bids")[2]
+    assert "id='my-bids-nav'" in h and "My bids (1)" in h
+    assert "data-end='2026-10-13T23:10:00Z'" in h
+    assert "src='/static/market_bids.js'" in h
+
+
+def test_link_only_unknown_close_is_truthful_and_does_not_fetch(ui):
+    link = "https://wooleyauctioneers.hibid.com/lot/324232426/countyline-32-ton-towable-log-splitter?tracking=x"
+    status, location, _ = post(ui, "/market/bid", act="add", url=link)
+    assert status in (302, 303) and "Add the closing time" in location
+    record = next(iter(mp.load()["bids"].values()))
+    assert record["closes_at"] == "" and record["bid"] is None
+    assert "closes UNKNOWN" in get(ui, new=1)
+
+
+def test_non_hibid_link_still_requires_manual_title_and_source(ui):
+    from operator_ui import market_bids as mb
+
+    with pytest.raises(ValueError, match="title is required"):
+        mb.act("add", {"url": "https://example.com/auction/1"}, "2026-10-13T05:00:00+00:00")
 
 
 def test_imported_card_is_snapshot_not_source_account_connection(ui):

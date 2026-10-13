@@ -82,6 +82,7 @@ header nav{display:flex;align-items:center;gap:14px}header nav>a{margin:0}
 .q a.rowlink{display:block;text-decoration:none;color:inherit}.bad{color:var(--no);font-weight:600}.ok{color:var(--yes);font-weight:600}
 .product-header{padding:10px 18px;background:var(--card);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:22px;flex-wrap:wrap}
 .product-header>a{color:var(--ink);font-size:19px;font-weight:800;text-decoration:none}.product-header nav{display:flex;gap:16px;flex-wrap:wrap}.product-header nav a{margin:0;text-decoration:none}.product-header nav a.active{font-weight:800;border-bottom:2px solid var(--acc)}
+.product-header nav a.bid-nav-urgent{background:#c0222c;color:#fff;border-radius:999px;padding:2px 9px;font-weight:800}@media(prefers-reduced-motion:no-preference){.product-header nav a.bid-nav-urgent{animation:navpulse .8s ease-in-out infinite alternate}@keyframes navpulse{to{transform:scale(1.06);filter:brightness(1.2)}}}
 @media(max-width:600px){.product-header{gap:10px;padding:9px 12px}.product-header nav{gap:11px}.product-header nav a{font-size:13px}}
 """
 
@@ -172,11 +173,19 @@ def _product_nav(path: str) -> str:
     market = path.startswith("/market") and not bids and not flash
     sell = path.startswith("/sell")
     settings = path.startswith("/settings")
+    try:
+        bid_summary = market_bids.nav_summary(utcnow())
+    except (OSError, ValueError):
+        bid_summary = {"active": 0, "urgent": 0}
+    bid_text = f"My bids ({bid_summary['active']})" if bid_summary["active"] else "My bids"
+    bid_urgent = " bid-nav-urgent" if bid_summary["urgent"] else ""
+    bid_class = (("active" if bids else "") + bid_urgent).strip()
+    bid_attrs = f" class='{bid_class}'" if bid_class else ""
     return ("<header class='product-header' id='product-header'><a href='/home'>DealSniffer</a><nav aria-label='DealSniffer'>"
             f"<a href='/market'{' class=active aria-current=page' if market else ''}>Browse</a>"
             f"<a href='/market/flash'{' class=active aria-current=page' if flash else ''}>Flash deals</a>"
             "<a href='/market?quick=saved'>Saved</a>"
-            f"<a href='/market/bids'{' class=active aria-current=page' if bids else ''}>My bids</a>"
+            f"<a id='my-bids-nav' href='/market/bids'{bid_attrs}{' aria-current=page' if bids else ''} data-bid-count='{bid_summary['active']}' data-bid-urgent='{bid_summary['urgent']}'>{bid_text}</a>"
             f"<a href='/sell'{' class=active aria-current=page' if sell else ''}>Sell</a>"
             f"<a href='/settings'{' class=active aria-current=page' if settings else ''}>Settings</a></nav></header>")
 
@@ -1218,6 +1227,8 @@ def make_handler(app):
                 return self._send(200, (Path(__file__).parent / "static" / "market_radius.js").read_text(encoding="utf-8"), "text/javascript; charset=utf-8")
             if u.path == "/static/market_detail.js":
                 return self._send(200, (Path(__file__).parent / "static" / "market_detail.js").read_text(encoding="utf-8"), "text/javascript; charset=utf-8")
+            if u.path == "/static/market_bids.js":
+                return self._send(200, (Path(__file__).parent / "static" / "market_bids.js").read_text(encoding="utf-8"), "text/javascript; charset=utf-8")
             if u.path.startswith("/market/item/"):                                    # F-160: listing detail page, cached record only
                 seg = u.path.split("/")
                 body = market_detail.page_body(app, seg[3], unquote(seg[4]), now) if len(seg) == 5 else None
