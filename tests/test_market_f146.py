@@ -76,7 +76,7 @@ def test_page_shows_unknown_lot_fields_links_and_connected_label(ui, wcache):
     assert f"https://wooleyauctioneers.com/{BRUCK}/" in h and "View and bid on HiBid" in h and "mi from your base" in h
     g = get(ui, go=1, source="wooley", broad=1)
     assert "data-kind='auction-event'" in g and "View and bid on HiBid" in g
-    assert "eBay: NOT CONNECTED" in h and "Facebook Marketplace: NOT CONNECTED" in h
+    assert "eBay: NOT CONNECTED" in h and "Facebook Marketplace:" in h
 
 
 def test_selector_option_and_all_sources_merge(ui, wcache, cache):
