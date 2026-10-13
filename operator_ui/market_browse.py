@@ -231,6 +231,10 @@ def card(c: dict, tok, now: datetime, pref_buttons) -> str:
     closes = c.get("closes_local") or msrc.local_when(c.get("closes")) or "closes UNKNOWN"
     if c.get("event"):
         money = "<div class='pr'>Auction event</div><div class='small mut'>current bid / bidders UNKNOWN (event, not a lot)</div>"
+    elif ltype(c) == "fixed":
+        price = c.get("price") if c.get("price") is not None else c.get("bid")
+        label = "asking price" if c.get("price_type") == "asking" else "fixed price"
+        money = f"<div class='pr'>${price:,.0f}</div><div class='small mut'>{label}</div>" if price is not None else "<div class='pr'>Price not stated</div><div class='small mut'>check original listing</div>"
     else:
         bd = c.get("bidders")
         bidders = f"{bd} bidder{'s' if bd != 1 else ''}" if isinstance(bd, int) and not isinstance(bd, bool) else "bidders UNKNOWN"
