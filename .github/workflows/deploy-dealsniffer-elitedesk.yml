@@ -61,7 +61,7 @@ jobs:
             date --iso-8601=seconds
             printf 'lane06=%s\nlane02=%s\n' "$LANE06" "$LANE02"
             ss -ltnp | grep ':8766'
-            curl -fsSI --max-time 10 http://127.0.0.1:8766/market | head -n 1
+            curl -fsS -o /dev/null -w 'http_status=%{http_code}\\n' --max-time 10 http://127.0.0.1:8766/market
             printf 'chrome=%s\n' "${CHROME:-NOT_FOUND}"
           } > "$PROOF_DIR/host-proof.txt"
 
