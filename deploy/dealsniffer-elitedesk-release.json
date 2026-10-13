@@ -1,7 +1,7 @@
 {
-  "lane06_sha": "0970b6eb3edab88cceda266eb0771ee1fa49c6a2",
+  "lane06_sha": "2a8cd4d38a844b4d909f7ebad0cbdc6ec75bf3ef",
   "lane02_sha": "cda867347505ac8e27945b2aa1ae6a3823939ae2",
   "requested_by": "Michael",
-  "purpose": "Usable multi-source filters, non-blocking Facebook refresh, sale-only defaults, visible hide controls, and readable source labels",
-  "verification_attempt": 14
+  "purpose": "Customer-only marketplace shell, per-account preferences, provenance-aware My Bids, honest delivery status, and review-only selling intake",
+  "verification_attempt": 15
 }

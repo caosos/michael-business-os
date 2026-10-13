@@ -57,13 +57,37 @@ jobs:
           grep -q "DealSniffer Marketplace" "$PROOF_DIR/market.html"
           grep -q "class='mk-grid' id='result-grid'" "$PROOF_DIR/market.html"
           grep -q "class='mk-save'" "$PROOF_DIR/market.html"
-          grep -q "id='admin-menu'" "$PROOF_DIR/market.html"
+          grep -q "id='product-header'" "$PROOF_DIR/market.html"
+          ! grep -q "id='admin-menu'" "$PROOF_DIR/market.html"
           ! grep -q "DRY-RUN · nothing leaves this machine" "$PROOF_DIR/market.html"
           ! grep -q "<header><b>Operator UI</b>" "$PROOF_DIR/market.html"
+          ! grep -q "Weekly mission" "$PROOF_DIR/market.html"
+          ! grep -q "HOLD backlog" "$PROOF_DIR/market.html"
+          ! grep -q "Receipt ledger" "$PROOF_DIR/market.html"
           ! grep -q "id='unchecked-section'" "$PROOF_DIR/market.html"
           ! grep -q "id='working-capital'" "$PROOF_DIR/market.html"
           ! grep -q "id='gsa-explainer'" "$PROOF_DIR/market.html"
           ! grep -q "No photo" "$PROOF_DIR/market.html"
+
+          # These are read-only customer journeys. They prove the deployed
+          # account/delivery state and selling guardrails without saving a
+          # preference, sending mail, creating an intake, or contacting anyone.
+          curl -fsS --max-time 30 http://127.0.0.1:8766/settings > "$PROOF_DIR/settings.html"
+          grep -q "id='product-header'" "$PROOF_DIR/settings.html"
+          grep -q "id='deal-preferences'" "$PROOF_DIR/settings.html"
+          grep -q "Google sign-in: <b>NOT CONFIGURED</b>" "$PROOF_DIR/settings.html"
+          grep -q "Email notifications: <b>NOT ACTIVE</b>" "$PROOF_DIR/settings.html"
+          ! grep -q "id='admin-menu'" "$PROOF_DIR/settings.html"
+          ! grep -q "DRY-RUN · nothing leaves this machine" "$PROOF_DIR/settings.html"
+          ! grep -q "<header><b>Operator UI</b>" "$PROOF_DIR/settings.html"
+
+          curl -fsS --max-time 30 http://127.0.0.1:8766/sell > "$PROOF_DIR/sell.html"
+          grep -q "id='product-header'" "$PROOF_DIR/sell.html"
+          grep -q "Review only" "$PROOF_DIR/sell.html"
+          grep -q "Send for human review" "$PROOF_DIR/sell.html"
+          ! grep -q "id='admin-menu'" "$PROOF_DIR/sell.html"
+          ! grep -q "DRY-RUN · nothing leaves this machine" "$PROOF_DIR/sell.html"
+          ! grep -q "<header><b>Operator UI</b>" "$PROOF_DIR/sell.html"
           grep -q "^sha=$LANE06$" var/lanes/agent-06/ARTIFACT
           cp var/lanes/agent-06/ARTIFACT "$PROOF_DIR/ARTIFACT"
 
