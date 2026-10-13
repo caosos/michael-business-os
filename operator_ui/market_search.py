@@ -49,7 +49,7 @@ CONDITIONS = ("", "new", "used", "salvage", "parts", "for parts", "not working",
 STALE_H = 6
 LTYPES = ("auction", "fixed", "event")      # F-159: Auction / Buy now or fixed price / Auction event
 QUICK = ("new", "today", "soon", "saved")
-PAGE_SIZE = 24
+PAGE_SIZE = 50
 META = ("min:", "cat:", "rows:", "broad:", "cond:", "any:", "locmode:", "states:", "alsorad:")   # F-54: other saved-search criteria ride in nice_to_have the same way (the frozen schema has no field)
 EXCLUDE_PREFIX = "exclude:"            # saved inside the campaign's nice_to_have, the only free-text list the frozen schema allows
 # F-136: state names for the By State picker (50 states + DC). A lot's state is the 2-letter code the GSA cache gives; anything else stays unknown.

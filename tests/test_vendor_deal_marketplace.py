@@ -59,23 +59,41 @@ def query(**overrides) -> dict:
 
 
 def test_mixed_auction_and_local_deals_share_filter_sort_and_pagination_path():
-    rows = [auction_card()] + [local_card(i, "restaurants" if i == 13 else "food_grocery") for i in range(1, 29)]
+    rows = [auction_card()] + [local_card(i, "restaurants" if i == 13 else "food_grocery") for i in range(1, 59)]
     checked, unchecked, hidden = search.partition(rows, query(sort="bid"))
     assert unchecked == [] and not any(hidden.values())
-    assert len(checked) == 29 and {c["source_key"] for c in checked} == {"gsa", "local_deals"}
+    assert len(checked) == 59 and {c["source_key"] for c in checked} == {"gsa", "local_deals"}
     assert [search.display_price(c) for c in checked] == sorted(search.display_price(c) for c in checked)
 
     first, page, pages = browse.paginate(checked, 1)
     second, page2, _ = browse.paginate(checked, 2)
-    assert (len(first), page, pages) == (24, 1, 2)
-    assert (len(second), page2) == (5, 2)
+    assert (len(first), page, pages) == (50, 1, 2)
+    assert (len(second), page2) == (9, 2)
     assert not {c["id"] for c in first} & {c["id"] for c in second}
-    assert "Showing 1-24 of 29" in browse.pager(query(), 1, pages, len(checked))
+    assert "Showing 1-50 of 59" in browse.pager(query(), 1, pages, len(checked))
     tok = lambda: "<input name='csrf' value='x'>"
     page_one_grid = "<div id='result-grid'>" + "".join(browse.card(c, tok, NOW, market_view.pref_buttons) for c in first) + "</div>"
     page_two_grid = "<div id='result-grid'>" + "".join(browse.card(c, tok, NOW, market_view.pref_buttons) for c in second) + "</div>"
-    assert page_one_grid.count("class='mk-g mk-card'") == 24
-    assert page_two_grid.count("class='mk-g mk-card'") == 5
+    assert page_one_grid.count("class='mk-g mk-card'") == 50
+    assert page_two_grid.count("class='mk-g mk-card'") == 9
+
+
+def test_named_vendor_source_selects_its_approved_offer_and_keeps_local_group():
+    payload = {
+        "method": "vendor_submission", "source_id": "half_off_wholesale",
+        "source_name": "Half Off Wholesale — Little Rock", "source_class": "liquidation / wholesale",
+        "geography": "North Little Rock, AR", "source_offer_id": "pallet-1",
+        "source_url": "https://halfoffvip.com/offers/pallet-1", "image_url": "https://halfoffvip.com/images/pallet-1.jpg",
+        "vendor_submission_id": "mail-pallet-1", "authority_attested": True,
+        "title": "Tool liquidation pallet", "category": "pallets_wholesale",
+        "description": "Current reviewed pallet offer", "deal_price": "699", "regular_price": "999",
+        "unit": "per pallet", "location": "North Little Rock, AR 72117", "availability": "One available",
+        "terms": "While available", "observed_at": "2026-10-13T17:30:00Z", "expires_at": "2026-10-14T23:00:00Z",
+    }
+    card = lds.card(lds.normalize(payload, "2026-10-13T18:00:00Z", "half-off-pallet-1"), search._origin("72032"))
+    assert browse.source_ok(card, "half_off_wholesale")
+    assert browse.source_ok(card, "local_deals")
+    assert set(browse.facets(lambda qq, relax: browse.post([card], qq, NOW, relax), query(), NOW)["source"]) >= {"half_off_wholesale", "local_deals"}
 
 
 def test_local_deal_category_source_and_keyword_filters_are_exact():

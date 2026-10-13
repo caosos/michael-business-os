@@ -23,13 +23,11 @@ from mbos_discovery.normalize import haversine_miles
 SCHEMA = "dealsniffer.local_deal_import.v1"
 SOURCE_KEY = "local_deals"
 SOURCE_NAME = "Authorized local deals"
-CATEGORIES = {
-    "food_grocery": "Meat & Groceries",
-    "restaurants": "Restaurants & Prepared Food",
-    "fuel_auto": "Fuel & Automotive",
-    "entertainment": "Entertainment & Tickets",
-    "retail_services": "Retail & Local Services",
-}
+# A reviewed business offer can use every customer-facing Marketplace
+# category.  The first version admitted only everyday deals, which meant a
+# real Half Off pallet or Tool Shop item could pass review but could not be
+# normalized into the feed at all.
+CATEGORIES = {key: ms.CAT_LABELS[key] for key in ms.CONTROL_CATS}
 METHODS = ("vendor_submission", "public_offer")
 _ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]{2,119}$")
 _SOURCE = re.compile(r"^[a-z0-9][a-z0-9_-]{1,62}$")

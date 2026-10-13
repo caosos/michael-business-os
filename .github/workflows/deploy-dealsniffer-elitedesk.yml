@@ -47,6 +47,30 @@ jobs:
           . var/owner.env
           set +a
           set -u
+          # The Marketplace page never performs a hidden GSA network request.
+          # A release explicitly refreshes the official read-only cache once
+          # (or reuses it when it is under an hour old), and fails visibly if
+          # the source cannot produce a valid current cache.
+          if [ "$REFRESH_MARKETPLACE" = true ]; then
+            PYTHONPATH="var/lanes/agent-06${PYTHONPATH:+:$PYTHONPATH}" .venv/bin/python - "$PROOF_DIR/gsa-refresh.txt" <<'PY'
+          import os, sys
+          from mbos_discovery.adapter import SearchProfile
+          from mbos_discovery.gsa_live import GsaLiveAdapter
+
+          cache = os.environ.get("MBOS_GSA_CACHE") or "/home/michaelos/business-os-worktrees/agent-01-coordinator/var/cache/gsa-active-auctions.json"
+          adapter = GsaLiveAdapter(cache, live=True, api_key=os.environ.get("GSA_API_KEY") or "DEMO_KEY")
+          result = adapter.fetch(SearchProfile("market", "flip"))
+          with open(sys.argv[1], "w", encoding="utf-8") as fh:
+              fh.write(f"cache={cache}\n")
+              fh.write(f"requests_made={result.requests_made}\n")
+              fh.write(f"records_in_nearby_states={len(result.records)}\n")
+              fh.write(f"as_of={adapter.summary.get('as_of') or 'UNKNOWN'}\n")
+              fh.write(f"lots_in_file={adapter.summary.get('lots_in_file', 0)}\n")
+              fh.write(f"error={result.error.message if result.error else 'NONE'}\n")
+          if result.error:
+              raise SystemExit(f"GSA refresh failed: {result.error.message}")
+          PY
+          fi
           PREFS="$(PYTHONPATH="var/lanes/agent-06${PYTHONPATH:+:$PYTHONPATH}" .venv/bin/python -c 'from operator_ui import market_prefs; print(market_prefs.path())')"
           FACEBOOK_CACHE="$(PYTHONPATH="var/lanes/agent-06${PYTHONPATH:+:$PYTHONPATH}" .venv/bin/python -c 'from operator_ui import market_facebook; print(market_facebook.cache_path())')"
           # Attempt 4's provider check used the coordinator-relative fallback
@@ -92,7 +116,7 @@ jobs:
               raise SystemExit("Marketplace result count is missing")
           total = int(match.group(1).replace(",", ""))
           cards = re.findall(r"class='mk-g mk-card' data-lot='([^']+)'", text)
-          if len(cards) != min(total, 24) or len(cards) != len(set(cards)):
+          if len(cards) != min(total, 50) or len(cards) != len(set(cards)):
               raise SystemExit(f"Marketplace DOM mismatch: total={total}, rendered={len(cards)}, unique={len(set(cards))}")
           if total and not all(marker in text for marker in ("id='pager-top'", "id='pager-bottom'", "Page 1 of")):
               raise SystemExit("Marketplace top/bottom page controls are missing")
@@ -202,7 +226,7 @@ jobs:
           print(f"facebook_filtered_total={total}\nfacebook_rendered={len(cards)}\nfacebook_rendered_photos={photos}")
           if total < 25:
               raise SystemExit(f"Facebook density acceptance failed: expected at least 25 filtered listings, got {total}")
-          if len(cards) != 24 or len(cards) != len(set(cards)):
+          if len(cards) != min(total, 50) or len(cards) != len(set(cards)):
               raise SystemExit(f"Facebook first-page DOM mismatch: total={total}, rendered={len(cards)}, unique={len(set(cards))}")
           if not all(marker in text for marker in ("id='pager-top'", "id='pager-bottom'", "Page 1 of")):
               raise SystemExit("Facebook top/bottom pagination is missing")

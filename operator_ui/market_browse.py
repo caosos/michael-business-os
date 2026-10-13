@@ -93,6 +93,18 @@ def source_key(c: dict) -> str | None:
     return None
 
 
+def source_keys(c: dict) -> set[str]:
+    """Every source selector that truthfully owns this card.
+
+    Reviewed local offers retain the shared ``local_deals`` provenance group,
+    but may also name a registered business source.  Both selectors must find
+    the card; otherwise clicking Half Off after its offer is approved still
+    returns zero while the same card appears only under a generic bucket.
+    """
+    keys = {key for key in (source_key(c), c.get("business_source_key")) if key in _names()}
+    return keys
+
+
 def _names() -> dict:
     return {i.key: i.name for i in msrc.REGISTRY}
 
@@ -109,8 +121,8 @@ def source_ok(c: dict, source: str) -> bool:
         return True
     if msrc.ALL_HOUSES in selected and c.get("source") in msrc.EVENT_NAMES:
         return True
-    key = source_key(c)
-    return key in selected or any(c.get("source") == _names().get(wanted, wanted) for wanted in selected)
+    keys = source_keys(c)
+    return bool(keys & selected) or any(c.get("source") == _names().get(wanted, wanted) for wanted in selected)
 
 
 def quick_ok(c: dict, quick: str, now: datetime) -> bool:
@@ -145,8 +157,8 @@ def facets(res, q: dict, now: datetime) -> dict:
     by_src = res(q, ("source",))
     src = {}
     for c in by_src:
-        k = source_key(c)
-        src[k] = src.get(k, 0) + 1
+        for k in source_keys(c):
+            src[k] = src.get(k, 0) + 1
     st_rows = res({**q, "loc_mode": "state", "states": list(ms.US_STATES)}, ())
     states = {}
     for c in st_rows:
@@ -343,6 +355,9 @@ def source_section(q: dict, fc: dict, now: datetime) -> str:
         active = msp.display_kind(r) in {"provider", "cache", "mailbox_cache", "imported"}
         rows += (f"<label class='mk-src-row' data-src='{e(i.key)}' data-count='{n}'>{box} {e(i.name)} <span class='mk-n'>({n} matching)</span> "
                  f"<span class='small {'' if active else 'mut'}'>{e(state)}</span></label>")
+        if i.key == "gsa" and n == 0 and q.get("loc_mode") != "state" and (q.get("radius") or 0) < 150:
+            rows += (f"<a class='small mk-source-action' id='gsa-widen' href='{href(q, source='gsa', loc_mode='distance', radius=150, page=1)}'>"
+                     "Show GSA Auctions within 150 miles</a>")
     return (f"<details open class='mk-sect' id='sec-source'><summary><b>Sources</b></summary>{rows}"
             "<p class='small mut'>Choose any combination. All sources selects every row; untick All to exclude individual sources.</p></details>")
 

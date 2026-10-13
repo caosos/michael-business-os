@@ -42,3 +42,11 @@ def test_every_status_keeps_its_precise_owner_label():
     assert panel.display_status(rows[2], 2) == "imported"
     assert panel.display_status(rows[3], 0) == "manual · no matches in this search"
     assert panel.display_status(rows[4], 0) == "not connected"
+
+
+def test_zero_nearby_gsa_offers_a_truthful_wider_search(monkeypatch):
+    monkeypatch.setattr(browse.msp, "rows", lambda now=None: source_rows())
+    q = search.parse_query({"base": ["72032"], "radius": ["41"], "source": ["all"], "cat": ["all"]})
+    h = browse.source_section(q, {"all_sources": 7, "source": {"facebook": 7, "gsa": 0}}, NOW)
+    assert "id='gsa-widen'" in h and "Show GSA Auctions within 150 miles" in h
+    assert "source=gsa" in h and "radius=150" in h
