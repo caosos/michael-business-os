@@ -46,6 +46,16 @@ def test_feed_has_29_items_with_publish_dates_that_are_not_event_dates():
     assert {i["title"] for i in items if "Stardust" in i["title"]} == {"“Stardust Ranch” Equipment & Structures Auction"}
 
 
+def test_feed_captures_allowlisted_default_event_images_only():
+    items = B.parse_feed(FEED)
+    assert len(items) == 29 and all("event_image_url" in i for i in items)
+    assert all(i["event_image_url"].startswith("https://images.squarespace-cdn.com/") for i in items)
+    assert "Bank+Repo.jpg?format=1500w" in items[0]["event_image_url"]
+    assert B._event_image_url("http://images.squarespace-cdn.com/x.jpg") is None
+    assert B._event_image_url("https://evil.example/x.jpg") is None
+    assert B._event_image_url("https://blackmon.proxibid.com/x.jpg") is None
+
+
 def test_event_page_dates_location_premium_and_proxibid_text(pages):
     ad, res, e = _bank(pages)
     assert len(res.records) == 1 and ad.summary["requests"] == 0 and ad.summary["feed_items"] == 29
@@ -57,6 +67,7 @@ def test_event_page_dates_location_premium_and_proxibid_text(pages):
     assert e.get("published_at").startswith("Fri, 09 Oct 2026")
     assert e.get("proxibid_url") == "https://www.proxibid.com/Blackmon-Auctions/BANK-REPO-AUCTION-LOGGING-EQUIP-TRUCKS-TRAILERS/event-catalog/301594"
     assert e.get("rules_url").endswith("/auctions/" + BANK)
+    assert "Bank+Repo.jpg?format=1500w" in e.get("event_image_url")
     assert e.fields["closes_at"].source == e.get("rules_url") and e.fields["closes_at"].observed_at == "2026-10-12T04:00:00Z"
 
 
