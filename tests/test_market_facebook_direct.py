@@ -91,6 +91,20 @@ class FacebookDirectTests(unittest.TestCase):
             fb.BrightDataClient("secret-token", request=request).search("tools", "72032", 30)
         self.assertNotIn("secret-token", str(caught.exception))
 
+    def test_same_recent_query_reuses_cache_without_a_paid_refresh(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "facebook.json"
+            path.write_text(json.dumps({"as_of": NOW.isoformat(), "query": {"keyword": "tools", "city": "72032", "radius": 30},
+                                        "records": [{"url": "https://www.facebook.com/marketplace/item/1/", "title": "Tools"}]}))
+
+            class MustNotRun:
+                def search(self, *args):
+                    raise AssertionError("recent identical query should use its cache")
+
+            result = fb.load(NOW, keyword="tools", city="72032", radius=30, refresh=True, client=MustNotRun(), path=path)
+            self.assertEqual(result["status"], "connected")
+            self.assertEqual(result["cards"][0]["title"], "Tools")
+
 
 if __name__ == "__main__":
     unittest.main()
