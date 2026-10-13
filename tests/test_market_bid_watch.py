@@ -6,6 +6,7 @@ import re
 import pytest
 
 from operator_ui import market_prefs as mp
+from operator_ui import accounts
 from tests.test_market_f47 import cache, get, post, ui  # noqa: F401
 
 
@@ -61,3 +62,42 @@ def test_manual_watch_rejects_bad_link_status_and_amount(ui):
         with pytest.raises(ValueError):
             mb.act("add", f, "2026-10-13T05:00:00+00:00")
         assert not mp.load()["bids"]
+
+
+def test_my_bids_has_a_direct_expanded_page_and_returns_there(ui):
+    post(ui, "/market/bid", act="add", title="Equipment trailer", source="HiBid",
+         url="https://hibid.com/lot/1", current_bid="450", max_bid="700",
+         closes_at="2026-10-15T19:00:00-05:00", next_action="Inspect frame")
+    from tests.test_operator_ui import req
+
+    h = req(ui, "GET", "/market/bids")[2]
+    assert "<h1 class='pagehead'>My Bids</h1>" in h
+    assert "id='my-bids' open" in h
+    assert "<span class='badge bid-origin'>MANUAL</span>" in h
+    assert "EMAIL CONNECTED — NOT ACTIVE" in h
+    assert "requires a proven mailbox connection" in h
+    assert "Update status, amounts, closing or next action" in h
+    assert "name='return_to' value='/market/bids'" in h
+    lot = next(iter(mp.load()["bids"]))
+    status, location, _ = post(ui, "/market/bid", act="update", lot=lot, status="winning",
+                              current_bid="500", max_bid="700", closes_at="2026-10-15T19:00:00-05:00",
+                              next_action="Check at 6:45", return_to="/market/bids")
+    assert status == 303 and location.startswith("/market/bids?msg=")
+
+
+def test_bid_records_are_isolated_by_verified_request_account(tmp_path, monkeypatch):
+    monkeypatch.setenv("MBOS_MARKET_PREFS_FILE", str(tmp_path / "owner.json"))
+    monkeypatch.setenv("MBOS_ACCOUNT_DATA_DIR", str(tmp_path / "accounts"))
+    first = accounts.google_account("google-user-one", "one@example.com")
+    second = accounts.google_account("google-user-two", "two@example.com")
+    form = {"title": "Loader", "source": "GovDeals", "url": "https://govdeals.com/asset/1"}
+    with accounts.use(first):
+        mb = __import__("operator_ui.market_bids", fromlist=["act"])
+        mb.act("add", form, "2026-10-13T06:00:00+00:00")
+        first_path = mp.path()
+        assert len(mp.load()["bids"]) == 1
+    with accounts.use(second):
+        second_path = mp.path()
+        assert mp.load()["bids"] == {}
+        assert second_path != first_path
+    assert not (tmp_path / "owner.json").exists()

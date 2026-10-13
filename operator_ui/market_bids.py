@@ -161,7 +161,8 @@ def countdown(r: dict, now: datetime) -> str:
     return f"closes in {dh} ({e((r.get('closes_at') or r['closes'])[:16])}{'' if r.get('closes_at') else ', date only'})"
 
 
-def window(d: dict, cards: list[dict], now: datetime, tok, auto: tuple = ((), "")) -> str:
+def window(d: dict, cards: list[dict], now: datetime, tok, auto: tuple = ((), ""), *, expanded: bool = False,
+           return_to: str = "") -> str:
     """Compact window, closing-soonest first (unknown close last). Live source data (when this source was loaded) wins over the marking-time snapshot."""
     live = {c["id"]: c for c in cards}
     rows = []
@@ -171,7 +172,7 @@ def window(d: dict, cards: list[dict], now: datetime, tok, auto: tuple = ((), ""
         rows.append((_end(r) or datetime.max.replace(tzinfo=timezone.utc), i, r))
     rows.sort(key=lambda t: (_rank(t[2], now), t[0], t[1]))
     li = []
-    mixed = sorted([(k, i, None, h, rk) for k, i, h, rk in mba.rows(auto[0], now, tok, countdown, _end, badge, _rank)] + [(k, i, r, None, _rank(r, now)) for k, i, r in rows], key=lambda t: (t[4], t[0], t[1]))
+    mixed = sorted([(k, i, None, h, rk) for k, i, h, rk in mba.rows(auto[0], now, tok, countdown, _end, badge, _rank, return_to)] + [(k, i, r, None, _rank(r, now)) for k, i, r in rows], key=lambda t: (t[4], t[0], t[1]))
     for _, i, r, html, _rk in mixed:
         if html:
             li.append(html)
@@ -179,7 +180,8 @@ def window(d: dict, cards: list[dict], now: datetime, tok, auto: tuple = ((), ""
         bid = f"${r['bid']:,.0f}" if r.get("bid") is not None else "UNKNOWN"
         cnt = f"{r['bidders']:g}" if r.get("bidders") is not None else "UNKNOWN"
         link = f"<a href='{e(r['url'])}' target='_blank' rel='noopener noreferrer'>original listing</a>" if r.get("url", "").startswith(("http://", "https://")) else "no link"
-        hid = f"{tok()}<input type='hidden' name='lot' value='{e(i)}'>"
+        back = f"<input type='hidden' name='return_to' value='{e(return_to)}'>" if return_to else ""
+        hid = f"{tok()}{back}<input type='hidden' name='lot' value='{e(i)}'>"
         mx = f"${r['max_bid']:,.0f}" if r.get("max_bid") is not None else "UNKNOWN"
         status = r.get("status") if r.get("status") in STATUSES else "bid placed"
         next_action = _clip(r.get("next_action"), 200) or "Review the original listing before its close."
@@ -187,12 +189,13 @@ def window(d: dict, cards: list[dict], now: datetime, tok, auto: tuple = ((), ""
         provenance = r.get("provenance") if isinstance(r.get("provenance"), dict) else {}
         proof = "listing feed snapshot; no source-account access" if provenance.get("kind") == "listing_snapshot" else "entered by you; no source-account access"
         opts = "".join(f"<option value='{e(s)}'{' selected' if s == status else ''}>{e(s)}</option>" for s in STATUSES)
-        li.append(f"<li data-bid='{e(i)}' data-origin='{origin}'><b>{e(r['title'] or i)}</b><br><span class='mut'>{e(r['source'] or 'source UNKNOWN')} · {origin} · {e(proof)}</span><br>"
+        li.append(f"<li class='bid-row' data-bid='{e(i)}' data-origin='{origin}'><span class='bid-title'><b>{e(r['title'] or i)}</b> "
+                  f"<span class='badge bid-origin'>{origin}</span></span><br><span class='mut'>{e(r['source'] or 'source UNKNOWN')} · {origin} · {e(proof)}</span><br>"
                   f"status <b>{e(status)}</b> · {countdown(r, now)}{badge(r, now)}<br>"
                   f"current bid {bid} · your max: {mx} · bids {cnt} · as of {e(r.get('fetched_at') or r.get('updated_at') or r.get('marked_at') or 'marking time')[:16]} · {link}<br>"
                   f"next action: {e(next_action)}<br>"
                   f"<form method='post' action='/market/bid' style='display:inline'>{hid}<button name='act' value='unbid'>Stop tracking</button></form> "
-                  f"<details class='small'><summary>Update bid watch</summary><form method='post' action='/market/bid'>{hid}"
+                  f"<details class='small bid-update'><summary>Update status, amounts, closing or next action</summary><form method='post' action='/market/bid'>{hid}"
                   f"<label>Status <select name='status'>{opts}</select></label> "
                   f"<label>Current bid $ <input name='current_bid' size='7' inputmode='decimal' value='{'' if r.get('bid') is None else r['bid']:}'></label> "
                   f"<label>Your max $ <input name='max_bid' size='7' inputmode='decimal' value='{'' if r.get('max_bid') is None else r['max_bid']:}'></label> "
@@ -200,15 +203,37 @@ def window(d: dict, cards: list[dict], now: datetime, tok, auto: tuple = ((), ""
                   f"<label>Next action <input name='next_action' size='32' maxlength='200' value='{e(r.get('next_action') or '')}'></label>"
                   "<button name='act' value='update'>Update</button></form></details></li>")
     body = f"<ul style='padding-left:16px;margin:4px 0'>{''.join(li)}</ul>" if li else "<p class='small mut'>Nothing tracked. Use 'I bid on this' on a card after you place a bid yourself.</p>"
-    add = (f"<details class='small' id='add-bid-watch'><summary><b>Add a bid to watch</b></summary><p class='mut'>Manual tracking only. DealSniffer never asks for or signs in to a source account.</p>"
-           f"<form method='post' action='/market/bid'>{tok()}<label>Title <input name='title' maxlength='120' required></label> "
+    back = f"<input type='hidden' name='return_to' value='{e(return_to)}'>" if return_to else ""
+    add = (f"<details class='small' id='add-bid-watch'{' open' if expanded and not li else ''}><summary><b>Add a bid to watch</b></summary><p class='mut'>Manual tracking only. DealSniffer never asks for or signs in to a source account.</p>"
+           f"<form method='post' action='/market/bid' class='bid-form'>{tok()}{back}<label>Listing title <input name='title' maxlength='120' required></label> "
            "<label>Source <input name='source' maxlength='60' required></label> <label>Original link <input name='url' type='url' maxlength='300' required></label> "
            "<label>Status <select name='status'>" + "".join(f"<option value='{e(s)}'>{e(s)}</option>" for s in STATUSES) + "</select></label> "
            "<label>Current bid $ <input name='current_bid' size='7' inputmode='decimal'></label> <label>Your max $ <input name='max_bid' size='7' inputmode='decimal'></label> "
            "<label>Closing <input name='closes_at' size='22' placeholder='2026-10-15T19:00:00-05:00'></label> <label>Next action <input name='next_action' maxlength='200'></label> "
            "<button name='act' value='add'>Add to My bids</button></form></details>")
-    return (f"<details class='card small' id='my-bids'><summary><b>My bids ({len(li)})</b> <span class='mut'>(collapsed; click to open)</span></summary><p class='mut' style='margin:2px 0'>Manual and imported bid watches stay with this local account. We do not place bids or access source accounts; "
+    state = "open" if expanded else ""
+    hint = "" if expanded else " <span class='mut'>(collapsed; click to open)</span>"
+    return (f"<details class='card small' id='my-bids' {state}><summary><b>My bids ({len(li)})</b>{hint}</summary><p class='mut' style='margin:2px 0'>Manual and imported bid watches stay with this account only. We do not place bids or access source accounts; "
             f"email-alert rows appear only when a mailbox feed is connected.</p>{auto[1]}{add}{body}</details>")
+
+
+def page_body(app, now: datetime) -> str:
+    """Dedicated, usable My Bids page without refreshing or widening the listing feed."""
+    d = mp.load()
+    auto = mba.load(now, d)
+    tok = lambda: (f"<input type='hidden' name='csrf' value='{app.csrf}'>"
+                   f"<input type='hidden' name='nonce' value='{__import__('secrets').token_hex(8)}'>")  # noqa: E731
+    manual = sum(1 for r in d["bids"].values() if r.get("origin") == "MANUAL")
+    imported = sum(1 for r in d["bids"].values() if r.get("origin") == "IMPORTED") + len(auto[0])
+    email = 0  # the only reader currently available is explicitly fixture/import mode, never a live mailbox
+    return ("<style>.bid-head{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.bid-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:10px 0}"
+            ".bid-kpi,.bid-row{border:1px solid var(--line);border-radius:8px;padding:10px}.bid-row{margin:8px 0;list-style:none}.bid-title{font-size:16px}.bid-origin{margin-left:5px}.bid-form,.bid-update form{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:6px 12px}.bid-form button,.bid-update button{align-self:end}</style>"
+            "<div class='bid-head'><h1 class='pagehead'>My Bids</h1><a href='/market'>Back to listings</a></div>"
+            "<p>Track bids you placed on the original source. DealSniffer watches the facts you record or import; it never logs into a source or places a bid.</p>"
+            f"<div class='bid-kpis'><div class='bid-kpi'><b>{manual}</b><br><span class='badge'>MANUAL</span><br><span class='small mut'>entered by you</span></div>"
+            f"<div class='bid-kpi'><b>{imported}</b><br><span class='badge'>IMPORTED</span><br><span class='small mut'>listing snapshot</span></div>"
+            f"<div class='bid-kpi'><b>{email}</b><br><span class='badge'>EMAIL CONNECTED — NOT ACTIVE</span><br><span class='small mut'>requires a proven mailbox connection</span></div></div>"
+            + window(d, [], now, tok, auto, expanded=True, return_to="/market/bids"))
 
 
 def button(c: dict, tok) -> str:

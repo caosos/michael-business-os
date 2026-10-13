@@ -339,7 +339,7 @@ STATES = ("LIVE CONNECTED", "CONNECTED, WAITING FOR ALERTS", "IMPORTED", "MANUAL
 @dataclass(frozen=True)
 class SourceInfo:
     """`path` is one of: official API / provider API / own site / RSS / e-mail alerts / owner import / none. `probe` says which cache is read for freshness
-    (gsa | site:<key> | alerts:<key> | finds | None). `intended` is the state when a read exists; a fixture or a missing cache never reaches LIVE CONNECTED."""
+    (gsa | site:<key> | alerts:<key> | finds[:<source>] | None). `intended` is the state when a read exists; a fixture or a missing cache never reaches LIVE CONNECTED."""
     key: str
     name: str
     cls: str
@@ -351,42 +351,70 @@ class SourceInfo:
     next_step: str
     probe: str | None
     intended: str
+    setup_url: str | None = None
+    user_setup: str = ""
+    parser: str = "none"
+    import_key: str | None = None
 
 
 REGISTRY = (
     SourceInfo("gsa", "GSA Auctions", "government surplus", "US-wide (filtered by your distance)", "official API", "item (lot)", "bid on gsaauctions.gov with your own account; nothing is placed here",
-               "cached copy; refreshed only by an explicit command", "keep the refresh command scheduled", "gsa", "LIVE CONNECTED"),
+               "cached copy; refreshed only by an explicit command", "keep the refresh command scheduled", "gsa", "LIVE CONNECTED",
+               "https://gsaauctions.gov/", "No source login is shared with DealSniffer. Open the original lot link to verify and bid in your own account.", "official API"),
     SourceInfo("wooley", "Wooley Auctioneers", "auctioneer", "Arkansas", "own site", "auction event", "bids on HiBid (your account); this page never loads it",
-               "events only: HiBid terms forbid scraping, so lot numbers, bids and bid counts need written permission", "ask Wooley/HiBid for written permission before any lot-level read", "site:wooley", "LIVE CONNECTED"),
+               "events only: HiBid terms forbid scraping, so lot numbers, bids and bid counts need written permission", "ask Wooley/HiBid for written permission before any lot-level read", "site:wooley", "LIVE CONNECTED",
+               "https://wooleyauctioneers.com/auctions/", "DealSniffer can show cached Wooley auction events. Open the event's original HiBid link for lots, current bids and bidding.", "event cache", "wooley"),
     SourceInfo("wilson", "Wilson Auctioneers", "auctioneer", "Arkansas", "own site", "auction event", "bids on BidWrangler (your account); this page never loads it",
                "events only; at most one refresh an hour", "none for events; lots need the platform's permission", "site:wilson", "LIVE CONNECTED"),
     SourceInfo("blackmon", "Blackmon Auctions", "auctioneer", "Arkansas", "own site", "auction event", "bids on Proxibid (your account); this page never loads it",
                "events only; at most one refresh an hour", "none for events; lots need the platform's permission", "site:blackmon", "LIVE CONNECTED"),
     SourceInfo("govdeals", "GovDeals", "government surplus", "US-wide", "e-mail alerts", "item (lot)", "bid on govdeals.com with your own account",
-               "needs a read-only mailbox connection; test e-mails never count as live", "owner decision: connect a read-only alert mailbox", "alerts:govdeals", "LIVE CONNECTED"),
+               "needs a read-only mailbox connection; test e-mails never count as live", "connect the DealSniffer alert address, then forward genuine saved-search alerts", "alerts:govdeals", "LIVE CONNECTED",
+               "https://www.govdeals.com/", "Create the searches you want in your GovDeals account and forward their alert e-mails to your DealSniffer alert address.", "alert parser ready", "govdeals"),
     SourceInfo("publicsurplus", "Public Surplus", "government surplus", "US-wide", "e-mail alerts", "item (lot)", "bid on publicsurplus.com with your own account",
-               "needs a read-only mailbox connection; test e-mails never count as live", "owner decision: connect a read-only alert mailbox", "alerts:publicsurplus", "LIVE CONNECTED"),
+               "needs a read-only mailbox connection; test e-mails never count as live", "connect the DealSniffer alert address, then forward genuine saved-search alerts", "alerts:publicsurplus", "LIVE CONNECTED",
+               "https://www.publicsurplus.com/", "Create the searches you want in your Public Surplus account and forward their alert e-mails to your DealSniffer alert address.", "alert parser ready", "publicsurplus"),
     SourceInfo("hibid_email", "HiBid e-mail alerts", "auction platform", "per your saved HiBid searches", "e-mail alerts", "item (lot)", "bid on hibid.com with your own account",
-               "HiBid terms forbid scraping: lots need written permission; only alert e-mails you receive may be read", "owner decision: connect a read-only alert mailbox; no adapter yet", None, "NOT CONNECTED"),
+               "HiBid terms forbid scraping: lots need written permission; only alert e-mails you receive may be read", "save searches in HiBid; parser support and a real mailbox receipt are still required", None, "NOT CONNECTED",
+               "https://hibid.com/arkansas", "Create your own HiBid searches and alerts. DealSniffer does not log in or scrape HiBid; its alert parser is not implemented yet.", "not implemented", "hibid"),
     SourceInfo("hibid_site", "HiBid website (lot data)", "auction platform", "US-wide", "none", "item (lot)", "bid on hibid.com with your own account",
-               "HiBid terms forbid scraping: lots need written permission", "get written permission from HiBid; until then nothing is read", None, "BLOCKED"),
+               "HiBid terms forbid scraping: lots need written permission", "get written permission from HiBid; until then nothing is read", None, "BLOCKED",
+               "https://hibid.com/arkansas", "Use the original HiBid page yourself. DealSniffer will not fetch lot pages without written permission.", "blocked"),
     SourceInfo("craigslist", "Craigslist", "classifieds", "local (your saved-search regions)", "e-mail alerts", "item", "none; contact sellers yourself",
-               "only saved-search alert e-mails you receive are read (never craigslist.org); a test e-mail never counts as live; owner can still paste finds", "owner decision: connect a read-only alert mailbox", "alerts:craigslist", "LIVE CONNECTED"),
+               "only saved-search alert e-mails you receive are read (never craigslist.org); a test e-mail never counts as live; owner can still paste finds", "connect the DealSniffer alert address or paste an original listing link", "alerts:craigslist", "LIVE CONNECTED",
+               "https://littlerock.craigslist.org/", "Create a Craigslist saved search and forward its alert e-mails, or paste an original listing link into Your finds.", "alert parser ready", "craigslist"),
     SourceInfo("facebook", "Facebook Marketplace", "classifieds", "local (ZIP/city + radius)", "provider API", "item", "none; contact sellers yourself",
                "Bright Data provider route; public listing fields only; seller/profile/contact fields are dropped before caching",
                "configure BRIGHTDATA_TOKEN; successful results are cached and merged into this feed", "facebook", "LIVE CONNECTED"),
     SourceInfo("offerup", "OfferUp", "classifieds", "local", "owner import", "item", "none; contact sellers yourself",
-               "terms forbid automated access: owner pastes finds only", "paste a find on the Finds form", "finds", "MANUAL"),
+               "terms forbid automated access: owner pastes finds only", "paste a find on the Finds form", "finds:offerup", "MANUAL",
+               "https://offerup.com/", "Copy the original OfferUp listing link and paste it into Your finds. DealSniffer does not log in or fetch the page.", "manual only", "offerup"),
     SourceInfo("ebay", "eBay", "marketplace", "US-wide", "none", "item", "bid on ebay.com with your own account",
                "an official API exists but needs developer credentials; none are configured", "owner decision: apply for eBay API credentials", None, "NOT CONNECTED"),
     SourceInfo("owner_finds", "Owner-entered finds", "owner", "wherever you found it", "owner import", "item", "none",
-               "only what you typed; unverified until you check it", "add a find", "finds", "MANUAL"),
+               "only what you typed; unverified until you check it", "add a find", "finds", "MANUAL",
+               None, "Paste the original link and the facts you observed. DealSniffer preserves the link and labels the record owner-entered and unverified.", "manual only", "other"),
+    SourceInfo("nahlen", "Nahlen Auctions", "local auctioneer candidate", "Central Arkansas", "owner import", "auction event or item", "use the auctioneer's own bidding path; DealSniffer never bids",
+               "an official current feed or alert path has not been verified", "paste a current original event or listing link; verify the source before treating it as active", "finds:nahlen", "MANUAL",
+               None, "Paste a current original event or listing link into Your finds. No official feed or alert source is claimed.", "manual only", "nahlen"),
+    SourceInfo("auctionzip", "AuctionZip", "auction directory", "ZIP/radius selected by the user", "owner import", "auction event or item", "use the auctioneer or platform account shown on the original page",
+               "no automated retrieval is configured; directory entries can lead to a separate bidding platform", "search by ZIP, then paste the original auction or item link", "finds:auctionzip", "MANUAL",
+               "https://www.auctionzip.com/", "Search by ZIP and category, then paste the original event or item link into Your finds.", "manual only", "auctionzip"),
+    SourceInfo("half_off_wholesale", "Half Off Wholesale — Little Rock", "liquidation / wholesale", "North Little Rock area", "owner import", "pallet, truckload, or store event", "no bidding; purchase remains on the vendor's terms",
+               "store/event information is not an item-level live feed; inventory and availability must be verified", "paste a current pallet, truckload, or event link with observed price and location", "finds:half_off_wholesale", "MANUAL",
+               "https://halfoffvip.com/lp-little-rock/", "Open the vendor page, then paste a current pallet, truckload, or event link and the observed facts into Your finds.", "manual only", "half_off_wholesale"),
+    SourceInfo("northbay", "NorthBay Tool Liquidation Pallets", "liquidation candidate", "Central Arkansas candidate", "owner import", "pallet or store event", "no connected account or bid capability",
+               "current business status and an official source URL have not been verified", "verify the business and a current original page before adding an opportunity", "finds:northbay", "MANUAL",
+               None, "No verified official page is stored. Add a find only after you have a current original link and have verified the source.", "manual only", "northbay"),
+    SourceInfo("bargain_brothers", "Bargain Brothers", "discount / bin-store intelligence", "Central Arkansas candidate", "owner import", "store event or restock", "no bidding; purchase remains at the store",
+               "event/store intelligence only; no item-level feed is connected and the current local source must be verified", "paste a current official restock or event link after verification", "finds:bargain_brothers", "MANUAL",
+               None, "Paste a verified current restock or event link into Your finds. It remains store/event intelligence, not a live item listing.", "manual only", "bargain_brothers"),
 )
 
 
-def _finds_count() -> int:
+def _finds_count(source: str | None = None) -> int:
     from . import market_finds
-    return sum(1 for v in market_finds.load().values() if not v.get("deleted"))
+    return sum(1 for v in market_finds.load().values() if not v.get("deleted") and (source is None or v.get("source") == source))
 
 
 def probe(info: SourceInfo, now: datetime) -> dict:
@@ -397,7 +425,7 @@ def probe(info: SourceInfo, now: datetime) -> dict:
     kind, _, key = info.probe.partition(":")
     try:
         if kind == "finds":
-            return {**out, "status": "manual", "n": _finds_count()}
+            return {**out, "status": "manual", "n": _finds_count(key or None)}
         if kind == "facebook":
             return mfb.probe(now)
         if kind == "alerts":

@@ -9,6 +9,7 @@ import json
 import os
 import re
 import tempfile
+import threading
 from pathlib import Path
 
 from . import accounts
@@ -16,6 +17,7 @@ from . import accounts
 ACTIONS = ("save", "unsave", "hide", "restore", "dismiss", "more", "less", "reset", "disable", "enable")
 STOP = {"with", "from", "this", "that", "used", "lot", "item", "items", "unit", "units", "only", "each", "the", "and", "for", "set", "other"}
 EMPTY = {"enabled": True, "saved": [], "dismissed": [], "hidden": {}, "more": {}, "less": {}, "last": {}, "bids": {}, "auto_stopped": [], "resale_targets": {}, "ui": {}}
+_LOCK = threading.RLock()
 
 
 def path() -> Path:
@@ -51,11 +53,25 @@ def load() -> dict:
 
 def _store(d: dict) -> None:
     p = path()
-    p.parent.mkdir(parents=True, exist_ok=True)
-    fd, tmp = tempfile.mkstemp(dir=p.parent)
-    with os.fdopen(fd, "w") as fh:
-        json.dump(d, fh)
-    os.replace(tmp, p)
+    p.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    if accounts.current().authenticated:
+        p.parent.chmod(0o700)
+    with _LOCK:
+        fd, tmp = tempfile.mkstemp(dir=p.parent, prefix=".market-prefs-")
+        try:
+            os.fchmod(fd, 0o600)
+            with os.fdopen(fd, "w", encoding="utf-8") as fh:
+                json.dump(d, fh)
+                fh.flush()
+                os.fsync(fh.fileno())
+            os.replace(tmp, p)
+            p.chmod(0o600)
+        except BaseException:
+            try:
+                os.unlink(tmp)
+            except OSError:
+                pass
+            raise
 
 
 def recall(keys) -> dict:

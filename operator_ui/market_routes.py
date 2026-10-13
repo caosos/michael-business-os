@@ -148,4 +148,6 @@ def post(app, parts: list[str], f: dict) -> tuple[str | None, list[str] | None]:
             raise InputError("unknown marketplace action")
     except (InputError, ValueError) as ex:
         return None, [str(ex)]
-    return f"/market?msg={quote(msg)}", None
+    return_to = f.get("return_to") or ""
+    target = "/market/bids" if return_to == "/market/bids" else "/market"
+    return f"{target}?msg={quote(msg)}", None

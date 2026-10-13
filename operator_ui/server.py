@@ -26,7 +26,7 @@ try:  # lane C's package is optional: without it the notes form is simply unavai
 except ImportError:  # pragma: no cover
     NOTE_CATEGORIES, NOTE_KINDS = frozenset(), frozenset()
 
-from . import account_view, accounts, deal_ui, landing_fix, live_demo, market_detail, market_routes, resale_view, sell_intake, attest_view, bought_view, card_view, comps_view, glance_view, inputs_view, ux, views, wanted_view
+from . import account_view, accounts, deal_ui, landing_fix, live_demo, market_bids, market_detail, market_routes, resale_view, sell_intake, attest_view, bought_view, card_view, comps_view, glance_view, inputs_view, ux, views, wanted_view
 from .digest import figures as digest_figures, dollars as _dollars
 from .card_view import ec
 from .backend import AlreadyClosed, FollowupRefused, ItemNotFound, NoteRefused, NumbersRefused, ProfileUnavailable
@@ -161,16 +161,20 @@ def _notices(state):
 
 
 def _customer_path(path: str) -> bool:
-    return path == "/settings" or path.startswith("/settings/") or path == "/sell" or path.startswith("/sell/") or path == "/market" or path.startswith("/market/")
+    return (path in ("/home", "/privacy", "/terms") or path.startswith("/auth/") or
+            path == "/settings" or path.startswith("/settings/") or path == "/sell" or
+            path.startswith("/sell/") or path == "/market" or path.startswith("/market/"))
 
 
 def _product_nav(path: str) -> str:
-    market = path.startswith("/market")
+    bids = path == "/market/bids"
+    market = path.startswith("/market") and not bids
     sell = path.startswith("/sell")
     settings = path.startswith("/settings")
-    return ("<header class='product-header' id='product-header'><a href='/market'>DealSniffer</a><nav aria-label='DealSniffer'>"
+    return ("<header class='product-header' id='product-header'><a href='/home'>DealSniffer</a><nav aria-label='DealSniffer'>"
             f"<a href='/market'{' class=active aria-current=page' if market else ''}>Browse</a>"
-            "<a href='/market?quick=saved'>Saved</a><a href='/market#my-bids'>My bids</a>"
+            "<a href='/market?quick=saved'>Saved</a>"
+            f"<a href='/market/bids'{' class=active aria-current=page' if bids else ''}>My bids</a>"
             f"<a href='/sell'{' class=active aria-current=page' if sell else ''}>Sell</a>"
             f"<a href='/settings'{' class=active aria-current=page' if settings else ''}>Settings</a></nav></header>")
 
@@ -182,9 +186,10 @@ def page(title, body, state, flash=None, error=False):
     chrome = _product_nav(path) if customer else (f'<div class="banner">DRY-RUN · nothing leaves this machine · system {e(state)}</div>'
                                                      f'<header><b>Operator UI</b><nav>{_nav(state)}</nav></header>{_notices(state)}')
     main_class = ' class="market-page"' if path.startswith("/market") else ""
+    footer = "<footer class='small mut' style='max-width:1060px;margin:18px auto;padding:16px'><a href='/privacy'>Privacy</a> · <a href='/terms'>Terms</a></footer>" if customer else ""
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>{ec(title)}</title><style>{CSS}</style></head>
-<body>{chrome}<main{main_class}>{f}{'' if '<h1' in body else f'<h1 class="pagehead">{ec(title)}</h1>'}{body}</main></body></html>"""
+<body>{chrome}<main{main_class}>{f}{'' if '<h1' in body else f'<h1 class="pagehead">{ec(title)}</h1>'}{body}</main>{footer}</body></html>"""
 
 
 def render_queue(q):
@@ -574,6 +579,11 @@ class App:
         # credentials configured means the existing loopback/local-owner mode.
         self.google_oauth = accounts.google_oauth_config()
         self.account_store = accounts.AccountStore()
+        self.session_signer = accounts.SessionSigner(self.google_oauth.session_secret) if self.google_oauth.enabled else None
+        self.oauth_flow_signer = accounts.OAuthFlowSigner(self.google_oauth.session_secret) if self.google_oauth.enabled else None
+        self.oauth_client = accounts.GoogleOAuthClient(self.google_oauth) if self.google_oauth.enabled else None
+        callback_host = urlparse(self.google_oauth.redirect_uri).hostname if self.google_oauth.enabled else None
+        self.allowed_hosts = ALLOWED_HOSTS | ({callback_host.lower()} if callback_host else set())
 
     def state(self):
         st = UiState(self.store.system_state())
@@ -992,10 +1002,12 @@ def make_handler(app):
         def log_message(self, fmt, *args):  # quiet; the receipt ledger is the audit log
             pass
 
-        def _redirect(self, loc):
-            self.send_response(303)
+        def _redirect(self, loc, status=303, headers=None):
+            self.send_response(status)
             self.send_header("Location", loc)
             self.send_header("Content-Length", "0")
+            for key, value in (headers or []):
+                self.send_header(key, value)
             self.end_headers()
 
         def _send(self, status, body, ctype="text/html; charset=utf-8", headers=None):
@@ -1009,7 +1021,8 @@ def make_handler(app):
             self.send_header("X-Content-Type-Options", "nosniff")
             self.send_header("Referrer-Policy", "no-referrer")
             self.send_header("Cache-Control", "no-store")
-            for k, v in (headers or {}).items():
+            entries = headers.items() if isinstance(headers, dict) else (headers or [])
+            for k, v in entries:
                 self.send_header(k, v)
             self.end_headers()
             self.wfile.write(data)
@@ -1017,21 +1030,105 @@ def make_handler(app):
         def _host_ok(self):
             host = (self.headers.get("Host") or "").rsplit(":", 1)[0] if not (self.headers.get("Host") or "").startswith("[") \
                 else (self.headers.get("Host") or "").split("]")[0] + "]"
-            if host not in ALLOWED_HOSTS:
+            if host.lower() not in app.allowed_hosts:
                 self._send(HTTPStatus.FORBIDDEN, "forbidden host", "text/plain")
                 return False
             return True
 
+        def _host_name(self):
+            raw = self.headers.get("Host") or ""
+            return ((raw.split("]", 1)[0] + "]") if raw.startswith("[") else raw.rsplit(":", 1)[0]).lower()
+
+        def _loopback(self):
+            return self._host_name() in ALLOWED_HOSTS
+
+        def _request_account(self):
+            """Resolve only a signed session; loopback otherwise keeps local-owner mode."""
+
+            if app.google_oauth.enabled:
+                token = accounts.cookie_value(self.headers.get("Cookie"), "ds_session")
+                if token:
+                    try:
+                        subject = app.session_signer.verify(token)
+                        profile = app.account_store.load_google_profile(subject)
+                        if profile:
+                            return profile
+                    except accounts.InvalidSession:
+                        pass
+            return accounts.LOCAL_OWNER if self._loopback() else accounts.ANONYMOUS
+
+        def _public_host_gate(self, path, query=""):
+            """On the public host, expose customer routes only and require an account."""
+
+            if self._loopback() or not app.google_oauth.enabled:
+                return False
+            public = {"/", "/home", "/privacy", "/terms", "/auth/google/start", "/auth/google/callback"}
+            if path in public:
+                return False
+            if not accounts.current().authenticated:
+                target = accounts.safe_next_path(path + (("?" + query) if query else ""))
+                self._redirect("/home?next=" + quote(target, safe=""))
+                return True
+            if not _customer_path(path):
+                self._send(404, "not found", "text/plain")
+                return True
+            return False
+
         def do_GET(self):
             if not self._host_ok():
                 return
+            with accounts.use(self._request_account()):
+                return self._do_GET()
+
+        def _do_GET(self):
             u = urlparse(self.path)
             _CUR.path = u.path
             qs = parse_qs(u.query)
             now = utcnow()
             flash = (qs.get("msg") or [None])[0]
             err = (qs.get("err") or [None])[0]
-            if u.path == "/" and not u.query:  # F-48: the default landing is Michael's Marketplace; the old queue is /queue
+            if u.path in ("/home",) or (u.path == "/" and not self._loopback()):
+                next_path = accounts.safe_next_path((qs.get("next") or ["/market"])[0])
+                return self._send(200, page("DealSniffer", account_view.public_home(app.csrf, app.google_oauth.public_status(), next_path), app.state()))
+            if u.path == "/privacy":
+                return self._send(200, page("DealSniffer Privacy Policy", account_view.privacy(), app.state()))
+            if u.path == "/terms":
+                return self._send(200, page("DealSniffer Terms of Service", account_view.terms(), app.state()))
+            if u.path == "/auth/google/start":
+                if not app.google_oauth.enabled:
+                    return self._send(503, page("Google sign-in unavailable", account_view.auth_problem(
+                        "Google sign-in is not configured yet.", False), app.state()))
+                flow = accounts.new_oauth_flow((qs.get("next") or ["/market"])[0])
+                signed = app.oauth_flow_signer.issue(flow)
+                return self._redirect(app.oauth_client.authorization_url(flow), 302,
+                                      [("Set-Cookie", app.oauth_flow_signer.cookie(signed, app.oauth_client.secure_cookies))])
+            if u.path == "/auth/google/callback":
+                clear = [("Set-Cookie", app.oauth_flow_signer.clear_cookie(app.oauth_client.secure_cookies))] if app.google_oauth.enabled else []
+                if not app.google_oauth.enabled:
+                    return self._send(503, page("Google sign-in unavailable", account_view.auth_problem(
+                        "Google sign-in is not configured yet.", False), app.state()))
+                if "error" in qs:
+                    problem = "Google sign-in was cancelled." if (qs.get("error") or [""])[0] == "access_denied" else "Google did not complete sign-in."
+                    return self._send(400, page("Google sign-in unavailable", account_view.auth_problem(problem), app.state()), headers=clear)
+                if len(qs.get("code", [])) != 1 or len(qs.get("state", [])) != 1:
+                    return self._send(400, page("Google sign-in unavailable", account_view.auth_problem(
+                        "The sign-in response was incomplete.", True), app.state()), headers=clear)
+                try:
+                    signed = accounts.cookie_value(self.headers.get("Cookie"), "ds_oauth") or ""
+                    flow = app.oauth_flow_signer.verify(signed, qs["state"][0])
+                    account = app.oauth_client.authenticate(qs["code"][0], flow)
+                    app.account_store.save_google_profile(account)
+                    session = app.session_signer.issue(account)
+                except accounts.OAuthError as ex:
+                    return self._send(400, page("Google sign-in unavailable", account_view.auth_problem(str(ex)), app.state()), headers=clear)
+                except OSError:
+                    return self._send(503, page("Google sign-in unavailable", account_view.auth_problem(
+                        "DealSniffer could not save this account.", True), app.state()), headers=clear)
+                headers = clear + [("Set-Cookie", app.session_signer.cookie(session, app.oauth_client.secure_cookies))]
+                return self._redirect(flow.next_path, 303, headers)
+            if self._public_host_gate(u.path, u.query):
+                return
+            if u.path == "/" and not u.query:  # F-48: the local-owner default remains Marketplace
                 return self._redirect("/market")
             if u.path == "/":
                 return self._redirect("/queue?" + u.query)
@@ -1111,11 +1208,17 @@ def make_handler(app):
                 return self._send(200, page("Listing detail", body, app.state(), flash))
             if u.path == "/market":
                 return self._send(200, page("DealSniffer Marketplace", market_routes.page_body(app, qs, now), app.state(), flash))
+            if u.path == "/market/bids":
+                return self._send(200, page("My Bids", market_bids.page_body(app, now), app.state(), flash))
             if u.path == "/settings":
                 return self._send(200, page("DealSniffer Settings", account_view.render(app.csrf, app.google_oauth.public_status()), app.state(), flash or err, bool(err)))
             if u.path == "/sell":
                 body = sell_intake.render_form(app.csrf) + sell_intake.render_recent(app.sell_intake.recent())
                 return self._send(200, page("Sell with DealSniffer", body, app.state(), flash or err, bool(err)))
+            if u.path == "/sell/submissions":
+                body = ("<div class='sell-wrap'><p><a href='/sell'>Submit another item</a></p></div>" +
+                        sell_intake.render_submissions(app.sell_intake.recent(50)))
+                return self._send(200, page("My sell submissions", body, app.state(), flash or err, bool(err)))
             if u.path == "/wanted":
                 return self._wanted_page(flash or err, bool(err))
             if u.path == "/numbers":
@@ -1507,9 +1610,27 @@ def make_handler(app):
         def do_POST(self):
             if not self._host_ok():
                 return
+            with accounts.use(self._request_account()):
+                return self._do_POST()
+
+        def _do_POST(self):
             u = urlparse(self.path)
             parts = u.path.strip("/").split("/")
             _CUR.path = u.path
+            if parts == ["auth", "logout"]:
+                n = min(int(self.headers.get("Content-Length") or 0), 8192)
+                form = {k: v[0] for k, v in parse_qs(self.rfile.read(n).decode("utf-8", "replace"), keep_blank_values=True).items()}
+                try:
+                    app._check_csrf(form)
+                except InputError as ex:
+                    return self._send(400, page("Sign out", account_view.auth_problem(str(ex), app.google_oauth.enabled), app.state()))
+                secure = app.oauth_client.secure_cookies if app.google_oauth.enabled else False
+                headers = [("Set-Cookie", accounts.SessionSigner.clear_cookie(secure))]
+                if app.oauth_flow_signer:
+                    headers.append(("Set-Cookie", app.oauth_flow_signer.clear_cookie(secure)))
+                return self._redirect("/home?msg=" + quote("Signed out."), 303, headers)
+            if self._public_host_gate(u.path, u.query):
+                return
             if parts in (["resale", "tow"], ["resale", "preset"]):
                 return self._post_deal_settings(parts[1])
             if parts == ["notes", "add"]:

@@ -62,7 +62,7 @@ def urls(items) -> frozenset:
     return frozenset(u for u in (norm_url(r["url"]) for r in items) if u)
 
 
-def rows(items, now, tok, countdown, end, badge=lambda r, n: "", rank=lambda r, n: 2):
+def rows(items, now, tok, countdown, end, badge=lambda r, n: "", rank=lambda r, n: 2, return_to: str = ""):
     out = []
     for r in items:
         sent = r.get("email_date") or r.get("sent_at")     # the e-mail's own Date header, only if the parser provides it (v1 does not): else the read date
@@ -70,9 +70,10 @@ def rows(items, now, tok, countdown, end, badge=lambda r, n: "", rank=lambda r, 
         rr = {"closes_at": r.get("closes_at") or "", "closes": ""}
         amt = f"amount in the e-mail: ${r['amount']:,.2f} <span class='mut'>(owner-local, this page only)</span>" if r.get("amount") is not None else "amount not stated"
         link = f"<a href='{e(r['url'])}' target='_blank' rel='noopener noreferrer'>original listing</a>" if r["url"].startswith(("http://", "https://")) else "no link"
-        hid = f"{tok()}<input type='hidden' name='lot' value='{e(r['id'])}'>"
+        back = f"<input type='hidden' name='return_to' value='{e(return_to)}'>" if return_to else ""
+        hid = f"{tok()}{back}<input type='hidden' name='lot' value='{e(r['id'])}'>"
         out.append((end(rr) or __import__("datetime").datetime.max.replace(tzinfo=__import__("datetime").timezone.utc), r["id"],
-                    f"<li data-bid='{e(r['id'])}' data-auto='1' data-origin='EMAIL ALERT'><b>{e(r['title'])}</b><br><span class='mut'>{e(NAMES.get(r['source'], r['source']))} · auto-detected from your e-mail · EMAIL ALERT · no source-account access</span><br>"
+                    f"<li data-bid='{e(r['id'])}' data-auto='1' data-origin='IMPORTED'><b>{e(r['title'])}</b><br><span class='mut'>{e(NAMES.get(r['source'], r['source']))} · auto-detected from your e-mail staging file · IMPORTED · no source-account access</span><br>"
                     f"status <b>{WORDS[r['event']]}</b> · {when or countdown(rr, now) + badge(rr, now)}<br>current bid UNKNOWN · your max UNKNOWN · {amt} · {link}<br>"
                     + (f"earlier e-mails: {e(', '.join(WORDS[x] for x in r['earlier']))}<br>" if r.get("earlier") else "") + f"next action: {e(NEXT[r['event']])}<br><span class='mut'>provenance: e-mail Message-ID {e(r['provenance']['message_id'])}</span><br>"
                     f"<form method='post' action='/market/bid' style='display:inline'>{hid}<button name='act' value='unbid'>Stop tracking</button></form></li>",

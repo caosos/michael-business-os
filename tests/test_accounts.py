@@ -38,11 +38,14 @@ def test_google_config_is_disabled_by_default_and_never_exposes_secrets():
     {"MBOS_GOOGLE_REDIRECT_URI": "http://deals.example/auth/google/callback"},
     {"MBOS_GOOGLE_REDIRECT_URI": "https://user:pass@deals.example/cb"},
     {"MBOS_GOOGLE_REDIRECT_URI": "https://deals.example/cb#fragment"},
+    {"MBOS_GOOGLE_REDIRECT_URI": "https://deals.example/auth/google/callback?extra=1"},
+    {"MBOS_GOOGLE_REDIRECT_URI": "https://deals.example/callback"},
 ])
 def test_google_config_fails_closed_when_partial_or_unsafe(change):
     with pytest.raises(accounts.AccountConfigError):
         accounts.google_oauth_config(configured(**change))
-    assert accounts.google_oauth_config(configured(MBOS_GOOGLE_REDIRECT_URI="http://127.0.0.1:8766/callback")).enabled
+    assert accounts.google_oauth_config(configured(
+        MBOS_GOOGLE_REDIRECT_URI="http://127.0.0.1:8766/auth/google/callback")).enabled
 
 
 def test_session_is_signed_expires_and_contains_no_profile_data():

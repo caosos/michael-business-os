@@ -19,11 +19,16 @@ from . import market_prefs as mp
 from . import market_search as ms
 from mbos_discovery.normalize import haversine_miles
 
-SOURCES = {"facebook": "Facebook Marketplace", "craigslist": "Craigslist", "offerup": "OfferUp", "other": "Other site"}
+SOURCES = {
+    "facebook": "Facebook Marketplace", "craigslist": "Craigslist", "offerup": "OfferUp",
+    "govdeals": "GovDeals", "publicsurplus": "Public Surplus", "hibid": "HiBid", "wooley": "Wooley Auctioneers",
+    "nahlen": "Nahlen Auctions", "auctionzip": "AuctionZip", "half_off_wholesale": "Half Off Wholesale — Little Rock",
+    "northbay": "NorthBay Tool Liquidation Pallets", "bargain_brothers": "Bargain Brothers", "other": "Other site",
+}
 ACTIONS = ("add", "edit", "delete", "undo")
 WHO = "owner (Operator UI)"
 MAX_PRICE = 10**7
-ID_RE = re.compile(r"^own:(facebook|craigslist|offerup|other):[0-9a-f]{12}$")
+ID_RE = re.compile(rf"^own:({'|'.join(map(re.escape, SOURCES))}):[0-9a-f]{{12}}$")
 
 
 def path() -> Path:
@@ -75,7 +80,7 @@ def validate(f: dict) -> tuple[dict, list[str]]:
         errs.append("Title is required.")
     source = g("source").lower()
     if source not in SOURCES:
-        errs.append("Choose a source: facebook, craigslist, offerup or other.")
+        errs.append("Choose one of the listed sources.")
     price = None
     if g("price"):
         price = ms._num(g("price"), MAX_PRICE)
@@ -112,7 +117,9 @@ def act(action: str, f: dict) -> str:
     if action == "add":
         if fid in finds:
             raise ValueError("Already in your finds" + (" (deleted: undo it from 'Deleted finds')." if finds[fid].get("deleted") else ". Edit it instead; no duplicate was added."))
-        finds[fid] = {**clean, "id": fid, "created_by": WHO, "created_at": now, "updated_by": WHO, "updated_at": now, "deleted": False}
+        finds[fid] = {**clean, "id": fid, "created_by": WHO, "created_at": now, "updated_by": WHO, "updated_at": now, "deleted": False,
+                      "provenance": {"method": "owner_import", "source": clean["source"], "original_url": clean["link"] or None,
+                                     "recorded_by": WHO, "recorded_at": now}}
         msg = "Find added (owner-entered, not fetched, unverified)."
     else:
         old_id = str(f.get("find") or "")
@@ -121,7 +128,9 @@ def act(action: str, f: dict) -> str:
         if fid != old_id and fid in finds:
             raise ValueError("Those details match another find already in your list; no change was made.")
         r = finds.pop(old_id)       # the id follows the link/title/place; the record keeps the earlier id
-        finds[fid] = {**r, **clean, "id": fid, "former_id": old_id if fid != old_id else r.get("former_id"), "updated_by": WHO, "updated_at": now}
+        finds[fid] = {**r, **clean, "id": fid, "former_id": old_id if fid != old_id else r.get("former_id"), "updated_by": WHO, "updated_at": now,
+                      "provenance": {"method": "owner_import", "source": clean["source"], "original_url": clean["link"] or None,
+                                     "recorded_by": WHO, "recorded_at": r.get("created_at") or now, "updated_at": now}}
         msg = "Find updated." + (" It now has a new id, so earlier Save/Hide choices on the old id no longer apply." if fid != old_id else "")
     _store(finds)
     return msg
@@ -140,13 +149,17 @@ def card(r: dict, origin) -> dict:
     return {"id": r["id"], "title": r["title"], "description": r.get("notes") or "", "text": text, "url": r.get("link") or None, "image": None, "bid": r.get("price"),
             "bidders": None, "closes": None, "city": r.get("location"), "state": state_of(r.get("location", "")), "distance": haversine_miles(origin, pt) if (pt and origin) else None,
             "category": None, "condition": r.get("condition") or None, "labels": ms.auction_labels({}), "source": SOURCES[r["source"]], "source_key": r["source"],
-            "fetched_at": r.get("created_at"), "kind": "owner-entered", "stale": False, "find": r}
+            "fetched_at": r.get("created_at"), "kind": "owner-entered", "stale": False, "find": r,
+            "provenance": r.get("provenance") or {"method": "owner_import", "source": r.get("source"), "original_url": r.get("link")}}
 
 
 def cards(q: dict, prefs: dict) -> tuple[list[dict], list[dict], list[dict], int, int]:
     """-> (checked results, unchecked, deleted records, hidden-by-you count, hidden-by-filters count). Same hard filters as GSA via ms.partition; Hide/Save through the prefs ids."""
     finds = load()
-    live = [card(r, ms._origin(q["base"])) for r in finds.values() if not r.get("deleted")]
+    selected = {x for x in str(q.get("source") or "all").split(",") if x}
+    show_all_finds = not selected or "all" in selected or "owner_finds" in selected
+    live = [card(r, ms._origin(q["base"])) for r in finds.values()
+            if not r.get("deleted") and (show_all_finds or r.get("source") in selected)]
     gone = sorted((r for r in finds.values() if r.get("deleted")), key=lambda r: r.get("deleted_at", ""), reverse=True)
     res, unch, byf = ms.partition(live, q)
     res, g1 = mp.hide(res, prefs)
