@@ -159,11 +159,13 @@ def _notices(state):
 
 def page(title, body, state, flash=None, error=False):
     f = f'<div class="flash{" err" if error else ""}">{e(flash)}</div>' if flash else ""
+    marketplace = _active(getattr(_CUR, "path", "")) == "/market"
+    chrome = "" if marketplace else (f'<div class="banner">DRY-RUN · nothing leaves this machine · system {e(state)}</div>'
+                                      f'<header><b>Operator UI</b><nav>{_nav(state)}</nav></header>{_notices(state)}')
+    main_class = ' class="market-page"' if marketplace else ""
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>{ec(title)}</title><style>{CSS}</style></head>
-<body><div class="banner">DRY-RUN · nothing leaves this machine · system {e(state)}</div>
-<header><b>Operator UI</b><nav>{_nav(state)}</nav></header>{_notices(state)}
-<main>{f}{'' if '<h1' in body else f'<h1 class="pagehead">{ec(title)}</h1>'}{body}</main></body></html>"""
+<body>{chrome}<main{main_class}>{f}{'' if '<h1' in body else f'<h1 class="pagehead">{ec(title)}</h1>'}{body}</main></body></html>"""
 
 
 def render_queue(q):
