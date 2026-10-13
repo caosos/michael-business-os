@@ -293,14 +293,14 @@ def coverage(parts: list[dict]) -> list[dict]:
 
 
 def load_source(source: str, gsa_path: str | None, now: datetime, origin=None, directory: str | None = None, query: dict | None = None) -> dict:
-    """Dispatch on the `source` filter: gsa | govdeals | publicsurplus | all. Other sources (eBay, Craigslist, Facebook Marketplace) are NOT CONNECTED."""
+    """Dispatch a source or merge the unified pool; Facebook uses the Bright Data cache and refreshes only after explicit Search/Run."""
     directory = directory if directory is not None else fixture_dir()
     if source == "gsa":
         return ms.load_gsa(gsa_path, now, origin)
     if source == "facebook":
         q = query or {}
         selected = {v for v in str(q.get("source") or "facebook").split(",") if v}
-        refresh = bool({"all", "facebook"} & selected)
+        refresh = bool(q.get("_facebook_refresh")) and bool({"all", "facebook"} & selected)
         keyword = q.get("keywords") or "tools equipment trailers lawn machinery pallets"
         d = mfb.load(now, origin, keyword=keyword, city=q.get("base") or "72032",
                      radius=q.get("radius") or ms.DEFAULT_RADIUS, refresh=refresh)
