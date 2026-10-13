@@ -140,7 +140,9 @@ def normalize(payload: dict, imported_at: str, import_id: str,
             "availability": _text(payload.get("availability"), "availability", 300),
             "terms": str(payload.get("terms") or "").strip()[:1500],
             "observed_at": observed_s,
+            "starts_on": _text(payload.get("starts_on"), "starts on", 10, False) or None,
             "expires_at": expires_s,
+            "photo_url": _url(payload.get("photo_url"), "photo URL", False),
         },
         "provenance": {
             "method": method,
@@ -245,7 +247,7 @@ def card(row: dict, origin=None) -> dict:
     state = state_match.group(1).upper() if state_match and state_match.group(1).upper() in ms.US_STATES else None
     provenance = row.get("provenance") or {}
     return {"id": f"local:{row['import_id']}", "title": title, "description": desc, "text": f"{title} {desc}".lower(),
-            "url": provenance.get("original_url"), "image": None, "bid": None, "price": offer["deal_price_usd"], "price_type": "fixed",
+            "url": provenance.get("original_url"), "image": offer.get("photo_url"), "bid": None, "price": offer["deal_price_usd"], "price_type": "fixed",
             "bidders": None, "closes": offer["expires_at"][:10], "closes_at": offer["expires_at"], "city": loc, "state": state,
             "zip": zip_code, "posted": offer["observed_at"][:10], "distance": haversine_miles(origin, point) if origin and point else None,
             "category": CATEGORIES[offer["category"]], "condition": None, "labels": ms.auction_labels({}), "source": SOURCE_NAME,

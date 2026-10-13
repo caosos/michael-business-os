@@ -71,7 +71,7 @@ def _date(form: dict, key: str, required: bool = False) -> str | None:
 
 
 def parse(form: dict, created_at: str, submission_id: str,
-          *, account: accounts.Account | None = None) -> dict:
+          *, account: accounts.Account | None = None, provenance: dict | None = None) -> dict:
     """Validate a submitter-stated offer.  It remains unpublished and unverified."""
     account = account or accounts.current()
     if str(form.get("authority_attestation") or "") != "yes":
@@ -98,7 +98,8 @@ def parse(form: dict, created_at: str, submission_id: str,
     price, regular = _money(form, "deal_price", required=True), _money(form, "regular_price")
     if regular is not None and regular < price:
         raise InputError("regular price cannot be lower than the deal price")
-    return {
+    photo_url = _url(_text(form, "photo_url", 1000), "photo link")
+    record = {
         "schema": "dealsniffer.vendor_deal_submission.v1",
         "submission_id": submission_id,
         "account_key": account.storage_key,
@@ -127,6 +128,8 @@ def parse(form: dict, created_at: str, submission_id: str,
             "availability": _text(form, "availability", 300, required=True),
             "terms": str(form.get("terms") or "").strip()[:1500],
             "source_url": _url(_text(form, "source_url", 1000), "offer link"),
+            "photo_url": photo_url,
+            "observed_at": _text(form, "observed_at", 40) or None,
         },
         "permissions": {
             "authority_attested": True,
@@ -136,6 +139,11 @@ def parse(form: dict, created_at: str, submission_id: str,
             "recorded_at": created_at,
         },
     }
+    if provenance:
+        # Mail/provider adapters hand us already-normalized provenance.  The raw
+        # message, signatures, and credentials never belong in this journal.
+        record["provenance"] = dict(provenance)
+    return record
 
 
 class Store:
@@ -176,6 +184,55 @@ class Store:
                         raise OSError("vendor deal journal write did not make progress")
                     remaining = remaining[written:]
                 os.fsync(fd)
+            finally:
+                os.close(fd)
+
+    def append_once(self, record: dict, account: accounts.Account | None = None) -> bool:
+        """Append unless the mail message or exact offer was already accepted.
+
+        The check and append share one process/file lock, so two mailbox polls
+        cannot create duplicate review cards.  Returns ``False`` for a replay.
+        """
+        account = account or accounts.current()
+        if record.get("schema") != "dealsniffer.vendor_deal_submission.v1" or record.get("account_key") != account.storage_key:
+            raise ValueError("offer does not belong to the active account")
+        provenance = record.get("provenance") or {}
+        message_key = str(provenance.get("message_key") or "")
+        offer_identity = str(provenance.get("offer_identity") or "")
+        if not message_key or not offer_identity:
+            raise ValueError("mail imports require message and offer deduplication keys")
+        path = self._path(account)
+        path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        path.parent.chmod(0o700)
+        payload = (json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n").encode()
+        with _LOCK:
+            flags = os.O_APPEND | os.O_CREAT | os.O_RDWR
+            if hasattr(os, "O_NOFOLLOW"):
+                flags |= os.O_NOFOLLOW
+            fd = os.open(path, flags, 0o600)
+            try:
+                os.fchmod(fd, 0o600)
+                fcntl.flock(fd, fcntl.LOCK_EX)
+                if os.fstat(fd).st_size > 32 * 1024 * 1024:
+                    raise OSError("vendor deal journal is too large for safe mail deduplication")
+                os.lseek(fd, 0, os.SEEK_SET)
+                existing = os.read(fd, os.fstat(fd).st_size).decode("utf-8", "replace")
+                for line in existing.splitlines():
+                    try:
+                        old = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+                    old_prov = old.get("provenance") or {}
+                    if old_prov.get("message_key") == message_key or old_prov.get("offer_identity") == offer_identity:
+                        return False
+                remaining = memoryview(payload)
+                while remaining:
+                    written = os.write(fd, remaining)
+                    if written <= 0:
+                        raise OSError("vendor deal journal write did not make progress")
+                    remaining = remaining[written:]
+                os.fsync(fd)
+                return True
             finally:
                 os.close(fd)
 
