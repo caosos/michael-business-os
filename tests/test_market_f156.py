@@ -29,7 +29,7 @@ def test_registry_covers_every_named_source_and_state_is_one_label():
     for n in ("GSA Auctions", "Wooley Auctioneers", "Wilson Auctioneers", "Blackmon Auctions", "GovDeals", "Public Surplus", "HiBid e-mail alerts",
               "Craigslist", "Facebook Marketplace", "eBay", "OfferUp", "Owner-entered finds"):
         assert n in names
-    assert all(i.path in ("official API", "own site", "RSS", "e-mail alerts", "owner import", "none") for i in msrc.REGISTRY)
+    assert all(i.path in ("official API", "provider API", "own site", "RSS", "e-mail alerts", "owner import", "none") for i in msrc.REGISTRY)
     for r in msp.rows(NOW):
         assert r["state"] in msrc.STATES
 
@@ -43,7 +43,7 @@ def test_live_connected_only_from_a_real_cache(cache, wcache):  # noqa: F811
 
 def test_not_connected_without_caches():
     r = by(msp.rows(NOW))
-    for k in ("wooley", "govdeals", "publicsurplus", "hibid_email", "ebay"):
+    for k in ("wooley", "govdeals", "publicsurplus", "hibid_email", "facebook", "ebay"):
         assert r[k]["state"] == "NOT CONNECTED"
 
 
