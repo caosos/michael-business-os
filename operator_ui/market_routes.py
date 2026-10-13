@@ -65,9 +65,10 @@ def page_body(app, qs: dict, now, errors=None, values=None) -> str:
         q = ms.parse_query(qs)
     edit = (qs.get("edit") or [None])[0]
     ran = not qs.get("new") and not qs.get("edit")
-    data = ms.load_source(q["source"], now, ms._origin(q["base"]), os.environ.get("MBOS_GSA_CACHE") or None) if ran else \
+    # Always load the unified source pool once. The browse layer applies the selected source checkboxes.
+    data = ms.load_source("all", now, ms._origin(q["base"]), os.environ.get("MBOS_GSA_CACHE") or None) if ran else \
         {"status": "connected", "as_of": None, "age_h": 0, "stale": False, "in_scope": 0, "in_file": 0, "cards": [], "message": ""}
-    allcards = (data["cards"] if q["source"] == "all" else ms.load_source("all", now, ms._origin(q["base"]), os.environ.get("MBOS_GSA_CACHE") or None)["cards"]) if ran else []
+    allcards = data["cards"] if ran else []
     prefs = mp.load()
     auto, auto_note = mba.load(now, prefs)             # F-152: bid e-mails read from the staging fixture directory only; else a one-line not-connected note
     au = mba.urls(auto)
