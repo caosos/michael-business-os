@@ -36,8 +36,8 @@ class FacebookDirectTests(unittest.TestCase):
         self.assertNotIn("profile", rows[0])
         self.assertEqual(len(calls), 2)
         self.assertNotIn("limit_per_input", calls[0][1])
-        self.assertNotIn("discover_by", calls[0][1])
-        self.assertNotIn("type=discover_new", calls[0][1])
+        self.assertIn("discover_by=keyword", calls[0][1])
+        self.assertIn("type=discover_new", calls[0][1])
         self.assertNotIn("secret-token", calls[0][1])
         self.assertEqual(json.loads(calls[0][3]), {"input": [{"keyword": "utility trailer"}], "limit_per_input": 20})
         self.assertEqual(json.loads(calls[1][3]),

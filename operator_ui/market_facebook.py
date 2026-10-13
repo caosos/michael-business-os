@@ -190,9 +190,14 @@ class BrightDataClient:
                 return _rows(dbody)
         raise BrightDataError("Bright Data snapshot did not become ready before the polling limit")
 
-    def _scrape(self, inputs: list[dict], limit_per_input: int | None = None) -> list[dict]:
+    def _scrape(self, inputs: list[dict], limit_per_input: int | None = None, *, discover_by: str | None = None) -> list[dict]:
         query = {"dataset_id": os.environ.get("MBOS_BRIGHTDATA_FACEBOOK_DATASET") or DATASET_ID,
                  "include_errors": "true", "format": "json"}
+        if discover_by:
+            # The live Marketplace collector currently selects its discovery
+            # schema with these query flags. Without them, the same dataset ID
+            # validates the input as URL collection and rejects ``keyword``.
+            query.update({"type": "discover_new", "discover_by": discover_by})
         payload = {"input": inputs}
         if limit_per_input is not None:
             payload["limit_per_input"] = min(max(int(limit_per_input), 1), HARD_CAP)
@@ -208,7 +213,7 @@ class BrightDataClient:
         # exactly ``keyword`` in each input object.  City/radius belong to
         # DealSniffer's local filtering and cache identity; sending them to the
         # provider makes an otherwise valid request fail schema validation.
-        found = self._scrape([{"keyword": keyword}], cap)[:cap]
+        found = self._scrape([{"keyword": keyword}], cap, discover_by="keyword")[:cap]
         complete = [row for row in found if row.get("title")]
         urls = [{"url": row["url"]} for row in found if not row.get("title") and isinstance(row.get("url"), str)]
         if urls:
