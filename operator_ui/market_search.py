@@ -342,12 +342,17 @@ def search(lots: list[dict], q: dict) -> tuple[list[dict], dict]:
     return res, hidden
 
 
+def radius_applies(q: dict) -> bool:
+    """F-136: By State does not apply the radius unless the owner also ticks it (shown on the page)."""
+    return q.get("radius") is not None and (q.get("loc_mode") != "state" or bool(q.get("also_radius")))
+
+
 def partition(lots: list[dict], q: dict) -> tuple[list[dict], list[dict], dict]:
     """Filter + sort -> (checked results, unchecked, hidden counts). A lot whose distance (radius set) or price (price range set) is
     unknown cannot be tested, so it goes to `unchecked` with its reasons and is never counted as local or in range."""
     hidden = {"price": 0, "radius": 0, "terms": 0, "condition": 0, "closing": 0, "rentals": 0}
     by_state = q.get("loc_mode") == "state"
-    radius_on = q["radius"] is not None and (not by_state or q.get("also_radius"))      # F-136: By State does not apply the radius unless the owner also ticks it (shown on the page)
+    radius_on = radius_applies(q)
     if by_state:
         hidden["state"] = 0
     out, unchecked = [], []

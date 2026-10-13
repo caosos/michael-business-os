@@ -403,6 +403,10 @@ def render_page(q: dict, d: dict, results: list[dict], hidden: dict, saved: list
                     "That source can be available without having any matching inventory right now.</p>"
                     f"<a class='mk-view' id='search-all-sources' href='{mb.href(q, source='all', page=1)}'>Search all sources</a></div>")
         unknown = f" <span class='small mut'>({len(unchecked)} with distance or price not verified)</span>" if unchecked else ""
+        n_far = (hidden or {}).get("location_unknown", 0)
+        if n_far:
+            unknown += (f" <span class='small mut' id='location-unknown'>{n_far} listing{'s' if n_far != 1 else ''} with an unknown location "
+                        f"left out: the {q['radius']:g}-mile radius cannot be checked. Choose Any to include them.</span>")
         top_pager = mb.pager(q, page, pages, len(display_rows), "top")
         bottom_pager = mb.pager(q, page, pages, len(display_rows), "bottom")
         body = (f"<h2>{len(display_rows)} listing{'s' if len(display_rows) != 1 else ''}{unknown}</h2>"

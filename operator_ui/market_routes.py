@@ -87,6 +87,11 @@ def page_body(app, qs: dict, now, errors=None, values=None) -> str:
         pool = [{**c, "saved": c["id"] in saved_ids} for c in allcards]
         pool = mbr.post(pool, qq, now, relax) if live else []
         res, unch, hid = ms.partition(pool, qq) if live else ([], [], {})
+        if ms.radius_applies(qq):                      # P0-06: a listing whose distance cannot be measured is never shown inside a radius
+            far = [c for c in unch if c.get("distance") is None]
+            unch = [c for c in unch if c.get("distance") is not None]
+            if far:
+                hid = {**hid, "location_unknown": len(far)}
         n0 = len(res) + len(unch)
         res, g1 = mp.hide(res, prefs)                  # a hidden listing stays hidden in BOTH sections, with suggestions on or off
         unch, g2 = mp.hide(unch, prefs)
