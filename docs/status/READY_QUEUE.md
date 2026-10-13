@@ -1,562 +1,3227 @@
-# READY QUEUE: Michael Business OS, Round Two
+YªçŠx-®éÜj×¢ëiºÚ+Š§j[h‘éÜ¢éí×^ùã´èµ©hºÚn¶X§zÍHÈ‘PQHUQUQNˆZXÚY[\Ú[™\ÜÈÔË›İ[™ÛÂ‚ˆÈÈİÛ™\‹Y\™XİYØØ[YX[^[œÚ[Ûˆ8 %ØİØ™\ˆLËŒ‚‚ŸQšH\ÚÈ\Èİ]\ÈYÙ[XØÙ\[˜ÙHŸKK_KK_KK_KK_KK_KK_KK_Ÿ‹LMˆœ›ØY[ˆX[ÛšY™™\ˆœ›ÛH™\Ø[K[Û›H\ØÛİ™\H[ÈH\œÛÛ˜[^™YØØ[YX[™]ÛÜšËˆÙY\ZXÚY[	ÜÈ˜Z[\œËİÛÛËÙ\]Z\Y[Y˜][ËYÜZ[ˆØ]YÛÜšY\È›ÜˆYX]ÙÜ›ØÙ\šY\Ë™\İ]\˜[ËY[Ø]]Û[İ]™K[\Z[›Y[İXÚÙ]È[™™]Z[ÜÙ\šXÙ\Ë[™Y[ˆXØÛİ[Z\ÛÛ]Y\Ú[™\ÜË[Ù™™\ˆ[ZÙHØ\\š[™ÈšXÙKİ[š]™Yİ[\ˆšXÙK]˜Z[Xš[]KØØ][Û‹İ\Ù^\˜][Û‹Ù™šXÚX[[šË]]Üš]KÛÛXİÛÛœÙ[[™Z[Hœ™\Ú™\ÜÈÛÛ[Z]Y[ˆİX›Z\ÜÚ[ÛœÈİ^H™]šY]Ë[Û›H[™Ø[››İ\X\ˆ]™H[[™\šYšYYˆ^\İ[™ÈXØÛİ[\ÛÛ][Ûˆ[™X\šÙ]XÙHØ]YÛÜKÜ™YœÈ]È
+Š’STSQS•QM™YŒ˜ÌÙŒMÙLÌÍMÌÙMÍÙØM˜MÙM™LÈ[]Q\ÚÈ™[X\ÙKÜ›ÛÙˆ[ˆÎÌŒŒÌNSˆ“ÑÔ‘TÔËŠŠˆ\™Xİ\œÙ\ˆ˜[Y][Ûˆ[™XØÛİ[Z\ÛÛ][Ûˆ\œÚ\İ[˜ÙHÚXÚÜÈ\ÜÙYØØ[NÈ[\ÜÙ[X›Y™[X\ÙH\İÈ[™œ›İÜÙ\ˆ›ÛÙˆ\™H[™[™Ëˆˆ›Øİ\ÙY˜[Y][Û‹ØXØÛİ[Z\ÛÛ][Û‹ØØ]YÛÜKÙY˜][\İÎÈ\ÜÙ[X›YİZ]NÈØYYÙ][™ÜÈÚİÜÈ™]ÈØ]YÛÜšY\ÎÈÜÙ[ÙX[\ÚİÜÛ[Øš[H™[™\œÎÈ›ÈİX›Z\ÜÚ[ÛˆÜ™X]Y\š[™È›ÛÙÈ^XİØYY™]š\Ú[Ûˆ[™Üİ[Y\İ[\ˆŸ‹LMÈH[\˜Xİ]™H™[™Üˆ›Û[İ[ÛœÎˆ]\›Z[š\İXÈ›\Ú›ÜËÙš\œİSˆÛZ[\Èš\œİˆ[\[Y[ØÚY[Y™[X\ÙH[YKÛZ[H[™[ÜK[YÚXš[]Kİ\œš]ÜKÛ™K\\‹\\œÛÛ‹[š\]YH™Y[\[ÛˆÚÙ[‹™[™ÜˆÛÛ™š\›X][Û‹^\˜][Û‹ØZ]\İØÛZ[YY[İ]RK›İYšXØ][ÛœË\[™[Û›HÛZ[KÜ™Y[\[Ûˆ™XÙZ\Ëœ˜]YÜ˜]H[Z]È[™™[™Üˆ™\Ü[™ËˆØÜ˜]Ú\İ[Hš\İX[™]™X[È]\İ›İ[\HØ[X›[™Ëˆ‹LMÈ›ÙXİ[ÛˆXØÛİ[ËÛXZ[Û›İYšXØ][Ûˆ[]™\NÈ™[™ÜˆYÜ™Y[Y[Ü™]šY]Ù\ˆ]‘PQH›Üˆ\ÚYÛˆY\ˆ‹LMˆ]™HXØÙ\[˜ÙKˆ
+ŠÚ[˜ÙKX˜\ÙYš^™\È“ĞÒÑQÛˆYØ[™]šY]È[™Ù™šXÚX[[\ËŠŠˆˆRH
+ÈH›ÙXİÙÛİ™\›˜[˜ÙH[[Ûœİ˜]HH]\›Z[š\İXÈ›Ë\^[Y[›\ÚÛZ[H[™È[™Ú]Ş[]XÈ™[™Ü‹İ\İXØÛİ[ÎÈ›İ™H^Xİ[™[ÜHØ[››İİ™\‹XÛZ[H[™\ˆÛÛ˜İ\œ™[˜ŞNÈ›È^[Y[ØšYØÛÛXİÈÚ[˜ÙKÜ˜[™ÛH[ÙHXœÙ[Üˆ\™Y\ØX›Y[[YØ[\›İ˜[ˆŸ‹MHH]™\Y^KYX[Ûİ\˜ÙH™YÚ\İH[™œ™\Ú™\ÜÎˆÛ˜›Ø\™˜[YYÛÛØ^KX\™XH]Ú\œËÙÜ›ØÙ\œË™\İ]\˜[ËY[Ø]]Û[İ]™K[\Z[›Y[[™ØØ[\Ù\šXÙH\Ú[™\ÜÙ\È›İYÚ]]Üš^™Y™[™ÜˆİX›Z\ÜÚ[ÛœËÙ™šXÚX[X›XÈ™YYËÜYÙ\ËÜˆ\›Z]YK[XZ[ˆXXÚÛİ\˜ÙHİ]\ÈİÛ™\‹™]šY]˜[›İ]KÜ˜[[\š]K\]HÓK\İİXØÙ\ÜË^\K[™ÛÛ›™Xİ[ÛˆX™[ˆ‹LMÈ™[™Üˆ\›Z\ÜÚ[ÛˆÜˆX›XÈİ\ÜY›İ]H\ˆÛİ\˜ÙH‘PQHY\ˆ‹LMˆ]™HXØÙ\[˜ÙNÈ›È™[™Üˆ\Èİ\œ™[HÛZ[YYÛÛ›™XİYˆˆ]X\İÛ™HÙ[Z[™Hİ\œ™[Ù™™\ˆœ›ÛHXXÚXØÙ\YÛİ\˜ÙH[˜ÛY\ÈÜšYÚ[˜[[šÈÜˆ™[™Üˆ™XÙZ\^XİšXÙKİ[š]ØØ][Û‹Ù\İ[˜ÙKØœÙ\™Yİ\]Y[YK^\˜][Û‹Ø]˜Z[Xš[]H[™Û™\İİ]\ÎÈ›Èš^\™\ÈÛİ[Y]™KˆŸKMÍˆH\œÛÛ˜[^™Y[Ü›š[™È™YY[™[]™\Kˆ\ˆXØÛİ[ÛÛXš[™H\™Ú]KÖ’TÜ˜Y]\ËØØ]YÛÜKÜÛİ\˜ÙHÛÛ›ÛÈÚ]^XÚ]Ø]™KÚYKÛ[Ü™KÛ\ÜÈ™YY˜XÚÈ[™š]˜XŞK\™]šY]ÙY™Z]š[Ü˜[ÚYÛ˜[Ëˆ˜[šÚ[™È]\İÚİÈÚH[İIÜ™HÙYZ[™È\Ø[İÈ™\Ù]Ù\ØX›K™]™\ˆÜ›ÜÜÈH\™š[\‹^\™Hİ[HÙ™™\œËY\HÛİ\˜Ù\Ë[™]›ÚYš[\ˆX˜›\ÈÚ]H›İ[™Y\ØÛİ™\HZ^ˆ‹LM‹ÛÛ›™XİYÛİ\˜Ù\Ë›ÙXİ[Ûˆ›İYšXØ][Ûˆ[]™\H‘PQH›Üˆ[Ù[ÜÜXÎÈ]™H]™\Y^KYX[ÛZ[\È™[XZ[ˆ›ØÚÙYÛˆÛİ\˜Ù\ËˆHZ[HÚ]Ô[Ü›š[™ÈœšYYˆ\ÈØÚY[Y\›İ[™ŒSH[Y\šXØKĞÚXØYÛÈ™YÚ[›š[™ÈØİØ™\ˆM\ÈH][[\š[H[]™\KˆH
+ÈÈ
+Èˆ]\›Z[š\İXÈ˜[šÚ[™È\İË\‹XXØÛİ[\ÛÛ][Û‹™\Ù]Ù\ØX›K\™Yš[\ˆ[˜\šX[Ëœ™\Ú™\ÜÈ^\K™X\ÛÛˆX™[Ë›İYšXØ][ÛˆÜZ[‹İ[œİXœØÜšX™K\ÚİÜÛ[Øš[Hœ›İÜÙ\ˆ›ÛÙ‹[™HÙ[Z[™Hœ™\Ú[Ü›š[™ÈÙ]Ú]Ûİ\˜ÙH[šÜËˆ‚‹H
+Š“İÛ™\ŠŠˆYÙ[H
+ÛÛÜ™[˜]ÜˆÈ\Ü]Ú\ŠKˆ
+Š”›İØÛÛŠŠˆØÜËĞÓÓÔ‘SUSÓ‹›Yˆ™XY]™Y›Ü™HÛZ[Z[™Ë‚‹H
+Š“\İŞ[˜ÙYŠŠˆ™XÛÛ˜Ú[Yœ›ÛHİÛš[™Ë[[™HQÑS•ÔÕUTÈ™XÙZ\ÈYØZ[œİXYÈˆYX0­ÈÈ˜ÎLYŒØ0­ÈÙŒX0­ÈHL˜Œ˜0­ÈˆØ˜ÍYŒ˜0­ÈÈM™MÍ‚‹H
+Š”™XY]œ›ÛH[HÛÜšİ™YNŠŠˆÚ]™]Ú\HÜšYÚ[ˆ	‰ˆÚ]ÚİÈÜšYÚ[‹Ü™\ÙX\˜ÚØYÙ[LKXÛÛÜ™[˜]Ü™ØÜËÜİ]\ËÔ‘PQWÔUQUQK›Y‹H
+Š”İ]\È˜[Y\ÎŠŠˆ‘PQH0­ÈÓRSQQ0­È“ĞÒÑQ0­ÈÓ‘K‚‹H
+Š”š[Üš]NŠŠˆHÜš]XØ[]0­ÈHH™^]\0­ÈˆH\ÙY[\˜[[ÛÜšË‚‹H
+Š‘]™\H\ÚÈ\È–KT•SˆÓ“KŠŠˆ›ÈXİ[ÛˆÚ]İ]H™XÙZ\[™›È™XÙZ\Ú]İ]›İ™[˜[˜ÙK‚‚ˆ
+Š”]\ÙHĞSÑSQHHİÛ™\ˆ]NŒÌˆ
+T–PKLŒŒLLLLÌ
+NÈYÙ[H\YYL]NŒÌVˆHZ\İZÙK[™Y]]ŒNŒÍV‹ŠŠˆ]Y]YH™\İÜ™YÈÙYHØÜËÜİ]\ËÔUTÑQĞ–WÓÕÓ‘T‹›Y‚‚ˆÈÈÜš]XØ[]˜ËL
+Îˆ™[X\ÙKXØ[™Y]H[ˆÛˆ[™\ÈÑJH
+ÈKL˜
+Nˆ™[X\ÙHØ]JH8¡¤ˆØ]™K]ÛÈ™[X\ÙHØ[™Y]KˆKLIÜÈ™[XZ[š[™ÈLx $ĞLL\š]HÛˆ[™H[œÈ[ˆ\˜[[‚‚ˆÈÈ\ÚÜÂ‚ˆÈÈÈ[™HNˆYÙ[H
+ÛÜ™HÈ[YÜ˜][ÛŠBŸQšH\ÚÈ\Èİ]\ÈYÙ[XØÙ\[˜ÙHŸKK_KK_KK_KK_KK_KK_KK_ŸKL‹LLËÑ‹LM[[™ÜÎˆQ‹LL™Y™\™[˜ÙH[\[Y[][ÛœÈ
+H[™Ü[
+K™XİÜœË[\›ÜÛÛÜ[™HÛÛ™›Ü›X[˜ÙH›Û™H
+Š‘Ó‘JŠˆHMˆ\İÈ\ÜÎÈ™XİÜœÈ\ÜÈ[ˆ]Ûˆ[™[ˆÜİÜ™TÔSMˆŸKLHÜYÙ\‹œXØÜ[™KœXÛÈ	ÜÈİ]TİÜ™X
+ŒKÔŒŠKˆ
+Š”\ÙHK›İÎŠŠˆİ]HY\\ˆYØZ[œİ	ÜÈ^\İ[™ÈÔSTHÙŒXXˆ
+Š”\ÙHŠŠˆÛˆHLKLˆ›Üˆ\ÙHˆ
+Š‘Ó‘JŠˆ[™HY™XŞXÛHÚ]İ[™Z[ˆ[™[™HHØ]]Ø^\ÎÈLKPLL\š]H›İ™[ˆHÉÜÈÈ
+LKÌ
+H[™HØ]IÜÈPÕSÓˆ]
+ÈİšXİULH›İÈ[ˆ\ÈH™X[›Û‹\İ\\\Ù\ˆX›Ü×Ù›ÜØÙÚ[ˆ
+\ÜÙ\Y[ˆ‘TÕS
+HHLx $ĞLL\ÜÈ[˜Ú[™ÙYÛˆ	ÜÈØÚ[XHŸKLˆH™[X\ÙHØ]HÛÛËÜ™[X\ÙWÙØ]KœÚ
+]\İ
+È[\›ÜØÚXÚÈ
+ÈX›ÜÈ]Y]
+ÈÛÛ˜Xİ˜[Y]ÜŠK\ÈØÜËÜİ]\ËÔ‘SPTÑWÑĞUK›YÚ]™\İ[È›Û™H
+Š‘Ó‘JŠˆ™[X\ÙHØ]HTÔÈ‹Íˆ[˜Ûˆİ[KZ[œİ[ÚXÚÈHÛ™HÛÛ[X[™›Û‹^™\›ÈÛˆ[H˜Z[\™K™\İ[ÈÛÛ[Z]YŸKLÈHÚ\™HHXİ[Û‘Ø]]Ø^XØ[šXÔİ]XØÛXŞK™XÚYX™Z[™Ø]]Ø^XØÚ[İÚ]ÚØˆHØ]]Ø^HİÛœÈXİ[Û‹\İ]\È™XÙZ\È
+
+HKLˆ
+Š‘Ó‘JŠˆ
+\È\Ú
+NˆIÜÈ™X[Xİ[Û‘Ø]]Ø^H™Z[™HÜ[™HÛˆ[™H
+Ø]]Ø^WÛ[ÙO[[™WÙX
+NÈÛÎˆ^XİHÛ™HPÕSÓ—ÑVPÕUS‘ËÑVPÕUQHHØ]]Ø^KHÜ[™H[İ™\ÈÛ›HH][NÈÚZ[ˆ™\šYšYY[ˆˆ
+È™Y™\™[˜ÙHHMH[™NH\ÜÈÚ]IÜÈ™X[Ø]]Ø^HŸKLˆÚ\™H‰ÜÈˆY\\ˆ
+ÈY\\ˆ[ÈÛÛ\Û™[ØÈ[™]ËY[™š^\™H\ØÛİ™\H8¡¤ˆ‘TÑPTÒS‘È‹LH
+Š‘Ó‘JŠˆ
+H[™H‰ÜÈİÛˆ[]™\˜X›\Ë™\šYšYY[ˆ]È[™Ù™ŠNˆX›Ü×Ù\ØÛİ™\KœÜ[™K™\ØÛİ™\WØÛÛ\Û™[Ø
+Y\\œÈ
+ÈÜ[™S›Ü›X[^™\ˆ
+ÈÜ[™QY\\ŠH™YYÈX›ÜËœ[[YKÛÛ\Û™[ØÈ‹LHØZÙH]™[ÈÛˆH™X[“ÔÈÛÜšÙ›İÎÈ‹LLËĞ‹LMÜ[™K\]Y\[™İÜÎÈ‹LNHX›ÜËY\ØÛİ™\ˆ[˜Ûİ™\œÈ]™\HÛİ\˜ÙKˆ]™HÛİ\˜Ù\ÈØZ]Ûˆ‹LLˆ
+Ü™Y[X[ËZXÚY[Î
+HH[YÜ˜][Ûˆ\İˆˆš^\™\È›İYÚH“ÔÈÛÜšÙ›İÈŸKLHˆÚ\™HÉÜÈ‘TÑPTÒ›ÙXÙ\ˆ\ÈHÛÜšÙ›İÈİ\
+‘TÑPTÒS‘È8¡¤ˆĞÓÔ‘Q
+HËLH
+Š‘Ó‘JŠˆ
+\È\Ú
+Nˆ™\ÙX\˜Ú\˜[\™˜XÙH
+ÈXÛÛ›ÛZXÜÔ™\ÙX\˜Ú\˜È[™KPˆ][\È›İYÚ[™HÉÜÈ™\ÙX\˜ÚÜİ\[ˆHÛÜšÙ›İÈHH™X[\ØÛİ™\™Y][HY˜[˜Ù\È\İ‘TÑPTÒS‘È[ˆH\İŸKLÈH›İYWÙXÚ\Ú[ÛŠ][WÚY\›İ˜[ÚY
+XØZÙH[\ˆ›ÜˆHRH[™ÓH
+ˆL‹LJH›Û™H
+Š‘Ó‘JŠˆ
+\È\Ú
+HHX›ÜËÛÜšÙ›İÜË››İYWÙXÚ\Ú[Û˜^\İÎÈ‹LH\Ù\È]ŸKLˆØ\›İ˜[ÙØ]XXİÈÛˆØZÙWÛÛ˜H™]×Ú[™›ØÈšXÙWØÚ[™ÙXÈ]Xİ[Û—Ù[™[™ØšXHHY\ÜØYÙHÚ[™Ù[H[™\È‹ĞÈ
+ˆL‹LŠH›Û™H
+Š‘Ó‘JŠˆ
+\È\Ú
+NˆX›ÜËÛÜšÙ›İÜË››İYWÙ]™[
+][WÚY]™[İ[[X\K]šY[˜ÙWÜ›İ™[˜[˜ÙWÚY
+XH\İˆHÓÚ]ØZÙWÛÛ\šXÙWØÚ[™ÙXØZÙ\ÈÛˆHšXÙKXÚ[™ÙHY\ÜØYÙK™]™\ˆ^Xİ]\ÈŸKLHH[[™ÈŒLˆH][HYÙHX›H\È[™H	ÜÈ
+]™\H][H\ÜÙ\È‘TÑPTÒS‘ÎÈHQTÈÛˆS™K\™\Ù[Èš\œİÈPT“‘Q\È\›Z[˜[È›ÛİË]\YÙHPÕQ8¡¤UĞRUS‘×ĞT“ÕS
+KˆHÜ[™H\È[YÛ™Y
+ZYÜ˜][Ûˆ
+H›Û™H
+Š‘Ó‘JŠˆ
+\È\Ú
+HH\š]H\İYØZ[œİ	ÜÈ]™Hˆ\ÜÙ\ÈŸKLLˆˆŒLÈ›İ][™ÎˆTÔÈÚ]\Ü×ÛÛ—Üš[ÜœØ8¡¤ˆ‘TÑPTÒS‘Ë›İTÒU‘QËLH
+Š‘Ó‘JŠˆ
+\È\Ú
+NˆTÔÈÚ]ØÛÜ™XØ\™œ\Ü×ÛÛ—Üš[ÜœØOˆ‘TÑPTÒS‘ÈÛˆ›İÜ[™\ÎÈ]šY[˜ÙKX˜XÚÙYTÔÈİ[\˜Ú]™\ÎÈˆ\İÈH\İÚ]ÉÜÈ›YÈŸKLLÈˆÚ\™H‰ÜÈÛÛ[\ĞXİ[Û”[›™\˜
+‹LJH[™ÛÛ[\ÈK\[ˆY™™XİÜ˜
+‹LŠH[ÈÛÛ\Û™[ØÈ™Z[™IÜÈØ]]Ø^HÛ˜ÙHKLÈ[™È‹LK‹Lˆ
+Š‘Ó‘JŠˆ
+\È\Ú
+Nˆ^[ØY^[œÚ[ÛˆY\™ÙY™Y›Ü™H\Ú[™ÎÈY™™XİÜˆ›ØÚÙY8¡¤ˆPÕSÓ—ÑRSQÈÛÛ[\ÈÚXÚÜÈ[ˆ]Z[ØH[™]ËY[™K\[ˆÛÛ[\È™XÙZ\ÈÜ˜YYH‰ÜÈ]Y]ŸKLMˆY\\ˆÙX[HØ\
+ŠNˆY\\‹š\×Ù\XØ]X[ÛÈ™XÙZ]™\ÈHØ[™Y]IÜÈÛİ\˜ÙHÚYÚ[™ËÛÈØ[YK\Ûİ\˜ÙHÛÚËX[ZÙ\È\™H›İY\™ÙY›Û™H
+Š‘Ó‘JŠˆ
+[\™˜XÙJNˆY\\ˆÙ]ÈÛÛ^
+Ûİ\˜ÙKÙ™]Ú
+ÈX]ÚÚ[Ø
+NÈˆ[\[Y[ÈH[\È
+‹LLÊHH\İˆÛÈØ[YK\Ûİ\˜ÙHÛÚËX[ZÙ\Èİ^HÙ\\˜]HŸKLMHHL‹NˆX›XÈÜ[™Kœ›ÜÜÙWÙ›Ûİİ\
+ÛÛ›‹][WÚY›ÜÜÙYØXİ[ÛŠX\ÈHØ]HÛÜšÙ›İÈ›Üˆ›ÛİË]\™\]Y\İÈÛˆ[ˆ^\İ[™È][H
+ŒLˆPÕQ8¡¤UĞRUS‘×ĞT“ÕS
+H›Û™H
+Š‘Ó‘JŠˆ
+\È\Ú
+NˆÛÜšÙ›İÜËœ›ÜÜÙWÙ›Ûİİ\
+][WÚYJX
+›İ˜XÚÙ[™ÊNˆØ[YHÛXŞH]
+›ÜÜÙ\—Ù›Ü˜İ\]\
+NÈH][HÛÙ\ÈPÕQ8¡¤UĞRUS‘×ĞT“ÕSÛ›HYˆ\™H\ÈÛÛY][™ÈÈXÚYNÈH\›İ˜[Ø]H[œÈ\È]ÈİÛˆÛÜšÙ›İÈÛˆH›Ûİİ\Ø]Y]YNÈ›İ™[ˆÛˆH™Y™\™[˜ÙH˜XÚÙ[™[™Ûˆ[™H
+È[™HIÜÈ™X[Ø]]Ø^H
+ˆ™\]Y\İËˆPÕSÓ—ÑVPÕUQˆY™™XİÜˆØ[ÊHH\İˆ›ÛİË]\Ûˆ[ˆPÕQ][H8¡¤ˆ™]È\™\H8¡¤ˆ\›İ˜[Ø]H8¡¤ˆK\[ˆXİŸKLMˆHØ\\ÜÈ™XÙZ\Ù\H
+ˆš[™[™ÊNˆZYÜ˜][ÛˆNÈˆ™\šYWØÚZ[˜ÚXÚÜÈÛÛYİZ]NÈ›İ™\šYšY\œÈYÜ™YHY\ˆH›Û˜XÚÈ›Û™H
+Š‘Ó‘JŠˆ
+\È\Ú
+HHLÈ\İÈŸKLMÈHÈLËLˆ
+ĞÓÔ‘WÔ‘PÓÔ‘Q^[ØYÚ\Ú
+H
+ÈÈLËN
+˜Y›İ™[˜[˜ÙNˆ[Ù[Ü›Û\Üˆ[\]H™[™\™\‹Ú]YHH™\]Y\İ
+HÛˆ›İ˜XÚÙ[™È›Û™H
+Š‘Ó‘JŠˆ
+\È\Ú
+HH\İÈ[ˆ\İÜÙX[\ÈŸKLLHÚ\HÛÛ˜XİÈ\ÈXÚØYÙH]HÛÈH›Û‹YY]X›H[œİ[ÛÜšÜÈÚ]İ]P“Ô×ĞÓÓ•PÕ×ÑT˜
+ÈLËLKÑ‹LMŠH›Û™H
+Š‘Ó‘JŠˆ
+\È\Ú
+NˆÛÛ˜XİÈ
+ÈÜ\˜]Üˆ›Ùš[HXÚØYÙY[ˆHÚY[œ›ÛHZ\ˆÚ[™ÛHÛİ\˜Ù\ÎÈÛX[‹]™[ˆÚY[\İÈZ\ÜÚ[™È›Ùš[H˜Z\Ù\È
+™]™\ˆİY\ÜÙY
+HH\[œİ[˜[ÈHÛX[ˆ™[ÈHİZ]H\ÜÙ\ÈÚ]›È[ˆ˜\ˆŸKLLHHQ‹LL[\›ÜˆÛÛËÚ[\›ÜØÚXÚËœXÛİ™\œÈ™XİÜœË™Z™Xİ[ÛœÈ[™™[™Ü™YXÛÜH]HY[]H›Û™H
+Š‘Ó‘JŠˆ
+\È\Ú
+HH[ˆ]Ûˆ[™\ÈÓÓ‘“Ô“H
+LL
+HŸKLˆˆQ‹LHŒKŒKŒˆÛÛXİ[™HXÚÛ›İÛYÙ[Y[Ë[ˆXÚYH[™HXÚÜÈ
+Š‘Ó‘JŠˆQ‹LHQ‘T”‘QÚ]˜][Û˜[H[™™]š\Ú]šYÙÙ\œÈHQ‹LHPĞÑTQÜˆ[Y[™YÈ™XİÜœÈ[™^[\\È™YÙ[™\˜]Y‚ˆÈÈÈ[™HˆYÙ[
+İ]KÔ’UPĞSU
+BŸQšH\ÚÈ\Èİ]\ÈYÙ[XØÙ\[˜ÙHŸKK_KK_KK_KK_KK_KK_KK_ŸLH
+Š”
+ŠˆZYÜ˜][ÛˆXˆY™™XİÜ—ØØ[Ø
+S’TUQHY[\İ[˜ŞWÚÙ^KÒPÒÈWÜ[ŠKS’PËÙÛİ™\›˜[˜ÙHİ]HX›H
+JKWÜÜ[™\Y˜XİØ
+ÚLMˆÛÛ[XY™\ÜÙY
+K[[œÙ\[Û›HÚ\™H^H\™HYÙ\œËˆ[œİÙ\ˆ“ÔÈÙÚ[ˆ›ÛH
+X›Ü×Ù›ÜØ
+K[™Ú]\ˆ]\Ûİ\˜ÙHÚXÚÜÚ[ÈX^H]™H[ˆØÚ[XH›ÜØÙˆH\ˆ›Û™H
+Š‘Ó‘JŠˆLY˜™XX›\È^\İÚ]HØ[YH[˜\šX[È\ÈIÜÈWÜÜ[™KœÜ[È[œİÙ\œÈ[ˆQÑS•ÔÕUTÈŸLˆ
+Š”
+Šˆ
+ŠQ‹LLÛÛ™›Ü›X[˜ÙH
+İ\\œÙY\ÈHŒÈÛÜ™[™È[ˆ[İ\ˆÛZ[JKŠŠˆ[œİ[ÛÛ˜XİËØØ[›ÛšXØ[ÛX›Ü×ØØ[›ÛšXØ[œÜ[ˆÙ]‘UË˜Ø[›ÛšXØ[HX›ÜË˜ÚœÛÛŠX›ÜËœ™XÙZ\ØØ[›ÛšXØ[
+‘UÊJX[™‘UËœ›İ×Ú\ÚH	ÜÚLM‰ø¢)\ÚLMŠØ[›ÛšXØ[
+XÈ™\šYWØÚZ[˜\Ù\ÈHØ[YH›Ü›][KˆX›ÜËœ^[ØYÚ\Ú8¡¤ˆX›ÜË˜ÚœÛÛ—ÜÚLM˜ˆÙY\]×Ú\ÛØ
+][™XYHÛÛ™›Ü›\ÊH›Û™H
+Š‘Ó‘JŠˆLY˜™X
+™\šYšYYHIÜÈØ]H\İ
+H[™XİÜœËšœÛÛ˜\ÜÈ[ˆÜİÜ™TÔSÈHÚZ[ˆ^ÜYœ›ÛH	ÜÈˆ™\šYšY\ÈÚ]X›Ü×ØØ[›ÛšXØ[™\šYWØÚZ[˜ŸL
+Š”
+Šˆ›Û[™HIÜÈ™\]Z\™[Y[È[ÈH
+š[™[™È[œ]È[[™ÈJNˆÜšYÚ[‹Ü™\ÙX\˜ÚØYÙ[LKYÛİ™\›˜[˜ÙN™ØÜËÚ[YÜ˜][Û‹ÌK\™\]Z\™[Y[ËY›Ü‹L[ZYÜ˜][Û‹LK›YˆÛİ™\œÎˆ[šX×Ù]™[Ø
+\[™[Û›JH
+È[šX×Øİ\œ™[šY]È
+È[šX×ÜÙ]
 
-- **Owner:** Agent 01 (coordinator / dispatcher). **Protocol:** `docs/COORDINATION.md`. Read it before claiming.
-- **Last synced:** reconciled from owning-lane AGENT_STATUS receipts against heads 02 `0d40ed5` Â· 03 `4bc91f3` Â· 04 `46403f1` Â· 05 `44a0fb2` Â· 06 `cbc49f2` Â· 07 `96e4c68`.
-- **Read it from any worktree:** `git fetch -q origin && git show origin/research/agent-01-coordinator:docs/status/READY_QUEUE.md`
-- **Status values:** READY Â· CLAIMED Â· BLOCKED Â· DONE.
-- **Priority:** P0 = critical path Â· P1 = next-up Â· P2 = useful parallel work.
-- **Every task is DRY-RUN ONLY.** No action without a receipt, and no receipt without provenance.
+X™[X\ÙHH\›İ™\ˆÛ›K›Ûİİ˜\”“Ö‘SÈY™™XİÜ—ØØ[Ø\ÈH^Xİ][Û‹XÛZ[HX›NÈXİ[Û‹\İ]\ÈYÙ\È\›İ™Y8¡¤™^\™Y\›İ™Y8¡¤™˜Z[Y[™^Xİ][™ø¡¤˜Ø[˜Ù[YØWÙœ™Y^™XÈYÙ]Ø\È\ˆXİ[Û‹Z[KÛØ˜[[™™[ØÚ]HLH
+Ø[YHZYÜ˜][ÛŠH
+Š‘Ó‘JŠˆM™L
+Îˆ[šX×ÜÙ]Øİ\œ™[ÛZ[\ËÈØ]]Ø^HYÙ\ËYÙ][Ù\ÊHIÜÈKLˆÜ[œÈÛˆHÚ]İ]ÛÜšØ\›İ[™ÈŸLH
+Š”
+ŠˆŒLˆ™KXY™š\›YYˆ™[[İ™H“Ô“PSV‘Q8¡¤”ĞÓÔ‘QS8¡¤T“Õ‘Q[™PT“‘Q8¡¤TÒU‘QÑRSQ
+YY[ˆLY˜™HÈXØÛÛ[[Ù]H™KTŒLˆÜ[™JKˆÙY\PÕQ8¡¤UĞRUS‘×ĞT“ÕS›Û™H
+Š‘Ó‘JŠˆÎMØMMX
+\š]HØ]H™\šYšYYHNÈ›İÈH\™\ÜÊHIÜÈ\İÜŒL—Ú][WÙYÙ\×ÛX]ÚÛ[™WÙTÔÙ\È
+[ˆ›\YÈH\™Ø]JHŸLLÈ
+Š”H
+Üš]XØ[\]İ\Ü
+JŠˆ™]šY]ÈIÜÈ[™KQ˜XÚÙ[™
+Ü˜ËÛX›ÜËÜÜ[™WÙœXÜ˜ËÛX›ÜËÜ™Y™\™[˜ÙKÙÛİ™\›˜[˜ÙWÛ[™WÙœX
+H›ÜˆZ\İ\ÙHÙˆ[™H	ÜÈTH
+Y[\İ[˜ŞHÙ^\ËYÙ\Ë›ÛH^Xİ][ÛœËØİ[Y[šY]ÜÊKˆ™\Üš[™[™ÜÈÈNÈÛ‰İY]IÜÈœ˜[˜Ú›Û™H
+Š‘Ó‘JŠˆ™˜YL
+›ÛİXØ]\ÙYHL™H[™ÎÈSÑQ–H›İ™[˜[˜ÙH’Èš^Y[™K\ÚYH[ˆLŠHš[™[™ÜÈ\İ[ˆ[İ\ˆİ]\ËÜˆ››Èš[™[™ÜÈˆŸLLHˆØ\Ë™[ØÚ]WØXİ[Ûœ×Ü\—Úİ\˜
+IÜÈ™\]Y\İ
+H›Û™H
+Š‘Ó‘JŠˆ
+LÊHIÜÈ™[ØÚ]H\İÈ\ÜÈÛˆ[™HŸLLˆˆQ‹LHŒKŒKŒKLˆ
+Q‹LHXØÙ\Y
+H“ĞÒÑQ8 %ŸLMˆÙY\HØ[\‹\İ\YY[]Wİ\XØ[]WÚYÛˆ\]WÚ][WÙØØ™XÙZ\ÈÚ[ˆ[]Wİ\H8¢"ÜØÛÜ™XØ\™™XÛÛ[Y[™][ÛŸH
+ÈËLLˆ›İJKÛÈØÛÜ™XØ\™ÚY\È]Y\XX›H[ˆHYÙ\ˆ›Û™H
+Š‘Ó‘JŠˆ˜ŒLÍXÉÜÈ]Y]X]Ú\ÈH[]WÚY\ÈÙ[\È^[ØYÚ\ÚŸLMHH™]\ØX›H›Ûİİ˜\[\ˆÛÈ\İÈ[™ÛÜšÙ\œÈÛÛ›™Xİ\ÈH™X[X›Ü×Ù›ÜØÙÚ[ˆ
+›ÛKXÛÜœ™Xİ›ÜÈØÚ[XHİÛ™YH]İÛˆŞ\ÈŠKÚXÚ›İ™Y[ˆLLËˆHYÜÈ][ˆ]È[™KQ\İÈ›Û™H
+Š‘Ó‘JŠˆLY˜
+X›Ü×Üİ]Kœ›İš\Ú[Û‹œ›İš\Ú[Û˜
+NÈHÈYÜ
+KLH™[XZ[š[™ÊHIÜÈ[™KQL™H\ÜÙ\È\ÈX›Ü×Ù›ÜØÚ]›Èİ\\\Ù\ˆŸLÈH™\Ü[™ÈšY]ÜÈ
+\[[™HH[™KÓ˜XÚÛÙË\›İ˜[][˜ŞJHİ™\ˆHQ‹LLÚZ[È™\İÜ™Hš[H[ˆ™\šYWØÚZ[˜LH
+Š‘Ó‘JŠˆØMNYLØØ
+šY]ÜÈ
+ÈH™\İÜ™Hš[ÛˆHMÎK\™XÙZ\ÚZ[ŠHH\ÜÙ\ÎÈšY]ÜÈØİ[Y[Y‚ŸLˆHİ]HPÔÙ\™\ˆ˜\œ›İÈ[[ÛÛÈİ™\ˆ	ÜÈÔSTH
+Ü™X]Kİ˜[œÚ][Û‹Ü]Ú][K›ÜÜÙHXİ[Û‹™XÛÜ™\›İ˜[Ûİ]ÛÛYK›İ™[˜[˜ÙJH\ÈH
+Š›Û›JŠˆYÙ[Üš]H]
+Q‹LÊKˆY[]H[™ØÛÜH\™HØ\œšYY[È›İ™[˜[˜ÙKˆ›È˜]ÈÔSÛÛL
+Š‘Ó‘JŠˆL˜ÌMX
+İ[ÈPÔÈYÙ[›Ùš[H\È›È\›İ˜[Ù^Xİ]KÜÜ[™ÔS’PÈÛÛÎÈŒM
+HPÔÛÛ\İÎÈ[ˆYÙ[›ÛHÚ]İ]HPÔØ[››İÜš]NÈ]™\HÛÛØ[\È™XÙZ\YŸLÈˆ\Y˜XİİÜ™HÈ”È
+ÚLMˆÛÛ[XY™\ÜÙY[œÙ\[Û›K]Ø\Y˜XİÙY\ÈH[™^
+K™\İÜ™KYš[]Ø\™H›Û™H
+Š‘Ó‘JŠˆŒMXNŒX›İ[™]š\
+È[\\ˆ]Xİ[Ûˆ\İÈŸLˆİ™XİÜˆ™XZ[X›H[™^
+Îˆ›Ü8¡¤ˆ™XZ[8¡¤ˆY[XØ[]Y\H™\İ[ÊH›Û™H
+Š‘Ó‘JŠˆÎ˜
+İ™XİÜˆ[ˆX›Ü×Ù^È›Ûİİ˜\™YYÈİ\\\Ù\ŠHÈ\ÜÙ\ÈŸLHˆĞ˜XÚÔ™\İUˆÙ™‹X›ŞÜ\˜]ÜˆÙ™‹X›Ş\™Ù]“ĞÒÑQ
+Ü\˜]Üˆ[™œ˜JH™\İÜ™Hš[œ›ÛHÙ™‹X›Ş‚ˆÈÈÈ[™HˆYÙ[ˆ
+\ØÛİ™\JBŸQšH\ÚÈ\Èİ]\ÈYÙ[XØÙ\[˜ÙHŸKK_KK_KK_KK_KK_KK_KK_Ÿ‹LHHÛİ\˜ÙPY\\˜Ø›Ü›X[^™\˜ØY\\˜YØZ[œİX›ÜËš[\™˜XÙ\Ø
+
+Kˆ˜]×Ü™Y˜H\ÚÙˆİÜ™Y˜]È]\Ëˆ™]Ú™\İ[™\œ›Ü˜Øœ™Y^™WÜ™\]Y\İØÛÈÈHÚYHÚ[›™[›Û™H
+Š‘Ó‘JŠˆØÎYMXˆ‰ÜÈš^\™\È[ˆ›İYÚX›ÜØÛÛ\Û™[Ø[ˆ‰ÜÈ\İÎÈY[]KYš\œİY\Ÿ‹LˆHQ‹LLˆYË˜Ø[›ÛšXØ[ÚœÛÛ˜8¡¤ˆ™Y™\™[˜ÙHX›Ü×ØØ[›ÛšXØ[›Û™H
+Š‘Ó‘JŠˆØY™YXˆÛÛËÚ[\›ÜØÚXÚËœX›İÈˆHLÌLŸ‹LÈˆÜ™Y[X[Yœ™YHÛİ\˜Ù\ÎˆÔĞH]Xİ[ÛœÈTK[ˆ˜\Ú›İ[™Ë\Èš^\™KYš\œİY\\œË™XY[Û›KÛ›İ\š[™ÈQ‹L‹LŒˆ‹LH
+Š‘Ó‘JŠˆ™MÍ˜ˆš^\™H\İÎÈ›È]™HØ[ÈÚ]İ]^XÚ][˜X›[Y[Ÿ‹LˆÛİ\˜ÙKZX[8¡¤ˆˆœ™Y^™H™\]Y\İÚ\KYÜ™YYÚ]H
+\ØÛİ™\KœÛİ\˜ÙKÜ˜Ï‹œ™XY
+HKLH
+Š‘Ó‘JŠˆLÍM˜Ø
+H[ˆØNM
+Hˆ
 
-> **Pause CANCELLED by the owner at 05:30Z (ARYA-20261010-0530); Agent 01 applied 0528 at 05:31Z by mistake, undid it at ~05:35Z.** Queue restored; see `docs/status/PAUSED_BY_OWNER.md`.
+ÌJHHÚ\™Yš^\™H›İ[™\È\İYØZ[œİ‚Ÿ‹LHHL‹LNˆØZÙKY]™[›ÙXÙ\‹ˆÛˆ™K\ÚYÚ[™È
+šXÙHÚ[™ÙK™]È[™›ÊHÜˆ[ˆ]Xİ[Ûˆ™X\š[™È]È[™Ø[X›ÜËÛÜšÙ›İÜË››İYWÙ]™[
+][WÚYÚ[™]šY[˜ÙJXÚ\™HÚ[™8¢"šXÙWØÚ[™ÙXØ]Xİ[Û—Ù[™[™ØØ™]×Ú[™›Ø
+Yš[™YHKL
+Kˆ™XÛÜ™XXÚ]™[	ÜÈ›İ™[˜[˜ÙHKL
+THX›\ÚY\È\Ú
+H
+Š‘Ó‘JŠˆMÎXX˜
+[]™\—İØZÙWÙ]™[ØÈKL[œÈ]Y\ˆ\ØÛİ™\ŠHˆHÓÚ]ØZÙWÛÛ\šXÙWØÚ[™ÙXØZÙ\Èœ›ÛHHˆš^\™H™K\ÚYÚ[™ÎÈ]™]™\ˆ^Xİ]\ÈŸ‹LˆˆL‹LˆSPT[\[™Ù\İÜˆ
+Y\ˆŠKš^\™KYš\œİ›È]™HXZ[›ŞÚ]İ]^XÚ][˜X›[Y[›Û™H
+Š‘Ó‘JŠˆ™NY
+™XY[Û›HSPTÒSKXÚXÚÙY
+Hˆš^\™H[XZ[È8¡¤ˆ˜]Ó\İ[™ÎÈ›È™]ÛÜšÈ[ˆ\İÈŸ‹LÈˆL‹LÎˆĞSK™ÛİˆY\\ˆ
+Ù\šXÙH[™HÈÛİˆÛÛ˜XİÊKš^\™KYš\œİ›Û™H
+Š‘Ó‘JŠˆÌ˜ÌMØˆš^\™H\İÈŸ‹LˆL‹MˆP˜^Hœ›İÜÙH
+˜\ÚÚ[™ÊˆÛÛ\È›ÜˆÉÜÈ]šY[˜ÙH[™H
+X™[YTÒÒS‘Ë™]™\ˆÓÓ
+H›Û™H
+Š‘Ó‘JŠˆ™LL˜
+\ÚÚ[™Ë[Û›H]šY[˜ÙHÚ]™\ÈH™[˜ÙYS‘‘Tˆ\İ[X]NÈ™]™\ˆQTÊHˆ
 
-## Critical path
-`G-04` (07: release-candidate run on lanes D/E) + `A-02` (01: release gate) â†’ wave-two release candidate. A-01's remaining A1â€“A10 parity on lane D runs in parallel.
+ÌÊHÉÜÈ\İ[X]ÜˆÛÛœİ[Y\È[HÚ]HšYÚ˜\Ú\ÈŸ‹LLH\ØÛİ™\HXØÙ\[˜ÙHŒx $Ñ\ÈH[›˜X›H\›™\ÜÎˆŒH]™\H][H\È8¢iLHÛİ\˜Ù\Ö×XÚ]˜]×Ü™Y˜ÈŒˆ\XØ]H˜]HY\ˆY\ÛˆHËY^Hš^\™HÛÜœ\È
+\™Ù]‰JNÈŒÈ™\X]YËÍH8¡¤ˆˆœ™Y^™H™\]Y\İÈ›ÈÛÛXİÜˆİXÚ\ÈHË[›İX]]ÛX]HÛİ\˜ÙH›Û™H
+Š‘Ó‘JŠˆMÎY
+Œx $ÑTÔÈÛˆHŞ[]XÈËY^HÛÜœ\ÎÈŒˆZ\ÜÙYY\Œ	JHˆ\›™\ÜÈÜ™Y[ÈŒˆ˜]H™\ÜYŸ‹LLHˆL‹Mˆ[XYÙH\˜Ù\X[\Ú[™È›Üˆ™[\İÈ[™İÈ™K]\ØYÈ
+š^\™H[XYÙ\Ë›È™]ÛÜšÊH›Û™H
+Š‘Ó‘JŠˆÍŒÍÎX
+\Úˆ˜[ÙHY\™Ù\ÈÚ]İÜÊHˆH™[\İ[XšYİZ]H[ˆ‹LL™\ÛÛ™\ÈÚ]›È˜[ÙHY\™Ù\ÈŸ‹LLˆ
+Š”
+ŠˆL‹MÎˆ]™HÛ[ÚÙH[œÈ™Z[™]™H›YÜÈ
+š\œİ]ˆ^\İ[™ÈÛİ‘X[ËÔX›XÔİ\œ\È[\Y[XZ[[™Ù\İ[ÛÈ™K\™XÛÜ™™X[š^\™\ÎÈİ\H]™HŒˆØ[\JKˆ›ÙXİ\™Xİ[Ûˆ\È[™XYHÚ]™[ÈÈ›İ™KX\ÚÈ]ˆP˜^HX\šÙ]XÙH[œÚYÚÈ™[XZ[œÈÜ[Û˜[ÜÙ\\˜]H[™\ˆRPÒQSÎˆ^\İ[™ÈÒSKX]Ø\™HSPTXØÛİ[
+ÈYXØ]Y[\Ë[Û›H›Û\ˆ˜[YYHİÛ™\‹ÛÜ\˜]ÜÈÙ[Z[™HÛİ\˜ÙH[\È›İ]Y\™NÈ\\\ÜİÛÜ™ÜÙXÜ™][œİ[Yİ]ÚYHÚ]XÈ\œÚ\İ[™XY[Û›HXØÙ\ÜÈÛÛ™š\›YYˆ[H™]È›İšY\‹ØXØÛİ[Üˆ^\›˜[İXœØÜš\[ÛˆÚ[™ÙH™YYÈÙ\\˜]H]]Üš^˜][Û‹ˆ“ĞÒÑQˆ›İ[™YKYX[ˆÛ™H™XY[Û›H[\[XZ[›ŞÛ[ÚÙNÈ™\šYHÒSH[™ÙY[˜[˜Ú[™ÙYÈš]˜XŞK\ØY™H™XÙZ\ˆ^Xİ›İ[™\NˆØÜËÜ™XÙZ\ËÌŒ‹LLLLK\ÛXÚËXŒL‹XXØÙ\ÜËZY[]K\™XÛÛ˜Ú[X][Û‹›Yˆ
+Š”™\š[Üš]^™YˆÈHİÛ™\ˆŒ‹LLLLHMŒÌˆÑ
+\ØX›HØØ[X[È\ÈH™^›ÙXİØš™Xİ]™JKˆ™XY[™\ÜÈÚXÚÙYŒ‹LLLLUŒNŒÍVˆ[›İ\ˆXZ[›Ş™\™\]Z\Ú]\ÈXœÙ[Ûˆ\ÈÜİÈ^Xİ‘QQ[™HX\šÙ]XÙHÚ\š[™ÈÜXÈ
+š[\È
+ÈXØÙ\[˜ÙJH\™H[ˆØÜËÚ[™Ù™‹ĞŒL—ÓĞĞSÔÓÕTÑWÕÒT’S‘×ÔÔPË›YˆÜ˜ZYÜÛ\İİ^\È“ÕÓÓ“‘PÕQˆİ[HÛÜ™[™ÈÛÜœ™XİYˆ›ÙXİ\™Xİ[Ûˆ\ÈÚ]™[ÈRPÒQSÎÛÛ˜Ù\›œÈÛ›HÜ[Û˜[P˜^H[œÚYÚË›İ\È]ŠŠˆ
+Š”ÔUŒ‹LLLLUŒŒŒÎŒˆH[\[Y[X›HX\šÙ]XÙHÚ\š[™È\È[YÚX›HÙ\\˜][H\È‹LMH
+[™H‹‘PQK›ÈXZ[›Ş™YYY
+Kˆ\È‹LLˆ›İÈ›İÈÛİ™\œÈÓ“H]™HXØÙ\[˜ÙH
+H™X[XØÙ\ÜÚX›HÛİ\˜ÙY\İ[™È›İYÚHXZ[›Ş
+H[™İ^\È“ĞÒÑQÛˆH›İ\ˆXZ[›Ş™\™\]Z\Ú]\ËŠŠˆ
+Š•TUHŒ‹LLLLUŒÎŒÎŒÌˆHÛİYİ\\š\ÛÜˆÜ™X]YHÛXZ[X™[X[ÛšY™™\‹Ğ[\È[ˆHİÛ™\‰ÜÈ^\İ[™ÈÛXZ[
+XZ[›ŞÜ™Ø[š\Ø][ÛˆÛ›NÈY[]HÙ\İ]ÙˆÚ]XŠNÈHLY^HÙX\˜Ú›İ[™“ÈÛİ‘X[ËÔX›XÔİ\œ\È[\È\™Kˆ™[XZ[š[™È‘QQˆ
+JHÙ[Z[™HÛİ‘X[ËÔX›XÔİ\œ\ÈÛÛØ^KX\™XHØ]™Y\ÙX\˜Ú[\İXœØÜš\[ÛœÈ[]™\™YÈ]ÛXZ[[™š[\™Y[ÈX[ÛšY™™\‹Ğ[\ÎÈ
+ŠHØØ[™XY[Û›HSPTXØÙ\ÜÎˆHÛXZ[\\ÜİÛÜ™[œİ[YÛˆ\ÈÜİİ]ÚYHÚ]Xˆ\ÈP“Ô×ÒSPTÔTÔÕÓÔ‘
+Œ
+H\ÈÜİİ\Ù\‹Ù›Û\ˆÙ][™ÜÈ
+HÛİYÛXZ[ÛÛ›™Xİ[Ûˆ\È›İ™]\ØX›HHHØØ[\
+NÈ
+ÊHÛ™H›İ[™Y™XY[Û›HÛ[ÚÙKˆ›È™]È›İšY\ˆ™YYYŠŠˆ
+Š“ÕÓ‘TˆÓÔ”‘PÕSÓˆŒ‹LLLLHŒNŒÑˆÜ˜ZYÜÛ\İÙ™šXÚX[Ø]™Y\ÙX\˜Ú[\K[XZ[È\™HHİ\ÜYš\œİ\\H›İ]K\İ[˜İœ›ÛH›ÚXš]Y\™XİØÜ˜\[™Ëˆš[X\H[ÛÛ™š\›\ÈØ]™YÙX\˜Ú\È[™]]ÛX]YK[XZ[[\ÈÚ]\ÈŒ™\İ[Ëˆ™]\ÙH‹L‹Ğ‹LLˆ™XY[Û›HK[XZ[[™Ù\İ[ÛÈYš^\™KÜ\œÙ\‹ÙY\Üİ[KÕRHÛÜšÈY\ˆ‹LMHXØÙ\[˜ÙKˆ]™HÓÓ“‘PÕQ™\]Z\™\ÈÛ™HÙ[Z[™HÜ˜ZYÜÛ\İYÙ[™\˜]Y[\[ˆHYXØ]Y\Ù\‹X]]Üš^™Y›Û\‹[˜Ú[™ÙYÙY[ˆİ]K[™HØ\™Ü[š[™ÈHÜšYÚ[˜[\İ[™Ëˆ›È\™XİÜ˜ZYÜÛ\İ™]ÚŠŠˆŸ‹Lˆ
+Š”
+Šˆ
+Š“ÕÓ‘TˆŒ‹LLLLH
+XZ\ÛÛˆŒ‹LLLLK[İÛ™\‹\]ÛÛÛ^KZXšY[]™K\Ûİ\˜ÙJNˆÛÛÛ^H]Xİ[Û™Y\œÈ™X[™XY[Û›HÛİ\˜ÙKUPÕSÓ‹QU‘S•]™[™]\Ú[™ÈH‹LŒÈÙX[H
+X›Ü×Ù\ØÛİ™\KØ]Xİ[ÛœËœX]Xİ[Û“İÑšY[Ğ]Xİ[Û’İ\ÙKS’Ó“ÕÓˆÛÛ™[[ÛŠNÈÓ‘H[™HˆÛÜšÙ\È›ÈÛÛ\][™È\˜Ú]Xİ\™KŠŠˆÛİ\˜ÙH›İ[™\H
+PÕYÙ[HŒ‹LLLLUŒÎLÎŒÌŠNˆİ[]™[]H
+İ[X™\œËİ\œ™[šYšYÛİ[İ[XYÙ\ÊH]™\ÈÛ›HÛˆÛÛÛ^X]Xİ[Û™Y\œËšXšY˜ÛÛX[™PšY	ÜÈ\›\ÈÙˆ\ÙH
+\İ\]YŒŒ‹LLKLŒ‹ÙXİ[ÛˆJH›ÚXš]ØÜ˜\[™Ë]H^˜Xİ[Û‹›Ø›İËÙ]K[Z[š[™ÈÛÛËYÙÜ™YØ][Ûˆ›ÜˆÛÛ[Y\˜ÚX[\œÜÙ\È[™ØÜ™Y[œÚİÈÙˆ]Xİ[Ûˆ[™›Ü›X][Ûˆ‘U‘Tˆ™]Ú\œÙHÜˆØÜ™Y[œÚİ[HXšY˜ÛÛHT“ÈİÜ™HHPšYØ][ÙÈ[šÈÛ›H\ÈH[X[ˆ	İšY]ËØšYÛˆPšY	È[šËˆ]Xİ[Û‹Y]™[]H]™\ÈÛˆÛÛÛ^IÜÈİÛˆÚ]HÛÛÛ^X]Xİ[Û™Y\œË˜ÛÛX
+›Ø›İËˆÛ›HİÜXYZ[‹È\Ø[İÙYÜ˜]ÛY[^HLÈ›È\›\ÈYÙH›İ[™
+KˆZ[Ü˜ËÛX›Ü×Ù\ØÛİ™\KØY\\œËİÛÛÛ^WÜÚ]KœXˆ\œÙHHİ\œ™[X]Xİ[ÛœÈYÙH[™XXÚ]Xİ[ÛˆYÙH[È]™[™XÛÜ™È
+]Xİ[Û™Y\‹]KØ[H\HK™ËˆÓ“S‘H’QS‘ÈÓ“K™YÚ[œ×Ø][™ÛÜÙ\×Ø]Ú][Y^›Û™KØØ][ÛˆY™\ÜË^Y\ˆ™[Z][K™]šY]È[YKØ]YÛÜHYÜËYÚYÚÈ^]Xİ[ÛˆYÙHT“PšYØ][ÙÈT“\È[šÈÛ›KØœÙ\™YØ]
+NÈİ[X™\‹İ\œ™[šYšYÛİ[[™İ[XYÙHİ^HS’Ó“ÕÓÈİX›HÛİ\˜ÙHQÈœ›ÛHH]Xİ[ÛˆYÙHÛYÈÛÈH™\X]\œÙHÙ\È›İ\XØ]KˆH]™H™]Ú]^\İÈ]\ÈÑ‘ˆHY˜][
+^XÚ]]™H›YÊKÙ[™È[ˆY[YZ[™È\Ù\‹PYÙ[ØZ]È]X\İLÈ™]ÙY[ˆ™\]Y\İË™]Ú\ÈÛ›HÛÛÛ^X]Xİ[Û™Y\œË˜ÛÛHYÙ\È[šÙYœ›ÛHHİ\œ™[X]Xİ[ÛœÈYÙK[™[™\È\œ›ÜœËİ[Y[İ]È\È[ˆÛ™\İÙ™›[™Hİ]\Ëˆ\İÈ\ÙHÓ“HH\˜Ú]™Y™X[™\ÜÛœÙ\ÈÛˆHÛÛÜ™[˜]Üˆœ˜[˜Ú]ØÜËÜ™XÙZ\ËØŒ‹]ÛÛÛ^KX\˜Ú]™KØ
+™XY[HÚ]Ú]ÚİÈÜšYÚ[‹Ü™\ÙX\˜ÚØYÙ[LKXÛÛÜ™[˜]Ü]˜ÈØÜX˜™YÈÜšYÚ[˜[ÚLMˆ[ˆÔ’QÒSSÔÒLM‹
+HÛÜYY[È[™Hˆ\İš^\™\Îˆ›İİ\œ™[]Xİ[ÛœÈ\œÙY
+’‹ˆœXÚÈ\İ]K\œ]š[HT‹[™ÈLÌLËÌˆŒHÑ^Y\ˆ™[Z][HL	NÈÉ’Ş\İ[\È\ÙHRK›Û™\Ø›Ü›ÈT‹[™ÈLÌŒKÌˆŒHÕ
+K™\X]\\œÙHY\S’Ó“ÕÓˆİšY[ËH\İ]HY\\ˆ™Y\Ù\È[HXšY˜ÛÛH™]ÚÜ˜]ÛY[^H[™›Ü˜ÙY
+˜ZÙHÛØÚÊK]™H›YÈÙ™ˆHY˜][ˆ›È™]ÛÜšÈ[œÚYHHÛÜšÙ\ˆ
+ÛÜšÙ\œÈ]™H›Û™JNÈYÙ[H[œÈH›İ[™Y]™HÛ[ÚÙHY\ˆ™\šYšXØ][Û‹ˆ
+Š”‘U’QUÈ’VTÈ‘TURT‘Q
+YÙ[H™]šY]ÈÙˆLÌ™Œ˜Ø™YXØŒ‹LLLLUŒÎNMÖÈ\İÈM‹Ì[™[™HÍLËÌ\ÜË]
+Nˆ
+JHTÑT—ĞQÑS•]\İ“ÕÛÛZ[ˆ[H\œÛÛ˜[K[XZ[Y™\ÜÈÜˆÛÛXİY[]Nˆ\ÙHX[ÛšY™™\›İÌKŒ
+™XY[Û›NÈ]Xİ[Ûˆ]™[ÈÛ›JXÚ]›ÈXZ[Ë[™YH\İ\ÜÙ\[™È›È	Ğ	È[ˆH\Ù\‹PYÙ[È
+ŠH›Ü›X[^™Xˆ™]™\ˆY˜][^Y\—Ü™[Z][WÜİÈˆ[˜ÛYH][ˆšXÙXÛ›HÚ[ˆHÛİ\˜ÙHİ]\È]È
+ÊH›Ü›X[^™XˆÛÛ™][Û˜]\İ™H[šÛ›İÛ˜
+HÛİ\˜ÙHÙ\È›İİ]HÛÛ™][ÛŠK›İ\ÙYÈ
 
-## Tasks
+H›Ü›X[^™XˆÛZ]šXÙK\XÚ[ˆ›È[[İ[\ÈÛ›İÛˆ
+HÛÛ˜Xİ[[H\È›È[šÛ›İÛˆ˜[YH[™HšY[\ÈÜ[Û˜[
+NÈ™]™\ˆÛZ[Hİ\[™×ØšYÚ]İ][ˆ[[İ[ˆY›Øİ\ÙY\İÈ›Üˆ
+ŠKJ
+HÚ]H\˜Ú]™Y’‹ˆœXÚÈYÙH
+™[Z][HL™\Ù[
+H[™HYÙHÚ]İ]H™[Z][H
+XœÙ[›İ
+KˆÙY\]™\][™È[ÙH[˜Ú[™ÙYŠŠˆ‹LŒÈÙX[H
+Û™JHÓ‘H8 %]Xİ[Û‹QU‘S•Ûİ\˜ÙH]™K]™\šYšYYŒ‹LLLL•ŒŒÌÖˆ
+[™HˆXÌXXXMXš^\È™XMÙXÈNÌ›Øİ\ÙYÍMKÌ[™NÈ]™HÛ[ÚÙHÈ™\]Y\İËXšYˆ™X[]™[È[˜Ûˆ’‹ˆœXÚÈ\œ]š[HÛÜÙ\ÈŒ‹LLLLÈNŒÑŒKŒˆZK™[Z][HL	NÈ™XÙZ\ØÜËÜ™XÙZ\ËÌŒ‹LLLL‹XŒ‹]ÛÛÛ^K\Ûİ\˜ÙK]™\šYšXØ][Û‹›Y
+KˆÕ]™[
+İÍšYÊH“ÕÛ™Nˆ‘QQÛÛÛ^H™YYÜˆPšYÜš][ˆ\›Z\ÜÚ[Û‹ˆÛX\šÙ]Ú\š[™ÈH‹LMˆˆ^XİÛX[ˆÛÛ[Z]Y\Y˜XİÛˆ[™HˆÚ]\İÈ\ÜÚ[™È
+™\Ü[X™\œÊNÈ›ÈXšY˜ÛÛH™\]Y\İ[]Ú\™H[ˆÛÙHÜˆ\İÎÈš]˜XŞK\ØY™Hš^\™\ÎÈ™XÙZ\ˆYÙ[H[ˆ[™\[™[H™]šY]ÜË[œÈH\İÈœ›ÛHHÛX[ˆÚXÚÛİ][™[œÈÓ‘H›İ[™Y]™HÛ[ÚÙHYØZ[œİÛÛÛ^X]Xİ[Û™Y\œË˜ÛÛH
+™XÙZ\ˆ›İ]Kİ]\Ë[Y\İ[\T“Ë\œÙYšY[ÊKˆ‘V›İ[™\H
+Ù\\˜]H›İË›İ\ÈÛ™JNˆ[™HˆÚ\™\È\ÙH™X[]™[Ø\™È[ÈÛX\šÙ]Ú]Ûİ\˜ÙHİ]\Ë\İ[˜ÙKØ]YÛÜKÙ^]ÛÜ™šXÙH[™ÙX\˜Ú›İË™\šYšYY[ˆÛ]YHÚ›ÛYH\ÚİÜ
+Û[Øš[KˆÕSU‘SXØÙ\[˜ÙH
+İÍİ\œ™[šYšYÛİ[
+H\È“Õ™XXÚX›H[™\ˆPšY	ÜÈ\›\Îˆ‘QQHÜš][ˆ\›Z\ÜÚ[Û‹ÛXÙ[œÙHœ›ÛHPšY
+ˆ™[\™\ËÊHÜˆHÛÛÛ^K\›İšYY]H™YYˆŸ‹LMˆ
+Š”
+Šˆ
+Š‹Lˆ‘V“ÕS‘T–H
+İÛ™\ˆÛÛÛ^HÛİ\˜ÙJNˆÓ‘H[™HˆÛÜšÙ\ˆÚ\™\ÈH‘PSÛÛÛ^H]Xİ[Ûˆ]™[È[ÈÛX\šÙ]ŠŠˆ
+JH[ˆ[™HˆXÌXXXMXH^\İ[™ÈØØ[Ø^H
+Ú]\˜Ú]™HXÌXXXMX[ÈÛÛËÙ\ØËMXÌXXXMX\[œİ[K[›ËY\È[ÈH[™Hˆ™[È›È™]ÛÜšÊKˆ
+ŠHÛÛËÜ™Yœ™\ÚİÛÛÛ^WØØXÚKœXˆ[œÈÛÛÛ^TÚ]PY\\Š]™OUYJXÓ“HÚ[ˆ[›ÚÙY^XÚ]HÚ]K[]™X[™Üš]\È˜\‹ØØXÚKİÛÛÛ^KY]™[ËšœÛÛ˜
+™XÛÜ™È
+È\×ÛÙˆ
+È™\]Y\İÛİ[
+È\œ›ÜŠH]ÛZXØ[NÈÚ]İ]K[]™X]™Y\Ù\ËˆHRH™]™\ˆ™]Ú\ÈÛˆYÙHØYˆ
+ÊHÜ\˜]Ü—İZKÛX\šÙ]ÜÛİ\˜Ù\ËœXˆHÛÛÛ^XÛİ\˜ÙH[ˆH^\İ[™ÈÛİ\˜ÙHÙX[H™XY[™È]ØXÚH
+[ˆP“Ô×ÕÓÓÓVWĞĞPÒX
+K™]\›š[™ÈHØ[YHØ\™Ú\Nˆ]Xİ[Û™Y\‹]KÛÜÙ\×Ø]ØØ][Û‹\İ[˜ÙHœ›ÛHH\Ù\‰ÜÈÜšYÚ[‹^Y\ˆ™[Z][HÚ[ˆİ]YØ]YÛÜHYÜËHÛÛÛ^H]Xİ[ÛˆYÙH\ÈHÜšYÚ[˜[[šÈ[™HPšYØ][ÙÈ\ÈHÙ\\˜]H	İšY]È[™šYÛˆPšY	È[šÎÈİ[X™\ˆÈİ\œ™[šYÈšYÛİ[ÚİÛˆ\ÈS’Ó“ÕÓÈØ\™Ú[™	Ø]Xİ[Ûˆ]™[	È
+›İHİ
+NÈœ™\Ú™\ÜÈœ›ÛH\×ÛÙˆÚ]H^\İ[™ÈÕSH[NÈZ\ÜÚ[™Ëİ[œ™XYX›HØXÚHHÛ™\İÙ™›[™Hİ]\ÎÈ\È\ÈH‘PSÛİ\˜ÙHÛÈ]\ÈX™[YÛÛ›™XİY
+ØXÚYš[JK™]™\ˆ’VT‘Kˆ
 
-### Lane A: Agent 01 (core / integration)
-| ID | Pri | Task | Deps | Status | Agent | Acceptance |
-|---|---|---|---|---|---|---|
-| A-00 | P0 | F-13/F-14 rulings: ADR-0010, reference implementations (py and sql), vectors, interop tool, spine conformance | none | **DONE** | 01 | 142 tests pass; vectors pass in Python and in PostgreSQL 16 |
-| A-01 | P0 | Port `ledger.py`/`spine.py` onto 04's `StateStore` (R1/R2). **Phase 1, now:** state adapter against 04's existing SQL API @ `7f0649a`. **Phase 2:** on 0005 | D-01, D-02 for phase 2 | **DONE**: lane D lifecycle with stand-in and lane E gateways; A1-A10 parity proven by 07's RC (105/0) and the gate's ACTION path + strict AT-1 now run as the real non-superuser `mbos_dbos` login (asserted in RESULT) | 01 | A1â€“A10 pass unchanged on 04's schema |
-| A-02 | P1 | Release gate `tools/release_gate.sh` (pytest + interop_check + `mbos audit` + contract validator), plus `docs/status/RELEASE_GATE.md` with results | none | **DONE**: release gate PASS 6/6 incl. stale-install check | 01 | One command, non-zero on any failure, results committed |
-| A-03 | P1 | Wire 05 `ActionGateway`/`PanicState`/`policy.decide` behind `Gateway`/`KillSwitch`/`PDP`. The gateway owns action-status receipts (R4) | E-02 | **DONE** (this push): 05's real ActionGateway behind the spine on lane D (`gateway_mode=lane_e`); R4 holds: exactly one ACTION_EXECUTING/EXECUTED by the gateway, the spine moves only the Item; chain verified in DB + reference | 01 | A5 and A9 pass with 05's real gateway |
-| A-04 | P2 | Wire 02's B adapter + Deduper into `Components`; end-to-end fixture discovery â†’ RESEARCHING | B-01 | **DONE** (by lane 02's own deliverables, verified in its handoff): `mbos_discovery.spine.discovery_components` (adapters + SpineNormalizer + SpineDeduper) feeds `mbos.runtime.Components`; B-05 wake events on the real DBOS workflow; B-13/B-14 spine-path dedup and photos; B-19 `mbos-discover run` covers every source. Live sources wait on B-12 (credentials, Michael #8) | 01 | Integration test: 02 fixtures through the DBOS workflow |
-| A-05 | P2 | Wire 03's RESEARCH producer as a workflow step (RESEARCHING â†’ SCORED) | C-01 | **DONE** (this push): `Researcher` interface + `EconomicsResearcher`; lane-B items through lane C's research_step in the workflow | 01 | A real discovered Item advances past RESEARCHING in a test |
-| A-07 | P1 | `notify_decision(item_id, approval_id)` wake helper for the UI and CLI (06 P-06-1) | none | **DONE** (this push) | 01 | `mbos.workflows.notify_decision` exists; F-01 uses it |
-| A-08 | P2 | `_approval_gate` acts on `wake_on` = `new_info` / `price_change` / `auction_ending` via a message kind sent by lanes B/C (06 P-06-2) | none | **DONE** (this push): `mbos.workflows.notify_event(item_id, event, summary, evidence_provenance_id)` | 01 | Test: a HOLD with `wake_on=price_change` wakes on a price-change message, never executes |
-| A-09 | P1 | Ruling R12: the Item edge table is lane D's (every item passes RESEARCHING; a YES on HELD re-presents first; LEARNED is terminal; follow-up edge ACTEDâ†’AWAITING_APPROVAL). The spine is aligned (migration 0004) | none | **DONE** (this push) | 01 | Parity test against 04's live DB passes |
-| A-12 | P2 | R13 routing: PASS with `pass_on_priors` â†’ RESEARCHING, not ARCHIVED | C-05 | **DONE** (this push): PASS with `scorecard.pass_on_priors` -> RESEARCHING on both spines; evidence-backed PASS still archives; 2 tests | 01 | Test with 03's flag |
-| A-13 | P2 | Wire 06's `CommsActionPlanner` (F-05) and comms dry-run `Effector` (F-06) into `Components`; behind 05's gateway once A-03 lands | F-05, F-06 | **DONE** (this push): payload extension merged before hashing; effector `blocked` â†’ ACTION_FAILED; comms checks in `details` | 01 | End-to-end dry-run comms receipts graded by 06's audit |
-| A-14 | P2 | Deduper seam gap (02): `Deduper.is_duplicate` also receives the candidate's source sighting, so same-source look-alikes are not merged | none | **DONE** (interface): Deduper gets `context` (source/fetch + `match_hints`); 02 implements the rules (B-13) | 01 | Test: two same-source look-alikes stay separate |
-| A-15 | P1 | P-06-8: public `spine.propose_followup(conn, item_id, proposed_action)` plus a gate workflow for follow-up requests on an existing item (R12 `ACTEDâ†’AWAITING_APPROVAL`) | none | **DONE** (this push): `workflows.propose_followup(item_id, pa)` (both backends): same policy path (PDP, `proposer_for`, step-up); the item goes ACTEDâ†’AWAITING_APPROVAL only if there is something to decide; the approval gate runs as its own workflow on the `followups` queue; proven on the reference backend and on lane D + lane E's real gateway (2 requests, 2 ACTION_EXECUTED, 2 effector calls) | 01 | Test: follow-up on an ACTED item â†’ new areq â†’ approval gate â†’ dry-run act |
-| A-16 | P1 | Gapless receipt seq (06 finding): migration 0005; DB `verify_chain` checks contiguity; both verifiers agree after a rollback | none | **DONE** (this push) | 01 | A3 tests |
-| A-17 | P1 | 03 P-03-06 (SCORE_RECORDED `payload_hash`) + 07 P-07-8 (draft provenance: model/prompt or template renderer, cited by the request) on both backends | none | **DONE** (this push) | 01 | Tests in test_seams |
-| A-10 | P1 | Ship the contracts as package data so a non-editable install works without `MBOS_CONTRACTS_DIR` (07 P-07-1/F-16) | none | **DONE** (this push): contracts + operator profile packaged in the wheel from their single sources; clean-venv wheel test; missing profile raises (never guessed) | 01 | `pip install .` into a clean venv; the suite passes with no env var |
-| A-11 | P1 | ADR-0010 interop: `tools/interop_check.py` covers vectors, rejections and vendored-copy byte identity | none | **DONE** (this push) | 01 | All 6 Python lanes CONFORM (12:50) |
-| A-06 | P2 | ADR-0009 v1.1.0: collect lane acknowledgements, then decide | lane acks | **DONE**: ADR-0009 DEFERRED with rationale and revisit triggers | 01 | ADR-0009 ACCEPTED or amended; vectors and examples regenerated |
+HÛİ\˜ÙHÙ[XİÜˆØZ[œÈ	ÕÛÛÛ^H]Xİ[Û™Y\œÉÎÈ	Ğ[Ûİ\˜Ù\ÉÈY\™Ù\ÈÔĞH
+ÈÛÛÛ^H
 
-### Lane D: Agent 04 (state, CRITICAL PATH)
-| ID | Pri | Task | Deps | Status | Agent | Acceptance |
-|---|---|---|---|---|---|---|
-| D-01 | **P0** | Migration `0005`: `effector_calls` (UNIQUE idempotency_key, CHECK dry_run), PANIC/governance state table (R5), `llm_spend`, `artifacts` (sha256 content-addressed), all insert-only where they are ledgers. Answer: DBOS login role (`mbos_dbos`), and whether datasource checkpoints may live in schema `dbos` of the app DB | none | **DONE** @ `a0d1fbe` | 04 | Tables exist with the same invariants as 01's `0001_spine.sql`; answers in AGENT_STATUS |
-| D-02 | **P0** | **ADR-0010 conformance (supersedes the R3 wording in your claim).** Install `contracts/canonical/mbos_canonical.sql`. Set `NEW.canonical := mbos.cjson(mbos.receipt_canonical(NEW))` and `NEW.row_hash := 'sha256:'âˆ¥sha256(canonical)`; `verify_chain` uses the same formula. `mbos.payload_hash` â†’ `mbos.cjson_sha256`. Keep `utc_iso` (it already conforms) | none | **DONE** @ `a0d1fbe` (verified by 01's gate test) | 04 | All `vectors.json` pass in PostgreSQL; a chain exported from 04's DB verifies with `mbos_canonical.verify_chain` |
-| D-04 | **P0** | Fold Lane E's requirements into 0005 (binding input; ruling R5): `origin/research/agent-05-governance:docs/integration/05-requirements-for-04-migration-0005.md`. Covers: `panic_events` (append-only) + `panic_current` view + `panic_set()`, release by approver only, bootstrap FROZEN; `effector_calls` as the execution-claim table; action-status edges `approvedâ†’expired`, `approvedâ†’failed` and `executingâ†’cancelled_by_freeze`; budget caps per action, daily, global and velocity | D-01 (same migration) | **DONE** @ `14bd690` (0007: panic_set/current, claims, 3 gateway edges, budget modes) | 04 | 05's E-02 port runs on 0005 without workarounds |
-| D-05 | **P0** | R12 re-affirmed: remove `NORMALIZEDâ†’SCORED`, `HELDâ†’APPROVED` and `LEARNEDâ†’ARCHIVED/FAILED` (added in a0d1fbe to accommodate pre-R12 spine). Keep `ACTEDâ†’AWAITING_APPROVAL` | none | **DONE** @ `797a4e5` (parity gate verified by 01; now a hard pass) | 04 | 01's `test_r12_item_edges_match_lane_d` XPASSes (then flipped to a hard gate) |
-| D-13 | **P1 (critical-path support)** | Review 01's lane-D backend (`src/mbos/spine_d.py`, `src/mbos/reference/governance_lane_d.py`) for misuse of lane D's API (idempotency keys, edges, role expectations, document views). Report findings to 01; don't edit 01's branch | none | **DONE** @ `ffb9e24` (root-caused the e2e hang; MODIFY provenance FK fixed lane-side in 0012) | 04 | Findings list in your status, or "no findings" |
-| D-11 | P2 | `caps.velocity_actions_per_hour` (05's request) | none | **DONE** (0013) | 04 | 05's velocity tests pass on lane D |
-| D-12 | P2 | ADR-0009 v1.1.0 DDL | A-06 (ADR-0009 accepted) | BLOCKED | 04 | â€” |
-| D-14 | P2 | Keep a caller-supplied `entity_type`/`entity_id` on `update_item_doc` receipts when entity_type âˆˆ {scorecard, recommendation} (03 C-12 note), so `scorecard_id` is queryable in the ledger | none | **DONE** @ `80bb135` | 04 | 03's audit matches by entity_id as well as payload_hash |
-| D-15 | P1 | Reusable bootstrap helper so tests and workers connect as the real `mbos_dbos` login (role-correct, dbos schema owned by it, own sys DB), which 04 proved in D-13. 01 adopts it in its lane-D tests | none | **DONE** @ `a08dd9f` (`mbos_state.provision.provision`); 01 to adopt (A-01 remaining) | 04 | 01's lane-D e2e passes as `mbos_dbos` with no superuser |
-| D-03 | P1 | Reporting views (pipeline by lane, HOLD backlog, approval latency) over the ADR-0010 chain; restore drill D1 then `verify_chain` | D-01 | **DONE** @ `ca59e3c` (views + D1 restore drill on a 179-receipt chain) | 04 | D1 passes; views documented |
+È’VT‘H[\ÈÛ›HÛˆHİYÚ[™È›YÊKˆ\İ[˜ÙKØ]YÛÜKÙ^]ÛÜ™šXÙH
+]™[È]™H›ÈšXÙNˆHZ[‹ÛX^šXÙHš[\ˆ]\İ^ÛYHÜˆÛX\›HX\šÈ[KXÚYH[™Øİ[Y[
+H[™ÙX\˜Ú›İÈÛÜšËˆÜ˜ZYÜÛ\İÙP˜^KÑ˜XÙX›ÛÚÈİ^H“ÕÓÓ“‘PÕQˆÙY\‹LM‹‹‘‹LMH™Z]š[Ü‹ˆ›ÈXšY˜ÛÛH™\]Y\İ[]Ú\™Kˆ‹Lˆ
+Û™JHÓ‘H8 %U‘H˜˜ÎXØ
+İÛ™\‹\[ˆÛÛXš[™Y™[X\ÙHŒ‹LLLLˆNLVÈYÙ[HÛ]YKZ[‹PÚ›ÛYHÚXÚÈÛˆH]™HYÙHŒ‹LLLL•ŒÎŒMÈ™XÙZ\ØÜËÜ™XÙZ\ËÌŒ‹LLLL‹XÛÛXš[™Y\™[X\ÙK[]™K]™\šYšXØ][Û‹›Y
+KˆÜš[Üˆİ]\Ë]Y]ˆT•PS8 %ÕQÒS‘×ĞPĞÑTQ˜Ì˜XÍÌX
+ÛÙHÌYNL™˜ÈYÙ[HŒ‹LLLL•ŒÍÖˆ›Øİ\ÙYÎKÌ[™HLÌHÛ›İÛˆ›ZÙNÈ]™H™Yœ™\ÚÈ\ÛÛ]YİYÚ[™ÈÈ™\]Y\İÈˆ]™[ÎÈXY\ÜÈÚ›ÛYH\ÚİÜ
+Û[Øš[HTÔÈ[˜Ûˆ˜Y]\ËÙ^]ÛÜ™—Hˆ^XİÛX[ˆÛÛ[Z]Y\Y˜Xİ
+\OY˜[ÙJKˆÙ™›[™H\İÈÚ]H\˜Ú]™YÛÛÛ^HYÙ\È
+šXH[™Hˆš^\™\ÊH[™HØXÚHš[NˆØ\™Ú\H\š]KS’Ó“ÕÓˆİšY[Ëİ[KÛÙ™›[™Hİ]\Ë™Yœ™\Ú™Y\Ù\ÈÚ]İ]K[]™K›ÈXšY™\]Y\İš[\œÈ[˜ÛˆHØİ[Y[YšXÙH[KˆYÙ[H[ˆ[œÈÓ‘H™Yœ™\ÚİÛÛÛ^WØØXÚKœHK[]™XÛˆ\ÛÛ]YİYÚ[™È[™™\šYšY\È[ˆ
+ŠÛ]YH[ˆÚ›ÛYJŠˆ
+\ÚİÜ
+È[Øš[JH]™X[ÛÛÛ^HØ\™È
+’‹ˆœXÚË\œ]š[JH\X\ˆ[™™\ÜÛ™ÈÛİ\˜ÙK\İ[˜ÙKØ]YÛÜKÙ^]ÛÜ™šXÙH[™ÙX\˜Ú›İÎÈØÜ™Y[œÚİÈ™]šY]ÙYÈ^\İ[™ÈÚXÚÈÛÛÈİ[\ÜËˆ™[X\ÙHÛ›HšXHÛ™H›İ[™Y™[ØYÛÛ[X[™™XÛÜ™Y›ÜˆHİÛ™\ˆYˆYÙ[IÜÈ[ˆ\È[šYYˆŸ‹LMÈ
+Š”
+Šˆ
+Š‘’V‘TURT‘Q8 %“ÕÓ‘HQU
+YÙ[H™\›ÙXÙY][ˆH™X[œ›İÜÙ\ˆ]ML˜ØX
+NˆÍ™MLÎXÕSTÈTÈ•QÎÈH™K]™\šYšXØ][ÛˆÚ]İ]HÛÙHÚ[™ÙH\È“ÕXØÙ\X›H[™Ú[™H™Z™XİYˆ[ˆÜ\˜]Ü—İZKÛX\šÙ]ØšYËœXXİ
 
-| D-06 | P1 | State MCP server: narrow intent tools over 04's SQL API (create/transition/patch item, propose action, record approval/outcome, provenance) as the **only** agent write path (ADR-0003). Identity and scope are carried into provenance. No raw SQL tool | D-04 | **DONE** @ `012c141` (stdio MCP; agent profile has no approval/execute/spend/PANIC tools; R14) | 04 | MCP tool tests; an agent role without the MCP cannot write; every tool call is receipted |
-| D-07 | P2 | Artifact store to FS (sha256 content-addressed, insert-only, `put_artifact` keeps the index), restore-drill aware | none | **DONE** @ `215a861` | 04 | Round-trip + tamper detection tests |
-| D-08 | P2 | pgvector rebuildable index (D3: drop â†’ rebuild â†’ identical query results) | none | **DONE** @ `d668386` (pgvector in `mbos_ext`; bootstrap needs superuser) | 04 | D3 passes |
-| D-09 | P2 | pgBackRest PITR off-box | operator: off-box target | BLOCKED (operator infra) | 04 | Restore drill from off-box |
+XHİY\Èİ]ÈŒÚ\˜Xİ\œÈ
+ÎŒX
+NÈÛÛÛ^HYÈ\™HÍHÚ\˜Xİ\œÈ
+K™ËˆÛÛÛ^NZ‹XœXÚËY\İ]KZX]KY\]Z\Y[[XXÚ[™\KX]Xİ[Û‹\\œ]š[KX\šØ[œØ\Ø
+KÛÈHX\šÙYÛÛÛ^H]Xİ[Ûˆ\ÈİÜ™Y[™\ˆH[˜Ø]YY[™İ^\È[ˆHÙX\˜Ú™\İ[ËˆÚ[™ÙHH[Z]ÈŒ
+ÙY\HÚ\˜Xİ\ˆš[\ŠKYH™YÜ™\ÜÚ[Ûˆ\İÚ]]^XİÛ™ÈY
+X\šÙYOˆXœÙ[œ›ÛH™\İ[È[ˆ›İÙXİ[ÛœÈ[™™\Ù[[ˆHÚ[™İÎÈİÜ˜XÚÚ[™ÈOˆ˜XÚÈ[ˆ™\İ[ÊK[™XZÙHH]K[Û›HÛÜÙHÛİ[İÛˆÈŒÎNNNH[Y\šXØKĞÚXØYÛËˆÛÛ[Z]\ÈH‘UÈÛÛ[Z]ŠŠˆ
+Š“ÕÓ‘TˆŒ‹LLLLˆŒ^ˆ
+[ˆÚ]
+Nˆ	ÒHØ[^HŞ\İ[HÈÙYH]HšYÛˆ][™]Úİ[™HÛˆH]HÚ[™İÈØ]Ú[™ÈHšYÈH]™H[‹[™›İÚİÈYHÜÙH[ˆ^HÙX\˜Ú[™]\	ËˆSTSQS•ÈKMŒH
+]È[œÜXİ[Ûˆİ\\Èİ\\œÙYYH\ÈİÛ™\ˆ[œİXİ[ÛÈ™]\ÙH]È[\ÊHÛˆHLÌÈØ]Ú\İ]ÈÓ‘H[™HˆÛÜšÙ\‹Ù\šX[Q•Tˆ‹LM‹ŠŠˆ
+JH]™\H™\İ[Ø\™
+ÔĞHİÛÛÛ^H]™[[\\Ûİ\˜ÙHØ\™
+HÙ]È[ˆ	ÒHšYÛˆ\ÉÈÛÛ›ÛÈX\šÚ[™È\ÈÕÓ‘T‹T‘TÔ•Q
+™]™\ˆ[™™\œ™Yœ›ÛHØ]™K™]™\ˆHšYXÙ[Y[
+NÈÜ[Û˜[İÛ™\‹Y[\™YX^šYİ^\ÈİÛ™\‹[ØØ[
+™]™\ˆ[ˆÚ]XŠKˆ
+ŠHHÛÛ\Xİ	Ó^HšYÉÈÚ[™İÈÛˆÛX\šÙ]
+ÚYX˜\ˆÜˆ[›™Yİš\\ÚİÜ[™[Øš[JH\İÈ˜XÚÙY][\Îˆ]KÛİ\˜ÙKÛÜÙ\×Ø]Ú]HÛİ[İÛ‹İ\œ™[šY[™šYÛİ[ÒSˆHÛİ\˜ÙH›İšY\È[H
+ÔĞHØXÚNÈS’Ó“ÕÓˆİ\Ú\ÙJKœ™\Ú™\ÜËÜšYÚ[˜[[šÈ[™H	ÜİÜ˜XÚÚ[™ÉÈÛÛ›ÛÈÛÜÚ[™Ë\ÛÛÛˆ][\Èš\œİÈ]İ^\Èš\ÚX›H™YØ\™\ÜÈÙˆÙX\˜Úš[\œË˜Y]\ÈÜˆÛİ\˜ÙKˆ
+ÊH˜XÚÙY][\È\™HVÓQQœ›ÛHHÙX\˜Ú[™]\
+Ø[YH\œÚ\İ[˜ÙH\ÈH^\İ[™ÈYH\İ[ˆX\šÙ]Ü™YœØ]HÙ\\˜]H\İ[™Hš\ÚX›HÛİ[İXÚ\È	Óˆ[ˆ^HšYÉÊNÈ[‹]˜XÚÚ[™È™]\›œÈ[Kˆ
 
-### Lane B: Agent 02 (discovery)
-| ID | Pri | Task | Deps | Status | Agent | Acceptance |
-|---|---|---|---|---|---|---|
-| B-01 | P1 | `SourceAdapter`/`Normalizer`/`Deduper` against `mbos.interfaces` (R8). `raw_ref` = hash of stored raw bytes. `FetchResult.error`/`freeze_requests` go to a side channel | none | **DONE** @ `7c9da45` | 02 | 02's fixtures run through `mbos` `Components` in 02's tests; identity-first dedup |
-| B-02 | P1 | ADR-0010: `ids.canonical_json` â†’ reference `mbos_canonical` | none | **DONE** @ `cadfdae` | 02 | `tools/interop_check.py` row 02 = 10/10 |
-| B-03 | P2 | Credential-free sources: GSA Auctions API, then Trash Nothing, as fixture-first adapters, read-only, honouring ADR-02-0202 | B-01 | **DONE** @ `8ff5476` | 02 | Fixture tests; no live calls without explicit enablement |
-| B-04 | P2 | Source-health â†’ L2 freeze request shape, agreed with 05 (`discovery.source.<src>.read`) | E-01 | **DONE** @ `029356c` (05 half @ `d3b9948`) | 02 (+05) | A shared fixture both lanes test against |
+H™]\ÙHH^\İ[™È™XÛÜ™]
+LÌÈØ]Ú\İİÜ˜YÙHÜˆHİÛ™\‹[ØØ[X\šÙ]™YœÈİÜ™NÈØİ[Y[ÚXÚÈ›È\˜[[]\İÜ™JKˆ›È^\›˜[šYÚYÛ‹Z[‹XØÛİ[Ş[˜Ë™]ÈÛİ\˜ÙKÜ™Y[X[ÈÜˆÜ[™ˆš[\È[™\ˆ[™\ÈÚ\™H˜XİXØ[ˆ‹LMˆİYÚ[™ËXXØÙ\Y
+˜Ì˜XÍÌX
+HÓ‘H8 %U‘H˜˜ÎXØ
+İÛ™\‹\[ˆÛÛXš[™Y™[X\ÙHŒ‹LLLLˆNLVÈYÙ[HÛ]YKZ[‹PÚ›ÛYHÚXÚÈÛˆH]™HYÙHŒ‹LLLL•ŒÎŒMÈ™XÙZ\ØÜËÜ™XÙZ\ËÌŒ‹LLLL‹XÛÛXš[™Y\™[X\ÙK[]™K]™\šYšXØ][Û‹›Y
+KˆÜš[Üˆİ]\Ë]Y]ˆT•PS8 %ÕQÒS‘×ĞPĞÑTQ˜MNMMØ
+š^YXØXˆY[Z]Œ]K[Û›HÛÜÙHŒÎNNNH[Y\šXØKĞÚXØYÛË™YÜ™\ÜÚ[Ûˆ\İÈYÙ[HŒ‹LLLL•NNŒ–ˆ›Øİ\ÙYŒËÌ[™HİZ]HMËÌHÛ›İÛˆŒÎH›ZÙNÈXY\ÜÈÚ›ÛYH\ÚİÜ
+Û[Øš[HWHˆ^XİÛX[ˆÛÛ[Z]Y\Y˜XİÈ›Øİ\ÙY\İÎˆX\šËİ[›X\šË\œÚ\İ[˜ÙHXÜ›ÜÜÈ™\İ\^ÛYYœ›ÛH™\İ[ÈÚ]Ûİ[Ú[™İÈÚİÜÈ˜XÚÙY][\È[™\ˆ[Hš[\‹S’Ó“ÕÓˆšYšY[ÈÚ\™HHÛİ\˜ÙH\È›Û™K™]™\ˆ[™™\œ™Yœ›ÛHØ]™NÈYÙ[H™\šYšY\È[ˆÛ]YH[ˆÚ›ÛYH\ÚİÜ
+È[Øš[HÚ]ØÜ™Y[œÚİÎÈ^\İ[™ÈÚXÚÈÛÛÈ\ÜÎÈÛ™HÛÛXš[™Y™[X\ÙHÛÛ[X[™ˆŸ‹LÈH
+Š“ÕÓ‘TˆŒ‹LLLLˆ
+Ø[YH[œİXİ[ÛŠNˆHŞ\İ[HÚİ[ÑQH]HšY]]ÛX]XØ[KÚ\™HH]Ù[›İ]H^\İËŠŠˆ[™Hˆ\œÙ\ˆ›ÜˆHİÛ™\‰ÜÈÕÓˆšY›İYšXØ][ÛœÈ
+šYÛÛ™š\›X][Û‹İ]šYÚ[›š[™ËİÛÛ‹]Xİ[ÛˆÛÜÙY
+Hœ›ÛHÛİ‘X[ËX›XÔİ\œ\ËÔĞH]Xİ[ÛœÈ[™PšYZÜİY]Xİ[Û™Y\œË™XYœ›ÛHHYXØ]YX[ÛšY™™\‹Ğ[\ÈXZ[›Ş›Û\ˆ›İYÚH‹Lˆ™XY[Û›H™XY\ˆ
+VSRS‘K“ÑK”QRËÙ[™\ˆÒSHÚXÚÊKˆ˜\Ú\Îˆ\ÙH\™HHİÛ™\‰ÜÈİÛˆ™XÛÜ™ÎÈPšY	ÜÈ\›\ÈÙˆ\ÙH^ÛYH	Ü™XÛÜ™È™[][™ÈÈ[İ\ˆ]Xİ[ÛˆÜˆšY\İÜIÈœ›ÛHZ\ˆ^˜Xİ[Ûˆ˜[ˆ
+PÕ\›\ÈŒŒ‹LLKLŒˆËJKÛÈİÛˆšYZ\İÜHXZ[\ÈHİ\ÜY]]ÛX]XÈ›İ]NÈ“ÈÙÚ[ˆ]]ÛX][Û‹XØÛİ[ØÜ˜\[™ÈÜˆPšYYÙH™]Úˆİ]]™YYÈH‹LMÈ	Ó^HšYÉÈ\İ\ÈUUËQUPÕQ
+›İ™[˜[˜ÙNˆHK[XZ[
+H[™ÙY\ÈHİÛ™\‰ÜÈ[[İ[ÈİÛ™\‹[ØØ[ˆ
+Š•TÈ“ÕS‘T–H
+Œ‹LLLL•ŒMŒÍŠNˆ\œÙ\ˆ
+È™XÛÜ™Ú\HÚ]ÖS•UPÈš^\™HK[XZ[ÈÛ›H
+›È™X[XZ[›Ş›È™]ÛÜšË›ÈÜ™Y[X[ÊNˆ™]È[™Hˆ[Ù[H™]\Ú[™ÈH[XZ[Ø[\Ø\œÚ[™È[™ÒSHÚXÚÜÎÈİ]]™XÛÜ™ÈÜÛİ\˜ÙK\İ[™ÈY]K\›]™[
+šYÜXÙYİ]šYÚ[›š[™ËÛÛ‹ÜİÛÜÙY
+K[[İ[Ú[ˆİ]YÛÜÙ\×Ø]Ú[ˆİ]YØœÙ\™YØ]›İ™[˜[˜ÙOSY\ÜØYÙKRQKˆ]™HXZ[›Ş™XY[™È[™‹LMÈÚ\š[™È\™H]\ˆ›İ[™\šY\ËŠŠˆ›Û™H›ÜˆHš^\™H\œÙ\ˆT•PS8 %š^\™H\œÙ\ˆÓ‘H[™™]šY]Èš^\ÈÓ‘HÎÎLÌ
+İ]\ÈŒÙMMX˜ÈYÙ[H™\šYšYYŒ‹LLLL•ŒŒL–ˆ	ØÛÛ™Ü˜][][ÛœÉÈ[Û™H›ÈÛ™Ù\ˆYX[œÈÛÛÈ	Ş[İH\™HHÚ[›š[™ÈšY\‰È\ÈÛÛˆÛ›HÚ][ˆ]Xİ[Û‹XÛÜÙYİ][Y[[ÙHÚ[›š[™ÎÈ]K[Û›HÛÜÙ\×Ø]\ÈS’Ó“ÕÓÈ[™HˆİZ]HÍŒKÌ
+Kˆ™[XZ[š[™È›İ[™\šY\ÎˆÚ\™H[È‹LMÈ	Ó^HšYÉÈ
+Y\ˆ‹LMÊK]™H™XYÙˆHİÛ™\‰ÜÈX[ÛšY™™\‹Ğ[\È›Û\ˆ
+™YYÈ‹LLˆ\\ÜİÛÜ™
+K™K\™XÛÜ™™X[›İYšXØ][ÛˆÛÜ™[™ÈˆØÜX˜™Yš^\™HK[XZ[È\ˆÛİ\˜ÙH
+›Èš]˜]H]H[ˆÚ]XŠNÈ\İÈ›ÜˆXXÚ›İYšXØ][Ûˆ\KÒSH˜Z[\™H™Z™XİYY[\İ[™\X]™XYÙY[ˆ[˜Ú[™ÙYÈ]™HXØÙ\[˜ÙHÛ›HÚ]H™X[İÛˆšY›İYšXØ][Ûˆ[ˆHYXØ]Y›Û\‹ˆŸ‹LÌH
+[™H‹‹Lˆ›ÛİË]\œ›ÛHH‹LMˆ™\šYšXØ][ÛˆŒ‹LLLL•ŒÍÖŠHHÛÛÛ^H]Xİ[ÛˆYÙIÜÈ	ÜÙ[XİYYÚYÚÉÈ\İ
+›Üˆ^[\H	Ò›ÚˆY\™HÍLÜ˜]Û\ˆŞ™\‰ÊH\È›İØ\\™Yˆ\œÙWÙ]Z[ÙY\ÈÛ›HHØ]YÛÜHXY[™KÛÈÙ^]ÛÜ™ÙX\˜ÚØ[››İš[™˜[YY\]Z\Y[ˆØ\\™HHYÚYÚÈ\İ][\È
+^Û›Kœ›ÛHÛÛÛ^X]Xİ[Û™Y\œË˜ÛÛHYÙ\ÈÛ›JH[ÈYÚYÚØÈÙY\HXY[™H\ÈØ]YÛÜWÚXY[™XÈ[ÛÈ^ÜÙHHÛØ\œÙH]™[Ø]YÛÜH
+	Ø]Xİ[Ûˆ]™[ˆX]H\]Z\Y[	È]ËŠH[œİXYÙˆ][™ÈHİÛ\ÜÚYšY\ˆİY\ÜÈ	İ˜Z[\œÉËˆ\İÈœ›ÛHH\˜Ú]™YYÙ\Ëˆ›Èİ\ˆÚ[™ÙKˆ‹LˆÓ‘HÍÍMÎN
+İ]\ÈÎLÍÎXÈYÙ[H™\šYšYYŒ‹LLLL•NŒŒLVˆYÚYÚÈ\İØ\\™Y
+›ÚˆY\™HÍLÜ˜]Û\ˆŞ™\‹Ø]\œ[\ˆMÌˆ^Ø]˜]Ü‹‹‹ŠKØ]YÛÜWÚXY[™HÙ\Ø]YÛÜHœ›ÛH]HÛ›H
+›È[Ü™H	İ˜Z[\œÉÊNÈ[™HˆİZ]HÍŒ‹Ì
+Kˆ[™Hˆ]\İ™K\[ˆ[™HˆÈÎLÍÎX
+‹LM
+HˆÛX[ˆÛÛ[Z]Y\Y˜XİÈ\İÎˆ	ÙŞ™\‰È[™	Ò›ÚˆY\™IÈ™\Ù[[ˆYÚYÚÈ›Üˆ’‹ˆœXÚÎÈXY[™HÙ\ÈØ]YÛÜH›İ	İ˜Z[\œÉÎÈ›ÈXšY™\]Y\İÈ™XÙZ\ˆŸ‹LMH
+[™H‹‹LMˆ›ÛİË]\Ù\šX[Q•Tˆ‹LMÊH]Xİ[Û‹Y]™[Ø\™Û\ÚˆÚİÈÛÜÙ\×Ø]\ÈØØ[[X[ˆ[YH
+	ÕYHØİLËŒHÑ	ÊHÚ]H^\İ[™ÈÛİ[İÛˆİ[NÈš[H]™[È[™\ˆ[ˆ	Ğ]Xİ[Ûˆ]™[ÉÈ›İÈ
+ÜˆZ\ˆ‹LÌÛØ\œÙHØ]YÛÜJH[œİXYÙˆHİY\ÜÙYİ›İÎÈÙY\]™\H‹LM‹‹‘‹LMÈ™Z]š[Ü‹ˆ‹LMË‹LÌÕTT”ÑQQ
+›ÛY[È‹LMJHˆ›Øİ\ÙY\İÈ
+Èœ›İÜÙ\ˆØÜ™Y[œÚİÈ™]šY]ÙYHYÙ[NÈ^\İ[™ÈÚXÚÈÛÛÈ\ÜËˆŸ‹LH
+[™H‹œ›ÛHHŒ‹LLLLˆÛİ\˜ÙH™\ÙX\˜ÚÈÙ\šX[Y\ˆ‹LÌ
+HÚ[ÛÛˆ]Xİ[Û™Y\œÈ
+İÜš[™ÜÈTŠH]Xİ[ÛˆU‘S•Èœ›ÛH]ÈİÛˆÛÜ™™\ÜÈÚ]HÚ[ÛÛ˜]Xİ[Û™Y\œË˜ÛÛKØ]Xİ[ÛœËØ
+›Ø›İÎˆÛ›HİÜXYZ[‹È\Ø[İÙYÜ˜]ÛY[^HLÈ›È\›\ÈYÙH›İ[™
+KØ[YH]\›ˆ\ÈHÛÛÛ^HY\\ˆ]™HÙ™ˆHY˜][[›Û[[İ\È\Ù\‹PYÙ[HLÈ™]ÙY[ˆ™\]Y\İË][Üİİ\›NÈ‘U‘Tˆ™]Ú
+‹˜šYÜ˜[™Û\‹˜ÛÛX
+šYÜ˜[™Û\ˆ\›\ÈÙˆ\ÙH›Ü˜šY]HZ[š[™ÊNˆİÜ™H][šÈ›ÜˆH[X[ˆÛ›NÈİšY[ÈS’Ó“ÕÓ‹ˆ\˜Ú]™Y™X[™\ÜÛœÙH
+YÙ[HŒ‹LLLL•NŒŒÎV‹ŒÛ™H™\]Y\İØÜX˜™YÈÜšYÚ[˜[ÚLMˆÙ\
+NˆØÜËÜ™XÙZ\ËØŒ]Ú[ÛÛ‹X\˜Ú]™KØ]Xİ[ÛœËš[ÛˆHÛÛÜ™[˜]Üˆœ˜[˜Ú
+™XYÚ]Ú]ÚİÊKˆHØ]Xİ[ÛœËÈTÕYÙH[Û™HØ\œšY\È]KØ[H\H
+Û›[™HÛ›HÜˆ]™KÔÚ[][Ø\İ
+K]Xİ[ÛˆØØ][Û‹	Ğ]Xİ[Ûˆ[™ØİLÈŒˆ8 $ÈÎŒHÔÕ	È[™]Z[ËÛÈ“È]Z[\YÙH™]Ú\È™YYYˆHÚ]HÜš]\È	ĞÔÕ	È]™[ˆ\š[™È^[YÚ[YNˆ\œÙH\È[Y\šXØKĞÚXØYÛÈØØ[[YH[™X\šÈH˜\Ú\ÈS‘‘T‘SÑH
+È›İ\HHš^YUËMŠKˆ‹LÌ
+Û™JHÓ‘H8 %Ú[ÛÛˆ]Xİ[Û‹QU‘S•Ûİ\˜ÙH]™K]™\šYšYYŒ‹LLLL•NŒŒLVˆ
+[™HˆYYXÎM˜İ]\È˜™L˜ÈYÙ[Nˆ[™HˆİZ]HÎKÌÈšYÜ˜[™Û\ˆ™Y\ÙY™Y›Ü™H[H™\]Y\İÈ™XYÛ›U˜[œÜÜ[›™YÈÚ[ÛÛ˜]Xİ[Û™Y\œË˜ÛÛNÈ[›Û[[İ\ÈPNÈİ\›HØ\È	ĞÔÕ	È™XY\È[Y\šXØKĞÚXØYÛÈS‘‘T‘SÑNÈ]™HÛ[ÚÙHNŒŒÎVˆH™\]Y\İMÈ]™[Ë›È\œ›Ü‹›È\XØ]\ÎÈ]šY[˜ÙHØÜËÜ™XÙZ\ËØŒ[]™K\Û[ÚÙKÛ]™K\Û[ÚÙKšœÛÛŠKˆØ\ˆ]™KÔÚ[][Ø\İ]™[ÈÚİÈÛÜÙ\×Ø]S’Ó“ÕÓˆ
+Z\ˆ]H\È[ˆHÙ\\˜]H[™JKš^[ˆ‹LÌÈÛX\šÙ]Ú\š[™È[ˆ‹LMHˆ\È‹Lˆ\İÈÛˆ\˜Ú]™Y™X[YÙ\ËšYÜ˜[™Û\ˆ™\]Y\İË]™HÛ[ÚÙHHYÙ[K™XÙZ\ˆŸ‹LÌˆˆ
+[™H‹‹L›ÛİË]\
+HÚ[ÛÛˆ]™KÔÚ[][Ø\İ]Xİ[ÛœÎˆ\œÙHZ\ˆ]Xİ[Ûˆ]Kİ[YH[™H
+K™Ëˆ	ÓØİM]™HÈÚ[][Ø\İ	È\ÈHİ\[YHÛˆHØ\™
+H[È™YÚ[œ×Ø]ØÛÜÙ\×Ø]\ÈS‘‘T‘SÑHÚ[ˆÛ›HHİ\[YH^\İÎÈÙY\S’Ó“ÕÓˆÚ[ˆXœÙ[ˆœ›ÛHH\˜Ú]™Y\İYÙHÛ›Kˆ‹LÓ‘HXŒÌØ
+X™[Y	Ğ‹LÌIÈ[ˆ[™Hˆ\İÜHHH\Ü]Ú\ˆÛÜšÙ\ÈÙ˜YX‹LÌˆ™K]™\šYšXØ][Û‹İ]\ÈLXXYNÈYÙ[HŒ‹LLLL•NNŒ–ˆÎËÌÈLH]™KÔÚ[][Ø\İ]™[È]™H™YÚ[œ×Ø]S‘‘T‘SÑH[™[ˆ^XÚ]ÛÜÙ\×Ø]S’Ó“ÕÓˆ™X\ÛÛŠHˆ\İÈÛˆH\˜Ú]™YÚ[ÛÛˆYÙNˆ]™\H]™KÔÚ[][Ø\İ]™[Z]\ˆ\ÈH\œÙY]HÜˆ[ˆ^XÚ]S’Ó“ÕÓˆ™X\ÛÛÈ›È™]È™\]Y\İÈ™XÙZ\ˆŸ‹LMH
+Š”
+Šˆ
+[™H‹Ù\šX[Q•TˆH‹LMÈš^ÈİÛ™\ˆÛØ[	ÜÙYH[]Xİ[ÛœÈ[ˆ^H˜Y]\ÉÊHÙ[™\˜[^™HH‹LMˆÛÛÛ^HÙX[H[ÈÓ‘H]Xİ[Û™Y\‹Y]™[ÈÛİ\˜ÙNˆHÛX[™YÚ\İHİÛÛÛ^NˆÛÛÛ^TÚ]PY\\‹Ú[ÛÛˆÚ[ÛÛ”Ú]PY\\‹]\ˆ›XÚÛ[ÛŸH[ˆX\šÙ]ÜÛİ\˜Ù\ËœXÈÛÛËÜ™Yœ™\ÚØ]Xİ[Û—Ù]™[ËœHK[]™HËK[Û›HSQWXÜš]\ÈÛ™HØXÚH\ˆ]Xİ[Û™Y\ˆ
+ÙY\™Yœ™\ÚİÛÛÛ^WØØXÚKœXÛÜšÚ[™ÈÜˆXZÙH]H[ˆ[X\ÊK™\ÜXİ[™ÈXXÚY\\‰ÜÈİÛˆ˜]H[Z]ÎÈHÛİ\˜ÙHÙ[XİÜˆ\İÈXXÚ]Xİ[Û™Y\ˆ\È	Ğ[]Xİ[Ûˆİ\Ù\ÉÎÈ	Ğ[Ûİ\˜Ù\ÉÈ[˜ÛY\È[NÈ\‹\Ûİ\˜ÙHİ]\È[™\ÎÈØ[YHØ\™Ú\KS’Ó“ÕÓˆİšY[Ë[X[‹[Û›H]›Ü›H[šÜÈ
+PšYĞšYÜ˜[™Û\‹Ô›ŞXšY™]™\ˆ™\]Y\İY
+Kˆ™K\[ˆ[™HˆÈLXXYN
+ÛÛZ[œÈ‹L‹‹L‹LÌ‹LÌŠHH^\İ[™ÈØØ[Ø^Kˆ›Û[ˆ‹LMÛ\Úˆ[X[ˆØØ[ÛÜÙH[YH
+	ÕYHØİLËŒHÑ	ÊH[™[ˆ	Ğ]Xİ[Ûˆ]™[ÉÈ›İÈ[œİXYÙˆHİY\ÜÙYİ›İËˆ‹LMÈš^
+Û™JK‹L
+Û™JK‹LÌˆ
+Û™JHÓ‘H8 %U‘H˜˜ÎXØ
+İÛ™\‹\[ˆÛÛXš[™Y™[X\ÙHŒ‹LLLLˆNLVÈYÙ[HÛ]YKZ[‹PÚ›ÛYHÚXÚÈÛˆH]™HYÙHŒ‹LLLL•ŒÎŒMÈ™XÙZ\ØÜËÜ™XÙZ\ËÌŒ‹LLLL‹XÛÛXš[™Y\™[X\ÙK[]™K]™\šYšXØ][Û‹›Y
+KˆÜš[Üˆİ]\Ë]Y]ˆT•PS8 %[\[Y[YYŒÌMÍØ
+İ]\È™ÎX
+NÈYÙ[HŒ‹LLLL•ŒÌˆ™Yœ™\Ú™Y\Ù\ÈÚ]İ]K[]™NÈ]™HİYÚ[™È™Yœ™\ÚÛÛÛ^Hˆ]™[ËÌÈ™\]Y\İÈ
+ÈÚ[ÛÛˆMËÌNÈœ›İÜÙ\ˆ\ÚİÜ
+Û[Øš[Nˆ	Ğ[]Xİ[Ûˆİ\Ù\ÉÈÛİ\˜ÙKØØ[×HˆÛX[ˆÛÛ[Z]Y\Y˜XİÈÙ™›[™H\İÈÚ]›İ\˜Ú]™YÚ]\ÎÈ™Yœ™\Ú™Y\Ù\ÈÚ]İ]K[]™NÈ]›Ü›H™\]Y\İÎÈYÙ[Hœ›İÜÙ\ˆ™\šYšXØ][Ûˆ\ÚİÜ
+Û[Øš[HÚ]ØÜ™Y[œÚİÎÈ^\İ[™ÈÚXÚÈÛÛÈ\ÜËˆŸ‹LML
+Š”
+Šˆ
+Š”ÑPÓÓ‘’V‘TURT‘Q8 %“ÕÓ‘HQU
+YÙ[H™]šY]ÈÙˆÌMŒXÌXØÙLYÙŒ‹LLLL•ÎŒMNŒVŠNˆHY\Hš^\ÈPĞÑTQ
+Ø[YHÛİ\˜ÙNˆ[šÈÜˆYÛ›NÈÜ›ÜÜË\Ûİ\˜ÙNˆ[šËÜˆ]HHH
+ÈÚ]H
+ÈÛÜÙH]NÈ‹LMH^Xİ][Ûˆˆ™\İÜ™Y
+H[™[MÈÚ[ÛÛˆ]™[È›İÈÙ]\İ[˜Ù\Ëˆ‘SPRS’S‘ÎˆÔĞHØ\™Èİ[™]™\ˆ\ÙHH™]ÈØ^™]Y\ˆÜ\˜]Ü—İZKÛX\šÙ]ÜÙX\˜ÚœXØØ\™ÛÛ\]\ÈÛÛÜ™[˜]\ÈÛ›HÚ][™H‰ÜÈXÙWØÛÛÜ™ÊØÊXÛÈLÍÙˆMLÈØXÚYÔĞHİÈ
+İ\İÛ‹\™YËØZÈšYÙKÚÛZÛXHÚ]K]\ÚÛÙÙYK[\ÛË‹‹ŠHİ^H	Û›İÚXÚÙY	È[İYÚØ^™]Y\‹›ØØ]X™\ÛÛ™\È[Kˆš^ˆ[ˆØØ\™Ú[ˆXÙWØÛÛÜ™ÊØÊX™]\›œÈ›Û™K˜[˜XÚÈÈØ^™]Y\‹›ØØ]XÛˆHİ	ÜÈ’TYˆ™\Ù[[ÙH	ĞÚ]KÕ	Ëˆ\İÚ]H™X[ØXÚYYš[HÚ\NˆÜÙHÚ]Y\ÈÙ]H\İ[˜ÙH[™\™H^ÛYYHHML[Z[H˜Y]\Èœ›ÛHÛÛØ^H
+Ûİ[Y\Èİ]ÚYHH˜Y]\Ë›İ\È›İXÚXÚÙY
+KˆÛÛ[Z]\ÈH‘UÈÛÛ[Z]ÈH™K]™\šYšXØ][ÛˆÚ]İ]\ÈÚ[™ÙH\È›İXØÙ\X›KŠŠˆ
+ŠŠ[™HÈİÛ™\ˆÛØ[	Ø[]Xİ[ÛœÈ[™\İ[™ÜÈÚ][ˆH˜Y]\ÈHÚÛÜÙIÎÈ›İ[™[ˆH‹LMH™\šYšXØ][ÛŠHÓÈQ‘PÕË›İ™\]Z\™YŠŠˆ
+JHĞĞUSÓˆÓÕ‘TQÑNˆÜ\˜]Ü—İZKÙØ^™]Y\‹œX™\ÛÛ™\ÈÛ›HHŒ\›İÈÔÕ‹ÛÈ[Üİ\šØ[œØ\ÈİÛœËÖ’TÈ
+™YHœ˜[˜ÚÌŒLËİ\ˆÚ]HÌMËİ]Ø\ÌŒMŒX^Y›İÙ\ˆÌŒL‹\œKX[™\›‹‹‹ŠH˜[[È	Û›İÚXÚÙY	È[™™]™\ˆÛİ[[œÚYHH˜Y]\È
+H]™HYÙH[ÛÈÚİÜÈLÍÔĞHİÈ›İÚXÚÙY
+KˆYHÙ[œİ\ÈŒŒÈØ^™]Y\ˆ]H™\\™YHYÙ[HÛˆHÛÛÜ™[˜]Üˆœ˜[˜Ú]ØÜËÙ]KØÙ[œİ\ËYØ^™]Y\‹LŒŒËØ
+˜İWØ\—Ü™YÚ[Û‹˜Üİ˜ˆš\İ]K]™ÎÈXÙ\×Ø\—Ü™YÚ[Û‹˜Üİ˜ˆÚ]Kİ]K]™ËÚ[™ÈX›XÈÛXZ[È™XYÚ]Ú]ÚİÈÜšYÚ[‹Ü™\ÙX\˜ÚØYÙ[LKXÛÛÜ™[˜]Ü]˜
+H[ÈÜ\˜]Ü—İZKÙ]KØ[™XZÙHØ^™]Y\‹›ØØ]X™\ÛÛ™HHKYYÚ]’Tš\œİ[ˆ	ĞÚ]HÕ	ÈÈ	ĞÚ]KÕ	È
+Ø\ÙKZ[œÙ[œÚ]]™NÈ[ÛÈ	ÔØZ[	ËÉÔİ‰ÊKÙY\[™ÈH^\İ[™Èš[H[™P“Ô×ÑĞV‘UQT—Ñ’SHİ™\œšYHÛÜšÚ[™ÎÈ\›Ş[X]H\İ[˜Ù\Èİ^HX™[Y\›Ş[X]Kˆ
+ŠHQTNˆX\šÙ]ÜÛİ\˜Ù\Ë™Y\X]\İ™]™\ˆY\™ÙHÛÈØ\™Èœ›ÛHHĞSQHÛİ\˜ÙH
+\İ[˜İ]Xİ[ÛœÈÚ]Ú[Z[\ˆ]\È[ˆHØ[YHÚ]KK™ËˆÚ[ÛÛˆ™\ÚY[X[LLH[™™\ÚY[X[LLJNÈÜ›ÜÜË\Ûİ\˜ÙHY\™Ú[™Èİ^\ÈHY[XØ[[šËÜˆ]HÚ[Z[\š]HHHS‘Ø[YHÚ]HS‘Ø[YHÛÜÙH]Kˆ›Èİ\ˆÚ[™ÙKˆ‹LMHÓ‘H8 %U‘H˜˜ÎXØ
+İÛ™\‹\[ˆÛÛXš[™Y™[X\ÙHŒ‹LLLLˆNLVÈYÙ[HÛ]YKZ[‹PÚ›ÛYHÚXÚÈÛˆH]™HYÙHŒ‹LLLL•ŒÎŒMÈ™XÙZ\ØÜËÜ™XÙZ\ËÌŒ‹LLLL‹XÛÛXš[™Y\™[X\ÙK[]™K]™\šYšXØ][Û‹›Y
+KˆÜš[Üˆİ]\Ë]Y]ˆT•PS8 %ÕQÒS‘×ĞPĞÑTQÙØ˜˜
+ÛÙHÍŒNLØØ^™]Y\ˆ
+ÈÌMŒXÌXY\H
+È™M˜MØÔĞH˜[˜XÚÎÈYÙ[HŒ‹LLLL•ÎŒLVˆ[™HİZ]HLŒ‹ÌHÛ›İÛˆŒÎH›ZÙNÈÛÛ[ˆY™ˆÚÙ[‹\™]šY]ÙYHÛ›Hˆš^\™HİÈ[İ™Yœ›ÛH›İX×HˆÛX[ˆÛÛ[Z]Y\Y˜XİÈ\İÎˆÜÙH’TËİİÛœÈ™\ÛÛ™NÈ[MÈ\˜Ú]™YÚ[ÛÛˆ]™[ÈÙ]H\İ[˜ÙH
+Üˆ[ˆ^XÚ]™X\ÛÛŠNÈÚ[ÛÛ‹[Û›HÛİ[\]X[ÈHÚ[ÛÛˆ\Ùˆ	Ğ[]Xİ[Ûˆİ\Ù\ÉÎÈHÛÈÙ\İ]H›ØÚÈ\İ]\È›İ\X\ÈÔĞHİÈ™]š[İ\ÛH	Û›İÚXÚÙY	È™XØ]\ÙHÙˆHØ^™]Y\ˆ›İÈÙ]\İ[˜Ù\ÈÚ\™HZ\ˆİÛ‹Ö’T\È[ˆH]NÈ^\İ[™È\İÈ[™ÚXÚÈÛÛÈ\ÜËˆYÙ[Hœ›İÜÙ\ˆ™\šYšXØ][Ûˆ\ÚİÜ
+Û[Øš[NÈ[ˆÓ‘HÛÛXš[™Y™[X\ÙHÛÛ[X[™ˆŸ‹LHH
+[™H‹œ›ÛHHŒ‹LLLLˆÛİ\˜ÙH™\ÙX\˜ÚÈÙ\šX[Y\ˆ‹L
+H›XÚÛ[Ûˆ]Xİ[ÛœÈ
+Û›ÚÙHTŠH]Xİ[ÛˆU‘S•Èœ›ÛH]ÈİÛˆÜ]X\™\ÜXÙH”ÔÈ™YY›XÚÛ[Û˜]Xİ[ÛœË˜ÛÛKØ]Xİ[ÛœÏÙ›Ü›X]\œÜØ\È]™[YÙ\È
+›Ø›İÈ[İÈ›İ
+NÈ‘U‘Tˆ™]Ú
+‹œ›ŞXšY˜ÛÛX
+›XÚÛ[Û‹œ›ŞXšY˜ÛÛH›Ø›İÈ\Ø[İÎˆÊNˆİÜ™H][šÈ›ÜˆH[X[ˆÛ›NÈ™YY]\È\™HX›\Ú]\ËÛÈ]™[]\ÈÛÛYHœ›ÛHH]™[YÙNÈİšY[ÈS’Ó“ÕÓ‹ˆ\˜Ú]™Y™X[™\ÜÛœÙ\È
+YÙ[HŒ‹LLLL•ÎLŒÍ‹ŒÛÈ™\]Y\İÈLÈ\\[›Û[[İ\È\Ù\‹PYÙ[ØÜX˜™YÈÜšYÚ[˜[ÚLMˆÙ\
+NˆØÜËÜ™XÙZ\ËØŒKX›XÚÛ[Û‹X\˜Ú]™KØ]Xİ[ÛœËœœÜØ
+H][\Îˆİ\œ™[S‘\İ]Xİ[ÛœËÛÈÙY\Û›H]™[ÈÚÜÙHYÙH]H\ÈÙ^HÜˆ]\ŠH[™]™[X˜[šË\™\Ëš[
+]Kİ[YH	ÕY\Ù^KØİØ™\ˆLËŒˆNŒSH8 $ÈLNŒÌIÈ[ˆ[Y\šXØKĞÚXØYÛËØØ][ÛˆX^H™XY	Ó][\HØØ][ÛœÉÈ
+[ˆØØ][ÛˆS’Ó“ÕÓˆÚ]]™X\ÛÛŠK^Y\ˆ™[Z][H	ÌM	IÈ[ˆH\›\È^
+Kˆ]™[YÙ\È\™H™]ÚYÛ›H›Üˆ™YY][\ËLÈ\\][Üİİ\›Kˆ‹L
+Û™JHÓ‘H8 %›XÚÛ[Ûˆ]Xİ[Û‹QU‘S•Ûİ\˜ÙH]™K]™\šYšYYŒ‹LLLL•ŒNˆ
+[™HˆŒÌŒÌÎXØİ]\ÈMÌXNYÈYÙ[NˆKÌÈ›ŞXšY™Y\ÙY™Y›Ü™H[H™\]Y\İ™XYÛ›U˜[œÜÜ[›™Y[›Û[[İ\ÈPKİ\›HØ\LÈØ\ÎÈ]™HÛ[ÚÙHŒŒÍLŒNŒÍVˆÌH™\]Y\İËLİ\œ™[]™[È
+\İ›ÜY
+K›ŞXšY™\]Y\İËÚXØYÛÈ[Y\È[˜ÛˆHÔÕİÚ]ÚÈ]šY[˜ÙHØÜËÜ™XÙZ\ËØŒK[]™K\Û[ÚÙKÊKˆØ\ÈOˆ‹LÌÈˆ\È‹LˆŸ‹LÌÈH
+[™H‹‹LH›ÛİË]\œ›ÛHH]™HÛ[ÚÙJH›XÚÛ[Ûˆ]™[ĞĞUSÓ”È[™][KY^HUTÎˆ[Üİ]™[ÈØ[YH˜XÚÈÚ]ØØ][ÛˆS’Ó“ÕÓˆ[İYÚHYÙ\ÈØ\œHY™\ÜÙ\Ëˆ\œÙHHÜ]X\™\ÜXÙH]™[][K[Y]KXY™\ÜË[[™X[[Y[È[™HØÚ[XK›Ü™ÈØØ][Û‹˜Y™\ÜØ
+K™Ëˆ	ÍH›XÚÛ[Ûˆ›ØYÈÛ›ÚÙKT‹ÌŒ‰È[™	ÍK”ËˆŒÈÈÙ\İZ[œËZ\ÜÛİ\šKMÍÍIÎˆXØÙ\[İ]H˜[Y\È[™	ĞÚ]KÕ’T	ÊNÈÙY\	Ó][\HØØ][ÛœÉÈ\ÈS’Ó“ÕÓˆÚ]]™X\ÛÛ‹ˆ][KY^H]™[ÈÚ]]\È]›È[Y\È
+	ÕY\Ù^KØİØ™\ˆËŒ‰ÈÈ	Õ\œÙ^KØİØ™\ˆKŒ‰ÊNˆ™YÚ[œ×Ø]Hš\œİ^HŒ[™ÛÜÙ\×Ø]H\İ^HŒÎNH[Y\šXØKĞÚXØYÛË˜\Ú\ÈS‘‘T‘SÑKˆ™]È\˜Ú]™YYÙ\È
+YÙ[KØÜX˜™Y
+NˆØÜËÜ™XÙZ\ËØŒKX›XÚÛ[Û‹X\˜Ú]™KÙ]™[XÜ›İÛ‹[X[Y˜Xİ\š[™Ë[\]ZY][Û‹X]Xİ[Û‹š[]™[][š[Û‹\XÚYšXË\˜Z[›ØY\İ\œ\ËY\]Z\Y[X]Xİ[Û‹[ØİLŒ‹š[]™[X\šØ[œØ\ËXÛÛ˜XİÜœËX]Xİ[Û‹[ØİLŒ‹š[
+™XYÚ]Ú]ÚİÈœ›ÛHHÛÛÜ™[˜]Üˆœ˜[˜Ú
+Kˆ‹LHÓ‘HXÌŒY˜
+İ]\ÈLN˜ØM˜ÈYÙ[HŒ‹LLLL•ŒŒÎŒÌˆ[™HˆL‹ÌÈ\˜Ú]™YYÙ\ÈÚ]™HÙ\İZ[œÈSÈMÍÍH[™Û›ÚÙHTˆÌŒÈ	Ó][\HØØ][ÛœÉÈS’Ó“ÕÓˆÚ]™X\ÛÛÈ][KY^H]\ÈS‘‘T‘SÑJKˆ[™HˆÚİ[[ˆLN˜ØM˜
+‹LMLJHˆ\İÈÛˆH›İ\ˆ\˜Ú]™YYÙ\ÎˆÛ›ÚÙHTˆÌŒˆ[™Ù\İZ[œÈSÈMÍÍH\œÙYÈ][\HØØ][ÛœÈİ^\ÈS’Ó“ÕÓˆÚ]™X\ÛÛÈ][KY^H]\È\ÈS‘‘T‘SÑNÈ›È›ŞXšY™\]Y\İÈ[™HİZ]H\ÜÙ\ÎÈ™XÙZ\ˆŸ‹LMLHH
+[™HÈİÛ™\ˆÛØ[	Ø[]Xİ[ÛœÈ[ˆ^H˜Y]\ÉÊHY›XÚÛ[Ûˆ]Xİ[ÛœÈÈH‹LMH]Xİ[Û‹Zİ\ÙH™YÚ\İH
+X\šÙ]ÜÛİ\˜Ù\ËUPÕSÓ—ÔÒUTØˆÙ^H	Ø›XÚÛ[Û‰Ë˜[YH	Ğ›XÚÛ[Ûˆ]Xİ[ÛœÉË[ˆP“Ô×Ğ“PÒÓSÓ—ĞĞPÒKY\\ˆ›XÚÛ[Û”Ú]PY\\‹]›Ü›H[šÈ	Ü›ŞXšYİ\›	ÈÚİÛˆ\È	ÕšY]È[™šYÛˆ›ŞXšY	Ë™]™\ˆ™\]Y\İYİ\›HØ\ÍŒÊHY\ˆ™K\[›š[™È[™HˆÈLN˜ØM˜
+‹LÌÈØØ][ÛœÎÈYˆ\ÈÛÜšÙ\ˆ[™XYH[›™YMÌXNYH™^›İ[™\H™K\[œÊHH^\İ[™ÈØØ[Ø^NÈ	Ğ[]Xİ[Ûˆİ\Ù\ÉÈ[™	Ğ[Ûİ\˜Ù\ÉÈ[˜ÛYH]ˆ[ÛÈÛÜœ™XİHİ[H	ĞX›İ]\İ[˜Ù\ÉÈÛÜH]İ[Ø^\È	ÜÛX[ØØ[Ø^™]Y\ˆÚ][Z]YÛİ™\˜YÙIÈ
+›İÎˆÙ[œİ\ÈŒŒÈ’T[™XÙHÙ[›ÚYÈ›ÜˆTˆ[™™ZYÚ›İ\š[™Èİ]\Ë\›Ş[X]JKˆ›Èİ\ˆÚ[™ÙKˆ‹LHÓ‘H8 %U‘H˜˜ÎXØ
+İÛ™\‹\[ˆÛÛXš[™Y™[X\ÙHŒ‹LLLLˆNLVÈYÙ[HÛ]YKZ[‹PÚ›ÛYHÚXÚÈÛˆH]™HYÙHŒ‹LLLL•ŒÎŒMÈ™XÙZ\ØÜËÜ™XÙZ\ËÌŒ‹LLLL‹XÛÛXš[™Y\™[X\ÙK[]™K]™\šYšXØ][Û‹›Y
+KˆÜš[Üˆİ]\Ë]Y]ˆT•PS8 %ÕQÒS‘×ĞPĞÑTQYLØX
+ÛÙHLÌÙ™XÈYÙ[HŒ‹LLLL•ÎÖˆÚ][™HˆLN˜ØM˜ˆ›Øİ\ÙYLKÌ[™HˆİZ]HLKÌHÛ›İÛˆŒÎKÛÛÜ™[˜]ÜˆİZ]HŒNKÌÈ]™H›XÚÛ[Ûˆ™Yœ™\ÚÈİYÚ[™ÈÌH™\]Y\İÈL]™[ÎÈİY×HˆÛX[ˆÛÛ[Z]Y\Y˜XİÈÙ™›[™H\İÈÚ]H\˜Ú]™Y›XÚÛ[Ûˆ”ÔÈ
+È]™[YÙNÈ™Yœ™\ÚÛÛ™Y\Ù\ÈÚ]İ]K[]™NÈ›ŞXšY™\]Y\İÎÈ^\İ[™ÈÚXÚÈÛÛÈ\ÜÎÈYÙ[Hœ›İÜÙ\ˆ™\šYšXØ][Û‹ˆŸ‹LMLˆH
+ŠŠ[™HÈİÛ™\ˆŒ‹LLLLˆ	Û^HŞ\İ[HÚİ[ÙYH]HšYÛˆ]	ÎÈ‹LÈÚ\š[™È›İ[™\JHÚİÈUUËQUPÕQšYÈ[ˆH‹LMÈ	Ó^HšYÉÈÚ[™İËŠŠˆ[ˆ[™HˆLN˜ØM˜
+ÛÛZ[œÈX›Ü×Ù\ØÛİ™\K˜šYÙ]™[Øœ›ÛH‹LÈÎÎLÌ
+HH^\İ[™ÈØØ[Ø^KˆYH™XY[Û›HØY\ˆ][œÈšYÙ]™[Ëœ™XYØšYÙ]™[Øİ™\ˆ[ˆ[[\”™XY\˜Ó“HÛˆH\ÛÛ]Y\İYÚ[™Èš^\™H›YÈ
+P“Ô×ÔÕQÒS‘×Ñ’VT‘TÏLX
+ÈP“Ô×Ğ’QÓPRSÑT˜
+K™]™\ˆSPT\™K™]™\ˆH™]ÛÜšÈ™\]Y\İˆY\™ÙHH™\İ[[™È™XÛÜ™È[ÈH^HšYÈÚ[™İÈ™^ÈHİÛ™\‹[X\šÙYÛ™\ÎˆXXÚ›İÈX™[Y	Ø]]ËY]XİYœ›ÛH[İ\ˆK[XZ[	ÈÚ]]È]™[
+šYXÙYÈİ]šYÈÚ[›š[™ÈÈÛÛˆÈÜİÈÛÜÙY
+K[[İ[Û›HÚ[ˆİ]Y[™Û›HÛˆ\ÈYÙH
+İÛ™\‹[ØØ[
+KÛÜÙH[YHÚ[ˆİ]Y[ÙHS’Ó“ÕÓ‹›İ™[˜[˜ÙHHK[XZ[Y\ÜØYÙKRQÈ[ˆ]]ËY]XİY\İ[™È]X]Ú\ÈH™\İ[Ø\™
+Ø[YH\İ[™È[šÊH\È^ÛYYœ›ÛHHÙX\˜Ú[™]\^XİHZÙH[ˆİÛ™\‹[X\šÙYÛ™NÈ[ˆİÛ™\ˆ	ÜİÜ˜XÚÚ[™ÉÈY\È[ˆ]]ËY]XİY][HÛÈ
+İÜ™YİÛ™\‹[ØØ[™]™\ˆ[]\ÈXZ[
+KˆÚ]İ]Hš^\™H›YÈ
+H]™HÛÛ™šYİ\˜][Ûˆ[[HXZ[›Ş^\İÊHHÚ[™İÈÚİÜÈHÛ™K[[™HÛ™\İ›İH	Ğ]]ÛX]XÈšY]Xİ[Ûˆ\È›İÛÛ›™XİY
+›ÈXZ[›Ş
+IËˆ›ÈÚ[™ÙHÈH\œÙ\‹›ÈSPT›ÈÜ™Y[X[Ëˆ‹LMÈ
+İYÚ[™ËXXØÙ\Y
+K‹LÈ
+\œÙ\ˆÛ™JHÓ‘H8 %U‘H˜˜ÎXØ
+İÛ™\‹\[ˆÛÛXš[™Y™[X\ÙHŒ‹LLLLˆNLVÈYÙ[HÛ]YKZ[‹PÚ›ÛYHÚXÚÈÛˆH]™HYÙHŒ‹LLLL•ŒÎŒMÈ™XÙZ\ØÜËÜ™XÙZ\ËÌŒ‹LLLL‹XÛÛXš[™Y\™[X\ÙK[]™K]™\šYšXØ][Û‹›Y
+KˆÜš[Üˆİ]\Ë]Y]ˆT•PS8 %ÕQÒS‘×ĞPĞÑTQNX
+ÛÙHMMÌØÈYÙ[HŒ‹LLLL•NŒLˆÚ][™HˆLN˜ØMˆ›Øİ\ÙYKÌÈÛÛ[ˆY™ˆHÛ›HH	Û›İÛÛ›™XİY
+›ÈXZ[›Ş
+IÈ›İNÈXY\ÜÈÚ›ÛYH\ÚİÜ
+Û[Øš[HTÔÈÚ]Hš^\™H›YÎˆWHˆÛX[ˆÛÛ[Z]Y\Y˜XİÈÙ™›[™H\İÈÚ][™H‰ÜÈŞ[]XÈšYK[XZ[š^\™\ÎˆXXÚ]™[\H™[™\™Yİ]šYİÛÛˆÛÜ™[™ÈÚİÛ‹ÒSKY˜Z[YXZ[XœÙ[HX]Ú[™È™\İ[Ø\™^ÛYYİÜ]˜XÚÚ[™È\œÚ\İË›ËY›YÈİ]HÚİÜÈH›İXÛÛ›™XİY›İNÈ^\İ[™È\İÈ[™ÚXÚÈÛÛÈ\ÜÎÈYÙ[Hœ›İÜÙ\ˆ™\šYšXØ][Ûˆ\ÚİÜ
+Û[Øš[KˆŸ‹LMLÈˆ
+[™H‹‹LMLˆ›ÛİË]\
+H[ˆH^HšYÈÚ[™İË[ˆ]]ËY]XİY›İÈÚÜÙH]\İK[XZ[]™[\ÈÛÛ‹ÜİÜˆÛÜÙY]\İÚİÈ	Ù[™Y
+\ˆ[İ\ˆK[XZ[]OŠIÈ[œİXYÙˆH]\™H	ØÛÜÙ\È[ˆ‹‹‰ÈÛİ[İÛˆ
+ÙY[ˆ	Ş[İHÓÓˆ0­ÈÛÜÙ\È[ˆÙN	ÊNÈ[ÛÈÚİÈHÛİ\˜ÙIÜÈ\Ü^H˜[YH
+	ÑÛİ‘X[ÉË	ÑÔĞH]Xİ[ÛœÉË	ÒPšY	ÊH[œİXYÙˆH˜]ÈÙ^H
+	ÙÛİ™X[ÉÊKˆ›Èİ\ˆÚ[™ÙKˆ‹LMLˆÓ‘H8 %U‘H˜˜ÎXØ
+İÛ™\‹\[ˆÛÛXš[™Y™[X\ÙHŒ‹LLLLˆNLVÈYÙ[HÛ]YKZ[‹PÚ›ÛYHÚXÚÈÛˆH]™HYÙHŒ‹LLLL•ŒÎŒMÈ™XÙZ\ØÜËÜ™XÙZ\ËÌŒ‹LLLL‹XÛÛXš[™Y\™[X\ÙK[]™K]™\šYšXØ][Û‹›Y
+KˆÜš[Üˆİ]\Ë]Y]ˆT•PS8 %ÕQÒS‘×ĞPĞÑTQ˜˜ÎXØ
+ÛÙHYLÌØXÈYÙ[HŒ‹LLLL•NŒÍÎNˆ›Øİ\ÙYM‹Ì[™HİZ]HLÌËÌHÛ›İÛˆŒÎNÈİYÚ[™È[™\ˆHÛÛÜ™[˜]Üˆ]ÛˆÚ]Hš^\™H›YÎˆÛÛ‹ÛÜİØÛÜÙY›İÜÈ™XY	Ù[™Y
+\ˆ[İ\ˆK[XZ[Hˆ›Øİ\ÙY\İÈ›ÜˆÛÛ‹ÛÜİØÛÜÙY›İÜÈ[™\Ü^H˜[Y\ÎÈ^\İ[™È\İÈ[™ÚXÚÈÛÛÈ\ÜÎÈYÙ[Hœ›İÜÙ\ˆÚXÚËˆŸ‹LMMˆ
+[™HÈİÛ™\ˆ™YY™XÛÜ™YŒ‹LLLNˆH›Ú[œÈ]Xİ[ÛœÈ]HS‘[™Ø[È[\È™X\ˆÛÜÚ[™ÊH[ˆH^HšYÈÚ[™İËYÚYÚ][\ÈÛÜÚ[™ÈÛÛÛˆH	ØÛÜÚ[™ÈÚ][ˆˆ	È[™	ØÛÜÚ[™ÈÙ^IÈ˜YÙH
+[Y\šXØKĞÚXØYÛÊKÛÜYš\œİÈHØ[YH˜YÙ\ÈÛˆ™\İ[Ø\™È›Üˆ˜XÚÙY][\ÎÈH	Ù[™Y	È]H›Üˆ]]ËY]XİY›İÜÈ\Ù\ÈHK[XZ[	ÜÈİÛˆ]HXY\ˆÚ[ˆH\œÙ\ˆ›İšY\È]
+[ÙH	Ü™XY]O‰ÊKˆ\Ü^HÛ›NÈ›È›İYšXØ][ÛœÈÙ[›ÈšY[™Ëˆ‹LMLÈT•PS8 %ÕQÒS‘×ĞPĞÑTQLLÌLN
+ÛÛZ[™Y[ˆ˜LL™XÈ[™HİZ]HMLÌHÛ›İÛˆŒÎJKˆ“ÕU‘Nˆ™[X\ÙH˜LL™X
+ÈLN˜ØM˜ˆT•PS8 %[\[Y[YLMØÌLØ
+İ]\ÈLLÌLN
+NÈYÙ[HŒ‹LLLL•ŒŒÌVˆ›Øİ\ÙYŒKÌÈÛÜÚ[™Ë]Ú][‹LšÈÛÜÚ[™Ë]Ù^H˜YÙ\È
+[Y\šXØKĞÚXØYÛÊKÛÜÚ[™Ë\ÛÛÛ™\İš\œİ[™Y›İÜÈ	Ù[™Y
+™XY]OŠIÈÚ[ˆ›ÈK[XZ[]HXY\È[İZ]H[™[™Ëˆ“ÕU‘HÔÕTT”ÑQQİ\\š\ÛÜˆ›İKÙ\›Üˆ]Y]ˆÓÔ’ÒS‘È8 %^\İ[™È[™HˆÛÜšÙ\ˆ][˜Ú™\ÜYŒ‹LLLLˆŒÎ[Y\šXØKĞÚXØYÛÎÈUHX›İ]ÌZ[]\ÎÈ™^ØÚXÚ×Ø]Œ‹LLLLˆNŒ[Y\šXØKĞÚXØYÛÎÈ›ØÚÙ\ˆ“Ó‘NÈÜİØœÙ\˜][ÛˆS’Ó“ÕÓÈ]™[MÙMXXYLMÍÌM—Hˆ›Øİ\ÙY\İÈÚ]š^YÛØÚÜÈ
+ˆ›İ[™\KÙ^H›İ[™\H[ˆÑ[™ÔÕ
+Kœ›İÜÙ\ˆÚXÚÈ\ÚİÜ
+Û[Øš[NÈ^\İ[™ÈÛÛÈ\ÜËˆŸ‹LMMH
+Š”
+Šˆ
+Š•T‘ÕT8 %T”“ÕÈ
+YÙ[H™]šY]ÈÙˆÌLÙØŒÎLØØŒ‹LLLL•ÎŒNŒ–ÈÙXÛÛ™İ\PĞÑTQ[ˆ\ÚYÛˆÔÔ‘ˆÔÕÛX\šÙ]Ü™\Ø[K˜[Y]YİÛ™\‹[ØØ[Û™\İX™[
+Kˆš^^XİH™YH[™ÜË›İ[™È[ÙNˆ
+JHÜ\˜]Ü—İZKÛX\šÙ]Ü™YœËœXXİ[Ûˆ	Ü™\Ù]	È™XZ[ÈH™YœÈÒUÕU™\Ø[Wİ\™Ù]Ø
+[™Ûİ[Ú\HHİÛ™\‰ÜÈ™\Ø[HšXÙ\ÊNÈÙY\™\Ø[Wİ\™Ù]Ø
+[™Y]ÈSTHÚ]HXİ]\HİX\™[ˆØY
 
-| B-05 | P1 | P-02-1: wake-event producer. On re-sighting (price change, new info) or an auction nearing its end, call `mbos.workflows.notify_event(item_id, kind, evidence)`, where kind âˆˆ `price_change`/`auction_ending`/`new_info` (defined by A-08). Record each event's provenance | A-08 (API published this push) | **DONE** @ `e439b9b` (`deliver_wake_events`; A-04 runs it after discover) | 02 | A HOLD with `wake_on=price_change` wakes from a 02 fixture re-sighting; it never executes |
-| B-06 | P2 | P-02-2: IMAP alert ingestor (tier 2), fixture-first, no live mailbox without explicit enablement | none | **DONE** @ `bd899f4` (read-only IMAP, DKIM-checked) | 02 | Fixture emails â†’ RawListing; no network in tests |
-| B-07 | P2 | P-02-3: SAM.gov adapter (service lane / gov contracts), fixture-first | none | **DONE** @ `32c148c` | 02 | Fixture tests |
-| B-08 | P2 | P-02-4: eBay Browse *asking* comps for 03's evidence bundle (labelled ASKING, never SOLD) | none | **DONE** @ `be0dd52` (asking-only evidence gives a fenced INFER estimate; never YES) | 02 (+03) | 03's estimator consumes them with the right basis |
-| B-10 | P1 | Discovery acceptance F1â€“F4 as a runnable harness: F1 every Item has â‰¥1 `sources[]` with `raw_ref`; F2 duplicate rate after dedup on a 7-day fixture corpus (target <2%); F3 repeated 403/429 â†’ L2 freeze request; F4 no collector touches a do-not-automate source | none | **DONE** @ `e439d04` (F1â€“F4 PASS on a synthetic 7-day corpus; F2 missed-dup 0.00%) | 02 | Harness green; F2 rate reported |
-| B-11 | P2 | P-02-6: image perceptual hashing for relists and photo re-uploads (fixture images, no network) | none | **DONE** @ `8c634c9` (pHash: 0 false merges with photos) | 02 | The relist ambiguity in B-10 resolves with no false merges |
-| B-12 | **P0** | P-02-7: live smoke runs behind live flags (first path: existing GovDeals/PublicSurplus alert-email ingestion; re-record real fixtures; start the live F2 sample). Product direction is already given; do not re-ask it. eBay Marketplace Insights remains optional/separate under MICHAEL #8. | Existing DKIM-aware IMAP account + dedicated alerts-only folder named by owner/operator; genuine source alerts routed there; app-password/secret installed outside GitHub; persistent read-only access confirmed. Any new provider/account or external subscription change needs separate authorization. | BLOCKED | 02 | Bounded `--dry`, then one read-only alert-mailbox smoke; verify DKIM and `\\Seen` unchanged; privacy-safe receipt. Exact boundary: `docs/receipts/2026-10-11-slack-b12-access-identity-reconciliation.md`. **Reprioritized P2 to P0 by owner 2026-10-11 16:32 CDT (usable local deals is the next product objective). Readiness checked 2026-10-11T21:36:49Z: all four mailbox prerequisites absent on this host; exact NEED and the Marketplace wiring spec (files + acceptance) are in `docs/handoff/B12_LOCAL_SOURCE_WIRING_SPEC.md`. Craigslist stays NOT CONNECTED. Stale wording corrected: product direction is given; MICHAEL #8 concerns only optional eBay Insights, not this path.** **SPLIT 2026-10-11T22:23:24Z: the implementable Marketplace wiring is eligible separately as F-145 (lane 06, READY, no mailbox needed). This B-12 row now covers ONLY live acceptance (a real accessible sourced listing through the mailbox) and stays BLOCKED on the four mailbox prerequisites.** **UPDATE 2026-10-11T23:03:30Z: the cloud supervisor created the Gmail label DealSniffer/Alerts in the owner's existing Gmail (mailbox organisation only; identity kept out of GitHub); a 90-day search found NO GovDeals/PublicSurplus alerts there. Remaining NEED: (a) genuine GovDeals/PublicSurplus Conway-area saved-search alert subscriptions delivered to that Gmail and filtered into DealSniffer/Alerts; (b) local read-only IMAP access: a Gmail app password installed on this host outside GitHub as MBOS_IMAP_PASSWORD (0600) plus host/user/folder settings (the cloud Gmail connection is not reusable by the local app); (c) one bounded read-only smoke. No new provider needed.** **OWNER CORRECTION 2026-10-11 21:2x CDT: Craigslist official saved-search alert e-mails are a supported first-party route, distinct from prohibited direct scraping. Primary help confirms saved searches and automated e-mail alerts with up to 20 results. Reuse B-06/B-12 read-only e-mail ingestion; add fixture/parser/dedup/stale/UI work after F-149 acceptance. Live CONNECTED requires one genuine Craigslist-generated alert in the dedicated user-authorized folder, unchanged Seen state, and a card opening the original listing. No direct Craigslist fetch.** |
-| B-26 | **P0** | **OWNER P0 2026-10-11 (liaison 2026-10-11-owner-p0-wooley-hibid-live-source): Wooley Auctioneers real read-only source, AUCTION-EVENT level, reusing the B-23 seam (`mbos_discovery/auctions.py` AuctionLot/Field/AuctionHouse, UNKNOWN convention); ONE lane 02 worker; no competing architecture.** Source boundary (FACT, Agent 01 2026-10-11T23:53:30Z): lot-level data (lot numbers, current bid, bid count, lot images) lives only on `wooleyauctioneers.hibid.com`, and HiBid's Terms of Use (last updated 2022-11-22, section 9) prohibit scraping, data extraction, robots/data-mining tools, aggregation for commercial purposes and screenshots of auction information: NEVER fetch, parse or screenshot any hibid.com URL; store the HiBid catalog link only as the human 'view/bid on HiBid' link. Auction-event data lives on Wooley's own site `wooleyauctioneers.com` (robots.txt: only /wp-admin/ disallowed, Crawl-delay 10; no terms page found). Build `src/mbos_discovery/adapters/wooley_site.py`: parse the current-auctions page and each auction page into event records (auctioneer, title, sale type e.g. ONLINE BIDDING ONLY, begins_at and closes_at with timezone, location address, buyer premium, preview time, category tags, highlights text, auction page URL, HiBid catalog URL as link only, observed_at); lot number, current bid, bid count and lot image stay UNKNOWN; stable source IDs from the auction page slug so a repeat parse does not duplicate. A live fetch path exists but is OFF by default (explicit live flag), sends an identifying User-Agent, waits at least 10 s between requests, fetches only wooleyauctioneers.com pages linked from the current-auctions page, and handles HTTP errors/timeouts as an honest offline status. Tests use ONLY the archived real responses on the coordinator branch at `docs/receipts/b26-wooley-archive/` (read them with `git show origin/research/agent-01-coordinator:<path>`; scrubbed; original sha256 in ORIGINAL_SHA256.txt) copied into lane 02 test fixtures: both current auctions parsed (T.J. Bruck Estate, Perryville AR, ends 10/13/26 6:00 PM CDT, buyer premium 10%; S&H Systems Phase II, Jonesboro AR, ends 10/21/26 2:00 PM CT), repeat-parse dedup, UNKNOWN lot fields, a test that the adapter refuses any hibid.com fetch, crawl-delay enforced (fake clock), live flag off by default. No network inside the worker (workers have none); Agent 01 runs the bounded live smoke after verification. **REVIEW FIXES REQUIRED (Agent 01 review of `90672f2`/`fd05d1c`, 2026-10-11T23:58:57Z; tests 16/0 and lane 353/0 pass, but): (1) `USER_AGENT` must NOT contain any personal e-mail address or contact identity: use `DealSnifferBot/1.0 (read-only; auction events only)` with no mailto, and add a test asserting no '@' in the User-Agent; (2) `normalize`: never default `buyer_premium_pct` to 0: include it in `price` only when the source states it; (3) `normalize`: `condition` must be `unknown` (the source does not state condition), not `used`; (4) `normalize`: omit `price.type` when no amount is known (the contract enum has no unknown value and the field is optional); never claim `starting_bid` without an amount. Add focused tests for (2)-(4) with the archived T.J. Bruck page (premium 10 present) and a page without a premium (absent, not 0). Keep everything else unchanged.** | B-23 seam (done) | DONE â€” auction-EVENT source live-verified 2026-10-12T00:02:33Z (lane 02 `5c1aaa5`, fixes `2f81a7e`; 18/0 focused, 355/0 lane; live smoke 3 requests, 0 hibid, 2 real events incl. T.J. Bruck Perryville closes 2026-10-13 18:00 CDT, 21.2 mi, premium 10%; receipt docs/receipts/2026-10-12-b26-wooley-source-verification.md). LOT level (Lot 34, bids) NOT done: NEED Wooley feed or HiBid written permission. /market wiring = F-146 | 02 | Exact clean committed artifact on lane 02 with tests passing (report numbers); no hibid.com request anywhere in code or tests; privacy-safe fixtures; receipt. Agent 01 then independently reviews, runs the tests from a clean checkout, and runs ONE bounded live smoke against wooleyauctioneers.com (receipt: route, HTTP status, timestamp, URLs, parsed fields). NEXT boundary (separate row, not this one): lane 06 wires these real event cards into /market with source status, distance, category, keyword, price and Search Now, verified in Claude Chrome desktop+mobile. LOT-LEVEL acceptance (Lot 34, current bid, bid count) is NOT reachable under HiBid's terms: NEED = written permission/license from HiBid (402 Ventures, LLC) or a Wooley-provided data feed. |
-| F-146 | **P0** | **B-26 NEXT BOUNDARY (owner P0 Wooley source): ONE lane 06 worker wires the REAL Wooley auction events into /market.** (1) Pin lane 02 `5c1aaa5` the existing local way (`git archive 5c1aaa5` into `.tools/disc-5c1aaa5`, pip install --no-deps into the lane 06 venv; no network). (2) `tools/refresh_wooley_cache.py`: runs `WooleySiteAdapter(live=True)` ONLY when invoked explicitly with `--live` and writes `var/cache/wooley-events.json` (records + as_of + request count + error) atomically; without `--live` it refuses. The UI never fetches on page load. (3) `operator_ui/market_sources.py`: a `wooley` source in the existing source seam reading that cache (env `MBOS_WOOLEY_CACHE`), returning the same card shape: auctioneer, title, closes_at, location, distance from the user's origin, buyer premium when stated, category tags, the Wooley auction page as the original link and the HiBid catalog as a separate 'view and bid on HiBid' link; lot number / current bid / bid count shown as UNKNOWN; card kind 'auction event' (not a lot); freshness from as_of with the existing STALE rule; missing/unreadable cache = honest offline status; this is a REAL source so it is labelled connected (cached file), never FIXTURE. (4) Source selector gains 'Wooley Auctioneers'; 'All sources' merges GSA + Wooley (+ FIXTURE alerts only on the staging flag). Distance, category, keyword, price (events have no price: a min/max price filter must exclude or clearly mark them, decide and document) and Search Now work. Craigslist/eBay/Facebook stay NOT CONNECTED. Keep F-142..F-145 behavior. No hibid.com request anywhere. | B-26 (done) | DONE â€” LIVE @ `bbc80ec` (owner-run combined release 2026-10-12 05:51Z; Agent 01 Claude-in-Chrome check on the live page 2026-10-12T06:03:14Z; receipt docs/receipts/2026-10-12-combined-release-live-verification.md). [prior status, audit: PARTIAL â€” STAGING_ACCEPTED @ `6c2ac71` (code `d71e92f`; Agent 01 2026-10-12T00:34:43Z: focused 39/0, lane 490/1 known flake; live refresh to isolated staging 3 requests 2 events; headless Chrome desktop+mobile PASS incl. radius, keyword, pr] | 06 | Exact clean committed artifact (dirty=false). Offline tests with the archived Wooley pages (via lane 02 fixtures) and a cache file: card shape parity, UNKNOWN lot fields, stale/offline states, refresh refuses without --live, no hibid request, filters incl. the documented price rule. Agent 01 then runs ONE `refresh_wooley_cache.py --live` on isolated staging and verifies in **Claude in Chrome** (desktop + mobile) that real Wooley cards (T.J. Bruck, Perryville) appear and respond to source, distance, category, keyword, price and Search Now; screenshots reviewed; existing check tools still pass. Release only via one bounded reload command recorded for the owner if Agent 01's run is denied. |
-| F-147 | **P0** | **FIX REQUIRED â€” NOT DONE YET (Agent 01 reproduced it in a real browser at `568e2ca`): `c6da539` STILL HAS THIS BUG; a re-verification without a code change is NOT acceptable and will be rejected. In `operator_ui/market_bids.py` `act()`, the lot id is cut to 60 characters (`[:60]`); Wooley ids are ~75 characters (e.g. `wooley:t-j-bruck-estate-heavy-equipment-machinery-auction-perryville-arkansas`), so a marked Wooley auction is stored under a truncated id and stays in the search results. Change the limit to 200 (keep the character filter), add a regression test with that exact long id (marked -> absent from results in both sections and present in the window; stop tracking -> back in results), and make a date-only close count down to 23:59:59 America/Chicago. Commit as a NEW commit.** **OWNER 2026-10-12 00:1xZ (in chat): 'I want my system to see that I bid on it and it should be on a little window watching the bids I have in, and not show me those in my search lineup'. IMPLEMENTS A-61 (its inspection step is superseded by this owner instruction; reuse its rules) on the D-33 watchlist path; ONE lane 06 worker, serial AFTER F-146.** (1) Every result card (GSA lot, Wooley event, alert-source card) gets an 'I bid on this' control; marking is OWNER-REPORTED (never inferred from Save, never a bid placement); optional owner-entered max bid stays owner-local (never in GitHub). (2) A compact 'My bids' window on /market (sidebar or pinned strip, desktop and mobile) lists tracked items: title, source, closes_at with a countdown, current bid and bid count WHEN the source provides them (GSA cache; UNKNOWN otherwise), freshness, original link and a 'stop tracking' control; closing-soon items first; it stays visible regardless of search filters, radius or source. (3) Tracked items are EXCLUDED from the search lineup (same persistence as the existing hide list in `market_prefs`, but a separate list and a visible count such as 'N in My bids'); un-tracking returns them. (4) Reuse the existing record path (D-33 watchlist storage or the owner-local market prefs store; document which; no parallel datastore). No external bid, sign-in, account sync, new source, credentials or spend. Files under 400 lines where practical. | F-146 staging-accepted (`6c2ac71`) | DONE â€” LIVE @ `bbc80ec` (owner-run combined release 2026-10-12 05:51Z; Agent 01 Claude-in-Chrome check on the live page 2026-10-12T06:03:14Z; receipt docs/receipts/2026-10-12-combined-release-live-verification.md). [prior status, audit: PARTIAL â€” STAGING_ACCEPTED @ `ba45957` (fix `0065eca`: id limit 200, date-only close 23:59:59 America/Chicago, regression test; Agent 01 2026-10-12T01:58:26Z: focused 23/0, lane suite 497/1 known f39 flake; headless Chrome desktop+mobile PA] | 06 | Exact clean committed artifact; focused tests: mark/unmark, persistence across restart, excluded from results with count, window shows tracked items under any filter, UNKNOWN bid fields where the source has none, never inferred from Save; Agent 01 verifies in Claude in Chrome desktop + mobile with screenshots; existing check tools pass; one combined release command. |
-| B-27 | P1 | **OWNER 2026-10-12 (same instruction): the system should SEE that he bid, automatically, where a lawful route exists.** Lane 02 parser for the owner's OWN bid notifications (bid confirmation, outbid, winning/won, auction closed) from GovDeals, PublicSurplus, GSA Auctions and HiBid-hosted auctioneers, read from the dedicated DealSniffer/Alerts mailbox folder through the B-06 read-only reader (EXAMINE, BODY.PEEK, sender DKIM check). Basis: these are the owner's own records; HiBid's Terms of Use exclude 'records relating to your auction or bid history' from their extraction ban (FACT, terms 2022-11-22 s.9), so own bid-history mail is the supported automatic route; NO login automation, account scraping or HiBid page fetch. Output feeds the F-147 'My bids' list as AUTO-DETECTED (provenance: the e-mail) and keeps the owner's amounts owner-local. **THIS BOUNDARY (2026-10-12T00:14:34Z): parser + record shape with SYNTHETIC fixture e-mails only (no real mailbox, no network, no credentials): new lane 02 module reusing the `email_alerts` parsing and DKIM checks; output records {source, listing id, title, url, event (bid_placed, outbid, winning, won, lost, closed), amount when stated, closes_at when stated, observed_at, provenance=Message-ID}. Live mailbox reading and F-147 wiring are later boundaries.** | none for the fixture parser | PARTIAL â€” fixture parser DONE and review fixes DONE @ `c839030` (status `b3e495b`; Agent 01 verified 2026-10-12T00:22:52Z: 'congratulations' alone no longer means won; 'you are the winning bidder' is won only with an auction-closed statement, else winning; date-only closes_at is UNKNOWN; lane 02 suite 361/0). Remaining boundaries: wire into F-147 'My bids' (after F-147), live read of the owner's DealSniffer/Alerts folder (needs B-12 app password), re-record real notification wording | 02 | Scrubbed fixture e-mails per source (no private data in GitHub); tests for each notification type, DKIM failure rejected, idempotent repeat read, \\Seen unchanged; live acceptance only with a real own bid notification in the dedicated folder. |
-| B-30 | P1 | (lane 02, B-26 follow-up from the F-146 verification 2026-10-12T00:34:43Z) The Wooley auction page's 'selected highlights' list (for example 'John Deere 750 crawler dozer') is not captured: `parse_detail` keeps only the category headline, so keyword search cannot find named equipment. Capture the highlights list items (text only, from wooleyauctioneers.com pages only) into `highlights`; keep the headline as `category_headline`; also expose a coarse event category ('auction event: heavy equipment' etc.) instead of letting the lot classifier guess 'trailers'. Tests from the archived pages. No other change. | B-26 | DONE @ `c745798` (status `39379b4`; Agent 01 verified 2026-10-12T01:06:11Z: highlights list captured (John Deere 750 crawler dozer, Caterpillar E70B excavator, ...), category_headline kept, category from title only (no more 'trailers'); lane 02 suite 362/0). Lane 06 must re-pin lane 02 to `39379b4` (F-148) | 02 | Clean committed artifact; tests: 'dozer' and 'John Deere' present in highlights for T.J. Bruck; headline kept; category not 'trailers'; no hibid request; receipt. |
-| F-148 | P1 | (lane 06, F-146 follow-up, serial AFTER F-147) Auction-event card polish: show closes_at as local human time ('Tue Oct 13, 6:00 PM CDT') with the existing countdown style; file events under an 'Auction events' row (or their B-30 coarse category) instead of a guessed lot row; keep every F-142..F-147 behavior. | F-147, B-30 | SUPERSEDED (folded into F-149) | 06 | Focused tests + browser screenshots reviewed by Agent 01; existing check tools pass. |
-| B-28 | P1 | (lane 02, from the 2026-10-12 source research; serial after B-30) Wilson Auctioneers (Hot Springs AR) auction EVENTS from its own WordPress site `wilsonauctioneers.com/auctions/` (robots: only /wp-admin/ disallowed, Crawl-delay 10; no terms page found), same pattern as the Wooley adapter: live off by default, anonymous User-Agent, >= 10 s between requests, at most hourly; NEVER fetch `*.bidwrangler.com` (BidWrangler Terms of Use forbid data mining): store that link for the human only; lot fields UNKNOWN. Archived real response (Agent 01 2026-10-12T01:06:39Z, HTTP 200, one request, scrubbed; original sha256 kept): `docs/receipts/b28-wilson-archive/auctions.html` on the coordinator branch (read with git show). The /auctions/ LIST page alone carries title, sale type (Online Only or Live/Simulcast), auction location, 'Auction End Oct 13 2026 â€“ 7:00pm CST' and details, so NO detail-page fetch is needed. The site writes 'CST' even during daylight time: parse as America/Chicago local time and mark the basis INFERENCE (do not apply a fixed UTC-6). | B-30 (done) | DONE â€” Wilson auction-EVENT source live-verified 2026-10-12T01:24:11Z (lane 02 `25eec96`, status `02be286`; Agent 01: lane 02 suite 381/0; bidwrangler refused before any request; ReadOnlyTransport pinned to wilsonauctioneers.com; anonymous UA; hourly cap; 'CST' read as America/Chicago INFERENCE; live smoke 01:23:49Z 1 request, 17 events, no error, no duplicates; evidence docs/receipts/b28-live-smoke/live-smoke.json). Gap: Live/Simulcast events show closes_at UNKNOWN (their date is in a separate line), fix in B-32; /market wiring in F-149 | 02 | As B-26: tests on archived real pages, 0 bidwrangler requests, live smoke by Agent 01, receipt. |
-| B-32 | P2 | (lane 02, B-28 follow-up) Wilson Live/Simulcast auctions: parse their auction date/time line (e.g. 'Oct 14 Live / Simulcast' plus the start time on the card) into begins_at/closes_at as INFERENCE when only a start time exists; keep UNKNOWN when absent. From the archived list page only. | B-28 | DONE @ `4f69b33` (labelled 'B-31' in lane 02 history by the dispatcher worker; `cfaf485` B-32 re-verification, status `a05aae8`; Agent 01 2026-10-12T01:58:26Z: 383/0; 11 Live/Simulcast events have begins_at INFERENCE and an explicit closes_at UNKNOWN reason) | 02 | Tests on the archived Wilson page: every Live/Simulcast event either has a parsed date or an explicit UNKNOWN reason; no new request; receipt. |
-| F-149 | **P0** | (lane 06, serial AFTER the F-147 fix; owner goal 'see all auctions in my radius') Generalize the F-146 Wooley seam into ONE auctioneer-events source: a small registry {wooley: WooleySiteAdapter, wilson: WilsonSiteAdapter, later blackmon} in `market_sources.py`; `tools/refresh_auction_events.py --live [--only NAME]` writes one cache per auctioneer (keep `refresh_wooley_cache.py` working or make it a thin alias), respecting each adapter's own rate limits; the Source selector lists each auctioneer plus 'All auction houses'; 'All sources' includes them; per-source status lines; same card shape, UNKNOWN lot fields, human-only platform links (HiBid/BidWrangler/Proxibid never requested). Re-pin lane 02 to `a05aae8` (contains B-26, B-28, B-30, B-32) the existing local way. Fold in F-148 polish: human local close time ('Tue Oct 13, 6:00 PM CDT') and an 'Auction events' row instead of a guessed lot row. | F-147 fix (done), B-28 (done), B-32 (done) | DONE â€” LIVE @ `bbc80ec` (owner-run combined release 2026-10-12 05:51Z; Agent 01 Claude-in-Chrome check on the live page 2026-10-12T06:03:14Z; receipt docs/receipts/2026-10-12-combined-release-live-verification.md). [prior status, audit: PARTIAL â€” implemented @ `0af3177` (status `fd7828a`); Agent 01 2026-10-12T02:30:48Z: refresh refuses without --live; live staging refresh Wooley 2 events/3 requests + Wilson 17/1; browser desktop+mobile: 'All auction houses' source, local c] | 06 | Clean committed artifact; offline tests with both archived sites; refresh refuses without --live; 0 platform requests; Agent 01 browser verification desktop+mobile with screenshots; existing check tools pass. |
-| F-150 | **P0** | **SECOND FIX REQUIRED â€” NOT DONE YET (Agent 01 review of `30561c1`/`7e05d7d`, 2026-10-12T03:15:29Z): the dedupe fix is ACCEPTED (same source: link or id only; cross-source: link, or title >= 0.9 + city + close date; F-145 expectation 2 restored) and all 17 Wilson events now get distances. REMAINING: GSA cards still never use the new gazetteer: `operator_ui/market_search.py` `_card` computes coordinates only with lane 02's `place_coords(loc)`, so 134 of 153 cached GSA lots (Houston, Laredo, Oak Ridge, Oklahoma City, Muskogee, El Paso, ...) stay 'not checked' although `gazetteer.locate` resolves them. Fix: in `_card`, when `place_coords(loc)` returns None, fall back to `gazetteer.locate` on the lot's ZIP if present, else 'City, ST'. Test with the real cached-file shape: those cities get a distance and are excluded by a 150-mile radius from Conway (counted as outside the radius, not as not-checked). Commit as a NEW commit; a re-verification without this change is not acceptable.** **(lane 06; owner goal 'all auctions and listings within the radius I choose'; found in the F-149 verification) TWO DEFECTS, both required:** (1) LOCATION COVERAGE: `operator_ui/gazetteer.py` resolves only a 20-row CSV, so most Arkansas towns/ZIPs (Bee Branch 72013, Star City 71667, Stuttgart 72160, Mayflower 72106, Perry, Malvern, ...) fall into 'not checked' and never count inside the radius (the live page also shows 134 GSA lots not checked). Add the Census 2023 gazetteer data prepared by Agent 01 on the coordinator branch at `docs/data/census-gazetteer-2023/` (`zcta_ar_region.csv`: zip,state,lat,lng; `places_ar_region.csv`: city,state,lat,lng,kind; public domain; read with `git show origin/research/agent-01-coordinator:<path>`) into `operator_ui/data/`, and make `gazetteer.locate` resolve a 5-digit ZIP first, then 'City ST' / 'City, ST' (case-insensitive; also 'Saint'/'St.'), keeping the existing file and MBOS_GAZETTEER_FILE override working; approximate distances stay labelled approximate. (2) DEDUPE: `market_sources.dedupe` must never merge two cards from the SAME source (distinct auctions with similar titles in the same city, e.g. Wilson residential-1069 and residential-1089); cross-source merging stays by identical link, or title similarity >= 0.9 AND same city AND same close date. No other change. | F-149 | DONE â€” LIVE @ `bbc80ec` (owner-run combined release 2026-10-12 05:51Z; Agent 01 Claude-in-Chrome check on the live page 2026-10-12T06:03:14Z; receipt docs/receipts/2026-10-12-combined-release-live-verification.md). [prior status, audit: PARTIAL â€” STAGING_ACCEPTED @ `3dcbb86` (code `0c60193` gazetteer + `30561c1` dedupe + `26f56a7` GSA fallback; Agent 01 2026-10-12T03:46:11Z: lane suite 522/1 known f39 flake; golden diff token-reviewed = only 2 fixture lots moved from not-c] | 06 | Clean committed artifact; tests: those ZIPs/towns resolve; all 17 archived Wilson events get a distance (or an explicit reason); Wilson-only count equals the Wilson part of 'All auction houses'; the two West Little Rock estates both appear; GSA lots previously 'not checked' because of the gazetteer now get distances where their town/ZIP is in the data; existing tests and check tools pass. Agent 01 browser verification desktop+mobile; then ONE combined release command. |
-| B-29 | P1 | (lane 02, from the 2026-10-12 source research; serial after B-28) Blackmon Auctions (Lonoke AR) auction EVENTS from its own Squarespace RSS feed `blackmonauctions.com/auctions?format=rss` plus event pages (robots allow both); NEVER fetch `*.proxibid.com` (blackmon.proxibid.com robots Disallow: /): store that link for the human only; feed dates are publish dates, so event dates come from the event page; lot fields UNKNOWN. Archived real responses (Agent 01 2026-10-12T03:52:34Z, HTTP 200, two requests 10 s apart, anonymous User-Agent, scrubbed; original sha256 kept): `docs/receipts/b29-blackmon-archive/auctions.rss` (29 items: current AND past auctions, so keep only events whose page date is today or later) and `event-bank-repo.html` (date/time 'Tuesday, October 13, 2026 9:00 AM â€“ 11:30 PM' in America/Chicago, location may read 'Multiple Locations' (then location UNKNOWN with that reason), buyer premium '14%' in the terms text). Event pages are fetched only for feed items, 10 s apart, at most hourly. | B-28 (done) | DONE â€” Blackmon auction-EVENT source live-verified 2026-10-12T04:06:58Z (lane 02 `232339c`, status `0a71a9d`; Agent 01: 405/0; proxibid refused before any request, ReadOnlyTransport pinned, anonymous UA, hourly cap, 10 s gaps; live smoke 04:00:34-04:05:35Z: 31 requests, 10 current events (past dropped), 0 proxibid requests, Chicago times incl. the CST switch; evidence docs/receipts/b29-live-smoke/). Gaps -> B-33 | 02 | As B-28. |
-| B-33 | P1 | (lane 02, B-29 follow-up from the live smoke) Blackmon event LOCATIONS and multi-day DATES: most events came back with location UNKNOWN although the pages carry addresses. Parse the Squarespace `eventitem-meta-address-line` elements and the schema.org `location.address` (e.g. '425 Blackmon Road / Lonoke, AR, 72086' and '6468 U.S. 63 / West Plains, Missouri, 65775': accept full state names and 'City, ST, ZIP'); keep 'Multiple Locations' as UNKNOWN with that reason. Multi-day events with dates but no times ('Tuesday, October 27, 2026' to 'Thursday, October 29, 2026'): begins_at = first day 00:00 and closes_at = last day 23:59 America/Chicago, basis INFERENCE. New archived pages (Agent 01, scrubbed): `docs/receipts/b29-blackmon-archive/event-crown-manufacturing-liquidation-auction.html`, `event-union-pacific-railroad-surplus-equipment-auction-oct-2026.html`, `event-arkansas-contractors-auction-oct-2026.html` (read with git show from the coordinator branch). | B-29 | DONE @ `b49c21f` (status `a186ca6`; Agent 01 2026-10-12T04:23:30Z: lane 02 412/0; archived pages give West Plains MO 65775 and Lonoke AR 72086; 'Multiple Locations' UNKNOWN with reason; multi-day dates INFERENCE). Lane 06 should pin `a186ca6` (F-151) | 02 | Tests on the four archived pages: Lonoke AR 72086 and West Plains MO 65775 parsed; Multiple Locations stays UNKNOWN with reason; multi-day dates as INFERENCE; no proxibid request; lane suite passes; receipt. |
-| F-151 | P1 | (lane 06; owner goal 'all auctions in my radius') Add Blackmon Auctions to the F-149 auction-house registry (`market_sources.AUCTION_SITES`: key 'blackmon', name 'Blackmon Auctions', env MBOS_BLACKMON_CACHE, adapter BlackmonSiteAdapter, platform link 'proxibid_url' shown as 'View and bid on Proxibid', never requested, hourly cap 3600 s) after re-pinning lane 02 to `a186ca6` (B-33 locations; if this worker already pinned `0a71a9d`, the next boundary re-pins) the existing local way; 'All auction houses' and 'All sources' include it. Also correct the stale 'About distances' copy that still says 'small local gazetteer with limited coverage' (now: Census 2023 ZIP and place centroids for AR and neighbouring states, approximate). No other change. | B-29 | DONE â€” LIVE @ `bbc80ec` (owner-run combined release 2026-10-12 05:51Z; Agent 01 Claude-in-Chrome check on the live page 2026-10-12T06:03:14Z; receipt docs/receipts/2026-10-12-combined-release-live-verification.md). [prior status, audit: PARTIAL â€” STAGING_ACCEPTED @ `85d293a` (code `b533fd9`; Agent 01 2026-10-12T04:43:43Z with lane 02 `a186ca6`: focused 51/0, lane 06 suite 525/1 known f39, coordinator suite 619/0; live Blackmon refresh to staging 31 requests 10 events; stag] | 06 | Clean committed artifact; offline tests with the archived Blackmon RSS + event page; refresh tool refuses without --live; 0 proxibid requests; existing check tools pass; Agent 01 browser verification. |
-| F-152 | P1 | **(lane 06; owner 2026-10-12 'my system should see that I bid on it'; B-27 wiring boundary) Show AUTO-DETECTED bids in the F-147 'My bids' window.** Pin lane 02 `a186ca6` (contains `mbos_discovery.bid_events` from B-27 `c839030`) the existing local way. Add a read-only loader that runs `bid_events.read_bid_events` over an `EmlDirReader` ONLY on the isolated-staging fixture flag (`MBOS_STAGING_FIXTURES=1` + `MBOS_BID_MAIL_DIR`), never IMAP here, never a network request. Merge the resulting records into the My bids window next to the owner-marked ones: each row labelled 'auto-detected from your e-mail' with its event (bid placed / outbid / winning / won / lost / closed), amount only when stated and only on this page (owner-local), close time when stated else UNKNOWN, provenance = e-mail Message-ID; an auto-detected listing that matches a result card (same listing link) is excluded from the search lineup exactly like an owner-marked one; an owner 'stop tracking' hides an auto-detected item too (stored owner-local, never deletes mail). Without the fixture flag (the live configuration until the mailbox exists) the window shows a one-line honest note 'Automatic bid detection is not connected (no mailbox)'. No change to the parser, no IMAP, no credentials. | F-147 (staging-accepted), B-27 (parser done) | DONE â€” LIVE @ `bbc80ec` (owner-run combined release 2026-10-12 05:51Z; Agent 01 Claude-in-Chrome check on the live page 2026-10-12T06:03:14Z; receipt docs/receipts/2026-10-12-combined-release-live-verification.md). [prior status, audit: PARTIAL â€” STAGING_ACCEPTED @ `e9b84f4` (code `9572443`; Agent 01 2026-10-12T05:10:48Z with lane 02 a186ca6: focused 25/0; golden diff = only the 'not connected (no mailbox)' note; headless Chrome desktop+mobile PASS with the fixture flag: 5] | 06 | Clean committed artifact; offline tests with lane 02's synthetic bid e-mail fixtures: each event type rendered, outbid/won wording shown, DKIM-failed mail absent, a matching result card excluded, stop-tracking persists, no-flag state shows the not-connected note; existing tests and check tools pass; Agent 01 browser verification desktop+mobile. |
-| F-153 | P2 | (lane 06, F-152 follow-up) In the My bids window, an auto-detected row whose latest e-mail event is won, lost or closed must show 'ended (per your e-mail, <date>)' instead of a future 'closes in ...' countdown (seen: 'you WON Â· closes in 3d 18h'); also show the source's display name ('GovDeals', 'GSA Auctions', 'HiBid') instead of the raw key ('govdeals'). No other change. | F-152 | DONE â€” LIVE @ `bbc80ec` (owner-run combined release 2026-10-12 05:51Z; Agent 01 Claude-in-Chrome check on the live page 2026-10-12T06:03:14Z; receipt docs/receipts/2026-10-12-combined-release-live-verification.md). [prior status, audit: PARTIAL â€” STAGING_ACCEPTED @ `bbc80ec` (code `4b5e33a`; Agent 01 2026-10-12T05:37:58Z: focused 16/0, lane suite 533/1 known f39; staging under the coordinator python with the fixture flag: won/lost/closed rows read 'ended (per your e-mail, ] | 06 | Focused tests for won/lost/closed rows and display names; existing tests and check tools pass; Agent 01 browser check. |
-| F-154 | P2 | (lane 06; owner need recorded 2026-10-09: he joins auctions at the END and wants alerts near closing) In the My bids window, highlight items closing soon: a 'closing within 2 h' and 'closing today' badge (America/Chicago), sorted first; the same badges on result cards for tracked items; the 'ended' date for auto-detected rows uses the e-mail's own Date header when the parser provides it (else 'read <date>'). Display only; no notifications sent, no bidding. | F-153 | PARTIAL â€” STAGING_ACCEPTED @ `a132518` (contained in `bb512d9`; lane suite 550/1 known f39). NOT LIVE: release `bb512d9` + `a186ca6`. PARTIAL â€” implemented @ `917b713` (status `a132518`); Agent 01 2026-10-12T06:00:31Z: focused 21/0; closing-within-2h / closing-today badges (America/Chicago), closing-soonest first, ended rows 'ended (read <date>)' when no e-mail Date header; full suite pending. NOT LIVE [SUPERSEDED supervisor note, kept for audit: WORKING â€” existing lane 06 worker launch reported 2026-10-12 00:38 America/Chicago; ETA about 30 minutes; next_check_at 2026-10-12 01:08 America/Chicago; blocker NONE; host observation UNKNOWN; event `e43d569b49ae1768 #14`.] | 06 | Focused tests with fixed clocks (2 h boundary, today boundary in CDT and CST), browser check desktop+mobile; existing tools pass. |
-| F-155 | **P0** | **THIRD STEP â€” NARROW (Agent 01 review of `c2813dd`/`423903c`, 2026-10-12T07:29:06Z; second step ACCEPTED in design: CSRF POST /market/resale, validated, owner-local, honest label). Fix exactly three things, nothing else: (1) `operator_ui/market_prefs.py` action 'reset' rebuilds the prefs WITHOUT `resale_targets` (and would wipe the owner's resale prices); keep `resale_targets` (and add it to EMPTY with a dict-type guard in load()), with a test that reset keeps them; (2) a scored lot that is NOT ranked must always show WHY: on the real GSA cache, 'Trailer, Utility' (3-1-QSC-I-27-006-005) with an owner resale of $900 scores net $281 / 17 days but lands in 'outside' with an EMPTY reason list; show the engine verdict and its reason text, plus the cap and the repair rule when they apply; (3) label the engine's repair allowance 'estimate (repair scope unknown)' when `repair_scope_known` is false, and say plainly when it exceeds the 'little or no repair' rule. Tests for all three; commit, push, status; stop.** **(lane 06, serial AFTER F-154; morning owner acceptance ARIA-20261012-0034: 'ranked DealSniffer Suggestions with buy/max-bid, repair allowance, resale, profit, turnover, distance, reasoning and labeled uncertainty')** Add a 'DealSniffer Suggestions' panel at the top of /market results: the top N current listings/lots within the chosen radius, ranked by the EXISTING lane 03 economics engine (`mbos_economics`, already installed; reuse the scorer path `card_view.py` uses; no new engine), each showing: max bid (the engine's walk-away/ceiling), repair allowance, resale (low/likely/optimistic as the engine gives), net profit, expected turnover/time to cash, distance, a short 'why' and every UNKNOWN or estimated input labelled as such. Owner rules from his stated needs: cap about $500 per purchase and little or no repair unless he overrides; his own resale target (owner-set) overrides the engine's when present. Auction EVENTS (no price) are not ranked as deals; items with too many unknowns are listed below the ranking as 'needs research', never ranked by guessed numbers. For pallet/wholesale rows also show pallet price, estimated sellable units, testing/sort burden, expected recovery, sell-through speed, storage/handling and downside, with every estimate labelled. Display only: no bid, no contact, no spend. | F-154 (implemented; independent acceptance pending) | PARTIAL â€” STAGING_ACCEPTED @ `bb512d9` (code `8fc0112` + `c2813dd` + `52ccce9`; Agent 01 2026-10-12T07:56:45Z: focused 33/0, lane suite 550/1 known f39; REAL GSA cache: owner resale input scores a lot (Trailer, Utility at $900: net $281, 17 days) and a not-suggested lot shows every engine reason (cash $618.95 over the $500 cap, profit/hour below floor, 98-mile travel burden, $240 repair estimate over the $50 rule); reset keeps resale prices; staging under the coordinator python verify-only OK). NOT LIVE: release `bb512d9` + `a186ca6` | 06 | Clean committed artifact; tests: ranking uses the engine's numbers only, $500 cap and repair rule applied, owner resale override wins, events excluded, unknown-heavy items in 'needs research', every estimate labelled; existing check tools pass; Agent 01 firsthand browser check desktop+mobile (Claude in Chrome on owner-started staging when available). |
-| B-34 | **P0 OWNER MORNING ACCEPTANCE** | **MULTIPLE VENDOR SOURCES + authoritative source registry/live-feed expansion.** Reuse the existing source adapters, caches, owner-assisted import/email seams, account profile and /market card shape. Do not create a second registry or source-of-truth document. Implement the broadest truthfully supportable local/regional mix: Wooley/HiBid links, including the owner-provided T.J. Bruck registration-confirmation example; Wilson, Blackmon, Nahlen, AuctionZip and comparable auctions; GSA, GovDeals and Public Surplus; Facebook Marketplace, Craigslist and OfferUp only through authorized/supportable retrieval or import paths; Half Off Wholesale, NorthBay Tool Liquidation Pallets, Bargain Brothers and comparable pallet/returns/bin/store/event sources. The HiBid e-mail route must distinguish REGISTERED/TRACKED auctions from actual bid events: genuine registration confirmations populate registered/tracked auctions, while only genuine bid/outbid/winning/won/lost/closed messages populate My Bids. No HiBid scraping and no duplicate mailbox connector. Include tools, lawn equipment, small equipment, trailers, machinery, pallets and other fast-turn categories. Persist Conway/radius per account without test pollution. Every source must expose name/class, geography, retrieval path, item-vs-event/store granularity, account/bid capability, freshness/last success, constraints, state/blocker and next step. Never count fixtures or candidates as live. | F-155 | SPLIT (2026-10-12T07:57:15Z, Agent 01: too large for one bounded worker; F-155 needed three steps) -> B-35 (HiBid registration e-mails, lane 02), F-156 (Sources panel, lane 06), vendor research (Agent 01 research agent, then one adapter row per readable vendor). Parent acceptance unchanged. [prior status: BLOCKED (serial after F-155; owner-authorized and READY when dependency closes)] [2026-10-12T08:02:25Z: vendor research recorded in docs/handoff/B12_CRAIGSLIST_FACEBOOK_SOURCE_STATUS.md: Half Off Wholesale ALERTS/MANUAL, NorthBay EXCLUDED (scam risk), Bargain Brothers MANUAL (Facebook), OfferUp NOT READABLE (403), The Family Flips CANDIDATE via its published UCP catalog endpoint pending an owner/legal check; no adapter row created yet] | 02 through existing Agent 01 | Exact source-registry/checklist commits; multiple current real listings from MULTIPLE VENDOR SOURCES on the loaded feed; listing counts and representative original links per counted source; one genuine scrubbed HiBid registration confirmation shown as REGISTERED/TRACKED (not a bid) and one genuine bid-status e-mail shown in My Bids when available; truthful LIVE CONNECTED/IMPORTED/MANUAL/NOT CONNECTED/BLOCKED labels; desktop/mobile Claude Chrome on actual loaded page; radius/filter/My Bids/Suggestions journey; tests, loaded revision, service/host observation, blocker/NONE. |
-| B-35 | P1 | **(lane 02; B-34 sub-step) HiBid REGISTRATION confirmations are not bids.** Extend `mbos_discovery/bid_events.py` (B-27): a genuine, DKIM-verified HiBid/auctioneer registration-confirmation e-mail ('you are registered', 'registration approved', 'thank you for registering') yields a separate record kind `registered` {source, auction/catalog id, auction title, auctioneer, url, closes_at when stated, observed_at, provenance Message-ID}, NEVER a bid event; only bid_placed/outbid/winning/won/lost/closed remain bid events. Same read-only readers; no HiBid page fetch; no new mailbox connector. Synthetic scrubbed fixtures (the owner's real T.J. Bruck confirmation is NOT available in the repo: when it is supplied, scrub and add it). | B-27 | DONE @ `9466880` (status `22fc464`; Agent 01 2026-10-12T08:50:44Z: lane 02 414/0; explicit registration wording only, bids never become registrations, HiBid DKIM + Message-ID required, catalog links only, nothing fetched). UI wiring of 'registered/tracked auctions' = later boundary (needs the mailbox for live) | 02 through existing Agent 01 | Tests: registration e-mail -> `registered` record only; a bid e-mail -> bid event only; a newsletter mentioning 'registered' -> nothing; DKIM failure rejected; lane suite passes; receipt; then Agent 01 integration and loaded acceptance. |
-| F-156 | P1 | **(lane 06; B-34 sub-step) Sources panel on /market (the source registry lives in code, in `market_sources`; no second truth document).** One compact 'Sources' section listing every source the page knows (GSA, Wooley, Wilson, Blackmon, GovDeals, Public Surplus, HiBid e-mail, Craigslist, Facebook Marketplace, eBay, OfferUp, owner-entered finds): name/class, geography, retrieval path (official API / own site / RSS / e-mail alerts / owner import / none), granularity (item, auction event, store), account/bid capability, freshness/last success (from the caches), constraints (e.g. 'HiBid terms forbid scraping: lots need written permission'), STATE as exactly one of LIVE CONNECTED, IMPORTED, MANUAL, NOT CONNECTED, BLOCKED, and the next step. Fixtures and candidates are never counted as live. Display only. | F-155 | PARTIAL â€” STAGING_ACCEPTED @ `a0ee240` (code `1c77a14`; Agent 01 2026-10-12T08:50:44Z: focused 21/0, lane suite 558/1 known f39; staging with the LIVE caches under the coordinator python: GSA/Wooley/Wilson/Blackmon LIVE CONNECTED with real last-success times and constraints, GovDeals/Public Surplus/HiBid e-mail NOT CONNECTED with next step; verify-only OK). NOT LIVE: release `a0ee240` + `a186ca6` | 06 through existing Agent 01 | Tests for every state label and that fixtures never read LIVE; existing tools pass; Agent 01 browser check on desktop/mobile after integration. |
-| A-72 | P2 | (Agent 01; F-156 says GSA's next step is 'keep the refresh command scheduled' but nothing schedules it) Hourly-at-most refresh of the GSA cache (supported GsaLiveAdapter, DEMO_KEY, 1 logical fetch, its own 1 h cache rule) and of the auction-house caches (their own hourly caps) inside the EXISTING local watchdog cycle (no new service), with backup-before-swap for GSA, receipts, and an off switch; never during a release. | F-156 | PARTIAL â€” IMPLEMENTED (2026-10-12T08:52:42Z): tools/cache_refresh.py inside the watchdog (GSA hourly via GsaLiveAdapter to a temp file, validated, backup then atomic swap, newest 5 backups kept, failure keeps the old cache; auction houses via the release-installed refresh tool in the background, hourly, one at a time; never during a release; off switch var/watchdog/refresh.off or MBOS_AUTO_REFRESH=0); tests 5/0 + watchdog 33/0. INCIDENT (recorded honestly): before the test fixture existed, a unit-test run called the real cycle and performed a real GSA refresh (08:51:46Z; valid 1167-lot file, backup prev-20261012T085146Z) and started a real auction-house refresh; both read-only and within the hourly limits; tests now forbid live side effects (autouse fixture). First live watchdog run pending | 01 | Tests: at most one GSA fetch per hour, failure keeps the old cache, backup made, receipt written, off switch honoured; first live run observed. |
-| F-157 | **P0 OWNER UX CORRECTION** | **Category controls must actually control the feed.** Enlarge the category controls for easy desktop/mobile use; support multi-select plus All; include Tools, Equipment, Trailers, Vehicles, Lawn & Garden, Machinery, Pallets/Wholesale, Land/Real Estate, and Other/Unknown. Land/Real Estate is unchecked by default for Michael's profile. When All is selected, show every category; otherwise show only selected categories. Hide pure land/home auctions when Land/Real Estate is off, but retain mixed auctions containing selected equipment/tools. Persist choices per owner account; tests and isolated staging must not overwrite owner preferences. Reuse the existing Marketplace filter/prefs path; no parallel settings store. | F-156 (same lane; serialize after Sources panel) | **NEED â€” REWORK (Agent 01 review 2026-10-12 12:50 CDT): NOT ACCEPTED; continues as F-158.** Clean checkout `498fcb3`: focused 17/0; full 571 passed, 3 failed (f39 known flake passes alone; f140 absent-store + f145 golden fail identically on `a0ee240`: env leak, not F-157); goldens: only the intended controls/labels/chip text. Real-cache check: 13 pure-property events hidden, all equipment/vehicle/liquidation events kept, no GSA false positives; BUT 3 commercial real-estate events leak (see F-158). Prior history: Existing Agent 01 resumed Monday, October 12, 2026 â€” 12:26 PM America/Chicago and is reviewing completed lane 06 artifact `498fcb3eb04d5e1a4d281a5ade2cac306141bda4` from `var/review-f157`; do not re-dispatch lane 06. The artifact descends from `a0ee240`. Newest host event reports live `:8766` ARTIFACT `a0ee24051fb06dcab8f04306bcb7da54504c5ece`, exported 2026-10-12T17:22:00Z. F-157 remains NOT LOADED. Independent focused/full tests, golden review and Claude Chrome desktop/mobile acceptance are in progress. ETA about 40 minutes from resume; next_check_at Monday, October 12, 2026 â€” 1:10 PM America/Chicago; blocker NONE. PR transition comment `6129248011`; canonical check-in `docs/receipts/2026-10-12-supervisor-visible-check-1228.md`. | 06 through existing Agent 01 | Focused filter/persistence tests; pure-land exclusion and mixed-auction retention; owner preference isolation; Agent 01 firsthand Claude Chrome desktop/mobile on the actually loaded revision; exact loaded revision, tests, browser journey and blocker/NONE. |
-| F-158 | **P0 OWNER UX CORRECTION (F-157 rework)** | **Commercial real-estate auctions leak through the Land/Real Estate filter.** Agent 01 review of `498fcb3` on the real Wilson cache (2026-10-12 12:50 CDT): with Land/Real Estate unticked (default), `CENTRAL AVENUE NO RESERVE COMMERCIAL REAL ESTATE AUCTION`, `MALVERN AVENUE COMMERCIAL REAL ESTATE AUCTION` and `MCGEHEE MULTI-PARCEL COMMERCIAL BUILDING AUCTION` are still shown. Cause: lane 02 `classify` guesses `commercial_equipment` for these, and `market_search.in_cat` matches the word `equipment` in that system guess, so `card_cats` marks them mixed (equipment + land) and keeps them. Fix in lane 06 only (`operator_ui/market_search.py`, on top of `498fcb3`): when the TITLE matches Land/Real Estate, the other categories that keep a lot must come from the title (seller text), not from the system category guess; also treat `commercial building` and `building` + `auction` titles as land/real estate. Keep everything else from F-157 (All, multi-select, defaults, per-owner prefs, test/staging isolation). Owner request 2026-10-12: he never wants property listings unless he ticks the box, and the choice must be remembered. | F-157 (`498fcb3`, same lane) | **STAGING_ACCEPTED (Agent 01 commit `e37a53a` at 2026-10-12 12:57:50 PM CDT; PR receipt `6129725258` at 12:58:22 PM CDT) @ `112fce4`** (worker by hand, dispatcher not running). Clean checkout: focused 22/0; full 573 passed / 2 failed (f140 absent-store + f145 golden: identical on live `a0ee240`, env resolves the real decision store; goldens unchanged by F-158). Real caches: all 16 property events hidden by default, equipment/vehicle/liquidation events kept, 0 GSA lots hidden. Sandbox staging :8791 with a COPY of owner prefs (broad=1 restored): 0 property cards in default/broad/equipment views, 60 matches with All; ticks remembered (tools+trailers restored); live prefs file untouched. Firsthand Claude-in-Chrome desktop/mobile pending on the LOADED page after the owner release: `tools/release_marketplace.sh 112fce4 a186ca6e29f785e7bbb705ce6eb44482558f26da`. F-157 accepted as part of this revision. **CORRECTION:** supersedes the prior impossible future acceptance timestamp `~13:35 CDT`; canonical check-in `docs/receipts/2026-10-12-supervisor-visible-check-1259.md`. Stage is NOT LIVE / NOT DONE until the owner-gated release and loaded Claude Chrome desktop/mobile verification. | 06 through existing Agent 01 | New tests using the three real titles above with category `commercial_equipment`: hidden by default and with Equipment ticked; shown with Land/Real Estate or All. Mixed auctions with equipment/vehicle/trailer words in the TITLE (e.g. `ONLINE ONLY NO RESERVE FALL CONSIGNMENT CAMPERS, VEHICLES, TRAILERS, TRACTOR & IMPLEMENTS`) still kept. tests/test_market_f157.py and the full suite pass (known: f39 flake; f140 absent-store + f145 golden fail identically on `a0ee240` because the test env resolves the real decision store â€” do not 'fix' goldens for that). Receipt with exact SHA. No live reload. |
-| F-159 | **P0 OWNER PROGRAM (GSA parity 1/2)** | **Search page with GSA Auctions parity, across ALL sources (GSA, Wooley, Wilson, Blackmon, e-mail sources, owner finds).** Owner 2026-10-12 ~14:30 CDT: 'it needs to do all of [GSA Auctions' search/listing experience] but also FB Marketplace, Craigslist and other apps selling stuff; tailor to Arkansas for now; eventually whoever logs in searches wherever they are with local apps from there; don't stop building until complete.' Agent 01 inspected gsaauctions.gov in Claude in Chrome the same hour. Rework /market (reuse market_view/market_search/market_routes and the F-157/F-158 category + prefs path; no parallel store): (1) sticky top bar with one large search box (title + description), result count ('N results found'), Filters button showing the number of active filters, Sort dropdown (Ending soonest default, Newest, Price low/high, Distance, Suggested); (2) Quick views with live counts: All, New today, Closing today (and Closing soon); (3) collapsible left filter sidebar (collapse state remembered) with sections: Category (our F-157 categories, each with a live count, zero-count greyed, a 'filter categories' text box, Land/Real Estate unticked by default), Source (each source with count and connected/not-connected), Location (By State searchable list with counts, Arkansas preselected for this owner / By Distance ZIP + radius dropdown 10/25/50/100/250/Any, default Conway 72032), Price range min-max, Listing type (Auction / Buy now or fixed price / Auction event), Condition; (4) uniform responsive card grid (4/3/2/1 columns desktop to phone): photo or 'no photo' tile, source badge, red countdown badge under 24 h ('12 min left', 'Closing'), title, city ST ZIP + distance, closing date local, current bid + bidder count (UNKNOWN shown honestly for events), View button to the original listing; (5) numbered pagination (24 per page) with the page in the URL. Keep: honest UNKNOWNs, auction events never shown as lots, F-155 Suggestions, My bids, Sources panel, prefs persistence per owner. Phone layout must work at 390 px with filters as a drawer. | F-158 (`112fce4`, same lane) | **PARTIAL â€” NOT ACCEPTED AS COMPLETE (Agent 01 review 2026-10-12 ~14:58 CDT) @ `64ce371`** (status `12a5374`). Functionally right on a staged copy with real caches + a COPY of owner prefs: counts, quick views, sort, category filter, pagination, Land default-off (0 property cards unless All). Test edits follow the intended design (slider to presets, rows to grid), not weakened. Layout falls short of GSA parity in headless Chrome 1440 px and 390 px: continues as F-163. Full suite at `64ce371`: 592 passed / 2 failed (f140 absent-store + f145 golden, identical on `a0ee240`, env leak). | 06 | Focused tests for counts (category/source/state counts equal the filtered rows), quick views, sort orders, pagination, collapse persistence, Land default-off kept, prefs isolation; regenerate goldens only for the intended page change and list the token diff in the receipt; full suite (known env failures f140/f145 absent-store/golden identical on `a0ee240`, f39 flake). Receipt with exact SHA. No live reload. |
-| F-160 | **P0 OWNER PROGRAM (GSA parity 2/2)** | **Listing detail page** /market/item/<source>/<id> for every card (View opens it; the original listing link is on it). Owner 2026-10-12 ~14:30 CDT: 'it needs to do all of [GSA Auctions' search/listing experience] but also FB Marketplace, Craigslist and other apps selling stuff; tailor to Arkansas for now; eventually whoever logs in searches wherever they are with local apps from there; don't stop building until complete.' Agent 01 inspected gsaauctions.gov in Claude in Chrome the same hour. GSA-style layout from the cached record only (no new fetch): photo gallery with thumbnails and full-screen (GSA image URLs when the cache has them, otherwise 'no photo'), status box (Active/Preview/Closed), current bid, live countdown (days/hrs/min/sec, client JS with server-rendered fallback), next minimum bid and increment when known, bidder count, 'Bid on the original site' link (never a bid here), Description and specs (GSA lotInfo), condition text, inspection/removal and pay-by/remove-by dates when present, property address with an OpenStreetMap link (no embedded third-party map script), custodian/sales contacts exactly as published, 'Similar listings' (same category, nearest first), plus our decision helpers (Suggestions reason, resale price input, My bids add). Auction EVENTS get an event page (dates, address, auctioneer link, 'lots not available: see auctioneer'). Phone layout at 390 px. Also: make tests/test_market_f163.py skip cleanly when playwright is missing (pytest.importorskip, as f60/f143 do). Base on `cb682ff`. | F-159 (same lane, serial) | **STAGING_ACCEPTED as part of `fb84d0c`** (defects fixed by F-165). | 06 | Tests: every card links to a detail page; GSA fields rendered from a fixture lot; UNKNOWN fields labelled; event page; no outbound fetch during render; similar listings exclude the item and respect Land default-off. Full suite, receipt, no live reload. |
-| B-36 | **P0 OWNER PROGRAM (Craigslist)** | **Craigslist saved-search alert e-mail parser** in `mbos_discovery/adapters/email_alerts.py` (the lawful route recorded in docs/handoff/B12_CRAIGSLIST_FACEBOOK_SOURCE_STATUS.md; never fetch craigslist.org pages). Owner 2026-10-12 ~14:30 CDT: 'it needs to do all of [GSA Auctions' search/listing experience] but also FB Marketplace, Craigslist and other apps selling stuff; tailor to Arkansas for now; eventually whoever logs in searches wherever they are with local apps from there; don't stop building until complete.' Agent 01 inspected gsaauctions.gov in Claude in Chrome the same hour. Parse Craigslist alert e-mails (up to ~20 results each) into the SAME normalized item shape as the GovDeals/PublicSurplus alerts: title, price, neighborhood/location text, region from the craigslist subdomain (e.g. littlerock, fayar, fortsmith, texarkana, memphis), original listing URL, posting ID as stable source ID, thumbnail URL only if present in the e-mail, received_at freshness; dedupe across repeated alerts by posting ID. Read-only IMAP via the existing reader (label DealSniffer/Alerts, EXAMINE/BODY.PEEK). Fixtures: build scrubbed synthetic e-mails matching Craigslist's documented alert structure; label them FIXTURE. | none (mailbox installed 2026-10-12, label exists, empty) | **DONE @ `27aa922`** (status `aa6f8dc`; Agent 01 2026-10-12 ~15:20 CDT: clean checkout lane 02 suite 421 passed / 0 failed; DKIM-authenticated sender only, spoof fixture rejected, posting-ID dedupe across alerts, region subdomain kept, UNKNOWN for absent price/thumbnail; craigslist.org never fetched). Live proof waits for the owner's NEW dedicated alerts mailbox (owner 2026-10-12: personal Gmail must NOT be used; that secret was removed). | 02 | Fixture tests: multi-result alert parsed, ID dedupe, region mapping, missing price/thumbnail stay UNKNOWN, Seen flag untouched (reader uses PEEK). Lane suite numbers. Receipt. Live proof waits for one genuine alert in the label (owner sets up the saved search). |
-| F-161 | **P0 OWNER PROGRAM (alert sources on /market)** | **Show e-mail alert listings (GovDeals, Public Surplus, Craigslist) on /market** through the existing cards/filters/Sources panel. Owner 2026-10-12 ~14:30 CDT: 'it needs to do all of [GSA Auctions' search/listing experience] but also FB Marketplace, Craigslist and other apps selling stuff; tailor to Arkansas for now; eventually whoever logs in searches wherever they are with local apps from there; don't stop building until complete.' Agent 01 inspected gsaauctions.gov in Claude in Chrome the same hour. Loader reads the parsed alert items (B-06 + B-36) from a local cache written by the existing read-only mailbox reader on the watchdog's hourly refresh (A-72 path; off switch respected). Sources panel says CONNECTED only after a real mailbox read returned items, otherwise 'connected, waiting for alerts' or NOT CONNECTED; fixture data always bannered FIXTURE. Distance via the existing gazetteer; unknown distance never counted as local. | B-36 and F-159 | **STAGING_ACCEPTED @ `dc0e804`** (status `24fd172`; Agent 01 2026-10-12 ~17:55 CDT): needs lane 02 >= B-36 (with lane 02 `62a1bb0` on the path: full suite 613 passed / 2 failed known f140/f145; with the old `a186ca6` 17 fail on the missing craigslist_email origin). Staged with lane 02 `62a1bb0`: release check VERIFY OK; with no alert cache GovDeals/Public Surplus/Craigslist honestly NOT CONNECTED. Read-only refresh tool `tools/refresh_alert_mail.py` (EXAMINE/PEEK, alert senders only, hourly cap); Agent 01 wired it into the watchdog hourly refresh (`1edd604`, env from ~/.config/mbos, password only in the child env; watchdog restarted). Dedicated mailbox dealsniffer2026@gmail.com login verified read-only; label DealSniffer/Alerts not created yet (owner). Owner release: `tools/release_marketplace.sh dc0e804 62a1bb0`. | 06 | Tests: card parity with GSA cards, honest status states, fixture banner, dedupe across sources, filters/counts include the new sources. Live acceptance: one genuine alert listing on the loaded page with working original link. |
-| B-37 | P1 OWNER PROGRAM (eBay local) | **eBay local listings via the official Browse API** (existing `ebay_browse.py`): add local-pickup search near a ZIP (Conway 72032, radius from the page) using eBay's documented filters (pickupCountry/pickupPostalCode/pickupRadius, deliveryOptions SELLER_ARRANGED_LOCAL_PICKUP) plus buyingOptions (AUCTION/FIXED_PRICE) so cards show bid/price, end time, item location, image and itemWebUrl. Owner 2026-10-12 ~14:30 CDT: 'it needs to do all of [GSA Auctions' search/listing experience] but also FB Marketplace, Craigslist and other apps selling stuff; tailor to Arkansas for now; eventually whoever logs in searches wherever they are with local apps from there; don't stop building until complete.' Agent 01 inspected gsaauctions.gov in Claude in Chrome the same hour. | owner eBay developer keys (EBAY_CLIENT_ID/SECRET) for the live smoke only | **DONE @ `b54cf9a`** (status `db303a8`; Agent 01 2026-10-12 ~15:50 CDT: clean checkout lane 02 suite 424 passed / 0 failed; local-pickup filters by ZIP + radius already present, buyingOptions now selectable AUCTION/FIXED_PRICE/BEST_OFFER/CLASSIFIED_AD; the launcher's exit 1 was a no-op retry, not a failure). Live smoke + /market wiring wait for owner eBay developer keys on this host. | 02 | Fixture tests for the local filter URL and normalization; live smoke only after keys exist on this host (outside GitHub). |
-| B-38 | P1 OWNER PROGRAM (other selling apps) | **Research + source matrix: other apps where people sell stuff in Arkansas** (OfferUp, Mercari, Nextdoor, Poshmark, Kijiji-style, Trash Nothing (adapter exists), more Arkansas auction houses and HiBid/Proxibid/AuctionZip auctioneers, AR state/county/city surplus, school/university surplus). For each: official API / alert e-mail / feed / written-permission-only / not allowed, cost, Arkansas coverage, and the narrowest lawful route. Owner 2026-10-12 ~14:30 CDT: 'it needs to do all of [GSA Auctions' search/listing experience] but also FB Marketplace, Craigslist and other apps selling stuff; tailor to Arkansas for now; eventually whoever logs in searches wherever they are with local apps from there; don't stop building until complete.' Agent 01 inspected gsaauctions.gov in Claude in Chrome the same hour. Read-only research; primary documents; no logins, no scraping, no bot-block evasion.  Assigned to lane 07 (docs/research only, no code) so it runs in parallel with lane 02.| none | **DONE @ `1334450`** (status `3b74f09`; Agent 01 accepted 2026-10-12 ~15:15 CDT). Correction: the Trash Nothing adapter DOES exist on lane 02 (`src/mbos_discovery/adapters/trashnothing.py`). Next connectable: AuctionZip alerts, AR State Surplus E-News + GovDeals alerts, Trash Nothing API (terms check first). All alert routes wait for the owner's dedicated mailbox. | 07 | docs/handoff/B38_SOURCE_MATRIX.md with FACT/INFER provenance and a ranked list of the next 3 connectable sources with exact NEEDs. |
-| A-74 | P1 OWNER PROGRAM (multi-user, location-aware) | **ADR: accounts + location-scoped sources** so anyone who logs in searches where THEY are with the local sources for that place. Owner 2026-10-12 ~14:30 CDT: 'it needs to do all of [GSA Auctions' search/listing experience] but also FB Marketplace, Craigslist and other apps selling stuff; tailor to Arkansas for now; eventually whoever logs in searches wherever they are with local apps from there; don't stop building until complete.' Agent 01 inspected gsaauctions.gov in Claude in Chrome the same hour. Decide: user accounts and per-user prefs (current single-owner prefs file becomes per-user), each source declares a coverage region (national: GSA/eBay; regional: Craigslist subdomain, auction houses' states), the page picks sources and default radius from the user's ZIP/state, and how alert e-mail sources work per user. Arkansas remains the default for this owner. No implementation in this row.  Lane 04 DRAFTS the ADR (status Proposed) and the migration rows as text in the ADR; Agent 01 accepts.| none | **DONE â€” ADR-0015 ACCEPTED by Agent 01 2026-10-12 ~15:25 CDT** (draft `3094eca` lane 04). Owner direction answers its question 1 ('whoever logs in'): invite-only accounts, member role read/search/save only. Question 2: Arkansas only until a real second user. Migration rows queued as D-35, D-36, D-37, B-39, F-162, B-40, G-24, A-75. Fits the owner's dedicated alerts mailbox (plus-address per user). | 04 | docs/decisions/ADR-00xx accepted by Agent 01 with migration steps queued as rows. |
-| D-35 | P1 OWNER PROGRAM (accounts 1) | ADR-0015 (lane 04 `3094eca`, accepted by Agent 01 2026-10-12). P-74-1: next free migration: `mbos.app_user` with roles; seed the owner row (Conway AR 72032, AR, 150 mi). Members never get owner_channel/approver/effector. | ADR-0015 | **DONE @ `44a9535`** (status `21383bb`; Agent 01 2026-10-12 ~16:20 CDT: clean checkout spine suite all passed, no failures; migration 0029 app_user, single owner seeded Conway 72032 AR 150 mi, rows never deleted, role immutable, member refused on all owner-only paths). | 04 | Spine suite green; a new test proves a member session is refused on every owner-only function (D-24/25/28..31 and the D-33 ceiling). |
-| D-36 | P1 OWNER PROGRAM (accounts 2) | ADR-0015 (lane 04 `3094eca`, accepted by Agent 01 2026-10-12). P-74-2: migration `mbos.user_pref`, `user_item_state`, `set_user_pref`; add user_id to the D-33 watch/alert tables (alerts once per user per item per threshold); backfill to owner. | D-35 (same lane) | **DONE @ `7a5c19e`** (status `1cc8618`; Agent 01 2026-10-12 ~15:10 CDT: clean checkout spine suite 335 passed, exit 0; migration 0030 per-user prefs/item state/watches only via SECURITY DEFINER functions that accept the caller's own user id; watches backfilled to owner, unique per user+item; ceilings stay owner-only). | 04 | Two users' saved/dismissed/watch never leak; D-33 tests pass; receipt chain verifies. |
-| D-37 | P1 OWNER PROGRAM (accounts 3) | ADR-0015 (lane 04 `3094eca`, accepted by Agent 01 2026-10-12). P-74-3: migration `mbos.source_registry` + `user_item_interest`, seed loader for `config/sources.v1.json` (GSA/eBay national; Craigslist per-subdomain metro; GovDeals/PublicSurplus/AuctionZip alert_email; auction houses states AR; FB/OfferUp blocked/manual with policy_ref). | D-36 (same lane) | **DONE @ `c729a2c`** (status `7ef4fba`; Agent 01 2026-10-12 ~15:35 CDT: clean checkout spine suite 338 passed, exit 0; migration 0031 source_registry + user_item_interest, JSON-schema-validated seed). Seed data defect continued as D-38. | 04 | Registry rows validate against a JSON schema; each row has a policy_ref. |
-| B-39 | P1 OWNER PROGRAM (location) | ADR-0015 (lane 04 `3094eca`, accepted by Agent 01 2026-10-12). P-74-4: offline ZIP table (Census ZCTA centroids, public domain, in repo) and `sources_for(user)` / default-radius function. | D-37 | **DONE @ `43a24e5`** (status `17f88f3`; Agent 01 2026-10-12 ~15:40 CDT: clean checkout lane 02 suite 432 passed / 0 failed; Census 2023 Gazetteer ZCTA centroids pinned with sha256; checked by hand: owner Conway gets national + 4 AR Craigslist regions + AR auction houses, Ohio 43004 gets no AR Craigslist, Memphis 38103 gets Little Rock + Jonesboro). Follow-up: lane 02 vendors a COPY of the registry seed (`src/mbos_discovery/data/sources.v1.json` from `c729a2c`); re-vendor after D-38 lands (folded into B-40). | 02 | Test matrix incl. an Ohio user sees no Arkansas Craigslist; owner output identical to today. |
-| F-162 | P1 OWNER PROGRAM (login UI) | ADR-0015 (lane 04 `3094eca`, accepted by Agent 01 2026-10-12). P-74-5: login/session (local auth, CSRF, lockout), per-user prefs read/write, profile ZIP/radius, 'sources near you' with 'not connected: reason'; one-time import of the owner prefs file to the owner row. | D-35, D-36, B-39, F-161 | BLOCKED | 06 | Owner sees the same page as before; a second invited user sees their own state; Agent 01 browser check. |
-| B-40 | P1 OWNER PROGRAM (per-user alerts) | ADR-0015 (lane 04 `3094eca`, accepted by Agent 01 2026-10-12). P-74-6: per-user alert-mail ingest on the dedicated alerts mailbox: plus-tag to user, quarantine unknown tags (owner-only view), per-user interest rows, shared listing facts deduped. Fixture-first, read-only, Seen unchanged. FIRST re-vendor `src/mbos_discovery/data/sources.v1.json` from lane 04's D-38 commit `b0cb55e` and add a test that the copy's sha256 matches the pinned lane 04 commit noted in PINNED.md. | D-36, D-37 (done), D-38 | **DONE @ `b318842`** (status `6ce46e2`; Agent 01 2026-10-12 ~16:10 CDT: clean checkout lane 02 suite passing; plus-tag routing, disjoint per-user feeds, shared facts once, untagged/unknown/spoofed quarantined owner-only, registry re-vendored from `b0cb55e` with sha256 pin test). Owner-mailbox default continued as B-41. | 02 | Two users' fixtures give disjoint feeds; untagged mail quarantined and shown to the owner only. |
-| G-24 | P2 OWNER PROGRAM (governance) | ADR-0015 (lane 04 `3094eca`, accepted by Agent 01 2026-10-12). P-74-7: review that the member role cannot obtain owner/approver/effector/PANIC authority; session + password handling checklist. | D-35, F-162 | BLOCKED | 05 | Written review receipt with pass/fail per control. |
-| A-75 | P2 OWNER PROGRAM (runbook) | ADR-0015 (lane 04 `3094eca`, accepted by Agent 01 2026-10-12). P-74-8: member onboarding runbook (invite, set ZIP, set up own Craigslist/GovDeals/AuctionZip saved searches with the plus address). | F-162, B-40 | BLOCKED | 01 | Runbook reviewed. |
-| F-163 | **P0 OWNER PROGRAM (GSA parity 1b: layout rework of F-159)** | Owner 2026-10-12: GSA Auctions parity, 'let me know when the search page is complete'. Agent 01 staged `64ce371` with real caches (headless Chrome 1440x1600 and 390x1500) and found: (1) on a 390 px phone NO result card is visible in the first 1500 px: the sources status list, FIXTURE banner, Suggestions box, Sources panel and applied-filter chips all render ABOVE the results; (2) on desktop the Filters card sits BELOW the long 'My bids' list (~y 1590) instead of top-left beside the results; (3) the top bar wraps ('Apply' drops to a second line) and has two submit buttons ('Search Now' + 'Apply'); (4) cards carry 8 controls each (Save, Not interested, More like this, Less like this, Hide, my max, I bid on this, View) vs GSA's single action; (5) the active quick-view pill count '(17)' is dark-on-blue, unreadable. Fix, reusing F-159 code: page order = sticky top bar (one search box + ONE 'Search' button + result count + Sort + Filters toggle, one line at 1024 px+) then quick-view pills then [left column: Filters card FIRST and collapsible; My bids moved below Filters and collapsed by default with its count] + [right: result grid immediately]. Move the per-source status list into the existing Sources panel (collapsed, one-line summary 'N connected, M not connected'); move Suggestions to a collapsed 'Suggestions (N)' strip ABOVE the grid that takes one line when closed; applied-filter chips one compact line. Card = photo, source badge, countdown badge, title, city ST + distance, closing time, current bid + bidders, one 'View' button; Save/Not interested/More/Less/Hide/my max/I bid move into a small 'â‹¯' menu (details/summary, no script needed). FIXTURE banner stays but one line. Phone: Filters is a drawer (keep), and the FIRST result card must be visible within 900 px of the top at 390 px width. Pill counts readable (white on blue when active). Keep everything else from F-157/F-158/F-159. | F-159 (`64ce371`, same lane) | **STAGING_ACCEPTED as part of `cb682ff`** (desktop parity accepted at `478bfc0`; phone defects fixed by F-164). | 06 | Playwright or headless-Chrome layout test: at 390x900 the first result card's top < 900 px; at 1440x900 the Filters card top < the first My bids item and the result grid starts within 450 px; top bar is one line at 1440; exactly one submit in the top bar; each card has exactly one visible primary button. All F-159 tests still pass; goldens regenerated only for the intended change with token diff in the receipt; full suite. No live reload. |
-| F-164 | **P0 OWNER PROGRAM (GSA parity 1c: phone overflow + location text)** | Agent 01 staged `478bfc0` with real caches (headless Chrome 390x900, URL /market?go=1&base=Conway+AR&radius=150): (1) the page is WIDER than the 390 px viewport: the top-bar Search button, Sort, the Filters drawer button and the right part of the quick-view pills and FIXTURE banner are off-screen to the right (horizontal scroll). At 390 px the top bar must wrap to: search box full width, then [Search][Filters] on one row, then Sort; pills wrap or scroll inside their own row (overflow-x:auto on the pill row only); long chips/banners wrap; no element may make document.scrollingElement.scrollWidth exceed the viewport width. (2) every card's location line shows the state twice ('Fayetteville, AR, AR', 'Little Rock, AR, AR', 'Hot Springs, AR, AR'): the city value already contains ', ST' and the template appends the state again; show 'City, ST ZIP Â· N mi' once. | F-163 (`478bfc0`, same lane) | **STAGING_ACCEPTED @ `cb682ff`** (status `4e22422`; Agent 01 2026-10-12 ~15:55 CDT). Search page ACCEPTED as one release with F-159 + F-163 + F-164 @ `cb682ff`: staged with real caches + copy of owner prefs; Playwright (system Chrome) at 390x900 / 360x800 / 1440x900: document scrollWidth == viewport, Search button inside, first card top 696 / 764 / 414 px; no ', ST, ST'; layout + browser tests 42 passed in the lane 06 venv; full suite (coordinator venv) 594 passed / 7 failed = f140 + f145 known env leak + 5 F-163 Playwright tests that hard-import playwright (not installed in that venv; fold importorskip into F-160). Owner release: `tools/release_marketplace.sh cb682ff a186ca6e29f785e7bbb705ce6eb44482558f26da`, then Agent 01 live Claude-in-Chrome check. | 06 | Layout test at 390x900 and 360x800: scrollWidth == viewport width, the Search and Filters buttons are fully inside the viewport, first card top < 900; desktop 1440 unchanged. Unit test: no card renders ', ST, ST'. All F-159/F-163 tests pass; full suite. No live reload. |
-| D-38 | P1 OWNER PROGRAM (registry seed truth) | Fix `config/sources.v1.json` (D-37 `c729a2c`) to match what is actually connected: replace the single `ar_local_auction_houses` manual/not_connected row with three rows `wooley_auctioneers`, `wilson_auctioneers`, `blackmon_auctions`, scope `states` ['AR'], status `connected`, access via the auctioneer's OWN site event pages (add access_mode `site_feed` to the schema enum, defined as 'the publisher's own pages, robots/crawl-delay respected, auction EVENTS only, no lots'), policy_ref to their receipts (B-26/B-28/B-29); add `trashnothing` (national, api, not_connected, policy_ref Trash Nothing terms: personal-use clause pending written confirmation) and `ar_state_surplus` (states AR, alert_email, not_connected). Keep everything else. | D-37 (same lane) | **DONE @ `b0cb55e`** (status `e6ce654`; Agent 01 2026-10-12 ~16:05 CDT: spine suite exit 0; seed now 16 rows: GSA + Wooley/Wilson/Blackmon connected, auction houses as site_feed AR, Trash Nothing + AR State Surplus added, FB/OfferUp blocked/manual). | 04 | Schema validates; a test asserts the three AR auction houses are connected site_feed rows and no row claims connected without a receipt policy_ref; spine suite green. |
-| B-41 | P1 OWNER PROGRAM (owner mailbox default) | B-40 follow-up. The owner's dedicated alerts mailbox is dealsniffer2026@gmail.com (owner 2026-10-12; his personal Gmail must never be used). Today `peruser_alerts.ingest` quarantines every alert with no plus tag, so alerts the owner points at the plain address (many sites reject '+' addresses) would never reach his feed. Add an explicit `untagged_user` argument (default None = today's quarantine behaviour); the coordinator config sets it to the owner's user id for this mailbox, so untagged alerts from AUTHENTICATED alert senders go to the owner; unknown tags are still quarantined. Make `base_local` come from config (the mailbox local part `dealsniffer2026`, so tags are `dealsniffer2026+<handle>@gmail.com`), not the hard-coded 'alerts'. Update the example config, not the owner's local config. | B-40 (same lane) | **DONE @ `bff57c6`** (status `0586f26`; Agent 01 2026-10-12 ~16:15 CDT: clean checkout lane 02 suite passing; untagged alerts to the plain dealsniffer2026@ address go to the owner only from DKIM-authenticated alert senders; unknown tags still quarantined; base_local from config). Live wiring = F-161. | 02 | Fixture tests: untagged authenticated alert lands in the owner's feed when untagged_user is set and is quarantined when it is not; unknown tag still quarantined; spoofed sender still quarantined; base_local from config. Lane suite. Receipt. |
-| F-165 | **P0 OWNER PROGRAM (GSA parity 2b: detail page fixes)** | Agent 01 staged F-160 `f6a399c` with real caches (e.g. /market/item/gsa-auctions/2-1-QSC-I-27-021-015 and /market/item/wilson-auctioneers/wilson%3Apersonal-property-1082): (1) with NO photo the gallery still reserves a large empty block (about 400 px of blank left column at 1440 px; at 390 px the status box starts about 750 px down): when there is no photo show a compact one-line 'No photo (open the original listing)' and let the facts box take the full width / move up. (2) the detail page says 'distance unknown (location not found)' for lots whose search card shows a distance: compute distance exactly as the search card does (same origin from the query/owner prefs, same gazetteer/Census path) and show 'City, ST ZIP Â· N mi'. (3) 'Similar listings (nearest first)' shows distance UNKNOWN for every row, including Greenbrier AR lots near Conway, and includes lots far outside the owner's radius (Texas, Tennessee): use the same distance computation, restrict to the owner's current radius/location mode and Land default-off, sort by known distance then closing time, cap 8, and say 'distance unknown' only when it truly is. | F-160 (same lane) | **STAGING_ACCEPTED @ `fb84d0c`** (status `250c03c`; Agent 01 2026-10-12 ~16:55 CDT): staged real caches; detail page at 390 px Status row top 296 px (was ~750), no horizontal overflow at 390/1440; distance 'Memphis, TN 38118 Â· 142.3 mi' matches the card; Similar listings in radius, nearest first (Greenbrier AR 10.4 mi); f159/f160/f163/f165 38 passed in the lane 06 venv; full suite 600 passed / 2 failed (known f140/f145 env leak), layout tests now skip without playwright. Release check (tools/reload_ui.sh) fixed twice today (`2fd05a0`, `05601e2`): it required the removed 'Gallery rows' marker, which rolled back the owner's 16:27 release of `cb682ff`. Owner release: `tools/release_marketplace.sh fb84d0c a186ca6e29f785e7bbb705ce6eb44482558f26da` (contains F-157..F-165). | 06 | Tests: no-photo layout has no empty gallery block (Playwright at 1440 and 390: facts box top < 400 px at 390); detail distance equals the card's distance for the same lot and origin; similar listings within radius, sorted by distance, exclude the item and pure land. Layout tests importorskip playwright. Full suite. No live reload. |
-| B-42 | **P0 OWNER DECISION (Facebook Marketplace routes b + c)** | Owner chose 2026-10-12: (b) a paid third-party Facebook Marketplace data provider, owner accepts that provider compliance with Meta's Automated Data Collection Terms is UNKNOWN; and (c) apply to Meta for written permission. Research + drafting only, no accounts, no signups, no spend, no scraping, no logins. Deliver docs/handoff/B42_FACEBOOK_MARKETPLACE_ROUTES.md with: (1) a provider comparison (at least Apify Facebook Marketplace actors, Bright Data, and any other established provider with a documented API): how a search is specified (location/radius around Conway AR 72032, keywords, categories), fields returned (title, price, location, photos, listing URL, posted time, seller info), freshness/latency, pricing for ~2,000 listings/week, auth model (API token), their own terms/acceptable-use and data-retention terms, and red flags; a ranked recommendation with the exact owner steps to create the account and token (the token is stored by the owner on this host, never in GitHub or chat); (2) the Meta route: which official program/form applies (Meta's automated data collection / written permission process and any Marketplace or Content Library partner program), eligibility, and a ready-to-send DRAFT request letter from Michael describing DealSniffer (self-hosted, single owner, read-only, Arkansas, no resale of data, rate limits, attribution), for the owner to review and send himself. | none | **DONE @ `632947d`** (status `42673e8`; Agent 01 accepted 2026-10-12 ~17:05 CDT). Doc: docs/handoff/B42_FACEBOOK_MARKETPLACE_ROUTES.md on lane 07. (b) recommended Bright Data Scraper API (about $1.30/week at 2,000 listings after a 5K/month free tier), Apify official actor as alternative; owner creates the account/token and stores it on the host only. (c) Meta has no published form; draft letter ready for the owner to edit and send himself; approval unlikely for a single user. Next: owner signup + token, then a lane 02 adapter row. | 07 | Primary sources cited with dates; FACT/INFER/UNK labels; costs with the date seen; draft letter ready for owner review; no account created, nothing sent. |
-| B-43 | **P0 OWNER PROGRAM (Facebook Marketplace via Bright Data)** | Owner chose route (b) 2026-10-12 and stored a Bright Data API token on this host at ~/.config/mbos/secrets/BRIGHTDATA_TOKEN (mode 600; read it from that file at run time; NEVER print, log, commit or put it in a receipt; strip whitespace). Build `mbos_discovery/adapters/brightdata_fb_marketplace.py` on the existing SourceAdapter seam, per docs/handoff/B42_FACEBOOK_MARKETPLACE_ROUTES.md on lane 07 (`632947d`): Bright Data Facebook Marketplace scraper API (keyword discovery and/or by-URL; bearer token), search near Conway AR 72032 within the profile radius for the profile keywords; normalize to the same Item shape as other sources: title, price, location text + coordinates when given, images, listing URL, listing_date, condition, stable source id (product_id); DROP seller name/profile fields at ingest; label every record `source_compliance: UNKNOWN (no Meta permission; owner-accepted provider route)`. Add a `brightdata_fb` policy row (Disposition ALLOWED tier 4 with that note) and a registry row update (fb_marketplace access_mode api via provider, status fixture until the live smoke passes). Fixture-first with a recorded-shape fixture. Then ONE bounded live smoke: at most 20 records, one keyword ('tools'), Conway AR; record count, fields present, whether location/radius was honoured and listing_date present, and the cost shown, in the receipt (no listing personal data in the receipt). Respect a hard cap of 20 records in code for the smoke. | B-42 (accepted) | **PARTIAL â€” ADAPTER DONE @ `570888a`** (status `62a1bb0`; Agent 01 2026-10-12 ~17:10 CDT: clean checkout lane 02 suite 451 passed / 0 failed; token read at call time from the 0600 file, kept out of repr/errors/URL/raw bytes; seller fields dropped before hashing; compliance label on every record; hard cap 20). Live smoke BLOCKED: one request, HTTP 400 'Customer is not active' (owner must finish Bright Data account activation; nothing charged). Continues as B-44. Note: lane 02 edited its vendored registry copy (fb_marketplace api/fixture) ahead of lane 04; lane 04 must take it in the next registry change. | 02 | Fixture tests (normalization, seller fields dropped, compliance label, token never in logs/exceptions, record cap). Live smoke receipt with counts only. Lane suite. No UI wiring in this row (follow-up F row). |
-| B-44 | P0 OWNER PROGRAM (Facebook live smoke) | B-44 worker 2026-10-12 19:43 CDT (lane 02 5bca3a1/83274d0, 453 passed): 202+poll path done; ONE live smoke returned 20 records without error but a script bug lost the field/radius/listing_date counts, so registry stays fixture. BLOCKED on owner OK for one more bounded paid run (tools/b44_live_smoke.py). NOT yet reviewed by Agent 01. Owner confirmed Bright Data account 2026-10-12 ~19:35 CDT; token on host answers HTTP 200 (datasets/list). After the owner confirms Bright Data activation: (1) support Bright Data's async reply in `brightdata_fb_marketplace.py` (HTTP 202 with a snapshot id: poll the documented progress/snapshot endpoints with back-off, total wait cap 5 minutes, same token handling, same 20-record cap) instead of erroring; (2) re-run the ONE bounded live smoke (keyword 'tools', Conway AR, 50 mi, cap 20) and record in the receipt: record count, which fields were present, whether city/radius were honoured (distance of each record from Conway, counts only), listing_date presence, and cost shown. If it works, set the vendored registry row fb_marketplace status to `connected` with the receipt as policy_ref. No listing personal data in the receipt. | B-43; owner: Bright Data account active | BLOCKED | 02 | Fixture test for the 202 + poll path; live receipt with counts; lane suite. |
-| A-73 | **P0 OPERATING CONTROL** | Close the proven F-157 wake gap inside the EXISTING watchdog: when a bounded specialist worker finishes and its artifact awaits Agent 01 acceptance, wake existing Agent 01 and create an exact ETA checkpoint/event. No new service, coordinator, worker, queue, watchdog, monitor or automation. | **F-157/F-158 staging-acceptance boundary satisfied at `112fce4` / Agent 01 `e37a53a`; live release remains separately owner-gated.** | **DELIVERED IN REPOSITORY / ACK UNVERIFIED â€” Monday, October 12, 2026 â€” 1:32 PM America/Chicago.** Owner: existing Agent 01. Priority: P0. Root cause proven by host ACK `05e9938`. Existing protocol authorizes this compatible no-extra-cost internal watchdog work while the exact-target release is blocked. ETA UNKNOWN until ACK; next_check_at Monday, October 12, 2026 â€” 1:37 PM America/Chicago. Blocker: NONE for implementation; current host delivery/liveness unverified. Next action: existing Agent 01 ACKs A-73 with host evidence, realistic ETA, exact next_check_at and expected tests, or publishes command-specific NEED. Canonical receipt `docs/receipts/2026-10-12-supervisor-visible-check-1332.md`. | 01 | Deterministic tests for one wake, deduplication, project isolation, finished-artifact provenance, ACK/WORKING checkpoint within 300 seconds, and no duplicate process/service. |
-| B-31 | **P0 OWNER PRIORITY** | **Connected Facebook Marketplace discovery â€” actual listings, not F-141 manual entry.** Existing queue/coordinator only; Agent 02 owns the source adapter after access is proven. First boundary is a capability/readability proof using only an already-authorized route: inspect existing configured connectors/browser session/export/API capability; attempt no login bypass, credential capture, scraping evasion, seller contact, bid or purchase. If an authorized readable route exists, ingest one real Conway-area listing with title, price, location/distance, actual photos where exposed, original URL, observed_at, stable source ID and dedup; label source/freshness honestly and wire through the existing Marketplace card seam with Claude Chrome desktop/mobile acceptance. | Exact current blocker: anonymous public-web test could not read a Facebook listing; no repository receipt proves a Meta API/export or owner-authorized signed-in read-only session accessible to Agent 01. Owner directive does not authorize new credentials, authentication bypass or expanded access. | **BLOCKED / CAPTURED** â€” priority preserved; do not substitute F-141 manual finds or claim connection. Compatible authorized work continues serially: F-147 fix is current; B-28 lawful Wilson events remains queued. **[ID-COLLISION NOTE 2026-10-12T01:58:26Z: lane 02 commits `4f69b33`/`bfcf129` and its AGENT_STATUS say 'B-31' but are the Wilson live-auction dates (= B-32), launched by the dispatcher from a row Agent 01 briefly mis-numbered. They are NOT this Facebook row; this row is unchanged and must not be reconciled as DONE from lane 02's status.]** **OWNER DECISION 2026-10-12 ~16:40 CDT: pursue BOTH (b) an owner-authorized paid third-party data provider, accepting the terms risk, and (c) a written-permission request to Meta. Work continues as B-42.** | 02 after F-147 boundary and only when access proof exists | Acceptance: exact access provenance; one genuine listing with stable ID/dedup, fields/photos actually available, zero contact/bid/purchase, tests, and Agent 01 Claude Chrome desktop/mobile proof. Next action: existing Agent 01 records whether any already-authorized Facebook-readable route exists; if none, retain exact NEED and continue the next compatible READY source task. |
-| B-13 | P1 | Spine-side Deduper in 02's package implementing `mbos.interfaces.Deduper` with A-14 `context` (relist rule + pHash MATCH/DIFFERENT), plus `match_hints` on `NormalizedListing` from 02's normalizer | none | **DONE** (02; F2 0.00% / 0 false merges through 01's `spine.ingest`; dedup_key now `category/state`) | 02 | 02's corpus through 01's spine `ingest`: F2 0.00% missed, 0 false merges |
-| B-14 | P2 | P-02-8: spine image-artifact hook: lane B photos are put into lane D's artifact store (`put_artifact`) and referenced in `normalized.images` | none | **DONE** (reconciled from lane 02 AGENT_STATUS Done) | 02 | Images round-trip by sha256 through the spine path |
-| B-09 | P2 | P-02-5: source-freeze wiring onto Postgres PANIC | E-02 | **DONE** @ `b12bdbd` (freeze round trip on lanes D/E Postgres) | 02 | Freeze round-trips on 04/05's tables |
+JKÚ]H\İ]™\Ù]ÙY\È[NÈ
+ŠHHØÛÜ™Yİ]\È“Õ˜[šÙY]\İ[Ø^\ÈÚİÈÒNˆÛˆH™X[ÔĞHØXÚK	Õ˜Z[\‹][]IÈ
+ËLKTTĞËRKLËL‹LJHÚ][ˆİÛ™\ˆ™\Ø[HÙˆ	LØÛÜ™\È™]	HÈMÈ^\È][™È[ˆ	Ûİ]ÚYIÈÚ][ˆSTH™X\ÛÛˆ\İÈÚİÈH[™Ú[™H™\™Xİ[™]È™X\ÛÛˆ^\ÈHØ\[™H™\Z\ˆ[HÚ[ˆ^H\NÈ
+ÊHX™[H[™Ú[™IÜÈ™\Z\ˆ[İØ[˜ÙH	Ù\İ[X]H
+™\Z\ˆØÛÜH[šÛ›İÛŠIÈÚ[ˆ™\Z\—ÜØÛÜWÚÛ›İÛ˜\È˜[ÙK[™Ø^HZ[›HÚ[ˆ]^ÙYYÈH	Û]HÜˆ›È™\Z\‰È[Kˆ\İÈ›Üˆ[™YNÈÛÛ[Z]\Úİ]\ÎÈİÜŠŠˆ
+ŠŠ[™H‹Ù\šX[Q•Tˆ‹LMMÈ[Ü›š[™ÈİÛ™\ˆXØÙ\[˜ÙHT’PKLŒŒLL‹LÍˆ	Ü˜[šÙYX[ÛšY™™\ˆİYÙÙ\İ[ÛœÈÚ]^KÛX^XšY™\Z\ˆ[İØ[˜ÙK™\Ø[K›Ùš]\››İ™\‹\İ[˜ÙK™X\ÛÛš[™È[™X™[Y[˜Ù\Z[IÊJŠˆYH	ÑX[ÛšY™™\ˆİYÙÙ\İ[ÛœÉÈ[™[]HÜÙˆÛX\šÙ]™\İ[ÎˆHÜˆİ\œ™[\İ[™ÜËÛİÈÚ][ˆHÚÜÙ[ˆ˜Y]\Ë˜[šÙYHHVTÕS‘È[™HÈXÛÛ›ÛZXÜÈ[™Ú[™H
+X›Ü×ÙXÛÛ›ÛZXÜØ[™XYH[œİ[YÈ™]\ÙHHØÛÜ™\ˆ]Ø\™İšY]ËœX\Ù\ÎÈ›È™]È[™Ú[™JKXXÚÚİÚ[™ÎˆX^šY
+H[™Ú[™IÜÈØ[ËX]Ø^KØÙZ[[™ÊK™\Z\ˆ[İØ[˜ÙK™\Ø[H
+İËÛZÙ[KÛÜ[Z\İXÈ\ÈH[™Ú[™HÚ]™\ÊK™]›Ùš]^XİY\››İ™\‹İ[YHÈØ\Ú\İ[˜ÙKHÚÜ	İÚIÈ[™]™\HS’Ó“ÕÓˆÜˆ\İ[X]Y[œ]X™[Y\ÈİXÚˆİÛ™\ˆ[\Èœ›ÛH\Èİ]Y™YYÎˆØ\X›İ]	L\ˆ\˜Ú\ÙH[™]HÜˆ›È™\Z\ˆ[›\ÜÈHİ™\œšY\ÎÈ\ÈİÛˆ™\Ø[H\™Ù]
+İÛ™\‹\Ù]
+Hİ™\œšY\ÈH[™Ú[™IÜÈÚ[ˆ™\Ù[ˆ]Xİ[ÛˆU‘S•È
+›ÈšXÙJH\™H›İ˜[šÙY\ÈX[ÎÈ][\ÈÚ]ÛÈX[H[šÛ›İÛœÈ\™H\İY™[İÈH˜[šÚ[™È\È	Û™YYÈ™\ÙX\˜Ú	Ë™]™\ˆ˜[šÙYHİY\ÜÙY[X™\œËˆ›Üˆ[]İÚÛ\Ø[H›İÜÈ[ÛÈÚİÈ[]šXÙK\İ[X]YÙ[X›H[š]Ë\İ[™ËÜÛÜ\™[‹^XİY™XÛİ™\KÙ[]›İYÚÜYYİÜ˜YÙKÚ[™[™È[™İÛœÚYKÚ]]™\H\İ[X]HX™[Yˆ\Ü^HÛ›Nˆ›ÈšY›ÈÛÛXİ›ÈÜ[™ˆ‹LMM
+[\[Y[YÈ[™\[™[XØÙ\[˜ÙH[™[™ÊHT•PS8 %ÕQÒS‘×ĞPĞÑTQ˜LL™X
+ÛÙH˜ÌLL˜
+ÈÌLÙ
+ÈL˜ØØÙNXÈYÙ[HŒ‹LLLL•ÎMVˆ›Øİ\ÙYÌËÌ[™HİZ]HMLÌHÛ›İÛˆŒÎNÈ‘PSÔĞHØXÚNˆİÛ™\ˆ™\Ø[H[œ]ØÛÜ™\ÈHİ
+˜Z[\‹][]H]	Lˆ™]	KMÈ^\ÊH[™H›İ\İYÙÙ\İYİÚİÜÈ]™\H[™Ú[™H™X\ÛÛˆ
+Ø\Ú	ŒNMHİ™\ˆH	LØ\›Ùš]Úİ\ˆ™[İÈ›ÛÜ‹N[Z[H˜]™[\™[‹	™\Z\ˆ\İ[X]Hİ™\ˆH	L[JNÈ™\Ù]ÙY\È™\Ø[HšXÙ\ÎÈİYÚ[™È[™\ˆHÛÛÜ™[˜]Üˆ]Ûˆ™\šYK[Û›HÒÊKˆ“ÕU‘Nˆ™[X\ÙH˜LL™X
+ÈLN˜ØM˜ˆÛX[ˆÛÛ[Z]Y\Y˜XİÈ\İÎˆ˜[šÚ[™È\Ù\ÈH[™Ú[™IÜÈ[X™\œÈÛ›K	LØ\[™™\Z\ˆ[H\YYİÛ™\ˆ™\Ø[Hİ™\œšYHÚ[œË]™[È^ÛYY[šÛ›İÛ‹ZX]H][\È[ˆ	Û™YYÈ™\ÙX\˜Ú	Ë]™\H\İ[X]HX™[YÈ^\İ[™ÈÚXÚÈÛÛÈ\ÜÎÈYÙ[Hš\œİ[™œ›İÜÙ\ˆÚXÚÈ\ÚİÜ
+Û[Øš[H
+Û]YH[ˆÚ›ÛYHÛˆİÛ™\‹\İ\YİYÚ[™ÈÚ[ˆ]˜Z[X›JKˆŸ‹LÍ
+Š”ÕÓ‘TˆSÔ“’S‘ÈPĞÑTSÑJŠˆ
+Š“USTH‘S‘ÔˆÓÕTÑTÈ
+È]]Üš]]]™HÛİ\˜ÙH™YÚ\İKÛ]™KY™YY^[œÚ[Û‹ŠŠˆ™]\ÙHH^\İ[™ÈÛİ\˜ÙHY\\œËØXÚ\ËİÛ™\‹X\ÜÚ\İY[\ÜÙ[XZ[ÙX[\ËXØÛİ[›Ùš[H[™ÛX\šÙ]Ø\™Ú\KˆÈ›İÜ™X]HHÙXÛÛ™™YÚ\İHÜˆÛİ\˜ÙK[Ù‹]]Øİ[Y[ˆ[\[Y[Hœ›ØY\İ][Hİ\ÜX›HØØ[Ü™YÚ[Û˜[Z^ˆÛÛÛ^KÒPšY[šÜË[˜ÛY[™ÈHİÛ™\‹\›İšYY’‹ˆœXÚÈ™YÚ\İ˜][Û‹XÛÛ™š\›X][Ûˆ^[\NÈÚ[ÛÛ‹›XÚÛ[Û‹˜Z[‹]Xİ[Û–š\[™ÛÛ\\˜X›H]Xİ[ÛœÎÈÔĞKÛİ‘X[È[™X›XÈİ\œ\ÎÈ˜XÙX›ÛÚÈX\šÙ]XÙKÜ˜ZYÜÛ\İ[™Ù™™\•\Û›H›İYÚ]]Üš^™YÜİ\ÜX›H™]šY]˜[Üˆ[\Ü]ÎÈ[ˆÙ™ˆÚÛ\Ø[K›Ü˜^HÛÛ\]ZY][Ûˆ[]Ë˜\™ØZ[ˆœ›İ\œÈ[™ÛÛ\\˜X›H[]Ü™]\›œËØš[‹ÜİÜ™KÙ]™[Ûİ\˜Ù\ËˆHPšYK[XZ[›İ]H]\İ\İ[™İZ\Ú‘QÒTÕT‘QÕPÒÑQ]Xİ[ÛœÈœ›ÛHXİX[šY]™[ÎˆÙ[Z[™H™YÚ\İ˜][ÛˆÛÛ™š\›X][ÛœÈÜ[]H™YÚ\İ\™Yİ˜XÚÙY]Xİ[ÛœËÚ[HÛ›HÙ[Z[™HšYÛİ]šYİÚ[›š[™ËİÛÛ‹ÛÜİØÛÜÙYY\ÜØYÙ\ÈÜ[]H^HšYËˆ›ÈPšYØÜ˜\[™È[™›È\XØ]HXZ[›ŞÛÛ›™XİÜ‹ˆ[˜ÛYHÛÛË]Ûˆ\]Z\Y[ÛX[\]Z\Y[˜Z[\œËXXÚ[™\K[]È[™İ\ˆ˜\İ]\›ˆØ]YÛÜšY\Ëˆ\œÚ\İÛÛØ^KÜ˜Y]\È\ˆXØÛİ[Ú]İ]\İÛ][Û‹ˆ]™\HÛİ\˜ÙH]\İ^ÜÙH˜[YKØÛ\ÜËÙ[ÙÜ˜\K™]šY]˜[]][K]œËY]™[ÜİÜ™HÜ˜[[\š]KXØÛİ[ØšYØ\Xš[]Kœ™\Ú™\ÜËÛ\İİXØÙ\ÜËÛÛœİ˜Z[Ëİ]KØ›ØÚÙ\ˆ[™™^İ\ˆ™]™\ˆÛİ[š^\™\ÈÜˆØ[™Y]\È\È]™Kˆ‹LMMHÔU
+Œ‹LLLL•ÎMÎŒMV‹YÙ[NˆÛÈ\™ÙH›ÜˆÛ™H›İ[™YÛÜšÙ\È‹LMMH™YYY™YHİ\ÊHOˆ‹LÍH
+PšY™YÚ\İ˜][ÛˆK[XZ[Ë[™HŠK‹LMMˆ
+Ûİ\˜Ù\È[™[[™HŠK™[™Üˆ™\ÙX\˜Ú
+YÙ[H™\ÙX\˜ÚYÙ[[ˆÛ™HY\\ˆ›İÈ\ˆ™XYX›H™[™ÜŠKˆ\™[XØÙ\[˜ÙH[˜Ú[™ÙYˆÜš[Üˆİ]\Îˆ“ĞÒÑQ
+Ù\šX[Y\ˆ‹LMMNÈİÛ™\‹X]]Üš^™Y[™‘PQHÚ[ˆ\[™[˜ŞHÛÜÙ\ÊWHÌŒ‹LLLL•ŒŒVˆ™[™Üˆ™\ÙX\˜Ú™XÛÜ™Y[ˆØÜËÚ[™Ù™‹ĞŒL—ĞÔRQÔÓTÕÑPÑP“ÓÒ×ÔÓÕTÑWÔÕUTË›Yˆ[ˆÙ™ˆÚÛ\Ø[HST•ËÓPS•PS›Ü˜^HVÓQQ
+ØØ[Hš\ÚÊK˜\™ØZ[ˆœ›İ\œÈPS•PS
+˜XÙX›ÛÚÊKÙ™™\•\“Õ‘PQP“H
+ÊKH˜[Z[H›\ÈĞS‘QUHšXH]ÈX›\ÚYPÔØ][ÙÈ[™Ú[[™[™È[ˆİÛ™\‹ÛYØ[ÚXÚÎÈ›ÈY\\ˆ›İÈÜ™X]YY]Hˆ›İYÚ^\İ[™ÈYÙ[H^XİÛİ\˜ÙK\™YÚ\İKØÚXÚÛ\İÛÛ[Z]ÎÈ][\Hİ\œ™[™X[\İ[™ÜÈœ›ÛHUSTH‘S‘ÔˆÓÕTÑTÈÛˆHØYY™YYÈ\İ[™ÈÛİ[È[™™\™\Ù[]]™HÜšYÚ[˜[[šÜÈ\ˆÛİ[YÛİ\˜ÙNÈÛ™HÙ[Z[™HØÜX˜™YPšY™YÚ\İ˜][ÛˆÛÛ™š\›X][ÛˆÚİÛˆ\È‘QÒTÕT‘QÕPÒÑQ
+›İHšY
+H[™Û™HÙ[Z[™HšY\İ]\ÈK[XZ[ÚİÛˆ[ˆ^HšYÈÚ[ˆ]˜Z[X›NÈ][U‘HÓÓ“‘PÕQÒSTÔ•QÓPS•PSÓ“ÕÓÓ“‘PÕQĞ“ĞÒÑQX™[ÎÈ\ÚİÜÛ[Øš[HÛ]YHÚ›ÛYHÛˆXİX[ØYYYÙNÈ˜Y]\ËÙš[\‹Ó^HšYËÔİYÙÙ\İ[ÛœÈ›İ\›™^NÈ\İËØYY™]š\Ú[Û‹Ù\šXÙKÚÜİØœÙ\˜][Û‹›ØÚÙ\‹Ó“Ó‘KˆŸ‹LÍHH
+ŠŠ[™HÈ‹LÍİX‹\İ\
+HPšY‘QÒTÕUSÓˆÛÛ™š\›X][ÛœÈ\™H›İšYËŠŠˆ^[™X›Ü×Ù\ØÛİ™\KØšYÙ]™[ËœX
+‹LÊNˆHÙ[Z[™KÒSK]™\šYšYYPšYØ]Xİ[Û™Y\ˆ™YÚ\İ˜][Û‹XÛÛ™š\›X][ÛˆK[XZ[
+	Ş[İH\™H™YÚ\İ\™Y	Ë	Ü™YÚ\İ˜][Ûˆ\›İ™Y	Ë	İ[šÈ[İH›Üˆ™YÚ\İ\š[™ÉÊHZY[ÈHÙ\\˜]H™XÛÜ™Ú[™™YÚ\İ\™YÜÛİ\˜ÙK]Xİ[Û‹ØØ][ÙÈY]Xİ[Ûˆ]K]Xİ[Û™Y\‹\›ÛÜÙ\×Ø]Ú[ˆİ]YØœÙ\™YØ]›İ™[˜[˜ÙHY\ÜØYÙKRQK‘U‘TˆHšY]™[ÈÛ›HšYÜXÙYÛİ]šYİÚ[›š[™ËİÛÛ‹ÛÜİØÛÜÙY™[XZ[ˆšY]™[ËˆØ[YH™XY[Û›H™XY\œÎÈ›ÈPšYYÙH™]ÚÈ›È™]ÈXZ[›ŞÛÛ›™XİÜ‹ˆŞ[]XÈØÜX˜™Yš^\™\È
+HİÛ™\‰ÜÈ™X[’‹ˆœXÚÈÛÛ™š\›X][Ûˆ\È“Õ]˜Z[X›H[ˆH™\ÎˆÚ[ˆ]\Èİ\YYØÜXˆ[™Y]
+Kˆ‹LÈÓ‘HM
+İ]\ÈŒ™˜ÍÈYÙ[HŒ‹LLLL•Lˆ[™HˆMÌÈ^XÚ]™YÚ\İ˜][ÛˆÛÜ™[™ÈÛ›KšYÈ™]™\ˆ™XÛÛYH™YÚ\İ˜][ÛœËPšYÒSH
+ÈY\ÜØYÙKRQ™\]Z\™YØ][ÙÈ[šÜÈÛ›K›İ[™È™]ÚY
+KˆRHÚ\š[™ÈÙˆ	Ü™YÚ\İ\™Yİ˜XÚÙY]Xİ[ÛœÉÈH]\ˆ›İ[™\H
+™YYÈHXZ[›Ş›Üˆ]™JHˆ›İYÚ^\İ[™ÈYÙ[H\İÎˆ™YÚ\İ˜][ÛˆK[XZ[Oˆ™YÚ\İ\™Y™XÛÜ™Û›NÈHšYK[XZ[OˆšY]™[Û›NÈH™]ÜÛ]\ˆY[[Ûš[™È	Ü™YÚ\İ\™Y	ÈOˆ›İ[™ÎÈÒSH˜Z[\™H™Z™XİYÈ[™HİZ]H\ÜÙ\ÎÈ™XÙZ\È[ˆYÙ[H[YÜ˜][Ûˆ[™ØYYXØÙ\[˜ÙKˆŸ‹LMMˆH
+ŠŠ[™HÈ‹LÍİX‹\İ\
+HÛİ\˜Ù\È[™[ÛˆÛX\šÙ]
+HÛİ\˜ÙH™YÚ\İH]™\È[ˆÛÙK[ˆX\šÙ]ÜÛİ\˜Ù\ØÈ›ÈÙXÛÛ™]Øİ[Y[
+KŠŠˆÛ™HÛÛ\Xİ	ÔÛİ\˜Ù\ÉÈÙXİ[Ûˆ\İ[™È]™\HÛİ\˜ÙHHYÙHÛ›İÜÈ
+ÔĞKÛÛÛ^KÚ[ÛÛ‹›XÚÛ[Û‹Ûİ‘X[ËX›XÈİ\œ\ËPšYK[XZ[Ü˜ZYÜÛ\İ˜XÙX›ÛÚÈX\šÙ]XÙKP˜^KÙ™™\•\İÛ™\‹Y[\™Yš[™ÊNˆ˜[YKØÛ\ÜËÙ[ÙÜ˜\K™]šY]˜[]
+Ù™šXÚX[THÈİÛˆÚ]HÈ”ÔÈÈK[XZ[[\ÈÈİÛ™\ˆ[\ÜÈ›Û™JKÜ˜[[\š]H
+][K]Xİ[Ûˆ]™[İÜ™JKXØÛİ[ØšYØ\Xš[]Kœ™\Ú™\ÜËÛ\İİXØÙ\ÜÈ
+œ›ÛHHØXÚ\ÊKÛÛœİ˜Z[È
+K™Ëˆ	ÒPšY\›\È›Ü˜šYØÜ˜\[™ÎˆİÈ™YYÜš][ˆ\›Z\ÜÚ[Û‰ÊKÕUH\È^XİHÛ™HÙˆU‘HÓÓ“‘PÕQSTÔ•QPS•PS“ÕÓÓ“‘PÕQ“ĞÒÑQ[™H™^İ\ˆš^\™\È[™Ø[™Y]\È\™H™]™\ˆÛİ[Y\È]™Kˆ\Ü^HÛ›Kˆ‹LMMHT•PS8 %ÕQÒS‘×ĞPĞÑTQLYL
+ÛÙHXÍÍØLMÈYÙ[HŒ‹LLLL•Lˆ›Øİ\ÙYŒKÌ[™HİZ]HMNÌHÛ›İÛˆŒÎNÈİYÚ[™ÈÚ]HU‘HØXÚ\È[™\ˆHÛÛÜ™[˜]Üˆ]ÛˆÔĞKÕÛÛÛ^KÕÚ[ÛÛ‹Ğ›XÚÛ[ÛˆU‘HÓÓ“‘PÕQÚ]™X[\İ\İXØÙ\ÜÈ[Y\È[™ÛÛœİ˜Z[ËÛİ‘X[ËÔX›XÈİ\œ\ËÒPšYK[XZ[“ÕÓÓ“‘PÕQÚ]™^İ\È™\šYK[Û›HÒÊKˆ“ÕU‘Nˆ™[X\ÙHLYL
+ÈLN˜ØM˜ˆ›İYÚ^\İ[™ÈYÙ[H\İÈ›Üˆ]™\Hİ]HX™[[™]š^\™\È™]™\ˆ™XYU‘NÈ^\İ[™ÈÛÛÈ\ÜÎÈYÙ[Hœ›İÜÙ\ˆÚXÚÈÛˆ\ÚİÜÛ[Øš[HY\ˆ[YÜ˜][Û‹ˆŸKMÌˆˆ
+YÙ[NÈ‹LMMˆØ^\ÈÔĞIÜÈ™^İ\\È	ÚÙY\H™Yœ™\ÚÛÛ[X[™ØÚY[Y	È]›İ[™ÈØÚY[\È]
+Hİ\›KX][[Üİ™Yœ™\ÚÙˆHÔĞHØXÚH
+İ\ÜYÜØS]™PY\\‹SS×ÒÑVKHÙÚXØ[™]Ú]ÈİÛˆHØXÚH[JH[™ÙˆH]Xİ[Û‹Zİ\ÙHØXÚ\È
+Z\ˆİÛˆİ\›HØ\ÊH[œÚYHHVTÕS‘ÈØØ[Ø]ÚÙÈŞXÛH
+›È™]ÈÙ\šXÙJKÚ]˜XÚİ\X™Y›Ü™K\İØ\›ÜˆÔĞK™XÙZ\Ë[™[ˆÙ™ˆİÚ]ÚÈ™]™\ˆ\š[™ÈH™[X\ÙKˆ‹LMMˆT•PS8 %STSQS•Q
+Œ‹LLLL•L–ŠNˆÛÛËØØXÚWÜ™Yœ™\ÚœH[œÚYHHØ]ÚÙÈ
+ÔĞHİ\›HšXHÜØS]™PY\\ˆÈH[\š[K˜[Y]Y˜XÚİ\[ˆ]ÛZXÈİØ\™]Ù\İH˜XÚİ\ÈÙ\˜Z[\™HÙY\ÈHÛØXÚNÈ]Xİ[Ûˆİ\Ù\ÈšXHH™[X\ÙKZ[œİ[Y™Yœ™\ÚÛÛ[ˆH˜XÚÙÜ›İ[™İ\›KÛ™H]H[YNÈ™]™\ˆ\š[™ÈH™[X\ÙNÈÙ™ˆİÚ]Ú˜\‹İØ]ÚÙËÜ™Yœ™\Ú›Ù™ˆÜˆP“Ô×ĞUU×Ô‘Q”‘TÒL
+NÈ\İÈKÌ
+ÈØ]ÚÙÈÌËÌˆSÒQS•
+™XÛÜ™YÛ™\İJNˆ™Y›Ü™HH\İš^\™H^\İYH[š]]\İ[ˆØ[YH™X[ŞXÛH[™\™›Ü›YYH™X[ÔĞH™Yœ™\Ú
+LN–È˜[YLMË[İš[K˜XÚİ\™]‹LŒŒLL•LM–ŠH[™İ\YH™X[]Xİ[Û‹Zİ\ÙH™Yœ™\ÚÈ›İ™XY[Û›H[™Ú][ˆHİ\›H[Z]ÎÈ\İÈ›İÈ›Ü˜šY]™HÚYHY™™XİÈ
+]]İ\ÙHš^\™JKˆš\œİ]™HØ]ÚÙÈ[ˆ[™[™ÈH\İÎˆ][ÜİÛ™HÔĞH™]Ú\ˆİ\‹˜Z[\™HÙY\ÈHÛØXÚK˜XÚİ\XYK™XÙZ\Üš][‹Ù™ˆİÚ]ÚÛ›İ\™YÈš\œİ]™H[ˆØœÙ\™YˆŸ‹LMMÈ
+Š”ÕÓ‘TˆVÓÔ”‘PÕSÓŠŠˆ
+ŠØ]YÛÜHÛÛ›ÛÈ]\İXİX[HÛÛ›ÛH™YYŠŠˆ[›\™ÙHHØ]YÛÜHÛÛ›ÛÈ›ÜˆX\ŞH\ÚİÜÛ[Øš[H\ÙNÈİ\Ü][K\Ù[Xİ\È[È[˜ÛYHÛÛË\]Z\Y[˜Z[\œË™ZXÛ\Ë]Ûˆ	ˆØ\™[‹XXÚ[™\K[]ËÕÚÛ\Ø[K[™Ô™X[\İ]K[™İ\‹Õ[šÛ›İÛ‹ˆ[™Ô™X[\İ]H\È[˜ÚXÚÙYHY˜][›ÜˆZXÚY[	ÜÈ›Ùš[KˆÚ[ˆ[\ÈÙ[XİYÚİÈ]™\HØ]YÛÜNÈİ\Ú\ÙHÚİÈÛ›HÙ[XİYØ]YÛÜšY\ËˆYH\™H[™ÚÛYH]Xİ[ÛœÈÚ[ˆ[™Ô™X[\İ]H\ÈÙ™‹]™]Z[ˆZ^Y]Xİ[ÛœÈÛÛZ[š[™ÈÙ[XİY\]Z\Y[İÛÛËˆ\œÚ\İÚÚXÙ\È\ˆİÛ™\ˆXØÛİ[È\İÈ[™\ÛÛ]YİYÚ[™È]\İ›İİ™\Üš]HİÛ™\ˆ™Y™\™[˜Ù\Ëˆ™]\ÙHH^\İ[™ÈX\šÙ]XÙHš[\‹Ü™YœÈ]È›È\˜[[Ù][™ÜÈİÜ™Kˆ‹LMMˆ
+Ø[YH[™NÈÙ\šX[^™HY\ˆÛİ\˜Ù\È[™[
+H
+Š“‘QQ8 %‘UÓÔ’È
+YÙ[H™]šY]ÈŒ‹LLLLˆLLÑ
+Nˆ“ÕPĞÑTQÈÛÛ[Y\È\È‹LMNŠŠˆÛX[ˆÚXÚÛİ]N˜ØŒØˆ›Øİ\ÙYMËÌÈ[MÌH\ÜÙYÈ˜Z[Y
+ŒÎHÛ›İÛˆ›ZÙH\ÜÙ\È[Û™NÈŒMXœÙ[\İÜ™H
+ÈŒMHÛÛ[ˆ˜Z[Y[XØ[HÛˆLYLˆ[ˆXZË›İ‹LMMÊNÈÛÛ[œÎˆÛ›HH[[™YÛÛ›ÛËÛX™[ËØÚ\^ˆ™X[XØXÚHÚXÚÎˆLÈ\™K\›Ü\H]™[ÈY[‹[\]Z\Y[İ™ZXÛKÛ\]ZY][Ûˆ]™[ÈÙ\›ÈÔĞH˜[ÙHÜÚ]]™\ÎÈ•UÈÛÛ[Y\˜ÚX[™X[Y\İ]H]™[ÈXZÈ
+ÙYH‹LMN
+Kˆš[Üˆ\İÜNˆ^\İ[™ÈYÙ[H™\İ[YY[Û™^KØİØ™\ˆL‹Œˆ8 %LŒˆH[Y\šXØKĞÚXØYÛÈ[™\È™]šY]Ú[™ÈÛÛ\]Y[™Hˆ\Y˜XİN˜ØŒÙXŒYLXMXMXYL˜ØXÌÌŒMX™Mœ›ÛH˜\‹Ü™]šY]ËYŒMMØÈÈ›İ™KY\Ü]Ú[™H‹ˆH\Y˜Xİ\ØÙ[™Èœ›ÛHLYLˆ™]Ù\İÜİ]™[™\ÜÈ]™HÍ˜T•QPÕLYLLY˜Œ™ØXŒÌ˜˜ØÙMMLÍYXÙX^ÜYŒ‹LLLL•MÎŒŒŒ‹ˆ‹LMMÈ™[XZ[œÈ“ÕĞQQˆ[™\[™[›Øİ\ÙYÙ[\İËÛÛ[ˆ™]šY]È[™Û]YHÚ›ÛYH\ÚİÜÛ[Øš[HXØÙ\[˜ÙH\™H[ˆ›ÙÜ™\ÜËˆUHX›İ]Z[]\Èœ›ÛH™\İ[YNÈ™^ØÚXÚ×Ø][Û™^KØİØ™\ˆL‹Œˆ8 %NŒLH[Y\šXØKĞÚXØYÛÎÈ›ØÚÙ\ˆ“Ó‘Kˆˆ˜[œÚ][ÛˆÛÛ[Y[ŒLLLXÈØ[›ÛšXØ[ÚXÚËZ[ˆØÜËÜ™XÙZ\ËÌŒ‹LLLL‹\İ\\š\ÛÜ‹]š\ÚX›KXÚXÚËLLŒ›Yˆˆ›İYÚ^\İ[™ÈYÙ[H›Øİ\ÙYš[\‹Ü\œÚ\İ[˜ÙH\İÎÈ\™K[[™^Û\Ú[Ûˆ[™Z^YX]Xİ[Ûˆ™][[ÛÈİÛ™\ˆ™Y™\™[˜ÙH\ÛÛ][ÛÈYÙ[Hš\œİ[™Û]YHÚ›ÛYH\ÚİÜÛ[Øš[HÛˆHXİX[HØYY™]š\Ú[ÛÈ^XİØYY™]š\Ú[Û‹\İËœ›İÜÙ\ˆ›İ\›™^H[™›ØÚÙ\‹Ó“Ó‘KˆŸ‹LMN
+Š”ÕÓ‘TˆVÓÔ”‘PÕSÓˆ
+‹LMMÈ™]ÛÜšÊJŠˆ
+ŠÛÛ[Y\˜ÚX[™X[Y\İ]H]Xİ[ÛœÈXZÈ›İYÚH[™Ô™X[\İ]Hš[\‹ŠŠˆYÙ[H™]šY]ÈÙˆN˜ØŒØÛˆH™X[Ú[ÛÛˆØXÚH
+Œ‹LLLLˆLLÑ
+NˆÚ][™Ô™X[\İ]H[XÚÙY
+Y˜][
+KÑS•SU‘S•QH“È‘TÑT•‘HÓÓSQTÒPS‘PSTÕUHUPÕSÓ˜PS‘T“ˆU‘S•QHÓÓSQTÒPS‘PSTÕUHUPÕSÓ˜[™PÑÑRQHUSKTTÑSÓÓSQTÒPS•RSS‘ÈUPÕSÓ˜\™Hİ[ÚİÛ‹ˆØ]\ÙNˆ[™HˆÛ\ÜÚYXİY\ÜÙ\ÈÛÛ[Y\˜ÚX[Ù\]Z\Y[›Üˆ\ÙK[™X\šÙ]ÜÙX\˜Úš[—ØØ]X]Ú\ÈHÛÜ™\]Z\Y[[ˆ]Ş\İ[HİY\ÜËÛÈØ\™ØØ]ØX\šÜÈ[HZ^Y
+\]Z\Y[
+È[™
+H[™ÙY\È[Kˆš^[ˆ[™HˆÛ›H
+Ü\˜]Ü—İZKÛX\šÙ]ÜÙX\˜ÚœXÛˆÜÙˆN˜ØŒØ
+NˆÚ[ˆHUHX]Ú\È[™Ô™X[\İ]KHİ\ˆØ]YÛÜšY\È]ÙY\Hİ]\İÛÛYHœ›ÛHH]H
+Ù[\ˆ^
+K›İœ›ÛHHŞ\İ[HØ]YÛÜHİY\ÜÎÈ[ÛÈ™X]ÛÛ[Y\˜ÚX[Z[[™Ø[™Z[[™Ø
+È]Xİ[Û˜]\È\È[™Ü™X[\İ]KˆÙY\]™\][™È[ÙHœ›ÛH‹LMMÈ
+[][K\Ù[XİY˜][Ë\‹[İÛ™\ˆ™YœË\İÜİYÚ[™È\ÛÛ][ÛŠKˆİÛ™\ˆ™\]Y\İŒ‹LLLLˆH™]™\ˆØ[È›Ü\H\İ[™ÜÈ[›\ÜÈHXÚÜÈH›Ş[™HÚÚXÙH]\İ™H™[Y[X™\™Yˆ‹LMMÈ
+N˜ØŒØØ[YH[™JH
+Š”ÕQÒS‘×ĞPĞÑTQ
+YÙ[HÛÛ[Z]LÍØMLØX]Œ‹LLLLˆLMÎLHÑÈˆ™XÙZ\ŒLMÌLN]LNŒŒˆHÑ
+HLL™˜ÙM
+Šˆ
+ÛÜšÙ\ˆH[™\Ü]Ú\ˆ›İ[›š[™ÊKˆÛX[ˆÚXÚÛİ]ˆ›Øİ\ÙYŒ‹ÌÈ[MÌÈ\ÜÙYÈˆ˜Z[Y
+ŒMXœÙ[\İÜ™H
+ÈŒMHÛÛ[ˆY[XØ[Ûˆ]™HLYL[ˆ™\ÛÛ™\ÈH™X[XÚ\Ú[ÛˆİÜ™NÈÛÛ[œÈ[˜Ú[™ÙYH‹LMN
+Kˆ™X[ØXÚ\Îˆ[Mˆ›Ü\H]™[ÈY[ˆHY˜][\]Z\Y[İ™ZXÛKÛ\]ZY][Ûˆ]™[ÈÙ\ÔĞHİÈY[‹ˆØ[™›ŞİYÚ[™ÈÎLHÚ]HÓÔHÙˆİÛ™\ˆ™YœÈ
+œ›ØYLH™\İÜ™Y
+Nˆ›Ü\HØ\™È[ˆY˜][Øœ›ØYÙ\]Z\Y[šY]ÜËŒX]Ú\ÈÚ][ÈXÚÜÈ™[Y[X™\™Y
+ÛÛÊİ˜Z[\œÈ™\İÜ™Y
+NÈ]™H™YœÈš[H[İXÚYˆš\œİ[™Û]YKZ[‹PÚ›ÛYH\ÚİÜÛ[Øš[H[™[™ÈÛˆHĞQQYÙHY\ˆHİÛ™\ˆ™[X\ÙNˆÛÛËÜ™[X\ÙWÛX\šÙ]XÙKœÚLL™˜ÙMLN˜ØM™LYÎYMØ˜˜ÌXÙM™XMNŒ™Xˆ‹LMMÈXØÙ\Y\È\Ùˆ\È™]š\Ú[Û‹ˆ
+ŠÓÔ”‘PÕSÓŠŠˆİ\\œÙY\ÈHš[Üˆ[\ÜÜÚX›H]\™HXØÙ\[˜ÙH[Y\İ[\ŒLÎŒÍHÑÈØ[›ÛšXØ[ÚXÚËZ[ˆØÜËÜ™XÙZ\ËÌŒ‹LLLL‹\İ\\š\ÛÜ‹]š\ÚX›KXÚXÚËLLNK›YˆİYÙH\È“ÕU‘HÈ“ÕÓ‘H[[HİÛ™\‹YØ]Y™[X\ÙH[™ØYYÛ]YHÚ›ÛYH\ÚİÜÛ[Øš[H™\šYšXØ][Û‹ˆˆ›İYÚ^\İ[™ÈYÙ[H™]È\İÈ\Ú[™ÈH™YH™X[]\ÈX›İ™HÚ]Ø]YÛÜHÛÛ[Y\˜ÚX[Ù\]Z\Y[ˆY[ˆHY˜][[™Ú]\]Z\Y[XÚÙYÈÚİÛˆÚ][™Ô™X[\İ]HÜˆ[ˆZ^Y]Xİ[ÛœÈÚ]\]Z\Y[İ™ZXÛKİ˜Z[\ˆÛÜ™È[ˆHUH
+K™ËˆÓ“S‘HÓ“H“È‘TÑT•‘HSÓÓ”ÒQÓ“QS•ĞSTT”Ë‘RPÓTËRST”ËPÕÔˆ	ˆSTSQS•Ø
+Hİ[Ù\ˆ\İËİ\İÛX\šÙ]ÙŒMMËœH[™H[İZ]H\ÜÈ
+Û›İÛˆŒÎH›ZÙNÈŒMXœÙ[\İÜ™H
+ÈŒMHÛÛ[ˆ˜Z[Y[XØ[HÛˆLYL™XØ]\ÙHH\İ[ˆ™\ÛÛ™\ÈH™X[XÚ\Ú[ÛˆİÜ™H8 %È›İ	Ùš^	ÈÛÛ[œÈ›Üˆ]
+Kˆ™XÙZ\Ú]^XİÒKˆ›È]™H™[ØYˆŸ‹LMNH
+Š”ÕÓ‘Tˆ“ÑÔSH
+ÔĞH\š]HKÌŠJŠˆ
+Š”ÙX\˜ÚYÙHÚ]ÔĞH]Xİ[ÛœÈ\š]KXÜ›ÜÜÈSÛİ\˜Ù\È
+ÔĞKÛÛÛ^KÚ[ÛÛ‹›XÚÛ[Û‹K[XZ[Ûİ\˜Ù\ËİÛ™\ˆš[™ÊKŠŠˆİÛ™\ˆŒ‹LLLLˆŒMŒÌÑˆ	Ú]™YYÈÈÈ[ÙˆÑÔĞH]Xİ[ÛœÉÈÙX\˜ÚÛ\İ[™È^\šY[˜ÙWH][ÛÈˆX\šÙ]XÙKÜ˜ZYÜÛ\İ[™İ\ˆ\ÈÙ[[™ÈİY™ÈZ[ÜˆÈ\šØ[œØ\È›Üˆ›İÎÈ]™[X[HÚÙ]™\ˆÙÜÈ[ˆÙX\˜Ú\ÈÚ\™]™\ˆ^H\™HÚ]ØØ[\Èœ›ÛH\™NÈÛ‰İİÜZ[[™È[[ÛÛ\]K‰ÈYÙ[H[œÜXİYÜØX]Xİ[ÛœË™Ûİˆ[ˆÛ]YH[ˆÚ›ÛYHHØ[YHİ\‹ˆ™]ÛÜšÈÛX\šÙ]
+™]\ÙHX\šÙ]İšY]ËÛX\šÙ]ÜÙX\˜ÚÛX\šÙ]Ü›İ]\È[™H‹LMMËÑ‹LMNØ]YÛÜH
+È™YœÈ]È›È\˜[[İÜ™JNˆ
+JHİXÚŞHÜ˜\ˆÚ]Û™H\™ÙHÙX\˜Ú›Ş
+]H
+È\ØÜš\[ÛŠK™\İ[Ûİ[
+	Óˆ™\İ[È›İ[™	ÊKš[\œÈ]ÛˆÚİÚ[™ÈH[X™\ˆÙˆXİ]™Hš[\œËÛÜ›ÜİÛˆ
+[™[™ÈÛÛÛ™\İY˜][™]Ù\İšXÙHİËÚYÚ\İ[˜ÙKİYÙÙ\İY
+NÈ
+ŠH]ZXÚÈšY]ÜÈÚ]]™HÛİ[Îˆ[™]ÈÙ^KÛÜÚ[™ÈÙ^H
+[™ÛÜÚ[™ÈÛÛÛŠNÈ
+ÊHÛÛ\ÚX›HYš[\ˆÚYX˜\ˆ
+ÛÛ\ÙHİ]H™[Y[X™\™Y
+HÚ]ÙXİ[ÛœÎˆØ]YÛÜH
+İ\ˆ‹LMMÈØ]YÛÜšY\ËXXÚÚ]H]™HÛİ[™\›ËXÛİ[Ü™^YYH	Ùš[\ˆØ]YÛÜšY\ÉÈ^›Ş[™Ô™X[\İ]H[XÚÙYHY˜][
+KÛİ\˜ÙH
+XXÚÛİ\˜ÙHÚ]Ûİ[[™ÛÛ›™XİYÛ›İXÛÛ›™XİY
+KØØ][Ûˆ
+Hİ]HÙX\˜ÚX›H\İÚ]Ûİ[Ë\šØ[œØ\È™\Ù[XİY›Üˆ\ÈİÛ™\ˆÈH\İ[˜ÙH’T
+È˜Y]\È›ÜİÛˆLÌKÍLÌLÌLĞ[KY˜][ÛÛØ^HÌŒÌŠKšXÙH˜[™ÙHZ[‹[X^\İ[™È\H
+]Xİ[ÛˆÈ^H›İÈÜˆš^YšXÙHÈ]Xİ[Ûˆ]™[
+KÛÛ™][ÛÈ
 
-### Lane C: Agent 03 (economics)
-| ID | Pri | Task | Deps | Status | Agent | Acceptance |
-|---|---|---|---|---|---|---|
-| C-01 | P1 | RESEARCH/estimate producer: fills `Item.economics` from normalized fields and comps evidence, with provenance per estimate (FACT/INFERENCE tags), deterministic | none | **DONE** @ `42fed5e` | 03 | An Item from 02's fixtures gets valid economics and scores past MAYBE-for-missing-inputs |
-| C-02 | P1 | ADR-0010: `canonical.py` â†’ reference (Decimals hashed as doubles); re-baseline golden hashes with a note | none | **DONE** @ `247c036` | 03 | interop row 03 = 10/10; 13 goldens replay |
-| C-03 | P2 | ADR-03-002 is ACCEPTED-WITH-CHANGES (see INDEX). Give the v1.1.0 schemas versioned `$id`s for re-vendoring (ADR-0009 item 6) | none | **DONE** @ `22b49e6` | 03 | New `$id`s; 03's tests pass |
+H[šY›Ü›H™\ÜÛœÚ]™HØ\™ÜšY
+ÌËÌ‹ÌHÛÛ[[œÈ\ÚİÜÈÛ™JNˆİÈÜˆ	Û›ÈİÉÈ[KÛİ\˜ÙH˜YÙK™YÛİ[İÛˆ˜YÙH[™\ˆ
+	ÌLˆZ[ˆY	Ë	ĞÛÜÚ[™ÉÊK]KÚ]HÕ’T
+È\İ[˜ÙKÛÜÚ[™È]HØØ[İ\œ™[šY
+ÈšY\ˆÛİ[
+S’Ó“ÕÓˆÚİÛˆÛ™\İH›Üˆ]™[ÊKšY]È]ÛˆÈHÜšYÚ[˜[\İ[™ÎÈ
+JH[X™\™YYÚ[˜][Ûˆ
+\ˆYÙJHÚ]HYÙH[ˆHT“ˆÙY\ˆÛ™\İS’Ó“ÕÓœË]Xİ[Ûˆ]™[È™]™\ˆÚİÛˆ\ÈİË‹LMMHİYÙÙ\İ[ÛœË^HšYËÛİ\˜Ù\È[™[™YœÈ\œÚ\İ[˜ÙH\ˆİÛ™\‹ˆÛ™H^[İ]]\İÛÜšÈ]ÎLÚ]š[\œÈ\ÈH˜]Ù\‹ˆ‹LMN
+LL™˜ÙMØ[YH[™JH
+Š”T•PS8 %“ÕPĞÑTQTÈÓÓTUH
+YÙ[H™]šY]ÈŒ‹LLLLˆŒMNÑ
+HÙLÍÌX
+Šˆ
+İ]\ÈL˜MLÍÍ
+Kˆ[˜İ[Û˜[HšYÚÛˆHİYÙYÛÜHÚ]™X[ØXÚ\È
+ÈHÓÔHÙˆİÛ™\ˆ™YœÎˆÛİ[Ë]ZXÚÈšY]ÜËÛÜØ]YÛÜHš[\‹YÚ[˜][Û‹[™Y˜][[Ù™ˆ
+›Ü\HØ\™È[›\ÜÈ[
+Kˆ\İY]È›ÛİÈH[[™Y\ÚYÛˆ
+ÛY\ˆÈ™\Ù]Ë›İÜÈÈÜšY
+K›İÙXZÙ[™Yˆ^[İ]˜[ÈÚÜÙˆÔĞH\š]H[ˆXY\ÜÈÚ›ÛYHM[™ÎLˆÛÛ[Y\È\È‹LMŒËˆ[İZ]H]ÙLÍÌXˆNLˆ\ÜÙYÈˆ˜Z[Y
+ŒMXœÙ[\İÜ™H
+ÈŒMHÛÛ[‹Y[XØ[ÛˆLYL[ˆXZÊKˆˆ›Øİ\ÙY\İÈ›ÜˆÛİ[È
+Ø]YÛÜKÜÛİ\˜ÙKÜİ]HÛİ[È\]X[Hš[\™Y›İÜÊK]ZXÚÈšY]ÜËÛÜÜ™\œËYÚ[˜][Û‹ÛÛ\ÙH\œÚ\İ[˜ÙK[™Y˜][[Ù™ˆÙ\™YœÈ\ÛÛ][ÛÈ™YÙ[™\˜]HÛÛ[œÈÛ›H›ÜˆH[[™YYÙHÚ[™ÙH[™\İHÚÙ[ˆY™ˆ[ˆH™XÙZ\È[İZ]H
+Û›İÛˆ[ˆ˜Z[\™\ÈŒMÙŒMHXœÙ[\İÜ™KÙÛÛ[ˆY[XØ[ÛˆLYLŒÎH›ZÙJKˆ™XÙZ\Ú]^XİÒKˆ›È]™H™[ØYˆŸ‹LMŒ
+Š”ÕÓ‘Tˆ“ÑÔSH
+ÔĞH\š]H‹ÌŠJŠˆ
+Š“\İ[™È]Z[YÙJŠˆÛX\šÙ]Ú][KÏÛİ\˜ÙO‹ÏYˆ›Üˆ]™\HØ\™
+šY]ÈÜ[œÈ]ÈHÜšYÚ[˜[\İ[™È[šÈ\ÈÛˆ]
+KˆİÛ™\ˆŒ‹LLLLˆŒMŒÌÑˆ	Ú]™YYÈÈÈ[ÙˆÑÔĞH]Xİ[ÛœÉÈÙX\˜ÚÛ\İ[™È^\šY[˜ÙWH][ÛÈˆX\šÙ]XÙKÜ˜ZYÜÛ\İ[™İ\ˆ\ÈÙ[[™ÈİY™ÈZ[ÜˆÈ\šØ[œØ\È›Üˆ›İÎÈ]™[X[HÚÙ]™\ˆÙÜÈ[ˆÙX\˜Ú\ÈÚ\™]™\ˆ^H\™HÚ]ØØ[\Èœ›ÛH\™NÈÛ‰İİÜZ[[™È[[ÛÛ\]K‰ÈYÙ[H[œÜXİYÜØX]Xİ[ÛœË™Ûİˆ[ˆÛ]YH[ˆÚ›ÛYHHØ[YHİ\‹ˆÔĞK\İ[H^[İ]œ›ÛHHØXÚY™XÛÜ™Û›H
+›È™]È™]Ú
+NˆİÈØ[\HÚ][X›˜Z[È[™[\ØÜ™Y[ˆ
+ÔĞH[XYÙHT“ÈÚ[ˆHØXÚH\È[Kİ\Ú\ÙH	Û›ÈİÉÊKİ]\È›Ş
+Xİ]™KÔ™]šY]ËĞÛÜÙY
+Kİ\œ™[šY]™HÛİ[İÛˆ
+^\ËÚœËÛZ[‹ÜÙXËÛY[”ÈÚ]Ù\™\‹\™[™\™Y˜[˜XÚÊK™^Z[š[][HšY[™[˜Ü™[Y[Ú[ˆÛ›İÛ‹šY\ˆÛİ[	ĞšYÛˆHÜšYÚ[˜[Ú]IÈ[šÈ
+™]™\ˆHšY\™JK\ØÜš\[Ûˆ[™ÜXÜÈ
+ÔĞHİ[™›ÊKÛÛ™][Ûˆ^[œÜXİ[Û‹Ü™[[İ˜[[™^KXKÜ™[[İ™KXH]\ÈÚ[ˆ™\Ù[›Ü\HY™\ÜÈÚ][ˆÜ[”İ™Y]X\[šÈ
+›È[X™YY\™\\HX\ØÜš\
+Kİ\İÙX[‹ÜØ[\ÈÛÛXİÈ^XİH\ÈX›\ÚY	ÔÚ[Z[\ˆ\İ[™ÜÉÈ
+Ø[YHØ]YÛÜK™X\™\İš\œİ
+K\Èİ\ˆXÚ\Ú[Ûˆ[\œÈ
+İYÙÙ\İ[ÛœÈ™X\ÛÛ‹™\Ø[HšXÙH[œ]^HšYÈY
+Kˆ]Xİ[ÛˆU‘S•ÈÙ][ˆ]™[YÙH
+]\ËY™\ÜË]Xİ[Û™Y\ˆ[šË	ÛİÈ›İ]˜Z[X›NˆÙYH]Xİ[Û™Y\‰ÊKˆÛ™H^[İ]]ÎLˆ[ÛÎˆXZÙH\İËİ\İÛX\šÙ]ÙŒMŒËœHÚÚ\ÛX[›HÚ[ˆ^]ÜšYÚ\ÈZ\ÜÚ[™È
+]\İš[\ÜÜœÚÚ\\ÈŒÙŒMÈÊKˆ˜\ÙHÛˆØ™™˜ˆ‹LMNH
+Ø[YH[™KÙ\šX[
+H
+Š”ÕQÒS‘×ĞPĞÑTQ\È\Ùˆ˜Ø
+Šˆ
+Y™XİÈš^YH‹LMJKˆˆ\İÎˆ]™\HØ\™[šÜÈÈH]Z[YÙNÈÔĞHšY[È™[™\™Yœ›ÛHHš^\™HİÈS’Ó“ÕÓˆšY[ÈX™[YÈ]™[YÙNÈ›Èİ]›İ[™™]Ú\š[™È™[™\ÈÚ[Z[\ˆ\İ[™ÜÈ^ÛYHH][H[™™\ÜXİ[™Y˜][[Ù™‹ˆ[İZ]K™XÙZ\›È]™H™[ØYˆŸ‹LÍˆ
+Š”ÕÓ‘Tˆ“ÑÔSH
+Ü˜ZYÜÛ\İ
+JŠˆ
+ŠÜ˜ZYÜÛ\İØ]™Y\ÙX\˜Ú[\K[XZ[\œÙ\ŠŠˆ[ˆX›Ü×Ù\ØÛİ™\KØY\\œËÙ[XZ[Ø[\ËœX
+H]Ù[›İ]H™XÛÜ™Y[ˆØÜËÚ[™Ù™‹ĞŒL—ĞÔRQÔÓTÕÑPÑP“ÓÒ×ÔÓÕTÑWÔÕUTË›YÈ™]™\ˆ™]ÚÜ˜ZYÜÛ\İ›Ü™ÈYÙ\ÊKˆİÛ™\ˆŒ‹LLLLˆŒMŒÌÑˆ	Ú]™YYÈÈÈ[ÙˆÑÔĞH]Xİ[ÛœÉÈÙX\˜ÚÛ\İ[™È^\šY[˜ÙWH][ÛÈˆX\šÙ]XÙKÜ˜ZYÜÛ\İ[™İ\ˆ\ÈÙ[[™ÈİY™ÈZ[ÜˆÈ\šØ[œØ\È›Üˆ›İÎÈ]™[X[HÚÙ]™\ˆÙÜÈ[ˆÙX\˜Ú\ÈÚ\™]™\ˆ^H\™HÚ]ØØ[\Èœ›ÛH\™NÈÛ‰İİÜZ[[™È[[ÛÛ\]K‰ÈYÙ[H[œÜXİYÜØX]Xİ[ÛœË™Ûİˆ[ˆÛ]YH[ˆÚ›ÛYHHØ[YHİ\‹ˆ\œÙHÜ˜ZYÜÛ\İ[\K[XZ[È
+\ÈŒŒ™\İ[ÈXXÚ
+H[ÈHĞSQH›Ü›X[^™Y][HÚ\H\ÈHÛİ‘X[ËÔX›XÔİ\œ\È[\Îˆ]KšXÙK™ZYÚ›ÜšÛÙÛØØ][Ûˆ^™YÚ[Ûˆœ›ÛHHÜ˜ZYÜÛ\İİX™ÛXZ[ˆ
+K™Ëˆ]\›ØÚË˜^X\‹›ÜÛZ]^\šØ[˜KY[\\ÊKÜšYÚ[˜[\İ[™ÈT“Üİ[™ÈQ\ÈİX›HÛİ\˜ÙHQ[X›˜Z[T“Û›HYˆ™\Ù[[ˆHK[XZ[™XÙZ]™YØ]œ™\Ú™\ÜÎÈY\HXÜ›ÜÜÈ™\X]Y[\ÈHÜİ[™ÈQˆ™XY[Û›HSPTšXHH^\İ[™È™XY\ˆ
+X™[X[ÛšY™™\‹Ğ[\ËVSRS‘KĞ“ÑK”QRÊKˆš^\™\ÎˆZ[ØÜX˜™YŞ[]XÈK[XZ[ÈX]Ú[™ÈÜ˜ZYÜÛ\İ	ÜÈØİ[Y[Y[\İXİ\™NÈX™[[H’VT‘Kˆ›Û™H
+XZ[›Ş[œİ[YŒ‹LLLL‹X™[^\İË[\JH
+Š‘Ó‘HØXNLŒ˜
+Šˆ
+İ]\ÈXM™ØÈYÙ[HŒ‹LLLLˆŒMNŒŒÑˆÛX[ˆÚXÚÛİ][™HˆİZ]HŒH\ÜÙYÈ˜Z[YÈÒSKX]][XØ]YÙ[™\ˆÛ›KÜÛÙˆš^\™H™Z™XİYÜİ[™ËRQY\HXÜ›ÜÜÈ[\Ë™YÚ[ÛˆİX™ÛXZ[ˆÙ\S’Ó“ÕÓˆ›ÜˆXœÙ[šXÙKİ[X›˜Z[ÈÜ˜ZYÜÛ\İ›Ü™È™]™\ˆ™]ÚY
+Kˆ]™H›ÛÙˆØZ]È›ÜˆHİÛ™\‰ÜÈ‘UÈYXØ]Y[\ÈXZ[›Ş
+İÛ™\ˆŒ‹LLLLˆ\œÛÛ˜[ÛXZ[]\İ“Õ™H\ÙYÈ]ÙXÜ™]Ø\È™[[İ™Y
+Kˆˆš^\™H\İÎˆ][K\™\İ[[\\œÙYQY\K™YÚ[ÛˆX\[™ËZ\ÜÚ[™ÈšXÙKİ[X›˜Z[İ^HS’Ó“ÕÓ‹ÙY[ˆ›YÈ[İXÚY
+™XY\ˆ\Ù\ÈQRÊKˆ[™HİZ]H[X™\œËˆ™XÙZ\ˆ]™H›ÛÙˆØZ]È›ÜˆÛ™HÙ[Z[™H[\[ˆHX™[
+İÛ™\ˆÙ]È\HØ]™YÙX\˜Ú
+KˆŸ‹LMŒH
+Š”ÕÓ‘Tˆ“ÑÔSH
+[\Ûİ\˜Ù\ÈÛˆÛX\šÙ]
+JŠˆ
+Š”ÚİÈK[XZ[[\\İ[™ÜÈ
+Ûİ‘X[ËX›XÈİ\œ\ËÜ˜ZYÜÛ\İ
+HÛˆÛX\šÙ]
+Šˆ›İYÚH^\İ[™ÈØ\™ËÙš[\œËÔÛİ\˜Ù\È[™[ˆİÛ™\ˆŒ‹LLLLˆŒMŒÌÑˆ	Ú]™YYÈÈÈ[ÙˆÑÔĞH]Xİ[ÛœÉÈÙX\˜ÚÛ\İ[™È^\šY[˜ÙWH][ÛÈˆX\šÙ]XÙKÜ˜ZYÜÛ\İ[™İ\ˆ\ÈÙ[[™ÈİY™ÈZ[ÜˆÈ\šØ[œØ\È›Üˆ›İÎÈ]™[X[HÚÙ]™\ˆÙÜÈ[ˆÙX\˜Ú\ÈÚ\™]™\ˆ^H\™HÚ]ØØ[\Èœ›ÛH\™NÈÛ‰İİÜZ[[™È[[ÛÛ\]K‰ÈYÙ[H[œÜXİYÜØX]Xİ[ÛœË™Ûİˆ[ˆÛ]YH[ˆÚ›ÛYHHØ[YHİ\‹ˆØY\ˆ™XYÈH\œÙY[\][\È
+‹Lˆ
+È‹LÍŠHœ›ÛHHØØ[ØXÚHÜš][ˆHH^\İ[™È™XY[Û›HXZ[›Ş™XY\ˆÛˆHØ]ÚÙÉÜÈİ\›H™Yœ™\Ú
+KMÌˆ]ÈÙ™ˆİÚ]Ú™\ÜXİY
+KˆÛİ\˜Ù\È[™[Ø^\ÈÓÓ“‘PÕQÛ›HY\ˆH™X[XZ[›Ş™XY™]\›™Y][\Ëİ\Ú\ÙH	ØÛÛ›™XİYØZ][™È›Üˆ[\ÉÈÜˆ“ÕÓÓ“‘PÕQÈš^\™H]H[Ø^\È˜[›™\™Y’VT‘Kˆ\İ[˜ÙHšXHH^\İ[™ÈØ^™]Y\È[šÛ›İÛˆ\İ[˜ÙH™]™\ˆÛİ[Y\ÈØØ[ˆ‹LÍˆ[™‹LMNH
+Š”ÕQÒS‘×ĞPĞÑTQÌN
+Šˆ
+İ]\È™MÌ˜ÈYÙ[HŒ‹LLLLˆŒMÎMHÑ
+Nˆ™YYÈ[™HˆH‹LÍˆ
+Ú][™HˆŒ˜LX˜ŒÛˆH]ˆ[İZ]HŒLÈ\ÜÙYÈˆ˜Z[YÛ›İÛˆŒMÙŒMNÈÚ]HÛLN˜ØM˜MÈ˜Z[ÛˆHZ\ÜÚ[™ÈÜ˜ZYÜÛ\İÙ[XZ[ÜšYÚ[ŠKˆİYÙYÚ][™HˆŒ˜LX˜Œˆ™[X\ÙHÚXÚÈ‘T’Q–HÒÎÈÚ]›È[\ØXÚHÛİ‘X[ËÔX›XÈİ\œ\ËĞÜ˜ZYÜÛ\İÛ™\İH“ÕÓÓ“‘PÕQˆ™XY[Û›H™Yœ™\ÚÛÛÛÛËÜ™Yœ™\ÚØ[\ÛXZ[œX
+VSRS‘KÔQRË[\Ù[™\œÈÛ›Kİ\›HØ\
+NÈYÙ[HÚ\™Y][ÈHØ]ÚÙÈİ\›H™Yœ™\Ú
+YYŒ[ˆœ›ÛH‹Ë˜ÛÛ™šYËÛX›ÜË\ÜİÛÜ™Û›H[ˆHÚ[[ÈØ]ÚÙÈ™\İ\Y
+KˆYXØ]YXZ[›ŞX[ÛšY™™\ŒŒÛXZ[˜ÛÛHÙÚ[ˆ™\šYšYY™XY[Û›NÈX™[X[ÛšY™™\‹Ğ[\È›İÜ™X]YY]
+İÛ™\ŠKˆİÛ™\ˆ™[X\ÙNˆÛÛËÜ™[X\ÙWÛX\šÙ]XÙKœÚÌNŒ˜LX˜Œˆˆ\İÎˆØ\™\š]HÚ]ÔĞHØ\™ËÛ™\İİ]\Èİ]\Ëš^\™H˜[›™\‹Y\HXÜ›ÜÜÈÛİ\˜Ù\Ëš[\œËØÛİ[È[˜ÛYHH™]ÈÛİ\˜Ù\Ëˆ]™HXØÙ\[˜ÙNˆÛ™HÙ[Z[™H[\\İ[™ÈÛˆHØYYYÙHÚ]ÛÜšÚ[™ÈÜšYÚ[˜[[šËˆŸ‹LÍÈHÕÓ‘Tˆ“ÑÔSH
+P˜^HØØ[
+H
+Š™P˜^HØØ[\İ[™ÜÈšXHHÙ™šXÚX[œ›İÜÙHTJŠˆ
+^\İ[™ÈX˜^WØœ›İÜÙKœX
+NˆYØØ[\XÚİ\ÙX\˜Ú™X\ˆH’T
+ÛÛØ^HÌŒÌ‹˜Y]\Èœ›ÛHHYÙJH\Ú[™ÈP˜^IÜÈØİ[Y[Yš[\œÈ
+XÚİ\Ûİ[KÜXÚİ\Üİ[ÛÙKÜXÚİ\˜Y]\Ë[]™\SÜ[ÛœÈÑST—ĞT”S‘ÑQÓĞĞSÔPÒÕT
+H\È^Z[™ÓÜ[ÛœÈ
+UPÕSÓ‹Ñ’VQÔ’PÑJHÛÈØ\™ÈÚİÈšYÜšXÙK[™[YK][HØØ][Û‹[XYÙH[™][UÙX•\›ˆİÛ™\ˆŒ‹LLLLˆŒMŒÌÑˆ	Ú]™YYÈÈÈ[ÙˆÑÔĞH]Xİ[ÛœÉÈÙX\˜ÚÛ\İ[™È^\šY[˜ÙWH][ÛÈˆX\šÙ]XÙKÜ˜ZYÜÛ\İ[™İ\ˆ\ÈÙ[[™ÈİY™ÈZ[ÜˆÈ\šØ[œØ\È›Üˆ›İÎÈ]™[X[HÚÙ]™\ˆÙÜÈ[ˆÙX\˜Ú\ÈÚ\™]™\ˆ^H\™HÚ]ØØ[\Èœ›ÛH\™NÈÛ‰İİÜZ[[™È[[ÛÛ\]K‰ÈYÙ[H[œÜXİYÜØX]Xİ[ÛœË™Ûİˆ[ˆÛ]YH[ˆÚ›ÛYHHØ[YHİ\‹ˆİÛ™\ˆP˜^H]™[Ü\ˆÙ^\È
+PVWĞÓQS•ÒQÔÑPÔ‘U
+H›ÜˆH]™HÛ[ÚÙHÛ›H
+Š‘Ó‘HMÙXX
+Šˆ
+İ]\ÈŒÌØNÈYÙ[HŒ‹LLLLˆŒMNLÑˆÛX[ˆÚXÚÛİ][™HˆİZ]H\ÜÙYÈ˜Z[YÈØØ[\XÚİ\š[\œÈH’T
+È˜Y]\È[™XYH™\Ù[^Z[™ÓÜ[ÛœÈ›İÈÙ[XİX›HUPÕSÓ‹Ñ’VQÔ’PÑKĞ‘TÕÓÑ‘‘T‹ĞÓTÔÒQ’QQĞQÈH][˜Ú\‰ÜÈ^]HØ\ÈH›Ë[Ü™]K›İH˜Z[\™JKˆ]™HÛ[ÚÙH
+ÈÛX\šÙ]Ú\š[™ÈØZ]›ÜˆİÛ™\ˆP˜^H]™[Ü\ˆÙ^\ÈÛˆ\ÈÜİˆˆš^\™H\İÈ›ÜˆHØØ[š[\ˆT“[™›Ü›X[^˜][ÛÈ]™HÛ[ÚÙHÛ›HY\ˆÙ^\È^\İÛˆ\ÈÜİ
+İ]ÚYHÚ]XŠKˆŸ‹LÎHÕÓ‘Tˆ“ÑÔSH
+İ\ˆÙ[[™È\ÊH
+Š”™\ÙX\˜Ú
+ÈÛİ\˜ÙHX]š^ˆİ\ˆ\ÈÚ\™H[ÜHÙ[İY™ˆ[ˆ\šØ[œØ\ÊŠˆ
+Ù™™\•\Y\˜Ø\šK™^ÛÜ‹ÜÚX\šËÚZšZšK\İ[K˜\Ú›İ[™È
+Y\\ˆ^\İÊK[Ü™H\šØ[œØ\È]Xİ[Ûˆİ\Ù\È[™PšYÔ›ŞXšYĞ]Xİ[Û–š\]Xİ[Û™Y\œËTˆİ]KØÛİ[KØÚ]Hİ\œ\ËØÚÛÛİ[š]™\œÚ]Hİ\œ\ÊKˆ›ÜˆXXÚˆÙ™šXÚX[THÈ[\K[XZ[È™YYÈÜš][‹\\›Z\ÜÚ[Û‹[Û›HÈ›İ[İÙYÛÜİ\šØ[œØ\ÈÛİ™\˜YÙK[™H˜\œ›İÙ\İ]Ù[›İ]KˆİÛ™\ˆŒ‹LLLLˆŒMŒÌÑˆ	Ú]™YYÈÈÈ[ÙˆÑÔĞH]Xİ[ÛœÉÈÙX\˜ÚÛ\İ[™È^\šY[˜ÙWH][ÛÈˆX\šÙ]XÙKÜ˜ZYÜÛ\İ[™İ\ˆ\ÈÙ[[™ÈİY™ÈZ[ÜˆÈ\šØ[œØ\È›Üˆ›İÎÈ]™[X[HÚÙ]™\ˆÙÜÈ[ˆÙX\˜Ú\ÈÚ\™]™\ˆ^H\™HÚ]ØØ[\Èœ›ÛH\™NÈÛ‰İİÜZ[[™È[[ÛÛ\]K‰ÈYÙ[H[œÜXİYÜØX]Xİ[ÛœË™Ûİˆ[ˆÛ]YH[ˆÚ›ÛYHHØ[YHİ\‹ˆ™XY[Û›H™\ÙX\˜ÚÈš[X\HØİ[Y[ÎÈ›ÈÙÚ[œË›ÈØÜ˜\[™Ë›È›İX›ØÚÈ]˜\Ú[Û‹ˆ\ÜÚYÛ™YÈ[™HÈ
+ØÜËÜ™\ÙX\˜ÚÛ›K›ÈÛÙJHÛÈ][œÈ[ˆ\˜[[Ú][™H‹Ÿ›Û™H
+Š‘Ó‘HLÌÍL
+Šˆ
+İ]\ÈØÍŒXÈYÙ[HXØÙ\YŒ‹LLLLˆŒMNŒMHÑ
+KˆÛÜœ™Xİ[ÛˆH˜\Ú›İ[™ÈY\\ˆÑTÈ^\İÛˆ[™Hˆ
+Ü˜ËÛX›Ü×Ù\ØÛİ™\KØY\\œËİ˜\Ú›İ[™ËœX
+Kˆ™^ÛÛ›™XİX›Nˆ]Xİ[Û–š\[\ËTˆİ]Hİ\œ\ÈKS™]ÜÈ
+ÈÛİ‘X[È[\Ë˜\Ú›İ[™ÈTH
+\›\ÈÚXÚÈš\œİ
+Kˆ[[\›İ]\ÈØZ]›ÜˆHİÛ™\‰ÜÈYXØ]YXZ[›ŞˆÈØÜËÚ[™Ù™‹ĞŒÎÔÓÕTÑWÓPU’V›YÚ]PÕÒS‘‘Tˆ›İ™[˜[˜ÙH[™H˜[šÙY\İÙˆH™^ÈÛÛ›™XİX›HÛİ\˜Ù\ÈÚ]^Xİ‘QQËˆŸKMÍHÕÓ‘Tˆ“ÑÔSH
+][K]\Ù\‹ØØ][Û‹X]Ø\™JH
+ŠQˆXØÛİ[È
+ÈØØ][Û‹\ØÛÜYÛİ\˜Ù\ÊŠˆÛÈ[[Û™HÚÈÙÜÈ[ˆÙX\˜Ú\ÈÚ\™HVH\™HÚ]HØØ[Ûİ\˜Ù\È›Üˆ]XÙKˆİÛ™\ˆŒ‹LLLLˆŒMŒÌÑˆ	Ú]™YYÈÈÈ[ÙˆÑÔĞH]Xİ[ÛœÉÈÙX\˜ÚÛ\İ[™È^\šY[˜ÙWH][ÛÈˆX\šÙ]XÙKÜ˜ZYÜÛ\İ[™İ\ˆ\ÈÙ[[™ÈİY™ÈZ[ÜˆÈ\šØ[œØ\È›Üˆ›İÎÈ]™[X[HÚÙ]™\ˆÙÜÈ[ˆÙX\˜Ú\ÈÚ\™]™\ˆ^H\™HÚ]ØØ[\Èœ›ÛH\™NÈÛ‰İİÜZ[[™È[[ÛÛ\]K‰ÈYÙ[H[œÜXİYÜØX]Xİ[ÛœË™Ûİˆ[ˆÛ]YH[ˆÚ›ÛYHHØ[YHİ\‹ˆXÚYNˆ\Ù\ˆXØÛİ[È[™\‹]\Ù\ˆ™YœÈ
+İ\œ™[Ú[™ÛK[İÛ™\ˆ™YœÈš[H™XÛÛY\È\‹]\Ù\ŠKXXÚÛİ\˜ÙHXÛ\™\ÈHÛİ™\˜YÙH™YÚ[Ûˆ
+˜][Û˜[ˆÔĞKÙP˜^NÈ™YÚ[Û˜[ˆÜ˜ZYÜÛ\İİX™ÛXZ[‹]Xİ[Ûˆİ\Ù\ÉÈİ]\ÊKHYÙHXÚÜÈÛİ\˜Ù\È[™Y˜][˜Y]\Èœ›ÛHH\Ù\‰ÜÈ’TÜİ]K[™İÈ[\K[XZ[Ûİ\˜Ù\ÈÛÜšÈ\ˆ\Ù\‹ˆ\šØ[œØ\È™[XZ[œÈHY˜][›Üˆ\ÈİÛ™\‹ˆ›È[\[Y[][Ûˆ[ˆ\È›İËˆ[™HQ•ÈHQˆ
+İ]\È›ÜÜÙY
+H[™HZYÜ˜][Ûˆ›İÜÈ\È^[ˆHQÈYÙ[HXØÙ\ËŸ›Û™H
+Š‘Ó‘H8 %Q‹LMHPĞÑTQHYÙ[HŒ‹LLLLˆŒMNŒHÑ
+Šˆ
+˜YÌMXØX[™H
+KˆİÛ™\ˆ\™Xİ[Ûˆ[œİÙ\œÈ]È]Y\İ[ÛˆH
+	İÚÙ]™\ˆÙÜÈ[‰ÊNˆ[š]K[Û›HXØÛİ[ËY[X™\ˆ›ÛH™XYÜÙX\˜ÚÜØ]™HÛ›Kˆ]Y\İ[Ûˆˆ\šØ[œØ\ÈÛ›H[[H™X[ÙXÛÛ™\Ù\‹ˆZYÜ˜][Ûˆ›İÜÈ]Y]YY\ÈLÍKLÍ‹LÍË‹LÎK‹LMŒ‹‹MËLKMÍKˆš]ÈHİÛ™\‰ÜÈYXØ]Y[\ÈXZ[›Ş
+\ËXY™\ÜÈ\ˆ\Ù\ŠKˆØÜËÙXÚ\Ú[ÛœËĞQ‹LXØÙ\YHYÙ[HÚ]ZYÜ˜][Ûˆİ\È]Y]YY\È›İÜËˆŸLÍHHÕÓ‘Tˆ“ÑÔSH
+XØÛİ[ÈJHQ‹LMH
+[™HÌMXØXXØÙ\YHYÙ[HŒ‹LLLLŠKˆMÍLNˆ™^œ™YHZYÜ˜][ÛˆX›ÜË˜\İ\Ù\˜Ú]›Û\ÎÈÙYYHİÛ™\ˆ›İÈ
+ÛÛØ^HTˆÌŒÌ‹T‹MLZJKˆY[X™\œÈ™]™\ˆÙ]İÛ™\—ØÚ[›™[Ø\›İ™\‹ÙY™™XİÜ‹ˆQ‹LMH
+Š‘Ó‘HNMLÍX
+Šˆ
+İ]\ÈŒLÎØ˜˜ÈYÙ[HŒ‹LLLLˆŒMŒŒÑˆÛX[ˆÚXÚÛİ]Ü[™HİZ]H[\ÜÙY›È˜Z[\™\ÎÈZYÜ˜][ÛˆH\İ\Ù\‹Ú[™ÛHİÛ™\ˆÙYYYÛÛØ^HÌŒÌˆTˆMLZK›İÜÈ™]™\ˆ[]Y›ÛH[[]]X›KY[X™\ˆ™Y\ÙYÛˆ[İÛ™\‹[Û›H]ÊKˆÜ[™HİZ]HÜ™Y[ÈH™]È\İ›İ™\ÈHY[X™\ˆÙ\ÜÚ[Ûˆ\È™Y\ÙYÛˆ]™\HİÛ™\‹[Û›H[˜İ[Ûˆ
+LÌKÌ‹ŒÌH[™HLÌÈÙZ[[™ÊKˆŸLÍˆHÕÓ‘Tˆ“ÑÔSH
+XØÛİ[ÈŠHQ‹LMH
+[™HÌMXØXXØÙ\YHYÙ[HŒ‹LLLLŠKˆMÍLˆZYÜ˜][ÛˆX›ÜË\Ù\—Ü™Y˜\Ù\—Ú][WÜİ]XÙ]İ\Ù\—Ü™Y˜ÈY\Ù\—ÚYÈHLÌÈØ]ÚØ[\X›\È
+[\ÈÛ˜ÙH\ˆ\Ù\ˆ\ˆ][H\ˆ™\ÚÛ
+NÈ˜XÚÙš[ÈİÛ™\‹ˆLÍH
+Ø[YH[™JH
+Š‘Ó‘HØMXÌNYX
+Šˆ
+İ]\ÈXØÎŒNÈYÙ[HŒ‹LLLLˆŒMNŒLÑˆÛX[ˆÚXÚÛİ]Ü[™HİZ]HÌÍH\ÜÙY^]ÈZYÜ˜][ÛˆÌ\‹]\Ù\ˆ™YœËÚ][Hİ]KİØ]Ú\ÈÛ›HšXHÑPÕT’UHQ’S‘Tˆ[˜İ[ÛœÈ]XØÙ\HØ[\‰ÜÈİÛˆ\Ù\ˆYÈØ]Ú\È˜XÚÙš[YÈİÛ™\‹[š\]YH\ˆ\Ù\ŠÚ][NÈÙZ[[™ÜÈİ^HİÛ™\‹[Û›JKˆÛÈ\Ù\œÉÈØ]™YÙ\ÛZ\ÜÙYİØ]Ú™]™\ˆXZÎÈLÌÈ\İÈ\ÜÎÈ™XÙZ\ÚZ[ˆ™\šYšY\ËˆŸLÍÈHÕÓ‘Tˆ“ÑÔSH
+XØÛİ[ÈÊHQ‹LMH
+[™HÌMXØXXØÙ\YHYÙ[HŒ‹LLLLŠKˆMÍLÎˆZYÜ˜][ÛˆX›ÜËœÛİ\˜ÙWÜ™YÚ\İX
+È\Ù\—Ú][WÚ[\™\İÙYYØY\ˆ›ÜˆÛÛ™šYËÜÛİ\˜Ù\ËŒKšœÛÛ˜
+ÔĞKÙP˜^H˜][Û˜[ÈÜ˜ZYÜÛ\İ\‹\İX™ÛXZ[ˆY]›ÎÈÛİ‘X[ËÔX›XÔİ\œ\ËĞ]Xİ[Û–š\[\Ù[XZ[È]Xİ[Ûˆİ\Ù\Èİ]\ÈTÈ‹ÓÙ™™\•\›ØÚÙYÛX[X[Ú]ÛXŞWÜ™YŠKˆLÍˆ
+Ø[YH[™JH
+Š‘Ó‘HÍÌXL˜Ø
+Šˆ
+İ]\ÈÙY˜˜XÈYÙ[HŒ‹LLLLˆŒMNŒÍHÑˆÛX[ˆÚXÚÛİ]Ü[™HİZ]HÌÎ\ÜÙY^]ÈZYÜ˜][ÛˆÌHÛİ\˜ÙWÜ™YÚ\İH
+È\Ù\—Ú][WÚ[\™\İ”ÓÓ‹\ØÚ[XK]˜[Y]YÙYY
+KˆÙYY]HY™XİÛÛ[YY\ÈLÎˆ™YÚ\İH›İÜÈ˜[Y]HYØZ[œİH”ÓÓˆØÚ[XNÈXXÚ›İÈ\ÈHÛXŞWÜ™Y‹ˆŸ‹LÎHHÕÓ‘Tˆ“ÑÔSH
+ØØ][ÛŠHQ‹LMH
+[™HÌMXØXXØÙ\YHYÙ[HŒ‹LLLLŠKˆMÍMˆÙ™›[™H’TX›H
+Ù[œİ\ÈÕHÙ[›ÚYËX›XÈÛXZ[‹[ˆ™\ÊH[™Ûİ\˜Ù\×Ù›ÜŠ\Ù\ŠXÈY˜][\˜Y]\È[˜İ[Û‹ˆLÍÈ
+Š‘Ó‘HØLMX
+Šˆ
+İ]\ÈMÙŒØÈYÙ[HŒ‹LLLLˆŒMNÑˆÛX[ˆÚXÚÛİ][™HˆİZ]HÌˆ\ÜÙYÈ˜Z[YÈÙ[œİ\ÈŒŒÈØ^™]Y\ˆÕHÙ[›ÚYÈ[›™YÚ]ÚLMÈÚXÚÙYH[™ˆİÛ™\ˆÛÛØ^HÙ]È˜][Û˜[
+ÈTˆÜ˜ZYÜÛ\İ™YÚ[ÛœÈ
+ÈTˆ]Xİ[Ûˆİ\Ù\ËÚ[ÈÌÙ]È›ÈTˆÜ˜ZYÜÛ\İY[\\ÈÎLÈÙ]È]H›ØÚÈ
+È›Û™\Ø›Ü›ÊKˆ›ÛİË]\ˆ[™Hˆ™[™ÜœÈHÓÔHÙˆH™YÚ\İHÙYY
+Ü˜ËÛX›Ü×Ù\ØÛİ™\KÙ]KÜÛİ\˜Ù\ËŒKšœÛÛ˜œ›ÛHÍÌXL˜Ø
+NÈ™K]™[™ÜˆY\ˆLÎ[™È
+›ÛY[È‹M
+Kˆˆ\İX]š^[˜Ûˆ[ˆÚ[È\Ù\ˆÙY\È›È\šØ[œØ\ÈÜ˜ZYÜÛ\İÈİÛ™\ˆİ]]Y[XØ[ÈÙ^KˆŸ‹LMŒˆHÕÓ‘Tˆ“ÑÔSH
+ÙÚ[ˆRJHQ‹LMH
+[™HÌMXØXXØÙ\YHYÙ[HŒ‹LLLLŠKˆMÍMNˆÙÚ[‹ÜÙ\ÜÚ[Ûˆ
+ØØ[]]ÔÔ‘‹ØÚÛİ]
+K\‹]\Ù\ˆ™YœÈ™XYİÜš]K›Ùš[H’TÜ˜Y]\Ë	ÜÛİ\˜Ù\È™X\ˆ[İIÈÚ]	Û›İÛÛ›™XİYˆ™X\ÛÛ‰ÎÈÛ™K][YH[\ÜÙˆHİÛ™\ˆ™YœÈš[HÈHİÛ™\ˆ›İËˆLÍKLÍ‹‹LÎK‹LMŒH“ĞÒÑQˆİÛ™\ˆÙY\ÈHØ[YHYÙH\È™Y›Ü™NÈHÙXÛÛ™[š]Y\Ù\ˆÙY\ÈZ\ˆİÛˆİ]NÈYÙ[Hœ›İÜÙ\ˆÚXÚËˆŸ‹MHÕÓ‘Tˆ“ÑÔSH
+\‹]\Ù\ˆ[\ÊHQ‹LMH
+[™HÌMXØXXØÙ\YHYÙ[HŒ‹LLLLŠKˆMÍMˆ\‹]\Ù\ˆ[\[XZ[[™Ù\İÛˆHYXØ]Y[\ÈXZ[›Şˆ\Ë]YÈÈ\Ù\‹]X\˜[[™H[šÛ›İÛˆYÜÈ
+İÛ™\‹[Û›HšY]ÊK\‹]\Ù\ˆ[\™\İ›İÜËÚ\™Y\İ[™È˜XİÈY\Yˆš^\™KYš\œİ™XY[Û›KÙY[ˆ[˜Ú[™ÙYˆ’T”Õ™K]™[™ÜˆÜ˜ËÛX›Ü×Ù\ØÛİ™\KÙ]KÜÛİ\˜Ù\ËŒKšœÛÛ˜œ›ÛH[™H	ÜÈLÎÛÛ[Z]ŒØMYX[™YH\İ]HÛÜIÜÈÚLMˆX]Ú\ÈH[›™Y[™HÛÛ[Z]›İY[ˆS“‘Q›YˆLÍ‹LÍÈ
+Û™JKLÎ
+Š‘Ó‘HŒÌN˜
+Šˆ
+İ]\È˜ÙM™L˜ÈYÙ[HŒ‹LLLLˆŒMŒLÑˆÛX[ˆÚXÚÛİ][™HˆİZ]H\ÜÚ[™ÎÈ\Ë]YÈ›İ][™Ë\Ú›Ú[\‹]\Ù\ˆ™YYËÚ\™Y˜XİÈÛ˜ÙK[YÙÙYİ[šÛ›İÛ‹ÜÜÛÙ™Y]X\˜[[™YİÛ™\‹[Û›K™YÚ\İH™K]™[™Ü™Yœ›ÛHŒØMYXÚ]ÚLMˆ[ˆ\İ
+KˆİÛ™\‹[XZ[›ŞY˜][ÛÛ[YY\È‹MKˆˆÛÈ\Ù\œÉÈš^\™\ÈÚ]™H\Ú›Ú[™YYÎÈ[YÙÙYXZ[]X\˜[[™Y[™ÚİÛˆÈHİÛ™\ˆÛ›KˆŸËLˆÕÓ‘Tˆ“ÑÔSH
+Ûİ™\›˜[˜ÙJHQ‹LMH
+[™HÌMXØXXØÙ\YHYÙ[HŒ‹LLLLŠKˆMÍMÎˆ™]šY]È]HY[X™\ˆ›ÛHØ[››İØZ[ˆİÛ™\‹Ø\›İ™\‹ÙY™™XİÜ‹ÔS’PÈ]]Üš]NÈÙ\ÜÚ[Ûˆ
+È\ÜİÛÜ™[™[™ÈÚXÚÛ\İˆLÍK‹LMŒˆ“ĞÒÑQHÜš][ˆ™]šY]È™XÙZ\Ú]\ÜËÙ˜Z[\ˆÛÛ›ÛˆŸKMÍHˆÕÓ‘Tˆ“ÑÔSH
+[˜›ÛÚÊHQ‹LMH
+[™HÌMXØXXØÙ\YHYÙ[HŒ‹LLLLŠKˆMÍNˆY[X™\ˆÛ˜›Ø\™[™È[˜›ÛÚÈ
+[š]KÙ]’TÙ]\İÛˆÜ˜ZYÜÛ\İÑÛİ‘X[ËĞ]Xİ[Û–š\Ø]™YÙX\˜Ú\ÈÚ]H\ÈY™\ÜÊKˆ‹LMŒ‹‹M“ĞÒÑQH[˜›ÛÚÈ™]šY]ÙYˆŸ‹LMŒÈ
+Š”ÕÓ‘Tˆ“ÑÔSH
+ÔĞH\š]HXˆ^[İ]™]ÛÜšÈÙˆ‹LMNJJŠˆİÛ™\ˆŒ‹LLLLˆÔĞH]Xİ[ÛœÈ\š]K	Û]YHÛ›İÈÚ[ˆHÙX\˜ÚYÙH\ÈÛÛ\]IËˆYÙ[HİYÙYÙLÍÌXÚ]™X[ØXÚ\È
+XY\ÜÈÚ›ÛYHMMŒ[™ÎLML
+H[™›İ[™ˆ
+JHÛˆHÎLÛ™H“È™\İ[Ø\™\Èš\ÚX›H[ˆHš\œİMLˆHÛİ\˜Ù\Èİ]\È\İ’VT‘H˜[›™\‹İYÙÙ\İ[ÛœÈ›ŞÛİ\˜Ù\È[™[[™\YYYš[\ˆÚ\È[™[™\ˆP“Õ‘HH™\İ[ÎÈ
+ŠHÛˆ\ÚİÜHš[\œÈØ\™Ú]È‘SÕÈHÛ™È	Ó^HšYÉÈ\İ
+HMNL
+H[œİXYÙˆÜ[Y™\ÚYHH™\İ[ÎÈ
+ÊHHÜ˜\ˆÜ˜\È
+	Ğ\IÈ›ÜÈÈHÙXÛÛ™[™JH[™\ÈÛÈİX›Z]]ÛœÈ
+	ÔÙX\˜Ú›İÉÈ
+È	Ğ\IÊNÈ
 
-| C-04 | P1 | Sold-comps feed (03 P-03-01, lead 03 with 02 for source access): a comps-evidence bundle interface + a fixture-first sold-comps source behind it (read-only, ADR-02-0202 tiers) that `estimate_item` consumes. Real eBay flips stay `insufficient` without it | none | **DONE** @ `882c726` (02 support @ `a1a7730`) | 03 (+02) | A 02-fixture flip with comps advances RESEARCHING â†’ SCORED with FACT-tagged comp provenance |
-| C-05 | P2 | R13: scorecard flag `pass_on_priors` when a PASS rests only on non-FACT inputs | none | **DONE** @ `6e938d2` (`scorecard.pass_on_priors`) | 03 | Golden test: a priors-only PASS is flagged |
+HØ\™ÈØ\œHÛÛ›ÛÈXXÚ
+Ø]™K›İ[\™\İY[Ü™HZÙH\Ë\ÜÈZÙH\ËYK^HX^HšYÛˆ\ËšY]ÊHœÈÔĞIÜÈÚ[™ÛHXİ[ÛÈ
+JHHXİ]™H]ZXÚË]šY]È[Ûİ[	ÊMÊIÈ\È\šË[Û‹X›YK[œ™XYX›Kˆš^™]\Ú[™È‹LMNHÛÙNˆYÙHÜ™\ˆHİXÚŞHÜ˜\ˆ
+Û™HÙX\˜Ú›Ş
+ÈÓ‘H	ÔÙX\˜Ú	È]Ûˆ
+È™\İ[Ûİ[
+ÈÛÜ
+Èš[\œÈÙÙÛKÛ™H[™H]L
+ÊH[ˆ]ZXÚË]šY]È[È[ˆÛYÛÛ[[ˆš[\œÈØ\™’T”Õ[™ÛÛ\ÚX›NÈ^HšYÈ[İ™Y™[İÈš[\œÈ[™ÛÛ\ÙYHY˜][Ú]]ÈÛİ[H
+ÈÜšYÚˆ™\İ[ÜšY[[YYX][WKˆ[İ™HH\‹\Ûİ\˜ÙHİ]\È\İ[ÈH^\İ[™ÈÛİ\˜Ù\È[™[
+ÛÛ\ÙYÛ™K[[™Hİ[[X\H	ÓˆÛÛ›™XİYH›İÛÛ›™XİY	ÊNÈ[İ™HİYÙÙ\İ[ÛœÈÈHÛÛ\ÙY	ÔİYÙÙ\İ[ÛœÈ
+ŠIÈİš\P“Õ‘HHÜšY]ZÙ\ÈÛ™H[™HÚ[ˆÛÜÙYÈ\YYYš[\ˆÚ\ÈÛ™HÛÛ\Xİ[™KˆØ\™HİËÛİ\˜ÙH˜YÙKÛİ[İÛˆ˜YÙK]KÚ]HÕ
+È\İ[˜ÙKÛÜÚ[™È[YKİ\œ™[šY
+ÈšY\œËÛ™H	ÕšY]ÉÈ]ÛÈØ]™KÓ›İ[\™\İYÓ[Ü™KÓ\ÜËÒYKÛ^HX^ÒHšY[İ™H[ÈHÛX[	ø¢ëÉÈY[H
+]Z[ËÜİ[[X\K›ÈØÜš\™YYY
+Kˆ’VT‘H˜[›™\ˆİ^\È]Û™H[™KˆÛ™Nˆš[\œÈ\ÈH˜]Ù\ˆ
+ÙY\
+K[™H’T”Õ™\İ[Ø\™]\İ™Hš\ÚX›HÚ][ˆLÙˆHÜ]ÎLÚYˆ[Ûİ[È™XYX›H
+Ú]HÛˆ›YHÚ[ˆXİ]™JKˆÙY\]™\][™È[ÙHœ›ÛH‹LMMËÑ‹LMNÑ‹LMNKˆ‹LMNH
+ÙLÍÌXØ[YH[™JH
+Š”ÕQÒS‘×ĞPĞÑTQ\È\ÙˆØ™™˜
+Šˆ
+\ÚİÜ\š]HXØÙ\Y]Î™˜ÌÈÛ™HY™XİÈš^YH‹LM
+Kˆˆ^]ÜšYÚÜˆXY\ÜËPÚ›ÛYH^[İ]\İˆ]ÎLLHš\œİ™\İ[Ø\™	ÜÈÜLÈ]MLHš[\œÈØ\™ÜHš\œİ^HšYÈ][H[™H™\İ[ÜšYİ\ÈÚ][ˆLÈÜ˜\ˆ\ÈÛ™H[™H]MÈ^XİHÛ™HİX›Z][ˆHÜ˜\ÈXXÚØ\™\È^XİHÛ™Hš\ÚX›Hš[X\H]Û‹ˆ[‹LMNH\İÈİ[\ÜÎÈÛÛ[œÈ™YÙ[™\˜]YÛ›H›ÜˆH[[™YÚ[™ÙHÚ]ÚÙ[ˆY™ˆ[ˆH™XÙZ\È[İZ]Kˆ›È]™H™[ØYˆŸ‹LM
+Š”ÕÓ‘Tˆ“ÑÔSH
+ÔĞH\š]HXÎˆÛ™Hİ™\™›İÈ
+ÈØØ][Ûˆ^
+JŠˆYÙ[HİYÙYÎ™˜ÌÚ]™X[ØXÚ\È
+XY\ÜÈÚ›ÛYHÎLLT“ÛX\šÙ]ÙÛÏLI˜˜\ÙOPÛÛØ^JĞT‰œ˜Y]\ÏLML
+Nˆ
+JHHYÙH\ÈÒQTˆ[ˆHÎLšY]ÜÜˆHÜX˜\ˆÙX\˜Ú]Û‹ÛÜHš[\œÈ˜]Ù\ˆ]Ûˆ[™HšYÚ\ÙˆH]ZXÚË]šY]È[È[™’VT‘H˜[›™\ˆ\™HÙ™‹\ØÜ™Y[ˆÈHšYÚ
+Üš^›Û[ØÜ›Û
+Kˆ]ÎLHÜ˜\ˆ]\İÜ˜\ÎˆÙX\˜Ú›Ş[ÚY[ˆÔÙX\˜ÚVÑš[\œ×HÛˆÛ™H›İË[ˆÛÜÈ[ÈÜ˜\ÜˆØÜ›Û[œÚYHZ\ˆİÛˆ›İÈ
+İ™\™›İË^˜]]ÈÛˆH[›İÈÛ›JNÈÛ™ÈÚ\ËØ˜[›™\œÈÜ˜\È›È[[Y[X^HXZÙHØİ[Y[œØÜ›Û[™Ñ[[Y[œØÜ›ÛÚY^ÙYYHšY]ÜÜÚYˆ
+ŠH]™\HØ\™	ÜÈØØ][Ûˆ[™HÚİÜÈHİ]HÚXÙH
+	Ñ˜^Y]]š[KT‹T‰Ë	Ó]H›ØÚËT‹T‰Ë	ÒİÜš[™ÜËT‹T‰ÊNˆHÚ]H˜[YH[™XYHÛÛZ[œÈ	ËÕ	È[™H[\]H\[™ÈHİ]HYØZ[ÈÚİÈ	ĞÚ]KÕ’T0­ÈˆZIÈÛ˜ÙKˆ‹LMŒÈ
+Î™˜ÌØ[YH[™JH
+Š”ÕQÒS‘×ĞPĞÑTQØ™™˜
+Šˆ
+İ]\ÈLŒŒ˜ÈYÙ[HŒ‹LLLLˆŒMNMHÑ
+KˆÙX\˜ÚYÙHPĞÑTQ\ÈÛ™H™[X\ÙHÚ]‹LMNH
+È‹LMŒÈ
+È‹LMØ™™˜ˆİYÙYÚ]™X[ØXÚ\È
+ÈÛÜHÙˆİÛ™\ˆ™YœÎÈ^]ÜšYÚ
+Ş\İ[HÚ›ÛYJH]ÎLLÈÍŒÈMLˆØİ[Y[ØÜ›ÛÚYOHšY]ÜÜÙX\˜Ú]Ûˆ[œÚYKš\œİØ\™ÜMˆÈÍÈMÈ›È	ËÕÕ	ÎÈ^[İ]
+Èœ›İÜÙ\ˆ\İÈˆ\ÜÙY[ˆH[™Hˆ™[È[İZ]H
+ÛÛÜ™[˜]Üˆ™[ŠHNM\ÜÙYÈÈ˜Z[YHŒM
+ÈŒMHÛ›İÛˆ[ˆXZÈ
+ÈH‹LMŒÈ^]ÜšYÚ\İÈ]\™Z[\Ü^]ÜšYÚ
+›İ[œİ[Y[ˆ]™[È›Û[\ÜÜœÚÚ\[È‹LMŒ
+KˆİÛ™\ˆ™[X\ÙNˆÛÛËÜ™[X\ÙWÛX\šÙ]XÙKœÚØ™™ˆLN˜ØM™LYÎYMØ˜˜ÌXÙM™XMNŒ™X[ˆYÙ[H]™HÛ]YKZ[‹PÚ›ÛYHÚXÚËˆˆ^[İ]\İ]ÎLL[™ÍŒˆØÜ›ÛÚYOHšY]ÜÜÚYHÙX\˜Ú[™š[\œÈ]ÛœÈ\™H[H[œÚYHHšY]ÜÜš\œİØ\™ÜLÈ\ÚİÜM[˜Ú[™ÙYˆ[š]\İˆ›ÈØ\™™[™\œÈ	ËÕÕ	Ëˆ[‹LMNKÑ‹LMŒÈ\İÈ\ÜÎÈ[İZ]Kˆ›È]™H™[ØYˆŸLÎHÕÓ‘Tˆ“ÑÔSH
+™YÚ\İHÙYY]
+Hš^ÛÛ™šYËÜÛİ\˜Ù\ËŒKšœÛÛ˜
+LÍÈÍÌXL˜Ø
+HÈX]ÚÚ]\ÈXİX[HÛÛ›™XİYˆ™\XÙHHÚ[™ÛH\—ÛØØ[Ø]Xİ[Û—Úİ\Ù\ØX[X[Û›İØÛÛ›™XİY›İÈÚ]™YH›İÜÈÛÛÛ^WØ]Xİ[Û™Y\œØÚ[ÛÛ—Ø]Xİ[Û™Y\œØ›XÚÛ[Û—Ø]Xİ[ÛœØØÛÜHİ]\ØÉĞT‰×Kİ]\ÈÛÛ›™XİYXØÙ\ÜÈšXHH]Xİ[Û™Y\‰ÜÈÕÓˆÚ]H]™[YÙ\È
+YXØÙ\Ü×Û[ÙHÚ]WÙ™YYÈHØÚ[XH[[KYš[™Y\È	İHX›\Ú\‰ÜÈİÛˆYÙ\Ë›Ø›İËØÜ˜]ÛY[^H™\ÜXİY]Xİ[ÛˆU‘S•ÈÛ›K›ÈİÉÊKÛXŞWÜ™YˆÈZ\ˆ™XÙZ\È
+‹L‹Ğ‹LĞ‹LJNÈY˜\Ú›İ[™Ø
+˜][Û˜[\K›İØÛÛ›™XİYÛXŞWÜ™Yˆ˜\Ú›İ[™È\›\Îˆ\œÛÛ˜[]\ÙHÛ]\ÙH[™[™ÈÜš][ˆÛÛ™š\›X][ÛŠH[™\—Üİ]WÜİ\œ\Ø
+İ]\ÈT‹[\Ù[XZ[›İØÛÛ›™XİY
+KˆÙY\]™\][™È[ÙKˆLÍÈ
+Ø[YH[™JH
+Š‘Ó‘HŒØMYX
+Šˆ
+İ]\ÈM˜ÙMMÈYÙ[HŒ‹LLLLˆŒMŒHÑˆÜ[™HİZ]H^]ÈÙYY›İÈMˆ›İÜÎˆÔĞH
+ÈÛÛÛ^KÕÚ[ÛÛ‹Ğ›XÚÛ[ÛˆÛÛ›™XİY]Xİ[Ûˆİ\Ù\È\ÈÚ]WÙ™YYT‹˜\Ú›İ[™È
+ÈTˆİ]Hİ\œ\ÈYY‹ÓÙ™™\•\›ØÚÙYÛX[X[
+KˆØÚ[XH˜[Y]\ÎÈH\İ\ÜÙ\ÈH™YHTˆ]Xİ[Ûˆİ\Ù\È\™HÛÛ›™XİYÚ]WÙ™YY›İÜÈ[™›È›İÈÛZ[\ÈÛÛ›™XİYÚ]İ]H™XÙZ\ÛXŞWÜ™YÈÜ[™HİZ]HÜ™Y[‹ˆŸ‹MHHÕÓ‘Tˆ“ÑÔSH
+İÛ™\ˆXZ[›ŞY˜][
+H‹M›ÛİË]\ˆHİÛ™\‰ÜÈYXØ]Y[\ÈXZ[›Ş\ÈX[ÛšY™™\ŒŒÛXZ[˜ÛÛH
+İÛ™\ˆŒ‹LLLLÈ\È\œÛÛ˜[ÛXZ[]\İ™]™\ˆ™H\ÙY
+KˆÙ^H\\Ù\—Ø[\Ëš[™Ù\İ]X\˜[[™\È]™\H[\Ú]›È\ÈYËÛÈ[\ÈHİÛ™\ˆÚ[È]HZ[ˆY™\ÜÈ
+X[HÚ]\È™Z™Xİ	ÊÉÈY™\ÜÙ\ÊHÛİ[™]™\ˆ™XXÚ\È™YYˆY[ˆ^XÚ][YÙÙYİ\Ù\˜\™İ[Y[
+Y˜][›Û™HHÙ^IÜÈ]X\˜[[™H™Z]š[İ\ŠNÈHÛÛÜ™[˜]ÜˆÛÛ™šYÈÙ]È]ÈHİÛ™\‰ÜÈ\Ù\ˆY›Üˆ\ÈXZ[›ŞÛÈ[YÙÙY[\Èœ›ÛHUUS•PĞUQ[\Ù[™\œÈÛÈÈHİÛ™\È[šÛ›İÛˆYÜÈ\™Hİ[]X\˜[[™YˆXZÙH˜\ÙWÛØØ[ÛÛYHœ›ÛHÛÛ™šYÈ
+HXZ[›ŞØØ[\X[ÛšY™™\ŒŒ˜ÛÈYÜÈ\™HX[ÛšY™™\ŒŒŠÏ[™OÛXZ[˜ÛÛX
+K›İH\™XÛÙY	Ø[\ÉËˆ\]HH^[\HÛÛ™šYË›İHİÛ™\‰ÜÈØØ[ÛÛ™šYËˆ‹M
+Ø[YH[™JH
+Š‘Ó‘H™™MØÍ˜
+Šˆ
+İ]\ÈN™Œ˜ÈYÙ[HŒ‹LLLLˆŒMŒMHÑˆÛX[ˆÚXÚÛİ][™HˆİZ]H\ÜÚ[™ÎÈ[YÙÙY[\ÈÈHZ[ˆX[ÛšY™™\ŒŒY™\ÜÈÛÈÈHİÛ™\ˆÛ›Hœ›ÛHÒSKX]][XØ]Y[\Ù[™\œÎÈ[šÛ›İÛˆYÜÈİ[]X\˜[[™YÈ˜\ÙWÛØØ[œ›ÛHÛÛ™šYÊKˆ]™HÚ\š[™ÈH‹LMŒKˆˆš^\™H\İÎˆ[YÙÙY]][XØ]Y[\[™È[ˆHİÛ™\‰ÜÈ™YYÚ[ˆ[YÙÙYİ\Ù\ˆ\ÈÙ][™\È]X\˜[[™YÚ[ˆ]\È›İÈ[šÛ›İÛˆYÈİ[]X\˜[[™YÈÜÛÙ™YÙ[™\ˆİ[]X\˜[[™YÈ˜\ÙWÛØØ[œ›ÛHÛÛ™šYËˆ[™HİZ]Kˆ™XÙZ\ˆŸ‹LMH
+Š”ÕÓ‘Tˆ“ÑÔSH
+ÔĞH\š]H˜ˆ]Z[YÙHš^\ÊJŠˆYÙ[HİYÙY‹LMŒ˜LÎNXØÚ]™X[ØXÚ\È
+K™ËˆÛX\šÙ]Ú][KÙÜØKX]Xİ[ÛœËÌ‹LKTTĞËRKLËLŒKLMH[™ÛX\šÙ]Ú][KİÚ[ÛÛ‹X]Xİ[Û™Y\œËİÚ[ÛÛ‰LĞ\\œÛÛ˜[\›Ü\KLLŠNˆ
+JHÚ]“ÈİÈHØ[\Hİ[™\Ù\™\ÈH\™ÙH[\H›ØÚÈ
+X›İ]Ùˆ›[šÈYÛÛ[[ˆ]MÈ]ÎLHİ]\È›Şİ\ÈX›İ]ÍLİÛŠNˆÚ[ˆ\™H\È›ÈİÈÚİÈHÛÛ\XİÛ™K[[™H	Ó›ÈİÈ
+Ü[ˆHÜšYÚ[˜[\İ[™ÊIÈ[™]H˜XİÈ›ŞZÙHH[ÚYÈ[İ™H\ˆ
+ŠHH]Z[YÙHØ^\È	Ù\İ[˜ÙH[šÛ›İÛˆ
+ØØ][Ûˆ›İ›İ[™
+IÈ›ÜˆİÈÚÜÙHÙX\˜ÚØ\™ÚİÜÈH\İ[˜ÙNˆÛÛ\]H\İ[˜ÙH^XİH\ÈHÙX\˜ÚØ\™Ù\È
+Ø[YHÜšYÚ[ˆœ›ÛHH]Y\KÛİÛ™\ˆ™YœËØ[YHØ^™]Y\‹ĞÙ[œİ\È]
+H[™ÚİÈ	ĞÚ]KÕ’T0­ÈˆZIËˆ
+ÊH	ÔÚ[Z[\ˆ\İ[™ÜÈ
+™X\™\İš\œİ
+IÈÚİÜÈ\İ[˜ÙHS’Ó“ÕÓˆ›Üˆ]™\H›İË[˜ÛY[™ÈÜ™Y[˜œšY\ˆTˆİÈ™X\ˆÛÛØ^K[™[˜ÛY\ÈİÈ˜\ˆİ]ÚYHHİÛ™\‰ÜÈ˜Y]\È
+^\Ë[›™\ÜÙYJNˆ\ÙHHØ[YH\İ[˜ÙHÛÛ\]][Û‹™\İšXİÈHİÛ™\‰ÜÈİ\œ™[˜Y]\ËÛØØ][Ûˆ[ÙH[™[™Y˜][[Ù™‹ÛÜHÛ›İÛˆ\İ[˜ÙH[ˆÛÜÚ[™È[YKØ\[™Ø^H	Ù\İ[˜ÙH[šÛ›İÛ‰ÈÛ›HÚ[ˆ][H\Ëˆ‹LMŒ
+Ø[YH[™JH
+Š”ÕQÒS‘×ĞPĞÑTQ˜Ø
+Šˆ
+İ]\ÈLÌØØÈYÙ[HŒ‹LLLLˆŒMMHÑ
+NˆİYÙY™X[ØXÚ\ÎÈ]Z[YÙH]ÎLİ]\È›İÈÜMˆ
+Ø\ÈÍL
+K›ÈÜš^›Û[İ™\™›İÈ]ÎLÌMÈ\İ[˜ÙH	ÓY[\\ËˆÎLN0­ÈM‹ŒÈZIÈX]Ú\ÈHØ\™ÈÚ[Z[\ˆ\İ[™ÜÈ[ˆ˜Y]\Ë™X\™\İš\œİ
+Ü™Y[˜œšY\ˆTˆLZJNÈŒMNKÙŒMŒÙŒMŒËÙŒMHÎ\ÜÙY[ˆH[™Hˆ™[È[İZ]HŒ\ÜÙYÈˆ˜Z[Y
+Û›İÛˆŒMÙŒMH[ˆXZÊK^[İ]\İÈ›İÈÚÚ\Ú]İ]^]ÜšYÚˆ™[X\ÙHÚXÚÈ
+ÛÛËÜ™[ØYİZKœÚ
+Hš^YÚXÙHÙ^H
+™™XLMŒYL˜
+Nˆ]™\]Z\™YH™[[İ™Y	ÑØ[\H›İÜÉÈX\šÙ\‹ÚXÚ›ÛY˜XÚÈHİÛ™\‰ÜÈMŒÈ™[X\ÙHÙˆØ™™˜ˆİÛ™\ˆ™[X\ÙNˆÛÛËÜ™[X\ÙWÛX\šÙ]XÙKœÚ˜ÈLN˜ØM™LYÎYMØ˜˜ÌXÙM™XMNŒ™X
+ÛÛZ[œÈ‹LMMË‹‘‹LMJKˆˆ\İÎˆ›Ë\İÈ^[İ]\È›È[\HØ[\H›ØÚÈ
+^]ÜšYÚ]M[™ÎLˆ˜XİÈ›ŞÜ]ÎL
+NÈ]Z[\İ[˜ÙH\]X[ÈHØ\™	ÜÈ\İ[˜ÙH›ÜˆHØ[YHİ[™ÜšYÚ[ÈÚ[Z[\ˆ\İ[™ÜÈÚ][ˆ˜Y]\ËÛÜYH\İ[˜ÙK^ÛYHH][H[™\™H[™ˆ^[İ]\İÈ[\ÜÜœÚÚ\^]ÜšYÚˆ[İZ]Kˆ›È]™H™[ØYˆŸ‹Mˆ
+Š”ÕÓ‘TˆPÒTÒSÓˆ
+˜XÙX›ÛÚÈX\šÙ]XÙH›İ]\Èˆ
+ÈÊJŠˆİÛ™\ˆÚÜÙHŒ‹LLLLˆ
+ŠHHZY\™\\H˜XÙX›ÛÚÈX\šÙ]XÙH]H›İšY\‹İÛ™\ˆXØÙ\È]›İšY\ˆÛÛ\X[˜ÙHÚ]Y]IÜÈ]]ÛX]Y]HÛÛXİ[Ûˆ\›\È\ÈS’Ó“ÕÓÈ[™
+ÊH\HÈY]H›ÜˆÜš][ˆ\›Z\ÜÚ[Û‹ˆ™\ÙX\˜Ú
+È˜Y[™ÈÛ›K›ÈXØÛİ[Ë›ÈÚYÛ\Ë›ÈÜ[™›ÈØÜ˜\[™Ë›ÈÙÚ[œËˆ[]™\ˆØÜËÚ[™Ù™‹Ğ—ÑPÑP“ÓÒ×ÓPT’ÑUPÑWÔ“ÕUTË›YÚ]ˆ
+JHH›İšY\ˆÛÛ\\š\ÛÛˆ
+]X\İ\YH˜XÙX›ÛÚÈX\šÙ]XÙHXİÜœËœšYÚ]K[™[Hİ\ˆ\İX›\ÚY›İšY\ˆÚ]HØİ[Y[YTJNˆİÈHÙX\˜Ú\ÈÜXÚYšYY
+ØØ][Û‹Ü˜Y]\È\›İ[™ÛÛØ^HTˆÌŒÌ‹Ù^]ÛÜ™ËØ]YÛÜšY\ÊKšY[È™]\›™Y
+]KšXÙKØØ][Û‹İÜË\İ[™ÈT“ÜİY[YKÙ[\ˆ[™›ÊKœ™\Ú™\ÜËÛ][˜ŞKšXÚ[™È›ÜˆŒ‹\İ[™ÜËİÙYZË]][Ù[
+THÚÙ[ŠKZ\ˆİÛˆ\›\ËØXØÙ\X›K]\ÙH[™]K\™][[Ûˆ\›\Ë[™™Y›YÜÎÈH˜[šÙY™XÛÛ[Y[™][ÛˆÚ]H^XİİÛ™\ˆİ\ÈÈÜ™X]HHXØÛİ[[™ÚÙ[ˆ
+HÚÙ[ˆ\ÈİÜ™YHHİÛ™\ˆÛˆ\ÈÜİ™]™\ˆ[ˆÚ]XˆÜˆÚ]
+NÈ
+ŠHHY]H›İ]NˆÚXÚÙ™šXÚX[›ÙÜ˜[KÙ›Ü›H\Y\È
+Y]IÜÈ]]ÛX]Y]HÛÛXİ[ÛˆÈÜš][ˆ\›Z\ÜÚ[Ûˆ›ØÙ\ÜÈ[™[HX\šÙ]XÙHÜˆÛÛ[Xœ˜\H\™\ˆ›ÙÜ˜[JK[YÚXš[]K[™H™XYK]Ë\Ù[™Q•™\]Y\İ]\ˆœ›ÛHZXÚY[\ØÜšXš[™ÈX[ÛšY™™\ˆ
+Ù[‹ZÜİYÚ[™ÛHİÛ™\‹™XY[Û›K\šØ[œØ\Ë›È™\Ø[HÙˆ]K˜]H[Z]Ë]šX][ÛŠK›ÜˆHİÛ™\ˆÈ™]šY]È[™Ù[™[\Ù[‹ˆ›Û™H
+Š‘Ó‘HŒÌMÙ
+Šˆ
+İ]\ÈÌÙNÈYÙ[HXØÙ\YŒ‹LLLLˆŒMÎŒHÑ
+KˆØÎˆØÜËÚ[™Ù™‹Ğ—ÑPÑP“ÓÒ×ÓPT’ÑUPÑWÔ“ÕUTË›YÛˆ[™HËˆ
+ŠH™XÛÛ[Y[™YœšYÚ]HØÜ˜\\ˆTH
+X›İ]	KŒÌİÙYZÈ]‹\İ[™ÜÈY\ˆHRËÛ[Ûœ™YHY\ŠK\YHÙ™šXÚX[XİÜˆ\È[\›˜]]™NÈİÛ™\ˆÜ™X]\ÈHXØÛİ[İÚÙ[ˆ[™İÜ™\È]ÛˆHÜİÛ›Kˆ
+ÊHY]H\È›ÈX›\ÚY›Ü›NÈ˜Y]\ˆ™XYH›ÜˆHİÛ™\ˆÈY][™Ù[™[\Ù[È\›İ˜[[›ZÙ[H›ÜˆHÚ[™ÛH\Ù\‹ˆ™^ˆİÛ™\ˆÚYÛ\
+ÈÚÙ[‹[ˆH[™HˆY\\ˆ›İËˆÈš[X\HÛİ\˜Ù\ÈÚ]YÚ]]\ÎÈPÕÒS‘‘T‹ÕS’ÈX™[ÎÈÛÜİÈÚ]H]HÙY[È˜Y]\ˆ™XYH›ÜˆİÛ™\ˆ™]šY]ÎÈ›ÈXØÛİ[Ü™X]Y›İ[™ÈÙ[ˆŸ‹MÈ
+Š”ÕÓ‘Tˆ“ÑÔSH
+˜XÙX›ÛÚÈX\šÙ]XÙHšXHœšYÚ]JJŠˆİÛ™\ˆÚÜÙH›İ]H
+ŠHŒ‹LLLLˆ[™İÜ™YHœšYÚ]HTHÚÙ[ˆÛˆ\ÈÜİ]‹Ë˜ÛÛ™šYËÛX›ÜËÜÙXÜ™]ËĞ”’QÒUWÕÒÑSˆ
+[ÙHŒÈ™XY]œ›ÛH]š[H][ˆ[YNÈ‘U‘Tˆš[ÙËÛÛ[Z]Üˆ]][ˆH™XÙZ\Èİš\Ú]\ÜXÙJKˆZ[X›Ü×Ù\ØÛİ™\KØY\\œËØœšYÚ]WÙ˜—ÛX\šÙ]XÙKœXÛˆH^\İ[™ÈÛİ\˜ÙPY\\ˆÙX[K\ˆØÜËÚ[™Ù™‹Ğ—ÑPÑP“ÓÒ×ÓPT’ÑUPÑWÔ“ÕUTË›YÛˆ[™HÈ
+ŒÌMÙ
+NˆœšYÚ]H˜XÙX›ÛÚÈX\šÙ]XÙHØÜ˜\\ˆTH
+Ù^]ÛÜ™\ØÛİ™\H[™ÛÜˆKUT“È™X\™\ˆÚÙ[ŠKÙX\˜Ú™X\ˆÛÛØ^HTˆÌŒÌˆÚ][ˆH›Ùš[H˜Y]\È›ÜˆH›Ùš[HÙ^]ÛÜ™ÎÈ›Ü›X[^™HÈHØ[YH][HÚ\H\Èİ\ˆÛİ\˜Ù\Îˆ]KšXÙKØØ][Ûˆ^
+ÈÛÛÜ™[˜]\ÈÚ[ˆÚ]™[‹[XYÙ\Ë\İ[™ÈT“\İ[™×Ù]KÛÛ™][Û‹İX›HÛİ\˜ÙHY
+›ÙXİÚY
+NÈ“ÔÙ[\ˆ˜[YKÜ›Ùš[HšY[È][™Ù\İÈX™[]™\H™XÛÜ™Ûİ\˜ÙWØÛÛ\X[˜ÙNˆS’Ó“ÕÓˆ
+›ÈY]H\›Z\ÜÚ[ÛÈİÛ™\‹XXØÙ\Y›İšY\ˆ›İ]JXˆYHœšYÚ]WÙ˜˜ÛXŞH›İÈ
+\ÜÜÚ][ÛˆSÕÑQY\ˆÚ]]›İJH[™H™YÚ\İH›İÈ\]H
+˜—ÛX\šÙ]XÙHXØÙ\Ü×Û[ÙH\HšXH›İšY\‹İ]\Èš^\™H[[H]™HÛ[ÚÙH\ÜÙ\ÊKˆš^\™KYš\œİÚ]H™XÛÜ™Y\Ú\Hš^\™Kˆ[ˆÓ‘H›İ[™Y]™HÛ[ÚÙNˆ][ÜİŒ™XÛÜ™ËÛ™HÙ^]ÛÜ™
+	İÛÛÉÊKÛÛØ^HTÈ™XÛÜ™Ûİ[šY[È™\Ù[Ú]\ˆØØ][Û‹Ü˜Y]\ÈØ\ÈÛ›İ\™Y[™\İ[™×Ù]H™\Ù[[™HÛÜİÚİÛ‹[ˆH™XÙZ\
+›È\İ[™È\œÛÛ˜[]H[ˆH™XÙZ\
+Kˆ™\ÜXİH\™Ø\ÙˆŒ™XÛÜ™È[ˆÛÙH›ÜˆHÛ[ÚÙKˆ‹Mˆ
+XØÙ\Y
+H
+Š”T•PS8 %QTTˆÓ‘HMÌX
+Šˆ
+İ]\ÈŒ˜LX˜ŒÈYÙ[HŒ‹LLLLˆŒMÎŒLÑˆÛX[ˆÚXÚÛİ][™HˆİZ]HLH\ÜÙYÈ˜Z[YÈÚÙ[ˆ™XY]Ø[[YHœ›ÛHHŒš[KÙ\İ]Ùˆ™\‹Ù\œ›ÜœËÕT“Ü˜]È]\ÎÈÙ[\ˆšY[È›ÜY™Y›Ü™H\Ú[™ÎÈÛÛ\X[˜ÙHX™[Ûˆ]™\H™XÛÜ™È\™Ø\Œ
+Kˆ]™HÛ[ÚÙH“ĞÒÑQˆÛ™H™\]Y\İ	Ğİ\İÛY\ˆ\È›İXİ]™IÈ
+İÛ™\ˆ]\İš[š\ÚœšYÚ]HXØÛİ[Xİ]˜][ÛÈ›İ[™ÈÚ\™ÙY
+KˆÛÛ[Y\È\È‹Mˆ›İNˆ[™HˆY]Y]È™[™Ü™Y™YÚ\İHÛÜH
+˜—ÛX\šÙ]XÙH\KÙš^\™JHZXYÙˆ[™HÈ[™H]\İZÙH][ˆH™^™YÚ\İHÚ[™ÙKˆˆš^\™H\İÈ
+›Ü›X[^˜][Û‹Ù[\ˆšY[È›ÜYÛÛ\X[˜ÙHX™[ÚÙ[ˆ™]™\ˆ[ˆÙÜËÙ^Ù\[ÛœË™XÛÜ™Ø\
+Kˆ]™HÛ[ÚÙH™XÙZ\Ú]Ûİ[ÈÛ›Kˆ[™HİZ]Kˆ›ÈRHÚ\š[™È[ˆ\È›İÈ
+›ÛİË]\ˆ›İÊKˆŸ‹MÕÓ‘Tˆ“ÑÔSH
+˜XÙX›ÛÚÈ]™HÛ[ÚÙJH‹MÛÜšÙ\ˆŒ‹LLLLˆNNÈÑ
+[™HˆX˜ØLØLKÎÌÍLÈ\ÜÙY
+NˆŒŠÜÛ]Û™NÈÓ‘H]™HÛ[ÚÙH™]\›™YŒ™XÛÜ™ÈÚ]İ]\œ›Üˆ]HØÜš\YÈÜİHšY[Ü˜Y]\ËÛ\İ[™×Ù]HÛİ[ËÛÈ™YÚ\İHİ^\Èš^\™Kˆ“ĞÒÑQÛˆİÛ™\ˆÒÈ›ÜˆÛ™H[Ü™H›İ[™YZY[ˆ
+ÛÛËØÛ]™WÜÛ[ÚÙKœJKˆ“ÕY]™]šY]ÙYHYÙ[KˆİÛ™\ˆÛÛ™š\›YYœšYÚ]HXØÛİ[Œ‹LLLLˆŒNNŒÍHÑÈÚÙ[ˆÛˆÜİ[œİÙ\œÈŒ
+]\Ù]ËÛ\İ
+KˆY\ˆHİÛ™\ˆÛÛ™š\›\ÈœšYÚ]HXİ]˜][Ûˆ
+JHİ\ÜœšYÚ]IÜÈ\Ş[˜È™\H[ˆœšYÚ]WÙ˜—ÛX\šÙ]XÙKœX
+ŒˆÚ]HÛ˜\ÚİYˆÛHØİ[Y[Y›ÙÜ™\ÜËÜÛ˜\Úİ[™Ú[ÈÚ]˜XÚË[Ù™‹İ[ØZ]Ø\HZ[]\ËØ[YHÚÙ[ˆ[™[™ËØ[YHŒ\™XÛÜ™Ø\
+H[œİXYÙˆ\œ›Üš[™ÎÈ
+ŠH™K\[ˆHÓ‘H›İ[™Y]™HÛ[ÚÙH
+Ù^]ÛÜ™	İÛÛÉËÛÛØ^HT‹LZKØ\Œ
+H[™™XÛÜ™[ˆH™XÙZ\ˆ™XÛÜ™Ûİ[ÚXÚšY[ÈÙ\™H™\Ù[Ú]\ˆÚ]KÜ˜Y]\ÈÙ\™HÛ›İ\™Y
+\İ[˜ÙHÙˆXXÚ™XÛÜ™œ›ÛHÛÛØ^KÛİ[ÈÛ›JK\İ[™×Ù]H™\Ù[˜ÙK[™ÛÜİÚİÛ‹ˆYˆ]ÛÜšÜËÙ]H™[™Ü™Y™YÚ\İH›İÈ˜—ÛX\šÙ]XÙHİ]\ÈÈÛÛ›™XİYÚ]H™XÙZ\\ÈÛXŞWÜ™Y‹ˆ›È\İ[™È\œÛÛ˜[]H[ˆH™XÙZ\ˆ‹MÎÈİÛ™\ˆœšYÚ]HXØÛİ[Xİ]™H“ĞÒÑQˆš^\™H\İ›ÜˆHŒˆ
+ÈÛ]È]™H™XÙZ\Ú]Ûİ[ÎÈ[™HİZ]KˆŸKMÌÈ
+Š”ÔTUS‘ÈÓÓ•“Ó
+ŠˆÛÜÙHH›İ™[ˆ‹LMMÈØZÙHØ\[œÚYHHVTÕS‘ÈØ]ÚÙÎˆÚ[ˆH›İ[™YÜXÚX[\İÛÜšÙ\ˆš[š\Ú\È[™]È\Y˜Xİ]ØZ]ÈYÙ[HXØÙ\[˜ÙKØZÙH^\İ[™ÈYÙ[H[™Ü™X]H[ˆ^XİUHÚXÚÜÚ[Ù]™[ˆ›È™]ÈÙ\šXÙKÛÛÜ™[˜]Ü‹ÛÜšÙ\‹]Y]YKØ]ÚÙË[Ûš]ÜˆÜˆ]]ÛX][Û‹ˆ
+Š‘‹LMMËÑ‹LMNİYÚ[™ËXXØÙ\[˜ÙH›İ[™\HØ]\ÙšYY]LL™˜ÙMÈYÙ[HLÍØMLØXÈ]™H™[X\ÙH™[XZ[œÈÙ\\˜][HİÛ™\‹YØ]YŠŠˆ
+Š‘SU‘T‘QSˆ‘TÔÒUÔ–HÈPÒÈS•‘T’Q’QQ8 %[Û™^KØİØ™\ˆL‹Œˆ8 %NŒÌˆH[Y\šXØKĞÚXØYÛËŠŠˆİÛ™\ˆ^\İ[™ÈYÙ[Kˆš[Üš]Nˆˆ›ÛİØ]\ÙH›İ™[ˆHÜİPÒÈYNNLÎˆ^\İ[™È›İØÛÛ]]Üš^™\È\ÈÛÛ\]X›H›ËY^˜KXÛÜİ[\›˜[Ø]ÚÙÈÛÜšÈÚ[HH^Xİ]\™Ù]™[X\ÙH\È›ØÚÙYˆUHS’Ó“ÕÓˆ[[PÒÎÈ™^ØÚXÚ×Ø][Û™^KØİØ™\ˆL‹Œˆ8 %NŒÍÈH[Y\šXØKĞÚXØYÛËˆ›ØÚÙ\ˆ“Ó‘H›Üˆ[\[Y[][ÛÈİ\œ™[Üİ[]™\KÛ]™[™\ÜÈ[™\šYšYYˆ™^Xİ[Ûˆ^\İ[™ÈYÙ[HPÒÜÈKMÌÈÚ]Üİ]šY[˜ÙK™X[\İXÈUK^Xİ™^ØÚXÚ×Ø][™^XİY\İËÜˆX›\Ú\ÈÛÛ[X[™\ÜXÚYšXÈ‘QQˆØ[›ÛšXØ[™XÙZ\ØÜËÜ™XÙZ\ËÌŒ‹LLLL‹\İ\\š\ÛÜ‹]š\ÚX›KXÚXÚËLLÌÌ‹›YˆH]\›Z[š\İXÈ\İÈ›ÜˆÛ™HØZÙKY\XØ][Û‹›Ú™Xİ\ÛÛ][Û‹š[š\ÚYX\Y˜Xİ›İ™[˜[˜ÙKPÒËÕÓÔ’ÒS‘ÈÚXÚÜÚ[Ú][ˆÌÙXÛÛ™Ë[™›È\XØ]H›ØÙ\ÜËÜÙ\šXÙKˆŸ‹LÌH
+Š”ÕÓ‘Tˆ’SÔ’UJŠˆ
+ŠÛÛ›™XİY˜XÙX›ÛÚÈX\šÙ]XÙH\ØÛİ™\H8 %XİX[\İ[™ÜË›İ‹LMHX[X[[KŠŠˆ^\İ[™È]Y]YKØÛÛÜ™[˜]ÜˆÛ›NÈYÙ[ˆİÛœÈHÛİ\˜ÙHY\\ˆY\ˆXØÙ\ÜÈ\È›İ™[‹ˆš\œİ›İ[™\H\ÈHØ\Xš[]KÜ™XYXš[]H›ÛÙˆ\Ú[™ÈÛ›H[ˆ[™XYKX]]Üš^™Y›İ]Nˆ[œÜXİ^\İ[™ÈÛÛ™šYİ\™YÛÛ›™XİÜœËØœ›İÜÙ\ˆÙ\ÜÚ[Û‹Ù^ÜĞTHØ\Xš[]NÈ][\›ÈÙÚ[ˆ\\ÜËÜ™Y[X[Ø\\™KØÜ˜\[™È]˜\Ú[Û‹Ù[\ˆÛÛXİšYÜˆ\˜Ú\ÙKˆYˆ[ˆ]]Üš^™Y™XYX›H›İ]H^\İË[™Ù\İÛ™H™X[ÛÛØ^KX\™XH\İ[™ÈÚ]]KšXÙKØØ][Û‹Ù\İ[˜ÙKXİX[İÜÈÚ\™H^ÜÙYÜšYÚ[˜[T“ØœÙ\™YØ]İX›HÛİ\˜ÙHQ[™Y\ÈX™[Ûİ\˜ÙKÙœ™\Ú™\ÜÈÛ™\İH[™Ú\™H›İYÚH^\İ[™ÈX\šÙ]XÙHØ\™ÙX[HÚ]Û]YHÚ›ÛYH\ÚİÜÛ[Øš[HXØÙ\[˜ÙKˆ^Xİİ\œ™[›ØÚÙ\ˆ[›Û[[İ\ÈX›XË]ÙXˆ\İÛİ[›İ™XYH˜XÙX›ÛÚÈ\İ[™ÎÈ›È™\ÜÚ]ÜH™XÙZ\›İ™\ÈHY]HTKÙ^ÜÜˆİÛ™\‹X]]Üš^™YÚYÛ™YZ[ˆ™XY[Û›HÙ\ÜÚ[ÛˆXØÙ\ÜÚX›HÈYÙ[KˆİÛ™\ˆ\™Xİ]™HÙ\È›İ]]Üš^™H™]ÈÜ™Y[X[Ë]][XØ][Ûˆ\\ÜÈÜˆ^[™YXØÙ\ÜËˆ
+Š“ĞÒÑQÈĞTT‘Q
+Šˆ8 %š[Üš]H™\Ù\™YÈÈ›İİXœİ]]H‹LMHX[X[š[™ÈÜˆÛZ[HÛÛ›™Xİ[Û‹ˆÛÛ\]X›H]]Üš^™YÛÜšÈÛÛ[Y\ÈÙ\šX[Nˆ‹LMÈš^\Èİ\œ™[È‹L]Ù[Ú[ÛÛˆ]™[È™[XZ[œÈ]Y]YYˆ
+Š–ÒQPÓÓTÒSÓˆ“ÕHŒ‹LLLL•NNŒ–ˆ[™HˆÛÛ[Z]ÈXŒÌØØ™˜ÙŒLX[™]ÈQÑS•ÔÕUTÈØ^H	Ğ‹LÌIÈ]\™HHÚ[ÛÛˆ]™KX]Xİ[Ûˆ]\È
+H‹LÌŠK][˜ÚYHH\Ü]Ú\ˆœ›ÛHH›İÈYÙ[HœšYY›HZ\Ë[[X™\™Yˆ^H\™H“Õ\È˜XÙX›ÛÚÈ›İÎÈ\È›İÈ\È[˜Ú[™ÙY[™]\İ›İ™H™XÛÛ˜Ú[Y\ÈÓ‘Hœ›ÛH[™H‰ÜÈİ]\Ë—JŠˆ
+Š“ÕÓ‘TˆPÒTÒSÓˆŒ‹LLLLˆŒMÑˆ\œİYH“Õ
+ŠH[ˆİÛ™\‹X]]Üš^™YZY\™\\H]H›İšY\‹XØÙ\[™ÈH\›\Èš\ÚË[™
+ÊHHÜš][‹\\›Z\ÜÚ[Ûˆ™\]Y\İÈY]KˆÛÜšÈÛÛ[Y\È\È‹M‹ŠŠˆˆY\ˆ‹LMÈ›İ[™\H[™Û›HÚ[ˆXØÙ\ÜÈ›ÛÙˆ^\İÈXØÙ\[˜ÙNˆ^XİXØÙ\ÜÈ›İ™[˜[˜ÙNÈÛ™HÙ[Z[™H\İ[™ÈÚ]İX›HQÙY\šY[ËÜİÜÈXİX[H]˜Z[X›K™\›ÈÛÛXİØšYÜ\˜Ú\ÙK\İË[™YÙ[HÛ]YHÚ›ÛYH\ÚİÜÛ[Øš[H›ÛÙ‹ˆ™^Xİ[Ûˆ^\İ[™ÈYÙ[H™XÛÜ™ÈÚ]\ˆ[H[™XYKX]]Üš^™Y˜XÙX›ÛÚË\™XYX›H›İ]H^\İÎÈYˆ›Û™K™]Z[ˆ^Xİ‘QQ[™ÛÛ[YHH™^ÛÛ\]X›H‘PQHÛİ\˜ÙH\ÚËˆŸ‹LLÈHÜ[™K\ÚYHY\\ˆ[ˆ‰ÜÈXÚØYÙH[\[Y[[™ÈX›ÜËš[\™˜XÙ\Ë‘Y\\˜Ú]KLMÛÛ^
+™[\İ[H
+È\ÚPUÒÑQ‘‘T‘S•
+K\ÈX]ÚÚ[ØÛˆ›Ü›X[^™Y\İ[™Øœ›ÛH‰ÜÈ›Ü›X[^™\ˆ›Û™H
+Š‘Ó‘JŠˆ
+ÈŒˆŒ	HÈ˜[ÙHY\™Ù\È›İYÚIÜÈÜ[™Kš[™Ù\İÈY\ÚÙ^H›İÈØ]YÛÜKÜİ]X
+Hˆ‰ÜÈÛÜœ\È›İYÚIÜÈÜ[™H[™Ù\İˆŒˆŒ	HZ\ÜÙY˜[ÙHY\™Ù\ÈŸ‹LMˆL‹NˆÜ[™H[XYÙKX\Y˜XİÛÚÎˆ[™HˆİÜÈ\™H][È[™H	ÜÈ\Y˜XİİÜ™H
+]Ø\Y˜Xİ
+H[™™Y™\™[˜ÙY[ˆ›Ü›X[^™Yš[XYÙ\Ø›Û™H
+Š‘Ó‘JŠˆ
+™XÛÛ˜Ú[Yœ›ÛH[™HˆQÑS•ÔÕUTÈÛ™JHˆ[XYÙ\È›İ[™]š\HÚLMˆ›İYÚHÜ[™H]Ÿ‹LHˆL‹MNˆÛİ\˜ÙKYœ™Y^™HÚ\š[™ÈÛÈÜİÜ™\ÈS’PÈKLˆ
+Š‘Ó‘JŠˆŒL˜™™
+œ™Y^™H›İ[™š\Ûˆ[™\ÈÑHÜİÜ™\ÊHˆœ™Y^™H›İ[™]š\ÈÛˆÌIÜÈX›\È‚ˆÈÈÈ[™HÎˆYÙ[È
+XÛÛ›ÛZXÜÊBŸQšH\ÚÈ\Èİ]\ÈYÙ[XØÙ\[˜ÙHŸKK_KK_KK_KK_KK_KK_KK_ŸËLHH‘TÑPTÒÙ\İ[X]H›ÙXÙ\ˆš[È][K™XÛÛ›ÛZXÜØœ›ÛH›Ü›X[^™YšY[È[™ÛÛ\È]šY[˜ÙKÚ]›İ™[˜[˜ÙH\ˆ\İ[X]H
+PÕÒS‘‘T‘SÑHYÜÊK]\›Z[š\İXÈ›Û™H
+Š‘Ó‘JŠˆ™™YYXÈ[ˆ][Hœ›ÛH‰ÜÈš^\™\ÈÙ]È˜[YXÛÛ›ÛZXÜÈ[™ØÛÜ™\È\İPVP‘KY›Ü‹[Z\ÜÚ[™ËZ[œ]ÈŸËLˆHQ‹LLˆØ[›ÛšXØ[œX8¡¤ˆ™Y™\™[˜ÙH
+XÚ[X[È\ÚY\ÈİX›\ÊNÈ™KX˜\Ù[[™HÛÛ[ˆ\Ú\ÈÚ]H›İH›Û™H
+Š‘Ó‘JŠˆØÌÍ˜È[\›Ü›İÈÈHLÌLÈLÈÛÛ[œÈ™\^HŸËLÈˆQ‹LËLˆ\ÈPĞÑTQUÒUPÒS‘ÑTÈ
+ÙYHS‘V
+KˆÚ]™HHŒKŒKŒØÚ[X\È™\œÚ[Û™Y	YÈ›Üˆ™K]™[™Üš[™È
+Q‹LH][HŠH›Û™H
+Š‘Ó‘JŠˆŒ˜YM˜È™]È	YÎÈÉÜÈ\İÈ\ÜÈ‚ŸËLHÛÛXÛÛ\È™YY
+ÈLËLKXYÈÚ]ˆ›ÜˆÛİ\˜ÙHXØÙ\ÜÊNˆHÛÛ\ËY]šY[˜ÙH[™H[\™˜XÙH
+ÈHš^\™KYš\œİÛÛXÛÛ\ÈÛİ\˜ÙH™Z[™]
+™XY[Û›KQ‹L‹LŒˆY\œÊH]\İ[X]WÚ][XÛÛœİ[Y\Ëˆ™X[P˜^H›\Èİ^H[œİY™šXÚY[Ú]İ]]›Û™H
+Š‘Ó‘JŠˆ˜ÍÌ˜
+ˆİ\ÜLXMÍÌÌ
+HÈ
 
-| C-06 | P1 | R13 amended (03 P-03-04): for flips, a PASS archives only if the revenue side AND â‰¥1 cost-side input are evidence-backed; otherwise `pass_on_priors=true` | none | **DONE** @ `9e36ec9` (engine 0.4.0; revenue requirement on the economic gates only, confirmed by 01) | 03 | Goldens: the floor PASS driven by prior repair costs is flagged |
-| C-07 | P1 | LEARN on 04's outcome store: Brier/MAPE from `predicted_vs_actual`; a config bump is PROPOSED as a tier-0 ActionRequest (`config.scoring.bump`), never auto-applied | none | **DONE** @ `0c3cf4a` (LEARN proposes, never applies; system-scoped areq waits on ADR-0009 item 9) | 03 | Two outcomes â†’ a bump proposal with provenance; nothing applied |
+ÌŠHH‹Yš^\™H›\Ú]ÛÛ\ÈY˜[˜Ù\È‘TÑPTÒS‘È8¡¤ˆĞÓÔ‘QÚ]PÕ]YÙÙYÛÛ\›İ™[˜[˜ÙHŸËLHˆŒLÎˆØÛÜ™XØ\™›YÈ\Ü×ÛÛ—Üš[ÜœØÚ[ˆHTÔÈ™\İÈÛ›HÛˆ›Û‹QPÕ[œ]È›Û™H
+Š‘Ó‘JŠˆ™NLÎ˜
+ØÛÜ™XØ\™œ\Ü×ÛÛ—Üš[ÜœØ
+HÈÛÛ[ˆ\İˆHš[ÜœË[Û›HTÔÈ\È›YÙÙY‚ŸËLˆHŒLÈ[Y[™Y
+ÈLËL
+Nˆ›Üˆ›\ËHTÔÈ\˜Ú]™\ÈÛ›HYˆH™]™[YHÚYHS‘8¢iLHÛÜİ\ÚYH[œ]\™H]šY[˜ÙKX˜XÚÙYÈİ\Ú\ÙH\Ü×ÛÛ—Üš[ÜœÏ]YX›Û™H
+Š‘Ó‘JŠˆYLÍ™XÎX
+[™Ú[™HŒÈ™]™[YH™\]Z\™[Y[ÛˆHXÛÛ›ÛZXÈØ]\ÈÛ›KÛÛ™š\›YYHJHÈÛÛ[œÎˆH›ÛÜˆTÔÈš]™[ˆHš[Üˆ™\Z\ˆÛÜİÈ\È›YÙÙYŸËLÈHPT“ˆÛˆ	ÜÈİ]ÛÛYHİÜ™NˆœšY\‹ÓPTHœ›ÛH™YXİYİœ×ØXİX[ÈHÛÛ™šYÈ[\\È“ÔÔÑQ\ÈHY\‹LXİ[Û”™\]Y\İ
+ÛÛ™šYËœØÛÜš[™Ë˜[\
+K™]™\ˆ]]ËX\YY›Û™H
+Š‘Ó‘JŠˆÌØÙX
+PT“ˆ›ÜÜÙ\Ë™]™\ˆ\Y\ÎÈŞ\İ[K\ØÛÜY\™\HØZ]ÈÛˆQ‹LH][HJHÈÛÈİ]ÛÛY\È8¡¤ˆH[\›ÜÜØ[Ú]›İ™[˜[˜ÙNÈ›İ[™È\YY‚ŸËLL
+Š”H
+Èš\œİ
+JŠˆš^ÛÛ\×Ù™YY™[J
+XÙ^Q\œ›ÜˆÛÛÙ]XÛˆTÒÒS‘ÈÛÛ\È
+‰ÜÈ™\›ÎÈ[˜›ØÚÜÈ‹L
+H›Û™H
+Š‘Ó‘JŠˆLNYŒ˜
+[™Ú[™H‹ŒNÈ™\šYšYYHIÜÈ[™KPÈ\İÊHÈ‰ÜÈ‹L˜Z[\İ\ÜÙ\È[˜Ú[™ÙYŸËLLHH\İ[X]ÜˆÛİ™\˜YÙNˆ]™\H›\Ø]YÛÜH
+˜Z[\ˆ8 )ˆİ\—Ø\ÜÙ]
+H\Èš[ÜœÈ[™HÛÛ\È]Y\HX\[™Ë[™]™\HÙ\šXÙHØ]YÛÜH\ÈH›Ø‹Ü][İH[\]KˆØ\È\™H™\ÜY\È]K™]™\ˆİY\ÜÙY›Û™H
+Š‘Ó‘JŠˆÍØLØ
+NKÌNHØ]YÛÜšY\ÎÈØÛÜWÛİ™\œšYWÜ™\]Z\™Y›Üˆİ\—ÊŠHÈÛİ™\˜YÙHX]š^\İˆNKÌNHØ]YÛÜšY\È›ÙXÙHZ]\ˆ[ˆ\İ[X]HÜˆ[ˆ^XÚ][œİY™šXÚY[Ú]Ø\ÈŸËLLˆH™\^H]Y]
+ULH]ØØ[JNˆH™XY[Û›H›Øˆ]™\^\È]™\HİÜ™YØÛÜ™XØ\™œ›ÛH]ÈİÜ™Y[œ]È
+ÈÛÛ™šYÈ™\œÚ[Ûˆ[™™\ÜÈ[H[œ]×Ú\ÚÈXÚ\Ú[ÛˆšY›Û™H
+Š‘Ó‘JŠˆYY˜
+NKÌNH[™KQ^ÜšY
+HÈ]Y]İ™\ˆÉÜÈÛÛ[œÈ
+ÈH[™KQˆ^Üˆ™\›ÈšY[™H[YšY\È]XİYŸËLLÈˆ™[X\ÙKYØ]HÛÚÈ
+ULJNˆ[ˆX›Ü×ÙXÛÛ›ÛZXÜÈ]Y]İ™\ˆ[ˆ^Üœ›ÛHIÜÈ[™KQL™H[›™\ÈØİ[Y[HÛ™HÛÛ[X[™›ÜˆKLˆ›Û™H
+Š‘Ó‘JŠˆMÙ˜˜
+]Ûˆ[HX›Ü×ÙXÛÛ›ÛZXÜÈ]Y]KYÛˆ8 )˜ÈK\İšXİ\ØX›H›İÈ]ĞÓÔ‘WÔ‘PÓÔ‘QØ\œšY\È^[ØYÚ\Ú
+HÈÛÛ[X[™
+È^XİYİ]][ˆÉÜÈØÜÎÈHYÈ]ÈHØ]HŸËLMHPT“ˆ[™È[™Ûˆ[™Hˆİ]ÛÛY\È™XÛÜ™YHHÜ[™H
+Ü[™WÙœ™XÛÜ™Ûİ]ÛÛYX
+H™YYØYÛİ]ÛÛY\ØØØ[Xœ˜]XÈH[\\È›ÜÜÙY[™›ØÚÙYØY™[H[[Q‹LH][HH›Û™H
+Š‘Ó‘JŠˆXÎMØ™Ø
+ÎˆPT“ˆ[™È[™Ûˆ[™HÈ›ÜÜØ[™Y\ÙYØY™[H[[Q‹LH][HJHÈ\İÛˆH[™KQˆİ]ÛÛY\È8¡¤ˆØ[Xœ˜][Ûˆ™\Ü8¡¤ˆ›ÜÜØ[˜YÈ›İ[™È\YYŸËLH[Ü›š[™ÈYÙ\İ˜[šÚ[™ÎˆH\™H[˜İ[Ûˆİ™\ˆØÛÜ™Y][\È8¡¤ˆH˜[šÙYÚ]ÈÈš\œİˆ\İ
+Uˆ	Ú[YK]ËXØ\Ú^\KØ]Xİ[Ûˆ[™ÛÛ™šY[˜ÙJHÚ]Û™K[[™H™X\ÛÛœÈ[™›İ™[˜[˜ÙH™YœË›ÜˆHÜ\˜]ÜˆRH[™HZ[Hİ[[X\H
+Ì‹Zİ\ˆ[ŠH›Û™H
+Š‘Ó‘JŠˆNXNNX
+X›Ü×ÙXÛÛ›ÛZXÜË™YÙ\İ˜Z[ÙYÙ\İ
+][\Ë\×ÛÙŠX
+HÈ
+ˆ™[™\œÊH]\›Z[š\İXÈ˜[šÚ[™Èİ™\ˆHLÈÛÛ[œÈ
+Èˆš^\™\ÎÈ^[˜][Ûˆ\ˆ›İÈŸËLHHİÛ™\‹YXÚ\Ú[Ûˆİ\Ü›ÜˆRPÒQSÑPÒTÒSÓ”ÈÌKÈÌˆHÙ[œÚ]]š]H™\ÜÚİÚ[™ÈİÈ™\™XİÈÛˆİ\œ™[ÛÛ[œÈ[™š^\™\ÈÚ[™ÙHXÜ›ÜÜÈØ\ÚØ\È[™	Ú›ÛÜ‹İ\™Ù]Ëˆ™\ÜÛ›NÈÛÛ™šYÈ[İXÚY›Û™H
+Š‘Ó‘JŠˆ™LŒØ
+ØÜËÜ™\ÙX\˜ÚØYÙ[LË\Ù[œÚ]]š]K[ZXÚY[YXÚ\Ú[ÛœË›Y
+HÈØÜËØ™\ÜÚ]HX›NÈ›ÈÛÛ™šYÈÚ[™ÙH‚ˆÈÈÈ[™HNˆYÙ[H
+Ûİ™\›˜[˜ÙJBŸQšH\ÚÈ\Èİ]\ÈYÙ[XØÙ\[˜ÙHŸKK_KK_KK_KK_KK_KK_KK_ŸKLHHÈ›ÜÜÙK[Û›HÜ˜[›ÜˆYÙ[LKXÛÛÜ™[˜]Ü˜
+ÈQ‹LL^[ØYÚ\Ú
+›ÜH›Ø]™Y\Ø[
+H
+Èİ[™Z[ˆİÜ™H›İ×Ú\Ú8¡¤ˆP“ÔËT’LH›Û™H
+Š‘Ó‘JŠˆ˜ÌØH[\›Ü›İÈHHLÌLÈ™XİÜœËšœÛÛ˜™XÙZ\ØÚZ[˜™\šYšY\ÈÚ]IÜÈÛÙHŸKLˆ
+Y\ˆLJHÜİÜ™\ËX˜XÚÙYÛİ™\›˜[˜ÙTİÜ™X
+È[šXÔİÜ™XÛˆ	ÜÈX›\È
+Œ‹ÔÔJKˆ˜Z[XÛÜÙY\ÈÙ\LKLˆ
+Š‘Ó‘JŠˆXÍMMØ˜
+ŒLH\İÈÛˆÌMˆšXH[™H	ÜÈTNÈ›ÈÔS]HÛˆH›ÙXİ[Ûˆ]È[™›Ü˜ÙYH›ÛJHHIÜÈİZ]H\ÜÙ\ÈÛˆÜİÜ™\ÎÈ›ÈÔS]H[ˆH›ÙXİ[Ûˆ]ŸKLÈˆNĞNH\™[š[™ËNˆ\‹XYÙ[]SHYÙ]ÛÛ™šYÈÙ[™\˜]Üˆ
+›È^\›˜[Ø[ÊNÈÈÛÚÈ]Ø[˜Ù[È[œİ\Y“ÔÈÛÜšÙ›İÜÈ
+“ÔË˜Ø[˜Ù[İÛÜšÙ›İÜØ
+H[™Üš]\ÈHYÜ™\ÜÈ[KX[ÛXŞHš[H›Û™H
+Š‘Ó‘JŠˆLL˜ØXLØH\İÈ›İ™HÈØ[˜Ù[È[™[™ÈÛÜšÙ›İÜÈ[™[Z]È[KX[ÛÛ™šYÎÈ›İ[™È™XXÚ\ÈH™]ÛÜšÈ‚ŸKLL
+Š”
+Üš]XØ[\]İ\Ü
+JŠˆY\\ˆ›ÜˆKLÈ[ˆIÜÈXÚØYÙNˆX›Ü×ÙÛİ™\›˜[˜ÙKœÜ[™WØY\\˜[\[Y[[™ÈX›ÜËš[\™˜XÙ\Ë‘Ø]]Ø^X
+^Xİ]J[™Ú[™K\™\WÚY\›İ˜[ÚY
+H8¡¤ˆİX\™™\İ[
+KÚ[İÚ]Ú
+Ô[šXÔİÜ™JH[™ÛXŞQXÚ\Ú[Û”Ú[
+[\™\JHÛˆ[™HˆˆHØ]]Ø^HİÛœÈXİ[Û‹\İ]\ÈYÙ\È[™™XÙZ\ËÛÈHÜ[™IÜÈš[š\ÚØXİ]\İ›İİX›K]Üš]NÈØİ[Y[H^XİÛÛ˜Xİˆ\È™XÛÛ˜Ú[J
+X\ÈH[˜İ[ÛˆHÜ[™HØ[ˆØÚY[H›Û™H
+Š‘Ó‘JŠˆX˜YLÍX
+[™Ù™ˆIÜÈØÜËÚ[YÜ˜][Û‹ÌK\Ü[™KXY\\‹TXÛÛ˜Xİ›Y
+HHIÜÈ\İÈš]™HHY\\ˆ›İYÚIÜÈX›ÜËš[\™˜XÙ\Ø\\ÈÛˆ[™HÈHÜš][ˆ[™Ù™ˆ›İH›ÜˆKLÈŸKLˆHÛXŞH]H[È[™H	ÜÈX›ÜËœÛXŞXÈÛXŞWØİ\œ™[
+X›\ÚšXHX›ÜËœX›\ÚÜÛXŞX™XÙZ\Y
+H›Û™H
+Š‘Ó‘JŠˆNMMÍH™XYÈÛXŞHœ›ÛHÜİÜ™\ÎÈØ[YHXÚ\Ú[ÛœÈ\ÈH”ÓÓˆš[HŸKLHHÛİ™\›˜[˜ÙH[\]Y\šY\È
+”‘QV‘KPŒˆYÙ]™Y\Ø[ËS’‘PÕSÓ—ÔÕTÔPÕQ‘QQ×ÒSPS‹İXÚÈÛZ[\ÊKˆ]Y\šY\ÈÛ›K›ÈÙ[™È›Û™H
+Š‘Ó‘JŠˆÍŒØŒ˜H[\šY]ÜÈ
+È\İÈŸKLÈˆYÜ™\ÜÈ[İË[\İ\ˆY\\‹ÙY™™XİÜˆ\ÈÛXŞH]H›Û™H
+Š‘Ó‘JŠˆ™MXH]H
+ÈÚXÚÙ\ˆŸKLˆØ[™›ŞÜXÈ
+ÈÛÛ™šYÈÚXÚÙ\ˆ
+ØÈ
+ÈÚXÚÙ\ˆÛ›NÈ›ÈÙX[ˆÛˆÜİ
+H›Û™H
+Š‘Ó‘JŠˆMYL˜HÚXÚÙ\ˆ\İÈŸKLLHˆ™K\[ˆ[™HÈLÊÈ[™\ÙHLLIÜÈ™[ØÚ]WØXİ[Ûœ×Ü\—Úİ\ˆ›Û™H
+Š‘Ó‘JŠˆ
+™XÛÛ˜Ú[Yœ›ÛH[™HHQÑS•ÔÕUTÈÛ™JHHHİZ]HÜ™Y[ˆÛˆLÈŸKLNHÜ[™HÚ[İÚ]ÚÛˆ[™HH8¡¤ˆÛİ‹˜Xİ[Û—ÙØ]]Ø^K™[™ØYÙWÜ[šXËÜ™[X\ÙWÜ[šXØ
+ÛÚÜÈ[È™[X\ÙH\È\›İ™\ŠNÈØÚY[H™XÛÛ˜Ú[J
+X
+KLJH]ÛÜšÙ\ˆİ\›Û™H
+Š‘Ó‘JŠˆ
+\È\Ú
+NˆÜ[™HÚ[İÚ]Ú[YØ]\ÈÈ[™HH
+ÛÚÜÎÈ\›İ™\‹[Û›H™[X\ÙJNÈ™XÛÛ˜Ú[HØÚY[H™YÚ\İ\™Y™Y›Ü™H][˜Ú[™Xİ]˜]YY\ÈL™H›İ™\ÈÈ[™ØYÙH›ØÚÜË]SHYÙ]È™\›Ë™[X\ÙHÛX\œÈH\İÈÛˆ[™HÑHŸKLHİ]›İ[™ÙXÜ™]ØØ[ˆ
+ÈS’‘PÕSÓ—ÔÕTÔPÕQš\Ú\™H
+H0©ÌMÈÌ8 $ÌŠNˆØØ[ˆ›ÜÜÙY^[ØYÈ[™Y™™XİÜˆ™\]Y\İÎÈ\İ[™ËÚ[˜›İ[™^X]Ú[™È[š™Xİ[Ûˆ]\›œÈ[Z]È[ˆS’‘PÕSÓ—ÔÕTÔPÕQ™XÙZ\[™›Ü˜Ù\ÈY\ˆ
+È™YY×Ü™]šY]Ø›Û™H
+Š‘Ó‘JŠˆ˜Y™MØH\İÎˆHÙXÜ™][ˆH^[ØY\È™Y\ÙYÈ[ˆ[š™XİY\İ[™ÈZY[È][ÜİHY\‹L›ÜÜØ[Ú]Hš\Ú\™H™XÙZ\ŸKLHˆİXÚËXÛZ[H™XÛÛ˜Ú[X][Ûˆ›Øˆ^Xİ][ÛœÈY^Xİ][™Ø\İH\™H™XÛÛ˜Ú[Y›İYÚHØ]]Ø^H
+›İšY\‹\]Y\KX™Y›Ü™K\™]HÙ[X[XÜËK\[ŠH›Û™H
+Š‘Ó‘JŠˆLÎLXÌM˜
+™XÛÛ˜Ú[J
+Nˆ™]™\ˆ™K\Ù[™ÎÈØÚY[H]İ\\[ˆKLÊHH\İˆHÜ˜\ÚYÛZ[H\È™XÛÛ˜Ú[Y^XİHÛ˜ÙNÈ›È™K\Ù[™‚ˆÈÈÈ[™HˆYÙ[ˆ
+Ü\˜]ÜˆRJBŸQšH\ÚÈ\Èİ]\ÈYÙ[XØÙ\[˜ÙHŸKK_KK_KK_KK_KK_KK_KK_Ÿ‹LHHŒLˆÜ\˜]ÜˆRHÛˆÜ[™Kœ[™[™×ÙXÚ\Ú[ÛœØÈÜ[™K™XÚYJÚ[›™[HÙXˆ‹™]×Ü^[ØYx )‹Ûx )‹]]ØÛÛ^^Èœİ\İ\¸ )ŸJX
+È›İYWÙXÚ\Ú[Û˜È›ÜHRHØ]]Ø^KXÚÙ\ˆ[™ÔS]HİÜ™H›Û™H
+Š‘Ó‘JŠˆNL˜X˜ˆHQTËÓ“ËÓSÑQ–KÒÓÙXˆ›İÈYØZ[œİIÜÈÜ[™HÛˆÜİÜ™\È
+ÜÙ\™\ŠHŸ‹LˆHQ‹LLˆ][˜Ø[›ÛšXØ[ÚœÛÛ˜8¡¤ˆ™Y™\™[˜ÙNÈİ[™Z[ˆ›İ×Ú\Ú8¡¤ˆP“ÔËT’LH›Û™H
+Š‘Ó‘JŠˆ˜ÌÌNM˜ˆ[\›Ü›İÈˆHLÌLŸ‹LˆL‹LÎˆHRIÜÈÜ[™P˜XÚÙ[™\Ù\ÈHÛÜšÙ\‰ÜÈ™X[ÛÛ\Û™[Ø
+H
+HKLÈ
+Š‘Ó‘JŠˆ
+™XÛÛ˜Ú[Yœ›ÛH[™HˆQÑS•ÔÕUTÈÛ™JHˆRHXÚ\Ú[ÛœÈ\ÙHH™X[Ÿ‹LÈˆÛÛ[\ÈK\[ˆÜXÈ][\È
+JJÊJ
+JŠHœ›ÛH‰ÜÈİ]\Îˆ[\]\È™YÚ\İK˜]KØÛÛœÙ[[\È\È]H›Û™H
+Š‘Ó‘JŠˆØÎÙˆ]Hš[\È
+È\İÎÈ›ÈÙ[™È‚Ÿ‹LHHL‹MˆÛÛ[\ĞXİ[Û”[›™\˜[\[Y[[™ÈX›ÜËš[\™˜XÙ\ËXİ[Û”[›™\˜œ›ÛHHÛÛ[\×ÜÜXÈ[\]H™YÚ\İKˆH^[ØYØ\œšY\È[\]WÚY[\]WÚ\Ú
+P“ÔËPÒ”ÓÓ‹LJH[™H™[™\™Y˜YÈXİ[ÛˆÛÛœİ˜Z[È
+Ú[™İËÛÛœÙ[™\™\]Z\Ú]\ÊHÛÈ[ˆH^[ØY›Û™H
+Š‘Ó‘JŠˆXØØÍL˜ˆÛÛ˜Xİ]˜[Y›ÜÜØ[È›ÜˆH›\
+ÈHÙ\šXÙHš^\™NÈHÚ\™\È][ÈÛÛ\Û™[Ø
+KLLÊHŸ‹LˆHL‹MNˆK\[ˆÛÛ[\ÈY™™XİÜ˜[\[Y[[™ÈX›ÜËš[\™˜XÙ\Ë‘Y™™XİÜ˜ˆ^XİK[Û˜ÙH\ˆY[\İ[˜ŞHÙ^NÈY™™XİÜ—Ü™\ÜÛœÙK™WÜ[]YXÈ]Z[ËšÚ[™XÛÛ[\ØØ\œšY\ÈÛÛœÙ[ÑËİÚ[™İËÙ\ØÛÜİ\™HÚXÚÈ™\İ[ÎÈ]Y]
+™XÙZ\ÊXÜ˜Y\ÈLx $ÑMËˆ›È™]ÛÜšÈ[\ÜÈ›Û™H
+Š‘Ó‘JŠˆXX™LYXˆLx $ÑMÈÜ˜YYÛˆHÜ[™H[ÈMÈİ[™\›È^Ù\[ÛœÈ‚Ÿ‹LÈHL‹MˆÛÛœÙ[YÙ\ˆ
+ÈÈØÜXˆİÜ™H\È]H
+\[™[Û›K™XÙZ\Y
+KÛÈLˆÜ˜Y\ÈTÔËÑRS[œİXYÙˆ–WÔ•S—ÑVSTˆ˜]ÈÛÛXİ˜[Y\Èİ^H[ˆHYÙ\ˆ[™\™H™Y™\™[˜ÙY™]™\ˆÛÜYY›Û™H
+Š‘Ó‘JŠˆÍ˜ÙNXM
+ÛÛœÙ[YÙ\ˆ
+ÈÎÈL‹ÑMTÔÊHˆ
 
-| C-10 | **P1 (do first)** | Fix `comps_feed.entry()` KeyError `sold_date` on ASKING comps (02's repro; unblocks B-08) | none | **DONE** @ `e1869f2` (engine 0.6.1; verified by 01's lane-C tests) | 03 | 02's B-08 xfail test passes unchanged |
-| C-11 | P1 | Estimator coverage: every flip category (trailer â€¦ other_asset) has priors and a comps query mapping, and every service category has a job/quote template. Gaps are reported as data, never guessed | none | **DONE** @ `c648ca3` (19/19 categories; `scope_override_required` for other_*) | 03 | Coverage matrix test: 19/19 categories produce either an estimate or an explicit `insufficient` with gaps |
-| C-12 | P1 | Replay audit (AT-1 at scale): a read-only job that replays every stored scorecard from its stored inputs + config version and reports any `inputs_hash` / decision drift | none | **DONE** @ `d5daf42` (19/19 lane-D export, 0 drift) | 03 | Audit over 03's goldens + a lane-D DB export: zero drift, and a planted drift is detected |
-| C-13 | P2 | Release-gate hook (AT-1): run `mbos_economics audit` over an export from 01's lane-D e2e runner; document the one command for A-02 | none | **DONE** @ `0d417fb` (`python -m mbos_economics audit --dsn â€¦`; `--strict` usable now that SCORE_RECORDED carries `payload_hash`) | 03 | Command + expected output in 03's docs; 01 adds it to the gate |
-| C-14 | P1 | LEARN end to end on lane D: outcomes recorded by the spine (`spine_d.record_outcome`) feed `load_outcomes`/`calibrate`; a bump is proposed and blocked safely until ADR-0009 item 9 | none | **DONE** @ `ec97bf7` (03: LEARN end to end on lane D; proposal refused safely until ADR-0009 item 9) | 03 | Test on a lane-D DB: outcomes â†’ calibration report â†’ proposal draft; nothing applied |
-| C-08 | P1 | Morning digest ranking: a pure function over scored Items â†’ a ranked "what to do first" list (EV $/h, time-to-cash, expiry/auction end, confidence) with one-line reasons and provenance refs, for the Operator UI and a daily summary (72-hour plan) | none | **DONE** @ `a81a989` (`mbos_economics.digest.build_digest(items, as_of)`) | 03 (06 renders) | Deterministic ranking over the 13 goldens + 02 fixtures; explanation per row |
-| C-09 | P1 | Owner-decision support for MICHAEL_DECISIONS #1/#2: a sensitivity report showing how verdicts on current goldens and fixtures change across cash caps and $/h floor/targets. Report only; config untouched | none | **DONE** @ `286e0f3` (docs/research/agent-03-sensitivity-michael-decisions.md) | 03 | `docs/` report with a table; no config change |
+Ì›ÜˆYˆ]™YYÈX›\ÊHLˆÜ˜YYTÔËÑRSÛˆHÜ[™H[ˆŸ‹LˆL‹MÎˆ›ÛİË]\[™š[™[™ÈÙ™™\‹Ü][İH[\]\È\ÈZ\ˆİÛˆİ\]\Xİ[Û”™\]Y\İÈ
+Y\ˆ\œ™]™\œÚX›JH‹LÈ
+Š‘Ó‘JŠˆYÍYM
+›ÛİË]\ÛÙ™™\‹Ü][İH\ÈÙ\\˜]Hİ\]\\™\\ÊHˆ[\]\È
+È\İÎÈ›İ[™È]]Ë\Ù[™È‚Ÿ‹LHHÜ\˜]ÜˆRHYÙ\Èœ›ÛHHÌ‹Zİ\ˆ[ˆ
+Š›İ]ÛÛYH[JŠˆ
+šXHÜ[™Kœ™XÛÜ™Ûİ]ÛÛYX
+K
+ŠœÛİ\˜ÙHX[
+Šˆ[™[
+‰ÜÈX[]K™XY[Û›JK
+Š’Ó˜XÚÛÙÊŠ‹ˆ[X[ˆÚ[›™[Û›H
+ŒM
+H›Û™H
+Š‘Ó‘JŠˆÌMØL™˜ˆYÙ\È
+È\İÈÛˆH™X[Ü[™NÈİ]ÛÛY\È™XÙZ\YŸ‹LLˆHZ[Hİ[[X\KÙ[™\˜]YØØ[H[™™]™\ˆÙ[ˆYÙ\İÜSˆ
+ÈÓ˜XÚÛÙÈ
+Èİ™\™YH
+ÈY\İ\™^IÜÈİ]ÛÛY\È
+ÈÛİ\˜ÙHX[\ÈHX\šÙİÛ‹ÒSš[HÛˆ\ÚÈ[™\ÈHRHYÙH›Û™H
+Š‘Ó‘JŠˆMXLÙ™XˆH]\›Z[š\İXÈİ[[X\Hœ›ÛHš^\™\ÎÈ›È™]ÛÜšÈ[\ÜÈŸ‹LLˆ[Ü›š[™ÈYÙ\İYÙH™[™\š[™ÈÉÜÈËL˜[šÚ[™ÈËL
+Š‘Ó‘JŠˆMMLŒNXˆ˜[šÙY\İÚ]™X\ÛÛœÈ[™›İ™[˜[˜ÙH[šÜÈŸ‹LLHˆ›ÛİË]\ÈÙ™™\ˆÈ][İH]ÛœÈÛˆHØ\™KLMH
+Š‘Ó‘JŠˆ
+[™HÈÙYH]ÈQÑS•ÔÕUTÈÈ[™Ù™ŠHˆXXÚÜ™X]\È]ÈİÛˆİ\]\Xİ[Û”™\]Y\İšXHHX›XÈTHŸLLˆYÜ‰ÜÈX›Ü×ØÛÛ[\ØÛÛœÙ[ÑÈØÚ[XH
+ÛÛ[\×ÜÜXËÜÜ[ÌWØÛÛ[\×ÛYÙ\‹œÜ[
+H[È[™HZYÜ˜][ÛœÈ
+ŒNˆÛ™HİÛ™\ŠH›Û™H
+Š‘Ó‘JŠˆLÌÌÌÍ
+LJNÈš[˜[XØÙ\[˜ÙHØZ]ÈÛˆKLH\ÙHˆ‰ÜÈ‹LÈ\İÈ\ÜÈÛˆ[™H	ÜÈØÚ[XH‚ˆÈÈÈ[™HÎˆYÙ[È
+PJBŸQšH\ÚÈ\Èİ]\ÈYÙ[XØÙ\[˜ÙHŸKK_KK_KK_KK_KK_KK_KK_ŸËLHHQ‹LLˆÛÜ™K˜Ø[›ÛšXØ[Ø™XÙZ\Ü›İ×Ú\Ú8¡¤ˆ™Y™\™[˜ÙNÈY™XİÜœËšœÛÛ˜ÈX›Ü×ÜXH[\›ÜÈ™K\[ˆ[\›ÜXÜ›ÜÜÈ[[™\È[™X›\ÚHX]š^›Û™H
+Š‘Ó‘JŠˆXØ˜ÙMÌ
+ØÜËÜXKÒS•T“ÔÔ‘TÔ•›Y
+HÈX]š^X›\ÚYÈ‹LLËÑ‹LMÛÜÙYÜˆ™K[Ü[™YÚ]]šY[˜ÙHŸËLˆH
+Š”ŒLH[Y[™Yˆİ\›İËŠŠˆÈÜš]\ÈP“Ô×ÔPWÒSTHX›Ü×ÜXKš[\ÜÜ[™N˜Z[YØZ[œİIÜÈX›XÈTH
+X›ÜËœ[[YXX›ÜËœÜ[™XX›ÜË›YÙ\˜X›ÜË˜]Y]X›ÜËÛÜšÙ›İÜØ
+HÛˆÜÙ\™\ˆÜİÜ™\Ëˆ™K]\™Ù]HİÜ™HÈ	ÜÈØÚ[XHÚ[ˆKLH[™È›Û™H
+KLH]\ŠH
+Š‘Ó‘JŠˆLMÌX
+ÉÜÈLx $ĞLLÛˆH™X[Ü[™NˆLÎL
+HÈLx $ĞLLœ›ÛHXKØ[ˆYØZ[œİH™X[Ü[™NÈ™\İ[È™\ÜY\È™X[›İ[ØÚÙYŸËL
+Š”
+™[X\ÙJJŠˆLËMNˆ™K\[ˆXKØLx $ĞLL
+ÈÌx $ÑÍÛˆH™X[Ü[™HÚ]İ]WØ˜XÚÙ[™[[™WÙØ]]Ø^WÛ[ÙO[[™WÙX
+[™HØÚ[XH]	ÜÈXYÈIÜÈØ]]Ø^NÈÙYHIÜÈ\İËÚ[\œËÛ[™WÙœX
+È\İËÚ[\œËÜ[›™\‹œH[™WÙÙL™X
+HKLÈ
+Š‘Ó‘JŠˆÈ™\İ[ÈX›\ÚY\ÈHØ]™K]ÛÈ™[X\ÙHØ[™Y]H™\™XİŸËLÈˆÌx $ÑÍX\šÙ][™È\İÈYØZ[œİH™X[Xİ[Û”™\]Y\İØ\›İ˜[]
+X›\Ú[™È˜YÈ\ÈK\[ˆXİ[Û”™\]Y\İÊHËLˆ
+Š‘Ó‘JŠˆ
+™XÛÛ˜Ú[Yœ›ÛH[™HÈQÑS•ÔÕUTÈÛ™JHÈÌx $ÑÍÜ™Y[ˆÛˆH™X[Ü[™H‚ˆÈÈÜ\˜]Üˆ[™œ˜\İXİ\™H
+›İH\Ú[™\ÜÈXÚ\Ú[ÛÈİ]ÚYHH™\ÊB‹H
+Š–LH
+K“Õ‘SSÑJNŠŠˆHÚ\™Y™Ú]ØÛÛ™šYØY[]H\Èİ™\Üš][ˆHH\İ[][˜ÚYYÙ[
+ÈLËL‹™\šYšYYHJKˆ[ÙˆIÜÈ›İ[™ÛÈÛÛ[Z]È\™H™XÛÜ™Y\ÈYÙ[ÈX\šÙ][™È‹ˆHš^\È[ˆ‹Øš[‹ÛX›ÜËXYÙ[ˆ[˜X›H^[œÚ[ÛœËÛÜšİ™YPÛÛ™šYØ[ˆÙ]Ú]ÛÛ™šYÈK]ÛÜšİ™YH\Ù\‹›˜[YKİ\Ù\‹™[XZ[ˆ[\š[H[Nˆ\‹XÛÛ[Z]XÈ\Ù\‹›˜[YKËXÈ\Ù\‹™[XZ[
+ØÜËĞÓÓÔ‘SUSÓ‹›Y
+KˆHÛÜœ™Xİ[Ûˆ™XÙZ\\È[ˆØÜËÜ™XÙZ\ËÌŒ‹LLLË\›İ™[˜[˜ÙKXÛÜœ™Xİ[Û‹XÛÛ[Z]X]]ÜœÚ\›Y‚‚‚ˆÈÈX[ÛšY™™\ˆÜÜ[š]HØ\™
+Q‹LLNÈZXÚY[Œ‹LLLÊH’SÔ’UH›ÜˆHRBŸQšH\ÚÈ\Èİ]\ÈYÙ[XØÙ\[˜ÙHŸKK_KK_KK_KK_KK_KK_KK_ŸKLŒ
+Š”
+ŠˆÚ\™H‰ÜÈ]XÚÙ[œšXÚY[
+ÛÛ›‹Ü[™WÛÜ—ÜÜ[™WÙ][WÚY˜]×ÜİÜ™K\×ÛÙŠX\ÈHÜİY\ØÛİ™\ˆÛÜšÙ›İÈİ\›Üˆ™]ËØÚ[™ÙY][\È
+ZÙH[]™\—İØZÙWÙ]™[Ø
+KÙÙ]\ˆÚ]KL‹LMHÛ™H
+Š‘Ó‘JŠˆ
+\È\Ú
+Nˆ[œšXÚ\˜›İØÛÛÈXÛÛ›ÛZXÜÑ[œšXÚ\˜
+[™HÊH[™[™P‘[œšXÚ\˜
+[™HŠHY\\œÎÈÛÜšÙ›İÈ[œÈ[œšXÚ\œÈY\ˆ[™Ù\İ[™Y\ˆØÛÜš[™ÎÈ]ÛZXËY[\İ[HH\ØÛİ™\™Y][HÚİÜÈ™X[\İ[™È]\ËÜÙ[\ˆ™YY˜XÚÈÛˆ]ÈØ\™Ú]›ÈX[X[Ø[ŸLˆH
+Ü\˜]ÜŠH
+Š\œÈÜ[‹İ\Ù\‹ÌLH
+KHĞŠHØ\ÈL	H[
+ŠÈYİ™\ˆLË\Ü[™K\ËJ˜
+YÙ[ËŒKŒĞŠH[™LËJ˜
+YÙ[
+HÛ\İ\œËˆİÛ™\œÈ\ÚÙYÈ[]HZ\œÈ[™\ÙHİ\È\›™\ÜÙ\È]\İÛX[ˆ[ˆX\™İÛˆ›Û™H
+Š‘Ó‘JŠˆ›ÜˆÈ
+\œÈ]ÉNÈÉÜÈ\›™\ÜÈ›İÈ\Ù\ÈÚÜİ\]ÈÚ]š[˜[KØ]^]ÛX[\[™İ[KXÛ\İ\ˆ™X\[™ÊNÈ	ÜÈLËJ˜\ˆİ[ÈÛX[ˆÚ[ˆ]™\İ[Y\ÈÜ\˜]Ü‹ÌËÌˆÜ[‹İ\Ù\‹ÌLX™[İÈL	NÈ›ÈÜİÜ™\Èİ\˜Z[\™\ÈŸKLNHØ\™ÛÛ˜Xİ
+Ø\™œØÚ[XKšœÛÛ˜
+KX›ÜË˜Ø\™
+Z[İ˜[Y]KÜ™[™\—İ^ÛØYÚ[œ]ËÙ[œšXÚY[Ùœ›ÛWÚ][JKÜ[™Kœ™XÛÜ™Ù[œšXÚY[Ûˆ›İ˜XÚÙ[™ËX›ÜÈØ\™USXÜ\˜]Üˆ›Ùš[H\È]KQ‹LLH›Û™H
+Š‘Ó‘JŠˆ
+\È\Ú
+HHŒØ\™\İÎÈØ\™È˜[YÛˆ[™HÑHL™NÈ[œšXÚY[›İ[™]š\È›İYÚH[™KQYÙ\ˆŸ‹LMH
+Š”
+Šˆ\İ[™×ØXİ]š]X[™Ù[\˜[œšXÚY[›ØÚÜÈ\ˆÛİ\˜ÙNˆÜİYØ]\]YØ]YÙWÙ^\Ë™XÙ[ØXİ]š]V×Kİ\ÜXİYÜ™[\İ
+œ›ÛH[İ\ˆ™[\İ]Xİ[Ûˆ
+Èš[ÜˆÚYÚ[™ÜÊKİ[WÜš\ÚÈ
+İËÛYY][KÚYÚÚ]˜\Ú\ÊNÈÙ[\ˆXØÛİ[YÙK˜][™ËÜ™]šY]ÜËš[Üˆ\İ[™ÜËÛÛ\Z[ÚYÛ˜[Ë™\ÜÛœÙH\İÜK[˜ÛÛœÚ\İ[˜ÚY\ËÛÛ™šY[˜ÙK
+Š›Û›HÚ\™HHÛİ\˜ÙH^ÜÙ\È]Èİ\Ú\ÙHÛZ]HÙ^H
+HØ\™š[ÈS’Ó“ÕÓŠJŠ‹ˆ]XÚÚ]Ü[™Kœ™XÛÜ™Ù[œšXÚY[
+È[İ\ˆ›İ™[˜[˜ÙKˆ™]™\ˆ[™™\ˆÙ[\ˆ]H›Û™H
+Š‘Ó‘JŠˆ
+ˆX›Ü×Ù\ØÛİ™\K™[œšXÚY[˜]XÚÙ[œšXÚY[ÈÛZ]ÈÙ^\ÈHÛİ\˜ÙHÙ\È›İ^ÜÙNÈP˜^KÑÔĞKÕ˜\Ú›İ[™È^ÜÙH]\ÎÈ™X[P˜^H]\È
+È™YY˜XÚÈ˜[Y]HÛˆHØ\™
+HˆP˜^Hš^\™\ÈÚ]™H™X[]\ËÜÙ[\ˆ™YY˜XÚÎÈÜ˜ZYÜÛ\İÓX\šÙ]XÙHš^\™\ÈÚ]™HS’Ó“ÕÓˆ›ÜˆÙ[\ˆšY[ÎÈH\İ›İ™\È›İ[™È\È˜XœšXØ]YŸËLMH
+Š”
+ŠˆXÛÛ›ÛZXÜØ
+ÈÙÚ\İXÜØ
+ÈÙX\ÛÛ˜[]X
+ÈÚX›ØÚÜÎˆÜ[š[™ÈÙ™™\‹X^[][HXÜ]Z\Ú][ÛˆšXÙKÛÛœÙ\˜]]™KÛZÙ[KÛÜ[Z\İXÈ™\Ø[Hœ›ÛHHÛÛ\ÈÜ™XY
+PÕ]YÙÙYÛÛ\ÊK˜[œÜÜÛÜİ^\Ë]ËXØ\ÚÈÙÚ\İXÜØœ›ÛHÛÛ™šYËÛÜ\˜]Ü—Ü›Ùš[KŒKšœÛÛ˜
+˜Z[\—ÛİÛ™YY˜[ÙK›Üœ›İÙYİ˜Z[\—ÜÜÜÚX›O]YNÈš]×İXÚÈœÈ™\]Z\™\×İ˜Z[\ˆHØ]YÛÜKÜÚ^™NÈš\Z[\ËÚİ\œËÙY[ÈY™šXİ[H\È[ˆXÛÛ›ÛZXÈ[˜[H[ˆHØÛÜ™K
+Š›™]™\ˆ[ˆ]]ÛX]XÈ™Z™Xİ[ÛŠŠÈ›Üœ›İÙY˜Z[\ˆ™YYÈÛÛ™š\›X][ÛŠNÈÙX\ÛÛ˜[]X\ˆØ]YÛÜH
+[X[™Û›İËÛÛZÙ[KXZ×Û[ÛÊNÈÚXˆ]\›Z[š\İXÈZ[‹Q[™Û\Ú™X\ÛÛœÈZ[œ›ÛHHØ]\È[™˜XİËK™Ëˆ8 'Û\İ[™Ë]HÙ[\ˆ\]Y]^\ÈYÛË™YXÚ[™Èİ[K[\İ[™Èš\ÚË¸ 'H‹LMH›ÜˆH]\È
+Š‘Ó‘JŠˆMÍYYØ
+ÎˆXÛÛ›ÛZXÜËÛÙÚ\İXÜËÜÙX\ÛÛ˜[]KİÚH›ØÚÜÎÈÙX\ÛÛ˜[]HÛİ\˜Ù\È\™HÙX\˜Úİ[[X\šY\ËÛÛ˜Ü™]HØ]È™\İÈÛˆZXÚY[	ÜÈ^[\JHÈÛÛ[œÎˆHÛÛ˜Ü™]HØ]È
+YX\‹\›İ[™
+H[™HšY[™È[İÙ\ˆ
+Üš[™È[X[™ÙXZÈØİØ™\ˆ™\Ø[JH›ÙXÙHY™™\™[ÙX\ÛÛ˜[]NÈH˜Z[\‹\™\]Z\š[™ÈX[\ÈØÛÜ™Y›İ™Z™XİYŸËLMˆH˜[YWØY›ØÚÎˆ[ˆ^
+È
+ŠœÛİ\˜ÙY
+Šˆ[Ù[\ÜXÚYšXÈš\ÚÜÈ
+˜Z[\™H[Ù\Ë[\İX[^[œÚ]™H\Ë\È]˜Z[Xš[]KÛ›İÛˆÙXZÛ™\ÜÙ\Ë™\Ø[H[X[™
+KˆHš^\™KYš\œİÛİ\˜ÙYÛ›İÛYÙH˜\ÙNÈXœÙ[Û›İÛYÙH8¡¤ˆÛZ]
+S’Ó“ÕÓŠKˆ]\İ\ÜÈX›ÜË˜Ø\™˜[Y]WØØ\™
+›È[[Y[\HYXÚ[šXÈYšXÙNÈ]™\Hš\ÚÈ\ÈHÛİ\˜ÙHÜˆ›İ™[˜[˜ÙJH›Û™H
+Š‘Ó‘JŠˆÎÙXX
+ÎˆÛİ\˜ÙYÔĞÈ™XØ[ĞÈ›ÈÙ[™\˜[YšXÙNÈÚ\™YHH[ÈXÛÛ›ÛZXÜÑ[œšXÚ\˜È[ˆH\ÚYÛˆ[Üİ\İ[™ÜÈÚİÈS’Ó“ÕÓŠHÈ
 
-### Lane E: Agent 05 (governance)
-| ID | Pri | Task | Deps | Status | Agent | Acceptance |
-|---|---|---|---|---|---|---|
-| E-01 | P1 | R7 propose-only grant for `agent-01-coordinator` + ADR-0010 `payload_hash` (drop the float refusal) + stand-in store `row_hash` â†’ MBOS-RH-1 | none | **DONE** @ `df826c3` | 05 | interop row 05 = 10/10; `vectors.json` `receipt_chain` verifies with 05's code |
-| E-02 | P0 (after D-01) | Postgres-backed `GovernanceStore` + `PanicStore` on 04's tables (R2/R4/R5). Fail-closed is kept | D-01, D-02 | **DONE** @ `1c554cb` (211 tests on PG16 via lane D's API; no SQLite on the production path; R4 enforced by role) | 05 | 05's suite passes on Postgres; no SQLite in the production path |
-| E-03 | P2 | A8/A9 hardening, dry: per-agent LiteLLM budget config generator (no external calls); L3 hook that cancels unstarted DBOS workflows (`DBOS.cancel_workflows`) and writes the egress deny-all policy file | none | **DONE** @ `e12caa3` | 05 | Tests prove L3 cancels pending workflows and emits deny-all config; nothing reaches the network |
+ÌˆÛİ\˜Ù\ÊHĞˆ[šY\ÈÚ]HÛİ\˜Ù\ÎÈ˜[Y]WØØ\™ÛX[È›È[HØ^\È8 'ÚXÚÈÛÛ\™\ÜÚ[Û‹ÜÜ\šËÙY[8 'HŸ‹LLÈ
+Š”
+Šˆ™[™\ˆHØ\™[ˆHÜ\˜]ÜˆRH\ÈHš[X\HÜÜ[š]HšY]È
+™\XÙ\ÈHÛØ\™YÙJNˆ][HXY\‹\İ[™ÈXİ]š]KÙ[\ˆ
+S’Ó“ÕÓˆİ[Y
+KÒKXÛÛ›ÛZXÜË˜[YKXY[‹ÙX\ÛÛ˜[]K˜[œÜÜŞ\İ[Hİ]\È[Y[[™HÚ][Y\İ[\Ë‘PÓÓSQS‘USÓˆ›ØÚÈÚ]İ\]\›YË
+Š˜Xİ]š]H˜Z[
+Šˆ
+YÙ[Ú]ÚK[œ]È8¡¤ˆ›İ™[˜[˜ÙH[šÜË™\İ[™XÙZ\™^Xİ[ÛŠK[™HS’Ó“ÕÓˆ\İˆZ[œ›ÛHX›ÜË˜Ø\™›ØYÚ[œ]ËÙ[œšXÚY[Ùœ›ÛWÚ][KØZ[ØØ\™ÈÚİÈHQTËÓ“ËÓSÑQ–KÒÓÛÛ›ÛÈ™[™X]H™XÛÛ[Y[™][Û‹ˆ\ØØ\H[\İ[™È^ˆÙY\ŒMKLNH
+Š‘Ó‘JŠˆ
+ˆÚ][KÏY˜\ÈHš[X\HØ\™šY]ËZ[Û›Hœ›ÛHX›ÜË˜Ø\™ÈLN™Y™\™[˜ÙH
+ÈLH[™HÑH\İÊHˆÚ][KÏY˜ÚİÜÈHØ\™Ûˆ[™HÑNÈHÜİ[H]HØ[››İœ™XZÈHYÙNÈ]™\H™XÙZ\\X\œÈ[ˆH˜Z[ÈÛÜšÜÈÚ]™\›È[œšXÚY[ŸËLMÈˆLËLÈ
+Ú]ŠNˆHÛİ\˜ÙH[ˆ›Üˆ›Û‹\™XØ[[Ù[Û›İÛYÙH
+Ù\šXÙH[][œË\ÈXYÜ˜[\Ë›Ü[K\Ûİ\˜ÙYÙXZÛ™\ÜÙ\ÊHÚ]›İ™[˜[˜ÙNÈZXÚY[	ÜÈİÛˆ›İ\È[\˜X›H\ÈX[X[[šY\ÈÚ]›İ™[˜[˜ÙH
+\ÈYXÚ[šXÈÛ›İÛYÙH\ÈH™\İÛİ\˜ÙJH›Û™H
+Š‘Ó‘JŠˆÍMYY˜˜
+ÎˆYZ\ÜÚ[Ûˆİ[™\™
+ÈÈ˜[šÙY›İ]\ÎÈX[X[›İ\È]ˆ[X[ˆ›İ™[˜[˜ÙHš\œİ‘PÓÓSQS‘USÓˆ˜\Ú\ËÛİ\˜ÙY™XØ[İ^\Èš\œİÈ›İ[™È[œÛİ\˜ÙYØ[ˆÚ\
+HÈ
 
-| E-10 | **P0 (critical-path support)** | Adapter for A-03 in 05's package: `mbos_governance.spine_adapter` implementing `mbos.interfaces.Gateway` (execute(engine, areq_id, approval_id) â†’ GuardResult), `KillSwitch` (PgPanicStore) and `PolicyDecisionPoint` (full areq) on lane D. R4: the gateway owns action-status edges and receipts, so the spine's finish_act must not double-write; document the exact contract. Plus `reconcile()` as a function the spine can schedule | none | **DONE** @ `ebae275` (handoff: 05's docs/integration/05-spine-adapter-R4-contract.md) | 05 | 05's tests drive the adapter through 01's `mbos.interfaces` types on lane D; a written handoff note for A-03 |
-| E-06 | P1 | Policy data into lane D's `mbos.policy` / `policy_current` (publish via `mbos.publish_policy`, receipted) | none | **DONE** @ `e957680` | 05 | PDP reads policy from Postgres; same decisions as the JSON file |
-| E-09 | P1 | Governance alert queries (FREEZE, MB006 budget refusals, INJECTION_SUSPECTED, NEEDS_HUMAN, stuck claims). Queries only, no sends | none | **DONE** @ `c68f3b2` | 05 | Alert views + tests |
-| E-07 | P2 | Egress allow-list per adapter/effector as policy data | none | **DONE** @ `2d65401` | 05 | Data + checker |
-| E-08 | P2 | Sandbox spec + config checker (doc + checker only; no Podman on host) | none | **DONE** @ `0b55f52` | 05 | Checker tests |
-| E-11 | P2 | Re-pin lane D to 0013+ and use D-11's velocity_actions_per_hour | none | **DONE** (reconciled from lane 05 AGENT_STATUS Done) | 05 | 05 suite green on 0013 |
-| A-18 | P1 | Spine kill switch on lane E â†’ `gov.action_gateway.engage_panic/release_panic` (hooks run; release as approver); schedule `reconcile()` (E-05) at worker start | none | **DONE** (this push): spine kill switch delegates to lane E (hooks; approver-only release); reconcile schedule registered before launch and activated after; e2e proves L3 engage blocks, LiteLLM budgets zero, release clears | 01 | Tests on lane D/E |
-| E-04 | P1 | Outbound secret scan + `INJECTION_SUSPECTED` tripwire (05 Â§17 #24â€“26): scan proposed payloads and effector requests; listing/inbound text matching injection patterns emits an `INJECTION_SUSPECTED` receipt and forces tier 0 + `needs_review` | none | **DONE** @ `4fadbe7` | 05 | Tests: a secret in a payload is refused; an injected listing yields at most a tier-0 proposal with the tripwire receipt |
-| E-05 | P2 | Stuck-claim reconciliation job: executions left `executing` past a TTL are reconciled through the gateway (provider-query-before-retry semantics, dry-run) | none | **DONE** @ `9391c16` (reconcile(): never re-sends; schedule at startup in A-03) | 05 | Test: a crashed claim is reconciled exactly once; no re-send |
+ÌŠHÛİ\˜ÙH[ˆØÈ
+ÈHX[X[[H][ˆHĞˆÚ]\İÎÈ›İ[™È[œÛİ\˜ÙYÚ\ÈŸLMÈHÜ\˜]Ü‹[›İHİÜ™H
+ÈLËLJNˆ[ˆ\[™[Û›K™XÙZ\YX›ÜË›Ü\˜]Ü—Û›İ\ØX›H
+XZÙK[Ù[Ø]YÛÜK›İK˜\Ú\ÈÙˆÛ›İÛYÙK]]Ü‹Ë›İ™[˜[˜ÙWÚY8¡¤ˆ[X[ˆ›İ™[˜[˜ÙJH\ÈH™XY\ˆšY]È›Üˆ˜[YXY›ØYÛX[X[Û›İ\Øˆ[œÙ\[Û›NÈZXÚY[	ÜÈ›İ\È\™H™]™\ˆY]YÛ›Hİ\\œÙYYˆ›ÛNˆHÜ\˜]ÜˆRH
+[X[ˆÚ[›™[
+HX^H[œÙ\ÈYÙ[ÈX^HÛ›H™XY
+Š”ÜXÎˆYÙ[ÉÜÈØÜËÜ™\ÙX\˜ÚØYÙ[LË[[Ù[ZÛ›İÛYÙK\Ûİ\˜ÙK\[‹›Y0©ÍÈ
+œ˜[˜Ú™\ÙX\˜ÚØYÙ[LËYXÛÛ›ÛZXÜÊKˆ•SQ
+Ü[ÛˆJNˆHYXØ]YX›HÚ]ÒPÒÜÈ
+Ø]YÛÜH[[KÚ[™[[K]™\HX]ÚÜ›İ\\È“ÕXZÙ\ÈS‘[Ù[Ëİ][Y[8¢iŒÚ\œË]]Ü‹‹X]Ø\™H[\™YØ]˜\Ú\×ÛÙ—ÚÛ›İÛYÙKÜ[Û˜[È™Y™\™[˜ÙWİ\›˜\Ú\È[Ø^\È‘PÓÓSQS‘USÓˆ™]™\ˆPÕ
+H
+ÈHTÔÓÓ—Ô‘PÓÔ‘Q™XÙZ\Ú][]Wİ\HÜ\˜]Ü—Û›İXÈÈ“Õ™]\ÙHX›ÜË›\ÜÛÛœØˆY]ËÜ™]˜Xİ[ÛœÈ\™H™]È›İÜÈ›ÛYHHİ\\œÙY\ØÚZ[‹ˆH[X[ˆ›İ™[˜[˜ÙH›İÈ\È[œÙ\Yš\œİŠŠˆ›Û™H
+Š‘Ó‘JŠˆÍÙYŒMØ
+Mˆ\[™[Û›HÜ\˜]Ü—Û›İ\ØÈˆ[™›Ü˜Ù\ÈXZÙHS‘[Ù[˜\Ú\È‘PÓÓSQS‘USÓ‹[X[ˆ›İ™[˜[˜ÙHš\œİÈ™\šYšYY[™È[™HJH›İ\È›İ[™]š\›İYÚY\™ÙWÛX[X[È[œÙ\[Û›HšYÙÙ\ÈYÙ[›Û\ÈØ[››İ[œÙ\ŸKLŒHHÜ[™HTH™XÛÜ™ÛÜ\˜]Ü—Û›İJÛÛ›‹‹‹ŠX
+\œÚ\İÈH[X[ˆ›İ™[˜[˜ÙHš\œİ[ˆH›İJH[™Ú\™HH›İ\È[ÈXÛÛ›ÛZXÜÑ[œšXÚ\˜
+Ø[Y\™ÙWÛX[X[
+ØYÚØŠ
+KØYÛX[X[Û›İ\Ê‹‹ŠJX
+HLMÈ
+Š‘Ó‘JŠˆ
+\È\Ú
+NˆÜ[™WÙœ™XÛÜ™ÛÜ\˜]Ü—Û›İKÛÜ\˜]Ü—Û›İ\×ÙØİ[Y[XÛÛ›ÛZXÜÑ[œšXÚ\˜Y\™Ù\ÈZXÚY[	ÜÈ›İ\ÈY\ˆÛİ\˜ÙY™XØ[ËX›ÜÈ›İHYÛ\İ
+[X[ˆÚ[›™[
+NÈİ]XÈİX\™ÙY\È]İ]ÙˆÛÜšÙ›İÜÈ
+ŒM
+HHH›İH[\™Y›ÜˆHXZÙJÛ[Ù[\X\œÈÛˆ][Ù[	ÜÈØ\™È\È‘PÓÓSQS‘USÓˆÚ]ZXÚY[	ÜÈ›İ™[˜[˜ÙKY\ˆ[HÛİ\˜ÙY™XØ[Ÿ‹LMH8 'YÚ][İHÛ›İÈX›İ]\È[Ù[8 'H›Û\ÛˆØ\™È]ÚİÈ›ÈÛİ\˜ÙY[Ù[Û›İÛYÙNÈH›Ü›HÛˆH[X[ˆÚ[›™[Ø[[™ÈKLŒH
+]]ÜˆHZXÚY[˜\Ú\ÈÚÜÙ[ˆœ›ÛHH[İÙY\İÈ[[Y[\HYšXÙH[™PÕ™Y\ÙYÚ]H™X\ÛÛœÈÚİÛŠHKLŒH
+Š‘Ó‘JŠˆÍLÌØØ
+ˆÙ\™\‹\Ù]]]Üˆ
+ÈSÈ]™\H™Y\Ø[^Z[™YÈ›İHÚİÜÈÛˆH™^Ø\™\ÈZXÚY[	ÜÈ‘PÓÓSQS‘USÓŠHˆZXÚY[[\œÈH›İNÈ]ÚİÜÈÛˆH™^Ø\™Ú]›İ™[˜[˜ÙNÈ™Y\Ø[È\™H^Z[™YŸ‹LMˆˆLËLˆÔĞÈ™XØ[ÈY\\ˆ
+™XY[Û›NÈ[™Ú[Î‹ËİİİËœØY™\œ›ÙXİË™Ûİ‹Ô™\İÙX”Ù\šXÙ\ËÔ™XØ[	™›Ü›X]ZœÛÛ˜Èš\œİ™XYH›ÙÜ˜[[Y\‰ÜÈİZYH›Üˆ™\ÜÛœÙHšY[È[™˜]H[Z]ËÚXÚ\™HS’Ó“ÕÓˆÙ^JK›ÙXÚ[™ÈÛİ\˜ÙY™XØ[[šY\È›ÜˆÉÜÈĞˆÚ]HÛİ\˜ÙHT“[™]Kˆš^\™KYš\œİÈ]™HÛ›H™Z[™H›YÈ›Û™H
+Š‘Ó‘JŠˆXŒYŒ˜
+ÔĞÈ™XY[Û›HY\\È›ÙÜ˜[[Y\‰ÜÈİZYHÛÛ™š\›YYšY[ÎÈ˜]H[Z]S’Ó“ÕÓÈ™]šY]È\İ›Üˆ[˜ÛÛ\]H[šY\ÊHˆ
 
-### Lane F: Agent 06 (Operator UI)
-| ID | Pri | Task | Deps | Status | Agent | Acceptance |
-|---|---|---|---|---|---|---|
-| F-01 | P1 | R10: Operator UI on `spine.pending_decisions` / `spine.decide(channel="web", new_payload=â€¦, hold=â€¦, auth_context={"step_up":â€¦})` + `notify_decision`; drop the UI gateway, ticker and SQLite store | none | **DONE** @ `190bb9b` | 06 | A YES/NO/MODIFY/HOLD web flow against 01's spine on Postgres (pgserver) |
-| F-02 | P1 | ADR-0010: `util.canonical_json` â†’ reference; stand-in `row_hash` â†’ MBOS-RH-1 | none | **DONE** @ `fc31896` | 06 | interop row 06 = 10/10 |
-| F-04 | P2 | P-06-3: the UI's `SpineBackend` uses the worker's real `Components` (05 PDP) | A-03 | **DONE** (reconciled from lane 06 AGENT_STATUS Done) | 06 | UI decisions use the real PDP |
-| F-03 | P2 | Comms dry-run spec items (1)(3)(4)(6) from 06's status: templates registry, rate/consent rules as data | none | **DONE** @ `cb787dd` | 06 | Data files + tests; no sends |
+ÌÊHš^\™H™\ÜÛœÙ\È™XÛÛYHĞˆ[šY\È]\ÜÈÉÜÈYZ\ÜÚ[Ûˆİ[™\™È›ÈØÜ˜\[™ÈŸËLÈH™K\[ˆØ\™XØÙ\[˜ÙH
+]Ûˆ[HX›Ü×ÜXHØ\™
+H[™H™[X\ÙHØ[™Y]H
+]Ûˆ[HX›Ü×ÜXHÜ[™HK\˜Ø
+H]H]\İXYËˆ™K]™[™ÜˆØ\™œØÚ[XKšœÛÛ˜
+Y]]™HÜ[Û˜[šY[Îˆ][K™›YÜË[Y[[™V×K™WÜ[‹ÚWÜ›İ™[˜[˜ÙJHKLMH
+Š‘Ó‘JŠˆYM˜L˜ˆ
+Šœ™[X\ÙHØ[™Y]H‘PQH›ÜˆHK\[ˆØÛÜJŠˆ
+LH\ÜÙY˜Z[Y
+NÈØ\™İZ]HŒÌ‹ÌLNÈHš^YHHÜ[ˆØ\™][\È\È\ÚÈ›İ™\ÜÎÈ™[XZ[š[™È™YÈX\YÈİÛ™\œÈŸËLˆ
+Š”
+™[X\ÙJJŠˆ™K\[ˆËL
+]Ûˆ[HX›Ü×ÜXHÜ[™HK\˜Ø
+H]H]\İXYÈ
+HPQMJØHY\ˆKLLÊH[™X›\ÚH™\™XİÈ™[[İ™HHİšXİ^˜Z[X\šÙ\œÈ]›\
+‹LŒ‹‹LŒÈš^YHŒŒJHKLLÈ
+Š‘Ó‘JŠˆ
+İ\\œÙYYHËLÊHÈ‘SPTÑWĞĞS‘QUK›Y™XYÈ‘PQHÜˆ\İÈ^XİHÚ]\ÈYŸËLHHØ\™XØÙ\[˜ÙNˆ›È˜XœšXØ]YÙ[\‹Ù]KÜÙX\ÛÛ˜[]H]NÈ]™\HØ\™][H\ÈH˜\Ú\ÈÜˆ\ÈS’Ó“ÕÓÈ[[Y[\KXYšXÙH[Ûˆ[™KPÈÛÛ[È˜Z[H™XÙZ\ÈNŒNÈØ\™Ú\Ú]\›Z[š\ÛNÈY™\œØ\šX[\İ[™È^ÈÛÜšÜÈÛˆ›İ˜XÚÙ[™ÈKLNH
+Š‘Ó‘JŠˆØÌÌÌN
+ËÌŒÍˆ˜Z[[™Ë[X\YÈ‹L¸ )‘‹LÎJNÈHš^Y‹L¸ $Ñ‹LÎ\È\ÚÈ‹LÎHÓÓ•’V
+ZXÚY[	ÜÈİÛˆ›ØØX[\H\ÈÓ
+HÈİZ]HÜ™Y[ÈY™XİÈš[Y\Èš[™[™ÜÈŸKLLÈ
+Š”
+™[X\ÙH›ØÚÙ\ŠJŠˆÉÜÈËL™\™Xİ“Õ‘PQNˆ
+JH‹LˆÛÛ™š\›HŒŒÛİ™\œÈHİX\™[šX[œ›ÛH[ˆS”‘PQP“HÜˆÓÔ”•TS’PÈİ]H[™KÓ‹›İÛ›H[ˆ[™ØYÙYœ™Y^™Nˆ\›İ™Y8¡¤˜Ø[˜Ù[YØWÙœ™Y^™X
+Üˆ˜Z[Y
+H[ˆHØ[YH˜[œØXİ[Ûˆ\ÈPÕSÓ—ÑRSQÈ[ˆÉÜÈ™YÜ™\ÜÚ[Ûˆ\İ\İØWÜ™\]Y\İÙ[šYYØWØWÙœ™Y^™WØØ[››İÙš\™WÛÛ˜ÙWİWÜİÚ]ÚÚ\×Ü™XYX›WØYØZ[˜ˆ
+ŠH‹LHÈŒŒˆK\[ˆ›İšY\ˆÛÚİ\™XYÈH\˜X›HX›ÜË™Y™™XİÜ—ØØ[ØÈÜ˜\ÚY\ˆÙ[™8¡¤ˆ^Xİ]Y
+][HPÕQ
+NÈÜ˜\Ú™Y›Ü™HÙ[™8¡¤ˆ˜Z[Y
+È‘PÓÓÒSQˆ
+ÊH‹LŒˆH›ÜÜÙK[Û›HÜ˜[›ÜˆX›\ÚŠ˜
+X›\Ú›\İ[™Ë˜Ü™X]X
+HÈH˜Y[™ÈYÙ[È
+ËJKY\ˆX›\Ú[™ÈØ]YÛÜKY˜][[Hİ\Ú\ÙH›Û™H
+Š‘Ó‘JŠˆXÙŒMŒ
+‹Lˆ[ÍÎ”S’P×Êˆ™X\ÛÛœÈ[˜Ûˆ[\KØÛÜœ\İ[˜]˜Z[X›Hİ]H8¡¤ˆØ[˜Ù[YØWÙœ™Y^™H[ˆHØ[YHÈ‹LKÔŒŒˆ\˜X›H›İšY\ˆYÙ\ˆHX›ÜË™Y™™XİÜ—ØØ[ØÜ˜\ÚXY\‹\Ù[™Ù]\È^Xİ]Y8¡¤PÕQÜ˜\ÚX™Y›Ü™H˜Z[È
+È‘PÓÓÒSQÈ‹LŒˆ›ÜÜÙK[Û›HX›\ÚÜ˜[ÊKˆ™\šYšYYHHÛˆHM˜Y˜ÌHÉÜÈ]Ûˆ[HX›Ü×ÜXHÜ[™HK\˜ØİšXİ˜Z[È‹LŒˆ›\ÎÈ‹L\İ\ÜÙ\ÎÈMH\ÜÙ\È[™\ˆŒŒˆŸKLMHXZÙHKLNš]šX[ˆ[ˆX›Ü×ÙÛİ™\›˜[˜ÙKœÜ[™WØY\\˜^ÜÙHZ[ˆ[˜İ[ÛœÈ[™ØYÙWÜ[šXÊÛİ‹]™[\™Ù]XİÜ‹™X\ÛÛŠX™[X\ÙWÜ[šXÊÛİ‹]™[\™Ù]XİÜ‹™X\ÛÛŠX
+™[X\ÙH\È\›İ™\ŠHÚ]HÈÛÚÜÈÚ\™Y[™HØÚY[WÜ™XÛÛ˜Ú[X[\ˆ
+H“ÔÈØÚY[YÛÜšÙ›İÈ˜XİÜJH]H™YÚ\İ\œÈ]ÛÜšÙ\ˆİ\ˆØİ[Y[H^XİØ[Ù\]Y[˜ÙH›Û™H
+Š‘Ó‘JŠˆ
+H˜ØYˆ[™ØYÙWÜ[šXËÜ™[X\ÙWÜ[šXËÜØÚY[WÜ™XÛÛ˜Ú[H
+ÈÛÚÜÈÚ\™Y
+HHIÜÈKLN™XÛÛY\ÈHÚ\š[™ÈÚ[™ÙHÚ]\İÈÛˆ[™HÑHŸ‹LMÈˆL‹LLNˆ’ĞHY\\ˆ
+™XØ[ËØÛÛ\Z[ÈH™ZXÛH›Üˆ›Ú™Xİİ™ZXÛX
+K™XY[Û›Kš^\™KYš\œİÈÛÛ™š\›H[™Ú[ÈÛˆH]™HÚ]Hš\œİÈØ[YHYZ\ÜÚ[Ûˆİ[™\™[™ŒŒÈ›Û™H
+Š‘Ó‘JŠˆÙLØ
+’ĞH™XY[Û›HY\\È\‹[[Ù[^YX\‹ÛÈ]™\H[H\È[ÛˆH™]šY]È\İ[[Ğˆİ\ÜÈYX\œÊHˆš^\™H™\ÜÛœÙ\È™XÛÛYHĞˆ[šY\ÈÈ™]šY]È][\ÎÈ›İ[™È[œÛİ\˜ÙYŸËLNH[Ù[^YX\ˆİ\Ü[ˆHĞˆX]Ú\ˆ
+‰ÜÈš[™[™ÊNˆX]Ú×KYX\œØ
+˜[™ÙHÜˆ\İ
+KˆHYX\‹\ÜXÚYšXÈ[H
+’ĞJHX]Ú\ÈÛ›HÚ[ˆHTÕS‘Èİ]\ÈHYX\ˆ
+^˜XİYœ›ÛHH]H\ÈS‘‘T‘SÑKÚ]H]šY[˜ÙHÚİÛŠNÈH\İ[™ÈÚ]›ÈYX\ˆÙ\È“ÕX]ÚHYX\‹\ÜXÚYšXÈ[H
+S’Ó“ÕÓ‹™]™\ˆH˜[ÙHØY™]HÛZ[JKˆ›\™ZXÛWÜØY™]K’Ğ—ÔÕTÔ•×ÓSÑSÖQPT”Ø\È[ˆ‰ÜÈÛ™K[[™HÚ[™ÙH
+‹LN
+KˆÙY\H[Y\šXË]ÚÙ[ˆİX\™\Ş[[Y]H
+Ú\YĞˆœÈZXÚY[	ÜÈ›İ\ÊH›Û™H
+Š‘Ó‘JŠˆX˜ÙYXX
+X]Ú×KYX\œÎÈYX\›\ÜÈ\İ[™È™]™\ˆX]Ú\ÈHYX\‹\ÜXÚYšXÈ[JHÈ\İÎˆHŒN™XØ[Ù\È›İ›YÈHŒŒH\İ[™ÈÜˆHYX\›\ÜÈÛ™NÈHŒN\İ[™ÈX]Ú\ÈŸ‹LNˆY\ˆËLNˆ›\Ğ—ÔÕTÔ•×ÓSÑSÖQPT”Ø™K\[ˆH’ĞHš^\™\È›İYÚŒŒÈ
+ÛÛ\]H[šY\È]]ËXYZ][˜ÛÛ\]Hİ^HÛˆH™]šY]È\İ
+HËLN
+Š‘Ó‘JŠˆ˜YLX
+ˆ]™\H’ĞH[HØ\œšY\ÈYX\œØÈH™]šY]È\İÛÈÛ›HÙ[Z[™[H[˜ÛÛ\]H[šY\ÎÈ[š\]YKZYİX\™YY
+Hˆ]]ËXYZ]Y[šY\ÈØ\œHYX\œØÈH™]šY]È\İÚš[šÜÈÈÙ[Z[™[H[˜ÛÛ\]HÛ™\ÈŸ‹LNHHÛÜÙHHš\œİ[]™K\[ˆÓHØ\[İH\İYˆX›ÜËY\ØÛİ™\ˆ[˜Ûİ™\œÈ[\K[XZ[ËÛÛ\ËÔĞÈ[™’ĞH
+XXÚ™Z[™]È]™H›YË™XY[Û›Kš^\™K]™\šYšYY
+KÛÈHš\œİ]™H[ˆ™YYÈ›ÈYZØÈØÜš\ˆ[˜ÛYHHKYX[ÙH]š[ÈH^Xİ™\]Y\İÈ]Ûİ[XZÙH›Û™H
+Š‘Ó‘JŠˆ
+ˆX›ÜËY\ØÛİ™\ˆ[ˆKYX›Üˆ]™\HÛİ\˜ÙNÈ™\›È™]ÛÜšÈÚ]İ]H]™H›YÊHˆX›ÜËY\ØÛİ™\ˆ[ˆK\Ûİ\˜ÙHXXÚˆKYš^\™\ØÜ™Y[ÈKYX\İÈ™\]Y\İÎÈ›È™]ÛÜšÈÚ]İ]H]™H›YÈŸKLMH
+Š”
+™[X\ÙJJŠˆÈ‹MÑ‹MKˆ
+JH[H\›İ™Y™\]Y\İHØ]]Ø^H™Y\Ù\È›ÜˆH›Û‹Yœ™Y^™H™X\ÛÛˆ
+ÕTÕTÔ‘TURT‘QUUĞÓÓ•VÔ‘TURT‘Q^[ØYZ\ÛX]Ú^\K\Ú
+HÙ]\È˜Z[YÚ]PÕSÓ—ÑRSQ[ˆHØ[YH˜[œØXİ[Ûˆ
+\›İ™Y8¡¤™˜Z[YYÙJK™]™\ˆİ^\È\›İ™Y
+H›İÈ[ÛÈ™Y\Ù\ÈHQTÈ]XÚÜÈH	ÜÈİ\]\]XÚ\Ú[Ûˆ[YJKˆ
+ŠH˜\œ›İÈYÙ[LKXÛÛÜ™[˜]Ü˜	ÜÈ›ÜÜÙK[Û›HÜ˜[ÈÈÚ]]È[›™\œÈØ[ˆ[Z]
+ÛÛ[\ËŠ‹Ù™™\‹Š‹\˜Ú\ÙK˜Ü™X]KX›\ÚŠŠNÈ™[[İ™H[Û™^Kœ^[Y[œÙ[™šXÙK˜Ú[™ÙKÛÛ[Z]™^\›˜[[[H[™H™YYÈ[NÈ\‹[[™H›ÜÜÙ\ˆY[]Y\È
+[›™\œÈYÈ›ÜÜØ[ÈÚ]Z\ˆ[™JKˆÛÛ[\Ë›ÚXÙK˜Ø[ÛÛ[\Ë›Y\ÜØYÙKœÙ[™ØÚY[K˜\Ú[Y[˜Ü™X]Xİ^H[™Ü˜[Y›Û™H
+Š‘Ó‘JŠˆ
+HÙŒLØˆ›Û‹Yœ™Y^™HİX\™™Y\Ø[ÈÙ]H˜Z[YÈÜ˜[È˜\œ›İÙYÌKÈ›ÜÜÙ\—Ù›Ü˜
+KˆHYÜYH[™XYÎˆ›ÜÜØ[ÈØ\œH[™XÈ›ÜÜÙYØXH›ÜÜÙ\—Ù›Ü˜È›Û™HÜ™X]\È›È™\]Y\İ[™HØ\™Ø^\ÈÛXŞH›ØÚÙYHÉÜÈ‹M™YÜ™\ÜÚ[Ûˆ\ÜÙ\ÎÈX]š^\İÚİÜÈ›È[›™YYYÜ˜[Ÿ‹LMHHYÈXXÚ›ÜÜÙYXİ[ÛˆÚ][™X
+ÛÛ[\ĞXİ[Û”[›™\ˆYÙ[L‹XÛÛ[][šXØ][ÛœØÈX›\Ú[™È˜YÎˆYÙ[LË[X\šÙ][™Ø
+HÛÈ[™HHØ[ˆİ[\›ÜÜÙYØX
+È‹MJKˆØ\Xš[]Y\È›Ø›ÙHÛÈ\™H™]™\ˆ›ÜÜÙY›Û™H
+Š‘Ó‘JŠˆ
+ˆ[›™\ˆXİ[ÛœÈØ\œH[™XÈ›ÜÜÙYØX™\šYšYYÛˆ[™HÑJHˆ
 
-| F-05 | P1 | P-06-4: `CommsActionPlanner` implementing `mbos.interfaces.ActionPlanner` from the comms_spec template registry. The payload carries `template_id`, `template_hash` (MBOS-CJSON-1) and the rendered draft; action constraints (window, consent prerequisites) go in the payload | none | **DONE** @ `acb7c52` | 06 | Contract-valid proposals for 1 flip + 1 service fixture; 01 wires it into `Components` (A-13) |
-| F-06 | P1 | P-06-5: dry-run comms `Effector` implementing `mbos.interfaces.Effector`: exactly-once per idempotency key; `effector_response.dry_run=true`; `details.kind=comms` carries consent/DNC/window/disclosure check results; `audit(receipts)` grades E1â€“E7. No network imports | none | **DONE** @ `5abf51e` | 06 | E1â€“E7 graded on a spine run; A7 still zero exceptions |
+ÌÈ›ÜˆX›\Ú[™È˜YÊH›ÜÜÙYØX\]X[ÈH˜Y[™È[™H[ˆHYÙ\ÈHØ\Xš[]H›È[™HÛÈÜ™X]\È›È™\]Y\İŸKLMˆHˆL‹LMˆH[šY\È[HÛÛ[\ËŠ‹ÜX›\ÚŠˆ^[ØY]\ÈHÙ^H˜[YYš[™[™Ø]S–H\]™[ˆš[™[™Îˆ˜[ÙXÈ˜Y[™È[™\È]]HXØÚY[ˆÚXÚÈÔSU‘SÙ^\ÈÛ›H
+ÜˆØİ[Y[H[™\Ù\™Y[˜[YH\İˆÙ™™\‹Ù™™\—Ø[[İ[Ûİ[\‹Ûİ[\—ÛÙ™™\‹š[™[™Ë‹‹ŠH[™Y]ÈHÛXŞHØÜÈÛÈ‹ÌÈØ[ˆ[ˆZ\ˆ[›™\œÈ›Û™H
+Š‘Ó‘JŠˆ
+HLØÌL˜ˆ™\Ù\™YÙ^\ÈØÛÜYÈÜ]™[È›İ\ˆ[˜[XšYİ[İ\È[[İ[˜[Y\È][H\Èš[™[™×ÚÙ^Wİš[Û][ÛœØ›Üˆ[›™\ˆ\İÊHHH˜YÚ]H™\İYš[™[™Îˆ˜[ÙX\È[İÙYÈHÜ[]™[Ù™™\˜\Èİ[[šYY
+’S‘S‘×ÕS‘T—ĞÓÓSTÊHŸLÈH™[[İ™HÛÛ[Z]YZ[Øœ›ÛH[™\È]]™H]
+HÛ™JNˆÚ]›H\ˆKXØXÚYZ[YÈ™Ú]YÛ›Ü™KˆHÛÛ[Z]YZ[ÛX˜XZÙ\ÈÚ]\˜Ú]™X
+È\[œİ[Ú[[H[ˆÓÛÙH›Û™H
+Š‘Ó‘JŠˆ
+™\šYšYYŒ‹LLLHNˆ›È˜XÚÙYZ[Èš[\ÈÛˆ[H[™Hœ˜[˜Ú‹LÊHS
+‹ËK‹ÎˆÚXÚÈÚ]ËYš[\Ëš[\™YÚ]Ü™\QHŠ‹ËÊXZ[È˜
+™\İYÛÎˆÉÜÈØ\ÈXÛÛ›ÛZXÜËØZ[Ø
+JHÚ]ËYš[\ØÚİÜÈ›ÈZ[ÈŸ‹LMˆˆ8 'Y]8 'H[™8 '™]˜Xİ8 'HÛˆÛ›İ\ÎˆY]HH™]È›İHÚ]İ\\œÙY\ØÈ™]˜XİHÜ[™WÙœ™]˜XİÛÜ\˜]Ü—Û›İJÛÛ›‹›İWÚY[\™YØK[\™YØ]™X\ÛÛŠXˆÙ\™\‹\Ù]]]Ü‹S‹]™\H™Y\Ø[™X\ÛÛˆÚİÛ‹ZXÚY[[Û›H
+ŒM
+Kˆ\İÈÛˆ[™H
+ÑNˆY]][‹XØ\™ÚİÜÈHXYÈ™]˜Xİ][‹XØ\™›ÜÈHš\ÚÈ›Û™H
+Š‘Ó‘JŠˆ
+[™HÈÙYH]ÈQÑS•ÔÕUTÈÈ[™Ù™ŠHˆ\È\ØÜšX™YŸËLH[™\[™[™\šYšXØ][ÛˆÙˆHÛÈ[™ÜÈÛ›HH\È\İYˆ
+JHKLMHÛÜšÙ›İÜËœ›ÜÜÙWÙ›Ûİİ\
+Y™\œØ\šX[ˆ›ÛİË]\ÛˆH›Û‹PPÕQ][KH›ÛİË]\H[šY\ÈÜˆ›È[™HX^H›ÜÜÙKH›ÛİË]\Ú[HS’PÈ\È[™ØYÙYHİX›HİX›Z]ÙˆHØ[YH›ÛİË]\HÜ˜\Ú™]ÙY[ˆ™\]Y\İÜ™X][Ûˆ[™HØ]Hİ\[™ËQTÈÚ]İ]İ\]\Hİ[H\›İ˜[Y\ˆHœ™Y^™JNÈ
+ŠHÛÛËÜ™[X\ÙWÙØ]KœX
+Ù\È]˜Z[Ú[ˆ]Úİ[È[Hİ[H[œİ[H[\\™YÚZ[‹H]™HY™™XİÜˆ›İËHÛÛ˜XİÚ[™ÙK[™ÛÛ™š\›HXXÚ\›œÈHØ]H™Y
+H›Û™H
+Š‘Ó‘JŠˆÌÍ˜X˜Øˆ›İ[™‹M‹ÍËÍÍH
+KLMJH[™‹M‹‹‘‹MH
+Ø]JNÈHš^Y[ZYÚ\È\ÚÈÈÈ™K]™\šYH
+ËLJHÈš[™[™ÜÈš[YÚ]İÛ™\œÎÈHØ]H\ÈÚİÛˆÈ˜Z[ÛˆXXÚ[Y˜][ŸËLHH™K]™\šYHIÜÈËLš^\ÎˆKLMH
+‹MˆÜœ[ˆØ]H™XÛİ™\H[˜Ûˆ™XÛİ™\—ÛÜœ[—ÙØ]\Ø]ÛÜšÙ\ˆİ\[™]™\HŒË‹MÈ™XÙZ\›ÜˆH›ØÚÙY›ÛİË]\‹MÛX[ˆ™Y\Ø[‹MH›İÈØÚÊH[™H\™[™YØ]H
+ÛÛ˜Xİ]H[‹İZ]H›ÛÜ‹^˜KØÚ[™ÙY[œİ[Yš[\Ë™]ÚXKYY˜][H™X[PÕSÓ‹\]ÚXÚÊKˆ[HØ[YH›İ\ˆ˜][È\È™]ÈÛ™\È[™ÛÛ™š\›H™Y›Û™H
+Š‘Ó‘JŠˆ
+[™HÎÈÙYH]ÈQÑS•ÔÕUTÈÈ[™Ù™ŠHÈš[™[™ÜÈÜˆ››Èš[™[™ÜÈÈHØ]HÚİÛˆ™YÛˆXXÚ[Y˜][ŸËLNH
+Š”
+ŠˆQ‹LLˆÈ\šXHY\ÜØYÙHT’PKLŒŒLËLNˆ
+Š”™[[İ™HH[š]™\œØ[Ø\][Ø[™Üš\ÚË›Z[—Ü›Ùš]Ù›\
+ML
+H[™Z[—Ü›Ùš]ÜÙ\šXÙX
+L
+H\™Ø]\ÊŠˆ
+Z[—Ü›Ùš]ÛÚØ]—ÛZ[—Ü›Ùš]ÛÚØ[™H[\İ™\ÚÛË™]—Û][\WÛÙ—ÛZ[—Ü›Ùš]]\š]™\Èœ›ÛH[JH[™™\XÙH[HÚ]Û\ÜËX]Ø\™HØ]\Èš]™[ˆHÛÛ™šYËÛÜ\˜]Ü—Ü›Ùš[KŒKšœÛÛ˜X[ØÛ\ÜÙ\Ø
+]JKˆY\È[œ]ËÛİ]]ÎˆØ\][™[ØÚ]KØ\Ú][\KØ]\İ›ÜXËYİÛœÚYH›Ø˜Xš[]K\Ë[İ]›ÛÜ‹\]ZY]K\œÛÛ˜[]\ÙH˜[YKİ\œ™[Ø\ÚÛÛ^
+[H[šÛ›İÛ‹™]™\ˆ\Üİ[YY
+K[Y\šXÈÙX\ÛÛ˜[]Kˆ˜[šÚ[™ÈØš™Xİ]™H8¢bš\ÚËXY\İY›Ùš]0åÈÛÛ™šY[˜ÙH0åÈØ\][™[ØÚ]KÚ]]™\HÛÛ\Û™[Ù\\˜][Hš\ÚX›H[ˆHØÛÜ™XØ\™ˆHĞTUSÒS•S”ÒU‘HÛ\ÜÈÙY\ÈHYX[š[™Ù[XœÛÛ]K\›Ùš]™\]Z\™[Y[
+\È]JKˆÛÛ[œÈœ›ÛHZXÚY[	ÜÈ™YH^[\\Îˆ
+JHHKZ[˜Úˆ]‰Ì
+ÛX[XœÛÛ]H›Ùš]ŒHİ\‹š[˜\H[™[š\ÚË\Ë[İ]›ÛÜŠH]\İ“Õ™HTÔÙY›Üˆ›Ùš]	MLÈ
+ŠH[ˆÛ\ˆšY[™È[İÙ\ˆ]H[ˆHÙX\ÛÛˆÚ][™ÈYÚ
+šYÈÜ™XYØ\Ú˜\Y›Üˆ[ÛÊH]\İ™H›YÙÙY\ÈHÜ›Û™È^HÙ^NÈ
+ÊHH›Û‹\[›š[™ÈÛ™H™XÛÛˆL]‰Ì
+YÚ\ˆ^Üİ\™KY™™\™[Û\ÜË[[™Ë\ÙX\ÛÛˆ\]ZY]JH›Û™H
+Š‘Ó‘JŠˆXÎ˜
+[™Ú[™HŒL‹ŒÛ\ÜËX]Ø\™HØ]\ÎÈˆPVP‘H›İTÔÊHÈÛÛ[œÈ\ÜÎÈ›ÈÛÛœİ[›Ùš]›ÛÜˆ™[XZ[œÈ[ˆÛÙHÜˆHY˜][ÛÛ™šYÈ^Ù\\‹XÛ\ÜÈ]H™\ÚÛÎÈ]—Û][\X[\[H™KX˜\ÙYÈLÊÈ^\İ[™ÈÛÛ[œÈ™KX˜\Ù[[™YÚ]H›İHŸËLŒH™K\˜[šÈH[Ü›š[™ÈYÙ\İ
+ËL
+HHHØ[YHØš™Xİ]™HÛÈH]ZXÚÈÛX[›\Ø[ˆİ]˜[šÈHšYÈÛİÈÛ™KÚ]H™X\ÛÛˆÚİÛˆ\ˆ›İÈËLNH
+Š‘Ó‘JŠˆØÌÌŒXØÈYÙ\İÛÛ[ˆˆX›İ™H[İÙ\ˆÙ^NÈXXÚ›İÈ˜[Y\ÈÚHŸ‹LMÈHÜ\˜]ÜˆRNˆÚİÈÜÜ[š]HÛ\ÜËØ\Ú][\KØ\][™[ØÚ]KİÛœÚYK\]ZY]KÚÚ[š][™HÚHHÛX[˜\İ›\Ø[ˆİ]˜[šÈHšYÈÛİÈÛ™Hˆ[™H
+™]ÈÜ[Û˜[Ø\™šY[ÊNÈ™K]™[™ÜˆØ\™œØÚ[XKšœÛÛ˜›Û™H
+Š‘Ó‘JŠˆ
+[™HÈÙYH]ÈQÑS•ÔÕUTÈÈ[™Ù™ŠHˆØ\™È›ÜˆH™YH˜Z[š[™È^[\\È™[™\ˆHšY[ÎÈS’Ó“ÕÓˆİ[YŸËLLHXØÙ\[˜ÙH›ÜˆQ‹LLˆH™]ÈØ\™šY[È\™HÛ™\İ
+S’Ó“ÕÓˆÚ]İ][X™\œÊK›È[š]™\œØ[›ÛÜˆ[ˆÛÙKØÛÛ™šYÈY\ˆËLNKH™YH˜Z[š[™È^[\\È™Z]™H\ÈÜXÚYšYYØ\ÚÛÛ^™]™\ˆ\Üİ[YYËLNH
+›ÜˆH[™Ú[™H[ŠH
+Š‘Ó‘JŠˆ
+ÎÈš[™[™ÜÈ‹MLK‹‘‹M™[İÊHÈš[™[™ÜÈÜˆ›Èš[™[™ÜÈŸKLLˆHÛXŞH›ÜˆH™XÛÛ[Y[™][ÛˆXİ[ÛœÎˆÙ™™\‹Š˜Ù™™\‹Š‹˜Ûİ[\˜\˜Ú\ÙKŠ˜X\ÈØ]YÛÜšY\ÈÙ™™\‹Ü\˜Ú\ÙHÚ]Y\ˆ
+Èİ\]\
+ÈØ\È\š]™Yœ›ÛHRPÒQSÑPÒTÒSÓ”ÈÌH
+ÛÛœÙ\˜]]™HY˜][Ë]JNÈY˜][[Kˆ
+Š”ŒŒŠŠˆHœ™Y^™K\™Y\ÙY\›İ™Y™\]Y\İ™XÛÛY\ÈØ[˜Ù[YØWÙœ™Y^™X
+ˆL‹LLJH›Û™H
+Š‘Ó‘JŠˆÍLØXÌ
+Ù™™\‹ØÛİ[\‹Ø^HÛXŞKİ\]\Ø\ÎÈŒŒÛˆ[™H
+HHXÚ\Ú[ÛœÈ›ÜˆÓÓ•PÕÓÑ‘‘T‹ĞÓÕS•T‹Ğ•VHØ\Xš[]Y\È\İYÈŒŒ™Z]š[İ\ˆ\İYÛˆ[™HŸLMˆHÛÛ™š\›HHRKÜ™XY\ˆ›Û\ÈØ[ˆ™XYX›ÜË˜\Y˜XİØÛÛ[
+[œšXÚY[›ØÚÜÊH[™]\]WÚ][WÙØØ[İÜÈ™\ÙX\˜Ú]Ú\ÈH[™HYÙ[ÎÈYHšY]È—Ú][WØØ\™Ú[œ]ØYˆ]Ú[\YšY\ÈHRH›Û™H
+Š‘Ó‘JŠˆ
+ˆ\[™Ú][WÜ™\ÙX\˜Ú]ÛZXÈ\[™
+È—Ú][WØØ\™Ú[œ]Ø
+NÈHYÜY]RH›ÛH™XYÈ[œšXÚY[Ûˆ[™HÈØİ[Y[Y‚ˆÈÈZXÚY[
+\Ú[™\ÜË\ÛXŞHÛ›NÈ›İ[™È›ØÚÜÈHK\[ˆU”
+B‹HRPÒQSÑPÒTÒSÓ”ÈÌx $ÈÍH\™H[˜Ú[™ÙY‚‹H
+ŠˆÍÈ
+™]Ë˜Z\ÙYHŠNŠŠˆX^HHŞ\İ[H\œİYH›\ÈÙˆ][\ÈÚ]™[ˆ]Ø^H[ˆÛÛ[][š]HÚYÜ›İ\È
+˜\Ú›İ[™ÊOÈÛÛYHÜ›İ\È›Ü˜šY™\Ù[[™ËˆY˜][ˆ\ÙH][\È\™H›YÙÙY™YY×Ü™]šY]Ø[™›È›\\È\œİYYÚ]İ]ZXÚY[	ÜÈØ\ÙKXKXØ\ÙHQTË‚‹H
+ŠˆÎ
+™]ËÜ[Û˜[
+NŠŠˆ\H›ÜˆP˜^HX\šÙ]XÙH[œÚYÚÈ
+[Z]Y™[X\ÙJH›ÜˆÛÛÛÛ\Ëˆ[[[‹ÛÛÛÛ\ÈÛÛYHœ›ÛHX[X[[K‚‹H
+Š“Ü[Û˜[ŠŠˆ[ˆP˜^H]™[Ü\ˆÙ^\Ù]›Üˆ]™H™XY[Û›HP˜^H\ØÛİ™\H
+YÙ[‰ÜÈ[˜›ÛÚÊKˆ›İ™\]Z\™YÈš^\™H[ÙH[œÈHØ[YHÛÙK‚‚ˆÈÈX[ÛšY™™\ˆ›ÙXİXÚØYÙH
+Q‹LLÎÈ\šXHT’PKLŒŒLËLNLNÈZXÚY[Œ‹LLLÊB”™XYØÜËÜ›ÙXİÑPSÔÓ’Q‘‘T—ÔÕT•ÒT‘K›Yš\œİˆ]™\][™È\™H\È–KT•Sˆ[™Y]]™Nˆ›Èœ›Ş™[ˆÛÛ˜XİÚ[™Ù\Ë›È^\›˜[Xİ[Û‹ˆU”™[X\ÙHÛÜšÈ
+ËLNKËLKËLL‹LLK‹LMÊHÙY\Èš[Üš]Hİ™\ˆ]™\][™È™[İË‚ŸQšH\ÚÈ\Èİ]\ÈYÙ[XØÙ\[˜ÙHŸKK_KK_KK_KK_KK_KK_KK_ŸKLŒˆ
+Š”
+Ü\˜][ÛœÊJŠˆ[[YH›Ü™[X[‹İØ]ÚÙÈ
+\šXNˆ[Ù]™[ˆYÙ[ÈØ[ˆYH]Û˜ÙJKˆÛÛËÙ›Ü™[X[‹œXˆ™XY[Û›NÈ™]Ú\ÈÜšYÚ[‹™XYÈXXÚ[™IÜÈQÑS•ÔÕUTÈ
+È‘PQWÔUQUQKš[È\‹XYÙ[Üİ]KÛZ[YY™^‘PQH\ÚÈ›Üˆ]YÙ[İ[K\]Y]YHØ\›š[™ÈÚ[ˆH]Y]YIÜÈ™XÛÜ™YXYÈY™™\ˆœ›ÛHÜšYÚ[ŸK^]ÈˆÚ[ˆ[ˆYÙ[\ÈYKÕĞRUS‘ÈÚ[H‘PQHÛÜšÈ^\İÈ›Üˆ]ˆK]ØZÙK]^[Z]ÈH^XİÛ™K[[™H›Û\ÈÙ[™È[ˆYHYÙ[ˆÜİ\ÚYHØÚY[[™È
+Ü›Û‹ÜŞ\İ[Y
+Èİ\[™ÈÙ\ÜÚ[ÛœÊH\È[ˆÕÓ‘TˆXİ[Ûˆ
+ÕÓ‘T—ĞPÕSÓ”ÊH™XØ]\ÙHHØ[››İ][˜ÚÙ\ÜÚ[ÛœÈ›Û™H
+Š‘Ó‘JŠˆ
+\È\Ú
+NˆÛÛËÙ›Ü™[X[‹œX
+™XY[Û›NÈK]ØZÙK]^È^]ˆHYHÚ]‘PQHÛÜšÎÈİ[K\]Y]YHØ\›š[™ÊH
+ÈÈ\İËˆPÕ]š\œİ[ˆÈQHÚ]ËLKÑËLLÑËLLH‘PQKˆÜİØÚY[[™È\ÈÕÓ‘T—ĞPÕSÓ”ÈˆH\İİ™\ˆHš^\™HÚ]™\ÎˆYK]Ú]]ÛÜšÈ^]Èˆ[™˜[Y\ÈH\ÚÎÈ\ŞHÜˆ[H›ØÚÙY^]ÈÈ[ˆYØZ[œİ™X[ÜšYÚ[ˆš[ÈHX›HŸKLŒÈ
+Š”
+[˜›ØÚÜÈËÌÌŠJŠˆZ\ÜÚ[Û‹œØÚ[XKšœÛÛ˜
+Y]]™JNˆZ\ÜÚ[Û˜İ\™Ù]İ\Ù\š[Ùİ\œ×Ø]˜Z[X›H
+[X›HHS’Ó“ÕÓŠKØ\][KØ\][ÛYÙ\˜Ü›İXİYÜš[˜Ú\[X\›™YİÛÜšÚ[™×ØØ\][Ø\][Ù\ŞYY™X[^™YÜ›Ùš]]˜Z[X›Wİ×Ù\Ş_HÚ]H[˜\šX[È\È˜[Y]ÜˆÛÙK[™Z\ÜÚ[Û—Ü[˜ÛYÜÖ×H
+][WÚYÛÜÜ[š]WØÛ\ÜËØØ\ÚØ]Üš\ÚËÙ^XİYÛ™]İË[ZÙ[KZYÚÙ^\×İ×ØØ\ÚÜ›Ø˜Xš[]KÚİ\œÊK›Ú™XİYİÙYZÈÛİËZÙ[KYÚK™[XZ[š[™×ÙØ\ÛÛ™šY[˜ÙK™\XÙWÚY—Üİ[V×K™XÛÛ[Y[™][Ûˆ[˜Ûˆ×Ó“ÕÔÔS‘Kˆ^[\\È
+ÈX›ÜË›Z\ÜÚ[Û‹˜[Y]Xˆ›Èœ›Ş™[ˆš[HİXÚYÈ[›™YH[—ØÛÛ˜XİËœX›Û™H
+Š‘Ó‘JŠˆ
+\È\Ú
+NˆZ\ÜÚ[Û‹œØÚ[XKšœÛÛ˜X›ÜË›Z\ÜÚ[Û‹˜[Y]WÛZ\ÜÚ[Û‹ÛYÙ\‹Ü[˜^[\\È[ˆ^[\\ËÛZ\ÜÚ[Û‹ØÜ\˜]Ü—Ü›Ùš[K›Z\ÜÚ[Û˜
+\™Ù]Úİ\œÈ[HS’Ó“ÕÓŠNÈNH\İÎÈ[ˆ›İÈˆš[\ÈH^[\\È˜[Y]NÈ[˜\šX[È™Z™XİYÚ[ˆš[Û]Y
+š[˜Ú\[™]™\ˆ™YØ]]™NÈ]˜Z[X›Wİ×Ù\ŞHHš[˜Ú\[
+ÈX\›™YH\ŞYY
+NÈ”“Ö‘S‹œÚLM‹šœÛÛ˜™K\[›™YÈ[\›Ü›İH[ˆ“ÕS‘ÕÓ×ÒS•QÔUSÓˆŸKLHšXÚ\ˆÛ\ÜÙ\ÈÛˆHØ\™ˆÑT•’PÑWÒ“ĞˆÈÕT—ÓÔÔ•S’UH[ˆX[ØÛ\ÜÙ\Ø]H[™Ø\™—ØÛ\Ü×ÛÙ˜ÈØ]YÛÜWİYÜÖ×X
+YXÚ[šX×ÜÜXÚX[›Ú™Xİ\×ÙÛ›Ü‹]ZXÚ×İ\›‹]Xİ[Û—ØØ[™Y]KØ[YÛX]ÚÛÛ˜XİÜ—ÛÜÜ[š]JH™[™\™YÛ›HÚ]˜\Ú\ÊÜ›İ™[˜[˜ÙK[ÙHXœÙ[‹LŒH›ÜˆYÈÛİ\˜ÙH
+Š‘Ó‘JŠˆ
+\È\Ú
+NˆÑT•’PÑWÒ“ĞˆÛ\ÜÎÈS”’PÒQS•Ğ“ĞÒÔØ
+ÏHØ]YÛÜWİYÜØÛˆ›İÜ[™\ÎÈØ\™Ø]YÛÜWİYÜÖ×X
+S‘‘T‘SÑH
+È][İY]šY[˜ÙH
+È[™H›İ™[˜[˜ÙNÈ[ÙH›ÜYÈS’Ó“ÕÓˆÚ[ˆ›Û™JNÈØ\™œØÚ[XHY]]™NÈÈ\İËˆ‰ÜÈ‹LŒH[Z]È]HØ\™\İÎˆÙ\šXÙH›ØˆÙ]ÈÑT•’PÑWÒ“ĞˆÚ]İ]H›\\İ[H][\NÈ[šÛ›İÛˆ[œ]Èİ^HS’Ó“ÕÓÈ›ÈYÈÚ]İ]H˜\Ú\ÈŸKLHH[™[ÜKœØÚ[XKšœÛÛ˜
+ÈY\˜Ú[™\Ú[™ËœØÚ[XKšœÛÛ˜
+Y]]™JNˆØ[›ÛšXØ[[™[ÜHØš™Xİ
+˜XİÖ×HXXÚÚ]˜\Ú\ØÙ[\—Üİ]YÜŞ\İ[WÚ[™™\œ™Yİ™\šYšYYÕS’Ó“ÕÓˆ
+È›İ™[˜[˜ÙKY™XİÖ×K]šY[˜ÙV×JH[™šY]ÜÖ×X\ˆ]YY[˜ÙNÈX›ÜË›Y\˜Ú[™\Ú[™Ë›[
+[™[ÜKšY]ÊX™Z™Xİ[™È[HšY]È]›ÜËÜÛÙ[œÈHÛ›İÛˆY™XİÚ[™Ù\ÈšXÙKİ\›\ÈÜˆ]šY[˜ÙH˜\Ú\Ë\ÜÙ\È[ˆ[œİ\ÜYÛZ[H\È™\šYšYYÜˆ›ÜÈ›İ™[˜[˜ÙH›Û™H
+Š‘Ó‘JŠˆ
+\È\Ú
+Nˆ[™[ÜKœØÚ[XKšœÛÛ˜Y\˜Ú[™\Ú[™ËœØÚ[XKšœÛÛ˜X›ÜË›Y\˜Ú[™\Ú[™Ë›[İ˜[Y]X
+™\˜˜][HY™XİË\›\È\]X[›È˜\Ú\È\Ü˜YK›İ™[˜[˜ÙHÙ\›ÈÛÛ™][Ûˆİ™\˜ÛZ[K›È[™X\›™Y	İ™\šYšYY	Ë[™[Y˜XİËİ[H\Ú
+NÈ]YY[˜ÙH^[\HšY]ÜÎÈ\İÎÈ[ˆÍˆš[\ÈHL
+È[Ø\Ù\È
+Y[ˆY™Xİ\Ü˜YY˜\Ú\Ë[\™YšXÙKZ\ÜÚ[™È›İ™[˜[˜ÙK™[Ü™\™YX]]][\ÜÙ\ÊNÈ^[\\Îˆ›Û‹\[›š[™È[İÙ\ˆ™[™\™Y\ÈYXÚ[šXÈÜXÚX[Û›Ü‹]ZXÚÈ\›‹Ü™[˜\HÛ\ÜÚYšYYŸKLˆHØ[\ZYÛ‹œØÚ[XKšœÛÛ˜
+È˜[X][Û‹œØÚ[XKšœÛÛ˜
+Y]]™JKˆØ[\ZYÛˆÜš]\šXH
+Ø]YÛÜKX^šXÙK˜Y]\Ë]\İÛšXÙKÛÜÛY]XÜË[ÚÊK]]Û›Û^XĞUÒÓÓ“KÔ‘PÓÓSQS‘ĞTÔÒTÕQÑPSĞ“ÕS‘QĞUUÔSÕİÜÛÛ™][ÛœË[š[YØKˆ˜[X][Ûˆ˜[™Ù\ØÜİYÙÙ\İYÛ\İZÙ[WÜØ[K˜\İÜØ[K\×Ú\ËY\—Ü™\Z\ŸKÛÛ™šY[˜ÙX]šY[˜ÙV×XX[™]ÜH›İØ[—Ø\˜Z\Ø[ˆYXÛÛ\È›İ™[˜[˜ÙH›Û™H
+Š‘Ó‘JŠˆ
+\È\Ú
+NˆØ[\ZYÛ‹œØÚ[XKšœÛÛ˜
+]]Ü[İ]\İØ\œH[Z]ÊH
+ÈX›ÜË˜Ø[\ZYÛ˜
+X^WÜ[˜ˆÛ›HĞUÒÓÓ“KÔ‘PÓÓSQS‘
+K˜[X][Û‹œØÚ[XKšœÛÛ˜
+ÈX›ÜË˜[X][Û˜
+›İØ[—Ø\˜Z\Ø[˜[™ÙH™YYÈ]šY[˜ÙKS’Ó“ÕÓˆ™YYÈ™X\ÛÛŠNÈ^[\\ÎÈN\İÎÈ[ˆÌš[\ÈH^[\\È˜[Y]H
+H^˜Z[\ˆØ[\ZYÛÈH[İÙ\ˆ˜[X][ÛŠNÈH˜[X][ÛˆÚ]İ]›İØ[—Ø\˜Z\Ø[H˜[™ÙHÚ]İ]]šY[˜ÙKÜˆ[ˆ]]Ü[İØ[\ZYÛˆÚ]İ][Z]È˜Z[ÈŸKLÈˆ[ZÙHÜXÈ›Ü›X]ÛÛ™šYËÚ[ZÙKÏØ]YÛÜO‹ŒKšœÛÛ˜
+™\]Z\™YšY[ÈÚ]\ÚØXØÙ\Y]šY[˜ÙH\\ËİÈ[™Û\ËØY™]K\™[]˜[]Y\İ[ÛœÊH
+ÈX›ÜËš[ZÙK›Z\ÜÚ[™ÊÜXË˜Y
+XÈÜXÜÈ›Üˆ[İÙ\‹˜Z[\‹ÛYK\™\Z\ˆ›Ø‹ˆ]\›Z[š\İXÎÈ›ÈHKLH
+Š‘Ó‘JŠˆ
+\È\Ú
+NˆÛÛ™šYËÚ[ZÙKŞÛ[İÙ\‹˜Z[\‹ÛYWÜ™\Z\—Ú›ØŸKŒKšœÛÛ˜
+ÈX›ÜËš[ZÙX
+Z\ÜÚ[™Ø[œİÙ\˜×Ú[™[ÜWÙ˜XİØ
+NÈ™\šYšYYØ[››İ™HÙ]H[ZÙNÈØY™]KÛX]\šX[]Y\İ[ÛœÈš\œİÈ\İÈHZ\ÜÚ[™Ê
+X™]\›œÈHZ[š[X[Ü™\™Y]Y\İ[ÛˆÙ]ÈHšY[Ú]Û›HÙ[\—Üİ]Y˜\Ú\È\È™]™\ˆ™\ÜY™\šYšYYŸ‹LŒHØ[\ZYÛˆX]Ú\ˆ
+ĞUÒÓÓ“KÔ‘PÓÓSQS‘
+NˆÚ]™[ˆHØ[\ZYÛˆ
+KLŠH[™›Ü›X[^™Y][\Ë[Z]X]Ú™XÛÜ™ÈÚ][WÚYÜš]\šXHY]ÛZ\ÜÙY\İ[˜ÙK˜[šËZ[‹Q[™Û\ÚÚ_HÚ]›İ™[˜[˜ÙNÈš^\™KYš\œİ™XY[Û›Kˆ]]Û›Û^HX›İ™H‘PÓÓSQS‘\È™Y\ÙYKLˆ
+Š‘Ó‘JŠˆ
+™XÛÛ˜Ú[Yœ›ÛH[™HˆQÑS•ÔÕUTÈÛ™JHˆH^][]K]˜Z[\ˆØ[\ZYÛˆİ™\ˆHš^\™HÛÜœ\ÎˆÛÜœ™XİX]Ú\Ë›ÈX]ÚX›İ™HHX^šXÙKÛÜÛY]XÜÈYÛ›Ü™Y]™\HX]Ú^Z[™YÈTÔÒTÕQÑPSØ[\ZYÛˆXZÙ\È›È™\]Y\İŸ‹LŒHH]šY[˜ÙKX˜\ÙYÛ\ÜÚYšXØ][ÛˆYÜÈœ›ÛH\İ[™È^ÜİÜÈY]Y]H
+YXÚ[šXÈÜXÚX[›Ú™Xİ\ËÙÛ›Ü‹]ZXÚÈ\›‹]Xİ[ÛˆØ[™Y]KÛÛ˜XİÜˆÜÜ[š]JH\ÈS‘‘T‘SÑHÚ]HX]ÚY]šY[˜ÙH][İYÈS’Ó“ÕÓˆİ\Ú\ÙKˆ[Z]Y\È[ˆ[œšXÚY[›ØÚÈØ\™˜Ø]YÛÜWİYÜØ›Û™H
+Š‘Ó‘JŠˆ
+[™HÈÙYH]ÈQÑS•ÔÕUTÈÈ[™Ù™ŠHˆš^\™HÛÜœ\ÎˆYÜÈÛ›HÚ\™H^İ\ÜÈ[NÈœ[œÈÜ™X]ˆ™]™\ˆYÜÈYXÚ[šX×ÜÜXÚX[ÈÛX[™YÙˆ[š™Xİ[Ûˆ^ÈØ\™˜[Y]\ÈŸËLŒHHÙYZÛH[Û™^HZ\ÜÚ[Ûˆ[›™\ˆX›Ü×ÙXÛÛ›ÛZXÜË›Z\ÜÚ[Û‹œ[—İÙYZÊZ\ÜÚ[Û‹YÙ\‹ØÛÜ™XØ\™ÊXOˆZ\ÜÚ[Û—Ü[˜
+KLŒÊNˆÚÛÜÙHH™X\ÚX›HÛÛXš[˜][Ûˆ
+›\È
+ÈÙ\šXÙ\ÊHX^[Z\Ú[™È›Ø˜Xš[]HÙˆÛÜÚ[™ÈHØ\™\ÜXİ[™È]˜Z[X›Wİ×Ù\ŞXİ\œÈ[™Û\ÜÈ™[ØÚ]NÈ×Ó“ÕÔÔS‘Ú[ˆÙ\šXÙ\È[Û™H\™H™]\È›ÈXœÛÛ]K\›Ùš]›ÛÜˆËLNKKLŒÈ
+Š‘Ó‘JŠˆ
+Îˆ[—İÙYZØ\ÜÙ\ÈX›ÜË›Z\ÜÚ[Û‹œ[—Ù\œ›ÜœØ[ˆ]™\HÛÛ[È[™Ú[™HŒLËŒÈ™XÙZ\Œ‹LLLXÌŒJHÈÛÛ[œÎˆ	LÈ	KLÙYZÈÚ]H‹[İÙ\‹™XÛÛ‹H]Ø[›ØÈØ\Ú]YÚÙYZÈÚÛÜÙ\ÈHÙ\šXÙH
+ÈÈ›È[ˆÜ[™È[Ü™H[ˆ]˜Z[X›Wİ×Ù\ŞNÈ]™\HYÈÚ]\È]ÈØÛÜ™XØ\™ŸËLŒˆˆ˜[X]Ü˜[\™˜XÙH
+È›\ÛÛ\\˜X›\Õ˜[X]Ü˜
+\Ù\È^\İ[™ÈÛÛ\ËÜš[ÜœÈ›Üˆ[İÙ\‹˜Z[\‹\]Z\Y[
+H™]\›š[™ÈKLˆ˜[X][ÛÈÛYKİ™uï;¶‰ËkºwµçY\ˆšY[™È[İÙ\ˆ]H[ˆHÙX\ÛÛ‹H›Û‹\[›š[™È™XÛÛˆX›İ]	Ì
+H\ÈHÙ\šXÙHXYÚÜÙH]šY[˜ÙHØ[ˆ™H]\İYXXÚÚ]ÛÛ\ËÜš[ÜœÈÛÈH‘PS\ÜÙ[X›H›ÙXÙ\Îˆ]X\İÛ™HQTÈ]ØZ][™È\›İ˜[Ú][ˆH	L˜[šÜ›ÛÛ™HPVP‘H]˜[Y\È]ÈZ\ÜÚ[™È]šY[˜ÙKÛ™HÓÔTÔÈÚ]H˜[šÜ›Û™X\ÛÛ‹ˆYHÙ]È›Ûİİ˜\Ù]˜\ÈHY˜][š^\™HKMËLH
+Š‘Ó‘JŠˆYÍÌY
+ÚYHÛÜšİ™YKÛÛ›™]Lˆ\›œË\İˆ	KMKY\™ÙYˆ˜Z[š[™×Ù^[\\ËšœÛÛ˜›İYÚH‘PS\ÜÙ[X›NˆˆHQTÈ
+\›İ˜X›HÚ][ˆ	L
+K™XÛÛˆHPVP‘H
+˜][ÚY[YšYY
+K[İÙ\ˆHTÔÈÛˆH˜[šÜ›Û]Ø[XYPVP‘HOˆQTÈY\ˆİÛ™\ˆ]\İ][ÛÈ›Ûİİ˜\Y˜][š^\™JHÛÜšÙ\œÚYK]ÛÜšİ™YH
+ÛÛ›™]
+H›İYÚH™X[\ÜÙ[X›HÛˆÌMˆİ]\È[™™\™XİÈ\ÈX›İ™NÈ]™\H[X™\ˆX™[YPÕÒS‘‘T‹ÕS’Ó“ÕÓÈØ\™˜[Y]\ÈŸËLŒH
+Š”
+Šˆ
+ÎÈØ]™HÊHš[Üš]KM[K\[ˆÙˆHÙYZÛH[Û™^HZ\ÜÚ[ÛˆÛˆH™X[\ÜÙ[X›HÚ]˜Z[š[™×Ù^[\\ËšœÛÛ˜ˆ\ØÛİ™\K›Ü›X[^˜][Û‹™\ÙX\˜Ú
+X[X[ÛÛ\
+È]\İ][Ûˆ›İYÚHRH›Ü›\ÊKØÛÜš[™Ë™XÛÛ[Y[™][Û‹ZXÚY[	ÜÈ\›İ˜[›İ[™\H
+QTÈ™YYÈİ\]\ÔSÈ“ËÒÓ]ÊKK\[ˆY™™XİÜ‹™XÙZ\È[™ÚZ[ˆ™\šYKİ]ÛÛYH[H\ÈH[X[ˆ
+Ø\][ÛÜÙ\Ëš[˜Ú\[™]\›œË›Ùš]™XÛÛY\ÈX\›™Y
+K[™HX\›š[™ÈÛÚÈ
+Ø[Xœ˜][Ûˆ›ÜÜØ[\È›ÙXÙY[™ØY™[H›ØÚÙY
+Kˆ™\›È^\›˜[Xİ[ÛœÎÈ\ÜÙ\]™WÙY™™XİÜ—ØØ[ÈOH‹LKKMH
+Š”ÔU
+Šˆ
+š\œİ[ˆ\ÙY[ŒH\›œËØ]™Y›İ[™ÎˆÛÈÚYJHOˆËLŒXH[™ËLŒXˆÛÜšÙ\›[™KLÈ
+ÛÛ›™]š\ÚÈYÚ
+HØÜËÜXKÓRTÔÒSÓ—Ñ–T•S‹›YÚ]XXÚİYÙHTÔËÑRS™XÙZ\YËHYÙ\ˆ™Y›Ü™KØY\‹[™H\İÙˆ[HØ\\È‹[›ˆŸËLŒˆH
+ÎÈØ]™HÊH™K\[ˆHËLŒ]Y]\ÈZXÚY[Y\ˆØ]™Hˆ[™X›\ÚH™]È™\™Xİ‹LKKMH
+Š‘Ó‘JŠˆX˜ÎY
+\Ü]Ú\‹[][˜ÚYÈÎÈÛÛ›™]H\›œË\İˆ	K
+Nˆ‘T‘PÕ
+Š–QTÈ›ÜˆH›\]“ÕQU›ÜˆH[X[ÜˆHÙ\šXÙHXY
+ŠÈ›ØœÈKMHTÔË‹MÈT•PSÈ‹LLŒ
+JK‹LLŒKÌLŒ‹ÌLŒËÌLH
+ŠK‹LL
+ÊHš[YÛÜšÙ\›[™KLÈXXÚ›ØˆKMÈTÔÈÜˆH˜[šÙY™X\ÛÛÈ™\™Xİ\]YŸLH
+Š”
+Šˆ
+ÈØ]™HŠHHİÛ™\ˆRHÙÚ[ˆ]\İ™HX›HÈ™XÛÜ™ZXÚY[	ÜÈ]\İ][ÛˆÙ^H\[™Ú][WÜ™\ÙX\˜Ú\ÈÜ˜[YÈYÙ[İÜš]XÛ›KÛÈHÜ\˜]ÜˆRH
+X›Ü×ÛÜ\˜]Ü—İZX
+HØ[››İÛÛ™š\›H]šY[˜ÙKˆ•SS‘ÎˆYHÑPÕT’UHQ’S‘TˆX›ÜËœ™XÛÜ™Ø]\İ][ÛŠ][WÚY]šY[˜ÙWÚÙ^K›İKXİÜ‹›İ™[˜[˜ÙWÚYËY[\İ[˜ŞWÚÙ^JX]™\]Z\™\ÈHİÛ™\—ØÚ[›™[›ÛHS‘H[X[ˆXİÜˆÚ][ˆYÜš]\ÈÓ‘H][H™\ÙX\˜Ú[HÚ\YZÙHKMĞËLIÜÈ]\İ][ÛÙ^O˜ÛÛ™[[Û‹[™H™XÙZ\ÈHÛÜšÙ›İÈÙÚ[ˆØ[››İØ[]ˆYÙ[İÜš]XÙY\È\[™Ú][WÜ™\ÙX\˜Ú›Üˆ[™H[œšXÚY[È]X^H“ÕÜš]H[ˆ]\İ][Û˜[H\™XİH
+ÒPÒÈÜˆ[˜İ[ÛˆİX\™
+H›Û™H
+Š‘Ó‘JŠˆ˜™ŒÍ˜Ø
+ÈÛÛ›™]NH\›œË\İˆ	MˆZYÜ˜][Ûˆ™XÛÜ™Ø]\İ][Û˜İÛ™\—ØÚ[›™[
+È[X[‹™XÙZ\YY[\İ[ÈYÙ[İÜš]HØ[››İÜš]H]\İ][Û˜[šY\ÊHÛÜšÙ\›[™KL
+ÛÛ›™]š\ÚÈYÚ
+H\ÈH™X[›Û\ÎˆİÛ™\ˆRHÙÚ[ˆ™XÛÜ™È[ˆ]\İ][Ûˆ
+™XÙZ\Y[X[ŠNÈX›Ü×Ù›ÜØ\È™Y\ÙYH›ÛH[™Ø[››İ\[™[ˆ]\İ][Û˜™\ÙX\˜Ú[NÈH[H\Èš\ÚX›HÈ[™HÈ[œ]È™\šYWØÚZ[ˆÒÎÈIÜÈØ]HÜ™Y[ˆŸ‹LÌ
+Š”
+Šˆ
+ŠH™K]™[™ÜˆHQ‹LLÈØÚ[X\È]KZY[XØ[œ›ÛHIÜÈXY
+Z\ÜÚ[Û‹œØÚ[XKšœÛÛ˜›İÈ\ÈYÈ]XØ™\™XİØØZ][™×ÛÛ˜È[™[ÜKœØÚ[XKšœÛÛ˜\È™\]Z\™YY™XİÚY×ÜÙY[˜[™™\ÛÛ™YÙY™XİØÈÚXÚÈØ[\ZYÛ‹˜[X][Û‹Y\˜Ú[™\Ú[™ËØ\™ÛÊNˆÛÜK[ˆH[ˆ\İË[™š^Ú]]™\ˆHİšXİ\ˆÛÛ˜Xİ[™HKLÌˆY\˜Ú[™\Ú[™È[
+™\˜˜][HY™XİÈ[ˆ›ÜÙK™]š\Ú[ÛˆÚXÚÊH›İÈ™Z™Xİ[ˆÛZ\ÜÚ[Û˜Ú[ZÙX[™Ü™]šY]Ø‹LH
+Š‘Ó‘JŠˆ˜ÌLÙ˜
+ÈÛÛ›™]\›œË\İˆ	LˆQ‹LLÈÛÛ˜XİÈ™K]™[™Ü™Y]KZY[XØ[Ú]HÚLMˆ[ˆ\İÈ[ZÙHZ[ÈH˜[Y[™[ÜH]\ÜÙ\ÈH[
+HÛÜšÙ\›[™KLˆ
+ÛÛ›™]
+H™[™Ü™YÛÜY\È\]X[IÜÈ]\È
+ÚLMˆ\İ
+NÈÛZ\ÜÚ[Û˜™[™\œÈH[ˆÚ]H™]ÈYÈšY[È[™˜[Y]\ÎÈÜ™]šY]Ø[™Ú[ZÙX›ÙXÙH[™[ÜHØš™XİÈ]\ÜÈX›ÜË›Y\˜Ú[™\Ú[™Ë›[ÈRHİZ]HÜ™Y[ˆŸËLŒXH
+Š”
+Šˆ
+ÎÈš[Üš]H\HÙˆŠHK\[ˆİYÙ\ÈKMÛˆH‘PS\ÜÙ[X›HÚ]š^\™\ËÜÛİ\˜Ù\Ëİ˜Z[š[™×Ù^[\\ËšœÛÛ˜
+›Ûİİ˜\Ù]‹X›ÜÈÛÜšÙ\˜Ü\˜]ÜˆRJNˆ
+JH\ØÛİ™\H
+È
+ŠH›Ü›X[^˜][Ûˆ
+]™\H˜Z[š[™ÈX[™XÛÛY\È[ˆ][JK
+ÊH™\ÙX\˜Ú
+YHZ\ÜÚ[™ÈÛÛ\›İYÚHRHYHšXÙHHØ]Èˆ›Ü›H[™]HÛÜšÙ\ˆXÚÈ]\
+K
 
-| F-07 | P1 | P-06-6: consent ledger + DNC scrub store as data (append-only, receipted), so E2 grades PASS/FAIL instead of DRY_RUN_EXEMPT. Raw contact values stay in the ledger and are referenced, never copied | none | **DONE** @ `36ce9a4` (consent ledger + DNC; E2/E4 PASS) | 06 (+04 for DDL if it needs tables) | E2 graded PASS/FAIL on a spine run |
-| F-08 | P2 | P-06-7: follow-up and binding offer/quote templates as their own step-up ActionRequests (tier 0, irreversible) | F-07 | **DONE** @ `9d75e44` (follow-up/offer/quote as separate step-up areqs) | 06 | Templates + tests; nothing auto-sends |
+HØÛÜš[™È
+È™XÛÛ[Y[™][Ûˆ
+ˆHQTÈÚ][ˆ	LÈ™XÛÛˆHPVP‘H˜[Z[™È]È]šY[˜ÙNÈ[İÙ\ˆHTÔÈÛˆH˜[šÜ›ÛÈ]Ø[XYPVP‘H[ˆQTÈY\ˆZXÚY[ÛÛ™š\›\È]šY[˜ÙH[ˆHRJKˆÜš]HØÜËÜXKÓRTÔÒSÓ—Ñ–T•S‹›YSÔ‘SQS•SH[™ÓÓSRUQ•TˆPPÒÕQÑH
+Û™HİYÙHHÛ™HÛÛ[Z]
+NÈİÜ[™™\Ü]Hš\œİ™X[Ø\\È‹[›ˆ‹LÌ
+Š‘Ó‘H\ÈHRSS‘ÈK\[ŠŠˆLNX˜
+ÎÈÛÛ›™]Ìˆ\›œË\İˆ	‹ŒJNˆİYÙ\ÈKLˆTÔËİYÙ\ÈËMRSÛˆH›Ûİİ˜\Y™X[\ÜÙ[X›NÈØÜËÜXKÓRTÔÒSÓ—Ñ–T•S‹›YÈ‹LL‹‹‘‹LLLš[Y
+‹LLˆH	ÌˆØ[››İ™XXÚH™XÛÛ[Y[™][ÛŠKˆHKMH\İÈ\ÜÙYÛˆHY™™\™[][ˆZXÚY[Ûİ[[ˆÛÜšÙ\›[™KLÈ
+ÛÛ›™]K[X^]\›œÈL
+HİYÙ\ÈKMXXÚTÔËÑRSÚ]H^XİÛÛ[X[™[™İ]]ÈÛÛ[Z]È\ˆİYÙNÈØ\Èš[YŸËLŒXˆ
+Š”
+Šˆ
+ÎÈ\ˆÙˆŠHİYÙ\ÈKNİ\[™Èœ›ÛHËLŒXIÜÈİ]Nˆ
+JHZXÚY[	ÜÈ\›İ˜[›İ[™\NˆQTÈ™YYÈHİ\]\S‹Ü›Û™ÈSˆ™Y\ÙY“È[™Ó]ÈÛÜšË›İ[™È^Xİ]\ÈÚ]İ]HXÚ\Ú[ÛÈ
+ŠHK\[ˆXİ[ÛˆY™™XİÜˆØ[™XÛÜ™Y]™WÙY™™XİÜ—ØØ[ÈOH™XÙZ\È
+ÈÚZ[ˆ™\šYNÈ
+ÊH[X[‹Y[\™Yİ]ÛÛYH›İYÚHRNˆØ\][ÛÜÙ\Ëš[˜Ú\[™]\›œË›Ùš]™XÛÛY\ÈX\›™YÛÜšÚ[™ÈØ\][YÙ\ˆ™Y›Ü™KØY\ˆÚİÛÈ
+
+HX\›š[™ÈÛÚÎˆØ[Xœ˜][Ûˆ›ÜÜØ[›ÙXÙY[™ØY™[H›ØÚÙYˆ\[™ÈØÜËÜXKÓRTÔÒSÓ—Ñ–T•S‹›YÛÛ[Z]Y\ˆXXÚİYÙHËLŒXH
+Š‘Ó‘JŠˆMŒÍ™X
+ÎÈÛÛ›™]\›œË\İˆ	‹JNˆİYÙHH\›İ˜[›İ[™\HTÔËİYÙHˆK\[ˆXİ[ÛˆTÔÈ
+]™WÙY™™XİÜ—ØØ[ÈÚZ[ˆÚÊNÈİYÙHÈT•PS
+›Ùš]™XÛÛY\ÈX\›™YØ\][ˆ	LOˆ	MŒÈ›İ[™È]™\ˆ\Ş\ÈØ\][
+KİYÙHT•PS
+›ÜÜØ[›ÙXÙY[™ØY™[H›ØÚÙYS’Ó“ÕÓ—ĞĞTP’SUNÈ›İÚ\™YÈˆÛ\ÜÈØ[››İØ[Xœ˜]JNÈ‹LLLË‹‘‹LLNHš[YÛÜšÙ\›[™KLÈ
+ÛÛ›™]K[X^]\›œÈL
+HİYÙ\ÈKNTÔËÑRSÚ]™XÙZ\YÈ[™HYÙ\ˆ™Y›Ü™KØY\ˆ‚ˆÈÈK\[ˆ˜Z[\™\Îˆ›ÛİØ]\Ù\È[™š^\È
+Ø]™HH›İËØ]™HˆY\‹[ˆ™K\[ˆËLŒJBŸQšH\ÚÈ\Èİ]\ÈYÙ[XØÙ\[˜ÙHŸKK_KK_KK_KK_KK_KK_KK_ŸKMˆ
+Š”
+Šˆ
+KÚYHÛÜšİ™YNÈØ]™HJH‹LLˆHÛÛ^[š™XİY›ÜˆØÛÜš[™È
+KM
+H]\İ“Õ™H\œÚ\İY[ÈHİÜ™Y][H
+]š[Û]\ÈHœ›Ş™[ˆ][HØÚ[XKÛÈX›ÜÈ]Y]ÛÛ™›Ü›X[˜ÙH\È™Y
+Nˆ\ÜÈ]ÈHØÛÜ™\ˆ]Ø[[YHÛ›NÈ‹LLH›È˜\Ú\ÈS’Ó“ÕÓˆÛˆİÜ™YšY[ÈÚ\™HH˜\Ú\È^\İÎÈ‹LLHHÛÜšÙ\ˆ™KXÚXÚÜÈH\šÙY][HÚ[ˆH™]È]\İ][ÛˆÜˆÛÛ\\X\œÈ
+›İÛ›HÛÛ\È[ˆH[˜›Ş
+Nˆ˜XÚÈ\İ\ÙY[ˆ™\ÙX\˜Ú[™İ\ˆ][NÈ‹LLÈ›\ÚH‘PSÔÕS‘RSˆ™\Ü]İ\È‹LLH˜]ÈİÜ™H™\ÛÛ™\È˜]×Ü™Y˜
+Üš]HH™]Z[™Y˜]È^[ØYÈ[™\ˆP“Ô×ÔU×ÑT‹ÜˆØ^HÚ\™H^H\™JH›Û™H
+Š‘Ó‘JŠˆM™X
+ÚYHÛÜšİ™YKÛÛ›™]H\›œË\İˆ	Í‹Y\™ÙYˆ‹LL‹ÌLËÌLÌLKÌLJHÛÜšÙ\œÚYK]ÛÜšİ™YH
+ÛÛ›™]K[X^]\›œÈL
+HX›ÜÈ]Y]ÛÛ™›Ü›X[˜ÙHÜ™Y[ˆÛˆH›Ûİİ˜\YÈ]\İ[™È[ˆ][H[İ™\È]Ú]İ]HX[X[™XÚXÚÎÈ™\Üš\ÚX›H[ˆHÛÜšÙ\ˆÙÎÈ\İÈÛˆ™X[ÌMˆŸËLˆ
+Š”
+Šˆ
+ÎÈØ]™HJH‹LLˆH	Ìˆ\È›\Ûİ\—Ø\ÜÙ]ÚXÚ[X[™ÈH[X[ˆØÛÜHİ™\œšYK[™ˆ\È›È›Ü›H›Üˆ]ˆ•SS‘ÎˆYÛÛœİ[Y\ˆ[Xİ›ÛšXÜÈ[™Ù[™\˜[ÛX[ÛÛÙÈ\Èš\œİXÛ\ÜÈ\İ[X]ÜˆØ]YÛÜšY\ÈÚ]š[ÜœÈ
+[™[™Èİ\œË\ÈÛÜİ›Üˆ™\Ø[KX\ËZ\ËØ[H›Ø˜Xš[]K^\ÈÈØ\ÚÛÛ™][Û‹Yš]™[ˆ™\Ø[HÜ™XY
+HÛÈHˆÛÜšÜÈÚ]›Èİ™\œšYNÈÙY\ØÛÜWÛİ™\œšYWÜ™\]Z\™YÛ›H›Üˆ[H[šÛ›İÛˆØ]YÛÜšY\ÎÈ‹LLLH™\ÙX\˜Ú\ˆ]\İØ\œHH\İ[™ÉÜÈİÛˆ˜XİÎˆ›Ü›X[^™YœšXÙX\ÈHPÕ\ÚÈšXÙH
+XÜ]Z\Ú][Û‹˜\Ú×ÜšXÙJHÚ]HÛİ\˜ÙH›İ™[˜[˜ÙK^XİYØ^WÜšXÙXY˜][ÈÈ]
+S‘‘TŠK[™[›[™HXÛÛ›ÛZXÜÈİ\YYÚ]HPÕÒS‘‘Tˆ˜\Ú\È
+š^\™\Ë[ZÙJH\™HÙ\[œİXYÙˆ™\XÙYHš[ÜœËÛÈHXÚ\Ú[Ûˆ[œ]˜XÚÙYHH\İ[™È\È]šY[˜ÙKX˜XÚÙY
+H[İÙ\ˆTÔÈ\˜Ú]™\ËH™XÛÛˆ\ÈPVP‘H˜[Z[™È˜][ÚY[YšYY
+NÈ‹LLÈHİ]\È^İ]\ÈHYH›ØÚÙ\ˆ›Üˆ]™\HØ\ÛÙH
+ØÛÜWÛİ™\œšYWÜ™\]Z\™Y[—ØÛÛ\Ë™\Z\—ÜØÛÜWİ[šÛ›İÛ‹˜[œÜÜİ[˜Û\ÜÚYšYY
+H›Û™H
+Š‘Ó‘JŠˆÙ™˜
+ÎÈÛÛ›™]È\›œË\İˆ	KÎˆÛÛœİ[Y\‹Y[Xİ›ÛšXÜËÜÛX[YÛÛÙÈš[ÜœË\İ[™È˜XİÈ[™[›[™HXÛÛ›ÛZXÜÈÙ\YHØ\^ÈˆQTË™XÛÛˆPVP‘K[İÙ\ˆTÔÈ\˜Ú]™Y
+HÛÜšÙ\›[™KLÈ
+ÛÛ›™]K[X^]\›œÈL
+H›İYÚ™\ÙX\˜ÚÜİ\Ú]Û›HHX[X[ÛÛ\ˆˆ™XXÚ\ÈQTÈÚ][ˆ	LÈ™XÛÛˆPVP‘H˜[Z[™È]È]šY[˜ÙNÈ[İÙ\ˆTÔÈ\˜Ú]™Y
+Ø\ÚÛÚÈ˜XÚÙYHH\İ[™ÈšXÙJNÈÛÛ[œÈ™KX˜\Ù[[™YÚ]H›İNÈH™YH˜Z[š[™ÈÛ\ÜÙ\È[˜Ú[™ÙYÈİZ]HÜ™Y[ˆŸ‹LŒˆ
+Š”JŠˆ
+ÈØ]™HŠH‹LLHÛÛ\ZXÚY[[\œÈ“ÔˆHÜXÚYšXÈ][H›İYÚHRH]\İ[Ø^\È™HHØ[™Y]H›Üˆ]][NˆX[X[ÛÛ\[šY\ÈØ\œH›Ü—Ú][WÚYÈØ[™Y]WØÛÛ\ØÚÚ\ÈH]K\Ú[Z[\š]Hİ]›ÜˆHÛÛ\Z\™YÈ]^Xİ][K[™[Hİ\ˆ[›X]ÚYÛÛ\\È™\ÜY
+›İÚ[[H›ÜY
+HÚ]H™X\ÛÛˆ›Û™H
+Š‘Ó‘JŠˆØÍØÙ
+ÈÛÛ›™]LH\›œË\İˆ	Œˆ›Ü—Ú][WÚYZ\š[™È\\ÜÙ\ÈHÚ[Z[\š]KØØ]YÛÜKİÚ[™İÈİ]ÎÈ[›X]ÚYÛÛ\È\™H™\ÜYÚ]H™X\ÛÛŠHÛÜšÙ\›[™KLˆ
+ÛÛ›™]
+HH‘Ù[™\šXÈÈMZ[ˆQˆ	LˆˆÛÛ\[\™Y›ÜˆHˆ›İÈX]Ú\ÎÈ[ˆ[›X]ÚYÛÛ\\X\œÈ[ˆHØ\^ÈİZ]HÜ™Y[ˆŸ‹LÌH
+Š”
+Šˆ
+ÈØ]™H‹Y\ˆËLŠH‹LLˆRNˆ[ˆİÛ™\‹XÚ[›™[•[YHX›İ]H›Øˆˆ›Ü›H›ÜˆØÛÜHİ™\œšY\È
+\ÈÛÜİİ\œË™\]Z\™YÚÚ[ÊH]İÜ™\È›İ™[˜[˜ÙKXØ\œZ[™È[œ]È
+[X[‹™XÙZ\Y
+H›Üˆ[šÛ›İÛˆØ]YÛÜšY\ÎÈ‹LLHYHšXÙHHØ]Èˆ›Ü›HÜš]\È›Ü—Ú][WÚYÈ‹LLÈRH^\Ù\ÈH[™Ú[™IÜÈYHØ\^È‹LLHH˜[›™\ˆY\ˆ]\İ[™ÈØ^\ÈHÛÜšÙ\ˆÚ[™KXÚXÚÈ]ËL‹KM‹‹LŒˆ
+Š”T•PS
+ŠˆÙMÍ˜X
+ÈÛÛ›™]ÌH\›œË\İˆ	Í
+Nˆ‹LLËÌLÌLHÛ™NÈH‹LLˆØÛÜK[İ™\œšYH›Ü›H\È›ØÚÙY™XØ]\ÙH›İ[™È™YYÈHİÜ™Y[X[ˆİ™\œšYH[ÈH[™Ú[™HOˆËLÈÛÜšÙ\›[™KLˆ
+ÛÛ›™]K[X^]\›œÈL
+Hİ™\ˆˆHØÛÜHİ™\œšYHÛˆ[ˆ[šÛ›İÛ‹XØ]YÛÜH][H[İ™\È]ÈÛÛ\Z\š[™ÈÛÜšÜÎÈ^ÈYHŸËLÈ
+Š”JŠˆ
+ÈÚ]ÈY\ˆH[Û™^KY›İÈ›ÛÙŠH[X[ˆ[œ]È]™YYH[™Ú[™H
+‹LLLH
+È‹LLŠNˆ
+JHHÙ\šXÙHUSÕHZXÚY[Ù]ÈÜˆXØÙ\È›ÜˆHXY
+HØ\™[™XYHØ^\ÈÚ]][İHÛİ[ÛX\ˆH\™Ù]
+K
+ŠHØÛÜHİ™\œšY\È›Üˆ[H[šÛ›İÛˆØ]YÛÜšY\ÎˆHİÜ™YİÛ™\‹XÚ[›™[™XÛÜ™
+\ÈÛÜİİ\œË™\]Z\™YÚÚ[Ë[X[ˆ›İ™[˜[˜ÙK™XÙZ\Y
+H]H™\ÙX\˜Ú[™H™YYÈ[ÈH[™Ú[™H\È›İ™[˜[˜ÙKXØ\œZ[™Èİ™\œšY\Ë[ˆˆYÈH›Ü›H
+‹LÌIÜÈ›ØÚÙY[ŠKˆHˆ›ÈÛ™Ù\ˆ™YYÈ]
+ËLˆØ]™HÛÛœİ[Y\ˆ[Xİ›ÛšXÜÈš[ÜœÊHËLˆ
+Š”T•PS
+ŠˆŒÌLYX
+ÎÈÛÛ›™]NH\›œË\İˆ	ŒÍJNˆ
+ŠHÛ™Nˆ][Kœ™\ÙX\˜Ú[šY\ÈØÛÜWÛİ™\œšYN™ZXˆÜˆ›Ø‹šY[˜
+[X[ˆ›İ™[˜[˜ÙJH™YYH[™Ú[™H[™ÛX\ˆØÛÜWÛİ™\œšYWÜ™\]Z\™YÈ
+JHHÙ\šXÙH][İH[œ]\È›İZ[OˆËLLÌ‹LÌˆÛÜšÙ\›[™KLÈ[ˆ][H[ˆ[ˆ[šÛ›İÛˆØ]YÛÜH[İ™\Èœ›ÛHØÛÜWÛİ™\œšYWÜ™\]Z\™YY\ˆZXÚY[™XÛÜ™È[ˆİ™\œšYNÈ[™Ú[™HX\šÜÈH[œ]È[X[‹X]\İYŸËLŒXÈ
+Š”
+Šˆ
+ÊH™K\[ˆËLŒXHİYÙ\ÈËMÛˆH’VQ\ÜÙ[X›H
+KM‹ËL‹‹LŒ‹‹LÌH\X[
+Nˆ›Ûİİ˜\œ™\ÚˆÛÛ\šXHHRH›Ü›K^XİˆHQTÈÚ][ˆ	L[™š\ÚX›H[ˆX›ÜÈ]Y]YXÕÙ^K™XÛÛˆHPVP‘H˜[Z[™È]È]šY[˜ÙK[İÙ\ˆHTÔÈ\˜Ú]™Y]Ø[XYPVP‘H[ˆQTÈY\ˆ]\İ][ÛœÈÚ]HÛÜšÙ\ˆ™XÚXÚÚ[™ÈH]Ù[‹ˆ\[™ÈØÜËÜXKÓRTÔÒSÓ—Ñ–T•S‹›YÛÛ[Z]\ˆİYÙHØ]™HH
+Èˆ
+Š‘Ó‘JŠˆYŒ™
+ÎÈÛÛ›™]ÍÈ\›œË\İˆ	ÊNˆİYÙHÈTÔÎÈİYÙHÈÙˆˆˆQTÈ[ˆH]Y]YH[™ÛˆÙ^H
+Uˆ	LËØ\ÚYY\	Í‹Ú][ˆ	L
+K™XÛÛˆPVP‘H˜[Z[™È˜][ÚY[YšYY[İÙ\ˆTÒU‘QÈ]Ø[XYİ^\ÈPVP‘H
+‹LLLNˆ›ÈØ^HÈÙ]H][İJNÈX›ÜÈ]Y]ÛÛ™›Ü›X[˜ÙHÜ™Y[‹ÚZ[‹Ü›İ™[˜[˜ÙKÙK\[ˆÚÈÛÜšÙ\›[™KLÈ
+ÛÛ›™]K[X^]\›œÈL
+HİYÙ\ÈËMTÔÈÜˆš[Y\È‹[›ˆŸLÌ
+Š”JŠˆ
+ÈØ]™HÊHÛ™HİÛ™\‹[Û›H[˜İ[Ûˆ›ÜˆZXÚY[	ÜÈ\Y[œ]ËZÙH™XÛÜ™Ø]\İ][Û˜
+LJNˆX›ÜËœ™XÛÜ™Ú[X[—Ú[œ]
+][WÚYÚ[™Ù^K˜[YK›İKXİÜ‹›İ™[˜[˜ÙWÚYËY[\İ[˜ŞWÚÙ^JXÚ]Ú[™[ˆØÛÜWÛİ™\œšYX
+[HšY[ØÛÜWÛİ™\œšYN™ZXˆÜˆ›Ø‹šY[˜\ÈËLÈ™XYÊH[™][İX
+[HšY[][İN˜[[İ[İ\Ù
+NÈİÛ™\—ØÚ[›™[
+È[X[ˆXİÜˆ™\]Z\™Y™XÙZ\YY[\İ[[Y\šXÈ˜[Y\Èš[š]H[™Ø[™NÈHÛÜšÙ›İÈÙÚ[ˆØ[››İÜš]HØÛÜWÛİ™\œšYN˜Ø][İN˜[šY\È[Hİ\ˆØ^H
+Ø[YHİX\™\È]\İ][Û˜
+HLH
+Š‘Ó‘JŠˆYMMY˜
+ÈÛÛ›™]Lˆ\›œË\İˆ	ˆZYÜ˜][ÛˆH™XÛÜ™Ú[X[—Ú[œ]›ÜˆØÛÜWÛİ™\œšYH[™][İKİÛ™\—ØÚ[›™[
+È[X[‹[K\™Yš^İX\™^[™YÈX›Ü×Ù›ÜÈ™Y\ÙY
+HÛÜšÙ\›[™KL
+ÛÛ›™]š\ÚÈYÚ
+H™X[›Û\ÎˆRHÙÚ[ˆ™XÛÜ™È›İÚ[™ÎÈX›Ü×Ù›ÜØ™Y\ÙY[™Ø[››İ\[™ÜÙH[H™Yš^\ÎÈ™\šYWØÚZ[ˆÒÈŸËLH
+ÎÈØ]™HÊHH[™Ú[™H™XYÈZXÚY[	ÜÈUSÕH›ÜˆHÙ\šXÙHXYˆ™\ÙX\˜Ú[H][İN˜[[İ[İ\Ù
+[X[ˆ›İ™[˜[˜ÙJH™\XÙ\ÈHY˜][][İH[ˆHÙ\šXÙHXÛÛ›ÛZXÜÈ
+™]™[YJKÚİÛˆ\È[X[‹X]\İYÈHØ\™	ÜÈ˜H][İHÙˆ	Üˆ[Ü™HÛİ[ÛX\ˆ]ˆİ^\ÈHİYÙÙ\İ[ÛÈH][İH™[İÈÛÜİ\ÈXØÙ\Y]H™\™Xİ›ÛİÜÈH[X™\œÈLÌ
+Š‘Ó‘JŠˆM˜ØÌ
+ÎÈÛÛ›™]\›œË\İˆ	Nˆ][İN˜[[İ[İ\Ù™YYÈ›Ø‹œ][İYÜ™]™[YH[X[‹X]\İYÈH]Ø[XY\ÈQTÈ]	Ì[™PVP‘H]	L
+HÛÜšÙ\›[™KLÈ]Ø[XYÚ]H	Ì][İH™XXÚ\ÈQTÎÈÚ]	Lİ^\ÈPVP‘NÈÛÛ[œÈ\]YŸ‹LÌˆH
+ÈØ]™HÊH”Ù]^H][İHˆ
+Ù\šXÙHXYÊH[™•[YHX›İ]H›Øˆˆ
+[šÛ›İÛˆØ]YÛÜšY\ÊHİÛ™\‹XÚ[›™[›Ü›\ÈØ[[™ÈÜ[™WÙœ™XÛÜ™Ú[X[—Ú[œ]
+HÜ˜\\ˆKMÊKS‹İšXİ˜[Y][Û‹YHY\‹\Ø]™H^LÌËLKMÈ
+Š‘Ó‘JŠˆÌMÙML
+\Ü]Ú\‹[][˜ÚYÈÈ\İˆ	KŒÍNˆÙ]^H][İH[™[YHX›İ]H›ØˆØ]™H›İYÚ™XÛÜ™Ú[X[—Ú[œ]È]Ø[XYPVP‘H]	LÈQTÈ]	Ìİ™\ˆÛˆ™X[[™H
+HÛÜšÙ\›[™KLˆİ™\ˆˆ][İHÛˆH]Ø[XY[İ™\È]ÈQTÎÈØÛÜHİ™\œšYHÛˆ[ˆ[šÛ›İÛ‹XØ]YÛÜH][H[İ™\È]ŸKMÈH
+KÚYHÛÜšİ™YNÈØ]™HÊHÜ[™WÙœ™XÛÜ™Ú[X[—Ú[œ]
+ÛÛ›‹][WÚYÚ[™Ù^K˜[YK›İK[\™YØJXÜ˜\\ˆİ™\ˆLÌ	ÜÈ[˜İ[Ûˆ
+[X[ˆ›İ™[˜[˜ÙHš\œİZÙH™XÛÜ™Ø]\İ][Û˜
+KH›ÙXİ[ÛˆÛÜšÙ\ˆ™KXÚXÚÈšYÙÙ\ˆ›Üˆ™]È][İN˜ØØÛÜWÛİ™\œšYN˜[šY\Ë\İÈÛˆ™X[ÌMˆLÌ
+Š‘Ó‘JŠˆ
+ÚYHÛÜšİ™YKÛÛ›™]Y\™ÙYˆÜ[™WÙœ™XÛÜ™Ú[X[—Ú[œ]Ü˜\\ˆ
+ÈÛÜšÙ\ˆ™XÚXÚÈÙˆ™]È][İKÜØÛÜK[İ™\œšYH[šY\ÊHÛÜšÙ\œÚYK]ÛÜšİ™YH[HİÜ™YÚ][X[ˆ›İ™[˜[˜ÙNÈÛÜšÙ\ˆ™KXÚXÚÜÈH][HH]Ù[ˆ‚ˆÈÈK\[ˆİYÙ\ÈKNš[™[™ÜÈ
+Ø]™H
+BŸQšH\ÚÈ\Èİ]\ÈYÙ[XØÙ\[˜ÙHŸKK_KK_KK_KK_KK_KK_KK_ŸKM
+Š”JŠˆ
+KÚYHÛÜšİ™YJH‹LLMˆHÓØ[ˆ™HÛÚÙ[ˆ
+X›ÜÈ[™Ø
+H]H]\ˆQTÈÙ\È›İ[ˆXZÙHHÛÚÙ[ˆ™\]Y\İ\›İ˜X›H[™È[™È‹LLLÈ[™‹LLNH“È[™QTÈXÚ\Ú[Ûˆ\È\YYÚXÙH
+RHŞ[˜Ú›Û›İ\ÛK[ˆHÛÜšÙ\ŠH[™HÜÙ\ˆÙÜÈ[YØ[][H˜[œÚ][Û˜˜XÙX˜XÚÜÎˆXZÙHHÙXÛÛ™\XØ][ÛˆHÛX[ˆY[\İ[›Ë[ÜÈ‹LLNKÑ‹LLLˆÛÜ™[™È[™HPT“ˆ™\Üİ\™˜XÙHÛ›HYˆÚX\›Û™H
+Š‘Ó‘JŠˆ™LØ
+ÚYHÛÜšİ™YKÛÛ›™]\›œË\İˆ	‹ŒMY\™ÙYˆÓOˆ[™ÈOˆQTÈ™XXÚ\ÈPÕQÈ\XØ]HXÚ\Ú[ÛœÈ\™HY[\İ[Ú]›ÈT”“Ôˆ™XÛÜ™ÎÈ‹LLNKÑ‹LLLˆ›İÛ™NÈH\İ˜Z[\™H™\ÜY\È™KY^\İ[™Ë™\šYšYYHHØ]H™[İÊHÛÜšÙ\œÚYK]ÛÜšİ™YH
+ÛÛ›™]K[X^]\›œÈL
+HÓOˆ[™ÈOˆQTÈ™XXÚ\ÈPÕQÚ]™XÙZ\ÎÈHÛÜšÙ\ˆÙÈÙˆH[QTËÓ“ËÒÓ[ˆ\È›ÈT”“Ôˆ˜XÙX˜XÚÜÎÈ\İÈÛˆ™X[ÌMˆŸLÌH
+Š”JŠˆ
+ÈØ]™H
+H‹LLM•SS‘ÎˆHŞ\İ[H™]™\ˆ^\È[][™ÎÈZXÚY[^\ÈÙ™‹\Ş\İ[KÛÈØ\][\Ş\ÈÚ[ˆH™XÛÜ™È]ˆİÛ™\‹[Û›HX›ÜËœ™XÛÜ™ØXÜ]Z\Ú][ÛŠ][WÚY[[İ[İ\Ù›İKXİÜ‹›İ™[˜[˜ÙWÚYËY[\İ[˜ŞWÚÙ^JXÜš]\ÈHK\[ˆ•QÑUĞÓÓSRUQ™XÙZ\
+Ø]YÛÜH\˜Ú\ÙK[X[ˆXİÜŠH]HYÙ\ˆ\›œÈ[ÈH\ŞH[H
+™Y\ÙYX›İ™H]˜Z[X›Wİ×Ù\ŞX
+NÈ‹LLMHHÙXÛÛ™ÛÜÚ[™Èİ]ÛÛYH›ÜˆHØ[YH][H\È™Y\ÙY
+Üˆ™XÛÜ™Y\ÈHÛÜœ™Xİ[Ûˆ]Ù\È›İ[İ™HØ\][ÚXÙJHLÌ
+Š‘Ó‘JŠˆ˜MÙ˜X
+ÈÛÛ›™]ˆ\›œË\İˆ	ˆZYÜ˜][Ûˆˆ™XÛÜ™ØXÜ]Z\Ú][Û˜İÛ™\‹[Û›KÚ[X[‹ÙK\[ˆ\ŞK™Y\ÙYİ™\ˆ]˜Z[X›HÜˆ[™[™YÈ\XØ]HÛÜÚ[™Èİ]ÛÛYH™Y\ÙY
+HÛÜšÙ\›[™KL
+ÛÛ›™]š\ÚÈYÚ
+H™X[›Û\ÎˆXÜ]Z\Ú][Ûˆ\Ş\È	
+]˜Z[X›H˜[Ë\ŞYYš\Ù\ÊNÈİ™\‹X]˜Z[X›H™Y\ÙYÈÛÜÙH™]\›œÈš[˜Ú\[
+È›Ùš]È\XØ]HÛÜÙH™Y\ÙYÈ™\šYWØÚZ[ˆÒÈŸ‹LÌÈ
+Š”JŠˆ
+ÈØ]™H
+H’H›İYÚ]ˆİÛ™\‹XÚ[›™[›Ü›HÛˆHQTËĞPÕQ][H
+[[İ[›İKSŠHØ[[™ÈLÌH›İYÚHHÜ˜\\‹[™Hİ]ÛÛYH›Ü›HİX\™ÈYØZ[œİHÙXÛÛ™ÛÜÙNÈHZ\ÜÚ[ÛˆYÙHÚİÜÈ\ŞYYØ\][Ú[HH›\\ÈÜ[ˆLÌH
+Š‘Ó‘JŠˆÍÌLX
+\Ü]Ú\‹[][˜ÚYÈÈ\İˆ	KŒŒˆH›İYÚ]›Ü›HOˆ™XÛÜ™ØXÜ]Z\Ú][Ûˆ\ÈHİÛ™\ˆÙÚ[È\XØ]HÛÜÙHY\ÜØYÙNÈÜ[ˆ›\ÈÛˆZ\ÜÚ[ÛÈ\İˆ›İYÚ	LŒÛÛ	Œš[˜Ú\[˜XÚÈ[™
+ÎX\›™YÙXÛÛ™ÛÜÙH™Y\ÙY
+HÛÜšÙ\›[™KLˆİ™\ˆˆ›İYÚOˆ\ŞYYš\Ù\ÈOˆÛÛOˆš[˜Ú\[™]\›œÈ
+È›Ùš]X\›™YÈ\XØ]HÛÜÙHY\ÜØYÙH\ÈÛX\ˆŸËLHˆ
+ÎÈØ]™H
+H‹LLMÈH‰ÜÈÛ\ÜÈØ[››İØ[Xœ˜]Nˆ›\›İ\—Ø\ÜÙ]›X›Ü—Úİ\œØš[ÜœÈ\™H[™PT“ˆÚÚ\È™\›Èš[ÜœÎˆÚ]™HÛÛœİ[Y\ˆ[Xİ›ÛšXÜÈÈÛX[ÛÛÙÈ›Û‹^™\›È[™[™ËZİ\ˆš[ÜœÈ
+ËLˆ\™XJH[™]PT“ˆ›ÜÜÙHœ›ÛH[NÈİ]ÛÛYH™YXİY]œËXXİX[šY[ÈÛİ™\ˆH]X[]Y\ÈH[™Ú[™H™YXİY›Û™H
+Š‘Ó‘JŠˆ™MÎX
+\Ü]Ú\‹[][˜ÚYÈÎÈ\İˆ	ŒÌNˆPT“ˆÜ›İ\Èİ\—Ø\ÜÙ]œÈHš[ÜˆÛ\ÜÈÛÈHˆØ[Xœ˜]\ÊHÛÜšÙ\›[™KLÈ
+ÛÛ›™]
+HHˆİ]ÛÛYHÚ]HY™™\™[[™[™È[YHZY[ÈHPT“ˆ›ÜÜØ[
+İ[›ØÚÙYØY™[JNÈİZ]HÜ™Y[ˆ‚ˆÈÈİÛ™Y[™[ÜNˆH”HÈZ[Ø]H˜Z[\ˆ
+\šXHŒLÊH[™Ü\˜][™ËX›Y\š[YÜ[Ûˆ
+\šXHŒŒMJBŸQšH\ÚÈ\Èİ]\ÈYÙ[XØÙ\[˜ÙHŸKK_KK_KK_KK_KK_KK_KK_ŸKMHH
+JHİÛ™YX\ÜÙ][ZÙHÜXÈÛÛ™šYËÚ[ZÙKÛİÛ™Yİ˜Z[\‹ŒKšœÛÛ˜
+İÈ[™Û\ËØY™]KYš\œİ]Y\İ[ÛœËİ[šÈ˜\Ú\È™XÛÜ™Y]^ÛYYœ›ÛHXÚ\Ú[ÛœËH]H›ØÚÈÈÛÛØ^HİÈÙ\Ù[\—Üİ]Y™]™\ˆ™\šYšYY
+HKLÈ
+Š‘Ó‘JŠˆ
+\È\ÚÈH\İ
+HHÜXÈØYÎÈ[ZÙK›Z\ÜÚ[™Ø\ÚÜÈØY™]H]Y\İ[ÛœÈš\œİÈ˜\Ú\È™]™\ˆ\Ü˜YYŸËLÌ
+Š”JŠˆ
+ÊHİÛ™YX\ÜÙ]XÛÛ›ÛZXÜÎˆİÛ™YØ\ÜÙ]][\È\™HXÚYYÛˆSÔ‘SQS•SØ\Úœ›ÛHÙ^H
+\İÜšXØ[˜\Ú\ÈÚİÛˆ\Èİ[šË^ÛYYœ›ÛH™][™“ÒJK[™H[™Ú[™HÛÛ\\™\Èš]™H]È›ÜˆÛ™H\ÜÙ]Ú]HØ[YHšY[ÎˆÑSĞT×ÒT×ÓÔ—ÔT•ÓÕURS’SPSÔ‘RP—Ñ“TSQQÕSQWĞQÑ“TÓÓ•‘T•ÑQT
+\œÛÛ˜[]\ÙH˜[YJKˆ\ˆ]ˆ[˜Ü™[Y[[Ø\ÚÜ\˜]Üˆİ\œËš\ÚÈ
+İXİ\˜[›ØYÛÜ[™\ÜÈÛÛ™šY[˜ÙJKÙX\ÛÛ˜[]H
+Z[Ø]HÙX\ÛÛŠK^\ÈÈØ\Ú›Ùš]\ˆ[˜Ü™[Y[[Û\‹›Ùš]\ˆİ\‹š[š\ÚY\™\Ø[H˜[™ÙKˆ™XÛÛ[Y[™Û™H]Ú]Hİ\œÈÚİÛÈ[œ]È›İY]İ\YYİ^HS’Ó“ÕÓˆ
+›È[™[Y™ZXˆÛÜİÊNÈH›ØYÛÜ[™\ÜÈÛZ[H˜\ÙYÛ›HÛˆH\İİÈİ^\ÈS‘‘T‘SÑH›Û™H
+Š‘Ó‘JŠˆMÎL˜ØMØ
+][˜ÚY–HHTÔUÒTÈÎÈÛÛ›™]MÈ\›œË\İˆ	ˆİÛ™YØ\ÜÙ]˜ÛÛ\\™WÜ]Øš]™H]ÈÛˆ[˜Ü™[Y[[Ø\Úİ[šÈ˜\Ú\È^ÛYYZ\ÜÚ[™È[œ]È˜[YYS’Ó“ÕÓ‹\İİÈİ^\ÈS‘‘T‘SÑNÈ›İY]Ú\™Y[ÈØÛÜ™WÚ][HÜˆH][H\H[[HOˆ‹LÍĞKMÊHÛÜšÙ\›[™KLÈ
+ÛÛ›™]K[X^]\›œÈL
+HÛÛ[ˆ›ÜˆH”H˜Z[\ˆÚ]Û›HZXÚY[	ÜÈİ]Y˜XİÎˆ]™\H]ÛÛ\]\ÈÜˆØ^\ÈS’Ó“ÕÓˆÚ]H^XİZ\ÜÚ[™È[œ]Èİ[šÈ˜\Ú\È™]™\ˆÚ[™Ù\ÈH]	ÜÈ™]ÈÚ]^[\H™ZXˆ˜[™Ù\ÈH™XÛÛ[Y[™][ÛˆÚ[™Ù\ÈÚ][NÈİZ]HÜ™Y[ˆŸ‹LÍH
+ŠH“^H\ÜÙ]ÈˆYÙNˆY[ˆİÛ™Y\ÜÙ]œ›ÛHHİÛ™Y]˜Z[\ˆ[ZÙHÜXË\ØYİÈ™Y™\™[˜Ù\Ëš[H[œÜXİ[ÛˆÚXÚÛ\İ
+XXÚ[œİÙ\ˆÙY\È]È˜\Ú\ÎÈ™\šYšYY\È›İ\ÜÚYÛ˜X›JK[™ÚİÈHš]™K\]ÛÛ\\š\ÛÛˆœ›ÛHËLÌ\È[ˆÜÜ[š]HØ\™ÈİÛ™\ˆÚ[›™[ÈK\[ˆËLÌKMH
+Š‘Ó‘JŠˆÌÙX
+\Ü]Ú\‹[][˜ÚYÈÈ\İˆ	ˆØ\ÜÙ]ØYÙK”H˜Z[\ˆœ›ÛHHİÛ™Y]˜Z[\ˆÜXËÚXÚÛ\İÙY\È˜\Ú\Ëš]™K\]Ø\™˜[Y\ÈS’Ó“ÕÓœÎÈšYİ\™\È›Ü›Hİ[Z\ÜÚ[™ÈOˆ‹LÍJHÛÜšÙ\›[™KLˆ
+ÛÛ›™]
+Hİ™\ˆˆH”H˜Z[\ˆ\ÈYYÚ]ZXÚY[	ÜÈİ]Y˜XİËHØ\™\İÈHš]™H]ÈÚ]S’Ó“ÕÓœÈ˜[YY›İ[™È\ÈX\šÙY™\šYšYYŸKMˆH
+JH›Y\š[YÜ[Ûˆ
+\šXHŒ
+Nˆ›Y\š[ÛÜYYÈØÜËÛÜ\˜][ÛœËØÚ]›Ú™Xİİ™\œšY\ËÕT•ÒT‘KĞÓÓÔ‘SUSÓ‹İÛÜšÙ\ˆ›Û\\]Y]]ÛX]XÈ\Ü]Ú\ˆÛÛËÙ\Ü]Ú\‹œX
+]^X›ÜËY\Ü]Ú\˜
+H[™ÛÛËÜ[—Ù]—ÜİXÚËœÚ›Û™H
+Š‘Ó‘JŠˆ
+\È\ÚÈˆ
+ÈM\İÊHH\Ü]Ú\ˆ][˜Ú\ÈYH[™\ÈÚ][ˆ[Z]È[™™]™\ˆ\XØ]\ÈH[›š[™ÈÛÜšÙ\ˆŸËLHH
+Ü\˜]ÜŠHÜİØÚY[\ˆHŞ\İ[Y\Ù\ˆ[š]ÜˆÜ›Ûˆ™X›Ûİ]™\İ\È]^X›ÜËY\Ü]Ú\˜X›ÜËY]‹]ÛÜšÙ\˜X›ÜËY]‹]ZXY\ˆH™X›Ûİ
+ÙÚ[˜İ[˜X›K[[™Ù\ˆZXÚY[ÜØš\œİ
+KˆÛ™HÛÛ[X[™›ÜˆZXÚY[ÜˆHÜ\˜]ÜÈYÙ[HØ[››İ[œİ[ÜİÙ\šXÙ\È›Û™H‘QQÈÔTUÔˆİÛ™\ˆY\ˆH™X›ÛİH™YH]^Ù\ÜÚ[ÛœÈ\™H˜XÚÈÚ]›ÈXİ[ÛˆŸKMÈˆ
+JHÚ\™HİÛ™YØ\ÜÙ]˜ÛÛ\\™WÜ]Ø[ÈH›ÙXİ[Ûˆ\ÜÙ[X›Nˆ[ˆİÛ™YX\ÜÙ]][H\HÜˆ›YÈXØÙ\YHHÜ[™H[™Ø\™Hš]™K\]ÛÛ\\š\ÛÛˆÛˆHØ\™[™HİÛ™Y]˜Z[\ˆ[ZÙH[œİÙ\œÈX\YÈ]È[œ]ÈËLÌKMH
+Š‘Ó‘JŠˆ™MÍ˜
+ÚYHÛÜšİ™YKÛÛ›™]\›œË\İˆ	KŒŒKY\™ÙYˆİÛ™Y\ÜÙ]H›\][Hœ›ÛHÛİ\˜ÙHİÛ™YZ[ZÙKš]™H]È[ˆHØ\™˜[YYS’Ó“ÕÓœÎÈH‹LÍYÙH›İY]İÚ]ÚYÈX›ÜË›İÛ™YØ\ÜÙ]Oˆ‹LÍJHHH”H˜Z[\ˆš^\™H
+Û›HZXÚY[	ÜÈİ]Y˜XİÊH™[™\œÈHØ\™Ú]š]™H]È[™˜[YYS’Ó“ÕÓœÈ›İYÚH™X[\ÜÙ[X›HŸ‹LÍHH
+ŠHØ\ÜÙ]ØšYİ\™\È›Ü›NˆZXÚY[	ÜÈ›İYÚ˜[™Ù\È
+Z[š[X[[™[YY™ZXˆØ\ÚİÛˆİ\œËš[š\ÚY™\Ø[H˜[™ÙK\ËZ\È˜[YK\œÛÛ˜[]\ÙH˜[YK[Z[™ÊH™YYËLÌ	ÜÈÛÛ\\™WÜ]Ø›İYÚH\YZ[œ]™XÛÜ™ÛÈHš]™H]ÈÛÛ\]H[œİXYÙˆ[S’Ó“ÕÓÈÛÜ™[™ÈÙY\È˜[™Ù\È\ÈZXÚY[	ÜÈ\İ[X]\È
+S‘‘T‘SÑK[X[‹X]\İY
+HKMÈ
+Š‘Ó‘JŠˆ
+™XÛÛ˜Ú[Yœ›ÛH[™HˆQÑS•ÔÕUTÈÛ™JHÛÜšÙ\›[™KLˆÚ]^[\H˜[™Ù\ÈHØ\™™XÛÛ[Y[™ÈH][™ÚİÜÈHİ\œÎÈÛX\š[™ÈH˜[™ÙH™]\›œÈ]ÈS’Ó“ÕÓˆ‚ˆÈÈ™KX]Y]
+ËLŒŠHš[™[™ÜÂŸQšH\ÚÈ\Èİ]\ÈYÙ[XØÙ\[˜ÙHŸKK_KK_KK_KK_KK_KK_KK_ŸKM
+Š”JŠˆ
+KÚYHÛÜšİ™YJH‹LLŒHÓÛˆ[ˆ][HÚÜÙH\›İ˜[ÛÜšÙ›İÈØ\Èİ\YHH™XÚXÚÈ
+™XÚXÚÎ][O\ØÚ˜
+HØ[ˆ™H™Z]\ˆÛÚÙ[ˆ
+X›ÜÈ[™ØRHØZÙH›İÊH›Üˆ\›İ™YˆHØZÙH[™HXÚ\Ú[Ûˆ\™HY™\ÜÙYÈH][IÜÈİÛˆÛÜšÙ›İÈY›İÈHÛÜšÙ›İÈ]\ÈXİX[H\šÙY]HØ]KˆXZÙHHXÚ\Ú[Ûˆ[™ØZÙH\™Ù]HPÕU‘HØ]HÛÜšÙ›İÈ›ÜˆH][H
+ÛÚİ\ÜˆÛ™HØ[›ÛšXØ[Ø]HÛÜšÙ›İÈY\ˆ][H]™XÚXÚÜÈ™]\ÙJK[™YH[™]ËY[™\İˆÛÛ\Ø]™YOˆ™XÚXÚË\İ\YØ]HOˆÓOˆØZÙHOˆQTÈOˆPÕQ›Û™H
+Š‘Ó‘JŠˆX˜™˜L
+ÚYHÛÜšİ™YKÛÛ›™]LÈ\›œË\İˆ	KŒMY\™ÙYˆØZÙH[™XÚ\Ú[Ûˆ\™Ù]HXİ]™HØ]HÛÜšÙ›İÎÈL™HÓOˆ[™ÈOˆQTÈOˆPÕQšXHH™XÚXÚÈØ]K›ÈÜœ[œÊHÛÜšÙ\œÚYK]ÛÜšİ™YH
+ÛÛ›™]K[X^]\›œÈL
+HÓOˆØZÙHOˆQTÈ™XXÚ\ÈPÕQ›Üˆ[ˆ][H]Ù[›İYÚH™XÚXÚÎÈ›ÈÜœ[ˆØ]HÛÜšÙ›İÜÎÈ\İÈÛˆ™X[ÌMˆŸ‹LÍˆˆ
+ŠH‹LLŒH™\İ™^[İ™Hˆ\ÈÛÛ\]Yœ›ÛHÜ[ˆ™\]Y\İÈÛ›H
+Y\ˆÓÜˆ^Xİ][Ûˆ]˜[Y\ÈH™^Xİ[Ûˆ™XÛÜ™Hİ]ÛÛYHÜˆH™^™\İ][JNÈ‹LLŒˆÛZ\ÜÚ[Û˜™XÛÛ\]\ÈY\ˆ^Xİ][Ûˆ
+^Xİ]YYÜÈÚİÛˆ\ÈÛ™K]ØZ][™Èİ]ÛÛYNÈ›Èİ[HTÖHXY[™JNÈ‹LLŒÈ]™\HYÙHX™[ÈÚXÚšYİ\™H]ÚİÜÈ
+™]œÈ›Ø˜Xš[]K]ÙZYÚY
+KÛ™H[X™\ˆ\ˆX™[È‹LLØ[YØ^\È››ÈÛİ\˜ÙH\È[[™È›Üˆ\ÈY]È‹LLHHÛÛ\™Z™XİY›Üˆ]ÈÛÛ™][Ûˆ
+\ÈœÈ\ÙY
+HØ^\ÈÛÈ[ˆHØ\™[™ÛˆHØ]™H˜[›™\ˆ‹LÌÈ
+Š‘Ó‘JŠˆŒN™˜
+\Ü]Ú\‹[][˜ÚYÈˆ™^[İ™H[™ÛZ\ÜÚ[Ûˆœ›ÛH]™Hİ]\ËX™[YšYİ\™\ËØ[YÛÜ™[™Ë\ËXÛÛ\^[˜][ÛÈH
+ÈLˆ\İÊHÛÜšÙ\›[™KLˆ
+ÛÛ›™]
+HËLŒ‰ÜÈ™\›ÜÈ\ÜÎÈRHİZ]HÜ™Y[ˆŸËLH
+Š”
+Šˆ
+JHÛÛÜ™[˜]ÜˆØ]ÚÙÈ
+İÛ™\ˆÛÛ[X[™Œ‹LLLNÈ\šXHŒ‹LLLX\šXK[İÛ™\‹XYÙ[]Ø]ÚÙÊNˆÛÛËØÛÛÜ™[˜]Ü—İØ]ÚœX
+ÈX\™X]Ü›Ø™KœX
+ÈÛÛÜ™[˜]Ü—Üİ]KœXØØ[İ]\È™YYÎKÚZ[™Y™XÙZ\ËLˆ\İÎÈØÈØÜËÚ[YÜ˜][Û‹ĞÓÓÔ‘SUÔ—ÕĞUÒÑË›Y›Û™H
+Š‘Ó‘JŠˆØXNYØ
+]Xİ[Û‹›Ø™Kİ]H™YYXÚÈ™\šYšXØ][Û‹\Ü]Ú\ˆ™\İ\[™İ[Y]ÛÜšÙ\ˆÚXÚÜÈÛÜšÎÈHUVĞRÑH\ÈÑ‘ˆ™XØ]\ÙHH\›Z\ÜÚ[ÛˆÛ\ÜÚYšY\ˆ[šYYYÙ[Ù[‹Yš]™NÈHØ[˜İ[Û™YØZÙH\ÈHÙ[˜[œšYÙIÜÈY\ˆ™[^HHËLÊHHH™X[[˜XÚÛ›İÛYÙYİÛ™\ˆY\ÜØYÙHØZÙ\ÈHYHÙ\ÜÚ[ÛˆÛ˜ÙH[™HXÚÈ\È™\šYšYYŸËLˆH
+İÛ™\‹ÚÜİ
+HÜİˆİYÈŞ\İ[Xİ\ØX›HK[›İÈX›ÜËY›Ü™[X[‹œÙ\šXÙX
+ØZÙ\È]™\‹\XØ]\ÈHØ]ÚÙÊH[™ÙÚ[˜İ[˜X›K[[™Ù\˜
+È\Ù\ˆ[š]È›ÜˆH]^Ù\ÜÚ[ÛœÈ
+ËLJKˆ›İ\YYÈ™YYÈ\›İ˜[ËLH‘QQÈÔTUÔˆİÛ™\ˆY\ˆ\›İ˜[ˆÛ™HØ]Ú\‹Ù\šXÙ\È™]\›ˆY\ˆ™X›ÛİŸËLÈH
+İ\ˆ›Ú™Xİ
+HÙ[˜[œšYÙH
+\ÚİÜPYÙ[ÛÛÜ™[˜]ÜŠNˆYHP“ÔÈXZ\ÛÛˆ[˜›Ş\ÈHÛİ\˜ÙH[™ØÚY[HÛÛËÚX\™X]Ü›Ø™KœXÈ™[™\ˆ‹ËÌLËŒŒŒNÎKÚX[šœÛÛ˜ÜˆÛÛËØÛÛÜ™[˜]Ü—Üİ]KœXÛˆÍÈËLH
+Š”T•PS
+ŠˆÙ[˜[[Ûš]Üˆ™XYÈHXZ\ÛÛˆ[˜›Ş[™XÚÜÈ[™ÚİÜÈ‘PÑRU‘QĞPÒÓ“ÕÓQÑQÛˆÍÈ
+\ˆT’PKLŒŒLLŒŒJNÈ]Ø[››İØZÙHYÙ[H
+Y™™\™[[^\Ù\ŠHOˆİÛ™\ˆXÚ\Ú[ÛˆËMİ\ˆ›Ú™Xİ[™[ÚİÜÈP“ÔÈ\İÚXÚÈÈ\İØZÙHÈXÚÈÈİ]H™^ÈĞSÔĞØ\™HŸËMH
+İÛ™\ŠHXÚYHİÈYÙ[H\ÈÛÚÙ[ˆ]]ÛX]XØ[Nˆ
+JH˜\œ›İÈ]^Ù[‹]ØZÙH›ÜˆHX›ÜËXYÙ[LH[™HÛ›KÚ]ZXÚY[	ÜÈ^XÚ]\›Z\ÜÚ[Ûˆ[H
+™XÛÛ[Y[™Y
+NÈ
+ŠH[ˆH\ÚİÜPYÙ[Y\ˆ™[^H\ÈHZXÚY[ÜÈ[^\Ù\ˆ
+ÜİÚ[™ÙJNÈ
+ÊH›È]]ÛX]XÈØZÙKˆ›İ[™È\È[˜X›Y[[XÚYYËLÈ‘QQÈÕÓ‘TˆİÛ™\ˆÛ™H[œİÙ\È[ˆP“Ô×ĞSÕ×ÕUVÕĞRÑOLX
+ÈÈØZÙHˆY_XÜˆH™[^HÚ[™ÙHŸËLŒÈ
+Š”
+Šˆ
+ÊH\™Ü\˜]Üˆ]Y]\ÈRPÒQSÛˆHİ\œ™[\ÜÙ[X›H
+]™\][™ÈÚ[˜ÙHËLŒˆKMÓØZÙK‹LÌˆ][İH[™ØÛÜH›Ü›\Ë‹LÌÈH›İYÚ]‹LÍÑ‹LÍH^H\ÜÙ]Ë‹LÍˆÛÜ™[™ËËLĞËLÌÑLÌJNˆ™\X]›ØœÈKMÈ[™SÓÈ[ˆH[[Û™^HÛÜ[™È[™ÛˆH˜Z[š[™ÈX[ÎˆˆQTÈOˆ\›İ™HÚ]SˆOˆK\[ˆXİ[ÛˆOˆ’H›İYÚ]ˆ
+Ø\][\Ş\ÊHOˆİ]ÛÛYHÛÛ
+š[˜Ú\[™]\›œË›Ùš]X\›™Y
+NÈÓOˆØZÙHOˆQTÎÈ]Ø[XY][İH	ÌOˆQTÎÈ™XÛÛˆ]\İ][ÛÈ[İÙ\ˆ\˜Ú]™YÈYH”H˜Z[\ˆ\È[ˆİÛ™Y\ÜÙ][™™XY]Èš]™K\]Ø\™ˆš[H]™\HœšXİ[Ûˆ\È‹[›È\]HØÜËÜXKÓÔTUÔ—ĞUQU›YÚ]H™]È™\™Xİˆ–KT•SˆÛ›HKM‹LÌ‹‹LÌË‹LÍK‹LÍˆ
+Š‘Ó‘JŠˆYŒÍ™Ø
+ÎÈÛÛ›™]H\›œË\İˆ	KL
+Nˆ‘T‘PÕ
+Š–QTÈ›ÜˆH›\œ›ÛHÛÛ\ÈÛÜÙY›Ùš]
+Šˆ
+ˆQTÈÚ]SˆOˆPÕQOˆH›İYÚ]	ÌOˆÛÛ	LˆOˆš[˜Ú\[˜XÚË
+ÉŒˆX\›™YÈYÙ\ˆX]Ú\ÎÈ\XØ]HÛÜÙH™Y\ÙYÈ]Ø[XYQTÈœ›ÛHH\Y	Ì][İNÈ”H˜Z[\ˆš]™K\]Ø\™ÛÜšÜÊNÈ“ÕQU›ÜˆHÓ]\ˆ\›İ™Y
+‹LLˆJH[™]Y]ÛÛ™›Ü›X[˜ÙH™YY\ˆH][İH
+‹LLÈJNÈ‹LL‹‹‘‹LLÍHš[YÛÜšÙ\›[™KLÈ
+ÛÛ›™]K[X^]\›œÈL
+H™]È™\™Xİ\ˆ›ØˆKMÈ[™HÛÜİYÙ\ÈTÔËÑRSÚ]™XÙZ\YÈ[™HYÙ\ˆ™Y›Ü™KØY\ˆ‚ˆÈÈ\™]Y]
+ËLŒÊHš[™[™ÜÂŸQšH\ÚÈ\Èİ]\ÈYÙ[XØÙ\[˜ÙHŸKK_KK_KK_KK_KK_KK_KK_ŸKMH
+Š”JŠˆ
+KÚYHÛÜšİ™YJH‹LLˆ›ÛİØ]\Ù\Îˆ
+JHHQTÈ™XÛÜ™YÛˆHS™\]Y\İ]\İÛÜšÈ\™XİH
+ZXÚY[ÛXÚÜÈQTÈ]\ˆœ›ÛHHÓ\İ
+HÚ]İ]Hš[ÜˆØZÙNˆ[ˆHİÛ™\ˆ˜[œØXİ[ÛˆÜ[™WÙ™XÚYXš\œİ™K\™\Ù[ÈH[™\]Y\İ
+][HSOˆUĞRUS‘×ĞT“ÕS™\]Y\İ[Oˆ[™[™×Ø\›İ˜[
+H[™[ˆ™XÛÜ™ÈH\›İ˜[ÛÈHLÈØ]HÙY\ÈHQTÈ™XÙZ\ÒSÑHH][H[\™YUĞRUS‘×ĞT“ÕSÈ
+ŠHH^\İ[™ÈØZÙH]]\İÛÜšÈœ›ÛHHRH›ØÙ\ÜÈ
+‰ÜÈØÛY[ÜÙ[™Y™\ÜÙ\ÈÛ›H][NY˜È\ÙHX›ÜËÛÜšÙ›İÜËœ[™ØÚXÚ™\ÛÛ™\ÈHXİ]™HØ]HÛÜšÙ›İÎÈˆÚYH\È‹LÍÊNÈ‹LLHÛÈ]ZXÚÈ[œ]Èİ\ÛÈ™XÚXÚÎ˜ÛÜšÙ›İÜÈ›ÜˆÛ™H][H[™›İ\œ›ÜˆÛˆH\XØ]H›İ™[˜[˜ÙNˆÛØ[\ØÙH™XÚXÚÜÈ\ˆ][H
+Û™HXİ]™H™XÚXÚÎÈHÙXÛÛ™™\]Y\İX\šÜÈHš\œİ\È™YY[™ÈÛ™H[Ü™H\ÜÊH[™XZÙH™XÛÜ™Ü™\ÙX\˜ÚØ™XÛÜ™Ü›İ™[˜[˜ÙXY[\İ[›ÜˆY[XØ[ÛÛ[ˆ[™]ËY[™\İÈÛˆ™X[ÌMˆ^XİH\ÈHRHš]™\È[NˆÓ[ˆQTÈ\™XİHOˆPÕQÈÓOˆØZÙHOˆQTÈOˆPÕQÈÛÈ[œ]ÈHZ[]H\\OˆÛ™HÛX[ˆ™XÚXÚË›È˜XÙX˜XÚÜÈ›Û™H
+Š‘Ó‘JŠˆŒ˜ŒÌÎNHY\™ÙYHH
+Ø]HÜ™Y[ˆLLÈ[QTÈ[™ØZÙHœ›ÛHHRH›ØÙ\ÜÈ\İY
+NÈHLÌˆ™\X]\][İHY™Xİ]›İ[™\Èš^Y[ˆIÜÈÜ[™WÙÛÜšÙ\œÚYK]ÛÜšİ™YH
+ÛÛ›™]K[X^]\›œÈL
+H›İ]È™XXÚPÕQÚ]™XÙZ\È[™›ÈT”“Ôˆ™XÛÜ™È[ˆHÛÜšÙ\ˆÙÈŸ‹LÍÈ
+Š”JŠˆ
+ŠH‹LLŠŠNˆ•ØZÙH›İÈˆ\Ù\ÈX›ÜËÛÜšÙ›İÜËœ[™Ø
+™\ÛÛ™\ÈHXİ]™HØ]JH[œİXYÙˆ]ÈİÛˆØÛY[ÜÙ[™È\ÈËLŒÉÜÈRHš[™[™ÜÎˆ‹LL[[İ[[™]H›Ş\È[œİXYÙˆœ™YH^\œÙY[È[Û™^K‹LLÌYHİ]\È[™HÚ[ˆHØ\™Ø^\È]šY[˜ÙH\È›İH›ØÚÙ\‹‹LLÌHÛ™H[™H››ÈÛİ\˜ÙH\È[[™È›Üˆ\ÈY]‹‹LLÌˆÚİÈ\ŞYYØ\][Ù\\˜][Hœ›ÛHØ\Úİ[]š\ÚË‹LLÌÈÚİÈ\‹\]›Ùš]\ˆİ\ˆ[™\ˆ[˜Ü™[Y[[Û\ˆÛˆHš]™K\]Ø\™‹LLÍÙY\\Y˜[Y\È[™X\šÈH˜Y›Ş‹LLÍHİ]HÛˆHİ]ÛÛYH›Ü›HÚ]\ˆHSˆ\È™YYYKMH
+Š‘Ó‘JŠˆ
+™XÛÛ˜Ú[Yœ›ÛH[™H‹LQÑS•ÔÕUTÈÛ™JHÛÜšÙ\›[™KLˆ
+ÛÛ›™]K[X^]\›œÈL
+HËLŒÉÜÈ™\›ÜÈ\ÜÎÈRHİZ]HÜ™Y[ˆŸ‹LÎH
+ÈY\ˆ‹LÍÊHİÛ™\ˆV™\]Z\™[Y[Œ‹LLLH
+XÚÈŒ‹LLLKX\šXK[İÛ™\‹YX[\ÛšY™™\‹\™XYX›K]ZJNˆXZÙHHÜ\˜]ÜˆRH[™[™ÈØÜ™Y[ˆÛ[˜ÙXX›KˆÈÈHÛÛ\XİØ\™ÎˆÓ‘H
+™XÙZ\]™\šYšYY][\ÈÚ]HÛX[Ü™Y[ˆÚXÚÊKÓÔ’ÒS‘È
+™X[Xİ]™H›ØŠK“ĞÒÑQ
+›ØÚÙ\ˆ[™^XİİÛ™\ˆXİ[ÛŠKÔÔ•S’UQTÈ
+™\İZÙ[HØ\Ú›İÈœ›ÛH]™H]šY[˜ÙJK‘V
+Û™Hš[X\HÛXÚÊKˆÜÜ[š]HØ\™ˆ˜]\˜[]KØØ][Ûˆ[™Ûİ\˜ÙH[šËQTËÓPVP‘KÔTÔÈ\È]šY[˜ÙHØ\œ˜[Ë\˜Ú\ÙH[™[Z[ˆÛÜİ™X[\İXÈ™\Ø[HÜˆÙ\šXÙH][İKÛÛ™][Û˜[™][™Û\œÈ\ˆİ\ˆÛ›HÚ[ˆØ[İ[X›KÛÛ™šY[˜ÙKZ\ÜÚ[™È™\šYšXØ][Û‹Û™H™^Xİ[ÛÈX™[ÛÛ™š\›YYX\›š[™ÜÈœÈÚ[][]YœÈ[™\šYšYYœÈÜXİ[]]™KˆXÚ\Ú[ÛœÈ\ÙHÛ›H^\İ[™ÈÛÛ›ÛÈ
+\›İ™KÛ\ÜË[Ü™H]Z[ÊHÚ]HÚÜZ[‹[[™İXYÙH™X\ÛÛˆ[™HSˆ[™İÛ™\ˆ›İ[™\šY\È[˜Ú[™ÙYÈ[Øš[H[™\ÚİÜÈ™\İ˜Z[™Y[Û›ØÚ›ÛYHYÚXÛÛ˜\İİ[[™Ë™YÜˆ[X™\ˆÛ›H›Üˆ™X[›ØÚÙ\œËÜÈš[Üš]Y\ÈÚ]H™\İÛÛ\ÚX›KˆÈ›İ™\Ù]]KÈ›İ™\XÙHÛÜšÚ[™È›İÜËÈ›İ[™[Xİ[ÛœÈ‹LÍÈ
+Š‘Ó‘JŠˆ
+™XÛÛ˜Ú[Yœ›ÛH[™H‹LQÑS•ÔÕUTÈÛ™JHÛÜšÙ\›[™KLˆ
+ÛÛ›™]K[X^]\›œÈL
+HRH\İÈÚ]ÛX\›HX™[Y\İ]H
+ØÜ™Y[œÚİÈYˆ™X\ÚX›JNÈ]™\H\Ü^YYÓ‘H\È™XÙZ\X˜XÚÙYÈ]™\HÛXÚÈ›ÙXÙ\È]È™X[İ]H˜[œÚ][ÛÈ›ÈÛZ[HÙˆ™X[X\›š[™ÜÈÚ]İ]™XÙZ\ÎÈ^\İ[™ÈRHİZ]HÜ™Y[ˆŸ‹LŒÈ
+Š”JŠˆ
+ŠH\ÜÙ]]›İˆ\šØ[œØ\È]Xİ[Ûˆ\ØÛİ™\HÚ][ˆX›İ]LZ[\ÈÙˆÛÛØ^H
+İ]]ÚYHÛ›H›Üˆ^Ù\[Û˜[X\™Ú[ŠNˆ[™[ÜHH]Xİ[ÛˆÛİ\˜Ù\È
+]Xİ[Ûˆİ\Ù\ËÛİ‘X[ËX›XÔİ\œ\ËÔĞK\İ]H[™\]Z\Y[]Xİ[ÛœÊK™]šY]È\›\È\ˆQ‹LŒ‹Z[™XY[Û›Hš^\™KYš\œİY\\œÈ]Ø\\™Hİİ\œ™[šYšYÛİ[ÛÜÙ\×Ø]^Y\ˆ™[Z][KØ[\È^Yˆİ]YXÚİ\™\]Z\™[Y[Ë[\È[šËÛİ\˜ÙH[™œ™\Ú™\ÜÈ\ˆšY[ˆ›È]™H™]ÚÚ]İ]H^\İ[™È‹LLˆİÛ™\ˆİ\[ÛÈØ\\™H\ˆ]Xİ[Ûˆİ\ÙNˆ™YÚ\İ˜][Û‹X[\ˆÜˆXÙ[˜ÙH™\]Z\™[Y[\ÜÚ]^Y\ˆ™[Z][H[™Ø\™İ\˜Ú\™ÙK^[Y[[œÜXİ[Ûˆ[™XÚİ\Ú[™İÜË[™Ú]\ˆÛ›[™HšY[™È\ÈÜ[ˆÈHX›XËˆ[˜ÛYH™ZXÛ\È\ÈHØ]YÛÜKˆ›Û™H
+Š‘Ó‘JŠˆØ˜LÙH
+[™HÈH™K\˜[ˆ\İØŒŒ×Ø]Xİ[ÛœÈ
+È\İØŒÜ]›İˆŒ\ÜÙYÈš^\™\ÈÛ›K]™H™]ÚØZ]ÈÛˆXÚÙ]LÊHÛÜšÙ\›[™KLˆ
+ÛÛ›™]
+Hš^\™HİÈ›Ü›X[^™HÚ][šY[È[™œ™\Ú™\ÜÎÈ\İ[˜ÙHš[\ÈÙ™›[™HİX\˜[YH\İÜ™Y[ˆŸËLÌˆ
+Š”JŠˆ
+ÊH\ÜÙ]]›İˆ]Xİ[ÛˆÛÜİ[Ù[ˆ[Z[ˆÛÜİÚ]^Y\ˆ™[Z][KØ[\È^XÚİ\[™˜[œÜÜÈ[YHÈØ\ÚØ\][\››İ™\‹›Ùš]\ˆX›Üˆİ\ÈMİ\ˆ›YÈ[™Ù\\˜]HÛİËZ[™[ÜH›YÎÈ\ÚÚ[™ÈšXÙ\È™]™\ˆÛİ[\ÈÛÛ\]YØ[\È[™Ø[››İ[Û™HZY[QTËˆY]]™HÛÛ™šYËÛÛ[œÈ™YÙ[™\˜]YHH[™HİÛ™\ˆ[œ]Èİ™\œšYHŞ\İ[H\İ[X]\ÈÚ]›İ™[˜[˜ÙNˆİÛ™\ˆ™\Ø[H\™Ù]
+Ü]\ˆ^[\NˆŞ\İ[H	LZXÚY[	KL
+KÛÛ™][Û‹ÙX\ÛÛÈØ\ÚØ\\ˆ^H	LÚ]]HÜˆ›È™\Z\ˆ™YYYÈ›Ü™XØ\İHš[˜[šXÙHœ›ÛHİ\œ™[šYšYÛİ[[™[YHYX™[Y\ÈH›Ü™XØ\İˆ›Û™H
+Š‘Ó‘JŠˆ
+™XÛÛ˜Ú[Yœ›ÛH[™HÈQÑS•ÔÕUTÈÛ™JHÛÜšÙ\›[™KLÈ
+ÛÛ›™]
+HÛÛ[ˆØ\Ù\È›Üˆ™[Z][K^[™XÚİ\ÈÛİÈ][H›YÙÙYÈ\ÚÚ[™Ë[Û›HÛÛ\ÈØ[››İZY[QTÈŸËLÌÈ
+Š”JŠˆ
+ÊHİÛ™\ˆ]›İŒ‹LLLH
+˜Z[\œËÛ›ÜˆÚ\ÜÚ\ËİØX›\ËØ\][™[ØÚ]JKZ[ÛˆHËLÌˆ]Xİ[Ûˆ[Ù[ˆ
+JHÛ›Üˆ˜[YNˆHİš\YÜˆ[šÈØ[\\ˆÜˆ˜Z[\ˆ\È˜[YY\Èœ˜[YK^\ËÜš[™ÜËXœË[›š[™ÈÙX\ˆ[™İY[
+\Ë[İ]›ÛÜŠK›İØ[\[™È˜[YKˆ
+ŠHÛÛ\Û™[[]™[Ü]\ˆ[™XXÚ[™H˜[X][ÛˆHZ\ÜÚ[™ÈÜˆXY[™Ú[™HÜˆİ\\ˆ\È›İ[ˆ]]ÛX]XÈTÔÎÈ˜[YHH[\Ş[[™\‹˜[™K™X[KÙYÙKY˜][XÜÈ[™[›š[™ÈÙX\‹™\Z\ˆÛÜİ[™ZXÚY[	ÜÈÚÚ[È\È[œ]Ëˆ
+ÊH\\ÛÜšÈÛ\ÜÎˆ›Ë]]HÜˆš[[Ù‹\Ø[H˜Z[\œÈØ\œH]H]ÛÜİ[^H[™\ËZ\ÈœÈ™\ÛÛ™Y™\Ø[NÈ™]™\ˆ\Üİ[YHYØ[˜[œÙ™\‹ˆ
+
+Hİ]]Îˆ›Ùš]\ˆ^KØ\][YY\Ø\][]š\ÚË^\ÈÈØ\ÚİYÙÙ\İYX^šYÚ]]È\Üİ[\[ÛœËšY›Ü™XØ\İœ›ÛHİ\œ™[šYšYÛİ[[™[YHY
+X™[Y›Ü™XØ\İ
+Kˆ
+JHİÛ™\ˆ™\Ø[H\™Ù]İ™\œšY\ÈHŞ\İ[H\İ[X]HÚ]›İ™[˜[˜ÙK›İÚİÛ‹ˆY]]™HÛÛ™šYË^\İ[™ÈÛÛ[œÈ[˜Ú[™ÙYËLÌˆ
+Š‘Ó‘JŠˆ
+™XÛÛ˜Ú[Yœ›ÛH[™HÈQÑS•ÔÕUTÈÛ™JHÛÜšÙ\›[™KLÈ
+ÛÛ›™]
+HÛÛ[œÎˆ[šÈØ[\\ˆÛ›Ü‹Ü]\ˆÚ]İ][™Ú[™K›Ë]]H˜Z[\‹H	LØ\Ø\ÙKİÛ™\‹[İ™\œšYHØ\ÙNÈ\ÚÚ[™ÈÛÛ\Èİ[™]™\ˆZY[QTÈŸ‹L
+Š”JŠˆ
+ŠHÛ\ÜÚYšXØ][Ûˆ›ÜˆH]›İˆ˜Z[\ˆİX\H
+][]K›Ø]™]\ÚÚK\]Z\Y[[™ØØ\K[˜ÛÜÙYÚ[™ÛHÜˆ[™[H^JKÛ›ÜˆØ[\\ˆÜˆ[šÈ•‹ÙÈÜ]\ˆ[™İØX›HXXÚ[™KU‹Ú]]šY[˜ÙHœ›ÛH\İ[™È^È\\ÛÜšÈİ]\È
+]Kš[ÙˆØ[KZ\ÜÚ[™È™YÚ\İ˜][Û‹’Sˆ™\Ù[
+H\È]šY[˜ÙHÛ›NÈÛÛ™][ÛˆÛÜ™È
+›Û‹\[›š[™Ë™YYÈİ\\‹\İ
+Kˆ™]\ÙH‹LŒNÈ›È\XØ]HYÙÙ\ˆ›Û™H
+Š‘Ó‘JŠˆÍYØH
+[™HÈ™\šYšYYÚ]‹LŒÈ\İÊHÛÜšÙ\›[™KLˆ
+ÛÛ›™]
+Hš^\™H\İ[™ÜÈYÈÛÜœ™XİNÈ\\ÛÜšÈİ]\È™]™\ˆ[™™\œ™YÚ]İ]^ŸKMLˆ
+KÚYHÛÜšİ™YJH™\ÙX\˜ÚØ]Ú\ˆØ[ˆXœÛÜ˜ˆH™X[[X[ˆ[œ]\È]ÈİÛˆ™KXÚXÚÉÜÈÜ›İİÚ[ˆH[œ][™È[ˆH›İ[™Y\ˆH™KXÚXÚÈ
+ÙY[ˆ[ˆKMNˆ›İ[™ˆ]Y]YY›İ[™ÊKˆXœÛÜ˜ˆÛ›HÜ›İİÜš][ˆHH™KXÚXÚÈ]Ù[ˆ
+Ûİ[›Û‹Z[X[ˆ[šY\ÊHKMHÓ‘HÛÜšÙ\œÚYK]ÛÜšİ™YH
+ÛÛ›™]
+H\İˆ[œ][ˆH›İ[™Y\ˆH™KXÚXÚÈİ[]Y]Y\ÈH™KXÚXÚÈŸKMLH
+Š”JŠˆ
+KÚYHÛÜšİ™YJHÚ\™HH]›İ[ÈH]™H\[[™Nˆ[ˆ]Xİ[Ûˆİœ›ÛH‹LŒÈ
+š^\™JH›İÜÈ›İYÚHÜ[™HÈHØÛÜ™Y][H\Ú[™ÈËLÌ‹ĞËLÌÈ
+X›Ü×ÙXÛÛ›ÛZXÜË˜]Xİ[Û˜È\ÜÙ]ÙX[
+NˆHXÛÛ›ÛZXÜÑ[™Ú[™TØÛÜ™\˜Y\\ˆ\ÜÙ\ÈšYšYÛİ[ÛÜÙ\×Ø]™[Z][K^XÚİ\[™ÓÓÛÛ\È
+\ÚÚ[™ÈÛÛ\ÈÙ\Ù\\˜]JKHİÛ™\ˆ™\Ø[H\™Ù][™H	LØ\ÈH][KØØ\™Ø\œšY\È[Z[ˆÛÜİ™]^\ÈÈØ\Ú›Ùš]\ˆ^KØ\][YY\İYÙÙ\İYX^šY[™HX™[Y›Ü™XØ\İˆš\œİ™X[Ø\ÙNˆHÛİ[S[™HÌ‹]ÛˆÜ]\ˆš^\™H
+İ\œ™[šYLšYËZXÚY[	ÜÈ™\Ø[H\™Ù]ML
+Kˆ›ÈÛÛ˜XİÚ[™ÙH
+Y]]™JK›ÈšY]‹LŒËËLÌÈ
+Š‘Ó‘JŠˆ
+LMÙMØY\™ÙYÈ[™]ËY[™\İÈ\ÜË™[X\ÙHØ]HÜ™Y[ŠHÛÜšÙ\œÚYK]ÛÜšİ™YH
+Ü\Ë[YÜ˜][ÛŠH[™]ËY[™\İˆİ[‹ØÛÜ™Y][Hİ]Ú]HšY[ÈX›İ™NÈ\ÚÚ[™Ë[Û›Hİ[Ø[››İQTÎÈØ]HÜ™Y[ˆŸLÍÈ
+È]\ŠHTT•ÓÔ’È]Y]YNˆ˜]ÚHYÚ][X]H]K™YÚ\İ˜][Ûˆ[™Uˆİ\È›ÜˆXÜ]Z\™Y][\ËˆY™\œ™Y[[ËLÌÈ[™Hš\œİ™X[XÜ]Z\Ú][ÛˆËLÌÈ“ĞÒÑQÛˆËLÌÈÛÜšÙ\›[™KL
+ÛÛ›™]
+H›İİ\YŸLÌÈˆ
+ÈY\ˆ‹LŒËËLÌŠHØ]Ú\İšXÙH[\ÛÜÚ[™È[\[™\›İ™YšYÙZ[[™ÈİÜ˜YÙHÛˆHÜ[™KˆK\[ˆ›ÈšYİX›Z\ÜÚ[Ûˆ]^\İÈØ]Úİ\œ™[šY[™šYÛİ[İ™\ˆ[YNÈ[\[ˆH\İİ\œÈ™Y›Ü™HÛÜÙNÈZXÚY[›Ú[œÈ]H[™˜]\ˆ[ˆØ]Ú[™È›Üˆ^\ËˆK\[ˆ[[šY[YÜ˜][Ûˆ[™]]Üš^˜][Ûˆ\™H™\šYšYYˆ‹LŒËËLÌˆ
+Š‘Ó‘JŠˆ
+™XÛÛ˜Ú[Yœ›ÛH[™HQÑS•ÔÕUTÈÛ™JHÛÜšÙ\›[™KL
+ÛÛ›™]
+H[\š\™\ÈÛ˜ÙH\ˆ]™[È™YØ]]™H\İˆ›ÈšY]Ÿ‹LÎH
+Š”JŠˆ
+ÈY\ˆËLÌ‹‹LÎÈ›ÈRH™Y\ÚYÛ‹YÜ\˜][Û˜[[œÚ]HÈH^\İ[™ÈšY]ÜÊHX[Ø\™\ÈHXÚ\Ú[Ûˆ][KÛİ\˜ÙKØØ][Û‹İ\œ™[\ÚÈÜˆšY[Z[ˆÛÜİ\\ÛÜšË™\Z\ˆ[™˜[œÜÜ™\Ø[H˜\Ú\Ë^XİY™]^\ÈÈØ\Ú›Ùš]\ˆ^H[™İ\‹[X[™ÛÛ™šY[˜ÙKX^šYšY\ˆXİ]š]K™^Xİ[Ûˆ•VHÈĞUÒÈTÔÈ
+•VH[™šYÈİ^HİÛ™\‹YØ]Y
+K^XİYœÈ™X[^™Y\ÚÚ[™ÈœÈÛÛÛÛ\ËˆÛÛ›Ûİš\ˆØ\][]˜Z[X›H[™YY\[™[ÜK^XİY[™™X[^™Y›Ùš]]Xİ[ÛœÈÛÜÚ[™Ë\›İ˜[ËØ]Ú\İXÚİ\Ë\\ÛÜšË™XÙZ\Ëˆ™\Ø[HÛÜšÙ›İÈYÙNˆ[™[ÜH[ZÙKİÜË\İ[™È™\\˜][Û‹^Y\‹Y[X[™›İ\ËØ[Hİ]\Ë™X[^™Y\›Ùš]XØÛİ[[™ÈÚ]™XÙZ\ÎÈÙ^HÚİÜÈ\ÜÙ]X[Èš\œİ™\Ù[™\ÜÈ[™Ù^H[ˆZXÚY[	ÜÈ[Ü›š[™È[Û™^H[Ú\Nˆ›İÛH[™KÛX[˜[šÙYX›KÛ™H›ØÚÈ\ˆ][H
+Ûİ\˜ÙKXÛÛ›ÛZXÜË˜]™[[YHÈØ\Ú™\Z\‹š\ÚËÛÛ™šY[˜ÙKXİ[ÛˆÙ^JKÚ]Ú[™ÙYÚ]Ø\È™Z™XİYÙ^IÜÈ™\İ[İ™KˆËLÌ‹‹LÎ
+Š‘Ó‘JŠˆ
+™XÛÛ˜Ú[Yœ›ÛH[™HˆQÑS•ÔÕUTÈÛ™JHÛÜšÙ\›[™KLˆ
+ÛÛ›™]
+H][H[İ™\È[ZÙHÈÛÛÚ]H™XÙZ\ÈÚ[][]Y™]™\ˆX™[YX\›™YŸ‹MH
+Š”JŠˆ
+ÈY\ˆ‹LÎNÈ›ÛİÛ™\ˆXZ\ÛÛˆŒ‹LLLHØ\È[ÈHVTÕS‘ÈÜ\˜]ÜˆRK›È™Y\ÚYÛ‹›È™]È\Ú›Ø\™
+H]Y]‹LÎHYØZ[œİHİÛ™\ˆ\™Xİ]™\È[™ÛÜÙHHØ\Îˆ
+JHš^\™H^[\Kš[˜[Y[šÜÈ™]™\ˆ™Z]™H\È]™H[šÜÈ[™\™HX™[YSSÎÈ™X[\İ[™ÜÈÙ]šY]ÈÜšYÚ[˜[\İ[™È
+ËÚ[İÙYÜİ™[›ÛÜ[™\‹›È˜]˜\ØÜš\Ù]KÛÜ[ˆ™Y\™Xİ
+K[ÙH	Ó›È™\šYšYY]™H[šÉÎÈ
+ŠHİÈØ[\NˆÛİ™\ˆ[X›˜Z[[›\™ÙKÛİ[›İ™[˜[˜ÙK˜[˜XÚÈÚ[ˆZ\ÜÚ[™ËÙ^\™YÈÜšYÚ[˜[İÜÈÙ\\\œ›ÛH[H[ØÚİ\È
+ÊH™\˜˜][HÜšYÚ[˜[Ù[\ˆ\ØÜš\[Ûˆ
+[™Hœ™XZÜËÚİÈ[Y
+KSY\ØØ\YÈ
 
-| F-09 | P1 | Operator UI pages from the 72-hour plan: **outcome entry** (via `spine.record_outcome`), **source health** panel (02's health data, read-only), **HOLD backlog**. Human channel only (R14) | none | **DONE** @ `317a2db` | 06 | Pages + tests on the real spine; outcomes receipted |
-| F-12 | P1 | Daily summary, generated locally and never sent: digest top-N + HOLD backlog + overdue + yesterday's outcomes + source health, as a markdown/HTML file on disk and as a UI page | none | **DONE** @ `0e5a3fe` | 06 | A deterministic summary from fixtures; no network imports |
-| F-10 | P2 | Morning digest page rendering 03's C-08 ranking | C-08 | **DONE** @ `f955219` | 06 | Ranked list with reasons and provenance links |
-| F-11 | P2 | Follow-up / offer / quote buttons on the card | A-15 | **DONE** (lane 06; see its AGENT_STATUS / handoff) | 06 | Each creates its own step-up ActionRequest via the public API |
-| D-10 | P2 | Adopt 06's `mbos_comms` consent/DNC schema (`comms_spec/sql/0001_comms_ledger.sql`) into lane D migrations (R1: one DDL owner) | none | **DONE** DDL @ `6533334` (0011); final acceptance waits on A-01 phase 2 | 04 | 06's F-07 tests pass on lane D's schema |
+HÛ[˜ÙXX›HX[Ø\™ˆİË]H[™šXÙK\İ[˜ÙKÛÛ™][Û‹ÛÛ\ÈÓÓœÈ\ÚÚ[™Ë™]›Ùš]\ˆİ\‹^\ÈÈØ\ÚX^šY•VKÕĞUÒÔTÔËÛ™H™^Xİ[ÛÈ™XÙZ\È[™˜]È”ÓÓˆÛÛ\ÙY™Z[™šY]È›ÛÙÈ
+JHXİ]™K[˜]ˆYÚYÚYÙHXY[™Ëš[™X[È›İÈ\Èš[\œÈ
+Ø]YÛÜK˜Z[\ˆİX\K\İ[˜ÙKšXÙKÛÛ™][Û‹]Hİ]\Ë]Xİ[ÛˆœÈš^YÛÜÚ[™ÈÛÛÛ‹Z[ˆ›Ùš]^\ÈÈØ\ÚÛÛ™šY[˜ÙK˜[œÜÜˆØ[ˆİÈÈ˜[œÜÜ™\]Z\™YÈ[
+HÚ]Ø]™Y™\Ù]ÎÈİÈ™ZXÛH[™[Z]È\™HQUP“H\Ù\ˆšY[Ë™]™\ˆ\™XÛÙY^Û\Ú[ÛœÎÈš[\™Y[İ]][\È^Z[™Y›İ[]YÈ
+ŠH^H›İ\È\ÈHÛÜšÚ[™ÈY›İH]
+İÛ™\ˆÚ[›™[ÔÔ‘ŠÔSŠHÜˆHYH›ØÚÙ\ˆ\È˜[YYÈ
+ÊHZ[\İÛ™H[™[ˆÚ]\È\ØX›H›İÈœÈ›ØÚÙYœÈ]\™H
+Z[HÙX\˜Ú]™H]Xİ[ÛˆÛÛ›™XİÜ‹İ™\›šYÚ™YÛİX][ÛŠK›È[™[Y]\Ëˆ\İÈ]MLÎLÈK\[ˆÛ›H‹LÎH
+Š‘Ó‘JŠˆ
+™XÛÛ˜Ú[Yœ›ÛH[™HˆQÑS•ÔÕUTÈÛ™JHÛÜšÙ\›[™KLˆ
+ÛÛ›™]
+HRH\İÈ›ÜˆSSÈœÈ]™H[šËS[š™Xİ[Û‹Z\ÜÚ[™ÈİË›İ\ÈYš[\œÎÈØÜ™Y[œÚİÈ]™YHÚYÈŸ‹LH
+Š”
+Šˆ
+ŠHÔĞH]Xİ[ÛœÈTH]™HY\\ˆ
+™XY[Û›KSS×ÒÑVK™XÙZ\ØÜËÜ™XÙZ\ËÌŒ‹LLLKYÜØKX\K\Û[ÚÙK›Y
+Nˆ™]ÚXİ]™KX]Xİ[ÛœÈ
+›ÛİÈHÌÊK›Ü›X[\ÙHXXÚİÈH‹LŒÈ]Xİ[Û‹[İÚ\H
+Ø[S›Ë[İ›ÈY][S˜[YKYÚšY[[İ[šY\œĞÛİ[]XÑ[™ØØ][Û‹][Q\ØÕT“\ÈHÜšYÚ[˜[[šË[XYÙUT“\ÈHİËİ[™›È™\˜˜][JKÛİ\˜ÙOQÔĞK\Ë[Ùˆ[Y\İ[\›İ™[˜[˜ÙHÛˆ]™\HšY[ˆ™]™\ˆ[™[^Y\ˆ™[Z][HÜˆÛÛÛÛ\È
+S’Ó“ÕÓŠNÈš[\ˆ\šØ[œØ\È[™™X\˜Hİ]\ÎÈ™\›È™\İ[ÈÚİÛˆ][NÈ][ÜİH™]Ú\ˆ[‹ØXÚHHš[K™\ÜXİ˜]H[Z]ÎÈ›ÈXØÛİ[Ù^HÜˆZYØ[
+H\œÛÛ˜[\K™]K™ÛİˆÙ^H\È[ˆİÛ™\ˆXÚ\Ú[ÛŠKˆ™YYH^\İ[™È‹LŒÈOˆKMLHOˆØ\™]ˆ\İÈÚ]H™XÛÜ™YÛXÙHÙˆH™X[”ÓÓˆ›Û™H
+Š‘Ó‘JŠˆ
+™XÛÛ˜Ú[Yœ›ÛH[™HˆQÑS•ÔÕUTÈÛ™JHÛÜšÙ\›[™KLˆ
+ÛÛ›™]
+H™X[Tˆİ
+K™ËˆËLKTTĞËRKLËL‹LH][]H˜Z[\‹X\šX[›˜JH\X\œÈ\È[ˆ][HÚ]]È™X[T“[™İÎÈ\ÚÚ[™ËÚYÚXšY™]™\ˆÛİ[È\ÈÛÛŸ‹Mˆ
+Š”
+Šˆ
+ŠHİÛ™\ˆ]™HœÈ[[Îˆ[HYÙHÜˆØ\™[šÙYÈRS‹Jˆš^\™\ÈÚİÜÈSSÈÈRS’S‘ÈUK“Õ‘PSTÕS‘ÔËÈ“Õ•VNÈH›Ü›X[[™[™È[™]Y]YHÚİÈÛ›H][\ÈÚ]H™\šYšYYÛİ\˜ÙH
+™X[T“›İ^[\Kš[˜[Y
+NÈ˜Z[š[™È][\È]™H™Z[™HSSÈİÚ]Ú[™™]™\ˆ[™\ˆ™YYÈ[İNÈ^[\Kš[˜[Y™]™\ˆ™[™\™Y\ÈH[šÈ
+	Ó›È™X[\İ[™Ë˜Z[š[™È^[\IÊNÈ›ÈÛÛ\\˜X›K\ÛÛ\šXÙH›Û\ÈÛÚÈ][ˆ][Nˆ›ÈÛÛ]šY[˜ÙHH‘TÑPTÒ‘QQQÈ“Õ•VHQU[œ]Û›H[™\ˆ]Z[ÎÈ[[È	L˜[šÜ›ÛœÈ™X[Ø\ÚX™[YÚ]Ûİ\˜ÙH[™[YK›È™XÛÛ[Y[™][Ûˆœ›ÛH[[È˜[[˜Ù\ÎÈ[šÛ›İÛˆšY[ÈÛÛ\ÙY›İMHS’Ó“ÕÓˆ›İÜÎÈİÛ™\‹\İ\YYT“
+ÈİÜÈ
+È\İY^[ZÙHX\šÙYÕÓ‘T‹TÕTQQÈÔĞHİÈ
+‹LJH™[™\™YÚ]ÜšYÚ[˜[[šÈ[™İÈ‹MNÈ‹LH›ÜˆHÔĞHØ\™
+Š‘Ó‘JŠˆ
+™XÛÛ˜Ú[Yœ›ÛH[™HˆQÑS•ÔÕUTÈÛ™JHÛÜšÙ\›[™KLˆ
+ÛÛ›™]
+H\İÎˆ›Ü›X[™YY\È™\›ÈRS‹JÈ[[ÈİÚ]ÚÚİÜÈ[HÚ]H˜[›™\È›ÈÛXÚØX›H^[\Kš[˜[YÈİÛ™\ˆT“[ZÙHÚ]›İ™[˜[˜ÙHŸ‹MÈ
+Š”
+Šˆ
+ÈY\ˆ‹MÈİÛ™\ˆT’PKLŒŒLKLNLŒÛ™KZİ\ˆ™\XØ[ÛXÙJHZXÚY[	ÜÈX\šÙ]XÙHÛˆH^\İ[™ÈÍ‹ÛÛ\ÜÚ][ÛˆÛ›Nˆ\œÚ\İ[YÚYX˜\ˆ
+š[™X[È›İË
+È™]ÈÙX\˜Ú^HØ[\ZYÛœÈÈØ]™YÙX\˜Ú\ËØ]™YX[Ë]Xİ[ÛœÈÛÜÚ[™ÈÛÛÛ‹SSÈ[ˆHÙ\\˜]H\™XJKXZ[ˆ[™H]YZXÚY[	ÜÈX\šÙ]XÙKˆÙX\˜Ú›Ü›H
+Ù^]ÛÜ™Ë˜\ÙHÚ]HY˜][ÛÛØ^HTˆY]X›K˜Y]\ËX^šXÙKÛÛ™][Û‹™\]Z\™YÜ™Y™\œ™YÙ^ÛYH\›\ÈX]ÚYYØZ[œİÙ[\ˆ^[™YÙÙYÙ[\‹\İ]YœÈ[™™\œ™YÛİ\˜ÙHÔĞK]Xİ[Û‹Ùš^YÛÜÚ[™È]KÛÜ
+NÈÛ›HÙ^]ÛÜ™
+ÈšXÙH
+È˜Y]\È™YYYˆØ]™KY][˜X›KÙ\ØX›K[È™]\ÙHH^\İ[™ÈØ[YØØ[\ZYÛˆ[Ù[[™Ø]™Yš[\œË›È\˜[[]\İÜ™NÈHØ]™YÙX\˜Úİ\š]™\È™[ØYˆÛİ\˜ÙHİ]\È[™H
+ÛÛ›™XİYÈÙ™›[™HÈ\İ™]ÚY\Ë[ÙŠKˆ™\İ[Ø\™ˆÜšYÚ[˜[İË^Xİ]H[™ÚÜÜšYÚ[˜[\ØÜš\[Û‹šY]ÈÜšYÚ[˜[\İ[™Ëİ\œ™[šYÛÜÚ[™È]KÚ]H
+\İ[˜ÙHÛ›HÚ[ˆÜ›İ[™Y
+KÛÛ™][ÛˆÙ[\‹\Ø^\ËÛİ\˜ÙH
+È™]ÚY[Y\İ[\šXÙHX]Ú]S’Ó“ÕÓˆ™[Z][Kİ˜[œÜÜÜ™\Z\‹ÛÛœÈ\ÚÚ[™ÈÙ\\\Y˜][ĞUÒÈ‘TÑPTÒ‘QQQˆ›ÈRS‹JˆÈ^[\Kš[˜[Y[ˆ]™H™\İ[ËˆÓÕTÑHÒT’S‘È
+XÚYYHJNˆÙX\˜Ú™XYÈX›Ü×Ù\ØÛİ™\K™ÜØWÛ]™K‘ÜØS]™PY\\ŠØXÚWÜ]]™OQ˜[ÙJX
+[œİ[Y[ˆ[İ\ˆ™[ˆ][™KLˆXYYK›È™]ÛÜšÈœ›ÛHÛÜšÙ\œÊHİ™\ˆHØXÚHÚÛYKÛZXÚY[ÜËØ\Ú[™\ÜË[ÜË]ÛÜšİ™Y\ËØYÙ[LKXÛÛÜ™[˜]Ü‹İ˜\‹ØØXÚKÙÜØKXXİ]™KX]Xİ[ÛœËšœÛÛ˜
 
-### Lane G: Agent 07 (QA)
-| ID | Pri | Task | Deps | Status | Agent | Acceptance |
-|---|---|---|---|---|---|---|
-| G-01 | P1 | ADR-0010: `core.canonical`/`receipt_row_hash` â†’ reference; add `vectors.json` to `mbos_qa interop`; re-run interop across all lanes and publish the matrix | none | **DONE** @ `9cbce70` (docs/qa/INTEROP_REPORT.md) | 07 | Matrix published; F-13/F-14 closed or re-opened with evidence |
-| G-02 | P1 | **R11 amended: start now.** 07 writes `MBOS_QA_IMPL` = `mbos_qa.impl_spine:build` against 01's public API (`mbos.runtime`, `mbos.spine`, `mbos.ledger`, `mbos.audit`, `mbos.workflows`) on pgserver Postgres. Re-target the store to 04's schema when A-01 lands | none (A-01 later) | **DONE** @ `a1700d9` (07's A1â€“A10 on the real spine: 90/90) | 07 | A1â€“A10 from `qa/` run against the real spine; results reported as real, not mocked |
-| G-04 | **P0 (release)** | P-07-5: re-run `qa/` A1â€“A10 + G1â€“G4 on the real spine with `state_backend=lane_d`, `gateway_mode=lane_e` (lane D schema at 04's head; 05's gateway; see 01's `tests/helpers/lane_d.py` + `tests/helpers/runner.py lane_d_e2e`) | A-03 | **DONE** | 07 | Results published as the wave-two release candidate verdict |
-| G-03 | P2 | G1â€“G4 marketing tests against the real ActionRequest/approval path (publishing drafts as dry-run ActionRequests) | G-02 | **DONE** (reconciled from lane 07 AGENT_STATUS Done) | 07 | G1â€“G4 green on the real spine |
+È˜\ÛÙ˜™X[™]ÚŒ‹LLLLŒNV‹LMÎHİÊK]İ™\œšYX›HH[ˆP“Ô×ÑÔĞWĞĞPÒXÈÚİÈH\Ë[ÙÈ\İÈ\ÙH[™H‰ÜÈ™XÛÜ™YÛXÙH\İËÙš^\™\ËÙÜØWÛ]™KØXİ]™KX]Xİ[ÛœËšœÛÛ˜
+ÛÜH][È[İ\ˆ\İÊKˆX\šÙ]XÙHÙX\˜Ú\ÈH™]šY]˜[šY]Èİ™\ˆ\ÙH™XÛÜ™Ë›İHXÚ\Ú[Ûˆ]Y]YKˆ[œİ\ÜYÛİ\˜ÙHH	Û›İÛÛ›™XİY	Ë™]™\ˆ[ØÚËˆ‘UÈ[Ù[\È[™\İÈHÌ[™\ÈXXÚİÜ›Üˆ™]šY]È]Èİ\™˜XÙH[H^\İ[™Èš[Hˆ[™\È™Y›Ü™HÜ›İÚ[™È]‹M‹‹LH
+Š‘Ó‘JŠˆ
+™XÛÛ˜Ú[Yœ›ÛH[™HˆQÑS•ÔÕUTÈÛ™JHÛÜšÙ\›[™KLˆ
+ÛÛ›™]
+H\İÎˆÙX\˜ÚÜØ]™KÜ™[ØYÔĞH™\İ[Ú]™X[[šË[[È\ÛÛ][Û‹›Ë\İËİ[HİS\ØØ\[™Ë[™Ü›İ[™YÛÛ\HĞUÒÈØÜ™Y[œÚİ]\ÚİÜ[™ÎLŸ‹M
+Š”
+Šˆ
+ÈİÛ™\ˆXØÙ\[˜ÙH˜Z[\™HT’PKLŒŒLKLŒLNÈÓPSÛÛ\ÜÚ][Ûˆš^\ÈÛ›K›È™Y\ÚYÛ‹Ù\™\‹œX\ÈŒMLÍˆ[™\ÈÛÈY›È[Ü™H[ˆH™]È[™\È\™H[™]ÙÚXÈ[ˆÛX[™]È[Ù[\ÈHÌ[™\ÊH›İ[™HH™ZX\œÚ[™È[™HˆXYYLÌØŒ˜ÛˆHİYÚ[™ÈÜˆ
+JHH[™[™ÈØ	Ğ™\İ™^[İ™IÈ
+Z\ÜÚ[Û—İšY]ËœJHİ[˜[Y\ÈHšXİ[Û˜[	ÍMH[˜ÚQ‰ÈÚ[HH]Y]YH\È[\Nˆ^ÛYH[[Ëİ˜Z[š[™È][\Èœ›ÛHU‘T–H[™[™È[[Y[
+™\İ™^[İ™KÛ[˜ÙHØ\™ËÛİ[ËZ\ÜÚ[ÛŠNÈ
+ŠH	ĞØ\Ú	L]˜Z[X›HÈ\ŞIÈ™XYÈ\È™X[Ø\ÚˆX™[]	ÔÚ[][]Y˜[šÜ›Û›İ[İ\ˆØ\Ú	ÈÚ]Ûİ\˜ÙH[™\Ë[Ù‹[™Ú]™H›È™XÛÛ[Y[™][Ûˆœ›ÛH]È
+ÊHHY˜][[™[™È]\İ™HZXÚY[	ÜÈX\šÙ]XÙNˆØÚİÜÈ
+Üˆ™Y\™XİÈÊHÛX\šÙ][™HÛ]Y]YHİ^\ÈÛ™HÛXÚÈ]Ø^NÈ
 
-## Operator infrastructure (not a business decision; outside the repo)
-- **X-01 (P1, PROVENANCE):** the shared `.git/config` identity is overwritten by the last-launched agent (07 P-07-2, verified by 01). All of 01's Round Two commits are recorded as "Agent 07 Marketing". The fix is in `~/bin/mbos-agent`: enable `extensions.worktreeConfig`, then set `git config --worktree user.name/user.email`. Interim rule: per-commit `-c user.name/-c user.email` (docs/COORDINATION.md). The correction receipt is in `docs/receipts/2026-10-07-provenance-correction-commit-authorship.md`.
+HÔĞH[XYÙUT“
+\Ë™ÛİŠH™]\›œÈH	ÕÚÙ[ˆ^\™YÜˆ[˜[Y	ÈÚ]İ]HÔĞHÙÚ[‹ÛÈHœ›İÜÙ\ˆØ[ˆ™]™\ˆØY]ˆÈ“Õ›ŞH]Üˆ\ÙH[HÚÙ[È™[™\ˆHÛX[ˆ›Ë\İÈ[H	ÔİÈ\È™Z[™ÔĞIÜÈÙÚ[ˆÜ[ˆHÜšYÚ[˜[\İ[™ÉÈ[œİXYÙˆHœ›ÚÙ[ˆ[XYÙK[™ÙY\H[XYÙHT“[ˆ]Z[ÎÈ
+JHÜšYÚ[ˆ[™˜Y]\È\™Hœ™YH\Ù\ˆ[œ]
+[HÚ]HÜˆ’T[HZ[\ÊK›İ™\Ù]Ëˆ\İÈ›ÜˆXXÚ‹MÈ
+Š‘Ó‘JŠˆ
+™XÛÛ˜Ú[Yœ›ÛH[™HˆQÑS•ÔÕUTÈÛ™JHÛÜšÙ\›[™KLˆ
+ÛÛ›™]
+H›Ü›X[ØÛÛZ[œÈ™\›ÈRS‹J‹›È	ÍMH[˜Ú	Ë›È[›X™[Y	LÈØ[™ÈÛˆX\šÙ]XÙNÈ›Èœ›ÚÙ[ˆ[YÈÛˆHÔĞHØ\™È\˜š]˜\HÜšYÚ[ˆXØÙ\YŸ‹MHH
+ŠH›İ[™ÛˆH]™HÍˆY\ˆH™[ØYˆÛZ\ÜÚ[Û˜[™Üİ[[X\X
+Z[Hİ[[X\JHİ[\İHšXİ[Û˜[	ÍMH[˜ÚQ‰ÎÈ^ÛYH[[Ëİ˜Z[š[™È][\Èœ›ÛH]™\H›Û‹Y[[ÈYÙH
+Z\ÜÚ[ÛˆYÜËZ[Hİ[[X\KYÙ\İİ]ÛÛY\ËYÙ\ˆXY\œÊHÚ]H\İ]Ø[ÜÈ]™\H˜]ˆ›İ]NÈ[ˆ^[™ØØ][Ûˆ™\ÛÛ™HHTÈ’TÜˆÚ]H›İYÚHØØ[Ø^™]Y\ˆš[H
+›È™]ÛÜšË›ÈZYÙ[ØÛÙ\ŠHÜˆØ^HZ[›H]Ø[››İ‹M
+Š‘Ó‘H
+ÛÙHÛÛ\]H
+ÈİYÚ[™È™\šYšYYHHŒXLÙMÈ“Õ]™NˆÍˆİ[ÛˆH‹M^Ü[[Û™HİÛ™\‹YØ]YRH™[ØYÈÙYHØÜËÜ™XÙZ\ËÌŒ‹LLLLYK]™\šYšXØ][Û‹›Y
+JŠˆ
+™XÛÛ˜Ú[Yœ›ÛH[™HˆQÑS•ÔÕUTÈÛ™JHÛÜšÙ\›[™KLˆ
+ÛÛ›™]
+H\İØ[ÜÈ[˜]ˆ›İ]\Îˆ™\›ÈRS‹JˆÈ^[\Kš[˜[YÈÈ’TÌŒÌˆØØ]YÜˆ][H[›ØØ]YŸ‹MLH
+ŠHÛÈš[™[™ÜÈœ›ÛHIÜÈ‹MH™\šYšXØ][Ûˆ
+JHÚİÈHš\ÚX›KZ[ˆØ]™X]ÛˆÛX\šÙ]Ú[™]™\ˆ\İ[˜Ù\È\™H\ÙYˆXÙHÛÛÜ™[˜]\È\™H\›Ş[X]HÙ[›ÚYÈœ›ÛHHÛX[ØØ[Ø^™]Y\ˆÚ][Z]YÛİ™\˜YÙH
+Ø^HÚXÚÜšYÚ[œÈ[™İİÛœÈ\™HØØ]Y[™ÚXÚ\™H›İ
+NÈİ][Ù‹\İ]HİÈ]\İ›İ™XY\ÈH˜\™H	Ù\İ[˜ÙHS’Ó“ÕÓ‰ÈÚ]İ]]^[˜][ÛÈ
+ŠH\İËÛ[™WÙİ\İİØ[YÙŒKœN\İÙİX›WÜİX›Z]ÛÜÙ\—ÜÙY\×Ø[™XYWÜ™XÛÜ™Y›İÈ˜Z[È]\›Z[š\İXØ[H
+š\œİÛ[X™\œËØØ\][Ú]˜]È™]\›œÈŒ›İÌÊHÛˆ›İXMX[™ŒXLÙM˜È]\ÜÙY]ŒŒˆš[™HØ]\ÙH
+İ]K]HÜˆ[YH\[™[˜ÙOÊH[™š^H\İÜˆHÛÙK[™Ø^HÚXÚ‹MH
+Š‘Ó‘JŠˆ
+™XÛÛ˜Ú[Yœ›ÛH[™HˆQÑS•ÔÕUTÈÛ™JHÛÜšÙ\›[™KLˆ
+ÛÛ›™]
+HØ]™X]^™\Ù[[™\İYÈH[™H
+ÑHİZ]H\È˜XÚÈÈHˆÛ›İÛˆ‹LÌˆ˜Z[\™\ÈÛ›HŸ‹MLH
+Š”
+Šˆ
+ŠSQS‘QS•Œ‹LLLL
+T–PKLŒ
+ÈT–PKLÌË\YYHK]]Üš]]]™HØÛÜNÈ[^ØÜËÚ[™Ù™‹Ñ‹MLKX[Y[™Y[›Y
+NŠŠˆ
+JHİšXİš[\œÎˆHÛØ˜[X^ÛZ[ˆšXÙH[™HÛÛØ^H˜Y]\ÈÛÛœİ˜Z[ˆU‘T–H›İÎÈHİÚ][šÛ›İÛˆšXÙHÜˆ[šÛ›İÛˆ\İ[˜ÙH]\İ“ÕÚ[[H\ÜÈHİšXİ[Z]
+ÛÜœ™XİX\šÙ]ÜÙX\˜ÚœX[™H\İÈ][˜ÛÙHHÜÜÚ]JH[™\ÈÚİÛˆÛ›H[ˆHÙ\\˜][HX™[YÜZ[ˆÙXİ[ÛÈ[ˆ[˜[Y[Y\šXÈš[\ˆÚİÜÈHš\ÚX›H˜[Y][ÛˆY\ÜØYÙK™]™\ˆÚ[[HYÛ›Ü™Yˆ
+ŠHÜ˜ZYÜÛ\İ\İ[Hœ›İÜÙKYš\œİØ[\H
+[œÙHİÈØ\™ÈÚ]šXÙH]XÚYÚÜ]KİÛ‹ÜİYYÙK˜\œ›İÈYÚYX˜\ˆÚ]Ø]YÛÜHÚXÚØ›Ş\Ë’TÜ˜Y]\ËZ[‹ÛX^šXÙKÜÙX\˜ÚÜÛÜİšY]ÊKËMİ\İÛZ^˜X›HØ]YÛÜH›İÜÈ
+˜Z[\œÈš\œİÈİÛ™\ˆØ[ˆÚÛÜÙH[™™[Ü™\‹K™Ëˆ[Xİ›ÛšXÜÊK™\ÜÛœÚ]™HÚYËÛ™\İZ\ÜÚ[™Ë\İÈXÙZÛ\œË[\HØ]YÛÜHH	Û›ÈX]Ú[™ÈÛ›İÛˆ[™[ÜIËY˜[˜ÙYš[\œÈ™Z[™H\ØÛÜİ\™K›ÈÜ˜ZYÜÛ\İÑ˜XÙX›ÛÚÈœ˜[™[™ÈÜˆÛÜYY[™[ÜK›ÈØÜ˜\[™ÎÈÔĞK[Û›HØXÚYÛİ™\˜YÙHİ]Y[™	ØØXÚY	È™]™\ˆ™\Ù[Y\ÈHœ™\Ú™]Úˆ
+ÊHQ•Tˆ
+JH[™
+ŠHÛÜšÎˆ^XÚ]Ø]™\Ë\ÛZ\ÜØ[È[™[Ü™KÛ\ÜË[ZÙK]\È™YY˜XÚÈ\œÚ\İY[‹X\[™\ÙY›Üˆ[ˆ[™\œİ[™X›H˜[šÚ[™ÈÚ]Hš\ÚX›H	İÚHİYÙÙ\İY	Ë™\Ù][™\ØX›NÈ]™]™\ˆİ™\œšY\È\™šXÙKÜ˜Y]\ËÙ^Û\Ú[ÛœË™]™\ˆ[™[È›Ùš]Xš[]K›Èİ]ÚYH]K›È™]ÈÜ™Y[X[Ëˆ™Y™\™[˜ÙHX\›š[™È]\İ“Õ[^HİšXİš[\œÈÜˆH˜\ÚXÈØ[\Kˆ™]šY]ØX›HÛˆİYÚ[™ÈÚ]™X[ÛÛØ^H]H[™\İY[˜[Yİ[šÛ›İÛˆ›İ[™\šY\ÎÈ]™H™[ØYİ^\ÈİÛ™\‹YØ]Yˆ
+ÈİÛ™\ˆT–PKLŒŒLLLÍLË[˜ÛÛYKYš\œİ›ÙXİXØÙ\[˜ÙHÛˆH^\İ[™ÈÛX\šÙ]›È™]È\Ú›Ø\™ÈZ[ÈÛˆ‹MËÑ‹MÑ‹MK›È\XØ]HÛÜšÊHØ\ÈÈÛÜÙHÛˆİYÚ[™Èš\œİˆ
+JHZ[ˆS‘X^šXÙHÛÛ›ÛÎˆ[Y\šXÈ[œ]È\È[ˆXØÙ\ÜÚX›H˜[™ÙHÛY\ˆ
+H	KIŒ^[\H\ÈHÛÛ›Û	ÜÈ˜[™ÙK“ÕHYÙ]ÜˆÜ[™]]Üš^˜][ÛŠNÈ[\™Yš[\œÈ\œÚ\İXÜ›ÜÜÈ˜]ˆ[™\™HÚİÛˆ\ÈZ[ˆ\YYYš[\ˆÚ\ÎÈ]Xİ[ÛˆØ\™ÈX™[İ\œ™[šYœÈ\ÚÚ[™ÈšXÙH[™	Ø[Z[ˆÛÜİ[šÛ›İÛ‰Ë™]™\ˆš[˜[ÛÜİÈ
+ŠHY]X›HÜšYÚ[ˆ
+Y˜][ÛÛØ^HTˆÈ’TÌŒÌŠH[™˜Y]\È]™X[HÛÛœİ˜Z[œÈÛ›İÛ‹Y\İ[˜ÙH™\İ[ÎÈ[šÛ›İÛ‹İ[œ™\ÛÛ™YØØ][ÛœÈ[ˆHÙ\\˜][HX™[YÜ[Û˜[ÙXİ[Û‹™]™\ˆÛİ[Y\ÈØØ[È›È[™[YÛÛÜ™[˜]\È
+ÙYH‹MLØ]™X]
+NÈ
+ÊHY˜][šY]ÈH™\Z\˜X›H˜Z[\œËÙ\]Z\Y[™X\ˆÛÛØ^HÚ]Y]X›HØ]YÛÜKÚÙ^]ÛÜ™ÛÛ›ÛÎÈœ›ØY[™[ÜH[ÙH\È^XÚ][™Ù™ˆHY˜][ÈØİ[Y[YÛÜšÚ[™ËXØ\][Ù][™ÈX™[Y\\œ›ÛH™\šYšYYØ\ÚÈ
 
+H[[Ëİ˜Z[š[™È˜]šYØ][Ûˆ[™šXİ[Û˜[™XÛÜ™È™[[İ™Yœ›ÛHH›Ü›X[İÛ™\ˆÛÜšÙ›İËÙ\™Z[™HÙ\\˜]H^XÚ]›İ]K\İÜH[İXÚYÈ
+JHZ[‹[[™İXYÙHÔĞHHÛİ™\››Y[İ\œ\È]Xİ[ÛœËØXÚHœ™\Ú™\ÜË[XYÙKÛÙÚ[ˆ[Z]Ë™\šYšYYÜšYÚ[˜[[\İ[™È[šË›È˜XœšXØ]YİÜÈÜˆÙÚ[ˆ\\ÜÎÈ
+ŠHXYÛ›ÜÙH[ˆH‘PSœ›İÜÙ\ˆÚHHÙX\˜ÚÛÛ›ÛÛÚÜÈ˜YY[ˆHİÛ™\‰ÜÈØÜ™Y[œÚİ
+ÔÔÈœÈ\ØX›YœÈ›Øİ\Èİ]JH[™XZÙHÙX\˜ÚÜØ]™YXİ[ÛœÈš\ÚX›HÜ\˜X›KˆXØÙ\[˜ÙNˆ™X[Xœ›İÜÙ\ˆ[ˆ
+ØÜ™Y[œÚİÊHÙˆH˜Z[\‹Ù\]Z\Y[ÙX\˜Ú™X\ˆÛÛØ^NÈÚ[™Ú[™ÈZ[‹ÛX^[™˜Y]\ÈÚ[™Ù\ÈHÛÜœ™Xİ™\İ[Ù]Èİ][Ù‹\˜Y]\È[™[šÛ›İÛ‹[ØØ][ÛˆØ\Ù\ÎÈ™\›ÈÚİÛˆÛ™\İNÈ›È[[ÈÛÛ[Ûˆ›Ü›X[›İ]\ÎÈ^Xİ\Y˜XİÒKÛÛ[X[™Ë\İËØXÚH[Y\İ[\ËÛÙK]œË[]™Hİ]\È‹MK‹ML
+Š‘Ó‘JŠˆ
+™XÛÛ˜Ú[Yœ›ÛH[™HˆQÑS•ÔÕUTÈÛ™JHÛÜšÙ\›[™KLˆ
+ÛÛ›™]
+H™XÙZ\Ú]ØÜ™Y[œÚİÈ
+ÈÒNÈİYÚ[™ÈÛ›KˆU‘H™YYÈÓ‘HÛÛœÛÛY]YİÛ™\‹YØ]YRH™[ØYÛİ™\š[™È‹MJÑ‹ML
+Ñ‹MLH
+HŒˆ\›İ˜[\ÈÜ[
+HŸ‹MLˆ
+Š”
+Šˆ
+È›ÛİË[ÛˆÙˆ‹MLK“ÕH\˜[[ÛÜšÙ\Èİ\ÈÛ›HY\ˆ‹MLHÛÜÙ\ÊHÛÜÙHÚ]]™\ˆ\ÙˆH‹MLHSQS‘QS•
+JJŠJÊHH‹MLHÛÜšÙ\ˆY›İ[]™\ˆ™XY‹MLIÜÈ™XÙZ\[™ØÜËÚ[™Ù™‹Ñ‹MLKX[Y[™Y[›Yš\œİ\İÛİ™\™YœÈ[˜Ûİ™\™Y][\È[ˆ[İ\ˆ™XÙZ\[\[Y[Û›HH[˜Ûİ™\™YÛ™\ËØ[YHİYÚ[™ËÜ™X[Xœ›İÜÙ\‹İ\İÈ˜\ˆ‹MLH
+Š‘Ó‘H\ÈÛÙH[]™\™Y“ÕPĞÑTQ
+Šˆ
+™XÛÛ˜Ú[Yœ›ÛH[™HˆQÑS•ÔÕUTÈÛ™NÈT–PKLŒŒLLLLLˆ›İ[™XØÙ\[˜ÙHØ\Ë˜XÚÙY[ˆ‹MLÎÈ[™HÓÔÑQ\È›İ›ÙXİÛ™JHÛÜšÙ\›[™KLˆ
+ÛÛ›™]
+H™XÙZ\X\ÈXXÚ[Y[™Y[][HÈÛ™KÛ›İYÛ™HÚ]]šY[˜ÙNÈİšXİš[\œÈ[™Ø[\Hš\œİ™Y™\™[˜ÙHX\›š[™È\İŸ‹MLÈ
+Š”
+Šˆ
+‹Ù\]Y[X[›ÛİË[ÛˆÙˆ‹ML‹Û™HÛÜšÙ\‹›È\XØ]NÈT–PKLŒŒLLLLLÈÛÙH[™K“ÕÛ™HHXÚİ\
+HÛÜÙHH‹MLˆXØÙ\[˜ÙHØ\ÈÛˆ^\İ[™ÈÛX\šÙ][ˆ\ÈÜ™\ˆ
+JHœ›İÜÙKYš\œİ^[İ]ˆš\œİ\İ[™ÈØ\™È]\İ™H[ˆHš\œİ\ÚİÜšY]ÜÜ
+ØÜ™Y[œÚİKYØ[\KYY˜][œ™ÈÚİÜÈ[HŒMŒİÛŠNÈ[İ™HY˜[˜ÙYÜØ]™K\ÙX\˜ÚÜ™Y™\™[˜Ù\ËØØ\][Ù]Z[È[ÈHÛÛ\XİÚYX˜\ˆÜˆ\ØÛÜİ\™\ËÙY\ÛÛ˜Ú\ÙHš\ÚX›H]X™[È[™šXÙKÜÛİ\˜ÙHÛÛ™][ÛœË›È˜ZÙHİÜË\ØX›H]ÎLÈ
+ŠH\œÚ\İİÛ™\ˆš[\‹ØØ]YÛÜKÜ›İË[Ü™\ˆÚÚXÙ\ÈXÜ›ÜÜÈH™X[Ù\™\ˆ™\İ\
+X\šÙ]Ü›İ]\Ë—Ü™[Y[X™\™Y\ÈY[[ÜK[Û›NÈ\ÙH^\İ[™È\œÚ\İ[˜ÙHİXÚ\È˜\‹ÛX\šÙ]Ü™YœËšœÛÛ˜ØP“Ô×ÓPT’ÑUÔ‘Q”×Ñ’SX
+K›İ™[ˆÚ][ˆ\ÛÛ]Y\[œİ[˜ÙKİ\İİÜ™K“ÕH]™H™\İ\È
+ÊH˜[Y]HH’SS™\ÛÛ™Y[Y\šXÈ˜[Y\È
+ÛY\œÈ
+È\™Xİ]Y\K›İÛ›H›Ü›H›Ş\ÊNˆ™YÜ™\ÜÚ[Ûˆ\İÈ›Üˆ›[šËÛ™YØ]]™KÛ›Û›[Y\šXËÚ[™\YÙ^XİX›İ[™\H[™İšXİ[šÛ›İÛœÎÈ
 
-## Deal Sniffer opportunity card (ADR-0011; Michael, 2026-10-07)  PRIORITY P0 for the UI
-| ID | Pri | Task | Deps | Status | Agent | Acceptance |
-|---|---|---|---|---|---|---|
-| A-20 | **P0** | Wire 02's `attach_enrichment(conn, spine_or_spine_d, item_id, raw_store, as_of)` as a post-discover workflow step for new/changed Items (like `deliver_wake_events`), together with A-04 | B-15 done | **DONE** (this push): `Enricher` protocol; `EconomicsEnricher` (lane C) and `LaneBEnricher` (lane B) adapters; workflow runs enrichers after ingest and after scoring; atomic, idempotent | 01 | A discovered Item shows real listing dates/seller feedback on its card with no manual call |
-| X-02 | P1 (operator) | **tmpfs /run/user/1001 (1.5 GB) was 100% full**; leftover `a07-spine-pg-*` (Agent 07, ~1.0 GB) and `d13-*` (Agent 04) clusters. Owners asked to delete theirs and use /tmp; harnesses must clean in teardown | none | **DONE** for 07 (tmpfs at 3%; 07's harness now uses short /tmp paths with finally/atexit cleanup and stale-cluster reaping); 04's `d13-*` dir still to clean when it resumes | operator/07/04 | `df /run/user/1001` below 50%; no Postgres start failures |
-| A-19 | P0 | Card contract (`card.schema.json`), `mbos.card` (build/validate/render_text/load_inputs/enrichment_from_item), `spine.record_enrichment` on both backends, `mbos card ITEM`, operator profile as data, ADR-0011 | none | **DONE** (this push) | 01 | 20 card tests; cards valid on lane D/E e2e; enrichment round-trips through the lane-D ledger |
-| B-15 | **P0** | `listing_activity` and `seller` enrichment blocks per source: posted_at, updated_at, age_days, recent_activity[], suspected_relist (from your relist detection + prior sightings), stale_risk (low/medium/high with basis); seller account age, rating/reviews, prior listings, complaint signals, response history, inconsistencies, confidence, **only where the source exposes it; otherwise omit the key (the card prints UNKNOWN)**. Attach with `spine.record_enrichment` + your provenance. Never infer seller data | none | **DONE** (02: `mbos_discovery.enrichment.attach_enrichment`; omits keys the source does not expose; eBay/GSA/Trash Nothing expose dates; real eBay dates + feedback validate on the card) | 02 | eBay fixtures give real dates/seller feedback; Craigslist/Marketplace fixtures give UNKNOWN for seller fields; a test proves nothing is fabricated |
-| C-15 | **P0** | `economics` + `logistics` + `seasonality` + `why` blocks: opening offer, maximum acquisition price, conservative/likely/optimistic resale from the comps spread (FACT-tagged comps), transport cost, days-to-cash; `logistics` from `config/operator_profile.v1.json` (trailer_owned=false, borrowed_trailer_possible=true; fits_truck vs requires_trailer by category/size; trip miles/hours/fuel; difficulty as an economic penalty in the score, **never an automatic rejection**; borrowed trailer needs confirmation); `seasonality` per category (demand_now, hold_likely, peak_months); `why`: deterministic plain-English reasons built from the gates and facts, e.g. â€œOld listing, but the seller updated it 8 days ago, reducing stale-listing risk.â€ | B-15 for the dates | **DONE** @ `2575ed3` (03: economics/logistics/seasonality/why blocks; seasonality sources are search summaries, concrete saw rests on Michael's example) | 03 | Goldens: a concrete saw (year-round) and a riding mower (spring demand, weak October resale) produce different seasonality; a trailer-requiring deal is scored, not rejected |
-| C-16 | P1 | `value_add` block: plan text + **sourced** model-specific risks (failure modes, unusual expensive parts, parts availability, known weaknesses, resale demand). A fixture-first, sourced knowledge base; absent knowledge â†’ omit (UNKNOWN). Must pass `mbos.card.validate_card` (no elementary mechanic advice; every risk has a source or provenance) | none | **DONE** @ `c88cd5a` (03: sourced CPSC recall KB; no general advice; wired by 01 into `EconomicsEnricher`; thin by design: most listings show UNKNOWN) | 03 (+02 sources) | KB entries cite sources; validate_card clean; no entry says â€œcheck compression/spark/fuelâ€ |
-| F-13 | **P0** | Render the card in the Operator UI as the primary opportunity view (replaces the old card page): item header, listing activity, seller (UNKNOWN styled), WHY, economics, value-add plan, seasonality, transport, system status timeline with timestamps, RECOMMENDATION block with step-up flag, **activity trail** (agent, what, why, inputs â†’ provenance links, result, receipt, next action), and the UNKNOWN list. Build from `mbos.card.load_inputs/enrichment_from_item/build_card`; show the YES/NO/MODIFY/HOLD controls beneath the recommendation. Escape all listing text. Keep R14 | A-19 | **DONE** (06: `/item/<id>` is the primary card view, built only from `mbos.card`; 118 reference + 11 lane D/E tests) | 06 | `/item/<id>` shows the card on lane D/E; a hostile title cannot break the page; every receipt appears in the trail; works with zero enrichment |
-| C-17 | P2 | P-03-07 (with 02): a source plan for non-recall model knowledge (service bulletins, parts diagrams, forum-sourced weaknesses) with provenance; Michael's own notes enterable as `manual` entries with provenance (his mechanic knowledge is the best source) | none | **DONE** @ `3569efb` (03: admission standard + 7 ranked routes; `manual` notes path: human provenance first, RECOMMENDATION basis, sourced recall stays first; nothing unsourced can ship) | 03 (+02) | Source plan doc + a `manual` entry path in the KB with tests; nothing unsourced ships |
-| D-17 | P1 | Operator-note store (03 P-03-09): an append-only, receipted `mbos.operator_notes` table (make, model, category, note, basis of knowledge, author, ts, provenance_id â†’ human provenance) plus a reader view for `valueadd.load_manual_notes`. Insert-only; Michael's notes are never edited, only superseded. Role: the Operator UI (human channel) may insert; agents may only read **Spec: Agent 03's `docs/research/agent-03-model-knowledge-source-plan.md` Â§7 (branch research/agent-03-economics). RULED (Option A): a dedicated table with CHECKs (category enum, kind enum, every match group has BOTH makes AND models, statement â‰¤600 chars, author, tz-aware entered_at, basis_of_knowledge, optional https reference_url, basis always RECOMMENDATION never FACT) + a `LESSON_RECORDED` receipt with entity_type `operator_note`; do NOT reuse `mbos.lessons`. Edits/retractions are new rows folded by a `supersedes` chain. The human provenance row is inserted first.** | none | **DONE** @ `77d1f17` (0016: append-only `operator_notes`; DB enforces make AND model, basis RECOMMENDATION, human provenance first; verified end to end by 01) | 04 | Notes round-trip through `merge_manual`; insert-only trigger; agent roles cannot insert |
-| A-21 | P1 | Spine API `record_operator_note(conn, ...)` (persists the human provenance first, then the note) and wire the notes into `EconomicsEnricher` (`kb=merge_manual(load_kb(), load_manual_notes(...))`) | D-17 | **DONE** (this push): `spine_d.record_operator_note/operator_notes_document`, `EconomicsEnricher` merges Michael's notes after sourced recalls, `mbos note add/list` (human channel); static guard keeps it out of workflows (R14) | 01 | A note entered for a make+model appears on that model's cards as RECOMMENDATION with Michael's provenance, after any sourced recall |
-| F-14 | P1 | â€œAdd what you know about this modelâ€ prompt on cards that show no sourced model knowledge; a form on the human channel calling A-21 (author = Michael, basis chosen from the allowed list; elementary advice and `FACT` refused with the reasons shown) | A-21 | **DONE** @ `c68a33c` (06: server-set author + PIN; every refusal explained; note shows on the next card as Michael's RECOMMENDATION) | 06 | Michael enters a note; it shows on the next card with provenance; refusals are explained |
-| B-16 | P2 | P-03-08: CPSC recalls adapter (read-only; endpoint `https://www.saferproducts.gov/RestWebServices/Recall`, `&format=json`; first read the programmer's guide for response fields and rate limits, which are UNKNOWN today), producing sourced recall entries for 03's KB with the source URL and date. Fixture-first; live only behind a flag | none | **DONE** @ `ab61f02` (CPSC read-only adapter; programmer's guide confirmed fields; rate limit UNKNOWN; review list for incomplete entries) | 02 (+03) | Fixture responses become KB entries that pass 03's admission standard; no scraping |
-| G-07 | P1 | Re-run card acceptance (`python -m mbos_qa card`) and the release candidate (`python -m mbos_qa spine --rc`) at the latest heads. Re-vendor `card.schema.json` (additive optional fields: item.flags, timeline[].dry_run, why_provenance) | E-15 | **DONE** @ `5e66a02`: **release candidate READY for the dry-run scope** (105 passed, 0 failed); card suite 232/11; 01 fixed the 5 open card items this push | 07 | Both reports; remaining reds mapped to owners |
-| G-06 | **P0 (release)** | Re-run G-04 (`python -m mbos_qa spine --rc`) at the latest heads (01 `HEAD`, 04 `0015+`, 05 after E-13) and publish the verdict; remove the strict-xfail markers that flip (F-22, F-23 fixed by R21) | E-13 | **DONE** (superseded by G-07) | 07 | RELEASE_CANDIDATE.md reads READY or lists exactly what is left |
-| G-05 | P1 | Card acceptance: no fabricated seller/date/seasonality data; every card datum has a basis or is UNKNOWN; elementary-advice lint on lane-C content; trail = receipts 1:1; card_hash determinism; adversarial listing text; works on both backends | A-19 | **DONE** @ `3c330e8` (87/236 failing, all mapped to F-26â€¦F-39); 01 fixed F-26â€“F-38 this push; F-39 WONTFIX (Michael's own vocabulary has HOLD) | 07 | Suite green; defects filed as findings |
-| E-13 | **P0 (release blocker)** | 07's G-04 verdict NOT READY: (1) F-24: confirm R20 covers a guard denial from an UNREADABLE or CORRUPT PANIC state and L1/L2, not only an engaged freeze: `approvedâ†’cancelled_by_freeze` (or failed) in the same transaction as ACTION_FAILED; run 07's regression test `test_a_request_denied_by_a_freeze_cannot_fire_once_the_switch_is_readable_again`. (2) F-25 / R22: dry-run provider lookup reads the durable `mbos.effector_calls`; crash after send â†’ executed (item ACTED); crash before send â†’ failed + RECONCILED. (3) F-22: a propose-only grant for `publish.*` (`publish.listing.create`) to the drafting agents (07, 01), tier 0, publishing category, default deny otherwise | none | **DONE** @ `ecf1600` (F-24: all G7:PANIC_* reasons incl. empty/corrupt/unavailable state â†’ cancelled_by_freeze in the same txn; F-25/R22: durable provider ledger = `mbos.effector_calls`, crash-after-send settles executedâ†’ACTED, crash-before fails + RECONCILED; F-22: propose-only publish grants). Verified by 01 on 05 @ `e6afc28` | 05 | 07's `python -m mbos_qa spine --rc` strict xfails F-22 flips; F-24 test passes; A5 passes under R22 |
-| E-14 | P1 | Make A-18 trivial: in `mbos_governance.spine_adapter` expose plain functions `engage_panic(gov, level, target, actor, reason)`, `release_panic(gov, level, target, actor, reason)` (release as approver) with the L3 hooks wired, and a `schedule_reconcile` helper (a DBOS scheduled workflow factory) that 01 registers at worker start. Document the exact call sequence | none | **DONE** (05 @ `408bcad`: engage_panic/release_panic/schedule_reconcile + hooks wired) | 05 | 01's A-18 becomes a wiring change with tests on lane D/E |
-| B-17 | P2 | P-02-11: NHTSA adapter (recalls/complaints by vehicle for `project_vehicle`), read-only, fixture-first; confirm endpoints on the live site first; same admission standard and R23 | none | **DONE** @ `43de283` (NHTSA read-only adapter; per-model-year, so every entry is held on the review list until KB supports years) | 02 | Fixture responses become KB entries / review items; nothing unsourced |
-| C-18 | P1 | Model-year support in the KB matcher (02's finding): `match[].years` (range or list). A year-specific entry (NHTSA) matches only when the LISTING states a year (extracted from the title as INFERENCE, with the evidence shown); a listing with no year does NOT match a year-specific entry (UNKNOWN, never a false safety claim). Flip `vehicle_safety.KB_SUPPORTS_MODEL_YEARS` is then 02's one-line change (B-18). Keep the numeric-token guard asymmetry (shipped KB vs Michael's notes) | none | **DONE** @ `d9bceea` (match[].years; yearless listing never matches a year-specific entry) | 03 | Tests: a 2018 recall does not flag a 2021 listing or a yearless one; a 2018 listing matches |
-| B-18 | P2 | After C-18: flip `KB_SUPPORTS_MODEL_YEARS`, re-run the NHTSA fixtures through R23 (complete entries auto-admit, incomplete stay on the review list) | C-18 | **DONE** @ `bae240e` (02: every NHTSA entry carries `years`; the review list holds only genuinely incomplete entries; unique-id guard added) | 02 | Auto-admitted entries carry `years`; the review list shrinks to genuinely incomplete ones |
-| B-19 | P1 | Close the first-live-run CLI gap you listed: `mbos-discover run` covers alert e-mails, comps, CPSC and NHTSA (each behind its live flag, read-only, fixture-verified), so the first live run needs no ad-hoc script. Include a `--dry` mode that prints the exact requests it would make | none | **DONE** (02: `mbos-discover run --dry` for every source; zero network without the live flag) | 02 | `mbos-discover run --source <each> --fixtures` green; `--dry` lists requests; no network without the live flag |
-| E-15 | **P0 (release)** | 07 F-40/F-41. (1) Any approved request the gateway refuses for a non-freeze reason (STEP_UP_REQUIRED, AUTH_CONTEXT_REQUIRED, payload mismatch, expiry, hash) settles `failed` with ACTION_FAILED in the same transaction (approvedâ†’failed edge), never stays `approved` (01 now also refuses a YES that lacks the PDP's step-up at decision time). (2) Narrow `agent-01-coordinator`'s propose-only grants to what its planners can emit (comms.*, offer.*, purchase.create, publish.*); remove money.payment.send, price.change, commit.external until a lane needs them; per-lane proposer identities (planners tag proposals with their lane). `comms.voice.call`, `comms.message.send`, `schedule.appointment.create` stay ungranted | none | **DONE** (05 @ `87f0b53`: non-freeze guard refusals settle `failed`; grants narrowed w1.8; `proposer_for`). 01 adopted the `lane` tag: proposals carry `lane`; `proposed_by` = `proposer_for`; None creates no request and the card says policy blocked | 05 | 07's F-40 regression passes; PDP matrix test shows no unneeded grant |
-| F-15 | P1 | Tag each proposed action with `lane` (CommsActionPlanner: `agent-06-communications`; publishing drafts: `agent-07-marketing`) so lane E can stamp `proposed_by` (07 F-41). Capabilities nobody holds are never proposed | none | **DONE** (06: planner actions carry `lane`; `proposed_by` verified on lane D/E) | 06 (+07 for publishing drafts) | `proposed_by` equals the drafting lane in the ledger; a capability no lane holds creates no request |
-| E-16 | P1 | 06 P-06-16: the PDP denies any comms.*/publish.* payload that has a key named `binding` at ANY depth, even `binding: false`; drafting lanes hit it by accident. Check TOP-LEVEL keys only (or document the full reserved-name list: offer, offer_amount, counter, counter_offer, binding...) and add it to the policy docs so 06/07 can pin their planners | none | **DONE** (05 @ `4e3c10f`: reserved keys scoped to top level; four unambiguous amount names at any depth; `binding_key_violations` for planner tests) | 05 | A draft with a nested `binding: false` is allowed; a top-level `offer` is still denied (BINDING_UNDER_COMMS) |
-| X-03 | P1 | Remove committed `build/` from lanes that have it (01 done): `git rm -r --cached build`, add to .gitignore. A committed `build/lib` makes `git archive` + pip install silently run OLD code | none | **DONE** (verified 2026-10-08 by 01: no tracked build/ files on any lane branch 02-07) | ALL (02, 03, 04, 05, 06, 07: check `git ls-files, filtered with grep -E "(^//)build/"` (nested too: 03's was `economics/build/`)) | `git ls-files` shows no build/ |
-| F-16 | P2 | â€œEditâ€ and â€œRetractâ€ on /notes: edit = a new note with `supersedes`; retract = `spine_d.retract_operator_note(conn, note_id, entered_by, entered_at, reason)`. Server-set author, PIN, every refusal reason shown, Michael-only (R14). Tests on lane D+E: edit-then-card shows the head; retract-then-card drops the risk | none | **DONE** (lane 06; see its AGENT_STATUS / handoff) | 06 | As described |
-| G-08 | P1 | Independent verification of the two things only 01 has tested: (1) A-15 `workflows.propose_followup` (adversarial: follow-up on a non-ACTED item, a follow-up the PDP denies or no lane may propose, a follow-up while PANIC is engaged, a double submit of the same follow-up, a crash between request creation and the gate starting, YES without step-up, a stale approval after a freeze); (2) `tools/release_gate.py` (does it fail when it should? plant a stale install, a tampered chain, a live effector row, a contract change, and confirm each turns the gate red) | none | **DONE** @ `7342abc`: found F-42/43/44/45 (A-15) and F-46..F-49 (gate); 01 fixed all eight this push; 07 to re-verify (G-09) | 07 | Findings filed with owners; the gate is shown to fail on each planted fault |
-| G-09 | P1 | Re-verify 01's G-08 fixes: A-15 (F-42 orphan gate recovery incl. `recover_orphan_gates` at worker start and every 60 s, F-43 receipt for a blocked follow-up, F-44 clean refusal, F-45 row lock) and the hardened gate (contract byte pin, suite floor, extra/changed installed files, fetch-by-default, a real ACTION-path check). Plant the same four faults plus new ones and confirm red | none | **DONE** (lane 07; see its AGENT_STATUS / handoff) | 07 | Findings or "no findings"; the gate shown red on each planted fault |
-| C-19 | **P0** | ADR-0012 / Aria message ARIA-20261007-1840. **Remove the universal `capital_and_risk.min_profit_flip` (150) and `min_profit_service` (100) hard gates** (`min_profit_ok`, `ev_min_profit_ok`, and the `alert_thresholds.ev_multiple_of_min_profit` that derives from them) and replace them with class-aware gates driven by `config/operator_profile.v1.json` `deal_classes` (data). Add as inputs/outputs: capital velocity, cash multiple, catastrophic-downside probability, parts-out floor, liquidity, personal-use value, current cash context (null = unknown, never assumed), numeric seasonality. Ranking objective â‰ˆ risk-adjusted profit Ã— confidence Ã— capital velocity, with every component separately visible in the scorecard. A CAPITAL_INTENSIVE class keeps a meaningful absolute-profit requirement (as data). Goldens from Michael's three examples: (1) a 65-inch TV at ~$30 (small absolute profit, ~1 hour, binary panel risk, parts-out floor) must NOT be PASSed for profit < $150; (2) an older riding mower late in the season with funds tight (big spread, cash trapped for months) must be flagged as the wrong buy today; (3) a non-running Honda Recon 250 at ~$300 (higher exposure, different class, hunting-season liquidity) | none | **DONE** @ `4f49c8b` (engine 0.12.0, class-aware gates; TV MAYBE not PASS) | 03 | Goldens pass; no constant profit floor remains in code or the default config except per-class data thresholds; `ev_multiple` alert rule re-based; 13+ existing goldens re-baselined with a note |
-| C-20 | P1 | Re-rank the morning digest (C-08) by the same objective so a quick small flip can outrank a big slow one, with the reason shown per row | C-19 | **DONE** @ `3c3201c` | 03 | Digest golden: TV above mower today; each row names why |
-| F-17 | P1 | Operator UI: show opportunity class, cash multiple, capital velocity, downside, liquidity, skill fit and the "why a small fast flip can outrank a big slow one" line (new optional card fields); re-vendor `card.schema.json` | none | **DONE** (lane 06; see its AGENT_STATUS / handoff) | 06 | Cards for the three training examples render the fields; UNKNOWN styled |
-| G-10 | P1 | Acceptance for ADR-0012: the new card fields are honest (UNKNOWN without numbers), no universal floor in code/config after C-19, the three training examples behave as specified, cash context never assumed | C-19 (for the engine half) | **DONE** (07; findings F-51..F-68 below) | 07 | Findings or no findings |
-| E-12 | P1 | Policy for the recommendation actions: `offer.*`, `offer.*.counter`, `purchase.*` map to categories offer/purchase with tier 0 + step-up + caps derived from MICHAEL_DECISIONS #1 (conservative defaults, data); default deny. **R20:** a freeze-refused approved request becomes `cancelled_by_freeze` (06 P-06-11) | none | **DONE** @ `c507ac0` (offer/counter/buy policy, step-up, caps; R20 on lane D) | 05 | PDP decisions for CONTACT/OFFER/COUNTER/BUY capabilities tested; R20 behaviour tested on lane D |
-| D-16 | P1 | Confirm the UI/reader roles can read `mbos.artifacts` content (enrichment blocks) and that `update_item_doc` allows `research` patches by lane agents; add a view `v_item_card_inputs` if it simplifies the UI | none | **DONE** (04: `append_item_research` atomic append + `v_item_card_inputs`); 01 adopted it | 04 | UI role reads enrichment on lane D; documented |
+HY\ˆH\İš^[ˆY™™XİY
+È[™\]Z\™YØ]\Ë\ØÛÜÙH™[XZ[š[™È˜\Ù[[™H˜Z[\™\È
+Û›İÛˆ\İÜ™\Ø[WÙŒÎXÛØÚÙ][Y[İ][ˆ[[‹™KY^\İ[™È‹LÌˆ\İÊK[ˆ™XÛÜ™XXÚØ\ÙHTÔËÑRSÓ“Õ•Sˆ[ˆØÜËÚ[™Ù™‹Ñ‹MLKQ‹ML‹XXØÙ\[˜ÙK[X]š^›YÛˆHØ[YH\Y˜XİÚ]™X[İYÚ[™ÈØÜ™Y[œÚİÎÈ™]\ÙHÛİ™\™YØ\Ù\Ëˆ™\Ù\™Hİ\œ™[ÛÙH[™HİÛ™\‹YØ]Y]™HRH™[ØYÈ]\ÙHÙˆNŒˆÕTT”ÑQQHİÛ™\ˆ™\İ[YH]NŒÌˆ‹MLˆ
+Š‘Ó‘JŠˆ
+™XÛÛ˜Ú[Yœ›ÛH[™HˆQÑS•ÔÕUTÈÛ™JHÛÜšÙ\›[™KLˆ
+ÛÛ›™]
+HX]š^Ø\Ù\È™XÛÜ™YÛˆHš[˜[\Y˜XİÈš\œİ]šY]ÜÜØÜ™Y[œÚİÚİÜÈØ\™ÎÈ™\İ\\\œÚ\İ[˜ÙH\İ\ÜÙ\ÈÛˆ\ÛÛ]Y[œİ[˜ÙNÈš[˜[[YØ]H[X™\œÈ[ˆ™XÙZ\ˆ™\ÜXİX[™^ÕT•[™›İ[™YÛÜİ\™NÈÈ›İX\šÈ›ÙXİÛ™Hœ›ÛH[™HÓÔÑQŸ‹MM
+Š”
+Šˆ
+ŠQQ–HH
+›İ[™Ú[H™\šYZ[™È‹MLÈÛˆİYÚ[™ËŒ‹LLLLŒNMVŠNŠŠˆ
+JHHØ]™Y\İÚÚXÙ\È
+X\šÙ]Ü™YœØ
+H\™Hİ™\Üš][ˆHH‘Q•TÑQ™\]Y\İˆY\ˆH˜[Y™\]Y\İ
+˜Y]\ÈLŒX^	L
+HH]\ˆ˜Y]\Ï^™\]Y\İ™\XÙ\ÈHİÜ™YÚÚXÙ\ÈÚ]Ü˜Y]\Îˆ	Ş	ßXH˜[YÚÚXÙ\È\™HÜİ[™HZ[ˆÛX\šÙ]ØY
+[ÛÈY\ˆH™\İ\
+H[ˆÚİÜÈH˜[Y][Û‹Y\œ›Üˆ˜[›™\ˆÚ][\Hš[\œËˆ\œÚ\İÓ“HÚÚXÙ\È]\ÜÙY˜[Y][ÛÈ[ˆ[˜[Y™\]Y\İ]\İX]™HH\İÛÛÙÚÚXÙ\È[İXÚY[™H™^Z[ˆØY]\İİ[™\İÜ™H[Kˆ\İˆ˜[Y™\]Y\İ[˜[Y™\]Y\İZ[ˆØY
+[™H™]È\[œİ[˜ÙJHH˜[YÚÚXÙ\È™\İÜ™Y›È\œ›Üˆ˜[›™\‹ˆ
+‹Ù\]Y[X[›ÛİË[ÛˆÙˆ‹MLËÛ™HÛÜšÙ\‹›È\XØ]NÈT–PKLŒŒLLLMLNÈÛÙH[™K“ÕÛ™HHXÚİ\
+HÛˆH‹MLÈ\Y˜XİLMŒŒXÙˆ
+JH[ˆX]š^Ø\Ù\ÈLMˆ
+Ù^X›Ø\™
+KŒH
+ML
+KŒMˆ
+˜XÚË[˜]ŠKŒN
+SY\ØØ\Hš^\™JKÌËÌ[ˆH\ÛÛ]YİYÚ[™Èœ›İÜÙ\È]Y]\X[TÔÈLMÈ
+Ø]™Y\ÙX\˜ÚÙY\ÈİšXİ[Z]ÊKŒLˆ
+™X[™XY[Û›H[šÈÛXÚÊKŒNH
+˜]ÈÛİ\˜ÙKRQÛÛ\\š\ÛÛŠNÈİ\H]šY[˜ÙHÜˆİÛ™Ü˜YHÈ“Õ•S‹ÔT•PSÈ
+ŠH˜Y]\ÈY™XİÓÓ‘’T“QQHXÚİ\™XYˆÜ\˜]Ü—İZKÛX\šÙ]ÜÙX\˜ÚœNŒLÍ˜Ù\È\İH›İ[™
+]™\œÚ[™WÛZ[\Ê‹‹ŠKJX[™H\][Ûˆš[\ˆ\Ù\È]›İ[™Y˜[YKÛÈLŒHZH\ÜÙ\ÈHLZH[Z][™LTÔÈ\È›İ›İ™[ÈÛÛ\\™H[œ›İ[™Y›İ[™Û›H›Üˆ\Ü^KYH™X[›İ[™\Hš^\™HLœÈLŒH
+™X[]™\œÚ[™K›İ\œÙ\‹[Û›JNÈ
+ÊHØ]™Y\ÙX\˜Ú\œÚ\İ[˜ÙNˆ™\›ÙXÙH]Üš]\šXWİ×Ü]Y\XØØ]™WÙ›Ü›X
+X\šÙ]ÜÙX\˜ÚœNŒLX\šÙ]İšY]ËœNŒJH›ÜZ[—ÜšXÙK›Øİ\ËØØ]YÛÜšY\Ë›İÈÜ™\È™\Ù\™H›İYÚØ]™KÜ™[ØYÜ™\İ\ÜˆØİ[Y[[œİ\ÜYÜš]\šXHÚ]İ]Ú[[H™[^[™ÎÈ
 
-## Michael (business-policy only; nothing blocks the dry-run MVP)
-- MICHAEL_DECISIONS #1â€“#5 are unchanged.
-- **#7 (new, raised by 02):** may the system pursue flips of items given away in community gift groups (Trash Nothing)? Some groups forbid reselling. Default: these items are flagged `needs_review`, and no flip is pursued without Michael's case-by-case YES.
-- **#8 (new, optional):** apply for eBay Marketplace Insights (Limited Release) for sold comps. Until then, sold comps come from manual entry.
-- **Optional:** an eBay developer keyset for live read-only eBay discovery (Agent 02's runbook). Not required; fixture mode runs the same code.
+Hš^Û›HÛÛ™š\›YYØ\Ë™\[ˆY™™XİY
+Èš[˜[Ø]\Ë™XÛÜ™ÒKØÛÛ[X[™Ëİ[Y\İ[\ËØÛİ[È[ˆØÜËÚ[™Ù™‹Ñ‹MLKQ‹ML‹XXØÙ\[˜ÙK[X]š^›Yˆ›È]™HRH™[ØY[œİ[ËZY\ØYÙKÜ™Y[X[ËÛÛXİˆLŒ\[Øš[Hš\œİXØ\™İ^\ÈH\ØÛÜÙY[Z]][Ûˆ‹MLÈ
+Š‘Ó‘JŠˆ
+™XÛÛ˜Ú[Yœ›ÛH[™HˆQÑS•ÔÕUTÈÛ™JHÛÜšÙ\›[™KLˆ
+ÛÛ›™]
+HÚ^Ø\Ù\È
+È™YH]Y]È]™H]šY[˜ÙHÜˆÛ™\İİÛ™Ü˜YNÈ›İ[™\H\İ˜Z[ÈÛˆÛ›İ[™[™È[™\ÜÙ\ÈÛˆš^ÈØ]™Y\ÙX\˜Ú›İ[™]š\\İÈš[˜[Ø]H[X™\œÈ[ˆ™XÙZ\È]™H™[ØY™[XZ[œÈİÛ™\‹YØ]YŸLÌˆ
+Š”JŠˆ
+
+H‹LLÎˆ™XÛÜ™Ú[X[—Ú[œ]™\ÙX\˜Ú[šY\Èš[Û]HHœ›Ş™[ˆ][H™\ÙX\˜ÚØÚ[XH
+^˜H[\™YØX˜[YX
+K\›š[™ÈX›ÜÈ]Y]ÛÛ™›Ü›X[˜ÙH™YY\ˆH][İKˆÛÛ™›Ü›H[NˆH˜[YH[™]]ÜˆÛÈ[œÚYHš[™[™Ø\ÈÛ™HØ[›ÛšXØ[”ÓÓˆİš[™ÈÈ˜[YHˆ[X™\ˆÜˆİš[™Ï‹™[\™YØHˆYˆŸXÈH]]Üˆ[ÛÈİ^\È[ˆÛİ\˜ÙWİ\šX\È[X[Y˜È›È^˜H›Ü\Y\ËˆØ[YH›Üˆ]\İ][Û˜[šY\ÈYˆ^HØ\œH^˜\ËˆZYÜ˜][Ûˆ˜XÚÙš[È›İ[™È\İXİ]™H
+\[™HÛÜœ™XİY[NÈÛ[šY\È\™H\İÜJH›Û™H
+Š‘Ó‘JŠˆ
+™XÛÛ˜Ú[Yœ›ÛH[™HQÑS•ÔÕUTÈÛ™JHÛÜšÙ\›[™KL
+ÛÛ›™]š\ÚÈYÚ
+HX›ÜÈ]Y]ÛÛ™›Ü›X[˜ÙHİ^\ÈÜ™Y[ˆY\ˆH][İKHØÛÜHİ™\œšYH[™[ˆ]\İ][ÛÈ™\šYWØÚZ[ˆÒÈŸËLÌH
+Š”JŠˆ
+ÊH™XYH‹LLÈÚ\NˆËLËĞËL™XY\œÈXØÙ\H˜[YHœ›ÛHš[™[™Ø
+”ÓÓˆİš[™ÈX›İ™JH\ÈÙ[\ÈHÛ^˜HšY[ÎÈ\İÈÚ]›İÚ\\ÎÈH[™Ú[™HX\šÜÈ[H[X[‹X]\İY\È™Y›Ü™HLÌˆÚ\H
+YÜ™YY\™JHT’ÑQ
+İÛ™\ˆ]›İŒ‹LLLNˆ›ÈX›Ü‹\Ù\šXÙHÛÜšÎÈÛÙH[™\İÜHÙ\
+HÛÜšÙ\›[™KLÈ
+ÛÛ›™]
+H][İH	ÌOˆQTÈ[™	LOˆPVP‘Hœ›ÛHH™]ÈÚ\NÈÛÚ\Hİ[™XY‚ŸKMLˆ
+Š”JŠˆ
+KT–PKLŒŒLLLÌJHÛÛËÚ[˜›ŞÜXÚİ\œXİ]\ÈÙ[X[XÜÎˆ
+JHX\™X]\ÈX›\ÚYœ›ÛHHÙ\\˜]HØY[˜ÙH
+HÙ\ÜÚ[ÛˆÜÙXØÌŠHÜˆ™Y›Ü™KİÚ[HHŞ[˜Ú›Û›İ\È[]™\ˆ[œË›İÛ›H]™\HŒÈYØZ[œİHÌÈÈ
+ŠHİ\œ™[WÜ[›š[™Ø\ÈÛX\™YÛ›HQ•TˆHÛÛ\][ÛˆX\™X]\ÈX›\ÚY[™Ø\œšY\ÈH\ÚÈY
+Èİ\[YHÚ[H[]™\š[™ÎÈ
+ÊHÙ\ÜÚ[Ûˆİ]\È\È\ŞXØYXØS’Ó“ÕÓ˜ˆH[Üˆİ[H
+ØœÙ\™YØ]Û\ˆ[ˆÜÙXØ
+H™XY[™ÈZY[ÈS’Ó“ÕÓ˜Ú]]ÈYÙK™]™\ˆYXˆ\™Ù]Y\İÈ›ÜˆXXÚˆ›È™]ÈY[[Û‹ØÜ™Y[X[ËÜÙ][™ÜÈ›Û™H
+Š‘Ó‘JŠˆ
+Nˆ™X]\š[™È[]™\KHÌˆÚ[H\ŞNÈˆİ\œ™[WÜ[›š[™ÈØ\œšY\ÈY
+Èİ\YØ][™ÛX\œÈY\ˆHÛÛ\][Ûˆ™X]ÈÎˆİ[KÛ[OˆS’Ó“ÕÓˆÚ]YÙNÈˆXÚÈİYÙH\ÈH]™]™\ˆÓÓTUQİ™\ˆ“ĞÒÑQˆLH\İÎÈÛÛ[Z]ÈØ™LMŒŒØXŒY˜Î™YÈØ]Ú\ˆ™\İ\YŒÎN–ÈT–PKLÌÈİ]\ÈYÈš^Y
+HH
+ÛÙNÈÚYHÛÜšİ™YJH\İÈÚ]Ûİ[ÎˆX\™X]\š[™ÈHÛ™È[]™\ˆÚİÜÈH\ÚÎÈİ[KÛ[Ú]™\ÈS’Ó“ÕÓˆÚ]YÙNÈØœÙ\™YŒÌŒM–ˆ™XY[™È
+İ\œ™[WÜ[›š[™Îˆ[Ú[HHÌH[]™\HØ\Èİ\[™ÊHØ[››İ™Xİ\ˆŸUTÑKLH
+Š”
+İÛ™\ŠJŠˆUTÑQĞ–WÓÕÓ‘TˆX[ÛšY™™\‹ÓP“ÔÈ™]È]™[ÜY[[™[Ù[\Ü]ÚİÜYHİÛ™\ˆ
+T–PKLŒŒLLLL
+Kˆ™YYYœ›ÛHHÜİ\š]š[YÙYXİÜˆ
+›İXÚİ\
+NˆİÜÚÛÛÛËÙ\Ü]Ú\‹œX
+]^X›ÜËY\Ü]Ú\ŠH[™H[Ù[[][˜Ú[™ÈÛÛËÚ[˜›ŞÜXÚİ\œXY[[Ûˆ
+]^X›ÜË\XÚİ\
+HÛ˜ÙHH[‹Y›YÚ‹MLÈÛÜšÙ\ˆ[™ÎÈÈ›İÚ[[˜ÛÛ[Z]YÛÜšËˆ™\İ[YNˆİÛ™\ˆØ^\ÈÛË[ˆ™\İ\\Ü]Ú\ˆ›Û™H
+ŠĞSÑSQ
+Šˆ
+İÛ™\ˆ™\İ[YY]NŒÌ‹T–PKLLÌÈ›İ[™ÈØ\ÈİÜY›ÈÜİXİ[Ûˆ™YYY
+H‹ØHØÚİÜÈ›ÈÛÛËİÛÜšÙ\‹œX[™›È\Ü]Ú\‹ÜXÚİ\[Ù[][˜Ú\È™XÙZ\ØÜËÜ™XÙZ\ËÜXÚİ\ĞT–PKLŒŒLLLL[İÛ™\‹\]\ÙKXÛÛ\]K›YŸ‹MMH
+Š”
+Šˆ
+ŠQQ–HH
+T–PKLŒŒLLLŒLš\İX[›İ™[˜[˜ÙJNŠŠˆ‹MM\È“ÕXØÙ\YÛˆš\İX[]šY[˜ÙHY]ˆHŒHØ[\HØÜ™Y[œÚİ\Ù\ÈHš[™KZ][HY™\œØ\šX[š^\™H
+\ØØ\YX[XÚ[İ\È]KK[Z[H˜Y]\ÊNˆÙY\]\ÈÖS•UPÈÙXİ\š]K]\İ]šY[˜ÙKX™[YÛËİÜ™YÙ\\˜][Kˆ™X[X\šÙ]XÙHXØÙ\[˜ÙH™YYÎˆš[˜[\ÛÛ]YİYÚ[™ÈYÙHÛˆHXİX[^\İ[™ÈÔĞHØXÚKH™X[\İXÈ\ØÛÜÙYÛÛØ^HÙX\˜ÚHš\ÚX›Hİ\œ™[ØXÚH[Y\İ[\È›È˜XœšXØ]Y\İ[™ÜÈÜˆİÜË›È™\İšXİY\Ûİ\˜ÙHØÜ˜\[™ËˆYˆHÜš]\šXHX]Ú›İ[™ËÚİÈ]Û™\İK[ˆYHÙ\\˜][HX™[Yœ›ØY\ˆœ›İÜÚ[™È^[\Kˆ\ˆØÜ™Y[œÚİ™XÛÜ™Y]Y]Nˆ^XİÛÙHÒKT“ÜÜšY]ÜÜXİ]™Hš[\œËÛİ\˜ÙKØØXÚHY[]KØ\\™H[YKˆÛÛ\\™H\Ü^YY\İ[™ÈQÈ[™ÜšYÚ[˜[[šÜÈYØZ[œİHØXÚHÈİXœİ[X]HŒNK[ÙHX\šÈŒNHS•‘T’Q’QQˆİ\H“Õš\œİšY]ÜÜ[™[YÙKˆZXÚY[Ø[È\š[ÙXÈØÜ™Y[œÚİÈ›Üˆ\XH™]šY]ÈÙˆH\İ[™ÜËYš\œİ^[İ]
+™Xİ\œš[™È[]™\˜X›JKˆ
+‹™]\ÙHH^\İ[™È‹MMš[˜[XØÙ\[˜ÙHÛÜšÙ\È›È\XØ]HÛÜšÙ\‹›È™]È™X]\™H[™NÈÛÙKØœ›İÜÙ\ˆ[™K“ÕÛ™HHXÚİ\
+H]šY[˜ÙH[™\ˆØÜËÜ™XÙZ\ËØ
+ÈØÜËÚ[™Ù™‹Ñ‹MLKQ‹ML‹XXØÙ\[˜ÙK[X]š^›Yˆ›È]™H™[ØY
+İ[[˜]]Üš^™YÈ\™[\›İ˜[™\]Y\İ[˜[œİÙ\™Y
+Kˆ‹MM
+Š‘Ó‘JŠˆ
+™XÛÛ˜Ú[Yœ›ÛH[™HˆQÑS•ÔÕUTÈÛ™JHÛÜšÙ\›[™KLˆ
+ÛÛ›™]
+H™X[XØXÚHš\œİ]šY]ÜÜ
+È[\YÙHØÜ™Y[œÚİÈÚ]Y]Y]KŒNH™\™XİŞ[]XÈš^\™H]šY[˜ÙHÙ\\˜]Y[™X™[YÈ]™H™[ØYİ^\ÈİÛ™\‹YØ]YŸ‹MMˆ
+Š”
+Šˆ
+ŠQQ–HH
+T–PKLŒŒLLLŒLKÛÛ™š\›YYØ]™KY›Ü›HY™Xİ
+NŠŠˆ‹MMXÍNØÜ\˜]Ü—İZKÛX\šÙ]İšY]ËœXÜØ]™J
+X
+[™\ÈNLKLŒ
+HZ[ÈY[ˆšY[ÈÛ›Hœ›ÛHÙ^]ÛÜ™Ë˜\ÙK˜Y]\ËZ[—ÜšXÙKX^ÜšXÙK[K™\]Z\™Y™Y™\œ™Y^ÛYH
 
-## Deal Sniffer product package (ADR-0013; Aria ARIA-20261007-1905; Michael, 2026-10-07)
-Read `docs/product/DEAL_SNIFFER_START_HERE.md` first. Everything here is DRY-RUN and additive: no frozen contract changes, no external action. MVP release work (C-19, G-09, G-10, F-11, F-17) keeps priority over everything below.
-| ID | Pri | Task | Deps | Status | Agent | Acceptance |
-|---|---|---|---|---|---|---|
-| A-22 | **P0 (operations)** | Runtime foreman/watchdog (Aria: all seven agents can idle at once). `tools/foreman.py`: read-only; fetches origin, reads each lane's AGENT_STATUS + READY_QUEUE, prints per-agent {state, claimed, next READY task for that agent, stale-queue warning when the queue's recorded heads differ from origin}, exits 2 when an agent is idle/WAITING while READY work exists for it. `--wake-text` emits the exact one-line prompt to send to an idle agent. Host-side scheduling (cron/systemd + starting sessions) is an OWNER action (OWNER_ACTIONS) because I cannot launch sessions | none | **DONE** (this push): `tools/foreman.py` (read-only; `--wake-text`; exit 2 = idle with READY work; stale-queue warning) + 3 tests. FACT at first run: 07 IDLE with G-09/G-10/G-11 READY. Host scheduling is OWNER_ACTIONS D2 | 01 | Test over a fixture git repo: idle-with-work exits 2 and names the task; busy or truly blocked exits 0; run against real origin prints the table |
-| A-23 | **P0 (unblocks 03/04/06)** | `mission.schema.json` (additive): `mission` {target_usd, period, hours_available (nullable = UNKNOWN), capital}, `capital_ledger` {protected_principal, earned_working_capital, capital_deployed, realized_profit, available_to_deploy} with the invariants as validator code, and `mission_plan` {legs[] (item_id/opportunity_class/cash_at_risk/expected_net low-likely-high/days_to_cash/probability/hours), projected_week {low,likely,high}, remaining_gap, confidence, replace_if_stale[], recommendation incl. DO_NOT_SPEND}. Examples + `mbos.mission.validate`. No frozen file touched; pinned by `pin_contracts.py` | none | **DONE** (this push): `mission.schema.json`, `mbos.mission.validate_mission/ledger/plan`, examples in `examples/mission/`, `operator_profile.mission` (target/hours null = UNKNOWN); 19 tests; pin now 26 files | 01 | Examples validate; invariants rejected when violated (principal never negative; available_to_deploy = principal + earned - deployed); `FROZEN.sha256.json` re-pinned; interop note in ROUND_TWO_INTEGRATION |
-| A-24 | P1 | Richer classes on the card: SERVICE_JOB / OTHER_OPPORTUNITY in `deal_classes` data and `card._class_of`; `category_tags[]` (mechanic_special, project, parts_donor, quick_turn, auction_candidate, wanted_match, contractor_opportunity) rendered only with basis+provenance, else absent | B-21 for tag source | **DONE** (this push): SERVICE_JOB class; `ENRICHMENT_BLOCKS` += `category_tags` on both spines; card `category_tags[]` (INFERENCE + quoted evidence + lane provenance; else dropped; UNKNOWN when none); card.schema additive; 3 tests. 02's B-21 emits it | 01 | Card tests: service job gets SERVICE_JOB without a flip-style multiple; unknown inputs stay UNKNOWN; no tag without a basis |
-| A-25 | P1 | `inventory.schema.json` + `merchandising.schema.json` (additive): canonical inventory object (facts[] each with `basis` seller_stated/system_inferred/verified/UNKNOWN + provenance, defects[], evidence[]) and `views[]` per audience; `mbos.merchandising.lint(inventory, view)` rejecting any view that drops/softens a known defect, changes price/terms or evidence basis, asserts an unsupported claim as verified, or drops provenance | none | **DONE** (this push): `inventory.schema.json`, `merchandising.schema.json`, `mbos.merchandising.lint/validate` (verbatim defects, terms equal, no basis upgrade, provenance kept, no condition overclaim, no unearned 'verified', invented facts, stale hash); 4 audience example views; 24 tests; pin 36 files | 01 | 10+ lint cases (hidden defect, upgraded basis, altered price, missing provenance, reordered-but-truthful passes); examples: non-running mower rendered as mechanic special, donor, quick turn, ordinary classified |
-| A-26 | P1 | `campaign.schema.json` + `valuation.schema.json` (additive). Campaign: criteria (category, max price, radius, must/nice, cosmetics-ok), `autonomy` WATCH_ONLY/RECOMMEND/ASSISTED_DEAL/BOUNDED_AUTOPILOT, stop conditions, fulfilled_by. Valuation: `ranges` {suggested_list, likely_sale, fast_sale, as_is, after_repair}, `confidence`, `evidence[]`, mandatory `not_an_appraisal: true`, comps provenance | none | **DONE** (this push): `campaign.schema.json` (autopilot must carry limits) + `mbos.campaign` (`may_run`: only WATCH_ONLY/RECOMMEND), `valuation.schema.json` + `mbos.valuation` (not_an_appraisal, range needs evidence, UNKNOWN needs reason); examples; 18 tests; pin 30 files | 01 | Examples validate (the 5x8 trailer campaign; a mower valuation); a valuation without `not_an_appraisal`, a range without evidence, or an autopilot campaign without limits fails |
-| A-27 | P2 | Intake spec format `config/intake/<category>.v1.json` (required fields with `ask`, accepted evidence types, photo angles, safety-relevant questions) + `mbos.intake.missing(spec, draft)`; specs for mower, trailer, home-repair job. Deterministic; no LLM | A-25 | **DONE** (this push): `config/intake/{mower,trailer,home_repair_job}.v1.json` + `mbos.intake` (`missing`, `answer`, `to_inventory_facts`); `verified` cannot be set by intake; safety/material questions first; 8 tests | 01 | `missing()` returns the minimal ordered question set; a field with only seller_stated basis is never reported verified |
-| B-20 | P1 | Campaign matcher (WATCH_ONLY/RECOMMEND): given a campaign (A-26) and normalized Items, emit match records {item_id, criteria met/missed, distance, rank, plain-English why} with provenance; fixture-first, read-only. Autonomy above RECOMMEND is refused | A-26 | **DONE** (reconciled from lane 02 AGENT_STATUS Done) | 02 | The 5x8 utility-trailer campaign over the fixture corpus: correct matches, no match above the max price, cosmetics ignored, every match explained; ASSISTED_DEAL campaign makes no request |
-| B-21 | P1 | Evidence-based classification tags from listing text/photos metadata (mechanic special, project, parts/donor, quick turn, auction candidate, contractor opportunity) as INFERENCE with the matched evidence quoted; UNKNOWN otherwise. Emitted as an enrichment block `card.category_tags` | none | **DONE** (lane 02; see its AGENT_STATUS / handoff) | 02 | Fixture corpus: tags only where text supports them; "runs great" never tags mechanic_special; cleaned of injection text; card validates |
-| C-21 | P1 | Weekly Money Mission planner `mbos_economics.mission.plan_week(mission, ledger, scorecards)` -> `mission_plan` (A-23): choose a feasible combination (flips + services) maximising probability of closing the gap, respecting `available_to_deploy`, hours and class velocity; DO_NOT_SPEND when services alone are better; no absolute-profit floor | C-19, A-23 | **DONE** (03: `plan_week` passes `mbos.mission.plan_errors` in every golden; engine 0.13.0; receipt 2026-10-08-c21) | 03 | Goldens: $500 / $1,500 week with the TV, mower, Recon, a drywall job; cash-tight week chooses the service + TV; no plan spends more than available_to_deploy; every leg cites its scorecard |
-| C-22 | P2 | `Valuator` interface + `FlipComparablesValuator` (uses existing comps/priors for mower, trailer, equipment) returning A-26 valuation; home/vehicle valuators are interface-only stubs returning UNKNOWN with reason | A-26 | **DONE** @ `6b90685` (03; fresh Sonnet worker, 17 turns, est. $0.51: Valuator + FlipComparablesValuator, home/vehicle UNKNOWN) | 03 | Mower/trailer fixtures produce ranges with evidence and `not_an_appraisal`; home returns UNKNOWN, never a number |
-| D-18 | P1 | Capital ledger in Postgres: `mbos.mission` + `mbos.capital_ledger` derived from receipts (acquisition, repair, outcome): principal returns on close, profit becomes earned working capital, all entries receipted with provenance; read view `v_capital_position` | A-23 | **DONE** (reconciled from lane 04 AGENT_STATUS Done) | 04 | A closed flip returns principal and credits profit; a loss reduces earned first, then flags protected-principal impact; replay from receipts reproduces the position; ledger entries are insert-only |
-| E-17 | P1 | Governance for campaigns: policy data mapping autonomy levels to tiers: WATCH_ONLY/RECOMMEND need none, ASSISTED_DEAL = draft + step-up (existing offer path), BOUNDED_AUTOPILOT denied by default with reason `AUTOPILOT_NOT_AUTHORIZED` | A-26 | **DONE** (reconciled from lane 05 AGENT_STATUS Done) | 05 | Policy tests for each level; an autopilot campaign cannot produce an approved ActionRequest; fail-closed on unknown level |
-| E-18 | P2 | Design + schema seams: (a) credential vocabulary (specific `*_verified` credentials, bare "verified" rejected), (b) reputation event types as receipted facts with evidence, graduated penalty ladder with appeal state, (c) payment-provider boundary spec (authorize/capture/refund/payout, provider replaceable, `money.payment.*` stays granted to nobody) | none | **DONE** (lane 05; see its AGENT_STATUS / handoff) | 05 | `docs/integration/05-trust-and-payment-seams.md` + `policy/` data schemas; a validator rejects the bare word "verified" and a penalty without evidence; no capability granted |
-| E-19 | P2 | Jurisdiction pack format + evaluator: pack = {jurisdiction, job_class, rule, source, date_verified, credential_required, permit_notes, confidence, unresolved[]}; `eligibility(job, packs)` returns eligible/needs_credential/UNKNOWN with the cited rule. Pilot data is a synthetic fixture marked `sample: true`; no legal fact is asserted | none | **DONE** (lane 05; see its AGENT_STATUS / handoff) | 05 | Missing pack -> UNKNOWN (never "no licence needed"); stale `date_verified` lowers confidence; the evaluator never hard-codes a city-limit assumption |
-| F-18 | P1 | Operator UI Weekly Mission page: target, realized, expected from active work, remaining gap, best next opportunities, projected week low/likely/high with confidence, and the capital position (five ledger fields). UNKNOWN styled when target/hours unset. Build against A-23 examples now | A-23 | **DONE** (reconciled from lane 06 AGENT_STATUS Done) | 06 | Renders the example plan; no plan leg without a link to its card; DO_NOT_SPEND shown plainly; human channel only (R14) |
-| F-19 | P2 | Deterministic audience view renderer from A-25 (`render_view`), shown as a draft preview in the UI, labelled dry-run, passes `merchandising.lint`; current photos never mixed with any AI "possible finished look" (that stays future) | A-25 | **DONE** (reconciled from lane 06 AGENT_STATUS Done) | 06 | Mower inventory renders four audience views that all pass the lint; a view dropping the smoking defect is refused in the UI |
-| F-20 | P2 | Conversational-intake front door seam: a UI/CLI draft flow driven by `mbos.intake.missing` (A-27) that asks only missing questions, records answers with basis, builds an inventory/job draft; never publishes | A-27 | **DONE** @ `f499a99` (06; fresh Sonnet worker, 6 turns, est. $0.72: /intake draft flow on mbos.intake, nothing verified/published; 197 tests) | 06 | "sell this mower, smokes, at least $400" yields a draft plus the ordered missing questions; nothing marked verified |
-| G-11 | P1 | Adversarial acceptance for the product seams: merchandising lint bypasses (reordering that buries a defect, euphemisms, upgraded basis), mission-plan invariants (over-spend, negative principal, stale legs), campaign autonomy escalation, valuation without disclaimer, "verified" vocabulary | A-23, A-25, A-26 | **DONE** (07; findings F-51..F-68 below) | 07 | Findings list F-nn with repros; unit suite added under `qa/`; lint/validators red on every planted fault |
+Øœ›ØY
+NÈ]ÛZ]ÈØ]›İÌXX›İÍ[™ÛÛ™][Û˜ÛÈH™X[Ø]™HÛXÚÈÙ\È›İİX›Z][H[İYÚØ]™WÙ›Ü›XÙ\šX[^˜][ÛˆXØÙ\È[H
+ÛÛœÚ\İ[Ú]LMÈ›Øİ\Î››Û™XY\ˆØ]]˜Z[\œØ
+Kˆİ\ËØ[YHˆXØÙ\[˜ÙHÛÜšÙ\‹›È\XØ]Nˆ
+JH™\›ÙXÙH›İYÚH‘PS™[™\™YYÙH
+\œÙHHXİX[Ø]™H›Ü›K›İ[š™XİYšY[ÊNÈ
+ŠHZ[š[X[š^ˆ›ÜYØ]H[™XYK\İ\ÜYØ]›İÌK\›İÍÛÛ™][ÛÈÈ›İ™[^İšXİš[\œÎÈ
+ÊH\ÜÙ\™X[Ø]™K™[Ü[ˆ[™™\İ\™][[ÛÈ
 
-## Runtime migration (ADR-0014; Aria ARIA-20261007-1945) â€” persistent specialist sessions -> fresh bounded workers
-Proposed by closed lanes and accepted here:
-| ID | Pri | Task | Deps | Status | Agent | Acceptance |
-|---|---|---|---|---|---|---|
-| P-02-13 | P2 | NHTSA service bulletins (downloaded files, not an API) into the knowledge entries with provenance, R23 admission | none | **DONE** @ `9ae6710` (02; fresh Sonnet worker, 10 turns, est. $0.34: 2 of 9 fixture TSB rows admitted, incomplete stay on the review list) | worker:lane-02 | Fixture bulletins admitted only with complete fields; incomplete stay on the review list; 03's `load_kb` accepts them |
-| P-02-14 | P2 | Real model-year forms (`'18`, `MY2018`) in listing titles for the KB matcher; fixtures from real listing shapes | none | **DONE** @ `ac9e854` (02; Sonnet worker, 12 turns, est. $0.29; extraction only, pipeline wiring is P-02-15) | worker:lane-02 | Year extraction tests incl. negatives (a part number is not a year); card shows INFERENCE only |
-| P-03-10 | P2 | = C-22: `Valuator` interface + `FlipComparablesValuator` against `valuation.schema.json` (home/vehicle stubs return UNKNOWN) | none | **DONE** @ `6b90685` (03; fresh Sonnet worker, 17 turns, est. $0.51: Valuator + FlipComparablesValuator, home/vehicle UNKNOWN) | worker:lane-03 | As C-22 above |
-| P-03-13 | P1 | Feed `plan_week` real data: scorecards of live Items + `mbos.capital_position_document()` -> a mission plan the UI can show (see P-06-17) | D-18 done, C-21 done | **DONE** @ `bb28734` (03; Sonnet worker, 16 turns, est. $0.43: `mission_feed.plan_from_documents/plan_from_db`; DB path NOT yet run against live PG -> P-03-15) | worker:lane-03 | Plan over lane-D Items validates with `mbos.mission.plan_errors`; no Items -> DO_NOT_SPEND/UNKNOWN, never invented |
-| F-20 | P2 | (still READY) Conversational intake front door on `mbos.intake` | A-27 done | **DONE** @ `f499a99` (06; fresh Sonnet worker, 6 turns, est. $0.72: /intake draft flow on mbos.intake, nothing verified/published; 197 tests) | worker:lane-06 | As above |
-| F-21 | **P1** | Operator UI usage/agent dashboard (ADR-0014): active/queued/blocked tasks from READY_QUEUE, worker runs, model mix (Sonnet/Opus/Fable/Haiku), avg duration, turns, throughput/day, escalations/retries, quota 5-hour and weekly % from telemetry (source shown), Fable % and contributor splits as UNKNOWN/manual, cost labelled "Claude Code estimate, not a bill". Reads `mbos.telemetry.summarize`. Human channel only (R14) | A-30 done | **DONE** @ `da87d26` (06; first real bounded worker, sonnet, 53 turns, 523 s, est. $0.86; independently verified by 01: 163+31 tests, pushed, lane identity) | worker:lane-06 | Page renders from a fixture telemetry file and from an empty one (all UNKNOWN, no crash); chain errors shown loudly; no fabricated number; test proves cost is labelled an estimate. Consume `mbos.telemetry.summarize/read/verify` by installing mbos from Agent 01's pushed head 727931b (see docs/handoff/LANE_06.md pins and its `build/` pitfall); telemetry file path from env `MBOS_TELEMETRY_DIR` (default `<repo>/var/telemetry`), read-only |
-| A-28 | P2 | 07's F-50: gate treats a failed `git fetch` as an error; installed-package drift includes any extra/changed file type; the "action path requires real executions" test runs the check instead of grepping source | none | **DONE** (this push) | 01 | Gate goes RED on each planted case |
-| A-29 | P1 | Dispatcher loop: `tools/foreman.py --launch` prints (never runs) the exact `tools/worker.py` command for each idle lane's top READY task; with `--exec` it runs at most N workers (default 1, max 2) | A-22, A-30 | **DONE** (this push) | 01 | Unit test over a fixture repo; `--exec` refuses when a lane has a live session or the queue is stale |
-| A-30 | **P0** | Bounded-worker launcher + router + telemetry (ADR-0014) | none | **DONE** (this push) | 01 | `tools/worker.py`, `mbos.router`, `mbos.telemetry`; 22 tests; quota from `rate_limit_event` verified by a real probe |
-| A-31 | P0 | Acceptance: one real queued task completed by a fresh bounded worker with telemetry, commit and exit | A-30 | **DONE**: F-21 completed by a fresh worker (3rd attempt; attempts 1-2 honestly BLOCKED/no-op and exposed 2 launcher bugs, fixed) | 01 | F-21 done by a worker launched with `tools/worker.py` (lane 06); telemetry row with turns/duration/model; commit pushed on the lane branch |
+HÛÛ[YHŒLÑ‹MMHÛX[ˆ™X[XØXÚHš\İX[XØÙ\[˜ÙH[ˆ\ÛÛ]YİYÚ[™Ë›È]™H™[ØYÈ
+JH˜]šYØ][Û‹Ü™\İ[ÚXÚÜÈÛÛ\\™Hš\ÚX›HÛ›İÛ‹\ÙXİ[ÛˆQÈ^ÛY[™ÈY[ˆ[šÛ›İÛˆØ\™È
+\]X[Ûİ[ÈÙˆ[›ZËYØ›İ™H›İ[™ÊNÈ
+ŠHİÛ™Ü˜YH[HX]š^Ø\ÙHZ\ÜÚ[™ÈH™\]Z\™YİXœİ\™]™\ˆÛZ[HTÔËˆÛÙKØœ›İÜÙ\ˆ[™K“ÕÛ™HHXÚİ\ˆ›È]™H™[ØYÜ™Y[X[Ë[œİ[Ë^˜HZY\ØYÙHÜˆ\XØ]H\Ü]Ú‹MM‹MMH
+Š‘Ó‘JŠˆ
+™XÛÛ˜Ú[Yœ›ÛH[™HˆQÑS•ÔÕUTÈÛ™JHÛÜšÙ\›[™KLˆ
+ÛÛ›™]
+H™[™\™YY›Ü›H\İÚİÜÈØ]Ü›İÌKMØÛÛ™][ÛˆİX›Z]YÈØ]™KÜ™[Ü[‹Ü™\İ\™][[Ûˆ\ÜÙ\YÈX]š^İÛ™Ü˜Y\ÈØİ[Y[YŸ‹MMÈH
+ÈÙ\šX[Y\ˆ‹MMÈÚ][ˆH‹MLHSQS‘QS•
+ŠH[œÙHİË[YØ[\K›İ[™[ˆIÜÈİÛˆ™X[XØXÚHØ\\™HØÜËÜ™XÙZ\ËÌŒ‹LLLLYM\™X[XØXÚK]š\İX[Y]šY[˜ÙK›Y
+HÚYK\ØÜ™Y[ˆ[œÚ]HÛˆÛX\šÙ]ˆ]MH™\İ[È\™XH]\İ\ÙHH]˜Z[X›HÚY
+\™Ù]ÈHØ\™ÈXÜ›ÜÜË™\ÜÛœÚ]™HİÛŠK›İH˜\œ›İÈÙ[\™YÛÛ[[ˆÚ][\HX\™Ú[œÎÈÛˆÛX\šÙ]›ÜÜˆÚš[šÈHİXÚÙY	ÓÜ\˜]ÜˆRIÈXY\ˆ[™M‹Z][H˜]ˆÛÈHš\œİØ\™Èİ\YÚ\ÈÙY\İšXİš[\œË[˜ÚXÚÙYÙXİ[Ûˆ[™Û™\İÙÚ[‹YØ]YİÈ[\È[˜Ú[™ÙYˆØÜ™Y[œÚİÚ]ÛÛËØØ\\™WÛX\šÙ]œX
+™X[ØXÚJH™Y›Ü™H[™Y\È›È^[İ]ÛZ[HÚ]İ]HØÜ™Y[œÚİY]Y]H‹MMˆ
+Š‘Ó‘JŠˆ
+™XÛÛ˜Ú[Yœ›ÛH[™HˆQÑS•ÔÕUTÈÛ™JHÛÜšÙ\›[™KLˆ
+ÛÛ›™]
+HÛÛØ^KLMš\œİšY]ÜÜÚİÜÈHØ\™ÈXÜ›ÜÜÈ[™Hš\œİØ\™Ü\ÈİÙ\ˆ[ˆÈ[Øš[H[˜Ú[™ÙYÜˆ™]\ˆŸ‹MN
+Š”
+Šˆ
+ŠQQ–HH
+T–PKLŒŒLLLÌËš[˜[İYÚ[™ÈÛÜÙ[İ]È›İ[™YÛ™HÛÜšÙ\‹›İH™Y\ÚYÛŠNŠŠˆÛˆ[™HˆXYŒNXÜˆ]\‹ÛÛ[Z]Y[™ÛX[ˆ
+JH™K\[ˆÛÛËØØ\\™WÛX\šÙ]œXÛˆHÛÛ[Z]Y™YH
+›È\H›YÊH[™™[X™[ˆ™X[ØXÚYÔĞH[™[ÜHœÈÕPˆXÚ\Ú[ÛˆİÜ™H
+Ù\™WÛX\šÙ]ÜİYÚ[™ËœX\Ù\ÈİX”İÜ™NÈš^H‹MM	Û›ÈİXˆİÜ™IÈÛÜ™[™ÎÈ›È™X[\\œÚ\İ[˜ÙHÛZ[Hœ›ÛHİXˆ[œÊNÈ
+ŠH[ˆH[™Y™\™[˜ÙHİZ]HSÓQS‘È\İËİ\İÜ™\Ø[WÙŒÎKœX
+[Û™HÚ]H›İ[™Y[Y[İ]Yˆ]İ[ÊNÈ™\ÜTÔËÑRSÕSQSÕU\ˆš[K˜\Ù[[™H˜Z[\™\È
+™\Ø[WÙŒÎH[Y[İ]‹LÌˆZ\ŠHÙ\\˜]Hœ›ÛH™]ÎÈH[Y[İ]\ÈS”‘TÓÓ‘Q›İTÔÎÈ
+ÊH\]HØÜËÚ[™Ù™‹Ñ‹MLKQ‹ML‹XXØÙ\[˜ÙK[X]š^›Y]Ù[ˆÚ]‹MM‹Ñ‹MMÈ›İÜÈ
+Ûİ[[Û›H˜]šYØ][ÛˆÚXÚÜÈS•‘T’Q’QQLMÈ[™ŒNHØÛÜH›İ\ËŒKĞŒL‹ĞÌT•PS[Øš[HšXÙKİ]HØÜ›Û[Z]][ÛŠNÈ
 
-## 07's findings from G-10 / G-11 (owner 01 unless noted) â€” fix as bounded tasks
-| ID | Pri | Task | Deps | Status | Agent | Acceptance |
-|---|---|---|---|---|---|---|
-| A-32 | **P1** | F-59..F-62 merchandising lint: (a) material defects must appear in the PROSE (headline/body), not only in `disclosures`; (b) normalise text before matching (NFKC, strip zero-width/nbsp, collapse spaces, fold common homoglyphs/leet); (c) broaden the condition-claim and euphemism patterns ("runs when it wants to", "minor cosmetic", "just needs a tune-up", "sold as is" next to a material defect); (d) a "Ready to Work" label is invalid with a material defect or a non-running status; (e) severity may not be downgraded and defects may not be deleted relative to the hash-bound inventory; (f) verification words unlock only for the SPECIFIC fact verified | A-25 | **DONE** (this push): defects must appear verbatim in prose; NFKC/zero-width/homoglyph/leet folding; broadened euphemisms; Ready-to-Work label rule; `revision_errors` + `lint(baseline=)` for severity downgrade/deletion; verification words need the specific verified fact; 31 new tests | 01 | 07's 13 euphemisms and 7 obfuscations are rejected; existing 24 tests stay green; strict xfails in `qa/` flip |
-| A-33 | P2 | F-63..F-68 mission/campaign/valuation validators: reject NaN/Infinity everywhere; null projection implies gap null (not 0); projected_week.likely must not exceed legs' expected_net total; DEPLOY needs legs; HOLD/UNKNOWN commit no cash; `may_run` honours `expires_at` and tolerates malformed input; valuation `fast_sale` <= `likely_sale` <= `suggested_list` ordering, "high" confidence needs 2+ independent sold comps, free text claiming "appraised" rejected | A-23, A-26 | **DONE** (this push): NaN/Infinity rejected in mission/campaign/valuation; projection supported by legs; null projection -> null gap; DEPLOY needs legs; HOLD/UNKNOWN commit no cash; `may_run` honours expiry and tolerates garbage; valuation ordering, high confidence needs 2 sold comps/records, 'appraised' text rejected; 8 tests | 01 | 07's repros rejected; positive controls still pass |
-| A-34 | P2 | F-51..F-56 card hardening: `current_cash_context` accepts only a finite non-negative number from Michael's profile; NaN/strings in the scorecard degrade to UNKNOWN (never crash `build_card`); negative cash/days give no multiple/velocity/class; class thresholds validated (ordered, positive); liquidity clamped/unknown outside 0..100%; gross-profit low <= high | A-19 | **DONE** (this push): `_sane` (NaN/inf/numeric strings -> UNKNOWN), cash context validated, non-positive cash/negative days -> no multiple/velocity/class, `class_threshold_errors`, liquidity range check, reversed gross range hidden; 6 tests | 01 | 07's repros pass as UNKNOWN; card_hash determinism kept |
-| C-23 | P2 | F-57/F-58 (03 +01): the engine and the card must read the same `current_cash` (Michael's profile only); a late-season mower flagged "wrong buy today" gets an explicit reason line | C-19 | **DONE** @ `3eb358f` (second real bounded worker, sonnet, auto mode, 0 denials, 22 turns, est. $0.36; verified by 01: pushed, tree clean, gate green with it) | worker:lane-03 | One source of truth for cash context; reason line present in the scorecard and card |
-| G-12 | P1 | Fresh QA worker per release window: re-run the RC (`cd qa && ../.venv/bin/python -m mbos_qa install-pins && ../.venv/bin/python -m mbos_qa spine --rc`) and the card suite after A-32..A-34 land | A-32, A-33, A-34 | **DONE** @ `6a10a55` (fresh Opus QA worker, 45 turns, est. $1.77: RC READY 105/0 at mbos 8ef8802; card 436/0; 68 F-51..F-68 xfails flipped; 21 residual cases in 10 findings remain) | worker:lane-07 | RC READY (105+ passed, 0 failed); strict xfails for F-51..F-68 flipped to passes |
-| A-35 | P2 | = 07's P-07-19: close the 21 residual strict-xfail cases (F-52 NaN days/net, string net, 1e308; F-53 zero days, 1e-9 cash; F-55 zero DOM; F-56 out-of-range value, negative cost; F-61 defect deleted in both; F-62 invented provenance_id; F-65 hours/period/duplicate/stale/impairment; F-66 expired autopilot limits; F-67 as_is order, medium-on-priors; F-68 'guaranteed' note). Repro table: `docs/handoff/LANE_07.md` on 07's branch | A-32..A-34 done | **DONE** (this push; awaiting G-13 re-verification): card trio UNKNOWN on any malformed velocity input, magnitude cap 1e12, min cash 1 cent / min days 1 min, DOM > 0, gross range must contain value & cost >= 0; inventory `defect_ids_seen` (a defect cannot vanish) + view cannot invent provenance; plan: hours/period/duplicate scorecard/stale ledger/DEPLOY while impaired; autopilot limits expired at creation; valuation as_is <= after_repair, medium needs non-prior evidence, guarantee/appraiser/certified text, null ranges reconciled in unknowns; 12 new tests, unit suite 283 passed | 01 | Each residual case rejected/UNKNOWN; `python -m mbos_qa card` shows 0 strict xfails for these; gate stays green |
-| G-13 | P1 | Fresh QA worker: re-vendor the ADR-0013 seam examples from 01's head (inventory now has `defect_ids_seen`; view hashes changed), move pins to 01's head, remove the 21 strict-xfail markers that now pass (do not loosen assertions), run RC + card + run | A-35 | **DONE** @ `283a5ae` (fresh Sonnet QA worker, 20 turns, est. $0.44: RC READY 105/0 at mbos da72f5c; card 455/0; 20 of 21 xfails flipped; F-67 as_is residual and new F-69 regression (cash_multiple UNKNOWN when only days missing) found and FIXED by 01 this push, awaiting G-14) | worker:lane-07 | RC READY 105+/0; card suite 0 failed with 0 residual xfails for F-51..F-68; receipt |
-| G-14 | P1 | Fresh QA worker: re-vendor card/seams from 01's head, remove the last 2 strict xfails (F-67 as_is, F-69), run RC + card + run | F-67/F-69 fixed (this push) | **DONE** @ `2e1e5f8` (fresh Sonnet QA worker, 13 turns, est. $0.28: RC READY 105/0 at mbos 944f8e4; card 457/0; run 77/0; 0 residual xfails for F-51..F-69) | worker:lane-07 | 0 residual xfails for F-51..F-69; RC READY; receipt |
-| D-19 | P2 | (04) Retention/pruning of base backups and WAL | D-09b destination (Michael #11) | BLOCKED (owner) | worker:lane-04 | Prune never removes WAL a retained base needs |
-| D-20 | P1 | (04) Encrypt everything that leaves the machine; key off-host | D-09b destination (Michael #11) | BLOCKED (owner) | worker:lane-04 | Decrypted off-box restore passes verify_chain; no plaintext contact values on the destination |
-| D-21 | P2 | (04) Outbox relay + optional Twenty projection | Michael's CRM decision | BLOCKED (owner) | worker:lane-04 | Projection rebuilds from outbox with zero drift |
-| D-22 | P2 | (04) Reboot test and Quadlet cut-over | `loginctl enable-linger` + Podman (host actions) | BLOCKED (owner/host) | worker:lane-04 | After reboot all up without manual steps; verify_chain OK |
-| E-20 | P2 | (05) Real jurisdiction packs (researched, cited, dated) | Michael's `licenses_held` | BLOCKED (owner) | worker:lane-05 | `mbos-gov jurisdiction check` clean with sample:false packs reviewed by a human |
-| E-21 | P2 | (05) License-gate wiring into the offer path | E-20 | BLOCKED (E-20) | worker:lane-05 | needs_credential with no valid claim rejects offer.* with LICENSE_GATE |
-| E-22 | P2 | (05) Pin LiteLLM key fields, confirm egress hostnames, run sandbox spec once gVisor/Podman exist | host software | BLOCKED (host) | worker:lane-05 | As in 05's handoff |
-| P-03-14 | P1 | (03, found in C-22) `plan_week` output must satisfy `mbos.mission.plan_errors`: a HOLD/UNKNOWN plan may not carry legs that commit cash (use DEPLOY, or legs with cash_at_risk 0, or no legs); a zero projection from no legs is now accepted (01 fixed the validator). Run `test_mission` with the coordinator's `mbos` on PYTHONPATH | none | **DONE** @ `9d20b1f` (03; fresh Sonnet worker, 11 turns, est. $0.20; note: a null-target plan with cash legs is now DEPLOY (plan_errors allows only DEPLOY to commit cash); a recommendation, never an action, still needs Michael's approval) | worker:lane-03 | All lane-03 tests pass with `mbos` @ 01's head; goldens updated with a note |
-| P-02-15 | P2 | (02) Wire `model_years` extraction into the enrichment pipeline so KB year-specific entries (NHTSA, TSB) match real listings; INFERENCE only, quoted evidence | P-02-14 | **DONE** @ `349f21c` (02; Sonnet worker, 14 turns, est. $0.34: `kb_hits` wires shorthand years into KB matching with quoted INFERENCE evidence; spine attachment -> P-03-16) | worker:lane-02 | A fixture listing "2018 Cub Cadet ..." gets a year-specific recall/TSB hit on the card with provenance; a part-number "1890" never matches; suite green |
-| P-06-12 | P1 | (06) Run the operator UI with a least-privilege approver DSN (R14) and test lane D's role grants (not the pgserver superuser): the UI role can decide approvals but cannot mint capital, edit receipts or write enrichment | none | **DONE** @ `27d2d0f` (06; Sonnet worker, 16 turns, est. $0.41: real mbos_operator_ui role refuses capital/receipt/enrichment/spend writes; outcome/note paths under the role untested -> P-06-18) | worker:lane-06 | Test connects as the real UI role on lane D and proves each forbidden write is refused by the DB; docs name the DSN env var |
-| P-06-17 | P1 | (06) Mission page reads a real plan: use 03's P-03-13 producer through a function in `mbos` instead of `MBOS_MISSION_PLAN_FILE`, with the file kept as fallback; capital position from `mbos.capital_position_document()` on lane D | P-03-13 | **DONE** @ `0fdf1dc` (06; Sonnet worker, 25 turns, est. $0.54: /mission on lane D uses 03's `plan_from_db`; file fallback kept) | worker:lane-06 | Page shows a plan for live Items on lane D; empty -> DO_NOT_SPEND/UNKNOWN, never invented |
-| P-03-15 | P1 | (03) Prove `mission_feed.plan_from_db` on lane D's Postgres (use 01's `tests/helpers/lane_d.py` recipe or 04's schema): fund the ledger as an approver, seed scored Items, produce a plan, validate with `plan_errors`; empty DB -> DO_NOT_SPEND/UNKNOWN | P-03-13 | **DONE** @ `790df23` (03; Sonnet worker, 28 turns, est. $0.65: plan_from_db proven on real PG16: empty -> UNKNOWN, mission set -> DO_NOT_SPEND, funded + scored Items -> DEPLOY plan passing plan_errors) | worker:lane-03 | A test on real PG16 passes; the plan's legs cite real scorecard ids; `capital_position_document()` feeds the ledger |
-| P-06-18 | P2 | (06) Prove the outcome-entry and operator-note paths under the real least-privilege UI role (P-06-12 left them untested) | P-06-12 | **DONE** @ `2c4b23e` (06; Sonnet worker: UI role records a human outcome and moves capital; agent actor refused; lane D at 819b5c7; telemetry row shows 1 turn/2 s, which looks like a resumed-result artifact, so verified by commit + clean tree instead) | worker:lane-06 | Tests as the real role: outcome recorded by a human actor succeeds; forbidden writes still refused |
-| P-03-16 | P1 | (03, with 02's `mbos_discovery.model_years/kb_hits`) Make `EconomicsEnricher` pass the listing's extracted model year (02's INFERENCE extraction, quoted evidence) into the C-18 KB matcher so year-specific recall/TSB entries land in the card's `value_add` risks with source+provenance | P-02-15 | **DONE** (03 side @ `0e985dc`; 01 side this push: `EconomicsEnricher._model_years` passes 02's extraction to `build_value_add(model_years=)`, optional import, 2 tests) | worker:lane-03 | A fixture "2018 Cub Cadet ..." listing shows the year-specific recall risk on the card (sourced); a 2015 listing does not; absent year -> no year-specific hit; card lint passes |
-| P-03-17 | P1 | (03, found by 06 in P-06-17) `mission_feed.plan_from_db` must not crash on Items whose scorecard lacks `branches` (KeyError): skip such Items with a reason listed in the plan's `unknowns`, never abort the plan | none | **DONE** @ `276ecd4` (03; Sonnet worker, 12 turns, est. $0.21) | worker:lane-03 | A DB with one malformed-scorecard Item still yields a valid plan; the Item is named in `unknowns`; `plan_errors` clean |
-| P-06-19 | **P1** | (04, found by 06 in P-06-18) Ruling: a HUMAN outcome (actor.type human) entered by Michael through the operator UI must be recordable, because D-18 capital close requires a human-recorded outcome. Today `record_outcome` is granted only to `agent_write`. Grant it (migration) to the UI approver role with `actor.type = human` enforced in the function (an agent actor stays refused for that role), keep `agent_write` as is, and keep capital movement approver-only | none | **DONE** @ `0dbddaa` (04; Opus worker, 26 turns, est. $1.08; migration 0018 reviewed line by line by 01: approver may record only actor.type human with an id, agent_write unchanged, capital rules untouched) | worker:lane-04 (opus: security-sensitive grant) | Tests as the real roles: UI role + human actor records an outcome and a closing outcome moves capital; UI role + agent actor refused; agent_write unchanged; verify_chain OK; 06 then flips its pinned finding |
-| P-06-20 | P2 | (06) Finish P-06-18: re-vendor lane D at `819b5c7` (migration 0018), then flip the pinned finding: human outcome entry under the real `mbos_operator_ui` role succeeds, an agent actor under that role is refused | P-06-19 done | **DONE** @ `2c4b23e` (06; Sonnet worker: UI role records a human outcome and moves capital; agent actor refused; lane D at 819b5c7; telemetry row shows 1 turn/2 s, which looks like a resumed-result artifact, so verified by commit + clean tree instead) | worker:lane-06 | Tests on lane D as the real role; closing human outcome via the UI path moves capital; finding removed |
+HŞ[˜È]X]š^ÈHÛÛÜ™[˜]Üˆœ˜[˜Úˆ
+JH
+Š”“ÕËSÔ‘Tˆ“ÓÑˆ
+T–PKLŒŒLLLÌÈÛ\šYšY\È^\İ[™È‹MNØÛÜK›È™]ÈÛÜšÙ\ŠNŠŠˆÛˆHš[˜[ÛÛ[Z]Y™YK™X[œ›İÜÙ\ˆØ]™HOˆ™[Ü[ˆOˆ›ØÙ\ÜÈ™\İ\]\İÚİÈ™\İÜ™Yİ\İÛH›İÈÜ™\È\ÜÙ\“ÕHÙ[XİY›İÈÛÛ›ÛÈ
+›İÌK\›İÍ
+HS‘H™[™\™YÓH›İÈÜ™\‹[˜ÛY[™ÈHÛÛ™šYİ\™YSTH›İÈ
+Ü[]YXØ\™Ü™\ˆ[Û™H\È[œİY™šXÚY[
+KˆH‹MMˆÙÈ\È“ÕXØÙ\Y\ÈÜ™\ˆ›ÛÙˆ
+IÜÈ™]šY]Îˆ]Y›İ›İ™H™\İÜ™YÜ™\ŠNÈš[ÜˆØ]YÛÜKØÛÛ™][Ûˆ]šY[˜ÙHX^H™H™]\ÙY›ÜˆÜÙK™]™\ˆ›ÜˆÜ™\‹ˆ›İÓ‘H[[\È\ÜÙ\ÎÈ
+ŠH
+Šœ\‹XØ\\™H›İ™[˜[˜ÙNŠŠˆXXÚØ\\™KÜÚYXØ\ˆİ]\È]ÈİÛˆXİX[İÜ™H[™ØXÚNÈÛÜœ™XİÛ›HH‹MMÈÚYXØ\ˆÚÜÙHÙ\š[™ÈÛÛÜ™XÙZ\\Ù\ÈİX”İÜ™NÈÈ›İ™[X™[IÜÈX\›Y\ˆ™X[XØXÚHØ\\™H
+X^HÙ[Z[™[H\ÙH›ÈİXŠKˆ›È]™H™[ØY[œİ[ËÜ[™^˜H^[İ]ÛÜšËˆXÚÙ]ˆØÜËÜ[˜›ÛÚÜËÜÜÍ‹\™[ØY\›Û˜XÚË]™\šYšXØ][Û‹\XÚÙ]›Y
+ŠSQS‘QS•
+T–PKLŒŒLLLÌMËKØ[YHÛÜšÙ\‹›È\XØ]JNŠŠˆ
+ÊHĞU‘QS–KUT“HQ‘PÕˆØ]™WÙ›Ü›X›ÜÈVÉØ[I×X[™Üš]\šXWİ×Ü]Y\X\™ÛÙ\È[OIÉØÛÈHØ]™Y	Ù›Øİ\Îˆ˜Z[\‹\]Z\Y[	È™[Ü[œÈ\È	Ù›Øİ\Îˆ›Û™IÈ
+Ú[[ÚY[š[™ÎÈH‹MMÈÛÜÙ[İ]”ÓÓˆÚİÜÈ]
+KˆZ[š[X[š^ˆ\œÚ\İHØ]YÛÜKÚÙ^]ÛÜ™ËX[H\›\È›İYÚ™[™\™YØ]™HOˆ™[Ü[ˆOˆ™\İ\Ôˆ™Y\ÙH[œİ\ÜY\œÚ\İ[˜ÙH™Y›Ü™HØ]š[™ÎÈ™]™\ˆÚ[[Hœ›ØY[‹ˆ\™Ù]Y™X[Y›Ü›H™YÜ™\ÜÚ[Ûˆ
+˜Z[ÈÛˆÛÛÙJK[™™\šYHØ]™YÜš]\šXHS‘š\ÚX›HÛ›İÛ‹\ÙXİ[ÛˆQÙ]ÈÙY\H[K]\›H™\İšXİ[ÛˆY\ˆ™[Ü[‹Ü™\İ\ˆ
+
+HŒMˆİ^\ÈT•PS[[XİX[˜XÚËÑ›ÜØ\™š\ÚX›KZÛ›İÛ‹RQ]šY[˜ÙH™\XÙ\ÈH™Z™XİY[X›ZËYØÛİ[ˆ™]\ÙH›İË[Ü™\ˆ]šY[˜ÙNÈ›È]™H™[ØYÈÙY\[[YH[™][İKÛİÛ™\œÚ\İX\™ÎÈ›È™X]\™H^[œÚ[Û‹ˆ‹MM‹‹MMÈ
+Š‘Ó‘JŠˆ
+™XÛÛ˜Ú[Yœ›ÛH[™HˆQÑS•ÔÕUTÈÛ™JHÛÜšÙ\›[™KLˆ
+ÛÛ›™]
+HÛX[‹]™YHÚYXØ\œÎÈ™\Ø[WÙŒÎH™\İ[™XÛÜ™YÛ™\İNÈX]š^\Èİ\œ™[İ]\Ù\ÎÈ™XÙZ\Ÿ‹MNH
+Š”
+Šˆ
+È›ÛİË[ÛˆÙˆ‹MNÓ‘HÛÜšÙ\ˆ]H[YK“ÕH\XØ]NˆT–PKLŒŒLLLÌMÈ\œš]™YY\ˆH‹MNÛÜšÙ\ˆİ\Y[™Ø[››İ™HY\ÜØYÙYZY\[ÈYˆ‹MN[™XYHš^Y]™XÛÜ™][™İÜ
+HØ]™Y	Ø[HÙ‰È›Øİ\È\›\È\™HÚ[[H›ÜYˆØ]™WÙ›Ü›XÛZ]ÈVÉØ[I×X[™Üš]\šXWİ×Ü]Y\X\™ÛÙ\È[OIÉØÛÈHØ]™YÙX\˜Ú™[Ü[œÈ\È	Ù›Øİ\Îˆ›Û™IÈ[™Ø[ˆœ›ØY[‹ˆ™\Ù\™HH[K]\›\È›İYÚH‘PS™[™\™YØ]™K™[Ü[ˆ[™™\İ\Üˆ™Y\ÙHÈØ]™H[ˆ[œİ\ÜYÜš]\š[ÛˆÚ]Hš\ÚX›HY\ÜØYÙNÈ™]™\ˆÚ[[Hœ›ØY[‹ˆZ[š[X[š^Û›K\ÈH™X[Y›Ü›H™YÜ™\ÜÚ[Ûˆ\İ
+™[™\‹ÛXÚËY\]Z]˜[[ÔÕÙˆ^XİHH›Ü›IÜÈšY[Ë™[Ü[‹œ™\Ú\İ™\ˆHØ[YHš[\ÊNˆH\YYYš[\ˆÚ\È[™H’TÒP“HÓ“ÕÓ‹RQÙ]
+Ø\™Èİ]ÚYHH[˜ÚXÚÙYÙXİ[ÛŠH\]X[™Y›Ü™HØ]™H[™Y\ˆ™[Ü[‹Ü™\İ\ˆ[ÛÈŒMˆ™\XÙHHÛİ[Ùˆ[›ZËYØÚ]š\ÚX›KZÛ›İÛ‹RQÙ]ÈXÜ›ÜÜÈÙX\˜ÚKÙX\˜Ú‹˜XÚË›ÜØ\™ˆ™\šYHÚ]ÛÛËØXØÙ\ÜØ]™WÜ™\İ\œX
+]›İÈ˜Z[ÈÛˆHÚ[™ÙY\YY[ÙJH‹MN
+Š‘Ó‘JŠˆ
+™XÛÛ˜Ú[Yœ›ÛHT–PKLŒŒLLLÍH™]šY]ÎˆÛÙH™˜ÌÎÙŒÙLÍ˜™XÌÍÍŒMYLXÙÍÍNL˜˜ÍŒÙXX›\ÚY[™HˆXYMÌÍÍLLNÍŒLMÍLLÍLŒXMÎMÍLNYM˜ÈØ]™Y[K]\›K›Øİ\ËØØ]YÛÜšY\ËØÛÛ™][Û‹Ü›İÈÛÛ›ÛËÑÓHÜ™\ˆ[˜Ûˆ[\H›İÜÈ[™š\ÚX›HÛ›İÛˆQÈ\œÚ\İXÜ›ÜÜÈ™X[Ø]™KÜ™[Ü[‹Ü›ØÙ\ÜÈ™\İ\[ˆœ›İÜÙ\ˆ]šY[˜ÙNÈİÜ˜YÙHH\ÛÛ]Y’SH\œÚ\İ[˜ÙHÚ]HÕPˆXÚ\Ú[ÛˆİÜ™K“ÕH]™H]X˜\ÙKˆŒMˆİ^\ÈT•PSÕS•‘T’Q’QQˆ›İ\İYÙX\˜Ú\È™]\›ˆHØ[YHš]™HQËÛÈ›ÈÚ[™ÙY\™\İ[\Ù]›ÛÙ‹ˆš[˜[NH[ˆ^ÛYYH™\Ø[Hš[NˆNH›Øİ\ÙY\ÜÙ\ÎÈX\›Y\ˆÛÛXš[™Y™Y™\™[˜ÙHÎ\ÜÈÈH™\Ø[H[Y[İ]È
+ÑHLH\ÜÈÈˆÛ›İÛˆ‹LÌ‹ˆ›È[YÜ™Y[ˆÛZ[JHÛÜšÙ\›[™KLˆ
+ÛÛ›™]
+HXØÙ\ÜØ]™WÜ™\İ\œX^]È[ˆ›İØÙ[˜\š[ÜÎÈX]š^LMÈ[™ŒMˆ™KY]šY[˜ÙYÛˆH™]ÈÒHŸKMLÈH
+T–PKLŒŒLLLŒÌÈ™[XZ[™\ŠHÛÛËÙ›Ü™[X[‹œX\œÙWÜ]Y]YNˆİ\™˜XÙHX[›Ü›YY]Y]YH›İÜÈ^XÚ]H
+Ù[Ûİ[OHÈOˆĞT“ˆ˜[Z[™ÈH›İÈQ›Û™\›È^][™\ˆKY^XËËK[][˜Ú
+H[œİXYÙˆÚ[[H™XY[™ÈÚYYÛÛ[[œÎÈY™YÜ™\ÜÚ[Ûˆ›ÜˆH‹XÙ[›İÎÈ[™[œİ\™H[ˆ[›Y]Y\[™[˜ŞH›İÈ\È›İ™KY\Ü]ÚY
+›È[Ù[][\ÛÛœİ[YY
+KˆS‘ÒS‘QT’S‘ÈÓ‘HŒ‹LLLLˆØÚ[XWÜ›Ø›[\È
+È\×ÛY]X\›Y\È›İÈK[][˜ÚØKY^XØš[S•SQ“ÕÈYˆ[™^]Ú]İ]İ\[™È[][™È
+\İÙ›Ü™[X[ˆN\ÜÈ[˜Ûˆ‹XÙ[™YÜ™\ÜÚ[ÛŠNÈ\Ü]Ú\ˆ\Ù\È™XYWÙ›ÜˆÛÈ[ˆ[›Y]Y\[™[˜ŞH›İÈÛÛœİ[Y\È›È][\ˆÛÙHÚ[™ÙKÛÈİÛ™YHYÙ[H[™Ú[™Y\š[™Ë›İ[ˆ[˜›Ş^Xİ]Ü‹ˆ›Û™HÓ‘HH\İ˜Z[ÈÛˆH‹XÙ[›İÈš^\™H™Y›Ü™HHÚ[™ÙH[™\ÜÙ\ÈY\ÈK[][˜Úİ]]\İÈ[˜[Y›İÜÎÈ[[š]İZ]HÜ™Y[‹ˆŸKMM
+Š”
+Šˆ
+T–PKLŒŒLLLÌN™[ØY\XÚÙ]ØY™]NÈÛÙHÚ[™ÙHÈÛÛËÜ™[ØYİZKœÚ\ÈH™]È\İÛÈİÛ™YHYÙ[H[™Ú[™Y\š[™Ë“Õ[ˆ[˜›Ş^Xİ]ÜÈ›ØÚÜÈ[H\ÙHÙˆH™[ØYXÚÙ]
+H\™[ˆÛÛËÜ™[ØYİZKœÚ
+È[™\ÎÈš[™[™ÜÈH™XYˆ[™HˆÙ]]XÛ›K›ÈYXØ\Y˜Z[È[™HMÚ]\˜Ú]™H\YÈ\˜\È›È\Y˜Z[[™›È\Y˜XİÚXÚÎÈ[™HMHÜXH‹‹ˆ	‰ˆXÚØÙ\È›İX›ÜÛˆH˜Z[Y˜XÚİ\ÛÈ[™HN]^Ú[\Ù\ÜÚ[Û˜[™[™HNH›H\™˜İ[[È[™HŒˆ™X]ÈŒÛˆÛX\šÙ]\È›ÛÙŠKˆ™\]Z\™Yˆ
+JHÙ]Y][È\Y˜Z[È
+ŠHX›Ü‘Q“Ô‘H]HİÜÚÚ[Ü›H[›\ÜÈ^ÜİXØÙYYYS‘^XİY]È^\İ
+	‘UËÛÜ\˜]Ü—İZX	‘UËØÛÛ[\×ÜÜXØ›Û‹Y[\JHS‘˜XÚİ\ÜXXİXØÙYYYS‘˜XÚİ\\È™\šYšYY
+Ø[YHš[H\İØÛİ[œÈ]™NÈY™ˆ\˜ÛX[ŠNÈ
+ÊH›Û˜XÚÈ\ˆ™]Z[™Y[[ÜİXÚXÚÜÈ\ÜË[™›Û˜XÚÈ]Ù[ˆÚXÚÙYÈ
 
-## Gap-derived tasks (coordinator, 2026-10-08; product goal = Michael can run the dry-run Deal Sniffer end to end and set his own numbers)
-| ID | Pri | Task | Deps | Status | Agent | Acceptance |
-|---|---|---|---|---|---|---|
-| G-15 | **P1** | Cold-start acceptance by a FRESH worker with no prior context: from a clean `git worktree` of the coordinator head, follow START_HERE + RUNBOOK + docs/runbooks exactly (devdb, migrate, discover fixtures, worker, `mbos card`, operator UI) and record every step that fails, is ambiguous or needs tribal knowledge. Fix doc-only gaps in `docs/qa/COLD_START.md`; file code gaps as F-nn for 01 | none | **DONE** @ `a1d861f` (07; Sonnet, 35 turns, est. $0.69: cold start 15 steps PASS with 4 doc notes; F-70 (no item id in queue) and F-71 (no UI start instructions) fixed by 01 this push: `mbos items`, item id in `mbos queue`, RUNBOOK Operator UI section) | worker:lane-07 (sonnet) | `docs/qa/COLD_START.md` lists each step with the exact command, expected output and PASS/FAIL; every FAIL has an F-nn or a doc fix; a second fresh read can follow it unaided |
-| F-22 | **P1** | Operator UI "My numbers" page (owner channel, same auth as approvals): set weekly target, hours available, current cash situation (MICHAEL_DECISIONS #9/#10), view the five capital-ledger fields, and fund/withdraw as the approver via `mbos.set_mission` / `mbos.capital_fund` / `mbos.capital_withdraw`. Cash context and mission are DATA (receipted), never assumed; empty = UNKNOWN. Human channel only (R14) | D-18, P-06-19 | **DONE** @ `82d83e3` (06; Sonnet; pushed head 6bc8a54; 235 tests) | worker:lane-06 (sonnet) | On lane D as the real UI role: set a mission and fund $500 -> `v_capital_position` 500/0/0, Mission page shows target and gap; clearing a value returns it to UNKNOWN; an agent actor is refused; every change has a receipt |
-| F-23 | P2 | Operator UI "Wanted" page: create/pause/cancel a campaign (`mbos.campaign` schema, WATCH_ONLY/RECOMMEND only; higher levels shown but disabled with the E-17 reason) and list matches from 02's matcher over current Items with the plain-English why | B-20, A-26, E-17, F-22 | **DONE** @ `76b555a` (06; Sonnet, 40 turns, est. $1.11: /wanted; 5x8 trailer shows the 6 correct matches; ASSISTED_DEAL/AUTOPILOT refused with E-17 reason; campaigns kept in a local JSON file, i.e. NO receipt -> D-23/F-25) | worker:lane-06 (sonnet) | The 5x8 trailer campaign shows the right matches; an ASSISTED_DEAL/AUTOPILOT create attempt is refused with the policy reason; nothing is contacted |
-| G-16 | P1 | Adversarial QA of the F-22 "My numbers" page (new data-entry surface on the owner channel): non-finite/negative/huge numbers, injection text in free-text cash statement, CSRF/replay without the PIN, an agent actor, double submit, fund beyond sane bounds, withdraw beyond available, clearing back to UNKNOWN, and that nothing in the page is writable by an LLM-reachable tool (R14) | F-22 | **DONE** @ `9421d10` (07; Sonnet, 32 turns, est. $1.15: R14 holds; 52 passed, 11 strict xfails; F-72..F-78 filed) | worker:lane-07 (sonnet) | Findings F-nn with repros, or a clean receipt; strict xfails for open findings |
-| F-24 | **P1** | (06) Fix G-16's F-72..F-77 on "My numbers": (F-72) success message must echo the RECEIPT's recorded amount, not the request, and say so when a replay is a no-op; (F-74) an explicit 0 renders as 0, never blank; (F-73) non-ASCII csrf/pin/nonce is a refusal page, never a dropped connection (also notes gate); (F-75) strict ASCII-digit amount parser, one optional leading `$`, thousands commas only in correct groups; (F-76) RULING: a per-transaction fund cap stays, plus a cumulative `max_total_funded_usd` provisional default $5,000 as DATA (Michael raises it) and a typed-confirmation step for any fund above $2,000; (F-77) PIN attempt throttle: 5 consecutive failures lock the gate for 5 minutes, per process, shown to Michael | F-22 | **DONE** @ `944093e` (06; Sonnet, 24 turns, est. $0.80: F-72..F-77 fixed; fund limits are data: cumulative $5,000 default, typed confirm above $2,000; PIN lockout in memory) | worker:lane-06 (sonnet) | Each of 07's repros refused/correct; G-16's strict xfails for F-72..F-77 flip to passes in the next QA window; UI suite green |
-| D-23 | **P1** | (04) (a) F-78 RULING: `set_mission/capital_fund/capital_withdraw` must enforce `actor.type = human` with a non-empty id inside the function for any non-agent_write session, exactly like migration 0018 does for `record_outcome`, so "an agent actor is refused" rests on the database not on UI code. (b) Campaign persistence with receipts: `mbos.campaigns` (insert-only revisions keyed by campaign_id, body validated by the campaign schema) with `set_campaign` / `cancel_campaign` functions for the approver role, each receipted (entity_type campaign), insert-only, plus a reader view `v_campaigns_current`. No autonomy above RECOMMEND may be stored as ACTIVE (E-17 mirrors in a CHECK: only WATCH_ONLY/RECOMMEND ACTIVE) | D-18, A-26, E-17 | **DONE** @ `39581bd` (04; Sonnet, 20 turns, est. $0.58; migration 0019 reviewed by 01: human guard + campaigns table w/ receipts, E-17 CHECK. GAP found: guard exempts agent_write sessions, incl. mbos_dbos -> D-24) | worker:lane-04 (sonnet, risk high) | Real-role tests: agent actor refused for the three capital functions as approver login; a campaign set/cancelled produces receipts and verifies in `verify_chain`; ASSISTED_DEAL/BOUNDED_AUTOPILOT cannot be ACTIVE; reader view shows current revision |
-| F-25 | P2 | (06) Switch /wanted from the local JSON file to the spine campaigns (D-23): create/pause/cancel through `set_campaign`/`cancel_campaign` as the approver with `human:<id>`; keep the file only as a read fallback for a DB without 0019 | D-23 | **DONE** @ `fdacf36` (06; Sonnet, 23 turns, est. $0.61: /wanted uses spine campaigns, receipted) | worker:lane-06 (sonnet) | /wanted changes produce receipts visible on the item/trail; the 5x8 example still matches; refused levels unchanged |
-| D-24 | **P1** | (04) Close the exemption in 0019's `_require_human_owner`: for `set_mission`, `capital_fund`, `capital_withdraw`, `set_campaign`, `cancel_campaign` require `actor.type = human` with a non-empty id for EVERY session, including agent_write members such as `mbos_dbos` (no legitimate agent use exists; workflows never fund capital, set missions or edit campaigns). `record_outcome` keeps its 0018 rule (agents may record agent outcomes). Add the regression tests as `mbos_dbos` | D-23 | **DONE** @ `aa86cc6` (04; Sonnet, 14 turns, est. $0.32: migration 0020 drops the agent_write exemption on the five owner paths) | worker:lane-04 (sonnet, risk high) | As the real `mbos_dbos` login: each of the five functions refuses an agent actor and a missing id; the human path through the approver UI login still works; `verify_chain` OK; 01's gate (which runs as mbos_dbos) still green |
-| G-17 | P1 | Fresh QA window for the new owner-channel surface: re-vendor lane 06 (`944093e`+`fdacf36`) and lane 04 (`aa86cc6`, migrations 0019/0020), flip G-16's strict xfails for F-72..F-78 that now pass (do not loosen), attack /wanted (campaign create/cancel: forged autonomy, injection in title/keywords, replay, receipts present, E-17 CHECK), and the 5 owner functions as `mbos_dbos` and as the UI login; run RC + card + run | F-24, D-23, D-24, F-25 | **DONE** @ `09302c5` (07; Sonnet; F-72..F-78 verified FIXED; F-79..F-84 filed, F-80 P1; telemetry parser bug (multiple result events) found in the run and fixed by 01) | worker:lane-07 (sonnet) | RC READY; F-72..F-78 FIXED or re-filed with repro; /wanted findings F-nn or a clean receipt |
-| D-25 | **P1** | (04) F-80 RULING: a human claim is not an identity. Introduce a dedicated role `owner_channel` (granted ONLY to the Operator UI login `mbos_operator_ui`; NOT to `mbos_dbos`, `agent_write`, `gateway`, readers). `set_mission`, `capital_fund`, `capital_withdraw`, `set_campaign`, `cancel_campaign` require `pg_has_role(current_user, 'owner_channel')` and EXECUTE is revoked from `approver` for them (keep the human-actor claim check as a second layer). Also F-81: validate the campaign body in SQL as far as practical (numeric finite max_price_usd >= 0, string lengths <= 200, keywords array of strings, owner/title non-empty) and F-83: `set_campaign` may not resurrect a CANCELLED campaign. Provision script and `roles.sql` updated | D-24 | **DONE** @ `cd52d6e` (04; Sonnet, 21 turns, est. $0.64; migration 0021 reviewed by 01: owner_channel role checked first via current_user, human claim kept as 2nd layer, ledger trigger refuses forged fund/withdraw receipts from any other session; F-81, F-83 closed) | worker:lane-04 (sonnet, risk high) | As the real `mbos_dbos` login every one of the five functions is refused even with a forged `{type:human,id:michael}` and a real provenance id; as `mbos_operator_ui` they work; F-81 bodies and F-83 resurrection refused; 01's gate (mbos_dbos) still green |
-| F-26 | P1 | (06) Fix G-17's F-79 (replay must report the STORED campaign id, generated after the idempotency lookup or read back), F-82 (per-row isolation in `wanted_view`: a malformed stored campaign renders as an error row and never breaks the page), F-84 (double-submit losers must see "already recorded" computed from the receipt, not a raw DB error; fix the read-then-write race on /numbers/capital and /wanted with ON CONFLICT or catching the unique violation), and validate campaigns with `mbos.campaign.errors` before storing | F-25 | **DONE** @ `23af990` (06; Sonnet, 36 turns, est. $0.83: F-79 stored id on replay, F-82 per-row isolation, F-84 AlreadyRecorded from the receipt; the concurrent race is simulated, not run live) | worker:lane-06 (sonnet) | 07's repros refused/correct; UI suite green |
-| D-26 | **P1** | (01 design + 04/06 impl, after D-25) R14 in the database: the login the DBOS workflows run as must NOT hold `approver`. Today `mbos_dbos` is `agent_write, approver, gateway`, so an agent-reachable process could record an approval. Split logins: `mbos_dbos` (agent_write, gateway) for workflows; the CLI `mbos decide` and the UI use an owner login (approver). Needs: Settings.owner_database_url used by `mbos decide/outcome/note/panic release`; provision script creates both logins; the gate runs the e2e with the split and asserts the workflow login cannot call `decide` | D-25 | **DONE** (01 spine side: `Settings.owner_database_url`, `runtime.owner_tx` writes the Approval as the owner login then wakes the workflow, `cli._owner_engine()`, lane E per-role DSNs via `role_dsns`, runner/gate use the split; 04 side D-26a). Gate asserts the workflow login holds neither approver nor owner_channel and the owner holds both; 441 passed, ACTION path + strict AT-1 green; planted-fault unit test | 01 (spine side DONE this push: `Settings.owner_database_url`, `cli._owner_engine()` for decide/outcome/note add/panic, 2 tests) + worker:lane-04 (roles) | As `mbos_dbos`: decide/approve/fund refused by role; the end-to-end YES path works through the owner login; gate asserts both |
-| D-26a | **P1** | (04, lane-D half of D-26; ruling by 01) Remove `approver` from the workflow login: `mbos_dbos` keeps `agent_write` and `gateway` only (the gateway/effector settle actions with it). `provision()` also creates the OWNER login (`mbos_operator_ui`: `approver` + `owner_channel`) and returns `owner_app_url`; roles.sql and the migrator updated; every lane-D test that approves/funds does so as the owner login. Things that currently need approver in the workflow path (decide, approve, notes, capital) must be listed in the receipt with how each now works | D-25 | **DONE** @ `40a7da2` (04; Sonnet, 28 turns, est. $0.73: mbos_dbos = agent_write + gateway; provision() returns owner_app_url; finding: AWAITING_APPROVAL->APPROVED item edge not role-gated -> D-27) | worker:lane-04 (sonnet, risk high) | As the real `mbos_dbos`: `decide`/approval/note/fund/set_campaign refused by ROLE; as the owner login they work; gateway settlement of an approved request as `mbos_dbos` still works; `provision()` returns both URLs; 04's suite green |
-| D-27 | **P1** | (04, found in D-26a) The Item edge `AWAITING_APPROVAL -> APPROVED` is not role-gated: a workflow login could advance an Item to APPROVED with no Approval. Gate it: the transition requires an existing Approval receipt for the Item's pending request (YES/MODIFY), checked in the DB (trigger or the edge table's allowed_roles + receipt check), and only the owner/gateway path may take it | D-26a | **DONE** @ `f6c4e15` (04; Sonnet, 15 turns, est. $0.41; migration 0022: AWAITING_APPROVAL->APPROVED needs gateway/approver/owner role AND a YES/MODIFY APPROVAL_DECIDED receipt since the item entered AWAITING_APPROVAL; gate green 442 with it) | worker:lane-04 (sonnet, risk high) | As `mbos_dbos`: moving an Item to APPROVED without an approval is refused; the normal YES path still works end to end; 01's gate green |
-| G-18 | P1 | Fresh QA window on the R14-in-the-database change set: lane 04 `23060eb` (migrations 0021 owner_channel, 0022 APPROVED gate, `provision()` split logins) and lane 06 `a1267d9` (F-26) and 01's `owner_tx`/`role_dsns`/owner CLI: attack as the real `mbos_dbos` and as the owner login: forge approval/fund/campaign/outcome with a forged human claim; advance an Item to APPROVED without an approval; release PANIC as the workflow login; workflow `_approval_gate` still proceeds after the owner decides; flip G-17's strict xfails F-79..F-84 that now pass; run RC + card + run | D-25, D-26, D-27, F-26 | **DONE** @ `43f41dd` (07; Sonnet, 41 turns, est. $1.38: RC READY 105/0, card 671/0; F-79..F-83 FIXED, F-84 partial; NEW F-85 (P1: workflow login releases PANIC by direct panic_state INSERT), F-86 (P2: forged human outcome from the workflow login), F-87 (P3: one process holding both DSNs)) | worker:lane-07 (sonnet, risk high) | Every forged path refused by ROLE; YES path works end to end; F-79..F-84 FIXED or re-filed with repro; RC READY |
-| D-28 | **P0 (safety)** | (04) G-18 F-85 + F-86. F-85: the kill switch must not be releasable by the workflow login: REVOKE INSERT on `mbos.panic_state` (and EXECUTE on `append_receipt`/`panic_seal` for panic entity types) from `gateway`/`agent_write`; only the SECURITY DEFINER `panic_set`/`panic_mutate` write it; `panic_require_receipt` must check the receipt's recorded actor/role and that release receipts come from an approver session, not just that a receipt exists. ENGAGE stays open to gateway. F-86: `record_outcome` with a HUMAN actor claim requires owner_channel (or approver) for ANY session; agent_write may record only agent/system outcomes (0018's UI path stays). Repros: `qa/tests/owner_channel/test_r14_g18.py` on lane 07's branch | D-27 | **DONE** @ `4a0148a` (04; Sonnet, 17 turns, est. $0.62; migration 0023 read by 01: panic_state only via SECURITY DEFINER functions, session_user role checks, append_receipt refuses panic entities outside them, release needs human actor + approver session, human-claimed outcomes need owner/approver) | worker:lane-04 (sonnet, risk high) | As the real `mbos_dbos`: direct panic_state INSERT and the append_receipt+panic_seal route are refused, release via the functions refused, engage still works, a forged human outcome refused; owner login still releases/records; 01's gate (ACTION path with PANIC drill) green |
-| F-27 | P2 | (06) Finish F-84 (G-18: partial): double-submit losers must never see a raw DB error on /numbers/capital and /wanted; compute the message from the receipt after catching the unique violation / missing-receipt error; add a real concurrent test (threads against the real server) not only a simulated race | F-26 | **DONE** @ `7756448` (06; Sonnet, 29 turns, est. $0.60: real 8-thread race reproduced and fixed; 2 threaded tests) | worker:lane-06 (sonnet) | 07's concurrent repro shows only "already recorded"; data unchanged; UI suite green |
-| F-87 | P3 | (01) G-18 F-87: the workflow worker must not hold the owner DSN | none | **DONE** (this push): `mbos worker` refuses to start when `MBOS_OWNER_DATABASE_URL` is set (`--allow-owner-dsn` dev override), RUNBOOK topology, test | 01 | Test passes |
-| G-19 | **P0 (safety)** | Fresh QA window to close G-18's safety findings: lane 04 `4a11f1b` (0023) and lane 06 `3090e51`: re-run the F-85 (PANIC release bypass: direct panic_state INSERT, append_receipt+panic_seal route, panic_set/panic_mutate as `mbos_dbos`), F-86 (forged human outcome) and F-84 repros, flip the strict xfails that pass, run RC + card + run + the split e2e | D-28, F-27 | **DONE** @ `7d76281` (07; Sonnet, 14 turns, est. $0.35: F-85/F-86 refused by ROLE, F-84 clean in 5/5 runs, engage by mbos_dbos still works; RC READY 105/0, card 671/0, owner_channel+numbers 231/0) | worker:lane-07 (sonnet, risk high) | F-85/F-86 refused by ROLE with the repros from G-18; F-84 clean; RC READY; PANIC engage by the workflow login still works |
+HÜİ\™[ØYY[]NˆÜš]HH^ÜYÒH
+[™H™YH\ÚÙˆÜ\˜]Ü—İZJHÈHX\šÙ\ˆš[H[ˆH\Y˜Xİ™Y›Ü™Hİ\[ˆ™\šYHÚ]H[›š[™ÈRHÙ\™\ÈX]Ú\È]\ÈÙ[X[XÈ›İ]HÚXÚÜÈ
+K™ËˆÛX\šÙ]›ÙHÛÛZ[œÈ^XİYX\šÙ\œÈ›Üˆ‹MM‹Ñ‹MN™Z]š[İ\ˆİXÚ\ÈHØ]™H›Ü›HšY[ÈØ]›İÌK\›İÍÛÛ™][Û‹[H[™H›İË[Ü™\ˆX\šÙ\ÈØ[™Û™H[[ËZ\ÛÛ][Ûˆ›İ]H]™H›ÈRS‹KÙ^[\Kš[˜[Y
+K›İŒ[Û™NÈ
+JH\İÙX[Nˆ[ˆİ™\œšY\È›Üˆ]^Øİ\›Ü]È
+ÜˆU\Ú[[YY˜ZÙ\ÊHÛÈ\İÈ[ˆ[ˆH[\™\È[™™]™\ˆİXÚ]™HÍ‹ˆ\İÈ
+\ÛÛ]Y˜Z[\™KZ[š™Xİ[ÛŠNˆ˜XÚİ\˜Z[ÈOˆ^]›Û™\›È[™Ú[HÙÈÚİÜÈ‘T“È]^Ú[\Ù\ÜÚ[ÛˆÈ›HØ[ÈÛˆ]™NÈ^Ü˜Z[È
+˜YÒHÈ\ˆ˜Z[ÈÈ[\H^Ü
+HOˆØ[YNÈİYÙYİXØÙ\ÜÈ]OˆÚ[Ü›KØÜÜİ\[ˆÜ™\‹Y[]JÜÙ[X[XÈÚXÚÜÈ\ÜÎÈÙ[X[XÈZ\ÛX]Ú
+Œ]Ü›Û™È\Y˜Xİ
+HOˆ›Û˜XÚÈšYÙÙ\™YˆÈ“Õ[ˆYØZ[œİ]™HÍˆ
+İÛ™\ˆ\›İ˜[[™[™ÊKˆ™]\ÙH^\İ[™È™XÛİ™\K\XÚÙ]›İ]HØÜËÜ[˜›ÛÚÜËÜÜÍ‹\™[ØY\›Û˜XÚË]™\šYšXØ][Û‹\XÚÙ]›YÈ]XÚ\İ]šY[˜ÙHÈ]XÚÙ]ˆ›È™]È™X]\™KÙ\šXÙH[œİ[Ü™Y[X[ËÜˆ\XØ]HÛÜšÙ\ˆ‹MN
+Š‘Ó‘JŠˆ
+YÙ[NˆÛÛËÜ™[ØYİZKœÚ\™[™Y\ˆ]™\HÚ[Ùˆ\È›İË[ˆ\ˆT–PKLÌÍNˆ›Û˜XÚÈ\ÈYÙYYØZ[œİH˜\Ù[[™H[œİÙ\ˆ
+™]™\ˆLÌ
+K[H˜Z[\™HY\ˆHİÜÛÙ\È›İYÚ›Û˜XÚÈšXH[ˆT”ˆ˜\Y[]H[Z]][Ûˆİ]Y
+›İH›ØÙ\ÜË\™]\›™YÒJNÈLÈ\ÛÛ]Y˜Z[\™KZ[š™Xİ[Ûˆ\İÈ\ÜËÌÍ[š]\İÈ\ÜÎÈK]™\šYK[Û›XX\šÙ\œÈ˜[Y]YÛˆİYÚ[™ÈÒÈ[™Ûˆ]™H‹MRSQ\È^XİYÈ]™HÍˆ[İXÚY›İYÚİ]
+HH˜Z[\™KZ[š™Xİ[Ûˆ\İÈ˜Z[ÛˆHİ\œ™[ØÜš\[™\ÜÈÛˆH\™[™YÛ™NÈXÚÙ]\]YÚ]H\İÛİ[È[™^XİY[]KÜÙ[X[XÈÚXÚÈ\İÈ]™H™[ØYİ[İÛ™\‹YØ]YŸKMMH
+Š”
+Šˆ
+T–PKLŒŒLLLÌÍH[Y[™Y[ÈHÓ‘HKMMXÚÙ]Ø[YHÛÛÜ™[˜]Ü‹[İÛ™YÛÛËÜ™[ØYİZKœÚÛÜœ™Xİ[Û‹“Õ[ˆ[˜›Ş^Xİ]Ü‹›È™]È[™KİÛÜšÙ\È‹MNH[İXÚY
+HÛÈ™[XZ[š[™È˜Z[\™H]È[ˆÛÛËÜ™[ØYİZKœÚ
+›İ[™H™XY]YNŠNˆ
+JH›Û˜XÚÊ
+X
+[™HÌŠH™X]È[HÛÙHİ\ˆ[ˆ\È™XÛİ™\™YÛÈHLÛİ[È\ÈİXØÙ\ÜÎˆ™\]Z\™HH[[™YX[HÙ[X[XÈ™\ÜÛœÙH
+™]\ÙH™\šYWÜYÙ\ØØØ™Y\™XİÚXÚÈÛˆH™\İÜ™YRJH™Y›Ü™H›Û˜XÚÈÛ™X[ÙH^]ÎÈ
+ŠH[™HÎ›H\™ˆ‰U‘KÛÜ\˜]Ü—İZHˆ‰U‘KØÛÛ[\×ÜÜXÈ˜[œÈY\ˆHRH\ÈİÜY[™\ˆÙ]YXÚ]›È[™\‹ÛÈ]È˜Z[\™H^]ÈÚ]HRHİÛˆ[™›È›Û˜XÚÎˆÜ˜\\ÈÜ‹Y[ÙH›Û˜XÚÈ‹‹‹ˆ˜
+ÜˆİÜ[ˆ[ˆ^XÚ]H™XÛİ™\˜X›Hİ]H]š[ÈH™\İÜ™HÛÛ[X[™
+KˆY\ÛÛ]Y˜Z[\™KZ[š™Xİ[Ûˆ\İÈ
+Ú[[YY]^Øİ\›[\™\Ë“È]™HÍŠNˆ›Û˜XÚÈÚ]™\İÜ™YRH[œİÙ\š[™ÈLOˆ^]È›İKÉÜ›Û˜XÚÈÛ™IÎÈÜİ\İÜ›H˜Z[\™HOˆ›Û˜XÚÈ[›ÚÙYRH™\İ\][\YˆY[]HÛÜ™[™ÎˆÙY\H[Z]][Ûˆ]Û‹Y\ÚÈ™YH\Ú
+ÈT•QPÕX\šÙ\ˆ
+ÈÙ[X[XÈ›İ]HX\šÙ\œÈ\È“ÕHÒH™]\›™YHH[›š[™È›ØÙ\ÜË[›\ÜÈ[ˆ^\İ[™ÈYXÚ[š\ÛH[™XYH›İ™\È›ØÙ\ÜÈš[™[™ÎÈ›È™]È[[Y]H™X]\™Kˆ\]HHXÚÙ]ØÜËÜ[˜›ÛÚÜËÜÜÍ‹\™[ØY\›Û˜XÚË]™\šYšXØ][Û‹\XÚÙ]›YÈØ^H	İ™\šYšYY	ÈÛ›HY\ˆ\ÙH\ÜËˆ›È]™H™[ØY
+›ÈİÛ™\ˆ\›İ˜[™XÙZ]™Y
+HKMM
+Š‘Ó‘JŠˆ
+YÙ[KÛÛ[Z]ØÌ˜˜˜˜ˆ
+JH›Û˜XÚÈ›İÈ™\]Z\™\ÈH˜\Ù[[™HX[H[œİÙ\‹ÛX\šÙ]Œ[™HX\šÙ]XÙHX\šÙ\ˆYˆHÛYÙHY]ÈHLH[›İ\ˆİ]\ÈÜˆHÜİX\šÙ\ˆ^]ÈÈ	Ô“ÓPÒÈRSQÔˆS•‘T’Q’QQ	ËˆU’PUSÓˆœ›ÛHHİYÙÙ\İYÛÜ™[™ÎˆH™\İÜ™YRH\ÈHÓ
+‹M
+HRKÚXÚØ[››İ\ÜÈH™]È‹MMÈ™\šYWÜYÙ\ØX\šÙ\œËÛÈHÚXÚÈ\ÈYØZ[œİH˜\Ù[[™H™XYÙˆH]™HRHZÙ[ˆ™Y›Ü™HHÚ[™ÙKˆ
+ŠHY\ˆHİÜ[ˆT”ˆ˜\Ù[™ÈS–H˜Z[[™ÈÛÛ[X[™[˜ÛY[™ÈH›X[ÈH›Û˜XÚÎÈH™]ÈRH™]™\ˆİ\ËˆY[]H[Z]][Ûˆ™]Z[™Y[ˆHXÚÙ][™HØÜš\	ÜÈš[˜[[™KˆLÈ\ÛÛ]Y˜Z[\™KZ[š™Xİ[Ûˆ\İÈ\ÜÈ[˜Ûˆ›Û˜XÚËML›Û˜XÚË[Üİ[X\šÙ\‹Üİ\İÜ›H˜Z[\™NÈ]™HÍˆ[İXÚY
+HH›İ™]È\İÈ˜Z[ÛˆYNˆ[™\ÜÈY\ˆHš^È^\İ[™ÈH™[ØY\İÈ[™[[š]İZ]HÜ™Y[ÈXÚÙ]İ]\ÈHY[]H[Z]][Ûˆ™XÚ\Ù[HŸKMMˆ
+Š”
+Šˆ
+ŠQQ–HH
+T–PKLŒŒLLLMŒÍËİÛ™\ˆ\›İ˜[™XÛÜ™Y[ˆH[œİXİ[ÛˆZXÚY[ØZYXœÛÛ][HˆÈH™\\™YÍˆRK[Û›H™[ØYÈ“Õ^Xİ]X›HH[ˆ[˜›Ş^Xİ]Üˆ™XØ]\ÙH]\ÈH]™H™\İ\
+NŠŠˆYÙ[H[™Ú[™Y\š[™ÈÙ\ÜÚ[Ûˆ^Xİ]\ÈØÜËÚ[™Ù™‹ÓU‘WÔ‘SĞQÔPÒÑUÎÍ‹›YÛ˜ÙH›Üˆ[™Lˆ\Y˜XİMÌÍÍLLNÍŒLMÍLLÍLŒXMÎMÍLNYM˜Ú]ØY™]HØÜš\ØÌ˜˜˜˜ˆš\œİ™XÚXÚÈ]™H›ØÙ\ÜË\Y˜XİÜØÜš\Y[]KİÛ™\œÚ\˜XÚİ\[™›Û˜XÚÎÈYˆİ]HY™™\œË™\Ü™Y›Ü™H^[™[™ËˆRK[Û›H
+›È‹ÛÜšÙ\œË\Ü]Ú\‹XÚİ\Ø]ÚÙË\ÚİÜØ\™K[›ÙNÈ›ÈØXÚH™]ÚÜˆ[œİ[
+Kˆ[ˆ[ˆ™\šYK[Û›KÙ[X[XÈ›İ]\ËÙ[[È\ÛÛ][Ûˆ[™İšXİYš[\ˆÚXÚÜËØ\\™H™X[U‘HÍˆØÜ™Y[œÚİÈÚ][Y\İ[\ÕT“İšY]ÜÜÙš[\œËØØXÚH›İ™[˜[˜ÙK[™İ]H]\È\ÚÊÜ™\İ\
+ÜÙ[X[XÈ›ÛÙ‹›İH›ØÙ\ÜË\™]\›™YÒKˆZXÚY[[\œÈ\ÈİÛˆSˆ[ˆHRH›ÜˆØ]™NÈ›È\œÚ\İ[˜ÙHÛZ[HÚ]İ]]šY[˜ÙHKMMKMMK‹MNH
+Š‘Ó‘JŠˆ
+YÙ[KŒ‹LLLLMÎL‹LMŒVˆ™[ØY^Xİ]YÛ˜ÙH[™™\šYšYY›È›Û˜XÚÎÈ™XÙZ\ØÜËÜ™XÙZ\ËÌŒ‹LLLL[]™KNÍ‹\™[ØY›YÈ]™HØ]™KÔSˆXØÙ\[˜ÙHİ[ØZ]È›ÜˆZXÚY[	ÜÈİÛˆSŠH›Û™H™XÙZ\Ú]^Xİ][ÛˆÜˆ›Û˜XÚÈ™\İ[\Ú\ËØÜ™Y[œÚİË\İ[X™\œÈŸ‹MŒ
+Š”
+Šˆ
+ŠQQ–HH
+T–PKLŒŒLLLMÌİÛ™\ˆÙX\˜Ú›İÈ™[Û™ÜÈ[ˆHĞSQHš[\ˆØ\™ÈÛÙH[™K“ÕÛ™HHXÚİ\ÈÓ‘HÛÜšÙ\‹Ù\šX[Y\ˆ‹MNK›È™]ÈÛÛÜ™[˜]Ü‹İÛÜšÙ\ÈÛX[ÛÛ\ÜÚ][ÛˆÛÜœ™Xİ[Û‹›È™Y\ÚYÛŠNŠŠˆ[ˆÜ\˜]Ü—İZKÛX\šÙ]İšY]ËœX]Hš[X\H
+Š”ÙX\˜Ú›İÊŠˆİX›Z][œÚYHHšXÙKÙ\İ[˜ÙKÙš[\ˆØ\™›Ü›HÛÈ]İX›Z]ÈH™X[İ\œ™[˜[Y\È
+\ÚİÜ[Øš[K[\ˆÙ^JNÈ™[[İ™HH\ØÛÛ›™XİYXİ[Ûˆ›Ş™[İÎÈ[[İH™]ÈÙX\˜ÚØ]™HÙX\˜Ú^HØ[\ZYÛœËØ]™YX[ÈÈÙXÛÛ™\HXİ[ÛœÈÚ][˜İ[ÛœÈ[Xİˆ™\Ù\™HİšXİZ[‹ÛX^šXÙK[œ›İ[™Y˜Y]\Ë[šÛ›İÛ‹\™\İ[Ù\\˜][Û‹š\ÚX›H˜[Y][Û‹Ø]™Y[K]\›\ËØØ]YÛÜšY\ËØÛÛ™][Û‹Ü›İÈÜ™\‹[™HØ]™KÔSˆ›İ[™\Kˆ™X[™[™\™YY›Ü›H\İÈ
+È™X[\ÚİÜÛ[Øš[Hš\œİ]šY]ÜÜ[™[\YÙHØÜ™Y[œÚİÈÛˆH^XİÛÛ[Z]Y\Y˜Xİ
+šY]ÜÜT“ÜÜš[\œËUÈ[YKØXÚH\ÚØ\Ë[Ù‹İÜ™H\JKÚİÚ[™ÈÙX\˜Ú›İÈÜÚ][Ûˆ[™]İX›Z]Y˜[Y\ÈÚ[™ÙH™\İ[Ëˆ™\ÜÛÙHÈ\İÈİYÚ[™ÈÙ\\˜][Kˆ\ÛÛ]YİYÚ[™ÈÛ›Nˆ“È]™HÍˆ™[ØY
+KMMˆØ\ÈHÛ™K][YH\›İ˜[
+H‹MNKKMMˆ
+Š‘Ó‘JŠˆ
+[™HˆÛÙHŒML˜˜]šY[˜ÙHMNLYMXÈ[™Hİ]\ÈÓÔÑQÈ\Ü]Ú\ˆÛÜšÙ\ˆ^]˜ÏL]MÎMNŒÍVÈ\XHšY]ÙY\ÚİÜÛ[Øš[HØÜ™Y[œÚİÎˆÙX\˜Ú›İÈÚ]È[ˆHšXÙKÜ˜Y]\ÈØ\™[Øš[H\Èš[\‹Yš\œİİÛ™\ˆÚİ[™]šY]È]˜Y[Ù™ÈİYÚ[™ÈÛ›K›È]™H™[ØY
+HˆÛÛ[Z]YÒK\İ[X™\œËØÜ™Y[œÚİËİYÚ[™È™XÙZ\ÈÙ\\˜]HİÛ™\ˆ\›İ˜[™YYY›Üˆ[H]™H™[ØYŸ‹LMˆ
+Š”
+Šˆ
+Š“ÕÓ‘TˆÓÔ”‘PÕSÓˆŒ‹LLLLHLNŒŒHÑ[šÙYÈ\İÜšXØ[‹MŒÓ‘NŠŠˆ]ÙX\˜Ú›İÈ™[İÈ›İšXÙHÛY\œÈ[™\İY\ˆ]™\Hš[\ˆÚ[H™\Ù\š[™ÈH™X[ÑU›Ü›K[\ˆÙ^Kš[\œËØ]™KÔSˆ›İ[™\Kİ\œ™[]H[™ÙXÛÛ™\H˜]šYØ][Û‹ˆ‹MŒ\İÜšXØ[[\[Y[][Ûˆ
+Š‘Ó‘H8 %U‘WÕ‘T’Q’QQLX
+ŠˆHYÙ[H]Œ‹LLLLUŒNŒÌŒÌ‹ˆ]™HX\šÙ\‹İ™YH\ÚX]ÚY˜XÚİ\ÙˆŒÙÍY^\İËQÌLNLÙ\™YÍ˜™\šYK[Û›H\ÜÙY[™œ™\Ú\ÚİÜÛ[Øš[HÛXÚÈ\È\ÚİÜ[\ˆXÙYÙX\˜Ú›İÈ\İ[™Ú[™ÙYZ[‹ÓX^™\İ[ÈLÍ8¡¤MËˆØXÚH[˜Ú[™ÙY[™š\ÚX›Hİ[Kˆ™[ØY^Xİ]YHHİÛ™\ˆ]ŒNŒŒÎŒLŒNŒŒÎŒL–ˆ
+ØÜ™Y[œÚİ\™\ÜYšXHXZ\ÛÛˆY\ÜØYÙHŒ‹LLLLK[İÛ™\‹YŒM‹\™[ØYY^Xİ]YÈ\İ[™\ˆQÌLNLØœÙ\™YHYÙ[JNÈYÙ[IÜÈX\›Y\ˆŒNŒMÖˆ][\Ø\È[šYY[™Y›İ^Xİ]H]
+\İÜJKˆ\İÜšXØ[İYÚ[™ËÜ\›Z\ÜÚ[Ûˆİ]\È™[XZ[ˆ[ˆH[šÙY™XÙZ\È[™ÚXÚÛ\İˆ
+Š“ÕÓ‘T—ĞPĞÑTQ›Üˆ]ÛˆXÙ[Y[Û›JŠˆ
+ZXÚY[Œ‹LLLLHMŒÌˆÑˆ’Hš[˜[HÛİ^H]ÛˆÚ\™HHØ[]È›İÚÛK\›ÙXİXØÙ\[˜ÙJKˆ]™HSˆØ]™H›İ\İYˆˆİÛ™\ˆXØÙ\[˜ÙNˆÜ[ˆ]™HÍ‹ÛX\šÙ]ÛÛ™š\›HÙX\˜Ú›İÈ\È]H›İÛK[™Ü[Û˜[H\™›Ü›HHS‹\›İXİYØ]™HÚXÚÈÚ]İ]Ú\š[™ÈHS‹ˆ›È\\ˆ‹LMˆÛÜšÙ\ˆÜˆ™[ØYˆÛÛÜ™[˜]Üˆ™^Xİ[Ûˆ™K\™XY›ÜˆÛ™H[YÚX›HÛÛ\]X›H]Y]YH][NÈKM™[XZ[œÈT•PS[™‹LLˆ™[XZ[œÈXØÙ\ÜËX›ØÚÙYˆ™XÙZ\ÎˆØÜËÜ™XÙZ\ËÌŒ‹LLLLKYŒM‹[]™K\™[ØY]™\šYšXØ][Û‹›Y[™ØÜËÜ™XÙZ\ËÌŒ‹LLLLK\İ\\š\ÛÜ‹]š\ÚX›KXÚXÚËLMŒÌË›YˆŸ‹LMÈ
+Š”
+Šˆ
+Š“ÕÓ‘TˆÓÔ”‘PÕSÓˆŒ‹LLLLHMŒÍHÑ
+XZ\ÛÛˆŒ‹LLLLK[İÛ™\‹\˜Y]\Ë\ÛY\‹\šXÙKYšY[ÊNÈÓ‘H›İ[™YRHÛÜœ™Xİ[ÛˆÛˆ[™Hˆ
+Ü\˜]Ü—İZKÛX\šÙ]İšY]ËœXX\šÙ]ÜÙX\˜ÚœX
+K[\[Y[YÓÑH›Üˆ]™\H\Ù\‹›İHZXÚY[[Û›H›ÜšÎŠŠˆ
+JHÙY\^XÚ][Y\šXÈZ[ˆšXÙHÈX^šXÙHšY[Ëˆ‘SSÕ‘H›İšXÙHÛY\œÈ
+Z[—Ü‹ÛX^ÜŠH[™Z\ˆ[œİXİ[ÛœÈ[™™]š[İ\Ë]˜[YHY[ˆ™XÙY[˜ÙHÚ\š[™È
+ÜÛY\˜ÜšXÙWÜXÚØÜÛY\—ÜšXÙX
+Kˆ™\Ù\™H\Y›İ[™Ë›[šÈH[›[Z]Y˜[Y][Û‹İšXİš[\š[™ËØ]™Y\ÙX\˜ÚÛÛ\]Xš[]NˆÛØ]™YÙX\˜Ú\ÈÙY\Z\ˆ[Y\šXÈ˜[Y\ÎÈØœÛÛ]HÛY\ˆT“šY[È]\İ™HYÛ›Ü™YÚ]İ]Ú[™Ú[™È^XÚ]\YšXÙ\Ëˆ
+ŠHQH˜Y]\ÈÛY\ˆœ›ÛHZ[\ÈÈHX^[][H[İÙYHHVTÕS‘È˜Y]\È˜[Y][Ûˆ
+È›İ[™[H˜]™[[Z]ÈÈ›İÚ[™ÙHZXÚY[	ÜÈÚÜÙ[ˆ˜Y]\ÊKÚ]^XÚ]Z[\È[š]š\ÚX›H[Y\šXÈZ[‹ÛX^›İ[™È[™Hš\ÚX›H™XYX›Hİ\œ™[˜[YKÛİ\YÈH[Y\šXÈ˜Y]\È[œ]›Üˆ^Xİ[NÈÙX\˜Ú›İÈ[™[\ˆİX›Z]HXİX[Ù[XİY\İ[˜ÙNÈ™\ÜXİH^\İ[™ÈÔÔÜØÜš\[\ÈÚ]HÛÜšÚ[™È\ÚYÛ‹ˆ
+ÊHØÛÜHİ[[X\H™XYÈÙ[™\šXØ[KK™Ëˆ	ÕÚ][ˆˆZ[\ÉÎÈHÚÜÙ[ˆ’TØÚ]HÚİÜÈ[ˆHY]X›HØØ][ÛˆšY[È›Èš^Y	ĞÛÛØ^IÈ›ÙXİ^ÈÙY\ZXÚY[	ÜÈØ]™YÜšYÚ[‹Ü™YœÎÈH‘UÈ\Ù\ˆ]\İ\ÙKÜ™\]Z\™HZ\ˆÙ[XİYÜšYÚ[‹Ú]›ÈY[ˆÛÛØ^H˜[˜XÚÈ
+QUSĞTÑX
+NÈØØ][Û‹\™\ÛÛ][Ûˆ[Z]Èİ^HÛ™\İ
+›È˜][ÛÚYHÙ[ØÛÙ[™ÈÛZ[JKˆ
 
-## Operator audit wave (2026-10-08; Michael's request: find what blocks him from making money)
-| ID | Pri | Task | Deps | Status | Agent | Acceptance |
-|---|---|---|---|---|---|---|
-| C-24 | **P0** | (03) Stale bankroll defaults. CANON: protected principal = **$500** (`config/operator_profile.v1.json` `mission.protected_principal_usd`; MICHAEL_DECISIONS #1 is undecided, so no newer value exists). The engine still gates `cash_ok` at `risk_capital_per_deal_cap` **1500** and `max_loss_cap` **800**, so it can say YES to a deal Michael cannot fund. RULING: defaults `risk_capital_per_deal_cap = 500`, `max_loss_cap = 500` (a loss cannot exceed cash at risk); the engine accepts an optional `economics.context.available_to_deploy` (from the capital ledger) and uses `min(config cap, available_to_deploy)` when known, UNKNOWN keeps the config cap; `ev_cap_*` are score normalisers, leave them. New config version with a changelog note, goldens re-baselined with a note, a drift test that the cap equals the profile's protected principal, and a test that a $1,500 deal is not YES | none | **DONE** @ `6b8d9d4` (03; Sonnet; first attempt left edits and ran out of turns, `--allow-dirty` retry finished: caps 1500/800 -> 500/500, config 2026.10.4, engine 0.14.0, available_to_deploy honoured; Recon example parts 150 -> 100 to stay fundable under $500) | worker:lane-03 (sonnet) | A deal needing more cash than the cap/available is a hard PASS with a clear reason; the 3 training examples keep their classes (TV $30, Recon ~$300 fund-able, mower flagged); suite green; receipt names the old and new values |
-| E-23 | **P0** | (05) Stale cash caps in policy. RULING (same canon): `cash_at_risk.max_per_flip_usd = 500`, `max_total_active_usd = 500` (total active cash cannot exceed the protected principal; earned working capital raises the LIVE limit through the capital ledger, whose `available_to_deploy` the DB already enforces); `dry_run.buckets.money` per-action and daily hard caps 500; `global_daily_hard_cap` 600. Update the note text (remove "Agent 03 REC $1,500 / 2x"), bump the policy version, tests, ACTION_GATEWAY.md, and add a test that the caps never exceed `mission.protected_principal_usd` in the operator profile | none | **DONE** @ `76d90ac` (05; Sonnet, 22 turns, est. $0.54: caps = $500/$500, global 600, policy w1.11; 600 offer denied, 450 passes to approval; 601 tests) | worker:lane-05 (sonnet) | Policy validates against its schema; a 600 offer request is denied by the cap; a 450 one passes to approval; docs consistent; suite green |
-| A-36 | **P0** | (01) Production assembly: `mbos.production.build_components` + `Settings` from env (`MBOS_STATE_BACKEND`, `MBOS_GATEWAY_MODE`, `MBOS_SCORER`, `MBOS_RAW_DIR`, `MBOS_POLICY_PATH`); `mbos worker` assembles the REAL lane engine/gateway/enrichers/planner when installed and prints a REAL/STAND-IN report per component. FINDING (cold-start audit): `mbos worker` ran the placeholder scorer on the reference store; only the test runner wired the real lanes | none | **DONE** (this push; 4 tests incl. real lane D + lane E + engine assembly; worker never holds the owner DSN) | 01 | Report lists every stand-in; real engine/gateway wired on lane D |
-| A-37 | **P0** | (01, side worktree) Make the `mbos` CLI work on lane D: `items`, `queue`, `show`, `card`, `decide` (owner login), `outcome`, `note`, `panic`, `audit` currently call the reference `spine`/`ledger` and `_engine()` runs the REFERENCE migrations, which would be applied to a lane D database. Use the backend-aware module (`runtime.spine_module()`/`Pg04Ledger`), skip reference migrations when `state_backend=lane_d` | A-36 | **DONE** @ `b92683d` (side worktree worker, Sonnet, 27 turns, est. $0.71; merged by fast-forward: CLI works on lane D, no reference migration, 449 tests) | worker:side-worktree (sonnet) | With `MBOS_STATE_BACKEND=lane_d` on a database from `lane_d.build_as_worker`, every listed command works and applies no reference migration; tests on real PG16 |
-| A-38 | **P0** | (01, side worktree) `tools/bootstrap_dev.py` (and `mbos devdb up --lane-d`): one command that gives Michael a REAL local dry-run environment: pgserver cluster, lane D provisioned with split logins via 04's `provision()`, lane packages installed from pushed heads (reuse `tools/sync_lanes.py`), policy copied from 05, writes `var/dev.env` with every MBOS_* variable (worker URLs, owner URL kept in a SEPARATE file `var/owner.env`), prints the exact next commands (worker, UI, card) | A-36 | **DONE** @ `2198a74` (side worktree worker, Sonnet, 35 turns, est. $0.81; merged: `tools/bootstrap_dev.py` / `mbos devdb up --lane-d`, `var/dev.env` + separate `var/owner.env`, all-REAL worker report except sources; found: fixture parks at RESEARCHING because no comps source is wired -> A-39) | worker:side-worktree (sonnet) | On a clean checkout the command finishes; sourcing `var/dev.env` then `mbos worker --fixture ...` prints an all-REAL report except sources; the owner file works for `mbos decide`; documented in RUNBOOK |
-| A-39 | **P0** | (01, side worktree) FINDING (A-38 + cold-start audit): in the real assembly NO listing can reach a recommendation. `build_components` wires no Researcher/comps source, so every raw listing parks at RESEARCHING and Michael sees nothing to decide. Wire lane C's `EconomicsResearcher` with a production comps source built from lane B: a persisted `CompsStore` JSON (written by `mbos-discover` comps collection) plus the `ManualCompsAdapter` inbox (comps Michael entered), selected per Item with `candidate_comps`; asking comps from retained listings (`asking_comps_from_items`) fenced as INFER by lane C. `MBOS_COMPS_STORE`/`MBOS_COMPS_INBOX` in `var/dev.env`. Add `mbos recheck [ITEM_ID or --researching]` that re-launches the lifecycle for parked items (item_lifecycle already accepts RESEARCHING). The assembly report names the comps source or says STAND-IN: none | A-38 | **DONE** @ `6185927` (side worktree, Sonnet, 36 turns, est. $1.07, merged: ProductionCompsSource (store + manual inbox + asking) behind EconomicsResearcher; `mbos recheck`; no comps parks with the gap text, a manual comp + recheck reaches SCORED + recommendation on PG16) | worker:side-worktree (sonnet) | With the dev environment: a fixture listing WITHOUT inline economics plus one manual comp file reaches SCORED and a recommendation through the real assembly; with no comps it stays RESEARCHING with the exact gap text; `mbos recheck` moves it after a comp is added; tests on real PG16 |
-| F-28 | **P0** | (06) A parked item must tell Michael what to do. On the card (and the Today list) for an Item in RESEARCHING: a plain "Needs from you" section (the gap text from research, e.g. "no comparable sold price"), and an owner-channel form "Add a price I saw" that writes the `ManualCompsAdapter` inbox JSON (item category/make/model, sold price, date, condition, URL or note, entered_by human) with a receipt-friendly provenance note; after saving, the page tells Michael the item will be re-checked (the spine does it via `mbos recheck`; if the UI process cannot call it, say so and show the command). Validation as strict as F-24 (finite, positive, sane date). No automation of any site | A-39 (inbox path) | **DONE** @ `4e5681e` (06; Sonnet, 39 turns, est. $1.19: Needs-from-you section + Add-a-price form write the ManualCompsAdapter inbox; UI shows the `mbos recheck` command) | worker:lane-06 (sonnet) | A RESEARCHING item shows the gap and the form; a saved comp lands in the inbox in the exact shape `ManualCompsAdapter` reads (test reads it back with lane B's adapter); bad input refused; no LLM-reachable path |
-| G-20 | **P0** | Operator audit as MICHAEL, on the REAL assembly: run `tools/bootstrap_dev.py`, start `mbos worker` with fixtures and the Operator UI exactly as the RUNBOOK says, add a manual comp if an item parks, then try to do, in the browser/HTTP as he would: (1) see what matters today, (2) understand the best money opportunity, (3) create/update/pause a Wanted campaign, (4) see bankroll/cash and set his numbers, (5) understand WHY a deal is worth pursuing, (6) approve / decline / hold one, (7) know what needs his decision and what needs his input. Record every friction, dead end, stale label, confusing state, missing wiring or gap between backend capability and what the UI shows (including any $1,500/$3,000/stale value on screen) as F-nn with a repro and severity; doc-only fixes go in `docs/qa/OPERATOR_AUDIT.md`. DRY-RUN only, no real sends | A-39, F-28 | **DONE** (07; Sonnet, 61 turns, est. $1.71, ran out of turns after pushing `docs/qa/OPERATOR_AUDIT.md`): VERDICT **NO, Michael cannot use this today**; F-88..F-101 filed (P0: F-88 UI owner env mismatch, F-90 no item reaches a decision) | worker:lane-07 (sonnet, risk high) | `docs/qa/OPERATOR_AUDIT.md` with PASS/FAIL per job 1-7, screenshots-as-text of each page, F-nn list ranked, and a verdict "can Michael use this today?" |
+HÙX\˜Ú›İÈİ^\ÈTÕY\ˆ]™\Hš[\‹\ÚİÜ[™[Øš[Kˆİ]H[ÙHÙ[X[XÜÈ™\Ù\™Yˆ˜Y]\È\ØX›YÛ›İ\YY[ˆHİ]H[ÙH[›\ÜÈH^\İ[™È[ÛË\˜Y]\ÈÜ[Ûˆ\ÈÛ‹ˆ
+JH›È™Y\ÚYÛ‹›ÈÛİ\˜ÙHXİ]˜][Û‹›È]X˜\ÙHÚ[™ÙK›È™]ÈZY\[™[˜ŞK›È\XØ]H›ØÙ\ÜËˆš[\È[™\ˆ[™\ÈÚ\™H˜XİXØ[ˆ‹LMˆ
+Û™JHÓ‘H8 %U‘WÕ‘T’Q’QQÌMY˜XŒ‹LLLLUŒÎŒÎŒÌˆ™[ØY^Xİ]YHHİÛ™\ˆ
+T•QPÕÚOLÌMY˜x )‹™YHÎNM˜Lø )‹^ÜYŒLV‹\İ[™\ˆQÎLÍMHÚ[˜ÙHŒLL–‹˜XÚİ\™]‹LŒŒLLUŒLVŠNÈK]™\šYK[Û›HÒÎÈÙX\˜Ú›İÈÚXÚÈÒÈLÍOMÎÈ]™H˜Y]\ÈÛY\ˆÚİÜËÜİX›Z]ÈŒLŒ[™\YMËNÈšXÙHÛY\œÈXœÙ[ˆ™XÙZ\ØÜËÜ™XÙZ\ËÌŒ‹LLLLKYŒMË[]™K\™[ØY]™\šYšXØ][Û‹›YˆÔÕTT”ÑQQš[Üˆİ]\Ë]Y]ˆT•PS8 %ÕQÒS‘×ĞPĞÑTQÌMY˜X
+[\ŒMYÍXÈYÙ[HÛX[‹XÚXÚÛİ]™\šYšXØ][ÛˆŒ‹LLLLUŒŒMÖˆ›Øİ\ÙYMËÌ[™HİZ]HM‹Ì™X[Ú›ÛYHÌˆÚXÚÜÈ˜Z[Y\ÚİÜ
+Û[Øš[K˜Y]\È×Hˆ^XİÛX[ˆÛÛ[Z]Y\Y˜Xİ
+\OY˜[ÙKÛÙWÜÚHH\İYÛÛ[Z]
+Kˆ›Øİ\ÙY\İÎˆ[Y\šXËÜšXÙKÙš[\‹ÜØ]™Y\ÙX\˜ÚÛÛ\]Xš[]H[˜ÛˆØœÛÛ]HÛY\ˆT“šY[È[™ÛØ]™YÙX\˜Ú\Ëˆ™X[Ú›ÛYH\ÚİÜML[™[Øš[HÎLˆÛY\ˆ[İ™[Y[S‘[Y\šXÈ[K\Ü^YYZ[\È\]X[ÈİX›Z]Y˜Y]\ÎÈ›İ[™\HÚXÚÜÈ][ˆ[\›YYX]H˜[YKHX^[™[ˆ^Xİ\Y˜[YNÈ™\İ[Ù]Üˆ[YÚX›HQÈÚ[™ÙHÚ\™HHØXÚH[İÜË[ÙHØİ[Y[Y\İ[˜ÙK\™YXØ]H]šY[˜ÙNÈšXÙH[œ]ÈÚ[™ÙH™X[™\İ[ÎÈ™[[İ™YÛY\œÈXœÙ[ÈÙX\˜Ú›İÈ\İ
+ÛÛËÙŒM—Û]™WØÚXÚËœXY\YÜˆ^[™Yİ[\ÜÚ[™ÊKˆÛÛ\\™HZXÚY[	ÜÈØØ][ÛˆÚ]HÙXÛÛ™İ\ÜYÜšYÚ[ˆ[™H™]Ë]\Ù\ˆØÙ[˜\š[ÈÚ]›È\™ÛÙYÛÛØ^H˜[˜XÚÎÈÜšYÚ[‹Ü˜Y]\ËÜšXÙH\œÚ\İXÜ›ÜÜÈ™[ØYˆØÜ™Y[œÚİÈ™]šY]ÙYHYÙ[Kˆ[ˆYÙ[H[™\[™[H™\šYšY\ÈH^XİÛÛ[Z]œ›ÛHHÛX[ˆÚXÚÛİ]È™[X\ÙHÛ›H›İYÚÛÛËÜ™[ØYİZKœÚÚO˜[™\ˆH[™XYKYÚ]™[ˆ]]Üš]H
+YˆH\›Z\ÜÚ[ÛˆÛ\ÜÚYšY\ˆ™Z™XİÈ]™XÛÜ™H^Xİ‘QQ›ÜˆHİÛ™\ˆÈ[ˆ]ÈÈ›İ\\ÜÊKˆ™XÙZ\Ú]ÛÛ[Z]\İËØYY™]š\Ú[Û‹ÜİØœÙ\˜][Û‹ÛÜİYˆÛ›İÛ‹ˆŸ‹LMH
+Š“ÕÓ‘T‹T‘TÓÓ‘QŒ‹LLLLHMÎHÑ
+XZ\ÛÛˆŒ‹LLLLK[İÛ™\‹][˜›ØÚË\™[X\ÙKX[\ËYŒMÈ›È\\ˆİÛ™\ˆ]Y\İ[ÛŠNÈÛX[›ÛİË]\Ûˆ[™H‹Z[Ûˆ[™HˆXYÎMŒM˜
+‹LMÈ
+È‹LMJHÛÈÓ‘HÛÛXš[™Y™[X\ÙH›ÛİÜÎÈ›İH™Y\ÚYÛŠŠˆ
+JHYÙH]H™XÛÛY\È
+Š‘X[ÛšY™™\ˆX\šÙ]XÙJŠˆ
+ÜšYÚ[ˆ[™Ø]™Y™Y™\™[˜Ù\Èİ^H\‹]\Ù\ˆ›Ùš[H]NÈ›ÈZXÚY[[Û›H›ÜšÊNÈ
+ŠH˜Y]\ÈÛY\ˆ›Ü›X[ØØ[H
+ŠŒÈLZ[\ÊŠÈH[Y\šXÈ˜Y]\ÈšY[İ[XØÙ\ÈH[˜[Y]Y˜[™ÙH\ÈKˆYˆHØ]™YÜˆ\Y˜Y]\È^ÙYYÈLHÛY\ˆ˜[™ÙHš\ÚX›H^[™ÈÈ[˜ÛYHHYH˜[YH
+Üˆ[ˆ\]X[HÛX\ˆİ\İÛKY\İ[˜ÙHİ]JNˆ™]™\ˆİX›Z]LÚ[HÚİÚ[™ÈH\™Ù\ˆ˜[YK™]™\ˆÛ[\HØ]™Y˜[YK™]™\ˆÚ[™ÙHH\Ù\‰ÜÈ\İ[˜ÙNÈ[X™\ˆšY[[™ÛY\ˆ[Ø^\ÈYÜ™YHÚ[H[İš[™ÈÜˆ\[™ÎÈHØØ[H\ÈÛÛ›Û\ØXš[]K›İH˜]™[[Z]È
+ÊHš\œİš\Ú]Ú]›ÈÜšYÚ[ˆÚİÜÈH™]]˜[	Ñ[\ˆH’TÜˆÚ]HÈÙX\˜ÚH\İ[˜ÙIÈ[œİXYÙˆH\œ›Ü‹[ZÙH“ÜšYÚ[ˆ	ÉÈXØÙ\Y]›İØØ]Yˆ˜[›™\ˆ
+Ü\˜]Ü—İZKÛ[™[™×Ùš^œX
+NÈ
 
-## Operator-audit fixes (G-20 verdict NO; order = wave 1, 2, 3)
-| ID | Pri | Task | Deps | Status | Agent | Acceptance |
-|---|---|---|---|---|---|---|
-| A-40 | **P0** | (01, side worktree; wave 1) F-88 bootstrap prints the UI command with the ONE canonical variable `MBOS_OWNER_DATABASE_URL` (UI side is F-29); F-89 the dev DB is born FROZEN with no explanation: bootstrap releases the initial freeze as the owner (receipted, dev only) unless `--keep-frozen`, and says so; F-91 `mbos recheck` twice crashes on a duplicate lane provenance (`record_lane_provenance` must be idempotent for identical content); F-92 `mbos worker` watches the manual-comps inbox (60 s) and re-checks parked items itself; F-101 `bootstrap_dev` finds or installs `uv` instead of failing; F-96 inject the ledger into scoring: the adapters put `economics.context.available_to_deploy` and the stated cash context from `capital_position_document()` and the profile so cards stop saying UNKNOWN when Michael has funded the ledger; plus a spine function `record_attestation(conn, item_id, evidence_key, note, entered_by)` that stores Michael's confirmation of a requested evidence key as an item research entry with HUMAN provenance (for C-25 and F-29) | none | **DONE** @ `36068dd` (side worktree, Sonnet, 43 turns, est. $1.38, merged: F-88/89/91/92/101/96 + `record_attestation`; 461 tests; caveat: attestation needs a worker-login connection because append_item_research is granted to agent_write only -> D-29) | worker:side-worktree (sonnet) | Tests on real PG16: bootstrap leaves system RUNNING; second recheck is clean; a comp file dropped in the inbox moves a parked item without a command; funded ledger shows on the card; attestation is stored with human provenance and visible to lane C input |
-| C-25 | **P0** | (03; wave 1) F-90 accept Michael's attested evidence: a `record_attestation` research entry (human provenance) whose key matches a requested decisive-evidence key (for example customer_screened, scope_verified) counts as that evidence in the engine, raising confidence by the configured rule, never inventing it; F-93 status text must be true ("waiting for a price you saw" or "last re-check failed", never "research is running" when nothing runs); F-99 no contradiction between WHY and TRANSPORT (UNKNOWN stays UNKNOWN everywhere); F-94 `plan_week` fills `title`, `verdict`, `waiting_on` on every leg (schema fields added by 01) and recommends HOLD, not DEPLOY, when no leg is a YES | none | **DONE** @ `f7d5620` (03; Sonnet, 32 turns, est. $0.96: attested evidence counts, true status text, no WHY/TRANSPORT contradiction, plan legs carry title/verdict/waiting_on, HOLD when no YES leg; convention `attestation:<key>`) | worker:lane-03 (sonnet) | The doorbell example with both attestations can reach YES; without them it stays MAYBE with the exact waiting_on; plan with only MAYBE legs is HOLD; suite green |
-| F-29 | **P0** | (06; wave 2) UI half of the audit: F-88 read `MBOS_OWNER_DATABASE_URL` (accept the old `MBOS_APPROVER_DATABASE_URL` with a warning) and show an explicit red notice, not silent fallback, when owner-channel writes would run on the worker login; F-89 FROZEN banner explains what it means and how to release it; F-90 a "Confirm" form per requested evidence key that calls `record_attestation` (owner channel, PIN); F-92 truthful message after saving a comp (the worker re-checks it); F-94 `/mission` shows leg titles and what each waits on, and HOLD wording; F-95 one figure per concept on `/digest` and `/summary` (rename the rank score so it is not called Value per hour); F-97 edit a campaign and keep must-have and nice-to-have after saving; F-98 three-line Today header (gap, available to deploy, best next move); F-100 hide a tab whose data source is not configured | A-40, C-25 | **DONE** @ `c638453` (06; Sonnet, 72 turns, est. $2.50; pushed head b423b86; all nine audit fixes F-88/89/90/92/94/95/97/98/100; caveat: the worker's classifier blocked re-vendoring the mission/inventory schemas, so they are stale -> F-30) | worker:lane-06 (sonnet) | 07's G-20 repro for each id now passes; UI suite green |
-| A-41 | **P0** | (01, side worktree; wave 2) A viable dry-run deal set: `fixtures/sources/training_examples.json` (labelled ILLUSTRATIVE) built from Michael's three training examples (the $30 TV that resells for $75-100 in an hour, the older riding mower late in the season, the non-running Recon about $300) plus a service lead whose evidence can be attested, each with comps/priors so the REAL assembly produces: at least one YES awaiting approval within the $500 bankroll, one MAYBE that names its missing evidence, one HOLD/PASS with the bankroll reason. Add the set to `bootstrap_dev` as the default fixture | A-40, C-25 | **DONE** @ `45dc71d` (side worktree, Sonnet, 52 turns, est. $1.95, merged: `training_examples.json` through the REAL assembly: TV = YES (approvable within $500), Recon = MAYBE (fault_identified), mower = PASS on the bankroll, drywall lead MAYBE -> YES after owner attestation; bootstrap default fixture) | worker:side-worktree (sonnet) | Through the real assembly on PG16: states and verdicts as above; every number labelled FACT/INFER/UNKNOWN; card validates |
-| G-21 | **P0** | (07; wave 3) Priority-4 full dry-run of the Weekly Money Mission on the real assembly with `training_examples.json`: discovery, normalization, research (manual comp + attestation through the UI forms), scoring, recommendation, Michael's approval boundary (YES needs step-up/PIN; NO/HOLD paths), dry-run effector, receipts and chain verify, outcome entry as a human (capital closes, principal returns, profit becomes earned), and the learning hook (calibration proposal is produced and safely blocked). Zero external actions; assert `live_effector_calls == 0` | F-29, A-41 | **SPLIT** (first run used all 61 turns, saved nothing: too wide) -> G-21a and G-21b | worker:lane-07 (sonnet, risk high) | `docs/qa/MISSION_DRYRUN.md` with each stage PASS/FAIL, receipt ids, the ledger before/after, and the list of any gap as F-nn |
-| G-22 | P1 | (07; wave 3) Re-run the G-20 audit as Michael after wave 2 and publish the new verdict | F-29, A-41 | **DONE** @ `ebc9d44` (dispatcher-launched; 07; Sonnet, 69 turns, est. $1.84): VERDICT **YES for the flip path, NOT YET for a held deal or a service lead**; jobs 1-5 PASS, 6-7 PARTIAL; F-120 (P1), F-121/122/123/125 (P2), F-124 (P3) filed | worker:lane-07 | Each job 1-7 PASS or a ranked reason; verdict updated |
-| D-29 | **P0** | (04; wave 2) The owner UI login must be able to record Michael's attestation: today `append_item_research` is granted to `agent_write` only, so the Operator UI (`mbos_operator_ui`) cannot confirm evidence. RULING: add a SECURITY DEFINER `mbos.record_attestation(item_id, evidence_key, note, actor, provenance_ids, idempotency_key)` that requires the `owner_channel` role AND a human actor with an id, writes ONE item research entry shaped like A-40/C-25's `attestation:<key>` convention, and a receipt; the workflow login cannot call it. `agent_write` keeps `append_item_research` for lane enrichments but may NOT write an `attestation:` entry directly (CHECK or function guard) | none | **DONE** @ `fb6f36c` (04; Sonnet, 19 turns, est. $0.54: migration 0024 `record_attestation` owner_channel + human, receipted, idempotent; agent_write cannot write `attestation:` entries) | worker:lane-04 (sonnet, risk high) | As the real roles: owner UI login records an attestation (receipted, human); `mbos_dbos` is refused by role and cannot append an `attestation:` research entry; the entry is visible to lane C input; verify_chain OK; 01's gate green |
-| F-30 | **P0** | (06) Re-vendor the ADR-0013 schemas byte-identical from 01's head (`mission.schema.json` now has leg `title`/`verdict`/`waiting_on`; `inventory.schema.json` has required `defect_ids_seen` and `resolved_defects`; check campaign, valuation, merchandising, card too): copy, run the pin tests, and fix whatever the stricter contract and the A-32 merchandising lint (verbatim defects in prose, revision check) now reject in `/mission`, `/intake` and `/preview` | F-29 | **DONE** @ `bc050cf` (06; Sonnet, 28 turns, est. $0.50: ADR-0013 contracts re-vendored byte-identical with a sha256 pin test; intake builds a valid inventory that passes the lint) | worker:lane-06 (sonnet) | Vendored copies equal 01's bytes (sha256 test); `/mission` renders a plan with the new leg fields and validates; `/preview` and `/intake` produce inventory objects that pass `mbos.merchandising.lint`; UI suite green |
-| G-21a | **P0** | (07; Priority 4, part 1 of 2) Dry-run stages 1-4 on the REAL assembly with `fixtures/sources/training_examples.json` (bootstrap_dev, `mbos worker`, Operator UI): (1) discovery + (2) normalization (every training deal becomes an Item), (3) research (add the missing comp through the UI "Add a price I saw" form and let the worker pick it up), (4) scoring + recommendation (TV = YES within $500; Recon = MAYBE naming its evidence; mower = PASS on the bankroll; drywall lead MAYBE then YES after Michael confirms evidence in the UI). Write `docs/qa/MISSION_DRYRUN.md` INCREMENTALLY and COMMIT AFTER EACH STAGE (one stage = one commit); stop and report at the first real gap as F-nn | F-30 | **DONE as a FAILING dry-run** @ `4b90e9b` (07; Sonnet, 72 turns, est. $2.05): stages 1-2 PASS, stages 3-4 FAIL on the bootstrapped real assembly; `docs/qa/MISSION_DRYRUN.md`; F-102..F-110 filed (P0 F-106: the $30 TV cannot reach a recommendation). The A-41 tests passed on a different path than Michael would run | worker:lane-07 (sonnet, `--max-turns 100`) | Stages 1-4 each PASS/FAIL with the exact command and output; commits per stage; gaps filed |
-| G-21b | **P0** | (07; part 2 of 2) Stages 5-8 starting from G-21a's state: (5) Michael's approval boundary: YES needs the step-up PIN, wrong PIN refused, NO and HOLD paths work, nothing executes without a decision; (6) dry-run action: effector call recorded, `live_effector_calls == 0`, receipts + chain verify; (7) human-entered outcome through the UI: capital closes, principal returns, profit becomes earned working capital, ledger before/after shown; (8) learning hook: calibration proposal produced and safely blocked. Append to `docs/qa/MISSION_DRYRUN.md`, commit after each stage | G-21a | **DONE** @ `9634d6e` (07; Sonnet, 80 turns, est. $2.45): stage 5 approval boundary PASS, stage 6 dry-run action PASS (live_effector_calls 0, chain ok); stage 7 PARTIAL (profit becomes earned capital: $500 -> $560; nothing ever deploys capital), stage 8 PARTIAL (proposal produced and safely blocked UNKNOWN_CAPABILITY; not wired; TV class cannot calibrate); F-113..F-119 filed | worker:lane-07 (sonnet, `--max-turns 100`) | Stages 5-8 PASS/FAIL with receipt ids and the ledger before/after |
+Hİ™[™İ[ˆHÛÛ™][Û˜[œ™\Ú]š\Ú]\ÜÙ\[Ûˆ[ˆ\İËİ\İÛX\šÙ]ÙŒœX
+›ÈYˆ‹‹ˆ[ÙHYX
+KˆÙY\]™\H‹LM‹Ñ‹LMËÑ‹LMH™Z]š[Üˆ
+ÙX\˜Ú›İÈ\İ[Y\šXÈšXÙ\Ë’VT‘K[Û›HİYÚ[™ÈÛİ\˜Ù\Ë“ÕÓÓ“‘PÕQİ]\ÊKˆ›ÈÛİ\˜ÙHXİ]˜][Û‹›È]X˜\ÙHÚ[™ÙK›È™]È\[™[˜ŞKˆ‹LMHİYÚ[™ËXXØÙ\Y
+ÎMŒM˜
+HÓ‘H8 %U‘H˜˜ÎXØ
+İÛ™\‹\[ˆÛÛXš[™Y™[X\ÙHŒ‹LLLLˆNLVÈYÙ[HÛ]YKZ[‹PÚ›ÛYHÚXÚÈÛˆH]™HYÙHŒ‹LLLL•ŒÎŒMÈ™XÙZ\ØÜËÜ™XÙZ\ËÌŒ‹LLLL‹XÛÛXš[™Y\™[X\ÙK[]™K]™\šYšXØ][Û‹›Y
+KˆÜš[Üˆİ]\Ë]Y]ˆT•PS8 %ÕQÒS‘×ĞPĞÑTQMÎX™Œ˜
+ÛÙHÙXXÛÛ[ˆ™ØØ™]šY]ÙYÚÙ[‹XK]ÚÙ[ˆÛ›H]H
+ÈÛY\ˆX^Ú[™ÙYÈYÙ[HÛX[‹XÚXÚÛİ]™\šYšXØ][ÛˆŒ‹LLLLUŒÎŒÍNŒL–ˆ›Øİ\ÙYÍËÌ[™HÍKÌHÛ›İÛˆŒÎH›ZÙHÍ[Û™WHˆ^XİÛX[ˆÛÛ[Z]Y\Y˜Xİ
+\OY˜[ÙKÛÙWÜÚHH\İYÛÛ[Z]
+Kˆ›Øİ\ÙY\İÎˆ]H^ÈÛY\ˆX^LHY˜][È˜Y]\ÈÍLØ]™Yİ\YÚİÜÈÍLÛˆ›İÛÛ›ÛÈ[™İX›Z]ÈÍL
+ÛY\ˆ˜[™ÙH^[™Y
+KLXØÙ\YHHšY[ÈÛY\‹ÙšY[YÜ™Y[Y[›İ\™Xİ[ÛœÎÈ™]]˜[š\œİ]š\Ú]›Û\[™›È\œ›Üˆ˜[›™\Èİ™[™İ[™Y\ÜÙ\[Û‹ˆ™X[Ú›ÛYH\ÚİÜML[™[Øš[HÎLÚ]ØÜ™Y[œÚİÈ™]šY]ÙYHYÙ[NˆÛY\ˆ]ŒLÈ\YMËKÍLLÈÛÛËÙŒM×Û]™WØÚXÚËœX\]Y›ÜˆH™]ÈØØ[H[™\ÜÚ[™ÎÈÛÛËÙŒMWÜÛİ\˜ÙWÜÚİËœX[™ÛÛËÙŒM—Û]™WØÚXÚËœXİ[\ÜÚ[™ËˆYÙ[H[™\[™[H™\šYšY\ÈH^XİÛÛ[Z]œ›ÛHHÛX[ˆÚXÚÛİ]È[ˆÓ‘HÛÛXš[™YRK[Û›H™[ØY
+ÛÛZ[œÈ‹LMH
+È‹LM
+H[™\ˆHİÛ™\‰ÜÈ]]Üš]NÈYˆYÙ[IÜÈ[ˆ\È[šYYHH\›Z\ÜÚ[ÛˆÛ\ÜÚYšY\‹H^XİİÛ™\‹\[ˆÛÛ[X[™\È™XÛÜ™Y›İ\\ÜÙYˆŸ‹LMH
+Š”
+Šˆ
+Š‹LLˆSTSQS•P“HÕP‹TÕT
+™]\Ù\È‹LLÈ“ÕHÙXÛÛ™Ûİ\˜ÙH\ÚÎÈİÛ™\ˆš[Üš]HŒ‹LLLLHMÎŒˆÑ	ÙÈ›İİÜÚ][›İ\ˆÚ\š[™ÈÜXÉÊKˆÓ‘H[™HˆÛÜšÙ\ˆ[\[Y[ÈHZ[š[X[X\šÙ]XÙHÛİ\˜ÙHÙX[Hœ›ÛHØÜËÚ[™Ù™‹ĞŒL—ÓĞĞSÔÓÕTÑWÕÒT’S‘×ÔÔPË›YŠŠˆ
+JHÜ\˜]Ü—İZKÛX\šÙ]ÜÙX\˜ÚœXˆHÛİ\˜ÙKXYÛ›ÜİXÈØ\™ØY\ˆ
+ØYÜÛİ\˜ÙJÛİ\˜ÙK‹‹ŠX
+H™]\›š[™ÈHĞSQHØ\™Ú\H\ÈØYÙÜØXœ›ÛH[™H‰ÜÈ^\İ[™È[XZ[[\Y\\˜™XÛÜ™È
+X›Ü×Ù\ØÛİ™\K˜Y\\œË™[XZ[Ø[\Ø[›™Y[œİ[È™XY[Û›HSSY\ˆ™XY\‹™]™\ˆSPT\™JKÚ]\‹XØ\™Ûİ\˜ÙH˜[YKÛİ\˜ÙH[šËšXÙKØØ][Û‹Ù\İ[˜ÙH[™™]ÚYØ]œ™\Ú™\ÜËˆ
+ŠHÜ\˜]Ü—İZKÛX\šÙ]Ü›İ]\ËœXˆ\Ü]ÚÛˆVÉÜÛİ\˜ÙI×X
+ÜØKÛİ™X[ÈÜˆX›XÜİ\œ\ÎÈ[Y\™Ù\È[™KY\ÈšXH[™H‰ÜÈY\\ˆYˆ]˜Z[X›K[ÙH\İÈ\ˆÛİ\˜ÙJHÚ]H^\İ[™Èš[\œÈ
+šXÙK˜Y]\ËÜšYÚ[‹İ]\ËÙ^]ÛÜ™ËØ]YÛÜšY\ËYJH\Z[™ÈÈH\œÙ\‹X˜XÚÙY™XÛÜ™È^XİH\ÈÈÔĞKˆ
+ÊHÜ\˜]Ü—İZKÛX\šÙ]İšY]ËœXˆ\‹\Ûİ\˜ÙHÛİ™\˜YÙKÜİ]\È[™NÈÛ™\İ“ÕPÓÓ“‘PÕQİ]H›Üˆ[HÛİ\˜ÙHÚ]İ]H™X[™XYÈ[H\œÙ\‹X˜XÚÙY™XÛÜ™œ›ÛH[ˆ™[[š^\™H\™XİÜH\ÈÚİÛˆÓ“HÛˆ[ˆ\ÛÛ]Y\İYÚ[™È›YËX™[Y’VT‘HÈ›İ]™K™]™\ˆ\ÈHİÛ™\‰ÜÈ™X[X[È[™™]™\ˆ\È	ØÛÛ›™XİY	ÎÈÜ˜ZYÜÛ\İP˜^H[™˜XÙX›ÛÚÈX\šÙ]XÙHİ^H“ÕÓÓ“‘PÕQˆ
 
-## Dry-run failures: root causes and fixes (wave A now, wave B after, then re-run G-21)
-| ID | Pri | Task | Deps | Status | Agent | Acceptance |
-|---|---|---|---|---|---|---|
-| A-42 | **P0** | (01, side worktree; wave A) F-102 the context injected for scoring (A-40) must NOT be persisted into the stored Item (it violates the frozen item schema, so `mbos audit` conformance is red): pass it to the scorer at call time only; F-105 no basis UNKNOWN on stored fields where a basis exists; F-109 the worker re-checks a parked item when a new attestation or comp appears (not only comps in the inbox): track last-seen research length per item; F-103 flush the REAL/STAND-IN report at start; F-104 the raw store resolves `raw_ref` (write the retained raw payloads under MBOS_RAW_DIR, or say where they are) | none | **DONE** @ `69402d9` (side worktree, Sonnet, 29 turns, est. $0.76, merged: F-102/103/104/105/109) | worker:side-worktree (sonnet, `--max-turns 100`) | `mbos audit` conformance green on the bootstrapped DB; attesting an item moves it without a manual recheck; report visible in the worker log; tests on real PG16 |
-| C-26 | **P0** | (03; wave A) F-106 the $30 TV is `flip/other_asset`, which demands a human scope override, and 06 has no form for it. RULING: add consumer electronics and general small goods as first-class estimator categories with priors (handling hours, parts cost for resale-as-is, sale probability, days to cash, condition-driven resale spread) so a TV works with no override; keep `scope_override_required` only for truly unknown categories; F-110 the researcher must carry the listing's own facts: `normalized.price` is the FACT ask price (acquisition.ask_price) with the source provenance, `expected_buy_price` defaults to it (INFER), and inline economics supplied with a FACT/INFER basis (fixtures, intake) are kept instead of replaced by priors, so a decision input backed by the listing is evidence-backed (the mower PASS archives, the Recon is MAYBE naming `fault_identified`); F-107 the status text states the true blocker for every gap code (scope_override_required, thin_comps, repair_scope_unknown, transport_unclassified) | none | **DONE** @ `3d0fd86` (03; Sonnet, 43 turns, est. $1.67: consumer-electronics/small-goods priors, listing facts and inline economics kept, true gap text; TV YES, Recon MAYBE, mower PASS archived) | worker:lane-03 (sonnet, `--max-turns 100`) | Through `research_step` with only a manual comp: TV reaches YES within $500; Recon MAYBE naming its evidence; mower PASS archived (cash_ok backed by the listing price); goldens re-baselined with a note; the three training classes unchanged; suite green |
-| B-22 | **P1** | (02; wave B) F-108 a comp Michael enters FOR a specific Item through the UI must always be a candidate for that Item: manual comp entries carry `for_item_id`; `candidate_comps` skips the title-similarity cut for a comp paired to that exact Item, and any other unmatched comp is reported (not silently dropped) with the reason | none | **DONE** @ `3b77cd0` (02; Sonnet, 11 turns, est. $0.26: `for_item_id` pairing bypasses the similarity/category/window cuts; unmatched comps are reported with a reason) | worker:lane-02 (sonnet) | The "Generic / 55in LED TV $92" comp entered for the TV now matches; an unmatched comp appears in the gap text; suite green |
-| F-31 | **P0** | (06; wave B, after C-26) F-106 UI: an owner-channel "Tell me about the job" form for scope overrides (parts cost, hours, required skills) that stores provenance-carrying inputs (human, receipted) for unknown categories; F-108 the "Add a price I saw" form writes `for_item_id`; F-107 UI text uses the engine's true gap text; F-109 the banner after attesting says the worker will re-check it | C-26, A-42, B-22 | **PARTIAL** @ `cd174fa` (06; Sonnet, 31 turns, est. $0.74): F-107/108/109 done; the F-106 scope-override form is blocked because nothing feeds a stored human override into the engine -> C-27 | worker:lane-06 (sonnet, `--max-turns 100`) | Over HTTP: a scope override on an unknown-category item moves it; comp pairing works; texts true |
-| C-27 | **P1** | (03 with 04; after the money-flow proof) Human inputs that feed the engine (F-111 + F-106): (a) a service QUOTE Michael sets or accepts for a lead (the card already says what quote would clear the target), (b) scope overrides for truly unknown categories: a stored owner-channel record (parts cost, hours, required skills, human provenance, receipted) that the research bundle feeds into the engine as provenance-carrying overrides, then 06 adds the form (F-31's blocked half). The TV no longer needs it (C-26 gave consumer electronics priors) | C-26 | **PARTIAL** @ `f63011e` (03; Sonnet, 19 turns, est. $0.35): (b) done: Item.research entries `scope_override:<rehab or job>.<field>` (human provenance) feed the engine and clear scope_override_required; (a) the service quote input is not built -> C-28, D-30, F-32 | worker:lane-03 | An item in an unknown category moves from `scope_override_required` after Michael records an override; engine marks the inputs human-attested |
-| G-21c | **P0** | (07) Re-run G-21a stages 3-4 on the FIXED assembly (A-42, C-26, B-22, F-31 partial): bootstrap fresh, TV comp via the UI form, expect TV = YES within $500 and visible in `mbos queue`/Today, Recon = MAYBE naming its evidence, mower = PASS archived, drywall lead MAYBE then YES after attestations with the worker rechecking by itself. Append to `docs/qa/MISSION_DRYRUN.md`, commit per stage | wave A + B | **DONE** @ `ddef0bd` (07; Sonnet, 37 turns, est. $0.87): Stage 3 PASS; Stage 4 3 of 4: TV YES in the queue and on Today (EV $53, cash tied up $36, within $500), Recon MAYBE naming fault_identified, mower ARCHIVED; drywall lead stays MAYBE (F-111: no way to set a quote); `mbos audit` conformance green, chain/provenance/dry-run ok | worker:lane-07 (sonnet, `--max-turns 100`) | Stages 3-4 PASS or filed as F-nn |
-| D-30 | **P1** | (04; wave C) One owner-only function for Michael's typed inputs, like `record_attestation` (D-29): `mbos.record_human_input(item_id, kind, key, value, note, actor, provenance_ids, idempotency_key)` with kind in `scope_override` (entry field `scope_override:<rehab or job>.<field>`, as C-27 reads) and `quote` (entry field `quote:amount_usd`); owner_channel + human actor required, receipted, idempotent, numeric values finite and sane; the workflow login cannot write `scope_override:`/`quote:` entries any other way (same guard as `attestation:`) | D-29 | **DONE** @ `01e4e5f` (04; Sonnet, 12 turns, est. $0.40: migration 0025 `record_human_input` for scope_override and quote, owner_channel + human, entry-prefix guard extended; mbos_dbos refused) | worker:lane-04 (sonnet, risk high) | Real roles: UI login records both kinds; `mbos_dbos` refused and cannot append those entry prefixes; verify_chain OK |
-| C-28 | P1 | (03; wave C) The engine reads Michael's QUOTE for a service lead: research entry `quote:amount_usd` (human provenance) replaces the default quote in the service economics (revenue), shown as human-attested; the card's "a quote of $X or more would clear it" stays the suggestion; a quote below cost is accepted but the verdict follows the numbers | D-30 | **DONE** @ `96cb704` (03; Sonnet, 24 turns, est. $0.58: `quote:amount_usd` feeds job.quoted_revenue human-attested; the drywall lead is YES at $700 and MAYBE at $500) | worker:lane-03 | Drywall lead with a $700 quote reaches YES; with $500 stays MAYBE; goldens updated |
-| F-32 | P1 | (06; wave C) "Set my quote" (service leads) and "Tell me about the job" (unknown categories) owner-channel forms calling `spine_d.record_human_input` (01 wrapper: A-43), PIN, strict validation, true after-save text | D-30, C-28, A-43 | **DONE** @ `317e650` (dispatcher-launched; 06; est. $1.35: Set my quote and Tell me about the job save through record_human_input; drywall lead MAYBE at $500 to YES at $700 over HTTP on real lane D) | worker:lane-06 | Over HTTP: quote on the drywall lead moves it to YES; scope override on an unknown-category item moves it |
-| A-43 | P1 | (01, side worktree; wave C) `spine_d.record_human_input(conn, item_id, kind, key, value, note, entered_by)` wrapper over D-30's function (human provenance first, like `record_attestation`), the production worker re-check trigger for new `quote:`/`scope_override:` entries, tests on real PG16 | D-30 | **DONE** (side worktree, Sonnet, merged: `spine_d.record_human_input` wrapper + worker recheck of new quote/scope-override entries) | worker:side-worktree | Entry stored with human provenance; worker re-checks the item by itself |
+H^\İ[™ÈÔĞH™Z]š[Üˆ[™]™\H‹LM‹Ñ‹LMÈÛÛ›Ûİ^H[Xİ
+ÙX\˜Ú›İÈ\İ˜Y]\ÈÛY\‹[Y\šXÈšXÙHšY[Ë›ÈY[ˆÛÛØ^HÜšYÚ[ŠKˆ›ÈSPTÙÚ[‹›È™]ÛÜšÈ™]Ú›ÈÙXÜ™]Ë›È™]È\[™[˜ŞK›È]X˜\ÙHÚ[™ÙK›ÈÛİ\˜ÙK\ÛXŞH\\ÜËˆš[\È[™\ˆ[™\ÈÚ\™H˜XİXØ[ˆ
+JH[™HˆQÑS•ÔÕUTË›Y]\İ[ÛÈ™HÛÜœ™XİYÈİ\œ™[][ˆHØ[YH\Úˆ‹LMˆU‘WÕ‘T’Q’QQLX
+\İÜH™\Ù\™Y
+H[™‹LMÈÕQÒS‘×ĞPĞÑTQÌMY˜Xˆ‹LMÈ™\šYšYY
+ÌMY˜X
+HÓ‘H8 %U‘H˜˜ÎXØ
+İÛ™\‹\[ˆÛÛXš[™Y™[X\ÙHŒ‹LLLLˆNLVÈYÙ[HÛ]YKZ[‹PÚ›ÛYHÚXÚÈÛˆH]™HYÙHŒ‹LLLL•ŒÎŒMÈ™XÙZ\ØÜËÜ™XÙZ\ËÌŒ‹LLLL‹XÛÛXš[™Y\™[X\ÙK[]™K]™\šYšXØ][Û‹›Y
+KˆÜš[Üˆİ]\Ë]Y]ˆT•PS8 %ÕQÒS‘×ĞPĞÑTQÎMŒM˜
+ÛÙHÍØÍMM
+ØŒLÍÍØÈYÙ[HÛX[‹XÚXÚÛİ]™\šYšXØ][ÛˆŒ‹LLLLUŒÎŒŒÖˆ›Øİ\ÙYËÌ[™HİZ]HÌHÚ]HÛ›İÛˆ\İÜ™\Ø[WÙŒÎXØY›ZÙH\ÜÚ[™ÈËÌÈ[Û™K™X[Ú›ÛYH‹LMHŒ‹×Hˆ^XİÛX[ˆÛÛ[Z]Y\Y˜Xİ
+\OY˜[ÙKÛÙWÜÚHH\İYÛÛ[Z]
+KˆÙ™›[™H\œÙ\‹X˜XÚÙYš^\™H\İÈ
+\ÙH[™H‰ÜÈ^\İ[™È™[[š^\™\ÎÈØÜX˜™Y
+NˆØ\™\Ú\H\š]HÚ]ÔĞNÈ\‹\Ûİ\˜ÙH›İ™[˜[˜ÙH[™œ™\Ú™\ÜÈšY[ÎÈš[\œÈ[™Ûİ\˜ÙHÙ[Xİ[ÛˆÛÜšÈÛˆH\œÙ\‹X˜XÚÙY™XÛÜ™ÎÈ’VT‘HX™[™\Ù[[™	ØÛÛ›™XİY	ÈXœÙ[Ûˆš^\™H]NÈHÛİ\˜ÙHÚ]›È™XYİ^\È“ÕÓÓ“‘PÕQÈÔĞHİ]][˜Ú[™ÙY
+ÛÛ[ˆÛÛ\\š\ÛÛŠKˆ™X[Ú›ÛYH\ÚİÜML[™[Øš[HÎLÛˆ\ÛÛ]YİYÚ[™ÈÚ]ØÜ™Y[œÚİÈ™]šY]ÙYHYÙ[NÈÛÛËÙŒM—Û]™WØÚXÚËœXİ[\ÜÙ\ÎÈÛÛËÙŒM×Û]™WØÚXÚËœXİ[\ÜÙ\ËˆU‘HXØÙ\[˜ÙH\È“Õ\Ùˆ\È›İÎˆ]İ^\È[ˆ‹LLˆ[™™YYÈH™X[XØÙ\ÜÚX›HÛİ\˜ÙY\İ[™È
+XZ[›Ş‘QQ
+KˆYÙ[H[™\[™[H™\šYšY\ÈH^XİÛÛ[Z]œ›ÛHHÛX[ˆÚXÚÛİ]È™[X\ÙHÛ›H›İYÚÛÛËÜ™[ØYİZKœÚÚO˜
+H\›Z\ÜÚ[Û‹XÛ\ÜÚYšY\ˆ[šX[\È™\ÜY\È[ˆ^XİİÛ™\ˆ‘QQ›İ\\ÜÙY
+Kˆ™XÙZ\Ú]ÛÛ[Z]\İËØYY™]š\Ú[Û‹ÜİØœÙ\˜][Û‹ÛÜİYˆÛ›İÛ‹ˆŸ‹MŒHH
+‹Ù\šX[Y\ˆ‹MŒÈT–PKLŒŒLLLMÌ›İ[™Y›ÛİË[ÛŠHÛİ\˜ÙKX˜XÚÙY]Xİ[ÛˆX™[ÎˆÚİÈİ\œ™[šY™^Z[š[][HšY[™™\Ù\™HY\ËÓ›ËÕ[šÛ›İÛˆÛ›Hœ›ÛHšY[È™\Ù[[ˆH^\İ[™ÈÔĞHY\\‹ØØXÚKˆ[œÜXİX›Ü×Ù\ØÛİ™\K™ÜØWÛ]™X[™HØXÚHš\œİˆ™\Ù\™HY\ÈÚ]›È[[İ[™XYÈ	Ü™\Ù\™H[[İ[[™\ØÛÜÙY	ÎÈ™]™\ˆ\š]™HH›ÛÜˆœ›ÛH™]Z[šXÙHÜˆ™^Z[š[][HšYˆ\™[ØœÙ\˜][Ûˆ
+›İHØXÚH™XÛÜ™›ÈšXÙHİX\˜[YJNˆÔĞHÍÎLŒMÎŒÖˆ™\Ù\™HY\Ë[[İ[›İÚİÛ‹™^šY	KˆYˆšY[È\™HXœÙ[˜[YHH^Xİ]H\[™[˜ŞH[™™[™\ˆÛ™\İ[šÛ›İÛ‹İ[™\ØÛÜÙYÛÜ™[™ÎÈ›ÈØÜ˜\[™Ë™]È›İšY\œËÜ™Y[X[ËÜˆ™]ÚØÛÜKˆ]\İ›İ[^H‹MŒ‹MŒ
+Š‘Ó‘JŠˆMMLØH
+[™LˆÍMNXKÙMMLØJH
+T–PKLŒŒLLLNLˆ™XÛÛ˜Ú[X][ÛÈX›\ÚYÛİ\˜ÙKÜİ]\ËÜ™XÙZ\ÈÛˆÜšYÚ[‹Ü™\ÙX\˜ÚØYÙ[L‹XÛÛ[][šXØ][ÛœÎÈÈ“Õ™Y\Ü]Ú
+Hˆ\İÈ›ÜˆY\ËÓ›ËÕ[šÛ›İÛ‹İ[™\ØÛÜÙYÛÜ™[™ÎÈ\[™[˜ŞH˜[YYYˆšY[ÈZ\ÜÚ[™Ëˆ
+ŠT–PKLŒŒLLLNNHXØÙ\[˜ÙHÛ\šYšXØ][ÛœÈ8 %ĞT”’QQ–H‹LLÍˆ
+T–PKLŒŒLLLNŒŠNÈ‹MŒH\ÈÛ™H][™LˆÍMNXKÙMMLØKÈ›İ™[Ü[ˆÜˆ\XØ]NÈØ›YØ][ÛœÈ™[İÈ\™H^Xİ]YØXØÙ\Y[™\ˆ‹LLÍˆÛ›NŠŠˆ
+JH]Xİ[Û—ÛX™[ØYÚšY[[İ[
+Ø]XÒ[˜Ü™[Y[\È[ˆTÕSPUQ™^šYœ›ÛHØXÚNˆX™[]\İ[X]Y\Ë[ÙˆHØXÚYÛİ\˜ÙH[Y\İ[\İ\œ™[]™HZ[š[][H[™\šYšYY
+İ[HØXÚH[™XYHY™™\œÈœ›ÛH]™HÔĞLÍÎLÈ›ŞKÜ™\Ù\™H[\ÈX^HÚ[™ÙHHXØÙ\YZ[š[][JNÈ™]™\ˆ[\HšY[YÚXš[]Kˆ
+ŠHX™[Èİ\œ™[HÛ›H[ˆX\šÙ]İšY]Ëœ™[™\—ØØ\™
+\İšY]ÊNˆ™\šYHHš[X\HØ[\Hİ\™˜XÙH[ÛÈÚİÜÈİ\œ™[šYœÈ\İ[X]Y™^šY[™™\Ù\™HY\ËÓ›ËÕ[šÛ›İÛ‹Ø[[İ[[™\ØÛÜÙY›È[™Ü›İ[™YÛZ[\ÎÈ›İ™HšXHH^\İ[™È\ÚİÜÛ[Øš[HİYÚ[™ÈØÜ™Y[œÚİË›ÈÙ\\˜]HØ\\™HÛÜˆ
+ÊH™Z™Xİ›Û‹Yš[š]HšYÚ[˜Ü™[Y[˜[Y\È
+›È[™š[š]H\Ü^JNÈ[šÛ›İÛˆÜ[š[™ÈZ[š[][Hİ^\ÈÛ™\İÚ[ˆ›Èİ\œ™[šYˆ™\Ù\™HŒH[Y\šXËRQÛÜœ™Xİ[Û‹İ]KYš[\ˆØÛÜKØ]™KÜİšXİš[\œËMMÈ™\Z\‹ˆ›È]™HÍˆ™[ØY™]È™]Úİ™\˜YÙKšYÜ\˜Ú\ÙKˆ™\ÜÛİ\˜ÙHÚ[™Ù\Ëİ\İËÜØÜ™Y[œÚİÈÙ\\˜][Hœ›ÛHØÜÈYÜ[ÛˆŸKMMÈH
+T–PKLŒŒLLLNÈÓÑH[™K“ÕÛ™HHØÜË[Û›HXÚİ\
+HXÚİ\[Y\™ÙH™YÜ™\ÜÚ[ÛˆİX\™ˆ›ÛİØ]\ÙHÙˆMÍYHİ[K\ÚYHY\™ÙHÛÚÈH™[[İHÚYH›Üˆ‘PQWÔUQUQK›YÚ[[H›Ü[™È™]Ù\ˆ‹MŒÑ‹MŒH›İÜÈ[™™]™\[™È‹MŒÈ‘PQKˆYÈHXÚİ\ÛY\™ÙHÛÛ[™È
+ÛÛËÚ[˜›ŞÜXÚİ\œXÜˆ]ÈY\™ÙH[\ŠHH]Y]YK[Y\™ÙHÚXÚÈ]˜Z[ÈÛÜÙYYˆHY\™ÙH™\İ[
+JH›ÜÈ[H\ÚÈQ™\Ù[[ˆZ]\ˆ\™[
+ŠH[İ™\ÈHÓ‘H›İÈ˜XÚÈÈ‘PQKÛİ\ˆÜ[ˆİ]\ËÜˆ
+ÊHÜÙ\È\[™[˜ÚY\ËÛİÛ™\ˆ^[›\ÜÈ[ˆ^XÚ]]šX]X›HØ[˜Ù[Ü™[Ü[ˆX\šÙ\ˆ
+\ÚÈQ
+ÈXİÜˆ
+È™X\ÛÛˆ
+ÈY\ÜØYÙHQ
+H\È™\Ù[ˆ\İÎˆ™\^HHÛÛ˜Ü™]HMÍYİ[K\ÚYHY\™ÙH
+\™[ÈXNH[™H™[[İHÚYJH[™\ÜÙ\™Z™Xİ[ÛÈHYÚ][X]H^XÚ]™[Ü[‹ØØ[˜Ù[\ÜÙ\ÈÚ]]šX][ÛÈ‹MŒİ^\ÈÓ‘Kˆ›È[œ™[]Y™X]\™\Ë›È™]ÈÛÛÜ™[˜]Üˆ›Û™HÓ‘HH\İ[X™\œÈ›ÜˆHMÍY™\^H[™HYÚ][X]K]\]HØ\ÙNÈ›ÛİXØ]\ÙH›İHŸKMN
+Š”
+Šˆ
+ŠQQ–HPÒÕT
+T–PKLŒŒLLLNMMİÛ™\ˆ\›İ˜[[YØ]YÈ\XNÈ™XÛÛ˜Ú[\ÈHNMLHXÚÙ]ÛÈİ[H‘TT‘Qİ[˜\›İ™YÛÜ™[™È\Èİ\\œÙYY[™]\İ›İšYÙÙ\ˆH™]È\›İ˜[ÛÜÈ“Õ^Xİ]X›HH[ˆ[˜›Ş^Xİ]Üˆ™XØ]\ÙH]\ÈH]™H™\İ\
+NŠŠˆ^\İ[™ÈİÛš[™ÈYÙ[H[™Ú[™Y\š[™ÈÙ\ÜÚ[Ûˆ^Xİ]\È^XİHÛ™HRK[Û›H™[ØYÛˆÍˆÈYLÙYYM™ÌØX™YLYNX™MÎÌYÙŒY
+ÛˆÜšYÚ[‹Ü™\ÙX\˜ÚØYÙ[L‹XÛÛ[][šXØ][ÛœÊHY\ˆ™Y›YÚ
+]™HRHY[]KÛİÛ™\œÚ\›ÈÛÛ™›Xİ[™È™[X\ÙKÛÛËÜ™[ØYİZKœÚ›ØˆMXÍÌMÍ˜XN™L˜™ŒMØÌÙØYXMÍHHØÌ˜˜˜ŠNˆÙ‹Ø\Ú[™\ÜË[ÜË]ÛÜšİ™Y\ËØYÙ[LKXÛÛÜ™[˜]Üˆ	‰ˆÛÛËÜ™[ØYİZKœÚYLÙYYM™ÌØX™YLYNX™MÎÌYÙŒYÈ[ˆK]™\šYK[Û›HÍ˜ÚXÚÈÙX\˜Ú›İÈ[ˆš[\ˆØ\™İ]KÙ\İ[˜ÙH[ÙHÚ]ØÛÜKØÚ\ËİšXİšXÙKÛØØ][Û‹Ø[\KÛ\İ\İ[X]YØXÚY[™^XšYÜ™\Ù\™HX™[ÎÈ]™H\ÚİÜÛ[Øš[HØÜ™Y[œÚİÈÚ][YKÕT“İšY]ÜÜÙš[\œËØØXÚH›İ™[˜[˜ÙNÈ™\ÜİÜÜİ\[Y\ËÔQË™YH\Ú˜XÚİ\]™\šYHÜˆ›Û˜XÚËˆRK[Û›NÈ›È‹ÛÜšÙ\œË\Ü]Ú\‹XÚİ\Ø]ÚÙËİ\ˆ›Ú™XİË[›ÙK™]ÚÜ[™Üˆ[œİ[ËˆZXÚY[[\œÈ\ÈİÛˆSˆ›Üˆ[H]™HØ]™KˆY[]HH\ÚÈ\Ú
+È™\İ\
+ÈÙ[X[XË›İH›ØÙ\ÜË\™]\›™YÒKˆÛ›İÛˆ™Y›YÚ][NˆHYÙ[LKXÛÛÜ™[˜]ÜˆÛÜšİ™YHØ\È™Z[™ÜšYÚ[ˆHÌÈÛÛ[Z]ÈÚ][ˆ[˜ÛÛ[Z]Y\İËİ[š]İ\İØÛÛÜ™[˜]Ü—İØ]ÚœH
+\ˆNMLH™XÙZ\
+NÈÙ]HÚ]İ]\ØØ\™[™È]KMMKMMK‹LLÎÓ‘HH™XÙZ\Ú]^Xİ][ÛˆÜˆ›Û˜XÚÈ™\İ[\Ú\ËØÜ™Y[œÚİË™\šYK[Û›Hİ]]Ÿ‹LLÍˆH
+‹Ù\šX[Q•Tˆ‹MŒNÈT–PKLŒŒLLLNMËQÛÜœ™XİYœ›ÛH[œ\œÙXX›H‹MŒTÈHT–PKLŒŒLLLNNÈÓÑH[™K“ÕÛ™HHXÚİ\È‹LLÍˆ\ÈH]Y]YK\›İÈQ
+HİÛ™\‹\™\]Y\İYÙ[XİX›Hİ]\È[Û™ÜÚYH\İ[˜ÙKX]Ú[™ÈZXÚY[	ÜÈ™]šY]ÙYÔĞH™Y™\™[˜ÙNˆÛÛ\XİØØ][Ûˆ[™[Ú]^XÚ]Hİ]HÈH\İ[˜ÙH[Ù\ËÙX\˜ÚX›Hİ]H\İ][K\Ù[XİÚXÚØ›Ş\Ë™[[İ˜X›HÙ[XİY\İ]HÚ\ËˆÙY\ÛÛØ^HÈ˜][Û™\‹T[\ÚÚHØØ[Y˜][È[™^\İ[™È˜Y]\È™Z]š[İ\È›È[™[YÛİ[H™XÚ\Ú[Û‹ˆ[ÙHÙ[X[XÜÈš\ÚX›NÈÙ[Xİ[™Èİ]\È]\İ›İÚ[[H\\ÜÈ[ˆXİ]™H˜Y]\È
+^XÚ]İÚ]ÚÚİÚ[™È\YYØÛÜKÜˆX™[Y[\œÙXİ[ÛŠKˆ[šÛ›İÛ‹İ[œ™\ÛÛ™YØØ][Ûˆ˜Z[ÈHİšXİXİ]™HØØ][Ûˆš[\‹\X\œÈÛ›H[™\ˆH^\İ[™È^XÚ][šÛ›İÛˆÜZ[‹™]™\ˆÛİ[È\ÈØØ[ˆ\œÚ\İİ]\È
+È[ÙH›İYÚH\›İ™YØ]™YYš[\ˆ]
+Ø]™KÜ™[Ü[‹Ü™\İ\
+NÈ™\Ù\™HšXÙKØ]YÛÜKÛÛ™][Û‹[K]\›\Ë›İÈÜ™\‹Ø]™KÔSˆ›İ[™\H[™H‹MŒÙX\˜Ú›İÈ[ˆHš[\ˆØ\™ˆİ\œ™[Y\\‹ØØXÚHšY[ÈÛ›NÈ›È™]È›İšY\‹ØÜ˜\[™ÈÜˆ™]ÚÈ[œİ\ÜYİ]H]Hİ^\È[šÛ›İÛ‹ˆ\İÎˆ[ÙHİÚ]Ú][K\İ]KÚ\™[[İ˜[ÙX\˜Ú[˜[Yİ[šÛ›İÛˆİ]KİšXİÛÛš[˜İ[ÛˆÚ]šXÙH
+È˜Y]\Ë[\HÙ[Xİ[Û‹Ø]™Y›İ[™š\ˆ\ÚİÜ
+È[Øš[HØÜ™Y[œÚİÈÛˆHÛX[ˆÛÛ[Z]YİYÚ[™È\Y˜Xİ
+T“İšY]ÜÜÙš[\œËÕUÈ[YKØØXÚKÜİÜ™JKˆ\ÛÛ]YİYÚ[™ÈÛ›Nˆ“È]™HÍˆ™[ØY
+KMMˆÛ™K][YH\›İ˜[Ü[
+Kˆ›ÈYØ[Y[YÚXš[]HÛZ[Kˆ™\Ù\™HHXİ]™H‹MŒHÛÜšÙ\È›È™]È\˜[[ÛÜšÙ\‹ØÛÛÜ™[˜]Üˆ‹MŒH
+Š‘Ó‘JŠˆØH
+T–PKLŒŒLLLNLˆ™XÛÛ˜Ú[X][ÛÈX›\ÚYÛİ\˜ÙKÜİ]\ËÜ™XÙZ\ÈÛˆÜšYÚ[‹Ü™\ÙX\˜ÚØYÙ[L‹XÛÛ[][šXØ][ÛœÎÈÈ“Õ™Y\Ü]Ú
+HˆÛÙK\İÈ[™İYÚ[™È]šY[˜ÙH™\ÜYÙ\\˜][HÚ]ÛÛ[Z]YÒH[™\İ[X™\œÈ
+ŠØ\œšYYXØÙ\[˜ÙHØ›YØ][ÛœÈœ›ÛH‹MŒH
+T–PKLŒŒLLLNNKËLNŒÈØ[YH›İË›È™]ÈÛÜšÙ\‹›È™]È™X]\™JNŠŠˆ
+JHØXÚH™^XšY
+]Xİ[Û—ÛX™[ØYÚšY[[İ[
+Ø]XÒ[˜Ü™[Y[
+H\ÈTÕSPUQX™[Y\İ[X]Y\Ë[ÙˆHØXÚYÛİ\˜ÙH[Y\İ[\]™HZ[š[][H[™\šYšYY
+›ŞKÜ™\Ù\™H[\ÈX^HÚ[™ÙH]
+NÈ™]™\ˆ[\HšY[YÚXš[]Kˆ
+ŠHØ[\Hİ\™˜XÙH
+›İÛ›HX\šÙ]İšY]Ëœ™[™\—ØØ\™
+HÚİÜÈİ\œ™[šYœÈ\İ[X]Y™^šY[™™\Ù\™HY\ËÓ›ËÕ[šÛ›İÛ‹Ø[[İ[[™\ØÛÜÙY›È[™Ü›İ[™YÛZ[\Ë›İ™[ˆ[ˆH[™XYK\™\]Z\™Y\ÚİÜÛ[Øš[HİYÚ[™ÈØÜ™Y[œÚİÈ
+›ÈÙ\\˜]HØ\\™HÛÜ
+Kˆ
+ÊH™Z™Xİ›Û‹Yš[š]HšYÚ[˜Ü™[Y[
+›È[™š[š]H\Ü^JNÈ[šÛ›İÛˆÜ[š[™ÈZ[š[][Hİ^\ÈÛ™\İÚ[ˆ›Èİ\œ™[šYˆY\İÈ›ÜˆXXÚÈÙY\‹MŒH\[™[˜ŞH[™[İÛ™\ˆ›İ[™\šY\ÎÈ›È]™HÍˆ™[ØY™]Úİ™\˜YÙKšYÜ\˜Ú\ÙHŸ‹LLÍÈH
+‹ÓÓ•S•PUSÓˆÙˆ‹LLÍˆXØÙ\[˜ÙHØ\ÎÈT–PKLŒŒLLLNÎNÈÓÑH[™K“ÕÛ™HHXÚİ\È™]ÈQ™XØ]\ÙH›Ü™[X[ˆ^ÛY\È[™KLˆÛ™HQÈ‹LLÍˆØHÈ‹MŒHMMLØNÈÈ“Õ™Z[\[Y[[]™\™Yİ]H™X]\™K›È\˜[[ÛÜšÙ\‹›È™]ÈÛÛÜ™[˜]ÜŠHÛÜÙHÓ“H\ÙHØ\ÈÛˆ\ÛÛ]YİYÚ[™Îˆ
+JHX\šÙ]ÜÙX\˜Ú˜]Xİ[Û—ÛX™[ØˆšY
+Ú[˜Ü™[Y[ÚİÛˆ\ÈTÕSPUQ™^šYœ›ÛHØXÚKÚ]\Ë[ÙˆØXÚY[Y\İ[\[™	Û]™HZ[š[][H[™\šYšYY	ÎÈ™]™\ˆ\ÈHZ[š[][Kˆ
+ŠHØ[YH™\Ù\™HY\ËÓ›ËÕ[šÛ›İÛ‹İ[™\ØÛÜÙY
+Èİ\œ™[]œËY\İ[X]Y[™^XšY[™›ÈÛÛ\XİHÛˆHİÛ™\‰ÜÈØ[\Hİ\™˜XÙK›İ\İX\šÙ]İšY]Ëœ™[™\—ØØ\™\İˆ
+ÊHØ[]™Z™XİÈ›Û‹Yš[š]H
+[™‹Û˜[ŠHšY[˜Ü™[Y[[™İ[NÈ[šÛ›İÛˆÜ[š[™ÈZ[š[][H™]Z[™YÚ[ˆ›Èİ\œ™[šYˆ
 
-## Dry-run stages 5-8 findings (wave D)
-| ID | Pri | Task | Deps | Status | Agent | Acceptance |
-|---|---|---|---|---|---|---|
-| A-44 | **P1** | (01, side worktree) F-116 a HOLD can be woken (`mbos ping`) but the later YES does not run: make the woken request approvable end to end; F-113 and F-118 the NO and YES decision is applied twice (UI synchronously, then the worker) and the loser logs `illegal item transition` tracebacks: make the second application a clean idempotent no-op; F-119/F-112 wording and a LEARN report surface only if cheap | none | **DONE** @ `6440be3` (side worktree, Sonnet, 84 turns, est. $2.14, merged: HOLD -> ping -> YES reaches ACTED; duplicate decisions are idempotent with no ERROR records; F-119/F-112 not done; 1 test failure reported as pre-existing, verified by the gate below) | worker:side-worktree (sonnet, `--max-turns 100`) | HOLD -> ping -> YES reaches ACTED with receipts; a worker log of a full YES/NO/HOLD run has no ERROR tracebacks; tests on real PG16 |
-| D-31 | **P1** | (04; wave D) F-114 RULING: the system never buys anything; Michael buys off-system, so capital deploys when HE records it: owner-only `mbos.record_acquisition(item_id, amount_usd, note, actor, provenance_ids, idempotency_key)` writes a dry-run `BUDGET_COMMITTED` receipt (category purchase, human actor) that the ledger turns into a deploy entry (refused above `available_to_deploy`); F-115 a second closing outcome for the same item is refused (or recorded as a correction that does not move capital twice) | D-30 | **DONE** @ `ba7fb89` (04; Sonnet, 26 turns, est. $0.84: migration 0026 `record_acquisition` owner-only/human/dry-run deploy, refused over available or unfunded; duplicate closing outcome refused) | worker:lane-04 (sonnet, risk high) | Real roles: acquisition deploys $X (available falls, deployed rises); over-available refused; close returns principal + profit; duplicate close refused; verify_chain OK |
-| F-33 | **P1** | (06; wave D) "I bought it" owner-channel form on a YES/ACTED item (amount, note, PIN) calling D-31 through a 01 wrapper, and the outcome form guards against a second close; the Mission page shows deployed capital while a flip is open | D-31 | **DONE** @ `743250a` (dispatcher-launched; 06; est. $1.22: I bought it form -> record_acquisition as the owner login; duplicate close message; open flips on Mission; HTTP test: bought $120, sold $200, principal back and +80 earned, second close refused) | worker:lane-06 | Over HTTP: bought -> deployed rises -> sold -> principal returns + profit earned; duplicate close message is clear |
-| C-29 | P2 | (03; wave D) F-117 the TV's class cannot calibrate: `flip.other_asset.labor_hours` priors are 0 and LEARN skips zero priors: give consumer electronics / small goods non-zero handling-hour priors (C-26 area) and let LEARN propose from them; Outcome predicted-vs-actual fields cover the quantities the engine predicted | none | **DONE** @ `6f978de` (dispatcher-launched; 03; est. $0.31: LEARN groups other_asset TVs by prior class so the TV calibrates) | worker:lane-03 (sonnet) | A TV outcome with a different handling time yields a LEARN proposal (still blocked safely); suite green |
+H›Øİ\ÙY\İÈ
+Èš[˜[\ÚİÜÛ[Øš[H[XYÙ\ÈÙˆÛÜœ™XİYX™[È[™H^\İ[™Èİ]H[™[È™]\ÙH[˜Y™™XİY\İËÙ]šY[˜ÙKˆ]šY[˜ÙH™XÚ\Ú[ÛˆÛÛËÙŒLÍ—Üİ]WÜÚİËœXØ\\™\È\ÙHØÜ›Û[ÕšY]ËÛÈ™[X™[[H\ÈØÜ›ÛY]šY]ÜÜ]šY[˜ÙHÜˆ™XØ\\™H]ØÜ›ÛOL[™™XÛÜ™ØÜ›ÛÜÚ][Ûˆ
+[œØÜ›ÛYT‹Õİ]HÚİÚİÚ[™È[Øš[HÙX\˜Ú›İÈİ^\È˜[Y
+Kˆ\œÚ\İ[˜ÙNˆÈH‘PSœ›İÜÙ\ˆØ]™HÛXÚË™[Ü[ˆ[™\™\İ\›Üˆİ]\ËÛ[ÙKØ[ÛË\˜Y]\ÈÛˆHØ[YHš[˜[\ÛÛ]Y\Y˜XİÚ]š\ÚX›HÙ[XİYÛÛ›ÛËÜ™\İ[ÎÈHX\›Y\ˆY›Ü›H
+È™XÜ™X]YX\\İ]\İ›İ™HØ[YHœ›İÜÙ\ˆØ]™KÜ™\İ\ˆ\ÛÛ]Y\İÜ™Y[X[ÈÛ›K™]™\ˆ™XY]™HÙXÜ™]Ëˆ›È]™HÍˆ™[ØY™]È™]Úİ™\˜YÙKšYÜ\˜Ú\ÙH‹LLÍˆ
+Š‘Ó‘JŠˆLÍØŒÈ
+T–PKLŒŒLLLNLˆ™XÛÛ˜Ú[X][ÛÈX›\ÚYÛİ\˜ÙKÜİ]\ËÜ™XÙZ\ÈÛˆÜšYÚ[‹Ü™\ÙX\˜ÚØYÙ[L‹XÛÛ[][šXØ][ÛœÎÈÈ“Õ™Y\Ü]Ú
+HˆÛÛ[Z]YÒNÈ›Øİ\ÙY\İ[X™\œÎÈÙ\\˜]HÙXİ[ÛœÈ›ÜˆXØÙ\Yİ]H™Z]š[Ü‹ÛÜœ™XİYX™[Ë˜\Ù[[™H\İ˜Z[\™\Ëš\İX[›ÛÙ‹İÛ™\ˆ]™HØ]NÈ™\šYH›Ü™[X[ˆ\İÈ‹LLÍÈ\È[YÚX›H›Üˆ[™Hˆ[™]^XİHÛ™HÛÜšÙ\ˆİ\ÈŸ‹LLÎH
+ˆÜˆÙ\šX[XØÙ\[˜ÙH›İ]KT–PKLŒŒLLLNLÈU’QSÑKSÓ“K“ÕÛ™HHXÚİ\ÈÈ“Õ™Z[\[Y[‹LLÍË›È\˜[[ÛÜšÙ\‹›È™]ÈÛÛÜ™[˜]ÜŠHš[˜[Ûİ\˜ÙK]ËY]šY[˜ÙHš[™[™ÎˆØÜËÜ™XÙZ\ËÙŒLÍË\ØÜ™Y[œÚİËÙŒLÍËY]šY[˜ÙKšœÛÛ˜ÛˆÜšYÚ[‹Ü™\ÙX\˜ÚØYÙ[L‹XÛÛ[][šXØ][ÛœÈ™XÛÜ™ÈÛÙWÜÚHLN™NH[™\NYKÛÈHœ›İÜÙ\ˆØ]™KÜ™[Ü[‹Ü™\İ\[™Ø\\™\È\™H™KXÛÛ[Z][ÙYšYY]ÛÜšİ™YH]šY[˜ÙKˆ[ˆHVTÕS‘ÈÛÛËÙŒLÍ×Øœ›İÜÙ\‹œXÛ˜ÙHÛˆHÓPSˆÚXÚÛİ]ÙˆLÍØŒËÙYLÙYYH
+Üˆ]\ˆÚ][˜Ú[™ÙYRKİ\İËİÛÛÊK\ÛÛ]YİYÚ[™ÈÛ›H
+İXˆİÜ™KÛÜHÙˆÔĞHØXÚKÛÜ˜XÚË\İSŠKˆ™XÛÜ™XİX[ÛÙHÒHÚ]\N™˜[ÙKUÈØ\\™H[YKT“İšY]ÜÜØXÚHÚLM‹Ø\Ë[Ù‹ÜİÜ™KØÜ›ÛK™X[›ØÙ\ÜÈ™\İ\QËˆØ[YH›Øİ\ÙY\İË›È[\İZ]H™\X]ˆYˆÛÙHÜˆØÜš\Y™™\œË\ØÛÜÙH˜]\ˆ[ˆ™[X™[HÛ]šY[˜ÙKˆ›È]™HÍˆ™[ØY™]Úš[[™ÈÜˆXØÙ\ÜÈÚ[™ÙH‹LLÍÈ
+Š‘Ó‘JŠˆŒ˜˜ŒØXˆ
+]šY[˜ÙNÈ[™Lˆ™XÙZ\ÈØÜËÜ™XÙZ\ËÌŒ‹LLLLYŒLÎY]šY[˜ÙKXš[™[™Ë›Y
+H
+T–PKLŒŒLLLNLˆ™XÛÛ˜Ú[X][ÛÈX›\ÚYÛİ\˜ÙKÜİ]\ËÜ™XÙZ\ÈÛˆÜšYÚ[‹Ü™\ÙX\˜ÚØYÙ[L‹XÛÛ[][šXØ][ÛœÎÈÈ“Õ™Y\Ü]Ú
+Hˆ]šY[˜ÙH”ÓÓˆÚ]\N™˜[ÙH[™H^XİÒNÈ›Øİ\ÙY\İ[X™\œÎÈ[XYÙ\ÎÈ™\™XİØ][™ÈHÙ\\˜]HİÛ™\ˆ]™KX\›İ˜[™\]Y\İŸKMNH
+Š”JŠˆ
+ŠQQ–HPÒÕT
+T–PKLŒŒLLLŒL
+JŠˆ
+ÓÑH[™K^\İ[™ÈH[™Ú[™Y\š[™ÈÙ\ÜÚ[ÛÈKMMÈXØÙ\[˜ÙHÛÜœ™Xİ[Û‹›È™]ÈÛÜšÙ\ŠKˆ
+JHÛÛËÜXÚİ\ÙÚ]œNœ]Y]YWÜ›Ø›[\Ø™]\›œÈ×HÚ[ˆ\ÜˆZ[™H\È[\Nˆ\İ[™İZ\ÚXœÙ[[š]X[˜\Ù[[™Hœ›ÛH˜Z[YÚ]\ÚİÈÜˆ[]Y\İX›\ÚY]Y]YNÈ™Y\ÙH
+È™]Z[ˆ\İ™X[NÈ\İÎˆ^\İ[™È]Y]YHOˆš[H™[[İ™YÙ[\K[™™XY˜Z[\™K]\İ›İX›\Úˆ
+ŠHÛÛËÜ]Y]YWÙİX\™œXÛ›H›YÜÈ\ËØYÙ[™XÛÛZ[™ÈSTNˆ[ÛÈØ]Ú›Ü[™ÈÛ™HÙˆÙ]™\˜[\È[™İÛ™\ˆ™\XÙYH[›İ\ˆ›Û™[\H˜[YHœÈ\™[Ë[›\ÜÈ[ˆ]šX]X›H]]Üš^™YY]ÈÛ\˜]H\›[\ÜÈ›Ü›X][™ÎÈ\İÈ›Üˆ\X[Y\™[[İ˜[[™İÛ™\ˆ™\XÙ[Y[ˆ
+ÊH™\İÜ™H[[™LˆÛ™H\İÜH
+YLÙYYH
+ÈŒLÎÙY\™]Ù\ˆ[šY\Ë›ÈÚÛ\Ø[Hİ™\Üš]JHšXHHİÛš[™È]]Üš^™Y›İ]NÈ›İXİİ]\ÈÜš]\œÈœ›ÛH™\XÚ[™È[\İÜHÚ]]\İ\ÚÈÛ›H
+Œ˜˜ŒØXˆ™YÜ™\ÜÚ[ÛŠKˆ
 
-## Owned inventory: the BBQ / tailgate trailer (Aria 2253) and operating-blueprint adoption (Aria 2000, 2145)
-| ID | Pri | Task | Deps | Status | Agent | Acceptance |
-|---|---|---|---|---|---|---|
-| A-45 | P1 | (01) Owned-asset intake spec `config/intake/owned_trailer.v1.json` (photo angles, safety-first questions, sunk basis recorded but excluded from decisions, the Little Rock to Conway tow kept `seller_stated`, never verified) | A-27 | **DONE** (this push; 1 test) | 01 | Spec loads; `intake.missing` asks safety questions first; basis never upgraded |
-| C-30 | **P1** | (03) Owned-asset economics: `owned_asset` items are decided on INCREMENTAL cash from today (historical basis shown as sunk, excluded from net and ROI), and the engine compares five paths for one asset with the same fields: SELL_AS_IS_OR_PART_OUT, MINIMAL_REHAB_FLIP, THEMED_VALUE_ADD_FLIP, CONVERT, KEEP (personal-use value). Per path: incremental cash, operator hours, risk (structural, roadworthiness confidence), seasonality (tailgate season), days to cash, profit per incremental dollar, profit per hour, finished-resale range. Recommend one path with the others shown; inputs not yet supplied stay UNKNOWN (no invented rehab costs); a roadworthiness claim based only on a past tow stays INFERENCE | none | **DONE** @ `9792ca7` (launched BY THE DISPATCHER; 03; Sonnet, 17 turns, est. $0.46: `owned_asset.compare_paths`, five paths on incremental cash, sunk basis excluded, missing inputs named UNKNOWN, past tow stays INFERENCE; not yet wired into score_item or the Item type enum -> F-34/A-47) | worker:lane-03 (sonnet, `--max-turns 100`) | Golden for the BBQ trailer with only Michael's stated facts: every path computes or says UNKNOWN with the exact missing input; sunk basis never changes a path's net; with example rehab ranges the recommendation changes with them; suite green |
-| F-34 | P1 | (06) "My assets" page: add an owned asset from the owned-trailer intake spec, upload photo references, fill the inspection checklist (each answer keeps its basis; verified is not assignable), and show the five-path comparison from C-30 as an opportunity card; owner channel; dry-run | C-30, A-45 | **DONE** @ `f433dd1` (dispatcher-launched; 06; est. $0.88: `/assets` page, BBQ trailer from the owned-trailer spec, checklist keeps basis, five-path card names UNKNOWNs; figures form still missing -> F-35) | worker:lane-06 (sonnet) | Over HTTP: the BBQ trailer is added with Michael's stated facts, the card lists the five paths with UNKNOWNs named, nothing is marked verified |
-| A-46 | P1 | (01) Blueprint adoption (Aria 2000): blueprint copied to `docs/operations/` with project overrides, START_HERE/COORDINATION/worker prompt updated, automatic dispatcher `tools/dispatcher.py` (tmux `mbos-dispatcher`) and `tools/run_dev_stack.sh` | none | **DONE** (this push; 6 + 14 tests) | 01 | Dispatcher launches idle lanes within limits and never duplicates a running worker |
-| O-1 | P1 (operator) | Host scheduler: a systemd user unit or cron `@reboot` that restarts `tmux mbos-dispatcher`, `mbos-dev-worker`, `mbos-dev-ui` after a reboot (`loginctl enable-linger michaelos` first). One command for Michael or the operator; Agent 01 cannot install host services | none | NEEDS OPERATOR | owner | After a reboot the three tmux sessions are back with no action |
-| A-47 | P2 | (01) Wire `owned_asset.compare_paths` into the production assembly: an owned-asset Item type or flag accepted by the spine and card, the five-path comparison on the card, and the owned-trailer intake answers mapped to its inputs | C-30, A-45 | **DONE** @ `6e47646` (side worktree, Sonnet, 40 turns, est. $1.21, merged: owned asset = flip Item from source owned-intake, five paths in the card, named UNKNOWNs; the F-34 page not yet switched to mbos.owned_asset -> F-35) | 01 | The BBQ trailer fixture (only Michael's stated facts) renders a card with five paths and named UNKNOWNs through the real assembly |
-| F-35 | P1 | (06) `/assets` figures form: Michael's rough ranges (minimal and themed rehab cash, own hours, finished resale range, as-is value, personal-use value, timing) feed C-30's `compare_paths` through a typed-input record so the five paths compute instead of all UNKNOWN; wording keeps ranges as Michael's estimates (INFERENCE, human-attested) | A-47 | **DONE** (reconciled from lane 06 AGENT_STATUS Done) | worker:lane-06 | With example ranges the card recommends a path and shows the others; clearing a range returns it to UNKNOWN |
+HÙY\X\šÙ\ˆ[Xš[™È[˜ÛÛ›™XİYÈ›È]]ËX]]Üš^˜][Ûˆœ›ÛHX\šÙ\ˆ^ˆÙY\ŒÑŒKÑŒLÍ‹ÑŒLÍËÑŒLÎÓ‘NÈÈ›İ™\[ˆKMNÈKML\ÈÙ\\˜]Kˆ™\ÜÛÙHÈ\İÈ[[YHYÜ[ÛˆÙ\\˜][HKMMÈT•PSH[™Ú[™Y\š[™È›Øİ\ÙY™YÜ™\ÜÚ[Ûˆ\İÈ\ÜÈÚ][X™\œÎÈMÍY™\^Hİ[Ü™Y[È›ÈÛZ[HÙˆKMMÈXØÙ\Y[[KLÈÛ™HŸKMŒH
+ŠQQ–HPÒÕT
+T–PKLŒŒLLLŒLJJŠˆ
+ÓÑH[™K^\İ[™ÈH[™Ú[™Y\š[™ÈÙ\ÜÚ[Û‹Ù\šX[Q•TˆKMNH[™KMLÈ“ÕÛ™HHXÚİ\È›È™]ÈÛÜšÙ\‹ØÛÛÜ™[˜]ÜÈİÛ™\ˆ™\]Y\İ™\ÛZ\ÜÈ[Ø[YÛ™\Ë™\XÙHÚ]İ\ˆİ[X[ÈŠKˆ\ÛZ\ÜÈHİX›H\İ[™ÒQˆ
+JH\œÚ\İÈXÜ›ÜÜÈ™[ØYÜ™\İ\Û˜]šYØ][ÛˆÛˆÚXÚÙYS‘[˜ÚXÚÙY™\İ[ÙXİ[ÛœË[™\[™[ÙˆH˜[šÚ[™ËÜİYÙÙ\İ[ÛˆÙÙÛH
+Ù^HX\šÙ]Ü™YœË˜XİİÜ™\ÈQÈ]˜[šÈY\ÈÛ›HÚ[ˆİYÙÙ\İ[ÛœÈ[˜X›Y[™X\šÙ]Ü›İ]\Ø\Y\È˜[šÈÛ›HÈÚXÚÙY™\İ[ÊNÈİ\ˆ™YœÈ[XİÈ
+ŠH\‹Z][H[™È\ÈHY[‹Ù\ÛZ\ÜÙY\İ™XÛİ™\ˆÛ™H\İ[™ÈÚ]İ]™\Ù][™ÈØ]™\ËÛZÙ\Ëš[\œÈ[™Ûİ\˜ÙH›İ™[˜[˜ÙH™\Ù\™YÈ
+ÊHY\ˆ\ÛZ\ÜÈÚİÈ™[XZ[š[™È‘PS[YÚX›HØXÚY\İ[™ÜÈİ[™\ÜXİ[™ÈİšXİšXÙKÛØØ][Û‹ØØ]YÛÜKØÛÛ™][Û‹Ù^Û\Ú[ÛœÎÈ™]™\ˆ™Yš[Ú]İ][Ù‹Yš[\‹[šÛ›İÛ‹X\ËZÛ›İÛ‹šXİ[Û˜[Üˆ\XØ]H\İ[™ÜÎÈYˆ^]\İYØ^HÛÈÛ™\İK›È[\YY™]È™]ÚÜˆİX\˜[YY™\XÙ[Y[È
 
-## Re-audit (G-22) findings
-| ID | Pri | Task | Deps | Status | Agent | Acceptance |
-|---|---|---|---|---|---|---|
-| A-48 | **P1** | (01, side worktree) F-120 a HOLD on an item whose approval workflow was started by a recheck (`recheck:<item>:<epoch>`) can be neither woken (`mbos ping`, UI Wake now) nor approved: the wake and the decision are addressed to the item's own workflow id, not to the workflow that is actually parked at the gate. Make the decision and wake target the ACTIVE gate workflow for the item (lookup, or one canonical gate workflow id per item that rechecks reuse), and add the end-to-end test: comp saved -> recheck-started gate -> HOLD -> wake -> YES -> ACTED | none | **DONE** @ `8abbfa0` (side worktree, Sonnet, 53 turns, est. $1.14, merged: wake and decision target the active gate workflow; e2e HOLD -> ping -> YES -> ACTED via a recheck gate, no orphans) | worker:side-worktree (sonnet, `--max-turns 100`) | HOLD -> wake -> YES reaches ACTED for an item that went through a recheck; no orphan gate workflows; tests on real PG16 |
-| F-36 | P2 | (06) F-121 "Best next move" is computed from open requests only (after HOLD or execution it names the next action: record the outcome or the next best item); F-122 `/mission` recomputes after execution (executed legs shown as done, awaiting outcome; no stale DEPLOY headline); F-123 every page labels which figure it shows (net vs probability-weighted), one number per label; F-124 Wanted says "no source is hunting for this yet"; F-125 a comp rejected for its condition (parts vs used) says so in the card and on the save banner | F-33 | **DONE** @ `28f18bf` (dispatcher-launched; 06: next move and /mission from live states, labelled figures, Wanted wording, parts-comp explanation; 245 + 106 tests) | worker:lane-06 (sonnet) | G-22's repros pass; UI suite green |
-| W-1 | **P0** | (01) Coordinator watchdog (owner command 2026-10-09; Aria 2026-10-08-aria-owner-agent-watchdog): `tools/coordinator_watch.py` + `heartbeat_probe.py` + `coordinator_state.py`, local status feed :8479, chained receipts, 12 tests; doc `docs/integration/COORDINATOR_WATCHDOG.md` | none | **DONE** @ `7aa81d7` (detection, probe, state feed, ack verification, dispatcher restart and stalled-worker checks work; the TMUX WAKE is OFF because the permission classifier denied agent self-drive; the sanctioned wake is the central bridge's peer relay = W-3) | 01 | A real unacknowledged owner message wakes the idle session once and the ack is verified |
-| W-2 | P1 (owner/host) | Host: `sudo systemctl disable --now mbos-foreman.service` (0 wakes ever, duplicates the watchdog) and `loginctl enable-linger` + user units for the tmux sessions (O-1). Not applied; needs approval | W-1 | NEEDS OPERATOR | owner | After approval: one watcher, services return after reboot |
-| W-3 | P1 (other project) | Central bridge (Desktop-Agent coordinator): add the MBOS liaison inbox as a source and schedule `tools/heartbeat_probe.py`; render `http://127.0.0.1:8479/health.json` or `tools/coordinator_state.py` on :8477 | W-1 | **PARTIAL**: central monitor reads the liaison inbox and acks and shows RECEIVED/ACKNOWLEDGED on :8477 (per ARIA-20261008-2209); it cannot wake Agent 01 (different Linux user) -> owner decision W-4 | other project | Panel shows MBOS last check / last wake / ack / state next to CAOSCare |
-| W-4 | P1 (owner) | Decide how Agent 01 is woken automatically: (1) narrow tmux self-wake for the mbos-agent-01 pane only, with Michael's explicit permission rule (recommended); (2) run the Desktop-Agent peer relay as the michaelos Linux user (host change); (3) no automatic wake. Nothing is enabled until decided | W-3 | NEEDS OWNER | owner | One answer; then `MBOS_ALLOW_TMUX_WAKE=1` + `{"wake": true}` or the relay change |
-| G-23 | **P0** | (07) Third operator audit as MICHAEL on the current assembly (everything since G-22: A-48 HOLD wake, F-32 quote and scope forms, F-33 I bought it, F-34/F-35 My assets, F-36 wording, C-28/C-30/D-31): repeat jobs 1-7 and ALSO run the full money loop end to end on the training deals: TV YES -> approve with PIN -> dry-run action -> "I bought it" (capital deploys) -> outcome sold (principal returns, profit earned); HOLD -> wake -> YES; drywall lead quote $700 -> YES; Recon attestation; mower archived; add the BBQ trailer as an owned asset and read its five-path card. File every friction as F-nn; update `docs/qa/OPERATOR_AUDIT.md` with a new verdict. DRY-RUN only | A-48, F-32, F-33, F-35, F-36 | **DONE** @ `9f276d7` (07; Sonnet, 69 turns, est. $1.90): VERDICT **YES for a flip from comp to closed profit** (TV: YES with PIN -> ACTED -> I bought it $30 -> sold $92 -> principal back, +$62 earned; ledger matches; duplicate close refused; drywall lead YES from a typed $700 quote; BBQ trailer five-path card works); NOT YET for a HOLD later approved (F-126 P1) and audit conformance red after a quote (F-127 P1); F-126..F-135 filed | worker:lane-07 (sonnet, `--max-turns 100`) | New verdict per job 1-7 and the loop stages PASS/FAIL with receipt ids and the ledger before/after |
+H›Øİ\ÙY\İÈ
+ÙÙÛK›İÙXİ[ÛœË™\İ\[™]šYX[[™ËİšXİYš[\ˆ[˜\šX[™[XZ[š[™ËZ[™[ÜK^]\İYİ]JH\È\ÚİÜÛ[Øš[HØÜ™Y[œÚİÈ[™™X[[\˜Xİ[Ûˆ]šY[˜ÙHÛˆHÛÛ[Z]Y\ÛÛ]YİYÚ[™È\Y˜XİˆÛİ\˜ÙKÜİYÚ[™Èš\œİÈ™[X\ÙHÛ›HšXHH^\İ[™È›İ[™Y™[X\ÙH™]šY]ÈY\ˆXØÙ\[˜ÙH
+È›İ™\X]KMN[œ™]šY]ÙY
+Kˆ›È^\›˜[šYËÜ\˜Ú\Ù\ËÔĞHÚYÛ‹Z[‹ÜŞ[˜Ë™]ÈÛİ\˜ÙKØØXÚY™]ÚÜ[™ÜˆÜ™Y[X[È
+ŠSQS‘Q–HPÒÕT
+T–PKLŒŒLLLŒLÈØ[YH][K›È\XØ]JJŠˆ
+JH\İ[˜İÈYH\È\İ[™ÈÛÛ›Û›İÛK\šYÚÙˆØ\™XØÙ\ÜÚX›H˜[YH
+ÈÙ^X›Ø\™Ü\˜X›NÈ\˜X›HİX›KRQYHXÜ›ÜÜÈ™\İ\Ùš[\œËÜ˜[šÚ[™ÈÙÙÛKØÚXÚÙY
+İ[˜ÚXÚÙYÈ^Xİ[\İ[™ÈYHUTÕ“Õ˜Z[ˆØ]YÛÜKİ]K]\›KÜÚ[Z[\š]KÜ˜[šÚ[™ÈÙZYÚÈ
+YH\İ]X]™\È[X\›š[™ÈÙZYÚÈ[˜Ú[™ÙY
+NÈØ]™YØšY]Ø]Ú™XÛÜ™È™\Ù\™Y
+YHY™™XİÈ\ØÛİ™\HÛ›JNÈ
+ŠHÙY\^XÚ]›İ[\™\İYÈ[Ü™HZÙH\ÈÈ\ÜÈZÙH\È\ÈÙ\\˜]HX\›š[™ÈÛÛ›ÛÈÚ]Û™\İY™™XİX™[ÎÈ™XÛÛ˜Ú[Hİ\œ™[›İ[\™\İY
+Ù^H^XİRQ\ÛZ\ÜÊHÛÈ]\È›İÛÛ™›]YÚ]È
+ÊH\‹Z][H[™ËÚY[ˆ\İ™\İÜ™\ÈÛ›H]\İ[™ÈÚ]İ]™\Ù][™ÈX\›™Y™YœÈÜˆİ\ˆØ]™\ÎÈ
+
+HİšXİYš[\ˆ™X[Z[™[ÜH™Yš[Ù^]\İ[ÛˆXØÙ\[˜ÙH[˜Ú[™ÙYˆİÈÛÛ^Û›NˆÔĞHİÜÈØ[YÈ›ÈXØÛİ[[YÜ˜][Û‹]][XØ]YØÜ˜\[™ÈÜˆÜ™Y[X[[™[™ÎÈÙY\™\šYšYYÜšYÚ[˜[[\İ[™È[šÜÈ\È˜[˜XÚÈ[™™\ÜHXİX[İ\ÜYXØÙ\ÜÈ\[™[˜ŞKˆ
+Š‘TS‘SÖH‘PÓÓÒSQ–HPÒÕT
+T–PKLŒŒLLLŒŒÎÈØÜË[Û›JNŠŠˆKMNH][H
+ÊH
+[™LˆÛ™KZ\İÜH™\İÜ˜][ÛŠH\ÈØİ[Y[][Ûˆ[™“ÕHXÚšXØ[™\™\]Z\Ú]HÙˆ\ÛZ\ÜÎÈKMNH][\È
+JKJŠH\™HÛÙHİX\™È[œ™[]YÈ\ÛZ\ÜËˆKMŒX^H›ØÙYY›İYÚHÙ\šX[İÛ™\ˆ[™HÚ]İ]ØZ][™ÈÛˆH\İÜHÜš]KˆKMNHİ^\ÈT•PSH[™LˆÜš]H[šX[İ^\È[Xİ[™\İÜH\È“ÕÛZ[YY™\İÜ™Yˆ
+Š‘\[™[˜ŞH›İH
+T–PKLŒŒLLLŒŒ
+NŠŠˆHÛ›H\œÙY\[™[˜ŞH\ÈKML
+Ó‘JKˆKMNH][HÈ
+H[™HˆÛ™KZ\İÜH™\İÜ™JH\È“Ó‹X›ØÚÚ[™È›ÜˆKMŒÈKMNHİ^\ÈT•PSÚ]]È[™HˆÜš]H[šX[[Xİˆ“ÕH›ÜˆH[\[Y[\ˆKMŒÚ[™Ù\È[™HˆÜ\˜]Ü—İZXÚÜÙHœ˜[˜Ú\ÈÙ\ÜÚ[ÛˆX^H›İÜš]HÈÚ]İ]]]Üš^˜][Û‹ˆ
+Š“ĞÒÑQŒ‹LLLL
+YÙ[JNˆH[™HˆÛÜšÙ\ˆ][˜ÚÛÛËİÛÜšÙ\‹œHKMŒK[[™HˆKZÚ[™[\[Y[K\š\ÚÈYY][HK[X^]\›œÈK][Y[İ]ÍLØ\È[šYYHH]]Ë[[ÙHÛ\ÜÚYšY\ˆ
+\Ú\È[™Hˆœ˜[˜Ú
+NÈ™Y›YÚ\ÜÙY
+[YÚX›K[™HˆÛÜšİ™YHÛX[ˆ]Y˜L˜MÌ‹H[ˆÒÊKˆÈ[˜›ØÚÎˆİÛ™\‹Ğ\XHİ\È]ÛÛ[X[™Üˆ[İÜÈ\ÈÙ\ÜÚ[ÛˆËÜˆ™\İ\ÈH\Ü]Ú\ˆÚ]\È›İÈ˜[Z[™È[™HÈ[ˆÙ]‘PQKŠŠˆ
+Š•S“ĞÒÑQ
+ZXÚY[\›İ™YHÛÜšÙ\ˆ][˜ÚšXHÜ\›Z\ÜÚ[ÛœÊNˆ][˜Ú[™ÈH[™HˆÛÜšÙ\ˆ›İËŠŠˆ
+Š‘Ó‘Nˆ[™HˆÛÜšÙ\ˆ[]™\™YY™LYØNX™MMÍNNNÈ™[X\ÙYÈÍˆ]Œ‹LLLLUNNˆ
+™XÙZ\ØÜËÜ™XÙZ\ËÌŒ‹LLLLK[]™KNÍ‹\™[ØYXMŒ›Y
+NÈYKİ[™È™Z]š[İ\ˆÛˆH]™H™Y™\™[˜ÙHš[H›İ^\˜Ú\ÙY
+İÛ™\ˆ]JKŠŠˆKMLÓ‘HH[™Ú[™Y\š[™È\İÈ\ÜÈÚ][X™\œÎÈØÜ™Y[œÚİÈœ›ÛHÛÛ[Z]YİYÚ[™È\Y˜XİÈ›Èš[\‹]š[Û][™ÈÜˆšXİ[Û˜[™Yš[ÈPÒËÜ]Y]YKØXİX[ÕT•™\ÜYÙ\\˜][HŸKMŒHˆ
+ŠQQ–HPÒÕT
+T–PKLŒŒLLLŒLJJŠˆ
+Ù\šX[Q•TˆKMŒXØÙ\[˜ÙNÈÈ“ÕÛÛXš[™HÚ]KMŒ
+KˆİÛ™\‹\™\ÜYšYİØ]Ú˜XÚÚ[™Ëİ\HHS”ÔPÕSÓˆÓ“Nˆ[œÜXİ^\İ[™ÈYÙ\œËÛ[Ù[ËÕRH[™™]\ÙH[ˆ^\İ[™È™XÛÜ™]
+›È\˜[[]\İÜ™JNÈ™]\›ˆHÛX[\İİ\ÜYØÛÜH[™\[™[˜ÚY\Ëˆ[\ÎˆHØØ[’HšYÛˆ\Èˆ\È^XÚ]HİÛ™\‹\™\ÜYÙ\\˜]Hœ›ÛH]™HÔĞHXØÛİ[Ş[˜Ë]Xİ[Ûˆİ]\ÈÜˆšYXÙ[Y[È˜XÚÙY\İ[™ÜÈİ^HXØÙ\ÜÚX›HÚ[ˆ\ØÛİ™\Hš[\œÈÚ[™ÙH[™\™Hš\İX[HÙ\\˜]Hœ›ÛHš[\™Y\ØÛİ™\NÈ™]™\ˆ[™™\ˆHšYœ›ÛHØ]™H[Û™NÈ›Èš]˜]HİÛ™\ˆšY[[İ[ËØÙZ[[™ÜËØYÙ]È[ˆÚ]XÈ›È^\›˜[šYËÔĞHÚYÛ‹Z[‹ÜŞ[˜Ë™]ÈÛİ\˜ÙKZY\ØYÙHÜˆÜ™Y[X[È
+Š”XÚİ\ŒMMY][Ûˆ
+™\]Z\™[Y[ÈYÜ[ÛˆÛ›NÈ›È™]È][KİÛÜšÙ\È™\Ù\˜][ÛˆXØÛİ[[™È“Õ[\[Y[Y
+NŠŠˆHİÛ™\ˆYÙ\ˆ]\İ›ÛİÈØ[›ÛšXØ[Üš]\šXHPSÔÓ’Q‘‘T—ÔÕT•ÒT‘K›YLÙˆXİ]™HİÛ™\‹\™\ÜYšY™\Ù\™\ÈX^[Z[ˆÛÜİ[[ÛÛ™š\›YY™[X\ÙYİÚ]˜]Û‹İÛÛ‹X[™\ZY
+İ[H[™\šYšYYİ]\È\È›İ™[X\ÙY[™ÊNÈØ\Ú™\Ù\™YšYØ\XÚ]KÛÛ[Z]YÛÜİ™\Z\ˆ[İØ[˜ÙH[™š[Y™™\œÈÙ\Ù\\˜]HÚ]›ÈİX›H\ÙHÙˆØ\ÚÈÚİÈİÛ™\‹\™\ÜYœÈ™\šYšYY\Ë[Ùˆ[YK[˜Ù\Z[K]Xİ[Û‹Ü^[Y[ÜXÚİ\[Z[™ËØZ][™È[YH[™[\›˜]]™\È[ˆH›ÜÜØ[Èš]˜]H˜[Y\ÈÛ›HšXHHİ\ÜYİÛ™\‹[ØØ[]
+™\Ü]][\[Y[][ÛŠNÈ›È]]Üš]HÈXš]šY^KÛÛXİÜˆÛÛ›™XİXØÛİ[ËˆKMŒT•PS
+Œ‹LLLLˆ[\[Y[][Ûˆ›İÈİÛ™\‹Y\™XİY\È‹LMÈ	Ó^HšYÉÈÚ[™İÈ
+È‹LÈİÛ‹XšYK[XZ[]Xİ[ÛÈ\È›İÉÜÈ[\ÈØ\œHİ™\ŠHH[™Ú[™Y\š[™ÈÜš][ˆØÛÜKÙ\[™[˜ŞH›İHÛˆ™\È]˜[Z[™ÈH™]\ÙY™XÛÜ™]È
+Š‘S‘ÒS‘QT’S‘ÈTUH
+YÙ[KŒ‹LLLLT–PKLŒLNš[Üš]JNˆİÛ™\‹[ØØ[[XØ\ÙHİÜ™HSTSQS•Q
+È\İYÚ]Ş[]XÈ]H
+Ü˜ËÛX›ÜËÙXÚ\Ú[Û—ØØ\Ù\ËœKØÜËÛÜ\˜][ÛœËÑPÒTÒSÓ—ĞĞTÑTË›Y
+NÈ™YYÈ“ÕS‘Èœ›ÛHKMŒ
+KMŒ\ÈRH\ÛZ\ÜÎÈHİÜ™H\È[™\[™[
+Kˆ“ÕY]Û™NˆH™X[š]˜]HØ\ÙH\È“Õ[\ÜY
+ZXÚY[[œÈH[\ÜÛˆ\ÈXXÚ[™JK[™\XØ][ÛˆÛˆHÚ[Z[\ˆØ[™Y]H\È[[Ûœİ˜]YÛ›HÛˆŞ[]XÈ]Kˆ™XÙZ\ØÜËÜ™XÙZ\ËÌŒ‹LLLLXMŒKYXÚ\Ú[Û‹XØ\Ù\Ë›YˆšYİØ]Ú[œÜXİ[Ûˆ
+ÜšYÚ[˜[İ\JHİ[È™\ÜŠŠˆ
+Š”XÚİ\ŒLMˆY][ÛŠŠˆH[œÜXİ[Ûˆ™\İ[]\İ[ÛÈ™\ÜYÜ[ÛˆÙˆØ[›ÛšXØ[Üš]\šXHPSÔÓ’Q‘‘T—ÔÕT•ÒT‘K›YLØÈ
+XÚ\Ú[Ûˆ™XÛÜ™ÈÚ]™X\ÛÛœËÙ]šY[˜ÙKÛİ]ÛÛY\ËİÛ™\ˆ[œÜXİØÛÜœ™XİÜ™\Ù]Ú[™ÛK[\İ[™È\ÜÈOHØ]YÛÜH\ÛZÙKX\›š[™È™]™\ˆİ™\œšY\ÈØ]\ÊH[™HÛX[\İ^\İ[™Ë[[Ù[š]Ù\[™[˜ŞNÈÜš]\šXHÜš][ˆ\È“ÕØ\Xš[]H[\[Y[YÈ[\[Y[][Ûˆ\ÈHÙ\\˜]H›İÈY\ˆİÛ™\‹Ğ\XH™]šY]ÎÈ
+Š”XÚİ\ŒLMÈY][ÛŠŠˆ[ÛÈ™\ÜH^Xİ^\İ[™È›İXİYÜš]KÚ[\ÜÜ™XY˜XÚÈ›İ]HX›HÈÛHÛÛ\]Hš]˜]H\İ[™Ë[[šÙY\ÜÙ\ÜÛY[Ø\ÙH
+LØÈ[XØ\ÙH
+È›ÜÜØ[Yš\œİ
+KÜˆHZ[š[X[Z\ÜÚ[™ÈØ\Xš[]KˆÛ›İÛˆ™XY[Û›H[ÎˆÚ][H]\İÜØÛÜKÜ][İH›İ\È\™HØ\Y]ÌÚ\œÈÚ][Z]Y[İÙYÙ^\ÎÈØXÚYX\šÙ]XÙH™XÛÜ™È\™H›İ]]ÛX]XØ[HÜ[™R][\ÎÈ™\Ø[H›ÛÚÈ\È[‹[Y[[ÜKˆÈ“ÕZ\İ\ÙH\˜Ú\ÙKØXÜ]Z\Ú][Û‹˜\œ›İÈ]\İ][ÛˆÜˆ™\šYšXØ][ÛˆšY[ÎÈ›È›X\›™YˆÛZ[H™Y›Ü™H]]Üš\ÙYØØ[Üš]H
+È™XY˜XÚÈ›ÛÙÈ›ÈØ\ÙH˜[Y\È[ˆ™\ËÙš^\™\È
+Š”XÚİ\ŒLNY][Ûˆ
+İÛ™\ˆØ[ÈXİX[Ø\ÙHX\›š[™Ë›İØÜË[Û›NÈY\™ÙYÚ]ŒLM‹ÌŒLMÎÈ›È™]È\ÚËİÛÜšÙ\ŠNŠŠˆY\ˆKMŒKMŒHš[Üš]H\È\˜X›HİÛ™\‹[ØØ[[XØ\ÙH[\ÜÜ™]šY]˜[Ø\XØ][ÛÈYÙ[HİÛœÈÙ\šX[Ü™\‹ˆXØÙ\[˜ÙNˆ
+JH˜[YHHİ\ÜY›İXİYİÛ™\‹[ØØ[[\Ü›İ]NÈ\™[ÙY\ÈHš]˜]HØ\ÙK™]™\ˆ™\]Y\İ]šXHX›XÈÚ]XÈ
+ŠHY\ˆ]]Üš^™YÙXİ\™H˜[œÙ™\ˆÜš]K™XY˜XÚÈHİX›H\İ[™ÒQ[[Ûœİ˜]H™]šY]˜[
+İ\ÙHÛˆHÚ[Z[\ˆØ[™Y]H
+Ú]HÛİ\˜ÙHØ\ÙKİÛ™\ˆ\İ[X]\È\İ[˜İœ›ÛH˜XİË[˜Ù\Z[HÚİÛ‹›ÜÜØ[ÈİÛ™\ˆš\œİ
+NÈ
+ÊHİÛ™\ˆÛÜœ™Xİ[Û‹ÙY][™™\Ù]Ù\ØX›H[œÜXİX›H[™\İYšXH^\İ[™È]Y]Ú\İÜNÈ\‹Z][H\ÜËÚYH™]™\ˆ™XÛÛY\ÈØ]YÛÜH\ÛZÙNÈ
 
-## Third audit (G-23) findings
-| ID | Pri | Task | Deps | Status | Agent | Acceptance |
-|---|---|---|---|---|---|---|
-| A-49 | **P1** | (01, side worktree) F-126 root causes: (a) a YES recorded on a HELD request must work directly (Michael clicks YES later from the HOLD list) without a prior wake: in the owner transaction `spine_d.decide` first re-presents the held request (item HELD -> AWAITING_APPROVAL, request held -> pending_approval) and then records the Approval, so the D-27 gate sees a YES receipt SINCE the item entered AWAITING_APPROVAL; (b) the existing wake path must work from the UI process (06's `_client_send` addresses only `item:<id>`; use `mbos.workflows.ping`, which resolves the active gate workflow; 06 side is F-37); F-129 two quick inputs start two `recheck:` workflows for one item and both error on a duplicate provenance: coalesce rechecks per item (one active recheck; a second request marks the first as needing one more pass) and make `record_research`/`record_provenance` idempotent for identical content. End-to-end tests on real PG16 exactly as the UI drives them: HOLD then YES directly -> ACTED; HOLD -> wake -> YES -> ACTED; two inputs a minute apart -> one clean recheck, no tracebacks | none | **DONE** @ b2b3399 merged by 01 (gate green 510; held YES and Wake from the UI process tested); the D-32 repeat-quote defect it found is fixed in 01's spine_d | worker:side-worktree (sonnet, `--max-turns 100`) | Both paths reach ACTED with receipts and no ERROR records in the worker log |
-| F-37 | **P1** | (06) F-126(b): "Wake now" uses `mbos.workflows.ping` (resolves the active gate) instead of its own `_client_send`; plus G-23's UI findings: F-128 amount and date boxes instead of free text parsed into money, F-130 true status line when the card says evidence is not the blocker, F-131 one line "no source is hunting for this yet", F-132 show deployed capital separately from cash still at risk, F-133 show per-path profit per hour and per incremental dollar on the five-path card, F-134 keep typed values and mark the bad box, F-135 state on the outcome form whether the PIN is needed | A-49 | **DONE** (reconciled from lane 06,10 AGENT_STATUS Done) | worker:lane-06 (sonnet, `--max-turns 100`) | G-23's repros pass; UI suite green |
-| F-38 | P1 | (06; after F-37) Owner UX requirement 2026-10-09 (ack 2026-10-09-aria-owner-deal-sniffer-readable-ui): make the Operator UI landing screen glanceable. 3 to 5 compact cards: DONE (receipt-verified items with a small green check), WORKING (real active job), BLOCKED (blocker and exact owner action), OPPORTUNITIES (best likely cashflow from live evidence), NEXT (one primary click). Opportunity card: natural title, location and source link, YES/MAYBE/PASS as evidence warrants, purchase and all-in cost, realistic resale or service quote, conditional net and dollars per hour only when calculable, confidence, missing verification, one next action; label confirmed earnings vs simulated vs unverified vs speculative. Decisions use only existing controls (Approve, Hold, Pass, More details) with a short plain-language reason and the PIN and owner boundaries unchanged; mobile and desktop; restrained monochrome high-contrast styling, red or amber only for real blockers, top 3 priorities with the rest collapsible. Do not reset data, do not replace working flows, do not invent actions | F-37 | **DONE** (reconciled from lane 06,10 AGENT_STATUS Done) | worker:lane-06 (sonnet, `--max-turns 100`) | UI tests with clearly labelled test data (screenshots if feasible); every displayed DONE is receipt-backed; every click produces its real state transition; no claim of real earnings without receipts; existing UI suite green |
-| B-23 | **P1** | (02) Asset pivot: Arkansas auction discovery within about 100 miles of Conway (statewide only for exceptional margin): inventory the auction sources (auction houses, GovDeals, PublicSurplus, GSA, estate and equipment auctions), review terms per ADR-0202, build read-only fixture-first adapters that capture lot, current bid, bid count, closes_at, buyer premium, sales tax if stated, pickup requirements, rules link, source and freshness per field. No live fetch without the existing B-12 owner step Also capture per auction house: registration, dealer or licence requirement, deposit, buyer premium and card surcharge, payment, inspection and pickup windows, and whether online bidding is open to the public. Include vehicles as a category. | none | **DONE** @ 3bb503e (lane 02; 01 re-ran test_b23_auctions + test_b24_pivot: 20 passed; fixtures only, live fetch waits on packet Q3) | worker:lane-02 (sonnet) | Fixture lots normalize with all fields and freshness; distance filter; offline guarantee test green |
-| C-32 | **P1** | (03) Asset pivot: auction cost model. All-in cost with buyer premium, sales tax, pickup and transport; time to cash, capital turnover, profit per labor hour; 24-48 hour flag and separate slow-inventory flag; asking prices never count as completed sales and cannot alone yield YES. Additive config, goldens regenerated by the lane Owner inputs override system estimates with provenance: owner resale target (splitter example: system $900, Michael $1,500), condition, season; cash cap per buy $500 with little or no repair needed; forecast the final price from current bid, bid count and time left, labelled as a forecast. | none | **DONE** (reconciled from lane 03 AGENT_STATUS Done) | worker:lane-03 (sonnet) | Golden cases for premium, tax and pickup; slow item flagged; asking-only comps cannot yield YES |
-| C-33 | **P1** | (03) Owner pivot 2026-10-09 (trailers, donor chassis, towables, capital velocity), built on the C-32 auction model. (a) Donor value: a stripped or junk camper or trailer is valued as frame, axles, springs, hubs, running gear and steel (parts-out floor), not camping value. (b) Component-level splitter and machine valuation: a missing or dead engine or starter is not an automatic PASS; value the pump, cylinder, valve, beam, wedge, hydraulics and running gear, repair cost, and Michael's skills as inputs. (c) Paperwork class: no-title or bill-of-sale trailers carry title path, cost, delay and as-is vs resolved resale; never assume legal transfer. (d) Outputs: profit per day, capital tied up, capital at risk, days to cash, suggested max bid with its assumptions, bid forecast from current bid, bid count and time left (labelled forecast). (e) Owner resale target overrides the system estimate with provenance, both shown. Additive config, existing goldens unchanged | C-32 | **DONE** (reconciled from lane 03 AGENT_STATUS Done) | worker:lane-03 (sonnet) | Goldens: junk camper donor, splitter without engine, no-title trailer, a $500 cap case, owner-override case; asking comps still never yield YES |
-| B-24 | **P1** | (02) Classification for the pivot: trailer subtype (utility, boat, jet-ski, equipment, landscape, enclosed, single or tandem axle), donor camper or junk RV, log splitter and towable machine, ATV, with evidence from listing text; paperwork status (title, bill of sale, missing registration, VIN present) as evidence only; condition words (non-running, needs starter, rust). Reuse B-21; no duplicate tagger | none | **DONE** @ 875dcb5 (lane 02; verified with B-23 tests) | worker:lane-02 (sonnet) | Fixture listings tag correctly; paperwork status never inferred without text |
-| A-50 | P2 | (01, side worktree) ResearchWatcher can absorb a real human input as its own re-check's growth when the input lands in the round after a re-check (seen in A-49: round 2 queued nothing). Absorb only growth written by the re-check itself (count non-human entries) | A-49 | DONE | worker:side-worktree (sonnet) | Test: input in the round after a re-check still queues a re-check |
-| A-51 | **P1** | (01, side worktree) Wire the pivot into the live pipeline: an auction lot from B-23 (fixture) flows through the spine to a scored Item using C-32/C-33 (`mbos_economics.auction` / `asset_deal`): the `EconomicsEngineScorer` adapter passes bid, bid count, closes_at, premium, tax, pickup and SOLD comps (asking comps kept separate), the owner resale target and the $500 cap; the Item/card carries all-in cost, net, days to cash, profit per day, capital tied up, suggested max bid and the labelled forecast. First real case: the CountyLine 32-ton splitter fixture (current bid 450, 24 bids, Michael's resale target 1500). No contract change (additive), no bid path | B-23, C-33 | **DONE** (@ `12817e7`, merged; 4 end-to-end tests pass, release gate green) | worker:side-worktree (opus, integration) | End-to-end test: lot in, scored Item out with the fields above; asking-only still cannot YES; gate green |
-| D-34 | P3 | (04; later) PAPERWORK queue: batch the legitimate title, registration and DMV steps for acquired items. Deferred until C-33 and a first real acquisition | C-33 | BLOCKED on C-33 | worker:lane-04 (sonnet) | Not started |
-| D-33 | P2 | (04; after B-23, C-32) Watchlist, price alert, closing alert and approved bid ceiling storage on the spine. Dry-run: no bid submission path exists Watch current bid and bid count over time; alert in the last hours before close; Michael joins at the end rather than watching for days. Dry-run until bid integration and authorization are verified. | B-23, C-32 | **DONE** (reconciled from lane 04 AGENT_STATUS Done) | worker:lane-04 (sonnet) | Alert fires once per event; negative test: no bid path |
-| F-39 | **P1** | (06; after C-32, F-38; no UI redesign, add operational density to the existing views) Deal card as a decision: item, source, location, current ask or bid, all-in cost, paperwork, repair and transport, resale basis, expected net, days to cash, profit per day and hour, demand, confidence, max bid, bidder activity, next action BUY / WATCH / PASS (BUY and bids stay owner-gated), expected vs realized, asking vs sold comps. Control strip: capital available and tied up, inventory, expected and realized profit, auctions closing, approvals, watchlist, pickups, paperwork, receipts. Resale workflow page: inventory intake, photos, listing preparation, buyer-demand notes, sale status, realized-profit accounting with receipts; Today shows asset deals first Present reports and Today in Michael's Morning Money Hunt shape: bottom line, small ranked table, one block per item (source, economics, travel, time to cash, repair, risk, confidence, action today), what changed, what was rejected, today's best move. | C-32, F-38 | **DONE** (reconciled from lane 06 AGENT_STATUS Done) | worker:lane-06 (sonnet) | Item moves intake to sold with a receipt; simulated never labelled earned |
-| F-45 | **P1** | (06; after F-39; fold owner liaison 2026-10-09 gaps into the EXISTING Operator UI, no redesign, no new dashboard) Audit F-39 against the owner directives and close the gaps: (1) fixture `example.invalid` links never behave as live links and are labelled DEMO; real listings get View original listing (https/http, allowed host, rel noopener, no javascript/data/open redirect), else 'No verified live link'; (2) photo gallery: cover thumbnail, enlarge, count, provenance, fallback when missing/expired; original photos kept apart from any mockup; (3) verbatim original seller description (line breaks, Show full ad), HTML-escaped; (4) glanceable deal card: photo, title and price, distance, condition, comps SOLD vs asking, net, profit per hour, days to cash, max bid, BUY/WATCH/PASS, one next action; receipts and raw JSON collapsed behind View proof; (5) active-nav highlight, page heading, Find Deals Now plus filters (category, trailer subtype, distance, price, condition, title status, auction vs fixed, closing soon, min profit, days to cash, confidence, transport: can tow / transport required / all) with saved presets; tow vehicle and limits are EDITABLE user fields, never hard-coded exclusions; filtered-out items explained, not deleted; (6) My notes has a working Add note path (owner channel, CSRF+PIN) or the true blocker is named; (7) milestone panel: what is usable now vs blocked vs future (daily search, live auction connector, overnight negotiation), no invented dates. Tests at 1648, 1280, 390 px; dry-run only | F-39 | **DONE** (reconciled from lane 06 AGENT_STATUS Done) | worker:lane-06 (sonnet) | UI tests for DEMO vs live link, HTML injection, missing photo, notes add, filters; screenshots at three widths |
-| B-25 | **P0** | (02) GSA Auctions API live adapter (read-only, DEMO_KEY, receipt `docs/receipts/2026-10-09-gsa-api-smoke.md`): fetch active-auctions (follow the 303), normalise each lot to the B-23 auction-lot shape (saleNo-lotNo id, itemName, highBidAmount, biddersCount, aucEndDt, location, itemDescURL as the original link, imageURL as the photo, lotInfo verbatim), source=GSA, as-of timestamp, provenance on every field. Never invent buyer premium or sold comps (UNKNOWN); filter Arkansas and nearby states; zero results shown truthfully; at most 1 fetch per run, cache the file, respect rate limits; no account, key or paid call (a personal api.data.gov key is an owner decision). Feed the existing B-23 -> A-51 -> card path. Tests with a recorded slice of the real JSON | none | **DONE** (reconciled from lane 02 AGENT_STATUS Done) | worker:lane-02 (sonnet) | Real AR lot (e.g. 3-1-QSC-I-27-006-005 utility trailer, Marianna) appears as an Item with its real URL and photo; asking/high-bid never counts as sold |
-| F-46 | **P0** | (06) Owner P0 live vs demo: any page or card linked to TRAIN-* fixtures shows DEMO / TRAINING DATA, NOT REAL LISTINGS, DO NOT BUY; the normal landing and queue show only items with a verified source (real URL, not example.invalid); training items live behind a DEMO switch and never under Needs you; `example.invalid` never rendered as a link ('No real listing, training example'); no comparable-sold-price prompt to look at an item: no sold evidence = RESEARCH NEEDED, DO NOT BUY YET, input only under Details; demo $500 bankroll vs real cash labelled with source and time, no recommendation from demo balances; unknown fields collapsed, not 15 UNKNOWN rows; owner-supplied URL + photos + pasted text intake marked OWNER-SUPPLIED; GSA lots (B-25) rendered with original link and photo | F-45; B-25 for the GSA card | **DONE** (reconciled from lane 06 AGENT_STATUS Done) | worker:lane-06 (sonnet) | Tests: normal feed has zero TRAIN-*; demo switch shows them with the banner; no clickable example.invalid; owner URL intake with provenance |
-| F-47 | **P0** | (06; after F-46; owner ARIA-20261009-1920, one-hour vertical slice) Michael's Marketplace on the existing :8766, composition only: persistent left sidebar (Find Deals Now, + New Search, My Campaigns / Saved Searches, Saved Deals, Auctions Closing Soon, DEMO in a separate area), main pane titled Michael's Marketplace. Search form (keywords, base city default Conway AR editable, radius, max price, condition, required/preferred/exclude terms matched against seller text and tagged seller-stated vs inferred, source GSA, auction/fixed, closing date, sort); only keyword + price + radius needed. Save, edit, enable/disable, run; reuse the existing Wanted/campaign model and saved filters, no parallel datastore; a saved search survives reload. Source status line (connected / offline / last fetched as-of). Result card: original photo, exact title and short original description, View original listing, current bid, closing date, city (distance only when grounded), condition seller-says, source + fetched timestamp, price math with UNKNOWN premium/transport/repair, sold vs asking kept apart, default WATCH / RESEARCH NEEDED. No TRAIN-* / example.invalid in live results. SOURCE WIRING (decided by 01): search reads `mbos_discovery.gsa_live.GsaLiveAdapter(cache_path, live=False)` (installed in your venv at lane-02 head 0d40ed5, no network from workers) over the cache `/home/michaelos/business-os-worktrees/agent-01-coordinator/var/cache/gsa-active-auctions.json` (+ `.asof`, real fetch 2026-10-10T00:19Z, 1179 lots), path overridable by env `MBOS_GSA_CACHE`; show the as-of; tests use lane 02's recorded slice `tests/fixtures/gsa_live/active-auctions.json` (copy it into your tests). Marketplace search is a retrieval view over these records, not the decision queue. Unsupported source = 'not connected', never mock. NEW modules and tests <= 300 lines each, stop for review at 400; surface any existing file > 400 lines before growing it | F-46, B-25 | **DONE** (reconciled from lane 06 AGENT_STATUS Done) | worker:lane-06 (sonnet) | Tests: search/save/reload, GSA result with real link, demo isolation, no-photo, stale lot, HTML escaping, ungrounded comp = WATCH; screenshot at desktop and 390px |
-| F-48 | **P0** | (06; owner acceptance failure ARIA-20261009-2011; SMALL composition fixes only, no redesign, `server.py` is ~1536 lines so add no more than a few lines there and put logic in small new modules <= 300 lines) Found by 01 rehearsing lane 06 head `81e33b2` on a staging port: (1) the landing `/` 'Best next move' (mission_view.py) still names the fictional '55 inch LED TV' while the queue is empty: exclude demo/training items from EVERY landing element (best next move, glance cards, counts, mission); (2) 'Cash $500 available to deploy' reads as real cash: label it 'Simulated bankroll, not your cash' with source and as-of, and give no recommendation from it; (3) the default landing must be Michael's Marketplace: `/` shows (or redirects to) `/market`, and the old queue stays one click away; (4) GSA `imageURL` (ppms.gov) returns HTTP 401 'Token expired or invalid' without a GSA login, so the browser can never load it: do NOT proxy it or use any token; render a clean no-photo tile 'Photo is behind GSA's login: open the original listing' instead of a broken image, and keep the image URL in details; (5) origin and radius are free user input (any city or ZIP, any miles), not presets. Tests for each | F-47 | **DONE** (reconciled from lane 06 AGENT_STATUS Done) | worker:lane-06 (sonnet) | Normal `/` contains zero TRAIN-*, no '55 inch', no unlabelled $500; `/` lands on Marketplace; no broken img on a GSA card; arbitrary origin accepted |
-| F-49 | P1 | (06) Found on the live :8766 after the reload: `/mission` and `/summary` (Daily summary) still list the fictional '55 inch LED TV'; exclude demo/training items from every non-demo page (mission legs, daily summary, digest, outcomes, ledger headers) with a test that walks every nav route; then extend location: resolve a US ZIP or city through a local gazetteer file (no network, no paid geocoder) or say plainly it cannot | F-48 | **DONE (code complete + staging verified by 01 @ b1a3d16; NOT live: :8766 still on the F-48 export until one owner-gated UI reload; see docs/receipts/2026-10-10-f49-verification.md)** (reconciled from lane 06 AGENT_STATUS Done) | worker:lane-06 (sonnet) | Test walks all nav routes: zero TRAIN-* / example.invalid / TV; ZIP 72032 located or truthfully unlocated |
-| F-50 | P1 | (06) Two findings from 01's F-49 verification: (1) show a visible, plain caveat on /market whenever distances are used: place coordinates are approximate centroids from a small local gazetteer with limited coverage (say which origins and lot towns are located and which are not); out-of-state lots must not read as a bare 'distance UNKNOWN' without that explanation; (2) `tests/lane_d/test_wanted_f25.py::test_double_submit_loser_sees_already_recorded` now fails deterministically (first `/numbers/capital` withdraw returns 200 not 303) on both `5b42655` and `b1a3d16`; it passed at ~02:00Z: find the cause (state, date or time dependence?) and fix the test or the code, and say which | F-49 | **DONE** (reconciled from lane 06 AGENT_STATUS Done) | worker:lane-06 (sonnet) | Caveat text present and tested; the lane D+E suite is back to the 2 known F-32 failures only |
-| F-51 | **P0** **AMENDMENT 2026-10-10 (ARYA-0420 + ARYA-0433, applied by 01, authoritative scope; full text `docs/handoff/F-51-amendment.md`):** (A) strict filters: a global max/min price and the Conway radius constrain EVERY row; a lot with unknown price or unknown distance must NOT silently pass a strict limit (correct `market_search.py` and the tests that encode the opposite) and is shown only in a separately labelled opt-in section; an invalid numeric filter shows a visible validation message, never silently ignored. (B) Craigslist-style browse-first gallery (dense photo cards with price attached, short title, town, posted age, narrow left sidebar with category checkboxes, ZIP/radius, min/max price, top search/sort/view), 3-4 customizable category rows (trailers first; owner can choose and reorder, e.g. electronics), responsive widths, honest missing-photo placeholders, empty category = 'no matching known inventory', advanced filters behind a disclosure, no Craigslist/Facebook branding or copied inventory, no scraping; GSA-only cached coverage stated and 'cached' never presented as a fresh fetch. (C) AFTER (A) and (B) work: explicit saves, dismissals and more/less-like-this feedback persisted in-app and used for an understandable ranking with a visible 'why suggested', reset and disable; it never overrides hard price/radius/exclusions, never invents profitability, no outside data, no new credentials. Preference learning must NOT delay strict filters or the basic gallery. Reviewable on staging with real Conway data and tested invalid/unknown boundaries; live reload stays owner-gated. | (06; owner ARYA-20261010-0353, income-first product acceptance on the existing /market, no new dashboard; builds on F-47/F-48/F-49, no duplicate work) Gaps to close on staging first: (1) min AND max price controls: numeric inputs plus an accessible range slider (the $1-$20,000 example is the control's range, NOT a budget or spend authorization); entered filters persist across nav and are shown as plain applied-filter chips; auction cards label current bid vs asking price and 'all-in cost unknown', never final cost; (2) editable origin (default Conway AR / ZIP 72032) and radius that really constrains known-distance results; unknown/unresolved locations in a separately labelled optional section, never counted as local; no invented coordinates (see F-50 caveat); (3) default view = repairable trailers/equipment near Conway with editable category/keyword controls; broad inventory mode is explicit and off by default; documented working-capital setting labelled apart from verified cash; (4) demo/training navigation and fictional records removed from the normal owner workflow, kept behind a separate explicit route, history untouched; (5) plain-language GSA = government surplus auctions, cache freshness, image/login limits, verified original-listing link, no fabricated photos or login bypass; (6) diagnose in a REAL browser why the Search control looks faded in the owner's screenshot (CSS vs disabled vs focus state) and make Search/saved actions visibly operable. Acceptance: real-browser run (screenshots) of a trailer/equipment search near Conway; changing min/max and radius changes the correct result set; out-of-radius and unknown-location cases; zero shown honestly; no demo content on normal routes; exact artifact SHA, commands, tests, cache timestamps, code-vs-live status | F-49, F-50 | **DONE** (reconciled from lane 06 AGENT_STATUS Done) | worker:lane-06 (sonnet) | Receipt with screenshots + SHA; staging only. LIVE needs ONE consolidated owner-gated UI reload covering F-49+F-50+F-51 (the 02:04Z approval is spent) |
-| F-52 | **P0** | (06; follow-on of F-51, NOT a parallel worker; starts only after F-51 closes) Close whatever part of the F-51 AMENDMENT (A)(B)(C) the F-51 worker did not deliver: read F-51's receipt and `docs/handoff/F-51-amendment.md` first, list covered vs uncovered items in your receipt, implement only the uncovered ones, same staging/real-browser/tests bar | F-51 | **DONE as code delivered, NOT ACCEPTED** (reconciled from lane 06 AGENT_STATUS Done; ARYA-20261010-0512 found 4 acceptance gaps, tracked in F-53; lane CLOSED is not product done) | worker:lane-06 (sonnet) | Receipt maps each amendment item to done/not-done with evidence; strict filters and gallery first, preference learning last |
-| F-53 | **P0** | (06, sequential follow-on of F-52, one worker, no duplicate; ARYA-20261010-0512; code lane, NOT done by pickup) Close the 4 F-52 acceptance gaps on existing /market, in this order: (1) browse-first layout: first listing cards must be in the first desktop viewport (screenshot 01-gallery-default.png shows them ~1600px down); move advanced/save-search/preferences/capital/details into a compact sidebar or disclosures, keep concise visible truth labels and price/source conditions, no fake photos, usable at 390px; (2) persist owner filter/category/row-order choices across a real server restart (`market_routes._remembered` is memory-only; use existing persistence such as `var/market_prefs.json`/`MBOS_MARKET_PREFS_FILE`), proven with an isolated app instance/test store, NOT a live restart; (3) validate the FINAL resolved numeric values (sliders + direct query, not only form boxes): regression tests for blank/negative/nonnumeric/inverted/exact-boundary and strict unknowns; (4) after the last fix run affected + full required gates, disclose remaining baseline failures (known: `test_resale_f39` socket timeout in full run, pre-existing F-32 tests), then record each case PASS/FAIL/NOTRUN in `docs/handoff/F-51-F-52-acceptance-matrix.md` on the same artifact with real staging screenshots; reuse covered cases. Preserve current code and the owner-gated live UI reload; pause of 05:28Z SUPERSEDED by owner resume at 05:30Z | F-52 | **DONE** (reconciled from lane 06 AGENT_STATUS Done) | worker:lane-06 (sonnet) | Matrix cases recorded on the final artifact; first-viewport screenshot shows cards; restart-persistence test passes on isolated instance; final full-gate numbers in receipt. Report actual next START and bounded closure; do not mark product done from lane CLOSED |
-| F-54 | **P0** **ADDED BY 01 (found while verifying F-53 on staging, 2026-10-10 ~05:55Z):** (5) the saved `last` choices (`market_prefs`) are overwritten by a REFUSED request: after a valid request (radius 120, max $500) a later `radius=x` request replaces the stored choices with `{radius: 'x'}`, the valid choices are lost, and a plain `/market` load (also after a restart) then shows the validation-error banner with empty filters. Persist ONLY choices that passed validation; an invalid request must leave the last good choices untouched and the next plain load must still restore them. Test: valid request, invalid request, plain load (and a new app instance) = valid choices restored, no error banner. | (06, sequential follow-on of F-53, one worker, no duplicate; ARYA-20261010-0551; code lane, NOT done by pickup) On the F-53 artifact e1621cf: (1) run matrix cases A16 (keyboard), B01 (1648x1000), B16 (back-nav), B18 (HTML-escape fixture), C07, C08 in the isolated staging browser; audit partial PASS A17 (saved-search keeps strict limits), B12 (real read-only link click), B19 (raw source-ID comparison); supply evidence or downgrade to NOTRUN/PARTIAL; (2) radius defect CONFIRMED by pickup read: `operator_ui/market_search.py:136` does `dist = round(haversine_miles(...), 1)` and the partition filter uses that rounded value, so 50.01 mi passes a 50 mi limit and A04 PASS is not proven; compare unrounded, round only for display, add a real boundary fixture 50 vs 50.01 (real haversine, not parser-only); (3) saved-search persistence: reproduce that `criteria_to_query`/`save_form` (market_search.py:108, market_view.py:281) drop min_price, focus/categories, row order; preserve through save/reload/restart or document unsupported criteria without silently relaxing; (4) fix only confirmed gaps, rerun affected + final gates, record SHA/commands/timestamps/counts in `docs/handoff/F-51-F-52-acceptance-matrix.md`. No live UI reload, installs, paid usage, credentials, contact. 921px mobile first-card stays a disclosed limitation | F-53 | **DONE** (reconciled from lane 06 AGENT_STATUS Done) | worker:lane-06 (sonnet) | Six cases + three audits have evidence or honest downgrade; boundary test fails on old rounding and passes on fix; saved-search round-trip test; final gate numbers in receipt; live reload remains owner-gated |
-| D-32 | **P1** | (04) F-127: `record_human_input` research entries violate the frozen Item `research` schema (extra `entered_by`, `value`), turning `mbos audit` conformance red after a quote. Conform them: the value and author go inside `finding` as one canonical JSON string `{"value": <number or string>, "entered_by": "<id>"}`; the author also stays in `source_uri` as `human:<id>`; no extra properties. Same for `attestation:` entries if they carry extras. Migration backfills nothing destructive (append a corrected entry; old entries are history) | none | **DONE** (reconciled from lane 04 AGENT_STATUS Done) | worker:lane-04 (sonnet, risk high) | `mbos audit` conformance stays green after a quote, a scope override and an attestation; verify_chain OK |
-| C-31 | **P1** | (03) Read the F-127 shape: C-27/C-28 readers accept the value from `finding` (JSON string above) as well as the old extra fields; tests with both shapes; the engine marks them human-attested as before | D-32 shape (agreed here) | PARKED (owner pivot 2026-10-09: no labor-service work; code and history kept) | worker:lane-03 (sonnet) | Quote $700 -> YES and $500 -> MAYBE from the new shape; old shape still read |
+H™\ÜÙ\\˜][NˆØ\Xš[]H[\[Y[Yİ\İYœÈXİX[Ø\ÙH[\ÜYœÈ[[Ûœİ˜]Y\XØ][ÛÈ›È˜Z[š[™ËÛX\›š[™ÈÛZ[Hœ›ÛHHØËÜ]Y]YH›İÎÈ
+JHYˆ›È\›Z]Yš]˜]HÜš]H]^\İË˜[YH^Xİ™\™\]Z\Ú]H[™Ú\H˜[YKYœ™YH[\ÜØÚ[XKİ[\]NÈ›È˜XœšXØ]Y]\İ][Û‹ØXÜ]Z\Ú][Û‹ÔS‹ˆİ]ÙˆØÛÜNˆšYÜ\˜Ú\ÙKØÛÛXİXØÛİ[[YÜ˜][Û‹^\›˜[š[˜[˜ÚX[\ØÛÜİ\™K]™HRHÚ[™ÙKÛİ\˜ÙH™]Úš[[™ËØXØÙ\ÜÈ^[œÚ[Û‹ˆŸKMŒˆˆ
+ŠQQ–HPÒÕT
+T–PKLŒŒLLLŒLJJŠˆ
+ÓÑH[™K^\İ[™ÈH[™Ú[™Y\š[™ÈÙ\ÜÚ[Û‹Ù\šX[Q•TˆKMŒÈ›ÛİË[ÛˆÙˆHÛİ\˜ÙK[X™[ËÜİÜÈÛÜšË“ÕH™]ÈÛÜšÙ\‹›İšY\ˆÜˆØXÚH™Yœ™\Ú
+KˆÛX[\İØÛÜNˆ[ˆH\İ[™ÈØ\™Ú[ˆYÚšY[[İ[\È[
+“›ÈšYÈY]ŠKÚİÈ“Ü[š[™ËÛZ[š[][HšY[šÛ›İÛˆ8 %ÚXÚÈÜšYÚ[˜[\İ[™Èˆ\ÈH™\šYšYYÜšYÚ[˜[[\İ[™È[šËˆÚİÈH[Y\šXÈZ[š[][HÓ“HYˆ[ˆ^XÚ]Ûİ\˜ÙK\›İšYYÜ[š[™ËÛZ[š[][HšY[^\İÈ[ˆ[™XYK\\›Z]Y]KÚ]›İ™[˜[˜ÙH
+È\ÛÙ‹ˆÙY\İ\œ™[šY\İ[X]Y™^šYZ[š[][H[İÙYšY[™™\Ù\™H
+›ÛÛX[ˆ›YË™]™\ˆHÛ\ˆ[[İ[
+H\È\İ[˜İX™[YšY[Ëˆ™]™\ˆİXœİ]]H]XÒ[˜Ü™[Y[™]Z[\İ[X]K™\Ù\™H›YÈÜˆHÛÛ\]YİY\ÜÎÈ›ÈÛZ[HH]Xİ[ÛˆXØÙ\È[ˆ[[İ[ˆ˜[X][Ûˆ^\İ[™İZ\Ú\ÈÜ›ÜÜÈØÜ˜\ØÛÛ\Û™[\İ[X]Hœ›ÛH™]X\™XÚİ\Ù™™\ÈXÚİ\YXİ[ÛœËİÚ[™Ë\ÜÜØ[™Y\Ë]KÛÛ™][Û‹™XÛİ™\˜X›HÙZYÚİ^H^XÚ]S’Ó“ÕÓ‹ˆ›ÈX\™ÛÛXİšY\˜Ú\ÙKÜˆš]˜]HİÛ™\ˆ[[İ[È[ˆÚ]Xˆ
+Š‘SU‘T‘QH[™Hˆ
+ØÌM™MŒ‹İ]\ÈØNJNÈYÙ[H™\šYšYYˆMŒˆ\İÈ\ÜÈ[ˆH[™HˆÛÜšİ™YKY™ˆ™]šY]ÙY
+[šÛ›İÛˆX™[
+ÈÜšYÚ[˜[[šÈÚ[ˆYÚšY[[İ[\È[È[Y\šXÈZ[š[][HÛ›Hœ›ÛH[ˆ^XÚ]ÜÚ]]™HÛİ\˜ÙHšY[È™]™\ˆØ]XÒ[˜Ü™[Y[Ü™\Ù\™KÙİY\ÜÊKˆÛİ\˜ÙKÜİYÚ[™ÈÛ›Nˆ“ÕY]™[X\ÙYÈÍÈHÛÛXš[™Y™[X\ÙH\™Ù]\È[™HˆXYØNH
+‹LLÎJÑ‹LM
+ĞKMŒŠK[™[™ÈH™[X\ÙH\›Z\ÜÚ[Û‹ŠŠˆ
+Š”‘SPTÑQÈÍˆŒ‹LLLLUŒŒNŒLÖˆ\È[™HˆXYØNH
+™XÙZ\ØÜËÜ™XÙZ\ËÌŒ‹LLLLK[]™KNÍ‹\™[ØYYŒLÎKYŒMXMŒ‹›Y›È›Û˜XÚÊKŠŠˆKMŒÓ‘HH[™Ú[™Y\š[™È\İˆ›ËXšYš^\™H
+YÚšY[[İ[[]XÒ[˜Ü™[Y[™\Ù\™HYJH™[™\œÈH[šÛ›İÛˆX™[
+È[šÈ[™›È[X™\ÈHš^\™HÚ][ˆ^XÚ]Ûİ\˜ÙYZ[š[][H™[™\œÈ]Ú]›İ™[˜[˜ÙHŸKMŒÈ
+Š”JŠˆ
+ŠQQ–HPÒÕT
+T–PKLŒŒLLLŒLJJŠˆ
+ÓÑKÛÜÈ[™K^\İ[™ÈH[™Ú[™Y\š[™ÈÙ\ÜÚ[Ûˆ]HØY™H›İ[™\NÈİÛ™\ˆØZYœÙ]\HÛX[ˆ›İ]HÈĞSQH[]™\KYØ\™\Z\‹“ÕH™]ÈÛÛÜ™[˜]Ü‹İÛÜšÙ\‹Ù™X]\™JKˆÚ][ˆ^\İ[™ÈXØÙ\ÜÈÛ›H
+ZXÚY[ÜÈXØÛİ[^\İ[™ÈØ]Ú\‹Ù\Ü]Ú\‹İ\ÜYÛÛÜ™[˜]Üˆ™YÚ\İ˜][Û‹Û][˜Ú
+Nˆ
+JH^Z[ˆ
+È™\Z\ˆHXÚİ\]œËZ[\˜Xİ]™K\Ù\ÜÚ[ÛˆÛÛ\][ÛˆØ\œ›ÛHÛİ\˜ÙKÜˆ˜[YHH^Xİ[˜]˜Z[X›H™\™\]Z\Ú]NÈÙY\[œİXİ[Û‹RQY\[™PÒÈOˆ[™Ú[™Y\š[™ÈÕT•Oˆ™\İ[Ü™XÙZ\İ]\ÎÈ
+ŠHÜš]HH›İØÛÛ›Üˆ\XHÈÙ[™Ó‘H\›[\ÜÈ›İ[™Y[™Ú[™Y\š[™È›ÛÙˆšXHHÚ]Xˆ[˜›ŞX›\ÚYHH\İ[˜İÙ[™\‹ÚİÚ[™È™]Ú[]™\KPÒË™X[[™Ú[™Y\š[™È^Xİ][Ûˆ[™™XÙZ\Ú]›ÈX[X[\İH
+HØÜË[Û›HXÚİ\ÛÛ\][ÛˆÙ\È›İÛİ[
+NÈ
+ÊH›İ™H\XØ]H[]™\HÙ\È›İ^Xİ]HÚXÙH[™™XÛİ™\HXÜ›ÜÜÈ™\İ\Ü™KY[H
+\ÛÛ]Y\İYˆ]™H™\İ\\Èİ]ÚYH]]Üš]NÈİ]H]™H\S”“Õ‘SŠNÈ
 
-| A-52 | **P1** | (01, ARYA-20261010-0431) `tools/inbox_pickup.py` status semantics: (a) heartbeat is published from a separate cadence (<= session `ttl_sec`/2) or before/while a synchronous deliver runs, not only every 600s against a 300s TTL; (b) `currently_running` is cleared only AFTER the completion heartbeat is published, and carries the task id + start time while delivering; (c) session status is `busy`/`idle`/`UNKNOWN`: a null or stale (`observed_at` older than `ttl_sec`) reading yields `UNKNOWN` with its age, never `idle`. Targeted tests for each. No new daemon/credentials/settings | none | **DONE** (a: beat during delivery, <= ttl/2 while busy; b: currently_running carries id + started_at and clears after the completion beat; c: stale/null -> UNKNOWN with age; d: ack Stage is the truth, never COMPLETED over BLOCKED. 11 tests; commits 7bd5160 b27ab04 afc8fed; watcher restarted 04:39:46Z; ARYA-0433 status bug fixed) | 01 (code; side worktree) | Tests with counts: heartbeat during a long deliver shows the task; stale/null gives UNKNOWN with age; observed 04:30:16Z reading (`currently_running: null` while the 0431 delivery was starting) cannot recur |
-| PAUSE-01 | **P0 (owner)** | PAUSED_BY_OWNER: DealSniffer/MBOS new development and model dispatch stopped by owner (ARYA-20261010-0528). Needed from a host-privileged actor (not pickup): stop/hold `tools/dispatcher.py` (tmux mbos-dispatcher) and the model-launching `tools/inbox_pickup.py` daemon (tmux mbos-pickup) once the in-flight F-53 worker ends; do not kill uncommitted work. Resume: owner says so, then restart dispatcher | none | **CANCELLED** (owner resumed at 05:30Z, ARYA-0530; nothing was stopped, no host action needed) | n/a | `ps` shows no `tools/worker.py` and no dispatcher/pickup model launcher; receipt docs/receipts/pickup/ARYA-20261010-0528-owner-pause-compute.md |
-| F-55 | **P0** **ADDED BY 01 (ARYA-20261010-0610, visual provenance):** F-54 is NOT accepted on visual evidence yet. The B01 gallery screenshot uses the nine-item adversarial fixture (escaped malicious title, 25,000-mile radius): keep it as SYNTHETIC security-test evidence, labelled so, stored separately. Real marketplace acceptance needs: final isolated staging page on the actual existing GSA cache, a realistic disclosed Conway search, a visible current cache timestamp; no fabricated listings or photos, no restricted-source scraping. If the criteria match nothing, show that honestly, then add a separately labelled broader browsing example. Per screenshot record metadata: exact code SHA, URL/port, viewport, active filters, source/cache identity, capture time. Compare displayed listing IDs and original links against the cache to substantiate B19, else mark B19 UNVERIFIED. Supply BOTH first viewport and full page. Michael wants periodic screenshots for Arya review of the listings-first layout (recurring deliverable). | (06, reuse the existing F-54 final acceptance worker; no duplicate worker, no new feature lane; code/browser lane, NOT done by pickup) Evidence under `docs/receipts/` + `docs/handoff/F-51-F-52-acceptance-matrix.md`. No live reload (still unauthorized; parent approval request unanswered). | F-54 | **DONE** (reconciled from lane 06 AGENT_STATUS Done) | worker:lane-06 (sonnet) | Real-cache first-viewport + full-page screenshots with metadata, B19 verdict, synthetic fixture evidence separated and labelled; live reload stays owner-gated |
-| F-56 | **P0** | **ADDED BY 01 (ARYA-20261010-0611, confirmed Save-form defect):** F-54 `dec4587` `operator_ui/market_view.py` `_save()` (lines 191-200) builds hidden fields only from keywords, base, radius, min_price, max_price, any, required, preferred, exclude (+broad); it omits `cat`, `row1`-`row4` and `condition`, so a real Save click does not submit them although `save_form` serialization accepts them (consistent with A17 `focus:none` after `cat=trailers`). Steps, same 06 acceptance worker, no duplicate: (1) reproduce through the REAL rendered page (parse the actual Save form, not injected fields); (2) minimal fix: propagate already-supported cat, row1-row4, condition; do not relax strict filters; (3) assert real Save, reopen and restart retention; (4) continue 0610/F-55 clean real-cache visual acceptance in isolated staging, no live reload; (5) navigation/result checks compare visible known-section IDs excluding hidden unknown cards (equal counts of all `.mk-g` prove nothing); (6) downgrade any matrix case missing a required substep, never claim PASS. Code/browser lane, NOT done by pickup. No live reload, credentials, installs, extra paid usage or duplicate dispatch | F-54, F-55 | **DONE** (reconciled from lane 06 AGENT_STATUS Done) | worker:lane-06 (sonnet) | Rendered-form test shows cat/row1-4/condition submitted; Save/reopen/restart retention asserted; matrix downgrades documented |
-| F-57 | P1 | (06; serial after F-56; within the F-51 AMENDMENT (B) dense photo-led gallery, found in 01's own real-cache capture `docs/receipts/2026-10-10-f54-real-cache-visual-evidence.md`) Wide-screen density on `/market`: at 1648 px the results area must use the available width (target 4 to 5 cards across, responsive down), not a narrow centered column with empty margins; on `/market` drop or shrink the stacked 'Operator UI' header and 16-item nav so the first cards start higher; keep strict filters, unchecked section and honest login-gated photo tiles unchanged. Screenshot with `tools/capture_market.py` (real cache) before and after; no layout claim without the screenshot metadata | F-56 | **DONE** (reconciled from lane 06 AGENT_STATUS Done) | worker:lane-06 (sonnet) | `conway-1648` first viewport shows >= 4 cards across and the first card top is lower than 400 px; mobile unchanged or better |
-| F-58 | **P0** | **ADDED BY 01 (ARYA-20261010-0703, final staging closeout; bounded, one worker, not a redesign):** on lane 06 head `026058e` or later, committed and clean: (1) re-run `tools/capture_market.py` on the committed tree (no dirty flag) and relabel: real cached GSA inventory vs STUB decision store (`serve_market_staging.py` uses StubStore; fix the F-54 'no stub store' wording; no real-persistence claim from stub runs); (2) run the full reference suite INCLUDING `tests/test_resale_f39.py` (alone with a bounded timeout if it stalls); report PASS/FAIL/TIMEOUT per file, baseline failures (resale_f39 timeout, F-32 pair) separate from new; a timeout is UNRESOLVED, not PASS; (3) update `docs/handoff/F-51-F-52-acceptance-matrix.md` itself with F-56/F-57 rows (count-only navigation checks UNVERIFIED, A17 and B19 scope notes, B01/B12/C08 PARTIAL, mobile price/title scroll limitation); (4) sync that matrix to the coordinator branch. (5) **ROW-ORDER PROOF (ARYA-20261010-0706; clarifies existing F-58 scope, no new worker):** on the final committed tree, real browser Save -> reopen -> process restart must show restored custom row order; assert BOTH the selected row controls (row1-row4) AND the rendered DOM row order, including a configured EMPTY row (populated-card order alone is insufficient). The F-56 log is NOT accepted as order proof (01's review: it did not prove restored order); prior category/condition evidence may be reused for those, never for order. Not DONE until this passes; (6) **per-capture provenance:** each capture/sidecar states its own actual store and cache; correct only the F-57 sidecar whose serving tool/receipt uses StubStore; do not relabel 01's earlier real-cache capture (may genuinely use no stub). No live reload, installs, spend, extra layout work. Packet: `docs/runbooks/port8766-reload-rollback-verification-packet.md` **AMENDMENT (ARYA-20261010-0717, 01, same worker, no duplicate):** (7) SAVED ANY-TERM DEFECT: `save_form` drops `q['any']` and `criteria_to_query` hardcodes `any=''`, so a saved 'focus: trailer, equipment' reopens as 'focus: none' (silent widening; the F-57 closeout JSON shows it). Minimal fix: persist the category/keywords-any terms through rendered Save -> reopen -> restart, OR refuse unsupported persistence before saving; never silently broaden. Targeted real-form regression (fails on old code), and verify saved criteria AND visible known-section ID sets keep the any-term restriction after reopen/restart. (8) B16 stays PARTIAL until actual Back/Forward visible-known-ID evidence replaces the rejected all-`.mk-g` count. Reuse row-order evidence; no live reload; keep runtime and quota/ownership guards; no feature expansion. | F-56, F-57 | **DONE** (reconciled from lane 06 AGENT_STATUS Done) | worker:lane-06 (sonnet) | Clean-tree sidecars; resale_f39 result recorded honestly; matrix has current statuses; receipt |
-| F-59 | **P0** | (06; follow-on of F-58, ONE worker at a time, NOT a duplicate: ARYA-20261010-0717 arrived after the F-58 worker started and cannot be messaged mid-run; if F-58 already fixed it, record that and stop) Saved 'any of' focus terms are silently dropped: `save_form` omits `q['any']` and `criteria_to_query` hardcodes `any=''`, so a saved search reopens as 'focus: none' and can broaden. Preserve the any-terms through the REAL rendered Save, reopen and restart, or refuse to save an unsupported criterion with a visible message; never silently broaden. Minimal fix only, plus a real-form regression test (render, click-equivalent POST of exactly the form's fields, reopen, fresh app over the same files): the applied-filter chips and the VISIBLE KNOWN-ID set (cards outside the unchecked section) equal before Save and after reopen/restart. Also B16: replace the count of all `.mk-g` with visible-known-ID sets across search A, search B, Back, Forward. Verify with `tools/accept_save_restart.py` (it now fails on a changed applied mode) | F-58 | **DONE** (reconciled from ARYA-20261010-0741 review: code `bfc0b478dcf07e36bec376255e1cdc7592bc463e`, published lane 06 head `28973742511834201175010c6521a678a7519da6`; saved any-term, focus/categories/condition/row controls/DOM order incl. empty rows and visible known IDs persist across real Save/reopen/process restart in browser evidence; storage = isolated FILE persistence with a STUB decision store, NOT the live database. B16 stays PARTIAL/UNVERIFIED: both tested searches return the same five IDs, so no changed-result-set proof. Final F59 run excluded the resale file: 59 focused passes; earlier combined reference 380 pass / 1 resale timeout; D+E 105 pass / 2 known F-32. No all-green claim) | worker:lane-06 (sonnet) | `accept_save_restart.py` exits 0 in both scenarios; matrix A17 and B16 re-evidenced on the new SHA |
-| A-53 | P1 | (ARYA-20261010-0633 remainder) `tools/foreman.py` parse_queue: surface malformed queue rows explicitly (cell count != 7 -> WARN naming the row ID, nonzero exit under --exec/--launch) instead of silently reading shifted columns; add regression for a 6-cell row; and ensure an unmet-dependency row is not re-dispatched (no model attempt consumed). ENGINEERING DONE 2026-10-10: schema_problems + deps_met earlier; now `--launch`/`--exec` print INVALID ROW <id> and exit 4 without starting anything (test_foreman 18 pass incl. 6-cell regression); dispatcher uses ready_for so an unmet-dependency row consumes no attempt. Code change, so owned by Agent 01 engineering, not an inbox executor. | none | DONE | 01 | Test fails on a 6-cell row fixture before the change and passes after; `--launch` output lists invalid rows; full unit suite green. |
-| A-54 | **P0** | (ARYA-20261010-0718 reload-packet safety; code change to `tools/reload_ui.sh` plus a new test, so owned by Agent 01 engineering, NOT an inbox executor; blocks any use of the reload packet) Harden `tools/reload_ui.sh` (27 lines; findings by read: line 6 `set -u` only, no `-e`/`pipefail`; line 14 `git archive  piped to tar` has no pipefail and no artifact check; line 15 `cp -a ... && echo` does not abort on a failed backup, so line 18 `tmux kill-session` and line 19 `rm -rf` still run; line 22 treats HTTP 200 on `/market` as proof). Required: (1) `set -euo pipefail`; (2) abort BEFORE `date stop`/kill/rm unless export succeeded AND expected paths exist (`$NEW/operator_ui`, `$NEW/comms_spec`, non-empty) AND backup `cp -a` succeeded AND backup is verified (same file list/count vs live; `diff -r` clean); (3) rollback dir retained until post-checks pass, and rollback itself checked; (4) post-reload identity: write the exported SHA (and a tree hash of operator_ui) to a marker file in the artifact before start, then verify what the running UI serves matches it, plus semantic route checks (e.g. `/market` body contains expected markers for F-56/F-58 behaviour such as the Save form fields cat,row1-row4,condition,any and a row-order marker; `/` and one demo-isolation route have no TRAIN-/example.invalid), not HTTP 200 alone; (5) test seam: env overrides for tmux/curl/paths (or PATH-shimmed fakes) so tests run in a temp repo and never touch live 8766. Tests (isolated, failure-injection): backup fails -> exit nonzero and shim log shows ZERO tmux kill-session / rm calls on live; export fails (bad SHA / tar fails / empty export) -> same; staged success path -> kill/rm/cp/start in order, identity+semantic checks pass; semantic mismatch (200 but wrong artifact) -> rollback triggered. Do NOT run against live :8766 (owner approval pending). Reuse existing recovery-packet route `docs/runbooks/port8766-reload-rollback-verification-packet.md`; attach test evidence to that packet. No new feature, service install, credentials, or duplicate worker | F-58 | **DONE** (Agent 01: `tools/reload_ui.sh` hardened per every point of this row, then per ARYA-0735: rollback is judged against the baseline answer (never 500/000), any failure after the stop goes through rollback via an ERR trap, identity limitation stated (not a process-returned SHA); 13 isolated failure-injection tests pass, 334 unit tests pass; `--verify-only` markers validated on staging OK and on live F-48 FAILED as expected; live :8766 untouched throughout) | 01 | Failure-injection tests fail on the current script and pass on the hardened one; packet updated with the test counts and exact identity/semantic check list; live reload still owner-gated |
-| A-55 | **P0** | (ARYA-20261010-0735 amendment to the DONE A-54 packet, same coordinator-owned `tools/reload_ui.sh` correction, NOT an inbox executor, no new lane/worker; F-59 untouched) Two remaining failure paths in `tools/reload_ui.sh` (found by read at 09de842): (1) `rollback()` (line ~72) treats any HTTP code other than `000` as recovered, so a 500 counts as success: require the intended healthy semantic response (reuse `verify_pages`/`/` redirect check on the restored UI) before `rollback done`, else exit 3; (2) line ~78 `rm -rf "$LIVE/operator_ui" "$LIVE/comms_spec"` runs after the UI is stopped under `set -e` with no handler, so its failure exits with the UI down and no rollback: wrap as `or-else rollback "..."` (or stop in an explicitly recoverable state that prints the restore command). Add isolated failure-injection tests (shimmed tmux/curl, temp repo, NO live 8766): rollback with restored UI answering 500 -> exit 3 not 1/'rollback done'; post-stop rm failure -> rollback invoked, UI restart attempted. Identity wording: keep the limitation that on-disk tree hash + ARTIFACT marker + semantic route markers is NOT a SHA returned by the running process, unless an existing mechanism already proves process binding; no new telemetry feature. Update the packet `docs/runbooks/port8766-reload-rollback-verification-packet.md` to say 'verified' only after these pass. No live reload (no owner approval received) | A-54 | **DONE** (Agent 01, commit `7c0fbbb`: (1) rollback now requires the baseline healthy answer, `/market` HTTP 200 and the marketplace marker if the old page had it; a 500, a 000, another status or a lost marker exits 3 'ROLLBACK FAILED OR UNVERIFIED'. DEVIATION from the suggested wording: the restored UI is the OLD (F-48) UI, which cannot pass the new F-57 `verify_pages` markers, so the check is against a baseline read of the live UI taken before the change. (2) After the stop an ERR trap sends ANY failing command, including the `rm`, into the rollback; the new UI never starts. Identity limitation retained in the packet and the script's final line. 13 isolated failure-injection tests pass incl. rollback-500, rollback-lost-marker, post-stop rm failure; live :8766 untouched) | 01 | Both new tests fail on 09de842 and pass after the fix; existing 9 reload tests and full unit suite green; packet states the identity limitation precisely |
-| A-56 | **P0** | **ADDED BY 01 (ARYA-20261010-1637, owner approval recorded in the instruction: Michael said "Absolutely" to the prepared :8766 UI-only reload; NOT executable by an inbox executor because it is a live restart):** Agent 01 engineering session executes `docs/handoff/LIVE_RELOAD_PACKET_8766.md` once for lane06 artifact `28973742511834201175010c6521a678a7519da6` with safety script `7c0fbbb`: first recheck live process, artifact/script identity, ownership, backup and rollback; if state differs, report before expanding. UI-only (no DB, workers, dispatcher, pickup, watchdog, Desktop, Care, Linode; no cache fetch or install). Then run verify-only, semantic routes/demo isolation and strict-filter checks, capture real LIVE :8766 screenshots with timestamp/URL/viewport/filters/cache provenance, and state it is disk+restart+semantic proof, not a process-returned SHA. Michael enters his own PIN in the UI for Save; no persistence claim without evidence | A-54, A-55, F-59 | **DONE** (Agent 01, 2026-10-10T16:47:52-16:48:05Z: reload executed once and verified, no rollback; receipt `docs/receipts/2026-10-10-live-8766-reload.md`; live Save/PIN acceptance still waits for Michael's own PIN) | none | Receipt with execution or rollback result, hashes, screenshots, test numbers |
-| F-60 | **P0** | **ADDED BY 01 (ARYA-20261010-1728, owner: Search Now belongs in the SAME filter card; code lane, NOT done by pickup; ONE worker, serial after F-59, no new coordinator/worker; small composition correction, no redesign):** in `operator_ui/market_view.py` put the primary **Search Now** submit inside the price/distance/filter card form so it submits the real current values (desktop, mobile, Enter key); remove the disconnected action box below; demote New Search, Save Search, My Campaigns, Saved Deals to secondary actions with functions intact. Preserve strict min/max price, unrounded radius, unknown-result separation, visible validation, saved any-terms/categories/condition/row order, and the Save/PIN boundary. Real rendered-form tests + real desktop/mobile first-viewport and full-page screenshots on the exact committed artifact (viewport, URL/port, filters, UTC time, cache hash/as-of, store type), showing Search Now position and that submitted values change results. Report code / test / staging separately. Isolated staging only: NO live :8766 reload (A-56 was the one-time approval) | F-59, A-56 | **DONE** (lane 06: code `64b152b`, evidence `9590ae5`; lane status CLOSED; dispatcher worker exit rc=0 at 17:55:35Z; Arya viewed desktop/mobile screenshots: Search Now sits in the price/radius card, mobile is filter-first, owner should review that tradeoff; staging only, no live reload) | 06 | Committed SHA, test numbers, screenshots, staging receipt; separate owner approval needed for any live reload |
-| F-142 | **P0** | **OWNER CORRECTION 2026-10-11 11:21 CDT, linked to historical F-60 DONE:** put Search Now below both price sliders and last after every filter while preserving the real GET form, Enter key, filters, Save/PIN boundary, current data and secondary navigation. | F-60 historical implementation | **DONE â€” LIVE_VERIFIED @ `8524689`** by Agent 01 at 2026-10-11T21:30:30Z. Live marker/tree hash matched, backup of `63d741d` exists, PID 725190 served `:8766`, verify-only passed, and fresh desktop/mobile click plus desktop Enter placed Search Now last and changed Min/Max results 134â†’97. Cache unchanged and visibly stale. Reload executed by the owner at 21:23:00-21:23:12Z (screenshot-reported via liaison message 2026-10-11-owner-f142-reload-executed; listener PID 725190 observed by Agent 01); Agent 01's earlier 21:17Z attempt was denied and did not execute it (history). Historical staging/permission states remain in the linked receipts and checklist. **OWNER_ACCEPTED for button placement only** (Michael 2026-10-11 16:32 CDT: "I finally got my button where I want it"; not whole-product acceptance). Live PIN Save not tested. | 06 | Owner acceptance: open live `:8766/market`, confirm Search Now is at the bottom, and optionally perform the PIN-protected Save check without sharing the PIN. No further F-142 worker or reload. Coordinator next action: re-read for one eligible compatible queue item; A-68 remains PARTIAL and B-12 remains access-blocked. Receipts: `docs/receipts/2026-10-11-f142-live-reload-verification.md` and `docs/receipts/2026-10-11-supervisor-visible-check-1633.md`. |
-| F-143 | **P0** | **OWNER CORRECTION 2026-10-11 16:35 CDT (liaison 2026-10-11-owner-radius-slider-price-fields); ONE bounded UI correction on lane 06 (`operator_ui/market_view.py`, `market_search.py`), implemented ONCE for every user, not a Michael-only fork:** (1) Keep explicit numeric Min price / Max price fields. REMOVE both price sliders (min_r/max_r) and their instructions and previous-value hidden precedence wiring (`_slider`, `_price_pick`, `_slider_price`). Preserve typed bounds, blank = unlimited, validation, strict filtering, saved-search compatibility: old saved searches keep their numeric values; obsolete slider URL fields must be ignored without changing explicit typed prices. (2) ADD a radius slider from 0 miles to the maximum allowed by the EXISTING radius validation (do not invent a travel limit; do not change Michael's chosen radius), with explicit miles unit, visible numeric min/max bounds and a visibly readable current value, coupled to a numeric radius input for exact entry; Search Now and Enter submit the actual selected distance; respect the existing CSP/script rules with a working design. (3) Scope summary reads generically, e.g. 'Within N miles'; the chosen ZIP/city shows in the editable location field; no fixed 'Conway' product text; keep Michael's saved origin/prefs; a NEW user must use/require their selected origin, with no hidden Conway fallback (`DEFAULT_BASE`); location-resolution limits stay honest (no nationwide geocoding claim). (4) Search Now stays LAST after every filter, desktop and mobile. State mode semantics preserved: radius disabled/not applied in By State mode unless the existing also-radius option is on. (5) No redesign, no source activation, no database change, no new paid dependency, no duplicate process. Files under 400 lines where practical. | F-142 (done) | DONE â€” LIVE_VERIFIED @ `315ddfa` 2026-10-11T23:03:30Z: reload executed by the owner (ARTIFACT sha=315ddfaâ€¦, tree b79816a3â€¦, exported 22:50:49Z, listener PID 793565 since 22:50:52Z, backup prev-20261011T225049Z); --verify-only OK; Search Now check OK 134->97; live radius slider shows/submits 0, 60, 120 and typed 97.9; price sliders absent. Receipt docs/receipts/2026-10-11-f143-live-reload-verification.md. [SUPERSEDED prior status, audit: PARTIAL â€” STAGING_ACCEPTED @ `315ddfa` (impl `f255d75`; Agent 01 clean-checkout verification 2026-10-11T22:17Z: focused 17/0, lane suite 456/0, real Chrome 32 checks 0 failed desktop+mobile, radius 0/] | 06 | Exact clean committed artifact (dirty=false, code_sha = tested commit). Focused tests: numeric/price/filter/saved-search compatibility incl. obsolete slider URL fields and old saved searches. Real Chrome desktop 1648x1000 and mobile 390x844: slider movement AND numeric entry, displayed miles equals submitted radius; boundary checks at 0, an intermediate value, the max and an exact typed value; result set or eligible IDs change where the cache allows, else documented distance-predicate evidence; price inputs change real results; removed sliders absent; Search Now last (`tools/f142_live_check.py` adapted or extended, still passing). Compare Michael's location with a second supported origin and a new-user scenario with no hardcoded Conway fallback; origin/radius/price persist across reload. Screenshots reviewed by Agent 01. Then Agent 01 independently verifies the exact commit from a clean checkout; release only through `tools/reload_ui.sh <sha>` under the already-given authority (if the permission classifier rejects it, record the exact NEED for the owner to run it; do not bypass). Receipt with commit, tests, loaded revision, host observation, cost if known. |
-| F-144 | P1 | **OWNER-RESOLVED 2026-10-11 17:45 CDT (liaison 2026-10-11-owner-unblock-release-alerts-f144; no further owner question); small follow-up on lane 06, built on lane 06 head `3960e46` (F-143 + F-145) so ONE combined release follows; not a redesign:** (1) page title becomes **DealSniffer Marketplace** (origin and saved preferences stay per-user profile data; no Michael-only fork); (2) radius slider normal scale **0 to 500 miles**; the numeric radius field still accepts the full validated range up to 25,000. If a saved or typed radius exceeds 500, the slider range visibly expands to include the true value (or an equally clear custom-distance state): never submit 500 while showing a larger value, never clamp a saved value, never change the user's distance; number field and slider always agree while moving or typing; the scale is control usability, not a travel limit; (3) first visit with no origin shows a neutral 'Enter a ZIP or city to search by distance' instead of the error-like "Origin '' accepted but not located" banner (`operator_ui/landing_fix.py`); (4) strengthen the conditional fresh-visit assertion in `tests/test_market_f60.py` (no `if ... else True`). Keep every F-142/F-143/F-145 behavior (Search Now last, numeric prices, FIXTURE-only staging sources, NOT CONNECTED states). No source activation, no database change, no new dependency. | F-145 staging-accepted (`3960e46`) | DONE â€” LIVE @ `bbc80ec` (owner-run combined release 2026-10-12 05:51Z; Agent 01 Claude-in-Chrome check on the live page 2026-10-12T06:03:14Z; receipt docs/receipts/2026-10-12-combined-release-live-verification.md). [prior status, audit: PARTIAL â€” STAGING_ACCEPTED @ `179bd62` (code `3d4025a`, golden `64dfdcc` reviewed token-by-token: only title + slider max changed; Agent 01 clean-checkout verification 2026-10-11T23:35:12Z: focused 37/0, lane 475/1 known f39 flake 4/4 alone] | 06 | Exact clean committed artifact (dirty=false, code_sha = tested commit). Focused tests: title text; slider max 500 by default; radius 750 saved/typed shows 750 on both controls and submits 750 (slider range expanded), 25000 accepted by the field; slider/field agreement both directions; neutral first-visit prompt and no error banner; strengthened assertion. Real Chrome desktop 1648x1000 and mobile 390x844 with screenshots reviewed by Agent 01: slider at 0, 60, 500; typed 97.9, 750, 25000; `tools/f143_live_check.py` updated for the new scale and passing; `tools/f145_source_shots.py` and `tools/f142_live_check.py` still passing. Agent 01 independently verifies the exact commit from a clean checkout; then ONE combined UI-only reload (contains F-145 + F-144) under the owner's authority; if Agent 01's run is denied by the permission classifier, the exact owner-run command is recorded, not bypassed. |
-| F-145 | **P0** | **B-12 IMPLEMENTABLE SUB-STEP (reuses B-12; NOT a second source task; owner priority 2026-10-11 17:02 CDT 'do not stop with another wiring spec'). ONE lane 06 worker implements the minimal Marketplace source seam from `docs/handoff/B12_LOCAL_SOURCE_WIRING_SPEC.md`:** (1) `operator_ui/market_search.py`: a source-agnostic card loader (`load_source(source, ...)`) returning the SAME card shape as `load_gsa` from lane 02's existing `EmailAlertAdapter` records (`mbos_discovery.adapters.email_alerts`, pinned install; read-only EML-dir reader, never IMAP here), with per-card source name, source link, price, location/distance and `fetched_at` freshness. (2) `operator_ui/market_routes.py`: dispatch on `q['source']` (gsa, govdeals or publicsurplus; `all` merges and de-dups via lane 02's Deduper if available, else lists per source) with the existing filters (price, radius, origin, states, keywords, categories, hide) applying to the parser-backed records exactly as to GSA. (3) `operator_ui/market_view.py`: per-source coverage/status line; honest NOT-CONNECTED state for any source without a real read; any parser-backed record from an `.eml` fixture directory is shown ONLY on an isolated-staging flag, labelled FIXTURE / not live, never as the owner's real deals and never as 'connected'; Craigslist, eBay and Facebook Marketplace stay NOT CONNECTED. (4) Existing GSA behavior and every F-142/F-143 control stay intact (Search Now last, radius slider, numeric price fields, no hidden Conway origin). No IMAP login, no network fetch, no secrets, no new dependency, no database change, no source-policy bypass. Files under 400 lines where practical. (5) Lane 06 `AGENT_STATUS.md` must also be corrected to current truth in the same push: F-142 LIVE_VERIFIED @ `8524689` (history preserved) and F-143 STAGING_ACCEPTED @ `315ddfa`. | F-143 verified (`315ddfa`) | DONE â€” LIVE @ `bbc80ec` (owner-run combined release 2026-10-12 05:51Z; Agent 01 Claude-in-Chrome check on the live page 2026-10-12T06:03:14Z; receipt docs/receipts/2026-10-12-combined-release-live-verification.md). [prior status, audit: PARTIAL â€” STAGING_ACCEPTED @ `3960e46` (code `37c5494`+`2136743`; Agent 01 clean-checkout verification 2026-10-11T23:00:07Z: focused 27/0, lane suite 468/1 with the known `test_resale_f39` load flake passing 3/3 alone, real Chrome F-145 22/] | 06 | Exact clean committed artifact (dirty=false, code_sha = tested commit). Offline parser-backed fixture tests (use lane 02's existing `.eml` fixtures; scrubbed): card-shape parity with GSA; per-source provenance and freshness fields; filters and source selection work on the parser-backed records; FIXTURE label present and 'connected' absent on fixture data; a source with no read stays NOT CONNECTED; GSA output unchanged (golden comparison). Real Chrome desktop 1648x1000 and mobile 390x844 on isolated staging with screenshots reviewed by Agent 01; `tools/f142_live_check.py` still passes; `tools/f143_live_check.py` still passes. LIVE acceptance is NOT part of this row: it stays in B-12 and needs a real accessible sourced listing (mailbox NEED). Agent 01 independently verifies the exact commit from a clean checkout; release only through `tools/reload_ui.sh <sha>` (a permission-classifier denial is reported as an exact owner NEED, not bypassed). Receipt with commit, tests, loaded revision, host observation, cost if known. |
-| F-61 | P1 | (06, serial after F-60; ARYA-20261010-1728 bounded follow-on) Source-backed auction labels: show current bid, next minimum bid and reserve Yes/No/Unknown only from fields present in the existing GSA adapter/cache. Inspect `mbos_discovery.gsa_live` and the cache first. Reserve Yes with no amount reads 'reserve amount undisclosed'; never derive a floor from retail price or next minimum bid. Parent observation (not a cache record, no price guarantee): GSA 379280 ~17:27Z reserve Yes, amount not shown, next bid $85. If fields are absent, name the exact data dependency and render honest unknown/undisclosed wording; no scraping, new providers, credentials, or fetch scope. Must not delay F-60 | F-60 | **DONE** @ e54e27a (lane06 755869a/e54e27a) (ARYA-20261010-1906 reconciliation; published source/status/receipts on origin/research/agent-06-communications; do NOT redispatch) | 06 | Tests for Yes/No/Unknown/undisclosed wording; dependency named if fields missing. **ARYA-20261010-1819 acceptance clarifications â€” CARRIED BY F-136 (ARYA-20261010-1822); F-61 is Done at lane06 755869a/e54e27a, do not reopen or duplicate; obligations below are executed/accepted under F-136 only:** (1) `auction_labels` highBidAmount+aucIncrement is an ESTIMATED next bid from cache: label it estimated, as-of the cached source timestamp, current live minimum unverified (stale cache already differs from live GSA379280; proxy/reserve rules may change the accepted minimum); never imply bid eligibility. (2) Labels currently only in `market_view.render_card` (list view): verify the primary gallery surface also shows current bid vs estimated next bid and reserve Yes/No/Unknown/amount undisclosed, no ungrounded claims; prove via the existing desktop/mobile staging screenshots, no separate capture loop. (3) Reject non-finite bid/increment values (no infinity display); unknown opening minimum stays honest when no current bid. Preserve F61 numeric-ID correction, state-filter scope, Save/strict filters, A57 repair. No live :8766 reload, new fetch, overage, bid/purchase. Report source changes/tests/screenshots separately from docs adoption |
-| A-57 | P1 | (ARYA-20261010-1808; CODE lane, NOT done by docs-only pickup) Pickup-merge regression guard: root cause of 9435d68 = stale-side merge took the remote side for READY_QUEUE.md, silently dropping newer F-60/F-61 rows and reverting F-60 to READY. Add to the pickup/merge tooling (`tools/inbox_pickup.py` or its merge helper) a queue-merge check that fails closed if the merge result (a) drops any task ID present in either parent, (b) moves a DONE row back to READY/other open status, or (c) loses dependencies/owner text, unless an explicit attributable cancel/reopen marker (task ID + actor + reason + message ID) is present. Tests: replay the concrete 9435d68 stale-side merge (parents f5a844a and the remote side) and assert rejection; a legitimate explicit reopen/cancel passes with attribution; F-60 stays DONE. No unrelated features, no new coordinator | none | DONE | 01 | Test numbers for the 9435d68 replay and the legitimate-update case; root-cause note |
-| A-58 | **P0** | **ADDED BY PICKUP (ARYA-20261010-1954, owner approval delegated to Arya; reconciles the 1951 packet, so stale PREPARED/unapproved wording is superseded and must not trigger a new approval loop; NOT executable by an inbox executor because it is a live restart):** Existing owning Agent 01 engineering session executes exactly one UI-only reload on :8766 to eda3eee6d303ab6ee1df419b66d54c831d7d8b1d (on origin/research/agent-06-communications) after preflight (live UI identity/ownership, no conflicting release, `tools/reload_ui.sh` blob 5689c7176b65b8586f8e2bf17c27d47b801ea675 = 7c0fbbb): `cd ~/business-os-worktrees/agent-01-coordinator && tools/reload_ui.sh eda3eee6d303ab6ee1df419b66d54c831d7d8b1d`; then `--verify-only 8766`, check SearchNow in filter card, state/distance mode with scope/chips, strict price/location, gallery/list estimated cached-next-bid/reserve labels; live desktop/mobile screenshots with time/URL/viewport/filters/cache provenance; report stop/start times/PIDs, tree hash, backup path, verify or rollback. UI-only; no DB, workers, dispatcher, pickup, watchdog, other projects, Linode, fetch, spend or installs. Michael enters his own PIN for any live Save. Identity = disk hash + restart + semantic, not a process-returned SHA. Known preflight item: the agent-01-coordinator worktree was behind origin by 33 commits with an uncommitted tests/unit/test_coordinator_watch.py (per 1951 receipt); settle without discarding it | A-54, A-55, F-138 | DONE | 01 | Receipt with execution or rollback result, hashes, screenshots, verify-only output |
-| F-136 | P1 | (06, serial AFTER F-61; ARYA-20261010-1817, ID corrected from unparseable F-61S by ARYA-20261010-1818; CODE lane, NOT done by pickup; F-136 is a queue-row ID) Owner-requested selectable states alongside distance, matching Michael's reviewed GSA reference: compact Location panel with explicit By State / By Distance modes, searchable state list, multi-select checkboxes, removable selected-state chips. Keep Conway / Faulkner-Pulaski local defaults and existing radius behaviour; no invented county precision. Mode semantics visible; selecting states must not silently bypass an active radius (explicit switch showing applied scope, or labelled intersection). Unknown/unresolved location fails a strict active location filter, appears only under the existing explicit unknown opt-in, never counts as local. Persist states + mode through the approved saved-filter path (save/reopen/restart); preserve price, category, condition, any-terms, row order, Save/PIN boundary and the F-60 Search Now in the filter card. Current adapter/cache fields only; no new provider, scraping or fetch; unsupported state data stays unknown. Tests: mode switch, multi-state, chip removal, search, invalid/unknown state, strict conjunction with price + radius, empty selection, saved roundtrip. Desktop + mobile screenshots on a clean committed staging artifact (URL/viewport/filters/UTC time/cache/store). Isolated staging only: NO live :8766 reload (A-56 one-time approval spent). No legal-eligibility claim. Preserve the active F-61 worker; no new parallel worker/coordinator | F-61 | **DONE** @ 48d27b9 (ARYA-20261010-1906 reconciliation; published source/status/receipts on origin/research/agent-06-communications; do NOT redispatch) | 06 | Code, tests and staging evidence reported separately with committed SHA and test numbers **Carried acceptance obligations from F-61 (ARYA-20261010-1819/-1822; same row, no new worker, no new feature):** (1) cache next-bid (`auction_labels` highBidAmount+aucIncrement) is ESTIMATED, labelled estimated, as-of the cached source timestamp, live minimum unverified (proxy/reserve rules may change it); never imply bid eligibility. (2) Gallery surface (not only `market_view.render_card`) shows current bid vs estimated next bid and reserve Yes/No/Unknown/amount undisclosed, no ungrounded claims, proven in the already-required desktop/mobile staging screenshots (no separate capture loop). (3) Reject non-finite bid/increment (no infinity display); unknown opening minimum stays honest when no current bid. Add tests for each; keep F-61 dependency and all owner boundaries; no live :8766 reload, fetch, overage, bid/purchase |
-| F-137 | P1 | (06, CONTINUATION of F-136 acceptance gaps; ARYA-20261010-1839; CODE lane, NOT done by pickup; new ID because foreman excludes lane-06 Done IDs F-136 @ 48d27b9 / F-61 @ e54e27a; do NOT reimplement delivered state feature, no parallel worker, no new coordinator) Close ONLY these gaps on isolated staging: (1) `market_search.auction_labels`: bid+increment shown as ESTIMATED next bid from cache, with as-of cached timestamp and 'live minimum unverified'; never as the minimum. (2) Same reserve Yes/No/Unknown/undisclosed + current-vs-estimated-next-bid info compactly on the owner's gallery surface, not just `market_view.render_card` list. (3) `_amt` rejects non-finite (inf/nan) bid, increment and sum; unknown opening minimum retained when no current bid. (4) Focused tests + final desktop/mobile images of corrected labels and the existing state panel; reuse unaffected tests/evidence. Evidence precision: `tools/f136_state_shots.py` captures use scrollIntoView, so relabel them as scrolled-viewport evidence or recapture at scrollY=0 and record scroll position (unscrolled AR/TX state shot showing mobile Search Now stays valid). Persistence: do a REAL browser Save click, reopen and app restart for states/mode/also-radius on the same final isolated artifact with visible selected controls/results; the earlier HTTP-form + recreated-app test must not be called a browser Save/restart. Isolated test credentials only, never read live secrets. No live :8766 reload, new fetch, overage, bid/purchase | F-136 | **DONE** @ d537b27 (ARYA-20261010-1906 reconciliation; published source/status/receipts on origin/research/agent-06-communications; do NOT redispatch) | 06 | Committed SHA; focused test numbers; separate sections for accepted state behavior, corrected labels, baseline test failures, visual proof, owner live gate; verify foreman lists F-137 as eligible for lane 06 and that exactly one worker starts |
-| F-138 | P1 | (06 or serial acceptance route, ARYA-20261010-1902; EVIDENCE-ONLY, NOT done by pickup; do NOT reimplement F-137, no parallel worker, no new coordinator) Final source-to-evidence binding: `docs/receipts/f137-screenshots/f137-evidence.json` on origin/research/agent-06-communications records code_sha 1182e8a and dirty:true, so the browser Save/reopen/restart and captures are pre-commit modified-worktree evidence. Run the EXISTING `tools/f137_browser.py` once on a CLEAN checkout of d537b27/eda3eee (or later with unchanged UI/tests/tools), isolated staging only (stub store, copy of GSA cache, loopback, test PIN). Record actual code SHA with dirty:false, UTC capture time, URL/viewport, cache sha256/as-of/store, scrollY, real process restart PIDs. Same focused tests, no full-suite repeat. If code or script differs, disclose rather than relabel the old evidence. No live :8766 reload, fetch, billing or access change | F-137 | **DONE** @ 22bb3ab (evidence; lane06 receipts docs/receipts/2026-10-10-f138-evidence-binding.md) (ARYA-20261010-1906 reconciliation; published source/status/receipts on origin/research/agent-06-communications; do NOT redispatch) | 06 | Evidence JSON with dirty:false and the exact SHA; focused test numbers; images; verdict gating a separate owner live-approval request |
-| A-59 | **P1** | **ADDED BY PICKUP (ARYA-20261010-2100)** (CODE lane, existing 01 engineering session; A-57 acceptance correction, no new worker). (1) `tools/pickup_git.py:queue_problems` returns [] when up or mine is empty: distinguish absent initial baseline from failed git-show or deleted established queue; refuse + retain upstream; tests: existing queue -> file removed/empty, and read failure, must not publish. (2) `tools/queue_guard.py` only flags deps/agent becoming EMPTY: also catch dropping one of several deps and owner replaced by another nonempty value vs parents, unless an attributable authorized edit; tolerate harmless formatting; tests for partial-dep removal and owner replacement. (3) Restore full lane06 Done history (eda3eee + F138, keep newer entries, no wholesale overwrite) via the owning authorized route; protect status writers from replacing full history with latest task only (22bb3ab regression). (4) Keep marker plumbing unconnected; no auto-authorization from marker text. Keep F60/F61/F136/F137/F138 DONE; do not rerun A-58; A-50 is separate. Report code / test / runtime adoption separately | A-57 | PARTIAL | 01 engineering | Focused regression tests pass with numbers; 9435d68 replay still green; no claim of A-57 accepted until 1-3 done |
-| A-60 | P1 | **ADDED BY PICKUP (ARYA-20261010-2101)** (CODE lane, existing 01 engineering session, serial AFTER A-59 and A-50; NOT done by pickup; no new worker/coordinator; owner request "dismiss unwanted ones, replace with other potentials"). Dismiss by stable listingID: (1) persists across reload/restart/navigation on checked AND unchecked result sections, independent of the ranking/suggestion toggle (today `market_prefs.act` stores IDs but rank hides only when suggestions enabled and `market_routes` applies rank only to checked results); other prefs intact; (2) per-item Undo plus a hidden/dismissed list, recover one listing without resetting saves/likes, filters and source provenance preserved; (3) after dismiss show remaining REAL eligible cached listings still respecting strict price/location/category/condition/exclusions; never refill with out-of-filter, unknown-as-known, fictional or duplicate listings; if exhausted say so honestly, no implied new fetch or guaranteed replacement; (4) focused tests (toggle, both sections, restart, individual undo, strict-filter invariant, remaining-inventory, exhausted state) plus desktop/mobile screenshots and real interaction evidence on a committed isolated staging artifact. Source/staging first; release only via the existing bounded release review after acceptance (do not repeat A-58 unreviewed). No external bids/purchases, GSA sign-in/sync, new source/cachefetch, spend or credentials **AMENDED BY PICKUP (ARYA-20261010-2104; same item, no duplicate)**: (5) distinct X / Hide this listing control bottom-right of card, accessible name + keyboard operable; durable stable-ID hide across restart/filters/ranking toggle/checked+unchecked; exact-listing hide MUST NOT train category/title-term/similarity/ranking weights (add a test that X leaves all learning weights unchanged); saved/bid-watch records preserved (hide affects discovery only); (6) keep explicit Not interested / More like this / Less like this as separate learning controls with honest effect labels; reconcile current Not interested (today exact-ID dismiss) so it is not conflated with X; (7) per-item Undo/hidden list restores only that listing without resetting learned prefs or other saves; (8) strict-filter real-inventory refill/exhaustion acceptance unchanged. Photo context only: GSA photos wanted; no account integration, authenticated scraping or credential handling; keep verified original-listing links as fallback and report the actual supported access dependency. **DEPENDENCY RECONCILED BY PICKUP (ARYA-20261010-2203; docs-only):** A-59 item (3) (lane06 Done-history restoration) is documentation and NOT a technical prerequisite of dismiss; A-59 items (1)-(2) are code guards unrelated to dismiss. A-60 may proceed through the serial owner lane without waiting on the history write. A-59 stays PARTIAL, the lane06 write denial stays intact, and history is NOT claimed restored. **Dependency note (ARYA-20261010-2208):** the only parsed dependency is A-50 (DONE). A-59 item 3 (the lane 06 Done-history restore) is NON-blocking for A-60; A-59 stays PARTIAL with its lane 06 write denial intact. NOTE for the implementer: A-60 changes lane 06 `operator_ui`, whose branch this session may not write to without authorization. **BLOCKED 2026-10-10 (Agent 01): the lane 06 worker launch `tools/worker.py A-60 --lane 06 --kind implement --risk medium --max-turns 80 --timeout 3500` was denied by the auto-mode classifier (pushes lane 06 branch); preflight passed (eligible, lane 06 worktree clean at 1fa2a72, dry run OK). To unblock: owner/Arya starts that command, or allows this session to, or restarts the dispatcher with this row naming lane 06; then set READY.** **UNBLOCKED (Michael approved the worker launch via /permissions): launching the lane 06 worker now.** **DONE: lane 06 worker delivered afe269d/a9be4e4/4a818b9; released to :8766 at 2026-10-11T01:40:58Z (receipt docs/receipts/2026-10-11-live-8766-reload-a60.md); hide/undo behaviour on the live preference file not exercised (owner data).** | A-50 | DONE | 01 engineering | Tests pass with numbers; screenshots from committed staging artifact; no filter-violating or fictional refill; ACK/queue/actualSTART reported separately |
-| A-61 | P2 | **ADDED BY PICKUP (ARYA-20261010-2101)** (serial AFTER A-60 acceptance; do NOT combine with A-60). Owner-reported bid/watch tracking, step 1 = INSPECTION ONLY: inspect existing ledgers/models/UI and reuse an existing record path (no parallel datastore); return the smallest supported scope and dependencies. Rules: a local "I bid on this" is explicitly owner-reported, separate from live GSA account sync, auction status or bid placement; tracked listings stay accessible when discovery filters change and are visually separate from filtered discovery; never infer a bid from Save alone; no private owner bid amounts/ceilings/budgets in GitHub; no external bids, GSA sign-in/sync, new source, paid usage or credentials **Pickup 2154 addition (requirements adoption only; no new item/worker; reservation accounting NOT implemented):** the owner ledger must follow canonical criteria `DEAL_SNIFFER_START_HERE.md` 13d: active owner-reported bid reserves max all-in cost until confirmed released/withdrawn/won-and-paid (stale unverified status is not released funds); cash, reserved bid capacity, committed cost, repair allowance and bill buffers kept separate with no double use of cash; show owner-reported vs verified, as-of time, uncertainty, auction/payment/pickup timing, waiting time and alternatives in the proposal; private values only via a supported owner-local path (report it at implementation); no authority to debit, bid, buy, contact or connect accounts. | A-60 | PARTIAL (2026-10-12: implementation now owner-directed as F-147 'My bids' window + B-27 own-bid e-mail detection; this row's rules carry over) | 01 engineering | Written scope/dependency note on repo truth naming the reused record path; **ENGINEERING UPDATE (Agent 01, 2026-10-10, ARYA-2118 priority): owner-local full-case store IMPLEMENTED + tested with synthetic data (src/mbos/decision_cases.py, docs/operations/DECISION_CASES.md); needs NOTHING from A-60 (A-60 is UI dismiss; the store is independent). NOT yet done: the real private case is NOT imported (Michael runs the import on this machine), and application on a similar candidate is demonstrated only on synthetic data. Receipt docs/receipts/2026-10-10-a61-decision-cases.md. Bid/watch inspection (original step 1) still to report.** **Pickup 2116 addition:** the inspection result must also report adoption of canonical criteria `DEAL_SNIFFER_START_HERE.md` 13c (decision records with reasons/evidence/outcomes, owner inspect/correct/reset, single-listing pass != category dislike, learning never overrides gates) and the smallest existing-model fit/dependency; criteria written is NOT capability implemented; implementation is a separate row after owner/Arya review; **Pickup 2117 addition:** also report the exact existing protected write/import/readback route able to hold a complete private listing-linked assessment case (13c full-case + proposal-first), or the minimal missing capability. Known read-only hints: /item attest/scope/quote notes are capped at 300 chars with limited allowed keys; cached Marketplace records are not automatically spineItems; resale Book is in-memory. Do NOT misuse purchase/acquisition, narrow attestation or verification fields; no "learned" claim before authorised local write + readback proof; no case values in repo/fixtures **Pickup 2118 addition (owner wants actual case learning, not docs-only; merged with 2116/2117; no new task/worker):** after A-60, A-61 priority is durable owner-local full-case import/retrieval/application; Agent 01 owns serial order. Acceptance: (1) name the supported protected owner-local import route; parent keeps the private case, never request it via public GitHub; (2) after authorized secure transfer: write, read back by stable listingID, demonstrate retrieval+use on a similar candidate (cite source case, owner estimates distinct from facts, uncertainty shown, proposal to owner first); (3) owner correction/edit and reset/disable inspectable and tested via existing audit/history; per-item pass/hide never becomes category dislike; (4) report separately: capability implemented/tested vs actual case imported vs demonstrated application; no training/learning claim from a doc/queue row; (5) if no permitted private write path exists, name exact prerequisite and ship a value-free import schema/template; no fabricated attestation/acquisition/PIN. Out of scope: bid/purchase/contact, account integration, external financial disclosure, live UI change, source fetch, billing/access expansion. |
-| A-62 | P2 | **ADDED BY PICKUP (ARYA-20261010-2109)** (CODE lane, existing 01 engineering session, serial AFTER A-60; follow-on of the source-labels/photos work, NOT a new worker, provider or cache refresh). Smallest scope: in the listing card, when highBidAmount is null ("No bids yet"), show "Opening/minimum bid unknown â€” check original listing" plus the verified original-listing link. Show a numeric minimum ONLY if an explicit source-provided opening/minimum field exists in already-permitted data, with provenance + asof. Keep currentbid, estimated nextbid, minimum allowed bid and reserve (boolean flag, never a dollar amount) as distinct labelled fields. Never substitute 0, aucIncrement, retail estimate, reserve flag or a computed guess; no claim the auction accepts an amount. Valuation text distinguishes gross scrap/component estimate from net yard pickup offer; pickup, deductions, towing, disposal, fees, title, condition, recoverable weight stay explicit UNKNOWN. No yard contact, bid, purchase, or private owner amounts in GitHub **DELIVERED by lane 06 (cc16e62, status 0cb8459); Agent 01 verified: a62 4 tests pass in the lane 06 worktree, diff reviewed (unknown label + original link when highBidAmount is null; numeric minimum only from an explicit positive source field; never 0/aucIncrement/reserve/guess). Source/staging only: NOT yet released to :8766; the combined release target is lane 06 head 0cb8459 (F-139+F-140+A-62), pending the release permission.** **RELEASED to :8766 2026-10-11T04:21:13Z as lane 06 head 0cb8459 (receipt docs/receipts/2026-10-11-live-8766-reload-f139-f140-a62.md, no rollback).** | A-60 | DONE | 01 engineering | Test: no-bid fixture (highBidAmount null, aucIncrement 8, reserve true) renders the unknown label + link and no number; a fixture with an explicit sourced minimum renders it with provenance |
-| A-63 | **P1** | **ADDED BY PICKUP (ARYA-20261010-2125)** (CODE/ops lane, existing 01 engineering session at a safe boundary; owner said "set up a clean route"; SAME delivery-gap repair, NOT a new coordinator/worker/feature). Within existing access only (michaelos account, existing watcher/dispatcher, supported coordinator registration/launch): (1) explain + repair the pickup-vs-interactive-session completion gap from source, or name the exact unavailable prerequisite; keep instruction-ID dedup and ACK -> engineering START -> result/receipt states; (2) write a protocol for Arya to send ONE harmless bounded engineering proof via the GitHub inbox, published by a distinct sender, showing fetch, delivery, ACK, real engineering execution and receipt with no manual paste (a docs-only pickup completion does not count); (3) prove duplicate delivery does not execute twice and recovery across restart/re-entry (isolated test if live restart is outside authority; state live part UNPROVEN); (4) prove completion advances the next eligible existing task once, honoring deps and Done history. Out of scope: new persistent access, credentials, installs, quota bypass, paid usage, unrelated restarts, killing active work. A-59 stays PARTIAL: lane06 Done-history restore was denied; needs owner/lane-06 authorization (or owner decision) to apply the prepared restore, do not claim it restored. Keep A-59/A-61 work and A-60/A-62 order. **ENGINEERING START 2026-10-10T21:31Z (receipt docs/receipts/engineering/ARYA-20261010-2127-a63-dependency-reconcile.md, interactive session pid 2937731): code+tests done (tools/next_work.py, tools/engineering_session.py, pickup ENGINEERING_PROOF type), docs/operations/ENGINEERING_DELIVERY.md; LIVE PROOF DONE: ARYA-20261010-2133-engineering-proof delivered by the session Monitor, executed by session pid 2937731 (receipt docs/receipts/engineering/ARYA-20261010-2133-engineering-proof.md, 757df3c). Limits: session-owned 120s polling, 30-minute Monitor re-arm, no delivery after logout; watchdog still misreports the session (unchanged service).** **RECONCILED (ARYA-20261010-2127):** A-59 is NOT a technical prerequisite of A-63; the denied lane06 Done-history write stays PARTIAL/blocked on owner/lane-06 authorization and A-59 is NOT marked DONE, but it does not gate this independent delivery repair. Carry-forward: ARYA-20261010-2125 clean-route acceptance is part of this same A-63; report actual engineering adoption/START and implementation/proof, or the exact session-delivery blocker (a docs-only ACK does not prove the engineering session received it). Do not bypass the lane06 write restriction | none (A-59 history-write blocker is non-gating) | DONE | 01 engineering | Focused tests with numbers; isolated duplicate/recovery test; live restart marked UNPROVEN unless run; no private owner data in GitHub |
-| A-64 | P1 | **ADDED BY PICKUP (ARYA-20261010-2129); ENGINEERING: corrections 1-3 implemented + tested (synthetic) in the A-64 commit, receipt docs/receipts/2026-10-10-a64-decision-case-corrections.md; real case still NOT imported** (CODE lane, existing 01 engineering session; same A-61 decision-case store, correction of 83098fc; NOT a new worker; INDEPENDENT of A-63, creates no dependency for it). Three fixes, each with a focused regression using synthetic data only: (1) propose() must retain every relevant evidence entry with its provenance (verified/unverified/owner_estimate), presenting owner_estimate entries explicitly as estimates not facts, without requiring duplication into owner_estimates; test asserts text and owner_estimate label survive retrieval. (2) effective()/show/propose must verify the hash chain and refuse learned application and readback-as-valid on corrupted history, returning an explicit integrity failure; tests for tampered reason, tampered evidence and malformed records confirm no proposal is generated; keep an inspectable diagnostic recovery path, never silently discard history. (3) identity = source + stable listing id through read/write/correct/reset/outcome/propose; reject ambiguous bare ids (safe compat only if unambiguous); regression imports the same id from two sources and proves read/correct/reset/proposal isolation; duplicate ids within one import batch rejected before any write. Also return updated value-free import/schema instructions. Capability-tested, actual-case import/readback, and application on a real similar candidate stay SEPARATE claims; the parent holds the private case, so no private values in the repo and no claim of learned before secure owner-local write/readback/application proof. Actual private-case import WAITS for A-64. Pickup did NOT do any of this. | none (A-63 unaffected) | PARTIAL | 01 engineering | Focused regression results with numbers; committed correction; value-free import/schema doc; no private case content in GitHub |
-| A-65 | P1 | **ADDED BY PICKUP (ARYA-20261010-2142); ENGINEERING DONE: receipt docs/receipts/engineering/ARYA-20261010-2142-a63-sustained-progression.md** (CODE lane, existing 01 engineering session, SAME A-63 sustained-progression correction; NOT a new worker/coordinator; NOT done by pickup, docs-only). Source counterexample from the instruction (16c61e3 tools/next_work.py): new_items emits READY A-64 and the cycle writes seen.rows before claim/complete, so a missed notification is never re-sent; inbox IDs are likewise marked seen before handling; engineering_session.finish reports next but does not execute or claim it. Required: (1) separate observed/notified from claimed/STARTED/DONE; bounded-interval retry of an unclaimed still-eligible item or retry on completion, dedup via existing engineering receipt state, never rerun DONE or interrupt an active claim; (2) completion returns control to the registered engineering-session loop to run the next eligible approved task once, or states why not; (3) synthetic regressions: first notification unhandled -> second bounded retry; active claim suppresses duplicate; DONE suppresses retries; completing one item makes next eligible actionable once; re-entry recovers pending unclaimed work; (4) keep 120 s polling, session-open lifetime, 30-min Monitor re-arm limits explicit; record real expiry/re-arm evidence when it occurs; no persistence-after-logout or sub-minute claim. Keep active A-64 work; A-60 stays blocked on A-59 history (never fabricate DONE). No new access, credentials, installs, billing, restarts; no repeat of the 2133 proof job. | A-63 (accepted 2133 proof, A-53 dd5ca2b) | DONE | 01 engineering | Code + focused synthetic regression results with numbers; receipt; actual current task transition |
-| A-66 | P1 | **ADDED BY PICKUP (ARYA-20261011-0137)** (OPS release, existing 01 interactive engineering session ONLY; NOT done by pickup). Owner-approved (2026-10-11T01:36:46Z) UI-only port 8766 publication of reviewed A-60 X/Hide: staging artifact a9be4e4e96c10cffe83db22d8eaf6fcc8d24412d, feature source afe269dac14df84cf13f60be726b2c14ef6ecb68, receipt/screens successor 4a818b97b19f8a9e5d562a21da99d66766d09395 (lane06). Before acting: fetch, check whether already claimed/executed, reconcile instead of relaunch. Use the A58 release/backup/rollback procedure with safety 7c0fbbb; verify artifact identity and compatibility; capture recoverable backup BEFORE stop; abort if backup/export/preflight fails. Scope UI8766 only: no DB migration, cache/provider refresh, worker/dispatcher restart, account/security change, spend, bid/purchase; preserve owner prefs and hidden/saved state; never read or publish the live PIN; isolated copies for any destructive preference check. Report old/new runtime identity, backup/rollback ref, desktop/mobile screenshots, strict-filter and hidden-state compatibility, cache as-of, Save/PIN limits. Lifts the stop pause for THIS release only. **RECONCILED (Agent 01): this row IS the release I executed for ARYA-20261011-0137: released 2026-10-11T01:40:58Z, live artifact a9be4e4 (tree 624a6b74...), backup var/lanes/agent-06.prev-20261011T014045Z, no rollback; receipt docs/receipts/2026-10-11-live-8766-reload-a60.md. Not relaunched.** | A-60 (staged, reviewed) | DONE | 01 engineering | Live artifact SHA matches a9be4e4; HTTP/functional readiness; X/Hide on actual screenshots; rollback ref recorded |
-| A-67 | P1 | **ADDED BY PICKUP (ARYA-20261011-0150-existing-local-import)** (existing 01 interactive engineering session ONLY; NOT done by pickup; SAME A-61/A-64 decision-case import, not a new feature or worker). Owner-authorized import of the already-downloaded owner-provided decision-case JSON via the supported local importer (`src/mbos/decision_cases.py`, `docs/operations/DECISION_CASES.md`). Before acting: fetch, check claims and private store state, reconcile instead of duplicating. Bounded candidate file-name/schema check in this account's home/Downloads only (no broad private search); ambiguous -> stop; absent -> report INPUT_NOT_FOUND (never create an empty replacement or ask for retyping). Validate against the existing schema, import idempotently without overwriting corrections/history, verify hash chain, read back locally and compare with the input, then demonstrate local proposal retrieval on an appropriate similar candidate from existing permitted data (provenance kept, owner-review-first, no model-training claim). Already imported -> verify the existing record. Public receipt: success/failure, counts, code revision, evidence hashes ONLY; no filename, listing ID, amounts, rationale, signed URL or content. Report import/readback/chain separately from proposal demonstration. Out of scope: credentials/PIN, bids/purchases/contact, public data refresh (paused), releases, access expansion; respect access denials. **RECONCILED (Agent 01): executed. The owner transferred the case file; import, readback, hash chain and a local proposal demonstration succeeded (counts and hashes only): docs/receipts/engineering/ARYA-20261011-0150-existing-local-import.md, 36d6eab.** | A-64 (corrections done) | DONE | 01 engineering | Counts + code revision + evidence hashes in a privacy-safe receipt; separate verdicts for import/readback/chain vs proposal demo |
-| F-139 | **P0** | **ADDED BY 01 (owner, 2026-10-11: "make the system use what I gave it"; CODE lane, ONE lane 06 worker, no new coordinator):** show the owner's imported decision cases on /market, READ-ONLY and LOCAL. In `operator_ui`, for each checked result card call `mbos.decision_cases.propose({listing_id, source:'gsa', title, evidence:[]})` (owner-local store `var/private/decision_cases/`, already imported, hash-verified; if the store is absent, empty, disabled or `INTEGRITY_FAILURE`, show nothing or one honest line and never crash). When there is a match, add a small collapsed block on that card: "Your earlier decision on a similar listing (proposal, for your review)" with the precedent decision, the reason summary, which facts were verified vs YOUR ESTIMATES (explicitly labelled estimates, never facts), uncertainty/missing evidence then, which evidence this listing lacks, and the shared words; state it is about that ONE listing, not a category preference. Hard rules: it NEVER changes filters, ranking, hiding, saves or the learned prefs; no bid/purchase/contact amounts or suggestion of what to bid; no private content in GitHub, tests, fixtures or receipts (tests use SYNTHETIC cases via MBOS_DECISION_CASES_DIR; screenshots on isolated staging use a synthetic store only); no cache fetch; keep files under 400 lines. Tests: card with a match shows the block with estimates labelled; no store, disabled store and tampered store show nothing/one honest line; filters and card counts unchanged with and without the store; mobile and desktop screenshots from a committed isolated staging artifact. Source/staging only; release only via the existing bounded release review **DELIVERED by lane 06 (128f6c8/8ba956c; 8 tests); Agent 01 verification: privacy scan of the diff clean, synthetic-store staging shows the block with estimates labelled, filters and card counts unchanged. BUG found by Agent 01 (fixed in F-140): the store path defaults to `<operator_ui parent>/var/private/decision_cases`, which on the live layout (`var/lanes/agent-06/`) is NOT the real store, so the block would show nothing live.** **RELEASED to :8766 2026-10-11T04:21:13Z as lane 06 head 0cb8459 (receipt docs/receipts/2026-10-11-live-8766-reload-f139-f140-a62.md, no rollback).** | A-67 | DONE | 06 | Focused tests with numbers; synthetic-store screenshots; isolation proof; no live change |
-| F-140 | **P0** | **ADDED BY 01 (bug in F-139, found in staging with the real store):** `operator_ui/precedent_view.py` `REPO_STORE = Path(__file__).resolve().parents[1] / 'var' / 'private' / 'decision_cases'` points inside `var/lanes/agent-06/` when the UI runs live, so the real owner-local store is never read. Fix: drop that path guess; use `MBOS_DECISION_CASES_DIR` when set, otherwise let `mbos.decision_cases` compute its own default (the installed mbos is the coordinator's, whose default is the real store `<coordinator>/var/private/decision_cases`; verify which mbos the live UI imports and make the default robust, for example also accept `MBOS_COORDINATOR_ROOT` if needed). Tests (SYNTHETIC stores only): the block appears when the default store is found via env and via the default path layout `<root>/var/lanes/agent-06/operator_ui`; absent store = nothing. No private content anywhere in GitHub; no live change; files under 400 lines **RELEASED to :8766 2026-10-11T04:21:13Z as lane 06 head 0cb8459 (receipt docs/receipts/2026-10-11-live-8766-reload-f139-f140-a62.md, no rollback).** | F-139 | **DONE @ 29fbf0e** (reconciled from lane 06 AGENT_STATUS + receipt) | 06 | Focused tests with numbers; staging proof with a synthetic store in the live-style directory layout |
+H›İ™HÛÛ\][ÛˆY˜[˜Ù\ÈH™^[YÚX›H^\İ[™È\ÚÈÛ˜ÙKÛ›Üš[™È\È[™Û™H\İÜKˆİ]ÙˆØÛÜNˆ™]È\œÚ\İ[XØÙ\ÜËÜ™Y[X[Ë[œİ[Ë][İH\\ÜËZY\ØYÙK[œ™[]Y™\İ\ËÚ[[™ÈXİ]™HÛÜšËˆKMNHİ^\ÈT•PSˆ[™LˆÛ™KZ\İÜH™\İÜ™HØ\È[šYYÈ™YYÈİÛ™\‹Û[™KLˆ]]Üš^˜][Ûˆ
+ÜˆİÛ™\ˆXÚ\Ú[ÛŠHÈ\HH™\\™Y™\İÜ™KÈ›İÛZ[H]™\İÜ™YˆÙY\KMNKĞKMŒHÛÜšÈ[™KMŒĞKMŒˆÜ™\‹ˆ
+Š‘S‘ÒS‘QT’S‘ÈÕT•Œ‹LLLLŒNŒÌVˆ
+™XÙZ\ØÜËÜ™XÙZ\ËÙ[™Ú[™Y\š[™ËĞT–PKLŒŒLLLŒLËXMŒËY\[™[˜ŞK\™XÛÛ˜Ú[K›Y[\˜Xİ]™HÙ\ÜÚ[ÛˆYLÍÍÌÌJNˆÛÙJİ\İÈÛ™H
+ÛÛËÛ™^İÛÜšËœKÛÛËÙ[™Ú[™Y\š[™×ÜÙ\ÜÚ[Û‹œKXÚİ\S‘ÒS‘QT’S‘×Ô“ÓÑˆ\JKØÜËÛÜ\˜][ÛœËÑS‘ÒS‘QT’S‘×ÑSU‘T–K›YÈU‘H“ÓÑˆÓ‘NˆT–PKLŒŒLLLŒLÌËY[™Ú[™Y\š[™Ë\›ÛÙˆ[]™\™YHHÙ\ÜÚ[Ûˆ[Ûš]Ü‹^Xİ]YHÙ\ÜÚ[ÛˆYLÍÍÌÌH
+™XÙZ\ØÜËÜ™XÙZ\ËÙ[™Ú[™Y\š[™ËĞT–PKLŒŒLLLŒLÌËY[™Ú[™Y\š[™Ë\›ÛÙ‹›YÍMÙŒØÊKˆ[Z]ÎˆÙ\ÜÚ[Û‹[İÛ™YLŒÈÛ[™ËÌ[Z[]H[Ûš]Üˆ™KX\›K›È[]™\HY\ˆÙÛİ]ÈØ]ÚÙÈİ[Z\Ü™\ÜÈHÙ\ÜÚ[Ûˆ
+[˜Ú[™ÙYÙ\šXÙJKŠŠˆ
+Š”‘PÓÓÒSQ
+T–PKLŒŒLLLŒLÊNŠŠˆKMNH\È“ÕHXÚšXØ[™\™\]Z\Ú]HÙˆKMŒÎÈH[šYY[™LˆÛ™KZ\İÜHÜš]Hİ^\ÈT•PSØ›ØÚÙYÛˆİÛ™\‹Û[™KLˆ]]Üš^˜][Ûˆ[™KMNH\È“ÕX\šÙYÓ‘K]]Ù\È›İØ]H\È[™\[™[[]™\H™\Z\‹ˆØ\œKY›ÜØ\™ˆT–PKLŒŒLLLŒLHÛX[‹\›İ]HXØÙ\[˜ÙH\È\Ùˆ\ÈØ[YHKMŒÎÈ™\ÜXİX[[™Ú[™Y\š[™ÈYÜ[Û‹ÔÕT•[™[\[Y[][Û‹Ü›ÛÙ‹ÜˆH^XİÙ\ÜÚ[Û‹Y[]™\H›ØÚÙ\ˆ
+HØÜË[Û›HPÒÈÙ\È›İ›İ™HH[™Ú[™Y\š[™ÈÙ\ÜÚ[Ûˆ™XÙZ]™Y]
+KˆÈ›İ\\ÜÈH[™LˆÜš]H™\İšXİ[Ûˆ›Û™H
+KMNH\İÜK]Üš]H›ØÚÙ\ˆ\È›Û‹YØ][™ÊHÓ‘HH[™Ú[™Y\š[™È›Øİ\ÙY\İÈÚ][X™\œÎÈ\ÛÛ]Y\XØ]KÜ™XÛİ™\H\İÈ]™H™\İ\X\šÙYS”“Õ‘Sˆ[›\ÜÈ[È›Èš]˜]HİÛ™\ˆ]H[ˆÚ]XˆŸKMH
+ŠQQ–HPÒÕT
+T–PKLŒŒLLLŒLJNÈS‘ÒS‘QT’S‘ÎˆÛÜœ™Xİ[ÛœÈKLÈ[\[Y[Y
+È\İY
+Ş[]XÊH[ˆHKMÛÛ[Z]™XÙZ\ØÜËÜ™XÙZ\ËÌŒ‹LLLLXMYXÚ\Ú[Û‹XØ\ÙKXÛÜœ™Xİ[ÛœË›YÈ™X[Ø\ÙHİ[“Õ[\ÜY
+Šˆ
+ÓÑH[™K^\İ[™ÈH[™Ú[™Y\š[™ÈÙ\ÜÚ[ÛÈØ[YHKMŒHXÚ\Ú[Û‹XØ\ÙHİÜ™KÛÜœ™Xİ[ÛˆÙˆÌN˜ÎÈ“ÕH™]ÈÛÜšÙ\ÈS‘TS‘S•ÙˆKMŒËÜ™X]\È›È\[™[˜ŞH›Üˆ]
+Kˆ™YHš^\ËXXÚÚ]H›Øİ\ÙY™YÜ™\ÜÚ[Ûˆ\Ú[™ÈŞ[]XÈ]HÛ›Nˆ
+JH›ÜÜÙJ
+H]\İ™]Z[ˆ]™\H™[]˜[]šY[˜ÙH[HÚ]]È›İ™[˜[˜ÙH
+™\šYšYYİ[™\šYšYYÛİÛ™\—Ù\İ[X]JK™\Ù[[™ÈİÛ™\—Ù\İ[X]H[šY\È^XÚ]H\È\İ[X]\È›İ˜XİËÚ]İ]™\]Z\š[™È\XØ][Ûˆ[ÈİÛ™\—Ù\İ[X]\ÎÈ\İ\ÜÙ\È^[™İÛ™\—Ù\İ[X]HX™[İ\š]™H™]šY]˜[ˆ
+ŠHY™™Xİ]™J
+KÜÚİËÜ›ÜÜÙH]\İ™\šYHH\ÚÚZ[ˆ[™™Y\ÙHX\›™Y\XØ][Ûˆ[™™XY˜XÚËX\Ë]˜[YÛˆÛÜœ\Y\İÜK™]\›š[™È[ˆ^XÚ][YÜš]H˜Z[\™NÈ\İÈ›Üˆ[\\™Y™X\ÛÛ‹[\\™Y]šY[˜ÙH[™X[›Ü›YY™XÛÜ™ÈÛÛ™š\›H›È›ÜÜØ[\ÈÙ[™\˜]YÈÙY\[ˆ[œÜXİX›HXYÛ›ÜİXÈ™XÛİ™\H]™]™\ˆÚ[[H\ØØ\™\İÜKˆ
+ÊHY[]HHÛİ\˜ÙH
+ÈİX›H\İ[™ÈY›İYÚ™XYİÜš]KØÛÜœ™XİÜ™\Ù]Ûİ]ÛÛYKÜ›ÜÜÙNÈ™Z™Xİ[XšYİ[İ\È˜\™HYÈ
+ØY™HÛÛ\]Û›HYˆ[˜[XšYİ[İ\ÊNÈ™YÜ™\ÜÚ[Ûˆ[\ÜÈHØ[YHYœ›ÛHÛÈÛİ\˜Ù\È[™›İ™\È™XYØÛÜœ™XİÜ™\Ù]Ü›ÜÜØ[\ÛÛ][ÛÈ\XØ]HYÈÚ][ˆÛ™H[\Ü˜]Ú™Z™XİY™Y›Ü™H[HÜš]Kˆ[ÛÈ™]\›ˆ\]Y˜[YKYœ™YH[\ÜÜØÚ[XH[œİXİ[ÛœËˆØ\Xš[]K]\İYXİX[XØ\ÙH[\ÜÜ™XY˜XÚË[™\XØ][ÛˆÛˆH™X[Ú[Z[\ˆØ[™Y]Hİ^HÑTTUHÛZ[\ÎÈH\™[ÛÈHš]˜]HØ\ÙKÛÈ›Èš]˜]H˜[Y\È[ˆH™\È[™›ÈÛZ[HÙˆX\›™Y™Y›Ü™HÙXİ\™HİÛ™\‹[ØØ[Üš]KÜ™XY˜XÚËØ\XØ][Ûˆ›ÛÙ‹ˆXİX[š]˜]KXØ\ÙH[\ÜĞRUÈ›ÜˆKMˆXÚİ\Y“ÕÈ[HÙˆ\Ëˆ›Û™H
+KMŒÈ[˜Y™™XİY
+HT•PSH[™Ú[™Y\š[™È›Øİ\ÙY™YÜ™\ÜÚ[Ûˆ™\İ[ÈÚ][X™\œÎÈÛÛ[Z]YÛÜœ™Xİ[ÛÈ˜[YKYœ™YH[\ÜÜØÚ[XHØÎÈ›Èš]˜]HØ\ÙHÛÛ[[ˆÚ]XˆŸKMHH
+ŠQQ–HPÒÕT
+T–PKLŒŒLLLŒMŠNÈS‘ÒS‘QT’S‘ÈÓ‘Nˆ™XÙZ\ØÜËÜ™XÙZ\ËÙ[™Ú[™Y\š[™ËĞT–PKLŒŒLLLŒM‹XMŒË\İ\İZ[™Y\›ÙÜ™\ÜÚ[Û‹›Y
+Šˆ
+ÓÑH[™K^\İ[™ÈH[™Ú[™Y\š[™ÈÙ\ÜÚ[Û‹ĞSQHKMŒÈİ\İZ[™Y\›ÙÜ™\ÜÚ[ÛˆÛÜœ™Xİ[ÛÈ“ÕH™]ÈÛÜšÙ\‹ØÛÛÜ™[˜]ÜÈ“ÕÛ™HHXÚİ\ØÜË[Û›JKˆÛİ\˜ÙHÛİ[\™^[\Hœ›ÛHH[œİXİ[Ûˆ
+M˜ÍŒYLÈÛÛËÛ™^İÛÜšËœJNˆ™]×Ú][\È[Z]È‘PQHKM[™HŞXÛHÜš]\ÈÙY[‹œ›İÜÈ™Y›Ü™HÛZ[KØÛÛ\]KÛÈHZ\ÜÙY›İYšXØ][Ûˆ\È™]™\ˆ™K\Ù[È[˜›ŞQÈ\™HZÙ]Ú\ÙHX\šÙYÙY[ˆ™Y›Ü™H[™[™ÎÈ[™Ú[™Y\š[™×ÜÙ\ÜÚ[Û‹™š[š\Ú™\ÜÈ™^]Ù\È›İ^Xİ]HÜˆÛZ[H]ˆ™\]Z\™Yˆ
+JHÙ\\˜]HØœÙ\™YÛ›İYšYYœ›ÛHÛZ[YYÔÕT•QÑÓ‘NÈ›İ[™YZ[\˜[™]HÙˆ[ˆ[˜ÛZ[YYİ[Y[YÚX›H][HÜˆ™]HÛˆÛÛ\][Û‹Y\šXH^\İ[™È[™Ú[™Y\š[™È™XÙZ\İ]K™]™\ˆ™\[ˆÓ‘HÜˆ[\œ\[ˆXİ]™HÛZ[NÈ
+ŠHÛÛ\][Ûˆ™]\›œÈÛÛ›ÛÈH™YÚ\İ\™Y[™Ú[™Y\š[™Ë\Ù\ÜÚ[ÛˆÛÜÈ[ˆH™^[YÚX›H\›İ™Y\ÚÈÛ˜ÙKÜˆİ]\ÈÚH›İÈ
+ÊHŞ[]XÈ™YÜ™\ÜÚ[ÛœÎˆš\œİ›İYšXØ][Ûˆ[š[™YOˆÙXÛÛ™›İ[™Y™]NÈXİ]™HÛZ[Hİ\™\ÜÙ\È\XØ]NÈÓ‘Hİ\™\ÜÙ\È™]šY\ÎÈÛÛ\][™ÈÛ™H][HXZÙ\È™^[YÚX›HXİ[Û˜X›HÛ˜ÙNÈ™KY[H™XÛİ™\œÈ[™[™È[˜ÛZ[YYÛÜšÎÈ
 
-## Supervisor follow-up task
+HÙY\LŒÈÛ[™ËÙ\ÜÚ[Û‹[Ü[ˆY™][YKÌ[Z[ˆ[Ûš]Üˆ™KX\›H[Z]È^XÚ]È™XÛÜ™™X[^\KÜ™KX\›H]šY[˜ÙHÚ[ˆ]ØØİ\œÎÈ›È\œÚ\İ[˜ÙKXY\‹[ÙÛİ]ÜˆİX‹[Z[]HÛZ[KˆÙY\Xİ]™HKMÛÜšÎÈKMŒİ^\È›ØÚÙYÛˆKMNH\İÜH
+™]™\ˆ˜XœšXØ]HÓ‘JKˆ›È™]ÈXØÙ\ÜËÜ™Y[X[Ë[œİ[Ëš[[™Ë™\İ\ÎÈ›È™\X]ÙˆHŒLÌÈ›ÛÙˆ›Ø‹ˆKMŒÈ
+XØÙ\YŒLÌÈ›ÛÙ‹KMLÈXØL˜ŠHÓ‘HH[™Ú[™Y\š[™ÈÛÙH
+È›Øİ\ÙYŞ[]XÈ™YÜ™\ÜÚ[Ûˆ™\İ[ÈÚ][X™\œÎÈ™XÙZ\ÈXİX[İ\œ™[\ÚÈ˜[œÚ][ÛˆŸKMˆH
+ŠQQ–HPÒÕT
+T–PKLŒŒLLKLLÍÊJŠˆ
+ÔÈ™[X\ÙK^\İ[™ÈH[\˜Xİ]™H[™Ú[™Y\š[™ÈÙ\ÜÚ[ÛˆÓ“NÈ“ÕÛ™HHXÚİ\
+KˆİÛ™\‹X\›İ™Y
+Œ‹LLLLUNŒÍ–ŠHRK[Û›HÜÍˆX›XØ][ÛˆÙˆ™]šY]ÙYKMŒÒYNˆİYÚ[™È\Y˜XİNX™MMNM˜ÌLÙ™™NÙŒŒ™XY™˜ØÎL™™X]\™HÛİ\˜ÙHY™LYXÌMÙŒLÙŒ™MÌ˜Œ˜ÌMY™XØ™XÙZ\ÜØÜ™Y[œÈİXØÙ\ÜÛÜˆNNMØŒNYNYMYMŒ˜LŒYNNYÍ™LÎMH
+[™LŠKˆ™Y›Ü™HXİ[™Îˆ™]ÚÚXÚÈÚ]\ˆ[™XYHÛZ[YYÙ^Xİ]Y™XÛÛ˜Ú[H[œİXYÙˆ™[][˜Úˆ\ÙHHMN™[X\ÙKØ˜XÚİ\Ü›Û˜XÚÈ›ØÙY\™HÚ]ØY™]HØÌ˜˜˜È™\šYH\Y˜XİY[]H[™ÛÛ\]Xš[]NÈØ\\™H™XÛİ™\˜X›H˜XÚİ\‘Q“Ô‘HİÜÈX›ÜYˆ˜XÚİ\Ù^ÜÜ™Y›YÚ˜Z[ËˆØÛÜHRNÍˆÛ›Nˆ›ÈˆZYÜ˜][Û‹ØXÚKÜ›İšY\ˆ™Yœ™\ÚÛÜšÙ\‹Ù\Ü]Ú\ˆ™\İ\XØÛİ[ÜÙXİ\š]HÚ[™ÙKÜ[™šYÜ\˜Ú\ÙNÈ™\Ù\™HİÛ™\ˆ™YœÈ[™Y[‹ÜØ]™Yİ]NÈ™]™\ˆ™XYÜˆX›\ÚH]™HSÈ\ÛÛ]YÛÜY\È›Üˆ[H\İXİ]™H™Y™\™[˜ÙHÚXÚËˆ™\ÜÛÛ™]È[[YHY[]K˜XÚİ\Ü›Û˜XÚÈ™Y‹\ÚİÜÛ[Øš[HØÜ™Y[œÚİËİšXİYš[\ˆ[™Y[‹\İ]HÛÛ\]Xš[]KØXÚH\Ë[Ù‹Ø]™KÔSˆ[Z]ËˆYÈHİÜ]\ÙH›ÜˆTÈ™[X\ÙHÛ›Kˆ
+Š”‘PÓÓÒSQ
+YÙ[JNˆ\È›İÈTÈH™[X\ÙHH^Xİ]Y›ÜˆT–PKLŒŒLLKLLÍÎˆ™[X\ÙYŒ‹LLLLUNN‹]™H\Y˜XİNX™MM
+™YHŒM˜Í‹‹ŠK˜XÚİ\˜\‹Û[™\ËØYÙ[L‹œ™]‹LŒŒLLUMV‹›È›Û˜XÚÎÈ™XÙZ\ØÜËÜ™XÙZ\ËÌŒ‹LLLLK[]™KNÍ‹\™[ØYXMŒ›Yˆ›İ™[][˜ÚYŠŠˆKMŒ
+İYÙY™]šY]ÙY
+HÓ‘HH[™Ú[™Y\š[™È]™H\Y˜XİÒHX]Ú\ÈNX™MMÈÙ[˜İ[Û˜[™XY[™\ÜÎÈÒYHÛˆXİX[ØÜ™Y[œÚİÎÈ›Û˜XÚÈ™Yˆ™XÛÜ™YŸKMÈH
+ŠQQ–HPÒÕT
+T–PKLŒŒLLKLMLY^\İ[™Ë[ØØ[Z[\Ü
+JŠˆ
+^\İ[™ÈH[\˜Xİ]™H[™Ú[™Y\š[™ÈÙ\ÜÚ[ÛˆÓ“NÈ“ÕÛ™HHXÚİ\ÈĞSQHKMŒKĞKMXÚ\Ú[Û‹XØ\ÙH[\Ü›İH™]È™X]\™HÜˆÛÜšÙ\ŠKˆİÛ™\‹X]]Üš^™Y[\ÜÙˆH[™XYKYİÛ›ØYYİÛ™\‹\›İšYYXÚ\Ú[Û‹XØ\ÙH”ÓÓˆšXHHİ\ÜYØØ[[\Ü\ˆ
+Ü˜ËÛX›ÜËÙXÚ\Ú[Û—ØØ\Ù\ËœXØÜËÛÜ\˜][ÛœËÑPÒTÒSÓ—ĞĞTÑTË›Y
+Kˆ™Y›Ü™HXİ[™Îˆ™]ÚÚXÚÈÛZ[\È[™š]˜]HİÜ™Hİ]K™XÛÛ˜Ú[H[œİXYÙˆ\XØ][™Ëˆ›İ[™YØ[™Y]Hš[K[˜[YKÜØÚ[XHÚXÚÈ[ˆ\ÈXØÛİ[	ÜÈÛYKÑİÛ›ØYÈÛ›H
+›Èœ›ØYš]˜]HÙX\˜Ú
+NÈ[XšYİ[İ\ÈOˆİÜÈXœÙ[Oˆ™\ÜS”UÓ“ÕÑ“ÕS‘
+™]™\ˆÜ™X]H[ˆ[\H™\XÙ[Y[Üˆ\ÚÈ›Üˆ™]\[™ÊKˆ˜[Y]HYØZ[œİH^\İ[™ÈØÚ[XK[\ÜY[\İ[HÚ]İ]İ™\Üš][™ÈÛÜœ™Xİ[ÛœËÚ\İÜK™\šYH\ÚÚZ[‹™XY˜XÚÈØØ[H[™ÛÛ\\™HÚ]H[œ][ˆ[[Ûœİ˜]HØØ[›ÜÜØ[™]šY]˜[Ûˆ[ˆ\›ÜšX]HÚ[Z[\ˆØ[™Y]Hœ›ÛH^\İ[™È\›Z]Y]H
+›İ™[˜[˜ÙHÙ\İÛ™\‹\™]šY]ËYš\œİ›È[Ù[]˜Z[š[™ÈÛZ[JKˆ[™XYH[\ÜYOˆ™\šYHH^\İ[™È™XÛÜ™ˆX›XÈ™XÙZ\ˆİXØÙ\ÜËÙ˜Z[\™KÛİ[ËÛÙH™]š\Ú[Û‹]šY[˜ÙH\Ú\ÈÓ“NÈ›Èš[[˜[YK\İ[™ÈQ[[İ[Ë˜][Û˜[KÚYÛ™YT“ÜˆÛÛ[ˆ™\Ü[\ÜÜ™XY˜XÚËØÚZ[ˆÙ\\˜][Hœ›ÛH›ÜÜØ[[[Ûœİ˜][Û‹ˆİ]ÙˆØÛÜNˆÜ™Y[X[ËÔS‹šYËÜ\˜Ú\Ù\ËØÛÛXİX›XÈ]H™Yœ™\Ú
+]\ÙY
+K™[X\Ù\ËXØÙ\ÜÈ^[œÚ[ÛÈ™\ÜXİXØÙ\ÜÈ[šX[Ëˆ
+Š”‘PÓÓÒSQ
+YÙ[JNˆ^Xİ]YˆHİÛ™\ˆ˜[œÙ™\œ™YHØ\ÙHš[NÈ[\Ü™XY˜XÚË\ÚÚZ[ˆ[™HØØ[›ÜÜØ[[[Ûœİ˜][ÛˆİXØÙYYY
+Ûİ[È[™\Ú\ÈÛ›JNˆØÜËÜ™XÙZ\ËÙ[™Ú[™Y\š[™ËĞT–PKLŒŒLLKLMLY^\İ[™Ë[ØØ[Z[\Ü›YÍ™™XX‹ŠŠˆKM
+ÛÜœ™Xİ[ÛœÈÛ™JHÓ‘HH[™Ú[™Y\š[™ÈÛİ[È
+ÈÛÙH™]š\Ú[Ûˆ
+È]šY[˜ÙH\Ú\È[ˆHš]˜XŞK\ØY™H™XÙZ\ÈÙ\\˜]H™\™XİÈ›Üˆ[\ÜÜ™XY˜XÚËØÚZ[ˆœÈ›ÜÜØ[[[ÈŸ‹LLÎH
+Š”
+Šˆ
+ŠQQ–HH
+İÛ™\‹Œ‹LLLLNˆ›XZÙHHŞ\İ[H\ÙHÚ]HØ]™H]ÈÓÑH[™KÓ‘H[™HˆÛÜšÙ\‹›È™]ÈÛÛÜ™[˜]ÜŠNŠŠˆÚİÈHİÛ™\‰ÜÈ[\ÜYXÚ\Ú[ÛˆØ\Ù\ÈÛˆÛX\šÙ]‘PQSÓ“H[™ĞĞSˆ[ˆÜ\˜]Ü—İZX›ÜˆXXÚÚXÚÙY™\İ[Ø\™Ø[X›ÜË™XÚ\Ú[Û—ØØ\Ù\Ëœ›ÜÜÙJÛ\İ[™×ÚYÛİ\˜ÙN‰ÙÜØIË]K]šY[˜ÙN–×_JX
+İÛ™\‹[ØØ[İÜ™H˜\‹Üš]˜]KÙXÚ\Ú[Û—ØØ\Ù\ËØ[™XYH[\ÜY\Ú]™\šYšYYÈYˆHİÜ™H\ÈXœÙ[[\K\ØX›YÜˆS•QÔ’UWÑRST‘XÚİÈ›İ[™ÈÜˆÛ™HÛ™\İ[™H[™™]™\ˆÜ˜\Ú
+KˆÚ[ˆ\™H\ÈHX]ÚYHÛX[ÛÛ\ÙY›ØÚÈÛˆ]Ø\™ˆ–[İ\ˆX\›Y\ˆXÚ\Ú[ÛˆÛˆHÚ[Z[\ˆ\İ[™È
+›ÜÜØ[›Üˆ[İ\ˆ™]šY]ÊHˆÚ]H™XÙY[XÚ\Ú[Û‹H™X\ÛÛˆİ[[X\KÚXÚ˜XİÈÙ\™H™\šYšYYœÈSÕTˆTÕSPUTÈ
+^XÚ]HX™[Y\İ[X]\Ë™]™\ˆ˜XİÊK[˜Ù\Z[KÛZ\ÜÚ[™È]šY[˜ÙH[‹ÚXÚ]šY[˜ÙH\È\İ[™ÈXÚÜË[™HÚ\™YÛÜ™ÎÈİ]H]\ÈX›İ]]Ó‘H\İ[™Ë›İHØ]YÛÜH™Y™\™[˜ÙKˆ\™[\Îˆ]‘U‘TˆÚ[™Ù\Èš[\œË˜[šÚ[™ËY[™ËØ]™\ÈÜˆHX\›™Y™YœÎÈ›ÈšYÜ\˜Ú\ÙKØÛÛXİ[[İ[ÈÜˆİYÙÙ\İ[ÛˆÙˆÚ]ÈšYÈ›Èš]˜]HÛÛ[[ˆÚ]X‹\İËš^\™\ÈÜˆ™XÙZ\È
+\İÈ\ÙHÖS•UPÈØ\Ù\ÈšXHP“Ô×ÑPÒTÒSÓ—ĞĞTÑT×ÑTÈØÜ™Y[œÚİÈÛˆ\ÛÛ]YİYÚ[™È\ÙHHŞ[]XÈİÜ™HÛ›JNÈ›ÈØXÚH™]ÚÈÙY\š[\È[™\ˆ[™\Ëˆ\İÎˆØ\™Ú]HX]ÚÚİÜÈH›ØÚÈÚ]\İ[X]\ÈX™[YÈ›ÈİÜ™K\ØX›YİÜ™H[™[\\™YİÜ™HÚİÈ›İ[™ËÛÛ™HÛ™\İ[™NÈš[\œÈ[™Ø\™Ûİ[È[˜Ú[™ÙYÚ][™Ú]İ]HİÜ™NÈ[Øš[H[™\ÚİÜØÜ™Y[œÚİÈœ›ÛHHÛÛ[Z]Y\ÛÛ]YİYÚ[™È\Y˜XİˆÛİ\˜ÙKÜİYÚ[™ÈÛ›NÈ™[X\ÙHÛ›HšXHH^\İ[™È›İ[™Y™[X\ÙH™]šY]È
+Š‘SU‘T‘QH[™Hˆ
+L˜ÎÎ˜NMM˜ÎÈ\İÊNÈYÙ[H™\šYšXØ][Ûˆš]˜XŞHØØ[ˆÙˆHY™ˆÛX[‹Ş[]XË\İÜ™HİYÚ[™ÈÚİÜÈH›ØÚÈÚ]\İ[X]\ÈX™[Yš[\œÈ[™Ø\™Ûİ[È[˜Ú[™ÙYˆ•QÈ›İ[™HYÙ[H
+š^Y[ˆ‹LM
+NˆHİÜ™H]Y˜][ÈÈÜ\˜]Ü—İZH\™[‹İ˜\‹Üš]˜]KÙXÚ\Ú[Û—ØØ\Ù\ØÚXÚÛˆH]™H^[İ]
+˜\‹Û[™\ËØYÙ[L‹Ø
+H\È“ÕH™X[İÜ™KÛÈH›ØÚÈÛİ[ÚİÈ›İ[™È]™KŠŠˆ
+Š”‘SPTÑQÈÍˆŒ‹LLLLUŒŒNŒLÖˆ\È[™HˆXYØNH
+™XÙZ\ØÜËÜ™XÙZ\ËÌŒ‹LLLLK[]™KNÍ‹\™[ØYYŒLÎKYŒMXMŒ‹›Y›È›Û˜XÚÊKŠŠˆKMÈÓ‘Hˆ›Øİ\ÙY\İÈÚ][X™\œÎÈŞ[]XË\İÜ™HØÜ™Y[œÚİÎÈ\ÛÛ][Ûˆ›ÛÙÈ›È]™HÚ[™ÙHŸ‹LM
+Š”
+Šˆ
+ŠQQ–HH
+YÈ[ˆ‹LLÎK›İ[™[ˆİYÚ[™ÈÚ]H™X[İÜ™JNŠŠˆÜ\˜]Ü—İZKÜ™XÙY[İšY]ËœX‘T×ÔÕÔ‘HH]
+×Ùš[W×ÊKœ™\ÛÛ™J
+Kœ\™[ÖÌWHÈ	İ˜\‰ÈÈ	Üš]˜]IÈÈ	ÙXÚ\Ú[Û—ØØ\Ù\ÉØÚ[È[œÚYH˜\‹Û[™\ËØYÙ[L‹ØÚ[ˆHRH[œÈ]™KÛÈH™X[İÛ™\‹[ØØ[İÜ™H\È™]™\ˆ™XYˆš^ˆ›Ü]]İY\ÜÎÈ\ÙHP“Ô×ÑPÒTÒSÓ—ĞĞTÑT×ÑT˜Ú[ˆÙ]İ\Ú\ÙH]X›ÜË™XÚ\Ú[Û—ØØ\Ù\ØÛÛ\]H]ÈİÛˆY˜][
+H[œİ[YX›ÜÈ\ÈHÛÛÜ™[˜]Ü‰ÜËÚÜÙHY˜][\ÈH™X[İÜ™HÛÛÜ™[˜]Ü‹İ˜\‹Üš]˜]KÙXÚ\Ú[Û—ØØ\Ù\ØÈ™\šYHÚXÚX›ÜÈH]™HRH[\ÜÈ[™XZÙHHY˜][›Ø\İ›Üˆ^[\H[ÛÈXØÙ\P“Ô×ĞÓÓÔ‘SUÔ—Ô“ÓÕYˆ™YYY
+Kˆ\İÈ
+ÖS•UPÈİÜ™\ÈÛ›JNˆH›ØÚÈ\X\œÈÚ[ˆHY˜][İÜ™H\È›İ[™šXH[ˆ[™šXHHY˜][]^[İ]›Ûİ‹İ˜\‹Û[™\ËØYÙ[L‹ÛÜ\˜]Ü—İZXÈXœÙ[İÜ™HH›İ[™Ëˆ›Èš]˜]HÛÛ[[]Ú\™H[ˆÚ]XÈ›È]™HÚ[™ÙNÈš[\È[™\ˆ[™\È
+Š”‘SPTÑQÈÍˆŒ‹LLLLUŒŒNŒLÖˆ\È[™HˆXYØNH
+™XÙZ\ØÜËÜ™XÙZ\ËÌŒ‹LLLLK[]™KNÍ‹\™[ØYYŒLÎKYŒMXMŒ‹›Y›È›Û˜XÚÊKŠŠˆ‹LLÎH
+Š‘Ó‘HY˜™ŒJŠˆ
+™XÛÛ˜Ú[Yœ›ÛH[™HˆQÑS•ÔÕUTÈ
+È™XÙZ\
+Hˆ›Øİ\ÙY\İÈÚ][X™\œÎÈİYÚ[™È›ÛÙˆÚ]HŞ[]XÈİÜ™H[ˆH]™K\İ[H\™XİÜH^[İ]‚ˆÈÈİ\\š\ÛÜˆ›ÛİË]\\ÚÂ‚ŸQšH\ÚÈ\Èİ]\ÈYÙ[XØÙ\[˜ÙHŸKK_KK_KK_KK_KK_KK_KK_ŸKMH
+Š“İÛ™\ˆ\™Xİ]™H
+Œ‹LLLLŒŒÈÑÈ^\İ[™ÈÛÛÜ™[˜]Üˆ]È›È™]È›ØÙ\ÜËÛ[Ûš]ÜŠNˆ[™›Ü˜ÙHš]™K[Z[]HYH]Xİ[Ûˆ[™™^]\ÚÈ[™Ù™‹ŠŠˆ[YÚX›HYX[œÈ‘PQHÚ]\[™[˜ÚY\ÈY][™›ÈİÛ™\ˆ]\ÙK][İH›ØÚËÜˆXİ]™HÛZ[KˆÚ][ˆÌÙXÛÛ™Èœ›ÛHš\œİ[YÚXš[]Kİ\ÚÈÛÛ\][Û‹H^\İ[™È]]\İ][˜ÚH[™XYKX\›İ™Y[™HÛÜšÙ\ˆÜˆ[]™\ˆÛ™HY[\İ[Xİ[Û˜X›H›İYšXØ][ÛˆÈYÙ[Kˆ™]\ÙHÛÛÜ™[˜]Ü—İØ]ÚœK\Ü]Ú\‹œK™^İÛÜšËœH[™[™Ú[™Y\š[™×ÜÙ\ÜÚ[Û‹œNÈY\İZ\ˆ^\İ[™ÈÛÜ™]KÜ™\İ\[\˜[È\È™YYYˆ™\Ù\™HY\Xİ]™KXÛZ[KÑÓ‘Hİ\™\ÜÚ[Ûˆ[™™\İ\™XÛİ™\Kˆ›È™]ÈÛÛÜ™[˜]Ü‹ÛÜšÙ\ˆ›ØÙ\ÜË[Ûš]Ü‹ØÚY[\‹][İH\\ÜËÜ[™Üˆ^\›˜[Xİ[Û‹ˆ
+Š‘S‘ÒS‘QT’S‘È
+YÙ[JNˆÓÑJÕTÕÈÓ‘H
+™^İÛÜšÎˆÌÈÓKÌÈ™]KÛØ\Ë]\ÙKÜ][İHİ\™\ÜÚ[Û‹][˜ŞHÙÎÈMˆ™^İÛÜšËÙ[™Ú[™Y\š[™È\İÊNÈ•S•SQHU‘S‘TÔÈS”“Õ‘Sˆ[[H™X[[YÚX›H][H\ÈYX\İ\™Y[ˆ˜\‹Û™^İÛÜš×ÛÙËšœÛÛ›ÈØÜËÛÜ\˜][ÛœËÑS‘ÒS‘QT’S‘×ÑSU‘T–K›YŠŠˆ
+Š”•S•SQHU’QSÑH
+Œ‹LLLLJNˆÛ™H™X[[œİXİ[Ûˆ[™Ù™‹X›\ÚÈ›İYšXØ][ÛˆÌ‹HÈ
+HÌÊK™XÙZ\ØÜËÜ™XÙZ\ËÌŒ‹LLLLKXM\[[YK\›ÛÙ‹›YÈ“Õ›İ™[ˆİXYK\İ]HÛ][˜ŞH
+Ø[\H[˜ÛYYHœ™\ÚØ]Ú\ˆİ\
+H[™ÛÛ\][Û‹]Ë[™^]\ÚÈ[™Ù™ˆ
+›È[YÚX›H\ÚÊKˆİ^\ÈT•PSŠŠˆKMHT•PSH[™Ú[™Y\š[™È˜ZÙKXÛØÚÈ›İ[™\H\İÈ
+NKÌÌÙXÊKÛ˜ÙK[Û›H[™Ù™‹Xİ]™HÛZ[KÑÓ‘Kİ[›Y]\[™[˜ŞKÛİÛ™\‹\]\ÙHİ\™\ÜÚ[Û‹™\İ\™XÛİ™\NÈ›Øİ\ÙY\İÛİ[È[™™XÙZ\È]™HÜİ›ÛÙˆÚ]Û™H\›[\ÜÈ^\İ[™È\ÚÈÚİÚ[™È‘PQKÑÓ‘K]ËZ[™Ù™ˆ8¢iÌÙXËXİX[›İ]H[™›ØÙ\ÜËİ\ÚÈ™XÙZ\ˆÙY\ÛÙKİ\İ›ÛÙˆÙ\\˜]Hœ›ÛH[[YH]™[™\ÜÎÈØİ[Y[[H™[XZ[š[™È[Ûš]Ü‹ÜÙ\ÜÚ[ÛˆY™][YH[Z]Û™\İKˆŸKMHH
+Š‘Ó‘H
+ØÚÈ
+È\›KÙ^]ÙÈ
+ÈØ\ÚXÚËMÈ\İÎÈ]™H›ÛÙˆÈ™KX\›HŞXÛ\ËX^Ø\‹ˆÎÈ™XÙZ\ØÜËÜ™XÙZ\ËÌŒ‹LLLLKXMKXMÌXÛÛ[Z]K›Y
+KˆÙ\ÜÚ[Û‹X›İ[™ˆÛÈÛ›HÚ[H\ÈÙ\ÜÚ[Ûˆ™KX\›\ËŠŠˆİ™\›šYÚÛÛ[Z]H
+T–PKLŒŒLLKLÌ
+NˆXZÙHH^\İ[™ÈYÙ[HÙ\ÜÚ[Ûˆ
+YLÍÍÌÌJH™KX\›H]ÈÛ™H™^İÛÜšËœHK]Ø]ÚLŒ™YY™Y›Ü™HHŒÌZ[ˆ[Ûš]ÜˆY™][YH[™ÎÈÙÈXXÚ\›KÙ^\HÚ]Üİ[YNÈİ\™\ÜÈ\XØ]HØ]Ú\œÎÈÙY\KM[YÚXš[]KÜ]\ÙKÜ][İKÙY\ØÛZ[KÙ\[™[˜ŞKÑÓ‘H[\Ëˆ›Øİ\ÙY\İÎˆ™KX\›H[Z[™Ë™\İ\Ü™KY[K\XØ]Hİ\™\ÜÚ[Û‹Ù\ÜÚ[Û‹XÛÜÙYØY™H™Z]š[Ü‹ˆ]™H›ÛÙˆİXØÙ\ÜÚ]™H\›H[Y\İ[\Ë›ÈØ\ˆÌËÛ™H[YÚX›H\ÚÈXİ[Û˜X›HÛ˜ÙH[ˆ™^[YÚX›HÛ˜ÙKˆ›È™]È›ØÙ\ÜËÛ[Ûš]Ü‹ÜØÚY[\È›ÈÜ[™ˆ™YYÈÓÑH
+È]™HÙ\ÜÚ[Û‹ÛÈ“ÕÛ™HHHXÚİ\^Xİ]Ü‹ˆKMÓ‘HH[™Ú[™Y\š[™È
+[\˜Xİ]™HÙ\ÜÚ[ÛŠH™XÙZ\Ú]\›H[Y\İ[\È
+Ø\ÌÊK˜\‹Û™^İÛÜš×ÛÙËšœÛÛ›[šY\Ë\İÈÚ]Ûİ[ÎÈÛÙKİ\İ]™H[[YHÙ\Ù\\˜]NÈš]™K[Z[]HİX\˜[YH›İÛZ[YYÚ[H™YY^\™YÜˆÙ\ÜÚ[ÛˆÛÜÙYˆŸ‹LMH
+Š”
+Šˆ
+ŠQQ–HH
+İÛ™\‹Œ‹LLLLNˆ˜Z[HÛİ\˜Ù\Èİ\ˆ[ˆÔĞNˆ˜XÙX›ÛÚËÜ˜ZYÜÛ\İÈÓÑH[™KÓ‘H[™HˆÛÜšÙ\‹›È™]ÈÛÛÜ™[˜]ÜŠNŠŠˆHÛÛ\X[Ø^HÈœš[™È˜XÙX›ÛÚÈX\šÙ]XÙKÜ˜ZYÜÛ\İÙ™™\•\[™[Hİ\ˆÚ]H[ÈHX\šÙ]XÙNˆÕÓ‘T‹QS•T‘Q’S‘ËˆHŞ\İ[H™]™\ˆ™]Ú\ËØÜ˜\\ËÙÜÈ[ÈÜˆ]]ÛX]\ÈÜÙHÚ]\È
+Z\ˆ\›\È›Ü˜šY]È›ÈÜ™Y[X[ÊKˆš\œİS”ÔPÕH^\İ[™ÈÚ[ZÙXYÙH
+Ü\˜]Ü—İZKÚ[ZÙWİšY]ËœX[‹[Y[[ÜH˜YÊKHYH\İ[™ÈˆİÛ™\ˆ›Ü›H
+]™WÙ[[Ëœ™[™\—ÛİÛ™\—Ù›Ü›X
+K›İYÚİšY]ËœXØ[YİšY]ËœX[™X\šÙ]Ü™YœËœX[™‘UTÑHZ\ˆ]\›œÎÈÜš]HHÚÜØÛÜH›İH[ˆH™XÙZ\ˆZ[ˆ
+JHH]ZXÚËXY›Ü›H
+YHš[™ŠNˆ\İY[šË]KšXÙH
+Ü[Û˜[
+KÚ]KÜİ]HÜˆ’TÛÛ™][Û‹Ûİ\˜ÙHX™[ÚÜÙ[ˆœ›ÛH˜XÙX›ÛÚËØÜ˜ZYÜÛ\İÛÙ™™\\Ûİ\‹›İ\Ëˆ˜[Y]NÈ[šÈ\ÈİÜ™Y\È^Û›H[™™]™\ˆ™\]Y\İYÈÚİÈ]\È›İÛ™\‹Y[\™Y›İ™]ÚY[™\šYšYY‹ˆ
+ŠH\œÚ\İ\˜X›HİÛ™\‹[ØØ[[ˆH”ÓÓˆš[H™^ÈX\šÙ]Ü™YœËšœÛÛ˜
+˜\‹ÛX\šÙ]Ùš[™ËšœÛÛ˜[ˆH[™H\ˆ^[İ]]ÛZXÈÜš]Kİ\š]™\È™\İ\[™H™[ØY
+KİX›HYİÛÛİ\˜ÙO\ÚÙˆ[šÈÜˆ]JØÚ]O˜\XØ]\È™Y\ÙYY][]H
+ÛÙÚ][™ÊK[Ú]]Y]šY[È
+ÚËİÚ[ŠKˆ
+ÊHÚİÈ[HÛˆÛX\šÙ]\ÈZ\ˆİÛˆÙXİ[Ûˆ–[İ\ˆš[™Èˆ
+Ù\\˜]Hœ›ÛHÔĞH™\İ[ËÛX\›HX™[YÚ]HÛİ\˜ÙJKÛ›İ\š[™ÈHØ[YHİšXİš[\œÈ
+šXÙK˜Y]\ÈÜˆİ]HšXHH^\İ[™ÈØ^™]Y\ˆÚ[ˆHÚ]KÜİ]KÖ’T™\ÛÛ™\ËØ]YÛÜH\›\ËÛÛ™][ÛŠKÚ]YKÔØ]™KÓ›İ[\™\İYÛÜšÚ[™È›İYÚH^\İ[™È™YœÈHZ\ˆİX›HYË[™HXÚ\Ú[Û‹XØ\ÙH™XÙY[›ØÚÈ
+‹LLÎJH]˜Z[X›HÛˆ[Kˆ[ˆ[œ™\ÛÛ˜X›HØØ][Ûˆ\ÈÚİÛˆ\È[šÛ›İÛˆ[™™]™\ˆÛİ[Y\ÈØØ[ˆ
 
-| ID | Pri | Task | Deps | Status | Agent | Acceptance |
-|---|---|---|---|---|---|---|
-| A-68 | P1 | **Owner directive (2026-10-10 22:07 CDT; existing coordinator path; no new process/monitor): enforce five-minute idle detection and next-task handoff.** Eligible means READY with dependencies met and no owner pause, quota block, or active claim. Within 300 seconds from first eligibility/task completion, the existing path must launch the already-approved lane worker or deliver one idempotent actionable notification to Agent 01. Reuse coordinator_watch.py, dispatcher.py, next_work.py and engineering_session.py; adjust their existing poll/retry/restart intervals as needed. Preserve dedup, active-claim/DONE suppression and restart recovery. No new coordinator, worker process, monitor, scheduler, quota bypass, spend, or external action. **ENGINEERING (Agent 01): CODE+TESTS DONE (next_work: 300 s SLA, 300 s retry, poll cap 240 s, pause/quota suppression, latency log; 16 next_work/engineering tests); RUNTIME LIVENESS UNPROVEN until a real eligible item is measured in var/next_work_log.jsonl; docs/operations/ENGINEERING_DELIVERY.md.** **RUNTIME EVIDENCE (2026-10-11): one real instruction handoff, publish to notification 32.5 s (<= 300 s), receipt docs/receipts/2026-10-11-a68-runtime-proof.md; NOT proven: steady-state poll latency (sample included a fresh watcher start) and completion-to-next-task handoff (no eligible task). Stays PARTIAL.** | A-65 | PARTIAL | 01 engineering | Fake-clock boundary tests (299/300 sec), once-only handoff, active claim/DONE/unmet dependency/owner-pause suppression, restart recovery; focused test counts and receipt; live host proof with one harmless existing task showing READY/DONE-to-handoff â‰¤300 sec, actual route and process/task receipt. Keep code/test proof separate from runtime liveness; document any remaining Monitor/session lifetime limit honestly. |
-| A-69 | P1 | **DONE (lock + arm/exit log + gap check, 17 tests; live proof: 3 re-arm cycles, max gap 6.42 s; receipt docs/receipts/2026-10-11-a69-a70-continuity.md). Session-bound: holds only while this session re-arms.** Overnight continuity (ARYA-20261011-0030): make the existing Agent 01 session (pid 2937731) re-arm its one `next_work.py --watch 120` feed before the ~30 min Monitor lifetime ends; log each arm/expiry with host time; suppress duplicate watchers; keep A-68 eligibility/pause/quota/dedup/claim/dependency/DONE rules. Focused tests: re-arm timing, restart/re-entry, duplicate suppression, session-closed safe behavior. Live proof: successive arm timestamps, no gap > 300 s, one eligible task actionable once then next eligible once. No new process/monitor/scheduler; no spend. Needs CODE + live session, so NOT done by the pickup executor. | A-68 | DONE | 01 engineering (interactive session) | Receipt with arm timestamps (gap < 300 s), `var/next_work_log.jsonl` entries, tests with counts; code/test, live runtime kept separate; five-minute guarantee not claimed while feed expired or session closed. |
-| F-141 | **P0** | **ADDED BY 01 (owner, 2026-10-11: "build the sources other than GSA: Facebook, Craigslist"; CODE lane, ONE lane 06 worker, no new coordinator):** the compliant way to bring Facebook Marketplace, Craigslist, OfferUp and any other site into the Marketplace: OWNER-ENTERED FINDS. The system never fetches, scrapes, logs into or automates those sites (their terms forbid it; no credentials). First INSPECT the existing `/intake` page (`operator_ui/intake_view.py`, in-memory drafts), the "Add a listing" owner form (`live_demo.render_owner_form`), `bought_view.py`, `wanted_view.py` and `market_prefs.py` and REUSE their patterns; write a short scope note in the receipt. Build: (1) a quick-add form ("Add a find"): pasted link, title, price (optional), city/state or ZIP, condition, source label chosen from facebook/craigslist/offerup/other, notes. Validate; link is stored as text only and never requested; show it as "owner-entered, not fetched, unverified". (2) Persist durably owner-local in a JSON file next to `market_prefs.json` (`var/market_finds.json` in the lane dir layout, atomic write, survives restart and a reload), stable id `own:<source>:<hash of link or title+city>`, duplicates refused, edit, delete (soft, with undo), all with audit fields (who/when). (3) Show them on /market as their own section "Your finds" (separate from GSA results, clearly labelled with the source), honouring the same strict filters (price, radius or state via the existing gazetteer when the city/state/ZIP resolves, category terms, condition), with Hide/Save/Not interested working through the existing prefs by their stable ids, and the decision-case precedent block (F-139) available on them. An unresolvable location is shown as unknown and never counted as local. (4) Never mix them into GSA counts or claim they are live listings. Tests with SYNTHETIC finds: add, validate, persist across restart, duplicates, filters (price, radius boundary, unknown location), hide/undo, separation from GSA, no network calls (assert no urllib/requests/socket use), no private content. Staging only with a scratch file; release only through the existing bounded release review. Files under 400 lines **DELIVERED by lane 06 (471be60, status 63d741d; 13 tests). Agent 01 verified on isolated staging with a scratch finds file: add via the form, "Your finds (1)" section separate from the 12 GSA cards, persisted to the owner-local JSON and survived a server restart, max price 100 hides it and 1000 shows it, Hide buttons present, no mobile overflow, no network use in the store (urlsplit parsing only), privacy scan of the diff clean. Source/staging only until released.** **RELEASED to :8766 2026-10-11T04:52:41Z as lane 06 head 63d741d (receipt docs/receipts/2026-10-11-live-8766-reload-f141.md, no rollback).** | none | DONE | 06 | Focused tests with numbers; screenshots from isolated staging with synthetic finds; proof of zero network access; no live change |
-
-| A-70 | P2 | **ADOPTED 2026-10-11 (receipt docs/receipts/2026-10-11-a69-a70-continuity.md).** Shared Slack liaison (ARYA-20261011-0118): treat `#all-ask-aria` (C0C81K9QNGK) as a shared inbox only; GitHub receipts stay canonical. Agent 01 keeps the existing claim-first queue and liaison loop (no duplicate queue, coordinator, watchdog, service or worker), continues compatible work while any NEED is pending, pairs every reported problem with a proposed fix, and escalates to Michael only for a genuine owner decision, missing credential/access, spending/provider commitment, destructive/irreversible action, physical host action or conflicting instruction. Slack reading/replying and the processed-timestamp checkpoint belong to the Deal Sniffer hourly supervisor, not to this lane; Agent 01 acts on `DEAL SNIFFER:`/`ALL PROJECTS:` items only when they arrive as queue rows or liaison messages. | none | DONE (standing rule adopted; no code) | 01 | Receipt per resulting task cites message id and commit |
-| A-71 | **P0 OPERATING CONTROL** | **OWNER ADDENDA delivered 2026-10-11T23:56:30Z and 2026-10-12T00:04:30Z; next unused ID after historical A-70. Existing Agent 01 + existing local watchdog only; no duplicate coordinator, worker, queue, monitor, service or automation.** Hardcode ETA-driven checkpoints and event outbox/relay: root README operating protocol; verbatim/superseding rule in docs/COORDINATION.md; checklist history; docs/integration/COORDINATOR_WATCHDOG.md state machine; tools/coordinator_watch.py machine-readable record validation/timer, exactly one WORKING/DONE/NEED-BLOCKED outcome, early DONE, APPEARS STALE â€” HOST STATE UNVERIFIED, project isolation/quarantine, notification filtering, and once-only event outbox for DELIVERED/ACK/WORKING/DONE/NEED/ETA exceptions. Existing relay publishes stable deduplicated DealSniffer events only; if no authorized Slack relay exists, structured NEED (do not create/expose a token). Correct the pre-addendum B-26 history explicitly and make current F-146 the first live compliant WORKING checkpoint with evidence-based ETA and exact America/Chicago next_check_at. | F-146 active; adopt without interrupting its one worker | PARTIAL â€” IMPLEMENTED @ `3882be4` (2026-10-12T03:56:23Z): tools/eta_checkpoints.py + watchdog integration; owner addendum verbatim in README.md and docs/COORDINATION.md (3,312 chars, string-matched); state machine in docs/integration/COORDINATOR_WATCHDOG.md; tests 26/0 (tests/unit/test_eta_checkpoints.py + test_coordinator_watch.py). LOADED: watchdog reloaded through its user unit at 22:55:38 CDT (PID 1103557, :8479 200); first cycle 03:55:40Z: eta outcomes 0 (not due), 2 events queued, ONE relay_need receipt. First live checkpoints: B-29 next_check 2026-10-11 23:15 CDT, A-71 23:20 CDT (due-check proof pending). NEED (transport only): `gh auth login` on this host so the relay can post the queued events to PR #1; implementation not blocked. [SUPERSEDED prior status, audit: CLAIMED / PARTIAL â€” PR #1 transport acceptance is WORKING (controlled comments 6115954194 and 6115961662; next_check_at 2026-10-11 20:15 America/Chicago elapsed). Slack membership is verified, but immediate-event trigger provenance is still unproven and the required README/COORDINATION/checklist/wat] | 01 | Exact commits/files; deterministic tests for required fields/timezone/due-not-due/outcome exclusivity/early DONE/stale with+without host evidence/notification filtering/isolation/no duplicate launch/outbox ordering+dedup+retry/no loop; observed watchdog state; first F-146 timer/checkpoint proof; dated receipt with cost, blocker and next item. |
-
-
-## Supervisor reconciliation â€” Monday, October 12, 2026 â€” 1:10 AM America/Chicago
-
-- **Canonical receipt:** `DS-CHECKIN-20261012-0110-CDT` / `docs/receipts/2026-10-12-supervisor-visible-check-0110.md`.
-- **Correction to `DS-CHECKIN-20261012-0101-CDT`:** the loaded revision is now F-153 artifact `bbc80ec851b75aec52af1f8b0838dd56ccc714ef`, not F-143. Owner-run release occurred at 12:51 AM; Agent 01 recorded live verification at 1:03:14 AM.
-- **Loaded proof:** listener PID 1233443; verify-only OK; live Claude in Chrome showed GSA, Wooley, Wilson and Blackmon connected, 9 results within 30 miles, remembered 30-mile selection and Search Now last. GSA refreshed at 1:02 AM (1,167 lots; 193 bid/bidder updates). Live phone-width interaction was NOT proven; staging mobile evidence does not replace it.
-- **Morning acceptance is not complete:** the 9 nearby results were auction events, not multiple current item-level trailer/tool listings; My Bids showed 0 and mailbox auto-detection remains NOT CONNECTED; ranked Suggestions is still F-155; representative source links and live mobile journey remain missing.
-- **F-154 NEED:** the 1:08 AM acceptance checkpoint passed without a DONE receipt. At 1:09:33 AM the watchdog found no F-154 worker. Implementation `917b7135cef103297029a93241720e06192c2d86` exists, but the full coordinator suite and firsthand Claude Chrome desktop/mobile acceptance remain missing. **APPEARS STALE â€” HOST STATE UNVERIFIED.**
-- **Current bounded task:** F-155 Suggestions remains WORKING through existing Agent 01/lane 06 after corrected relaunch event `45ba39d0fbf94777 #16`. Its receipt estimates about 60 minutes from 1:01 AM plus review; `next_check_at` 2:01 AM. Current PID/service proof is UNKNOWN.
-- **Serial recovery:** Agent 01 must close F-154's independent acceptance using the existing coordinator path; do not create another worker. F-155 may continue, but no further dispatch or combined release may bypass that gate.
-- **Blocker:** F-154 independent suite and live desktop/mobile Claude Chrome acceptance are missing. **Michael:** NOTHING.
-
-
-## Supervisor reconciliation â€” Monday, October 12, 2026 â€” 1:53 PM America/Chicago
-- **A-73 remains the ONE current bounded task:** existing Agent 01; stage **DELIVERED IN REPOSITORY / ACK MISSED**. The 1:37 PM ACK deadline and 300-second watchdog window elapsed without ACK/WORKING or command-specific NEED/BLOCKED. ETA UNKNOWN; next_check_at MISSING. **APPEARS STALE â€” HOST STATE UNVERIFIED.**
-- **B-12 NEED / partial prerequisites satisfied:** independent receipt [6130595898](https://github.com/caosos/michael-business-os/pull/1#issuecomment-6130595898) reports mode-600 app password installed, read-only IMAP login OK, labels `DealSniffer` and `DealSniffer/Alerts` present, empty alerts folder, unchanged Seen state, and general inbox unopened. This does not replace A-73 as current work.
-- **B-12 remaining blocker:** owner must create/confirm a Craigslist saved-search alert and Gmail filter into `DealSniffer/Alerts`; one genuine alert is required before the read-only parser smoke. ETA within 15 minutes after first alert; arrival UNKNOWN; next_check_at Tuesday, October 13, 2026 â€” 9:00 AM America/Chicago.
-- **B-12 acceptance evidence:** genuine Craigslist alert; Seen unchanged; privacy-safe parser smoke; real Marketplace card opening the original listing; Agent 01 desktop/mobile Claude Chrome validation. No fixture counts as live.
-- **Tested / loaded:** B-12 parser NOT RUN; F-157/F-158 tested `112fce4`, loaded `a0ee240`; F-158 NOT LOADED; live browser proof MISSING.
-- **Canonical evidence:** `docs/receipts/2026-10-12-supervisor-visible-check-1353.md`.
-
-
-## Supervisor reconciliation â€” Monday, October 12, 2026 â€” 2:35 PM America/Chicago
-- **A-73 remains the ONE current bounded task:** existing Agent 01; priority P0; stage **NEED â€” ACK MISSED**. No current host-observed ACK/WORKING or command-specific NEED exists. ETA UNKNOWN; next_check_at Monday, October 12, 2026 â€” 2:40 PM America/Chicago. **APPEARS STALE â€” HOST STATE UNVERIFIED.**
-- **Parallel transport claims do not displace A-73:** PR comments `6131081063`, `6131081342`, `6131081626`, `6131081872`, `6131184715`, and `6131185011` claim multiple simultaneous WORKING tasks with Host observation UNKNOWN and future launch/acceptance times. Preserve their artifacts, but supersede those timestamps with acceptance time UNKNOWN until Agent 01 corrects them.
-- **Artifact truth preserved:** B-36 `27aa922` fixture parser 421/0, B-38 `1334450` research matrix, A-74 `3094eca` ADR artifact, and B-37 `b54cf9a` fixture eBay adapter 424/0 are not current host-liveness, loaded-UI, or live-connection proof.
-- **B-12 exact first source:** Craigslist official saved-search e-mail for the Little Rock region, starting with a narrow trailer search centered on Conway 72032 within 50 miles. Subscription is NOT ENABLED/NOT PROVEN because the alerts folder has zero genuine messages. Use a dedicated DealSniffer mailbox, not personal Gmail.
-- **B-12 filter truth:** sender address and real subject are UNKNOWN until the first genuine alert. Do not guess. After arrival, match the exact observed `craigslist.org` sender + exact saved-search subject prefix + dedicated recipient and apply `DealSniffer/Alerts`. Parser also requires `dkim=pass`, Craigslist HTTPS links, EXAMINE/BODY.PEEK, and unchanged Seen state.
-- **Tested / loaded:** F-157/F-158 tested `112fce4`; loaded `a0ee240`; F-158 NOT LOADED; loaded browser proof MISSING. No genuine B-12 smoke or live B-37 smoke.
-- **ONE next action:** existing Agent 01 publishes current host evidence and A-73 ACK/WORKING or exact NEED, then reconciles the conflicting parallel claims.
-- **Canonical evidence:** `docs/receipts/2026-10-12-supervisor-visible-check-1435.md`.
-
-
-## Supervisor reconciliation â€” Monday, October 12, 2026 â€” 3:21 PM America/Chicago
-- **ONE current bounded item:** A-73 existing-watchdog finished-artifact wake repair.
-- **Owner / priority / stage:** existing Agent 01 / P0 / **NEED â€” ACK MISSED**; no worker is validly current until timestamped host provenance and a serial ACK/dispatch exist.
-- **Acceptance:** exactly one wake, deduplication, project isolation, completed-artifact provenance, ACK/WORKING within 300 seconds, no duplicate coordinator/worker/service/watchdog/monitor.
-- **Blocker:** current Agent 01/watchdog host state is UNKNOWN; F-164 and D-37 transport claims conflict and cannot establish liveness.
-- **Next action:** Agent 01 publishes current host/process evidence and A-73 ACK/WORKING or exact command-specific NEED, then reconciles F-164 versus D-37 before one serial dispatch.
-- **Preserved next eligible UI item:** F-164 fixes 390Ã—900 and 360Ã—800 document overflow, keeps Search/Filters within the viewport, wraps or internally scrolls quick views, and renders location once as City, ST ZIP Â· distance. F-163 `478bfc0` is desktop-accepted in staged headless Chrome but PARTIAL overall.
-- **Evidence:** `478bfc00006e4257f68cb93317b2f573f3b21d2f`, `87071031f0c73a753f8d0cb390e9e8b6196345c4`, PR comment 6131957899, and `docs/receipts/2026-10-12-supervisor-visible-check-1521.md`.
-- **Tested / loaded / browser:** tested `478bfc0`; loaded `a0ee24051fb06dcab8f04306bcb7da54504c5ece`; loaded Claude Chrome desktop/mobile evidence NONE.
-- **ETA / next_check_at:** authoritative ETA UNKNOWN; A-73 next_check_at MISSING. F-164 transport's Monday, October 12, 2026 â€” 4:10 PM America/Chicago is retained only as an unverified claim.
-
-
-## Supervisor reconciliation â€” Monday, October 12, 2026 â€” 4:21 PM America/Chicago
-- **ONE current bounded item:** A-73 existing-watchdog finished-artifact wake/completion-state repair; existing Agent 01; P0; **NEED â€” ACK MISSED**.
-- **Observed defect:** at 4:10:15 PM and 4:16:27 PM America/Chicago, the existing watchdog emitted false NEEDs for completed/superseded A-74, B-36, B-38, F-159 and D-37. Do not re-dispatch them.
-- **Acceptance:** exactly one deduplicated provenance-bearing wake; DONE/superseded items cannot emit missed-DONE NEED; ACK/WORKING within 300 seconds; no duplicate process/service.
-- **Next eligible preserved item:** F-165 detail-page fixes after serial reconciliation. F-164 is STAGING_ACCEPTED at `cb682ff`; F-160 is PARTIAL at `f6a399c`.
-- **Tested / loaded / browser:** search `cb682ff` (42 layout/browser pass; full 594/7 documented environment failures), detail `f6a399c` (reference 612/1 known; lane D+E 105/2 known); loaded `a0ee240`; loaded Claude Chrome proof NONE.
-- **ETA / next_check_at:** A-73 ETA UNKNOWN; next_check_at MISSING. F-165's 5:15 PM timestamp is transport-only and host-unverified.
-- **Blocker / next action:** stale watchdog completion state and missing current Agent 01/A-73 process provenance; Agent 01 must publish host-backed A-73 ACK/WORKING or exact NEED, reconcile the five false NEED states, then permit one serial dispatch.
-- **Canonical evidence:** `docs/receipts/2026-10-12-supervisor-visible-check-1621.md`.
-
-
-## Supervisor reconciliation â€” Monday, October 12, 2026 â€” 5:15 PM America/Chicago
-- **ONE current bounded item:** A-73 existing-watchdog completion-state repair; existing Agent 01; P0; NEED â€” ACK MISSED.
-- **Observed defect:** false NEEDs now cover ten DONE/superseded tasks: A-74, B-36, B-38, F-159, D-37, F-163, D-35, B-39, D-38 and B-41. Do not re-dispatch them.
-- **Loaded boundary:** fb84d0c released Monday, October 12, 2026 â€” 4:58:46 PM America/Chicago; ARTIFACT verification passed; Claude Chrome desktop showed 16 results within 150 miles. Mobile/detail/source-link/My Bids/Suggestions acceptance remains missing.
-- **Compatible artifacts:** F-165 staged 38/0 focused, 600/2 known environment failures. B-43 adapter 570888a passed 451/0, but the live smoke is blocked by Bright Data HTTP 400 'Customer is not active'; cost $0.
-- **Next eligible preserved work:** F-161 genuine alert-source UI after serial reconciliation; B-44 only after owner Bright Data activation.
-- **ETA / next_check_at:** A-73 UNKNOWN / MISSING. F-161 6:10 PM is transport-only and unverified.
-- **ONE next action:** Agent 01 publishes host-backed A-73 ACK/WORKING or exact NEED, reconciles the ten false NEED states, then permits one serial dispatch.
-- **Canonical evidence:** docs/receipts/2026-10-12-supervisor-visible-check-1715.md.
-
-
-## Supervisor reconciliation â€” Monday, October 12, 2026 â€” 6:31 PM America/Chicago
-- **ONE current bounded item:** A-73 existing-watchdog finished-artifact wake/completion-state repair; existing Agent 01; P0; **NEED â€” ACK MISSED**.
-- **Control-plane defect:** false/stale NEEDs now cover at least fifteen completed or superseded tasks: A-74, B-36, B-38, F-159, D-37, F-163, D-35, B-39, D-38, B-41, B-40, D-36, B-42, F-160 and F-161. Do not re-dispatch them. B-43 remains a genuine blocked/partial item and must wait for provider activation.
-- **F-161 boundary:** STAGING_ACCEPTED at dc0e804 (coordinator 24fd172) with lane 02 62a1bb0; 613 passed / 2 documented known f140/f145 failures and release VERIFY passed. Existing watchdog refresh wiring is 1edd604. F-161 is not loaded and no genuine alert listing has been proven.
-- **Tested / loaded / browser:** F-161 tested dc0e804 + lane 02 62a1bb0; loaded marketplace fb84d0c, exact loaded lane 02 revision unproven. Prior desktop Claude Chrome showed 16 results within 150 miles; mobile/detail/source-link/My Bids/Suggestions and genuine-alert proof remain MISSING.
-- **Host / ETA / next_check_at:** latest timestamped host observation Monday, October 12, 2026 â€” 6:20 PM America/Chicago is limited to the B-43 watchdog checkpoint; current Agent 01/A-73/F-161 state UNKNOWN. **APPEARS STALE â€” HOST STATE UNVERIFIED.** A-73 ETA UNKNOWN; next_check_at MISSING.
-- **Blocker:** stale completion state; missing host-backed A-73 ACK/WORKING; dedicated alert label/filter and first genuine alert absent; B-44 waits for Bright Data customer activation.
-- **ONE next action:** Agent 01 publishes current host/process evidence plus A-73 ACK/WORKING or exact NEED, reconciles the false completion-state set, then permits one serial dispatch.
-- **Canonical evidence:** docs/receipts/2026-10-12-supervisor-visible-check-1831.md.
-
-
-## OWNER RESUME â€” Monday, October 12, 2026 â€” 7:40 PM America/Chicago
-- Michael explicitly resumed DealSniffer work for Facebook Marketplace after his earlier token-saving pause: he has a Bright Data account and wants actual Facebook listings visible and queryable in DealSniffer. This supersedes the pause for this bounded objective only.
-- Reuse existing Agent 01, B-43 adapter, B-44 READY live-smoke row, source registry, and /market search/filter seam. No duplicate worker or queue. Agent 01 first records current host/process and A-73 completion-state truth, then dispatches B-44 serially. Require ACK/WORKING within 300 seconds with responsible worker, exact next_check_at America/Chicago, realistic ETA or UNKNOWN, and blocker or NONE.
-- B-44 must validate provider activation with the existing owner-local token without exposing it, handle Bright Data HTTP 202 snapshot polling, run one bounded real Conway-area search (tools, 50 mi, at most 20 records), and receipt count, fields, location/radius fit, freshness, original listing links and observed provider cost. If the account still rejects requests, record its exact safe error and retain BLOCKED.
-- Once one real listing passes, Agent 01 assigns the existing UI/source integration path a bounded follow-up: add Facebook Marketplace to All Sources and a selectable source filter, support title/keyword and category/radius queries, use real images/original links when returned, deduplicate, label freshness and provenance, and persist Michael's source and Conway/radius choices. Never label fixtures or manual entries as a live connected feed. Verify the actually loaded desktop and mobile page in Claude Chrome by searching, filtering Facebook, opening a representative original link, and reloading to prove preferences survive.
-- Tested/loaded state at this instruction: B-43 adapter 570888a passed 451/0 fixture tests; earlier live smoke returned HTTP 400 Customer is not active; B-44 is READY but has no accepted live listing. Last reported loaded UI fb84d0c. Current host state UNKNOWN. No completion or ETA is claimed.
-
-
-## OWNER FILTER CORRECTION â€” Monday, October 12, 2026 â€” 7:42 PM America/Chicago
-- Michael's loaded-page screenshots show zero-count categories faded and several sources genuinely disabled; he wants those options available to choose. Existing lane 06 UI correction `bc677d88d82be368c01f5af865b8c06b89dd5ae4` removes zero-count fading and disabled source radios. Counts remain accurate; choosing a source without a usable read must show its honest NOT CONNECTED/BLOCKED/WAITING state and no fabricated results.
-- This is a user-visible staged change, not loaded acceptance. Existing Agent 01 must inspect the exact diff, run focused filter tests, load only through its established release path, and use Claude Chrome on the actually loaded desktop/mobile page: select a zero-count category, select Facebook Marketplace and another unconnected source, observe the truthful empty state, return to All Sources, then reload to verify remembered source and category choices. Confirm the controls remain readable and clickable even when a search such as 'trailers' yields zero for some categories.
-- Tested revision: no independent test receipt yet. Loaded revision: last reported fb84d0c. Current host state UNKNOWN. This correction is part of the existing UI acceptance path; do not create a duplicate worker or mark DONE from the commit alone.
+H™]™\ˆZ^[H[ÈÔĞHÛİ[ÈÜˆÛZ[H^H\™H]™H\İ[™ÜËˆ\İÈÚ]ÖS•UPÈš[™ÎˆY˜[Y]K\œÚ\İXÜ›ÜÜÈ™\İ\\XØ]\Ëš[\œÈ
+šXÙK˜Y]\È›İ[™\K[šÛ›İÛˆØØ][ÛŠKYKİ[™ËÙ\\˜][Ûˆœ›ÛHÔĞK›È™]ÛÜšÈØ[È
+\ÜÙ\›È\›X‹Ü™\]Y\İËÜÛØÚÙ]\ÙJK›Èš]˜]HÛÛ[ˆİYÚ[™ÈÛ›HÚ]HØÜ˜]Úš[NÈ™[X\ÙHÛ›H›İYÚH^\İ[™È›İ[™Y™[X\ÙH™]šY]Ëˆš[\È[™\ˆ[™\È
+Š‘SU‘T‘QH[™Hˆ
+ÌX™MŒİ]\ÈŒÙÍYÈLÈ\İÊKˆYÙ[H™\šYšYYÛˆ\ÛÛ]YİYÚ[™ÈÚ]HØÜ˜]Úš[™Èš[NˆYšXHH›Ü›K–[İ\ˆš[™È
+JHˆÙXİ[ÛˆÙ\\˜]Hœ›ÛHHLˆÔĞHØ\™Ë\œÚ\İYÈHİÛ™\‹[ØØ[”ÓÓˆ[™İ\š]™YHÙ\™\ˆ™\İ\X^šXÙHLY\È][™LÚİÜÈ]YH]ÛœÈ™\Ù[›È[Øš[Hİ™\™›İË›È™]ÛÜšÈ\ÙH[ˆHİÜ™H
+\›Ü]\œÚ[™ÈÛ›JKš]˜XŞHØØ[ˆÙˆHY™ˆÛX[‹ˆÛİ\˜ÙKÜİYÚ[™ÈÛ›H[[™[X\ÙYŠŠˆ
+Š”‘SPTÑQÈÍˆŒ‹LLLLULVˆ\È[™HˆXYŒÙÍY
+™XÙZ\ØÜËÜ™XÙZ\ËÌŒ‹LLLLK[]™KNÍ‹\™[ØYYŒMK›Y›È›Û˜XÚÊKŠŠˆ›Û™HÓ‘Hˆ›Øİ\ÙY\İÈÚ][X™\œÎÈØÜ™Y[œÚİÈœ›ÛH\ÛÛ]YİYÚ[™ÈÚ]Ş[]XÈš[™ÎÈ›ÛÙˆÙˆ™\›È™]ÛÜšÈXØÙ\ÜÎÈ›È]™HÚ[™ÙH‚ŸKMÌˆ
+ŠQÔQŒ‹LLLLH
+™XÙZ\ØÜËÜ™XÙZ\ËÌŒ‹LLLLKXMKXMÌXÛÛ[Z]K›Y
+KŠŠˆÚ\™YÛXÚÈXZ\ÛÛˆ
+T–PKLŒŒLLKLLN
+Nˆ™X]Ø[X\ÚËX\šXX
+ÌÎRÎTS‘ÒÊH\ÈHÚ\™Y[˜›ŞÛ›NÈÚ]Xˆ™XÙZ\Èİ^HØ[›ÛšXØ[ˆYÙ[HÙY\ÈH^\İ[™ÈÛZ[KYš\œİ]Y]YH[™XZ\ÛÛˆÛÜ
+›È\XØ]H]Y]YKÛÛÜ™[˜]Ü‹Ø]ÚÙËÙ\šXÙHÜˆÛÜšÙ\ŠKÛÛ[Y\ÈÛÛ\]X›HÛÜšÈÚ[H[H‘QQ\È[™[™ËZ\œÈ]™\H™\ÜY›Ø›[HÚ]H›ÜÜÙYš^[™\ØØ[]\ÈÈZXÚY[Û›H›ÜˆHÙ[Z[™HİÛ™\ˆXÚ\Ú[Û‹Z\ÜÚ[™ÈÜ™Y[X[ØXØÙ\ÜËÜ[™[™ËÜ›İšY\ˆÛÛ[Z]Y[\İXİ]™KÚ\œ™]™\œÚX›HXİ[Û‹\ÚXØ[ÜİXİ[ÛˆÜˆÛÛ™›Xİ[™È[œİXİ[Û‹ˆÛXÚÈ™XY[™ËÜ™\Z[™È[™H›ØÙ\ÜÙY][Y\İ[\ÚXÚÜÚ[™[Û™ÈÈHX[ÛšY™™\ˆİ\›Hİ\\š\ÛÜ‹›İÈ\È[™NÈYÙ[HXİÈÛˆPSÓ’Q‘‘T˜ØS“Ò‘PÕÎ˜][\ÈÛ›HÚ[ˆ^H\œš]™H\È]Y]YH›İÜÈÜˆXZ\ÛÛˆY\ÜØYÙ\Ëˆ›Û™HÓ‘H
+İ[™[™È[HYÜYÈ›ÈÛÙJHH™XÙZ\\ˆ™\İ[[™È\ÚÈÚ]\ÈY\ÜØYÙHY[™ÛÛ[Z]ŸKMÌH
+Š”ÔTUS‘ÈÓÓ•“Ó
+Šˆ
+Š“ÕÓ‘TˆQS‘H[]™\™YŒ‹LLLLUŒÎMŒÌˆ[™Œ‹LLLL•ŒŒÌÈ™^[\ÙYQY\ˆ\İÜšXØ[KMÌˆ^\İ[™ÈYÙ[H
+È^\İ[™ÈØØ[Ø]ÚÙÈÛ›NÈ›È\XØ]HÛÛÜ™[˜]Ü‹ÛÜšÙ\‹]Y]YK[Ûš]Ü‹Ù\šXÙHÜˆ]]ÛX][Û‹ŠŠˆ\™ÛÙHUKYš]™[ˆÚXÚÜÚ[È[™]™[İ]›ŞÜ™[^Nˆ›Ûİ‘PQQHÜ\˜][™È›İØÛÛÈ™\˜˜][KÜİ\\œÙY[™È[H[ˆØÜËĞÓÓÔ‘SUSÓ‹›YÈÚXÚÛ\İ\İÜNÈØÜËÚ[YÜ˜][Û‹ĞÓÓÔ‘SUÔ—ÕĞUÒÑË›Yİ]HXXÚ[™NÈÛÛËØÛÛÜ™[˜]Ü—İØ]ÚœHXXÚ[™K\™XYX›H™XÛÜ™˜[Y][Û‹İ[Y\‹^XİHÛ™HÓÔ’ÒS‘ËÑÓ‘KÓ‘QQP“ĞÒÑQİ]ÛÛYKX\›HÓ‘KTPT”ÈÕSH8 %ÔÕÕUHS•‘T’Q’QQ›Ú™Xİ\ÛÛ][Û‹Ü]X\˜[[™K›İYšXØ][Ûˆš[\š[™Ë[™Û˜ÙK[Û›H]™[İ]›Ş›ÜˆSU‘T‘QĞPÒËÕÓÔ’ÒS‘ËÑÓ‘KÓ‘QQÑUH^Ù\[ÛœËˆ^\İ[™È™[^HX›\Ú\ÈİX›HY\XØ]YX[ÛšY™™\ˆ]™[ÈÛ›NÈYˆ›È]]Üš^™YÛXÚÈ™[^H^\İËİXİ\™Y‘QQ
+È›İÜ™X]KÙ^ÜÙHHÚÙ[ŠKˆÛÜœ™XİH™KXY[™[H‹Lˆ\İÜH^XÚ]H[™XZÙHİ\œ™[‹LMˆHš\œİ]™HÛÛ\X[ÓÔ’ÒS‘ÈÚXÚÜÚ[Ú]]šY[˜ÙKX˜\ÙYUH[™^Xİ[Y\šXØKĞÚXØYÛÈ™^ØÚXÚ×Ø]ˆ‹LMˆXİ]™NÈYÜÚ]İ][\œ\[™È]ÈÛ™HÛÜšÙ\ˆT•PS8 %STSQS•QÎ˜™M
+Œ‹LLLL•ÎMŒŒÖŠNˆÛÛËÙ]WØÚXÚÜÚ[ËœH
+ÈØ]ÚÙÈ[YÜ˜][ÛÈİÛ™\ˆY[™[H™\˜˜][H[ˆ‘PQQK›Y[™ØÜËĞÓÓÔ‘SUSÓ‹›Y
+ËÌLˆÚ\œËİš[™Ë[X]ÚY
+NÈİ]HXXÚ[™H[ˆØÜËÚ[YÜ˜][Û‹ĞÓÓÔ‘SUÔ—ÕĞUÒÑË›YÈ\İÈ‹Ì
+\İËİ[š]İ\İÙ]WØÚXÚÜÚ[ËœH
+È\İØÛÛÜ™[˜]Ü—İØ]ÚœJKˆĞQQˆØ]ÚÙÈ™[ØYY›İYÚ]È\Ù\ˆ[š]]ŒMNŒÎÑ
+QLLÍMMËÎHŒ
+NÈš\œİŞXÛHÎMNˆ]Hİ]ÛÛY\È
+›İYJKˆ]™[È]Y]YYÓ‘H™[^WÛ™YY™XÙZ\ˆš\œİ]™HÚXÚÜÚ[Îˆ‹LH™^ØÚXÚÈŒ‹LLLLHŒÎŒMHÑKMÌHŒÎŒŒÑ
+YKXÚXÚÈ›ÛÙˆ[™[™ÊKˆ‘QQ
+˜[œÜÜÛ›JNˆÚ]]ÙÚ[˜Ûˆ\ÈÜİÛÈH™[^HØ[ˆÜİH]Y]YY]™[ÈÈˆÌNÈ[\[Y[][Ûˆ›İ›ØÚÙYˆÔÕTT”ÑQQš[Üˆİ]\Ë]Y]ˆÓRSQQÈT•PS8 %ˆÌH˜[œÜÜXØÙ\[˜ÙH\ÈÓÔ’ÒS‘È
+ÛÛ›ÛYÛÛ[Y[ÈŒLMNMMNM[™ŒLMNMŒMŒÈ™^ØÚXÚ×Ø]Œ‹LLLLHŒŒMH[Y\šXØKĞÚXØYÛÈ[\ÙY
+KˆÛXÚÈY[X™\œÚ\\È™\šYšYY][[YYX]KY]™[šYÙÙ\ˆ›İ™[˜[˜ÙH\Èİ[[œ›İ™[ˆ[™H™\]Z\™Y‘PQQKĞÓÓÔ‘SUSÓ‹ØÚXÚÛ\İİØ]HH^XİÛÛ[Z]ËÙš[\ÎÈ]\›Z[š\İXÈ\İÈ›Üˆ™\]Z\™YšY[Ëİ[Y^›Û™KÙYK[›İYYKÛİ]ÛÛYH^Û\Ú]š]KÙX\›HÓ‘KÜİ[HÚ]
+İÚ]İ]Üİ]šY[˜ÙKÛ›İYšXØ][Ûˆš[\š[™ËÚ\ÛÛ][Û‹Û›È\XØ]H][˜ÚÛİ]›ŞÜ™\š[™ÊÙY\
+Ü™]KÛ›ÈÛÜÈØœÙ\™YØ]ÚÙÈİ]NÈš\œİ‹LMˆ[Y\‹ØÚXÚÜÚ[›ÛÙÈ]Y™XÙZ\Ú]ÛÜİ›ØÚÙ\ˆ[™™^][Kˆ‚‚ˆÈÈİ\\š\ÛÜˆ™XÛÛ˜Ú[X][Ûˆ8 %[Û™^KØİØ™\ˆL‹Œˆ8 %NŒLSH[Y\šXØKĞÚXØYÛÂ‚‹H
+ŠØ[›ÛšXØ[™XÙZ\ŠŠˆËPÒPÒÒS‹LŒŒLL‹LLLPÑÈØÜËÜ™XÙZ\ËÌŒ‹LLLL‹\İ\\š\ÛÜ‹]š\ÚX›KXÚXÚËLLL›Y‚‹H
+ŠÛÜœ™Xİ[ÛˆÈËPÒPÒÒS‹LŒŒLL‹LLKPÑŠŠˆHØYY™]š\Ú[Ûˆ\È›İÈ‹LMLÈ\Y˜Xİ˜˜ÎXÎLXÍXYXÍL˜YŒYŒÎM˜ØØÍÌMY˜›İ‹LMËˆİÛ™\‹\[ˆ™[X\ÙHØØİ\œ™Y]LLHSNÈYÙ[H™XÛÜ™Y]™H™\šYšXØ][Ûˆ]NŒÎŒMSK‚‹H
+Š“ØYY›ÛÙŠŠˆ\İ[™\ˆQLŒÌÍÎÈ™\šYK[Û›HÒÎÈ]™HÛ]YH[ˆÚ›ÛYHÚİÙYÔĞKÛÛÛ^KÚ[ÛÛˆ[™›XÚÛ[ÛˆÛÛ›™XİYH™\İ[ÈÚ][ˆÌZ[\Ë™[Y[X™\™YÌ[Z[HÙ[Xİ[Ûˆ[™ÙX\˜Ú›İÈ\İˆÔĞH™Yœ™\ÚY]NŒˆSH
+KMÈİÎÈNLÈšYØšY\ˆ\]\ÊKˆ]™HÛ™K]ÚY[\˜Xİ[ÛˆØ\È“Õ›İ™[ÈİYÚ[™È[Øš[H]šY[˜ÙHÙ\È›İ™\XÙH]‚‹H
+Š“[Ü›š[™ÈXØÙ\[˜ÙH\È›İÛÛ\]NŠŠˆHH™X\˜H™\İ[ÈÙ\™H]Xİ[Ûˆ]™[Ë›İ][\Hİ\œ™[][K[]™[˜Z[\‹İÛÛ\İ[™ÜÎÈ^HšYÈÚİÙY[™XZ[›Ş]]ËY]Xİ[Ûˆ™[XZ[œÈ“ÕÓÓ“‘PÕQÈ˜[šÙYİYÙÙ\İ[ÛœÈ\Èİ[‹LMMNÈ™\™\Ù[]]™HÛİ\˜ÙH[šÜÈ[™]™H[Øš[H›İ\›™^H™[XZ[ˆZ\ÜÚ[™Ë‚‹H
+Š‘‹LMM‘QQŠŠˆHNŒSHXØÙ\[˜ÙHÚXÚÜÚ[\ÜÙYÚ]İ]HÓ‘H™XÙZ\ˆ]NŒNŒÌÈSHHØ]ÚÙÈ›İ[™›È‹LMMÛÜšÙ\‹ˆ[\[Y[][ÛˆLMØÌLÍXÙYŒLÌMÌXNLÌMÌŒLŒNL˜Ì™˜^\İË]H[ÛÛÜ™[˜]ÜˆİZ]H[™š\œİ[™Û]YHÚ›ÛYH\ÚİÜÛ[Øš[HXØÙ\[˜ÙH™[XZ[ˆZ\ÜÚ[™Ëˆ
+ŠTPT”ÈÕSH8 %ÔÕÕUHS•‘T’Q’QQŠŠ‚‹H
+Šİ\œ™[›İ[™Y\ÚÎŠŠˆ‹LMMHİYÙÙ\İ[ÛœÈ™[XZ[œÈÓÔ’ÒS‘È›İYÚ^\İ[™ÈYÙ[KÛ[™HˆY\ˆÛÜœ™XİY™[][˜Ú]™[X˜LÎY˜™MÍÍÈÌM˜ˆ]È™XÙZ\\İ[X]\ÈX›İ]ŒZ[]\Èœ›ÛHNŒHSH\È™]šY]ÎÈ™^ØÚXÚ×Ø]ŒHSKˆİ\œ™[QÜÙ\šXÙH›ÛÙˆ\ÈS’Ó“ÕÓ‹‚‹H
+Š”Ù\šX[™XÛİ™\NŠŠˆYÙ[H]\İÛÜÙH‹LMM	ÜÈ[™\[™[XØÙ\[˜ÙH\Ú[™ÈH^\İ[™ÈÛÛÜ™[˜]Üˆ]ÈÈ›İÜ™X]H[›İ\ˆÛÜšÙ\‹ˆ‹LMMHX^HÛÛ[YK]›È\\ˆ\Ü]ÚÜˆÛÛXš[™Y™[X\ÙHX^H\\ÜÈ]Ø]K‚‹H
+Š›ØÚÙ\ŠŠˆ‹LMM[™\[™[İZ]H[™]™H\ÚİÜÛ[Øš[HÛ]YHÚ›ÛYHXØÙ\[˜ÙH\™HZ\ÜÚ[™Ëˆ
+Š“ZXÚY[ŠŠˆ“ÕS‘Ë‚‚‚ˆÈÈİ\\š\ÛÜˆ™XÛÛ˜Ú[X][Ûˆ8 %[Û™^KØİØ™\ˆL‹Œˆ8 %NLÈH[Y\šXØKĞÚXØYÛÂ‹H
+ŠKMÌÈ™[XZ[œÈHÓ‘Hİ\œ™[›İ[™Y\ÚÎŠŠˆ^\İ[™ÈYÙ[NÈİYÙH
+Š‘SU‘T‘QSˆ‘TÔÒUÔ–HÈPÒÈRTÔÑQ
+Š‹ˆHNŒÍÈHPÒÈXY[™H[™Ì\ÙXÛÛ™Ø]ÚÙÈÚ[™İÈ[\ÙYÚ]İ]PÒËÕÓÔ’ÒS‘ÈÜˆÛÛ[X[™\ÜXÚYšXÈ‘QQĞ“ĞÒÑQˆUHS’Ó“ÕÓÈ™^ØÚXÚ×Ø]RTÔÒS‘Ëˆ
+ŠTPT”ÈÕSH8 %ÔÕÕUHS•‘T’Q’QQŠŠ‚‹H
+Š‹LLˆ‘QQÈ\X[™\™\]Z\Ú]\ÈØ]\ÙšYYŠŠˆ[™\[™[™XÙZ\ÍŒLÌNMNNJÎ‹ËÙÚ]X‹˜ÛÛKØØ[ÜÛÜËÛZXÚY[X\Ú[™\ÜË[ÜËÜ[ÌHÚ\ÜİYXÛÛ[Y[MŒLÌNMNN
+H™\ÜÈ[ÙKMŒ\\ÜİÛÜ™[œİ[Y™XY[Û›HSPTÙÚ[ˆÒËX™[ÈX[ÛšY™™\˜[™X[ÛšY™™\‹Ğ[\Ø™\Ù[[\H[\È›Û\‹[˜Ú[™ÙYÙY[ˆİ]K[™Ù[™\˜[[˜›Ş[›Ü[™Yˆ\ÈÙ\È›İ™\XÙHKMÌÈ\Èİ\œ™[ÛÜšË‚‹H
+Š‹LLˆ™[XZ[š[™È›ØÚÙ\ŠŠˆİÛ™\ˆ]\İÜ™X]KØÛÛ™š\›HHÜ˜ZYÜÛ\İØ]™Y\ÙX\˜Ú[\[™ÛXZ[š[\ˆ[ÈX[ÛšY™™\‹Ğ[\ØÈÛ™HÙ[Z[™H[\\È™\]Z\™Y™Y›Ü™HH™XY[Û›H\œÙ\ˆÛ[ÚÙKˆUHÚ][ˆMHZ[]\ÈY\ˆš\œİ[\È\œš]˜[S’Ó“ÕÓÈ™^ØÚXÚ×Ø]Y\Ù^KØİØ™\ˆLËŒˆ8 %NŒSH[Y\šXØKĞÚXØYÛË‚‹H
+Š‹LLˆXØÙ\[˜ÙH]šY[˜ÙNŠŠˆÙ[Z[™HÜ˜ZYÜÛ\İ[\ÈÙY[ˆ[˜Ú[™ÙYÈš]˜XŞK\ØY™H\œÙ\ˆÛ[ÚÙNÈ™X[X\šÙ]XÙHØ\™Ü[š[™ÈHÜšYÚ[˜[\İ[™ÎÈYÙ[H\ÚİÜÛ[Øš[HÛ]YHÚ›ÛYH˜[Y][Û‹ˆ›Èš^\™HÛİ[È\È]™K‚‹H
+Š•\İYÈØYYŠŠˆ‹LLˆ\œÙ\ˆ“Õ•SÈ‹LMMËÑ‹LMN\İYLL™˜ÙMØYYLYLÈ‹LMN“ÕĞQQÈ]™Hœ›İÜÙ\ˆ›ÛÙˆRTÔÒS‘Ë‚‹H
+ŠØ[›ÛšXØ[]šY[˜ÙNŠŠˆØÜËÜ™XÙZ\ËÌŒ‹LLLL‹\İ\\š\ÛÜ‹]š\ÚX›KXÚXÚËLLÍLË›Y‚‚‚ˆÈÈİ\\š\ÛÜˆ™XÛÛ˜Ú[X][Ûˆ8 %[Û™^KØİØ™\ˆL‹Œˆ8 %ŒÍHH[Y\šXØKĞÚXØYÛÂ‹H
+ŠKMÌÈ™[XZ[œÈHÓ‘Hİ\œ™[›İ[™Y\ÚÎŠŠˆ^\İ[™ÈYÙ[NÈš[Üš]HÈİYÙH
+Š“‘QQ8 %PÒÈRTÔÑQ
+Š‹ˆ›Èİ\œ™[Üİ[ØœÙ\™YPÒËÕÓÔ’ÒS‘ÈÜˆÛÛ[X[™\ÜXÚYšXÈ‘QQ^\İËˆUHS’Ó“ÕÓÈ™^ØÚXÚ×Ø][Û™^KØİØ™\ˆL‹Œˆ8 %H[Y\šXØKĞÚXØYÛËˆ
+ŠTPT”ÈÕSH8 %ÔÕÕUHS•‘T’Q’QQŠŠ‚‹H
+Š”\˜[[˜[œÜÜÛZ[\ÈÈ›İ\ÜXÙHKMÌÎŠŠˆˆÛÛ[Y[ÈŒLÌLLŒØŒLÌLLÍ˜ŒLÌLMŒ˜ŒLÌLNÌ˜ŒLÌLNÌMX[™ŒLÌLNLLXÛZ[H][\HÚ[][[™[İ\ÈÓÔ’ÒS‘È\ÚÜÈÚ]ÜİØœÙ\˜][ÛˆS’Ó“ÕÓˆ[™]\™H][˜ÚØXØÙ\[˜ÙH[Y\Ëˆ™\Ù\™HZ\ˆ\Y˜XİË]İ\\œÙYHÜÙH[Y\İ[\ÈÚ]XØÙ\[˜ÙH[YHS’Ó“ÕÓˆ[[YÙ[HÛÜœ™XİÈ[K‚‹H
+Š\Y˜Xİ]™\Ù\™YŠŠˆ‹LÍˆØXNLŒ˜š^\™H\œÙ\ˆŒKÌ‹LÎLÌÍL™\ÙX\˜ÚX]š^KMÍÌMXØXQˆ\Y˜Xİ[™‹LÍÈMÙXXš^\™HP˜^HY\\ˆÌ\™H›İİ\œ™[Üİ[]™[™\ÜËØYYURKÜˆ]™KXÛÛ›™Xİ[Ûˆ›ÛÙ‹‚‹H
+Š‹LLˆ^Xİš\œİÛİ\˜ÙNŠŠˆÜ˜ZYÜÛ\İÙ™šXÚX[Ø]™Y\ÙX\˜ÚK[XZ[›ÜˆH]H›ØÚÈ™YÚ[Û‹İ\[™ÈÚ]H˜\œ›İÈ˜Z[\ˆÙX\˜ÚÙ[\™YÛˆÛÛØ^HÌŒÌˆÚ][ˆLZ[\ËˆİXœØÜš\[Ûˆ\È“ÕSP“QÓ“Õ“Õ‘Sˆ™XØ]\ÙHH[\È›Û\ˆ\È™\›ÈÙ[Z[™HY\ÜØYÙ\Ëˆ\ÙHHYXØ]YX[ÛšY™™\ˆXZ[›Ş›İ\œÛÛ˜[ÛXZ[‚‹H
+Š‹LLˆš[\ˆ]ŠŠˆÙ[™\ˆY™\ÜÈ[™™X[İXš™Xİ\™HS’Ó“ÕÓˆ[[Hš\œİÙ[Z[™H[\ˆÈ›İİY\ÜËˆY\ˆ\œš]˜[X]ÚH^XİØœÙ\™YÜ˜ZYÜÛ\İ›Ü™ØÙ[™\ˆ
+È^XİØ]™Y\ÙX\˜ÚİXš™Xİ™Yš^
+ÈYXØ]Y™XÚ\Y[[™\HX[ÛšY™™\‹Ğ[\Øˆ\œÙ\ˆ[ÛÈ™\]Z\™\ÈÚ[O\\ÜØÜ˜ZYÜÛ\İÈ[šÜËVSRS‘KĞ“ÑK”QRË[™[˜Ú[™ÙYÙY[ˆİ]K‚‹H
+Š•\İYÈØYYŠŠˆ‹LMMËÑ‹LMN\İYLL™˜ÙMÈØYYLYLÈ‹LMN“ÕĞQQÈØYYœ›İÜÙ\ˆ›ÛÙˆRTÔÒS‘Ëˆ›ÈÙ[Z[™H‹LLˆÛ[ÚÙHÜˆ]™H‹LÍÈÛ[ÚÙK‚‹H
+Š“Ó‘H™^Xİ[ÛŠŠˆ^\İ[™ÈYÙ[HX›\Ú\Èİ\œ™[Üİ]šY[˜ÙH[™KMÌÈPÒËÕÓÔ’ÒS‘ÈÜˆ^Xİ‘QQ[ˆ™XÛÛ˜Ú[\ÈHÛÛ™›Xİ[™È\˜[[ÛZ[\Ë‚‹H
+ŠØ[›ÛšXØ[]šY[˜ÙNŠŠˆØÜËÜ™XÙZ\ËÌŒ‹LLLL‹\İ\\š\ÛÜ‹]š\ÚX›KXÚXÚËLMÍK›Y‚‚‚ˆÈÈİ\\š\ÛÜˆ™XÛÛ˜Ú[X][Ûˆ8 %[Û™^KØİØ™\ˆL‹Œˆ8 %ÎŒŒHH[Y\šXØKĞÚXØYÛÂ‹H
+Š“Ó‘Hİ\œ™[›İ[™Y][NŠŠˆKMÌÈ^\İ[™Ë]Ø]ÚÙÈš[š\ÚYX\Y˜XİØZÙH™\Z\‹‚‹H
+Š“İÛ™\ˆÈš[Üš]HÈİYÙNŠŠˆ^\İ[™ÈYÙ[HÈÈ
+Š“‘QQ8 %PÒÈRTÔÑQ
+ŠÈ›ÈÛÜšÙ\ˆ\È˜[YHİ\œ™[[[[Y\İ[\YÜİ›İ™[˜[˜ÙH[™HÙ\šX[PÒËÙ\Ü]Ú^\İ‚‹H
+ŠXØÙ\[˜ÙNŠŠˆ^XİHÛ™HØZÙKY\XØ][Û‹›Ú™Xİ\ÛÛ][Û‹ÛÛ\]YX\Y˜Xİ›İ™[˜[˜ÙKPÒËÕÓÔ’ÒS‘ÈÚ][ˆÌÙXÛÛ™Ë›È\XØ]HÛÛÜ™[˜]Ü‹İÛÜšÙ\‹ÜÙ\šXÙKİØ]ÚÙËÛ[Ûš]Ü‹‚‹H
+Š›ØÚÙ\ŠŠˆİ\œ™[YÙ[KİØ]ÚÙÈÜİİ]H\ÈS’Ó“ÕÓÈ‹LM[™LÍÈ˜[œÜÜÛZ[\ÈÛÛ™›Xİ[™Ø[››İ\İX›\Ú]™[™\ÜË‚‹H
+Š“™^Xİ[ÛŠŠˆYÙ[HX›\Ú\Èİ\œ™[ÜİÜ›ØÙ\ÜÈ]šY[˜ÙH[™KMÌÈPÒËÕÓÔ’ÒS‘ÈÜˆ^XİÛÛ[X[™\ÜXÚYšXÈ‘QQ[ˆ™XÛÛ˜Ú[\È‹LM™\œİ\ÈLÍÈ™Y›Ü™HÛ™HÙ\šX[\Ü]Ú‚‹H
+Š”™\Ù\™Y™^[YÚX›HRH][NŠŠˆ‹LMš^\ÈÎL0åÎL[™ÍŒ0åÎØİ[Y[İ™\™›İËÙY\ÈÙX\˜ÚÑš[\œÈÚ][ˆHšY]ÜÜÜ˜\ÈÜˆ[\›˜[HØÜ›ÛÈ]ZXÚÈšY]ÜË[™™[™\œÈØØ][ÛˆÛ˜ÙH\ÈÚ]KÕ’T0­È\İ[˜ÙKˆ‹LMŒÈÎ™˜Ì\È\ÚİÜXXØÙ\Y[ˆİYÙYXY\ÜÈÚ›ÛYH]T•PSİ™\˜[‚‹H
+Š‘]šY[˜ÙNŠŠˆÎ™˜Ì™MMÙØLÌÌMØŒ™MÌÙŒØŒŒY™˜ÌÌLÌYŒÍÌØMÍLÙØŒÎLNYNŒNMŒÍXÍˆÛÛ[Y[ŒLÌNMMÎNK[™ØÜËÜ™XÙZ\ËÌŒ‹LLLL‹\İ\\š\ÛÜ‹]š\ÚX›KXÚXÚËLMLŒK›Y‚‹H
+Š•\İYÈØYYÈœ›İÜÙ\ŠŠˆ\İYÎ™˜ÌÈØYYLYLLY˜Œ™ØXŒÌ˜˜ØÙMMLÍYXÙXÈØYYÛ]YHÚ›ÛYH\ÚİÜÛ[Øš[H]šY[˜ÙH“Ó‘K‚‹H
+Š‘UHÈ™^ØÚXÚ×Ø]ŠŠˆ]]Üš]]]™HUHS’Ó“ÕÓÈKMÌÈ™^ØÚXÚ×Ø]RTÔÒS‘Ëˆ‹LM˜[œÜÜ	ÜÈ[Û™^KØİØ™\ˆL‹Œˆ8 %ŒLH[Y\šXØKĞÚXØYÛÈ\È™]Z[™YÛ›H\È[ˆ[™\šYšYYÛZ[K‚‚‚ˆÈÈİ\\š\ÛÜˆ™XÛÛ˜Ú[X][Ûˆ8 %[Û™^KØİØ™\ˆL‹Œˆ8 %ŒŒHH[Y\šXØKĞÚXØYÛÂ‹H
+Š“Ó‘Hİ\œ™[›İ[™Y][NŠŠˆKMÌÈ^\İ[™Ë]Ø]ÚÙÈš[š\ÚYX\Y˜XİØZÙKØÛÛ\][Û‹\İ]H™\Z\È^\İ[™ÈYÙ[NÈÈ
+Š“‘QQ8 %PÒÈRTÔÑQ
+Š‹‚‹H
+Š“ØœÙ\™YY™XİŠŠˆ]ŒLŒMHH[™ŒMŒÈH[Y\šXØKĞÚXØYÛËH^\İ[™ÈØ]ÚÙÈ[Z]Y˜[ÙH‘QQÈ›ÜˆÛÛ\]YÜİ\\œÙYYKMÍ‹LÍ‹‹LÎ‹LMNH[™LÍËˆÈ›İ™KY\Ü]Ú[K‚‹H
+ŠXØÙ\[˜ÙNŠŠˆ^XİHÛ™HY\XØ]Y›İ™[˜[˜ÙKX™X\š[™ÈØZÙNÈÓ‘KÜİ\\œÙYY][\ÈØ[››İ[Z]Z\ÜÙYQÓ‘H‘QQÈPÒËÕÓÔ’ÒS‘ÈÚ][ˆÌÙXÛÛ™ÎÈ›È\XØ]H›ØÙ\ÜËÜÙ\šXÙK‚‹H
+Š“™^[YÚX›H™\Ù\™Y][NŠŠˆ‹LMH]Z[\YÙHš^\ÈY\ˆÙ\šX[™XÛÛ˜Ú[X][Û‹ˆ‹LM\ÈÕQÒS‘×ĞPĞÑTQ]Ø™™˜È‹LMŒ\ÈT•PS]˜LÎNXØ‚‹H
+Š•\İYÈØYYÈœ›İÜÙ\ŠŠˆÙX\˜ÚØ™™˜
+ˆ^[İ]Øœ›İÜÙ\ˆ\ÜÎÈ[NMÍÈØİ[Y[Y[š\›Û›Y[˜Z[\™\ÊK]Z[˜LÎNXØ
+™Y™\™[˜ÙHŒL‹ÌHÛ›İÛÈ[™H
+ÑHLKÌˆÛ›İÛŠNÈØYYLYLÈØYYÛ]YHÚ›ÛYH›ÛÙˆ“Ó‘K‚‹H
+Š‘UHÈ™^ØÚXÚ×Ø]ŠŠˆKMÌÈUHS’Ó“ÕÓÈ™^ØÚXÚ×Ø]RTÔÒS‘Ëˆ‹LMIÜÈNŒMHH[Y\İ[\\È˜[œÜÜ[Û›H[™Üİ][™\šYšYY‚‹H
+Š›ØÚÙ\ˆÈ™^Xİ[ÛŠŠˆİ[HØ]ÚÙÈÛÛ\][Ûˆİ]H[™Z\ÜÚ[™Èİ\œ™[YÙ[KĞKMÌÈ›ØÙ\ÜÈ›İ™[˜[˜ÙNÈYÙ[H]\İX›\ÚÜİX˜XÚÙYKMÌÈPÒËÕÓÔ’ÒS‘ÈÜˆ^Xİ‘QQ™XÛÛ˜Ú[HHš]™H˜[ÙH‘QQİ]\Ë[ˆ\›Z]Û™HÙ\šX[\Ü]Ú‚‹H
+ŠØ[›ÛšXØ[]šY[˜ÙNŠŠˆØÜËÜ™XÙZ\ËÌŒ‹LLLL‹\İ\\š\ÛÜ‹]š\ÚX›KXÚXÚËLMŒŒK›Y‚‚‚ˆÈÈİ\\š\ÛÜˆ™XÛÛ˜Ú[X][Ûˆ8 %[Û™^KØİØ™\ˆL‹Œˆ8 %NŒMHH[Y\šXØKĞÚXØYÛÂ‹H
+Š“Ó‘Hİ\œ™[›İ[™Y][NŠŠˆKMÌÈ^\İ[™Ë]Ø]ÚÙÈÛÛ\][Û‹\İ]H™\Z\È^\İ[™ÈYÙ[NÈÈ‘QQ8 %PÒÈRTÔÑQ‚‹H
+Š“ØœÙ\™YY™XİŠŠˆ˜[ÙH‘QQÈ›İÈÛİ™\ˆ[ˆÓ‘KÜİ\\œÙYY\ÚÜÎˆKMÍ‹LÍ‹‹LÎ‹LMNKLÍË‹LMŒËLÍK‹LÎKLÎ[™‹MKˆÈ›İ™KY\Ü]Ú[K‚‹H
+Š“ØYY›İ[™\NŠŠˆ˜È™[X\ÙY[Û™^KØİØ™\ˆL‹Œˆ8 %NˆH[Y\šXØKĞÚXØYÛÎÈT•QPÕ™\šYšXØ][Ûˆ\ÜÙYÈÛ]YHÚ›ÛYH\ÚİÜÚİÙYMˆ™\İ[ÈÚ][ˆMLZ[\Ëˆ[Øš[KÙ]Z[ÜÛİ\˜ÙK[[šËÓ^HšYËÔİYÙÙ\İ[ÛœÈXØÙ\[˜ÙH™[XZ[œÈZ\ÜÚ[™Ë‚‹H
+ŠÛÛ\]X›H\Y˜XİÎŠŠˆ‹LMHİYÙYÎÌ›Øİ\ÙYŒÌˆÛ›İÛˆ[š\›Û›Y[˜Z[\™\Ëˆ‹MÈY\\ˆMÌH\ÜÙYLKÌ]H]™HÛ[ÚÙH\È›ØÚÙYHœšYÚ]H	Ğİ\İÛY\ˆ\È›İXİ]™IÎÈÛÜİ	‚‹H
+Š“™^[YÚX›H™\Ù\™YÛÜšÎŠŠˆ‹LMŒHÙ[Z[™H[\\Ûİ\˜ÙHRHY\ˆÙ\šX[™XÛÛ˜Ú[X][ÛÈ‹MÛ›HY\ˆİÛ™\ˆœšYÚ]HXİ]˜][Û‹‚‹H
+Š‘UHÈ™^ØÚXÚ×Ø]ŠŠˆKMÌÈS’Ó“ÕÓˆÈRTÔÒS‘Ëˆ‹LMŒHŒLH\È˜[œÜÜ[Û›H[™[™\šYšYY‚‹H
+Š“Ó‘H™^Xİ[ÛŠŠˆYÙ[HX›\Ú\ÈÜİX˜XÚÙYKMÌÈPÒËÕÓÔ’ÒS‘ÈÜˆ^Xİ‘QQ™XÛÛ˜Ú[\ÈH[ˆ˜[ÙH‘QQİ]\Ë[ˆ\›Z]ÈÛ™HÙ\šX[\Ü]Ú‚‹H
+ŠØ[›ÛšXØ[]šY[˜ÙNŠŠˆØÜËÜ™XÙZ\ËÌŒ‹LLLL‹\İ\\š\ÛÜ‹]š\ÚX›KXÚXÚËLMÌMK›Y‚‚‚ˆÈÈİ\\š\ÛÜˆ™XÛÛ˜Ú[X][Ûˆ8 %[Û™^KØİØ™\ˆL‹Œˆ8 %ŒÌHH[Y\šXØKĞÚXØYÛÂ‹H
+Š“Ó‘Hİ\œ™[›İ[™Y][NŠŠˆKMÌÈ^\İ[™Ë]Ø]ÚÙÈš[š\ÚYX\Y˜XİØZÙKØÛÛ\][Û‹\İ]H™\Z\È^\İ[™ÈYÙ[NÈÈ
+Š“‘QQ8 %PÒÈRTÔÑQ
+Š‹‚‹H
+ŠÛÛ›Û\[™HY™XİŠŠˆ˜[ÙKÜİ[H‘QQÈ›İÈÛİ™\ˆ]X\İšYY[ˆÛÛ\]YÜˆİ\\œÙYY\ÚÜÎˆKMÍ‹LÍ‹‹LÎ‹LMNKLÍË‹LMŒËLÍK‹LÎKLÎ‹MK‹MLÍ‹‹M‹‹LMŒ[™‹LMŒKˆÈ›İ™KY\Ü]Ú[Kˆ‹MÈ™[XZ[œÈHÙ[Z[™H›ØÚÙYÜ\X[][H[™]\İØZ]›Üˆ›İšY\ˆXİ]˜][Û‹‚‹H
+Š‘‹LMŒH›İ[™\NŠŠˆÕQÒS‘×ĞPĞÑTQ]ÌN
+ÛÛÜ™[˜]Üˆ™MÌŠHÚ][™HˆŒ˜LX˜ŒÈŒLÈ\ÜÙYÈˆØİ[Y[YÛ›İÛˆŒMÙŒMH˜Z[\™\È[™™[X\ÙH‘T’Q–H\ÜÙYˆ^\İ[™ÈØ]ÚÙÈ™Yœ™\ÚÚ\š[™È\ÈYYŒˆ‹LMŒH\È›İØYY[™›ÈÙ[Z[™H[\\İ[™È\È™Y[ˆ›İ™[‹‚‹H
+Š•\İYÈØYYÈœ›İÜÙ\ŠŠˆ‹LMŒH\İYÌN
+È[™HˆŒ˜LX˜ŒÈØYYX\šÙ]XÙH˜Ë^XİØYY[™Hˆ™]š\Ú[Ûˆ[œ›İ™[‹ˆš[Üˆ\ÚİÜÛ]YHÚ›ÛYHÚİÙYMˆ™\İ[ÈÚ][ˆMLZ[\ÎÈ[Øš[KÙ]Z[ÜÛİ\˜ÙK[[šËÓ^HšYËÔİYÙÙ\İ[ÛœÈ[™Ù[Z[™KX[\›ÛÙˆ™[XZ[ˆRTÔÒS‘Ë‚‹H
+Š’ÜİÈUHÈ™^ØÚXÚ×Ø]ŠŠˆ]\İ[Y\İ[\YÜİØœÙ\˜][Ûˆ[Û™^KØİØ™\ˆL‹Œˆ8 %ŒŒH[Y\šXØKĞÚXØYÛÈ\È[Z]YÈH‹MÈØ]ÚÙÈÚXÚÜÚ[Èİ\œ™[YÙ[KĞKMÌËÑ‹LMŒHİ]HS’Ó“ÕÓ‹ˆ
+ŠTPT”ÈÕSH8 %ÔÕÕUHS•‘T’Q’QQŠŠˆKMÌÈUHS’Ó“ÕÓÈ™^ØÚXÚ×Ø]RTÔÒS‘Ë‚‹H
+Š›ØÚÙ\ŠŠˆİ[HÛÛ\][Ûˆİ]NÈZ\ÜÚ[™ÈÜİX˜XÚÙYKMÌÈPÒËÕÓÔ’ÒS‘ÎÈYXØ]Y[\X™[Ùš[\ˆ[™š\œİÙ[Z[™H[\XœÙ[È‹MØZ]È›ÜˆœšYÚ]Hİ\İÛY\ˆXİ]˜][Û‹‚‹H
+Š“Ó‘H™^Xİ[ÛŠŠˆYÙ[HX›\Ú\Èİ\œ™[ÜİÜ›ØÙ\ÜÈ]šY[˜ÙH\ÈKMÌÈPÒËÕÓÔ’ÒS‘ÈÜˆ^Xİ‘QQ™XÛÛ˜Ú[\ÈH˜[ÙHÛÛ\][Û‹\İ]HÙ][ˆ\›Z]ÈÛ™HÙ\šX[\Ü]Ú‚‹H
+ŠØ[›ÛšXØ[]šY[˜ÙNŠŠˆØÜËÜ™XÙZ\ËÌŒ‹LLLL‹\İ\\š\ÛÜ‹]š\ÚX›KXÚXÚËLNÌK›Y‚‚‚ˆÈÈÕÓ‘Tˆ‘TÕSQH8 %[Û™^KØİØ™\ˆL‹Œˆ8 %ÎH[Y\šXØKĞÚXØYÛÂ‹HZXÚY[^XÚ]H™\İ[YYX[ÛšY™™\ˆÛÜšÈ›Üˆ˜XÙX›ÛÚÈX\šÙ]XÙHY\ˆ\ÈX\›Y\ˆÚÙ[‹\Ø]š[™È]\ÙNˆH\ÈHœšYÚ]HXØÛİ[[™Ø[ÈXİX[˜XÙX›ÛÚÈ\İ[™ÜÈš\ÚX›H[™]Y\XX›H[ˆX[ÛšY™™\‹ˆ\Èİ\\œÙY\ÈH]\ÙH›Üˆ\È›İ[™YØš™Xİ]™HÛ›K‚‹H™]\ÙH^\İ[™ÈYÙ[K‹MÈY\\‹‹M‘PQH]™K\Û[ÚÙH›İËÛİ\˜ÙH™YÚ\İK[™ÛX\šÙ]ÙX\˜ÚÙš[\ˆÙX[Kˆ›È\XØ]HÛÜšÙ\ˆÜˆ]Y]YKˆYÙ[Hš\œİ™XÛÜ™Èİ\œ™[ÜİÜ›ØÙ\ÜÈ[™KMÌÈÛÛ\][Û‹\İ]H][ˆ\Ü]Ú\È‹MÙ\šX[Kˆ™\]Z\™HPÒËÕÓÔ’ÒS‘ÈÚ][ˆÌÙXÛÛ™ÈÚ]™\ÜÛœÚX›HÛÜšÙ\‹^Xİ™^ØÚXÚ×Ø][Y\šXØKĞÚXØYÛË™X[\İXÈUHÜˆS’Ó“ÕÓ‹[™›ØÚÙ\ˆÜˆ“Ó‘K‚‹H‹M]\İ˜[Y]H›İšY\ˆXİ]˜][ÛˆÚ]H^\İ[™ÈİÛ™\‹[ØØ[ÚÙ[ˆÚ]İ]^ÜÚ[™È][™HœšYÚ]HŒˆÛ˜\ÚİÛ[™Ë[ˆÛ™H›İ[™Y™X[ÛÛØ^KX\™XHÙX\˜Ú
+ÛÛËLZK][ÜİŒ™XÛÜ™ÊK[™™XÙZ\Ûİ[šY[ËØØ][Û‹Ü˜Y]\Èš]œ™\Ú™\ÜËÜšYÚ[˜[\İ[™È[šÜÈ[™ØœÙ\™Y›İšY\ˆÛÜİˆYˆHXØÛİ[İ[™Z™XİÈ™\]Y\İË™XÛÜ™]È^XİØY™H\œ›Üˆ[™™]Z[ˆ“ĞÒÑQ‚‹HÛ˜ÙHÛ™H™X[\İ[™È\ÜÙ\ËYÙ[H\ÜÚYÛœÈH^\İ[™ÈRKÜÛİ\˜ÙH[YÜ˜][Ûˆ]H›İ[™Y›ÛİË]\ˆY˜XÙX›ÛÚÈX\šÙ]XÙHÈ[Ûİ\˜Ù\È[™HÙ[XİX›HÛİ\˜ÙHš[\‹İ\Ü]KÚÙ^]ÛÜ™[™Ø]YÛÜKÜ˜Y]\È]Y\šY\Ë\ÙH™X[[XYÙ\ËÛÜšYÚ[˜[[šÜÈÚ[ˆ™]\›™YY\XØ]KX™[œ™\Ú™\ÜÈ[™›İ™[˜[˜ÙK[™\œÚ\İZXÚY[	ÜÈÛİ\˜ÙH[™ÛÛØ^KÜ˜Y]\ÈÚÚXÙ\Ëˆ™]™\ˆX™[š^\™\ÈÜˆX[X[[šY\È\ÈH]™HÛÛ›™XİY™YYˆ™\šYHHXİX[HØYY\ÚİÜ[™[Øš[HYÙH[ˆÛ]YHÚ›ÛYHHÙX\˜Ú[™Ëš[\š[™È˜XÙX›ÛÚËÜ[š[™ÈH™\™\Ù[]]™HÜšYÚ[˜[[šË[™™[ØY[™ÈÈ›İ™H™Y™\™[˜Ù\Èİ\š]™K‚‹H\İYÛØYYİ]H]\È[œİXİ[Ûˆ‹MÈY\\ˆMÌH\ÜÙYLKÌš^\™H\İÎÈX\›Y\ˆ]™HÛ[ÚÙH™]\›™Yİ\İÛY\ˆ\È›İXİ]™NÈ‹M\È‘PQH]\È›ÈXØÙ\Y]™H\İ[™Ëˆ\İ™\ÜYØYYRH˜Ëˆİ\œ™[Üİİ]HS’Ó“ÕÓ‹ˆ›ÈÛÛ\][ÛˆÜˆUH\ÈÛZ[YY‚‚‚ˆÈÈÕÓ‘Tˆ’STˆÓÔ”‘PÕSÓˆ8 %[Û™^KØİØ™\ˆL‹Œˆ8 %ÎˆH[Y\šXØKĞÚXØYÛÂ‹HZXÚY[	ÜÈØYY\YÙHØÜ™Y[œÚİÈÚİÈ™\›ËXÛİ[Ø]YÛÜšY\È˜YY[™Ù]™\˜[Ûİ\˜Ù\ÈÙ[Z[™[H\ØX›YÈHØ[ÈÜÙHÜ[ÛœÈ]˜Z[X›HÈÚÛÜÙKˆ^\İ[™È[™HˆRHÛÜœ™Xİ[Ûˆ˜ÍÍÙ˜™LÍÌYXYXÌ˜YXYM™[[İ™\È™\›ËXÛİ[˜Y[™È[™\ØX›YÛİ\˜ÙH˜Y[ÜËˆÛİ[È™[XZ[ˆXØİ\˜]NÈÚÛÜÚ[™ÈHÛİ\˜ÙHÚ]İ]H\ØX›H™XY]\İÚİÈ]ÈÛ™\İ“ÕÓÓ“‘PÕQĞ“ĞÒÑQÕĞRUS‘Èİ]H[™›È˜XœšXØ]Y™\İ[Ë‚‹H\È\ÈH\Ù\‹]š\ÚX›HİYÙYÚ[™ÙK›İØYYXØÙ\[˜ÙKˆ^\İ[™ÈYÙ[H]\İ[œÜXİH^XİY™‹[ˆ›Øİ\ÙYš[\ˆ\İËØYÛ›H›İYÚ]È\İX›\ÚY™[X\ÙH][™\ÙHÛ]YHÚ›ÛYHÛˆHXİX[HØYY\ÚİÜÛ[Øš[HYÙNˆÙ[XİH™\›ËXÛİ[Ø]YÛÜKÙ[Xİ˜XÙX›ÛÚÈX\šÙ]XÙH[™[›İ\ˆ[˜ÛÛ›™XİYÛİ\˜ÙKØœÙ\™HH][[\Hİ]K™]\›ˆÈ[Ûİ\˜Ù\Ë[ˆ™[ØYÈ™\šYH™[Y[X™\™YÛİ\˜ÙH[™Ø]YÛÜHÚÚXÙ\ËˆÛÛ™š\›HHÛÛ›ÛÈ™[XZ[ˆ™XYX›H[™ÛXÚØX›H]™[ˆÚ[ˆHÙX\˜ÚİXÚ\È	İ˜Z[\œÉÈZY[È™\›È›ÜˆÛÛYHØ]YÛÜšY\Ë‚‹H\İY™]š\Ú[Ûˆ›È[™\[™[\İ™XÙZ\Y]ˆØYY™]š\Ú[Ûˆ\İ™\ÜY˜Ëˆİ\œ™[Üİİ]HS’Ó“ÕÓ‹ˆ\ÈÛÜœ™Xİ[Ûˆ\È\ÙˆH^\İ[™ÈRHXØÙ\[˜ÙH]ÈÈ›İÜ™X]HH\XØ]HÛÜšÙ\ˆÜˆX\šÈÓ‘Hœ›ÛHHÛÛ[Z][Û™K‚
