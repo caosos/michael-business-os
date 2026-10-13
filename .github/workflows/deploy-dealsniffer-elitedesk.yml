@@ -126,6 +126,17 @@ jobs:
           grep -q "I will keep the price, availability, and expiration current" "$PROOF_DIR/vendor-deal.html"
           ! grep -q "id='admin-menu'" "$PROOF_DIR/vendor-deal.html"
 
+          # F-167 is deterministic first-N only. These read-only journeys prove
+          # the loaded customer and vendor pages without creating or claiming a
+          # deal, sending a message, taking payment, or changing owner state.
+          curl -fsS --max-time 30 http://127.0.0.1:8766/market/flash > "$PROOF_DIR/flash-customer.html"
+          grep -q "Flash deals" "$PROOF_DIR/flash-customer.html"
+          grep -q "No random winner and no payment to claim" "$PROOF_DIR/flash-customer.html"
+          curl -fsS --max-time 30 http://127.0.0.1:8766/sell/deal/flash > "$PROOF_DIR/flash-vendor.html"
+          grep -q "Deterministic flash deals" "$PROOF_DIR/flash-vendor.html"
+          grep -q "Fixed first-N claims only" "$PROOF_DIR/flash-vendor.html"
+          grep -q "Create a scheduled flash deal" "$PROOF_DIR/flash-vendor.html"
+
           curl -fsS --max-time 30 http://127.0.0.1:8766/home > "$PROOF_DIR/home.html"
           grep -q "Find the deals worth leaving home for" "$PROOF_DIR/home.html"
           grep -q "Privacy" "$PROOF_DIR/home.html"
@@ -168,6 +179,7 @@ jobs:
           grep -q "name='cat' value='tools' checked" "$PROOF_DIR/multi-source.html"
           grep -q "name='cat' value='equipment' checked" "$PROOF_DIR/multi-source.html"
           ! grep -q "name='source' value='all' checked" "$PROOF_DIR/multi-source.html"
+          grep -q ".mk-cat:has(input:checked),.mk-src-row:has(input:checked)" "$PROOF_DIR/multi-source.html"
           restore_prefs
           trap - EXIT
           set +e
@@ -214,6 +226,8 @@ jobs:
             "$CHROME" --headless --disable-gpu --no-sandbox --window-size=390,844 --screenshot="$PROOF_DIR/bids-mobile.png" http://127.0.0.1:8766/market/bids || true
             "$CHROME" --headless --disable-gpu --no-sandbox --window-size=1440,1000 --screenshot="$PROOF_DIR/vendor-deal-desktop.png" http://127.0.0.1:8766/sell/deal || true
             "$CHROME" --headless --disable-gpu --no-sandbox --window-size=390,1200 --screenshot="$PROOF_DIR/vendor-deal-mobile.png" http://127.0.0.1:8766/sell/deal || true
+            "$CHROME" --headless --disable-gpu --no-sandbox --window-size=1440,1000 --screenshot="$PROOF_DIR/flash-customer-desktop.png" http://127.0.0.1:8766/market/flash || true
+            "$CHROME" --headless --disable-gpu --no-sandbox --window-size=390,1200 --screenshot="$PROOF_DIR/flash-vendor-mobile.png" http://127.0.0.1:8766/sell/deal/flash || true
           fi
           {
             date --iso-8601=seconds
