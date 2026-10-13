@@ -44,6 +44,7 @@ jobs:
           set +a
           set -u
           PREFS="$(PYTHONPATH="var/lanes/agent-06${PYTHONPATH:+:$PYTHONPATH}" .venv/bin/python -c 'from operator_ui import market_prefs; print(market_prefs.path())')"
+          FACEBOOK_CACHE="$(PYTHONPATH="var/lanes/agent-06${PYTHONPATH:+:$PYTHONPATH}" .venv/bin/python -c 'from operator_ui import market_facebook; print(market_facebook.cache_path())')"
           # Attempt 4's provider check used the coordinator-relative fallback
           # instead of the module's actual preference path. Restore the exact
           # pre-test owner file captured by that release before proving again.
@@ -83,6 +84,11 @@ jobs:
           fi
           printf 'credential_configured=%s\n' "$CREDENTIAL_CONFIGURED" > "$PROOF_DIR/facebook-proof.txt"
           curl -fsS --max-time 180 'http://127.0.0.1:8766/market?go=1&keywords=trailer&base=72032&radius=30&source=facebook&cat=all' > "$PROOF_DIR/facebook-search.html"
+          for ATTEMPT in 2 3 4; do
+            [ -s "$FACEBOOK_CACHE" ] && break
+            sleep 30
+            curl -fsS --max-time 180 'http://127.0.0.1:8766/market?go=1&keywords=trailer&base=72032&radius=30&source=facebook&cat=all' > "$PROOF_DIR/facebook-search.html"
+          done
           curl -fsS --max-time 30 'http://127.0.0.1:8766/market?go=1&base=72032&radius=100&source=wooley&source=blackmon&cat=tools&cat=equipment' > "$PROOF_DIR/multi-source.html"
           grep -q "name='source' value='wooley' checked" "$PROOF_DIR/multi-source.html"
           grep -q "name='source' value='blackmon' checked" "$PROOF_DIR/multi-source.html"
@@ -96,7 +102,7 @@ jobs:
           from datetime import datetime, timezone
           from pathlib import Path
           from operator_ui import market_facebook as fb
-          if not Path("var/cache/facebook-marketplace.json").is_file():
+          if not fb.cache_path().is_file():
               d = fb.load(datetime.now(timezone.utc), keyword="trailer", city="72032", radius=30, refresh=True)
               message = " ".join(str(d.get("message") or "NONE").split())[:800]
               print(f"provider_status={d.get('status') or 'UNKNOWN'}")
@@ -105,10 +111,10 @@ jobs:
           PROVIDER_PROBE_RC=$?
           set -e
           printf 'provider_probe_rc=%s\n' "$PROVIDER_PROBE_RC" >> "$PROOF_DIR/facebook-proof.txt"
-          .venv/bin/python - <<'PY' >> "$PROOF_DIR/facebook-proof.txt"
+          PYTHONPATH="var/lanes/agent-06${PYTHONPATH:+:$PYTHONPATH}" .venv/bin/python - <<'PY' >> "$PROOF_DIR/facebook-proof.txt"
           import json
-          from pathlib import Path
-          p = Path("var/cache/facebook-marketplace.json")
+          from operator_ui import market_facebook as fb
+          p = fb.cache_path()
           try:
               d = json.loads(p.read_text(encoding="utf-8"))
               rows = d.get("records") if isinstance(d, dict) else None
