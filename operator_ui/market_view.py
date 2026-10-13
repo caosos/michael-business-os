@@ -280,12 +280,9 @@ def _sidebar(saved: list[dict], csrf: str, pin_html: str, tok, q: dict, save: st
                     f"<a style='display:inline' href='/market?run={cid}'>Run</a> · <a style='display:inline' href='/market?edit={cid}'>Edit</a> {toggle}</li>")
     saved_html = f"<ul style='padding-left:16px;margin:4px 0'>{''.join(rows)}</ul>" if rows else "<p class='small mut'>No saved searches yet.</p>"
     mine = ("<details class='mk-sect' id='my-marketplace'><summary><b>My Marketplace</b></summary>"
-            f"<a class='mk-sec2' href='{mb.href(q, quick='saved', page=1)}'>Saved listings</a><a class='mk-sec2' href='/market?new=1'>New search</a>"
+            f"<a class='mk-sec2' href='{mb.href(q, quick='saved', page=1)}'>Saved listings</a><a class='mk-sec2' href='/market?new=1'>New search</a><a class='mk-sec2' href='/sell'><b>Sell an item</b></a>"
             f"{save}<details><summary>Saved searches ({len(rows)})</summary>{saved_html}</details>{bids}{hidden_panel(prefs, tok) if prefs else ''}</details>")
-    admin = ("<details class='mk-sect' id='admin-menu'><summary><b>Admin</b></summary><a href='/queue'>Queue</a><a href='/mission'>Weekly mission</a>"
-             "<a href='/numbers'>My numbers</a><a href='/wanted'>Wanted</a><a href='/intake'>Intake</a><a href='/assets'>My assets</a>"
-             "<a href='/resale'>Resale</a><a href='/sources'>Source health</a></details>")
-    return f"<aside class='mk-side{' folded' if folded else ''}' id='filters-side'>{_side_filters(q, fc, now) if fc else ''}{mine}{admin}</aside>"
+    return f"<aside class='mk-side{' folded' if folded else ''}' id='filters-side'>{_side_filters(q, fc, now) if fc else ''}{mine}</aside>"
 
 
 def _slider(q: dict, form: str = "") -> str:

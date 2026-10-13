@@ -1,0 +1,8 @@
+# DealSniffer per-account mailbox and notification foundation
+
+- Added `operator_ui/account_delivery.py`, a provider-neutral boundary for two opaque, stable per-account aliases: `alerts-…` for vendor listing/bid alerts and `contact-…` for future buyer/seller replies.
+- `dealsniffers.com` is the intended domain, but it remains configuration (`MBOS_INTAKE_MAIL_DOMAIN`) rather than a connection claim. Until an inbound provider supplies a timestamped delivery receipt, the state is exactly **NOT CONNECTED**. DNS/MX/provider routing is not proven by this change.
+- A changed notification e-mail is unverified and e-mail delivery stays disabled. Explicit provider verification provenance is required before the preference can become enabled. Supported first-pass events are new matches, bid changes, closing soon, and seller messages; cadence is instant or daily.
+- Aliases use an HMAC secret read indirectly through `MBOS_INTAKE_ALIAS_SECRET_ENV`; the secret is never persisted. Account aliases contain neither the Google subject nor the user's e-mail. There is no source-password or source-token field: vendor and marketplace accounts remain the user's own accounts.
+- No network request, e-mail send, Google OAuth implementation, live DNS/MX claim, or source-account login was added. A future mail-provider adapter must route inbound aliases and call `record_inbound_receipt`; a future outbound adapter must verify and deliver notification e-mail.
+- Tests: `tests/test_account_delivery.py` covers unique/stable aliases, purpose separation, honest unconfigured/configured states, proof-gated LIVE CONNECTED status, proof-gated notification enabling, address-change reverification, secret/password non-persistence, and validation.

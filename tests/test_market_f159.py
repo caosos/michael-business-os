@@ -193,11 +193,11 @@ def test_collapse_needs_csrf(ui):
     assert st in (200, 400, 403) and not mbr.collapsed()
 
 
-def test_land_default_off_and_arkansas_preselected(ui):
+def test_land_default_off_and_conway_radius_preselected(ui):
     h = get(ui)
     box = re.search(r"<div id='mkcats'>.*?</div>", h, re.S).group(0)
     assert "value='land_real_estate' checked" not in box and "value='tools' checked" in box
-    assert "name='state' value='AR' checked" in h and "name='base' size='12' value='72032'" in h
+    assert "name='loc_mode' value='distance' checked" in h and "name='base' size='12' value='72032'" in h and "value='30' selected" in h
     assert "Filters (0)" in h
 
 
@@ -207,8 +207,8 @@ def test_prefs_isolated_to_the_test_file(isolate):
     d = json.loads(isolate.read_text())
     assert d["ui"] == {"filters_collapsed": True} and d["saved"] == [] and d["bids"] == {}
     isolate.write_text(json.dumps({"ui": {"home": {"state": "TX", "zip": "75001", "label": "Addison"}}}))
-    assert mbr.home() == {"state": "TX", "zip": "75001", "label": "Addison"}
-    assert mbr.with_home({})["state"] == ["TX"] and mbr.with_home({"base": ["x"]}) == {"base": ["x"]}
+    assert mbr.home() == {"state": "TX", "zip": "75001", "label": "Addison", "radius": 30.0, "categories": list(ms.DEFAULT_CATS)}
+    assert mbr.with_home({})["base"] == ["75001"] and mbr.with_home({"base": ["x"]}) == {"base": ["x"]}
 
 
 def test_phone_drawer_markup_and_card_shape(ui):
@@ -230,7 +230,7 @@ def test_search_is_the_only_control_that_requests_a_live_provider_refresh(ui):
 
 def test_card_source_and_hide_are_visible_not_buried_on_the_photo_or_in_more():
     c = {"id": "facebook:visible", "title": "Utility trailer", "description": "", "text": "utility trailer", "url": "https://www.facebook.com/marketplace/item/1/",
-         "image": "https://example.com/trailer.jpg", "bid": 450.0, "price": 450.0, "price_type": "fixed", "bidders": None, "closes": None, "city": "Conway, AR", "state": "AR",
+         "image": "https://scontent.xx.fbcdn.net/trailer.jpg", "bid": 450.0, "price": 450.0, "price_type": "fixed", "bidders": None, "closes": None, "city": "Conway, AR", "state": "AR",
          "distance": 4.2, "category": "trailer", "condition": "used", "labels": {}, "source": "Facebook Marketplace", "fetched_at": NOW.isoformat(),
          "kind": "fixed", "stale": False, "fixture": False, "posted": "2026-10-12"}
     h = mbr.card(c, lambda: "", NOW, __import__("operator_ui.market_view", fromlist=["x"]).pref_buttons)
@@ -271,7 +271,8 @@ def test_owner_marketplace_is_listings_first_without_operator_clutter(ui, caches
     assert "DRY-RUN · nothing leaves this machine" not in h and "<header><b>Operator UI</b>" not in h
     assert "id='result-grid'" in h and "id='unchecked-section'" not in h
     assert all(x not in h for x in ("id='working-capital'", "id='gsa-explainer'", "id='sources-panel'", "id='your-finds'", "id='suggestions-strip'"))
-    assert "id='my-marketplace'" in h and "id='admin-menu'" in h and "Saved listings" in h
+    assert "id='my-marketplace'" in h and "id='admin-menu'" not in h and "Saved listings" in h
+    assert "id='product-header'" in h and all(x not in h for x in ("Weekly mission", "HOLD backlog", "Receipt ledger"))
     assert "No photo" not in h and "No photo from the seller" not in h
     assert ".mk-card-src{display:flex;justify-content:flex-end" in h
     card = h.split("class='mk-g mk-card'", 1)[1].split("class='mk-g mk-card'", 1)[0]

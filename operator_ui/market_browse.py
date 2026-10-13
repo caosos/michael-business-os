@@ -38,9 +38,16 @@ def home() -> dict:
     h = ui_state().get("home")
     h = h if isinstance(h, dict) else {}
     if "state" in h and not h["state"] and not h.get("zip"):
-        return {"state": "", "zip": "", "label": ""}          # a user with no home set (new user): nothing is preselected
+        return {"state": "", "zip": "", "label": "", "radius": ms.DEFAULT_RADIUS, "categories": list(ms.DEFAULT_CATS)}
     st = str(h.get("state") or HOME["state"]).upper()
-    return {"state": st if st in ms.US_STATES else HOME["state"], "zip": str(h.get("zip") or HOME["zip"])[:10], "label": str(h.get("label") or HOME["label"])[:30]}
+    raw_cats = h.get("categories") if isinstance(h.get("categories"), list) else ms.DEFAULT_CATS
+    cats = [c for c in raw_cats if c in ms.CONTROL_CATS]
+    try:
+        radius = float(h.get("radius", ms.DEFAULT_RADIUS))
+    except (TypeError, ValueError):
+        radius = ms.DEFAULT_RADIUS
+    return {"state": st if st in ms.US_STATES else HOME["state"], "zip": str(h.get("zip") or HOME["zip"])[:60], "label": str(h.get("label") or HOME["label"])[:60],
+            "radius": radius if 1 <= radius <= 500 else ms.DEFAULT_RADIUS, "categories": cats or list(ms.DEFAULT_CATS)}
 
 
 def collapsed() -> bool:
@@ -56,13 +63,13 @@ def set_collapsed(flag: bool) -> str:
 
 
 def with_home(qs: dict) -> dict:
-    """A visit that names no location at all starts at this owner's home: By State with their state ticked, their ZIP as the distance origin."""
+    """A visit that names no location starts with this account's city/ZIP, radius and wanted categories."""
     if any(k in qs for k in ("state", "loc_mode", "base", "radius", "run", "edit")):
         return qs
     h = home()
-    if not h["state"]:
+    if not h["zip"]:
         return qs
-    return {**qs, "loc_mode": ["state"], "state": [h["state"]], "base": [h["zip"]]}
+    return {**qs, "loc_mode": ["distance"], "base": [h["zip"]], "radius": [f"{h['radius']:g}"], "cat": list(h["categories"])}
 
 
 # ---- row predicates ----
@@ -154,10 +161,11 @@ def active_filters(q: dict) -> int:
     """The number on the Filters button: filters that differ from the owner's starting view (the search box is not counted)."""
     h = home()
     n = 0
-    n += not (q.get("cat_default") or False)
+    start_cats = set(q.get("cats") or []) == set(h["categories"]) and not q.get("cat_all")
+    n += not start_cats
     n += selected_sources(q) != {"all"}
-    start_loc = (q.get("loc_mode") == "state" and q.get("states") == [h["state"]] and not q.get("also_radius")) if h["state"] else \
-        (q.get("loc_mode") != "state" and not q.get("base") and q.get("radius") is None)       # no home set: the empty starting location
+    start_loc = (q.get("loc_mode") != "state" and q.get("base") == h["zip"] and q.get("radius") == h["radius"]) if h["zip"] else \
+        (q.get("loc_mode") != "state" and not q.get("base") and q.get("radius") is None)
 
     n += not start_loc
     n += q.get("min_price") is not None or q.get("max_price") is not None

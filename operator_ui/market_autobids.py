@@ -19,6 +19,9 @@ WORDS = {"bid_placed": "bid placed", "outbid": "you were OUTBID", "winning": "yo
 NAMES = {"govdeals": "GovDeals", "publicsurplus": "Public Surplus", "gsa_auctions": "GSA Auctions", "gsa": "GSA Auctions", "hibid": "HiBid"}
 ENDED = frozenset({"won", "lost", "closed"})
 _RANK = {"bid_placed": 0, "outbid": 1, "winning": 1, "closed": 2, "won": 3, "lost": 3}   # later lifecycle stage wins; a tie keeps the later message in the directory
+NEXT = {"bid_placed": "Monitor the listing until closing.", "winning": "Monitor the listing until closing.",
+        "outbid": "Open the original listing; raise only if it stays within your max.", "won": "Open the source to confirm payment and pickup.",
+        "lost": "Review the result and archive this watch.", "closed": "Open the source to confirm the final result."}
 
 
 def mail_dir() -> str | None:
@@ -69,9 +72,9 @@ def rows(items, now, tok, countdown, end, badge=lambda r, n: "", rank=lambda r, 
         link = f"<a href='{e(r['url'])}' target='_blank' rel='noopener noreferrer'>original listing</a>" if r["url"].startswith(("http://", "https://")) else "no link"
         hid = f"{tok()}<input type='hidden' name='lot' value='{e(r['id'])}'>"
         out.append((end(rr) or __import__("datetime").datetime.max.replace(tzinfo=__import__("datetime").timezone.utc), r["id"],
-                    f"<li data-bid='{e(r['id'])}' data-auto='1'><b>{e(r['title'])}</b><br><span class='mut'>{e(NAMES.get(r['source'], r['source']))} · auto-detected from your e-mail</span> · "
-                    f"<b>{WORDS[r['event']]}</b> · {when or countdown(rr, now) + badge(rr, now)}<br>"
-                    + (f"earlier e-mails: {e(', '.join(WORDS[x] for x in r['earlier']))}<br>" if r.get("earlier") else "") + f"{amt} · {link}<br><span class='mut'>e-mail Message-ID {e(r['provenance']['message_id'])}</span><br>"
+                    f"<li data-bid='{e(r['id'])}' data-auto='1' data-origin='EMAIL ALERT'><b>{e(r['title'])}</b><br><span class='mut'>{e(NAMES.get(r['source'], r['source']))} · auto-detected from your e-mail · EMAIL ALERT · no source-account access</span><br>"
+                    f"status <b>{WORDS[r['event']]}</b> · {when or countdown(rr, now) + badge(rr, now)}<br>current bid UNKNOWN · your max UNKNOWN · {amt} · {link}<br>"
+                    + (f"earlier e-mails: {e(', '.join(WORDS[x] for x in r['earlier']))}<br>" if r.get("earlier") else "") + f"next action: {e(NEXT[r['event']])}<br><span class='mut'>provenance: e-mail Message-ID {e(r['provenance']['message_id'])}</span><br>"
                     f"<form method='post' action='/market/bid' style='display:inline'>{hid}<button name='act' value='unbid'>Stop tracking</button></form></li>",
                     2 if when else rank(rr, now)))
     return out

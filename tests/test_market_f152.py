@@ -52,6 +52,8 @@ def test_every_event_rendered_with_wording_amount_provenance(ui, on):
     assert "$1,310.50" in w and "(owner-local, this page only)" in w
     assert "ended (read 2026-10-12)" in w   # F-153: won/lost/closed rows; the outbid listing keeps its countdown
     assert "amount not stated" in w
+    assert "EMAIL ALERT" in w and "current bid UNKNOWN · your max UNKNOWN" in w
+    assert "no source-account access" in w and "next action:" in w and "provenance: e-mail Message-ID" in w
 
 
 def test_dkim_failed_mail_is_absent(ui, on):

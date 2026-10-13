@@ -26,7 +26,7 @@ try:  # lane C's package is optional: without it the notes form is simply unavai
 except ImportError:  # pragma: no cover
     NOTE_CATEGORIES, NOTE_KINDS = frozenset(), frozenset()
 
-from . import deal_ui, landing_fix, live_demo, market_detail, market_routes, resale_view, attest_view, bought_view, card_view, comps_view, glance_view, inputs_view, ux, views, wanted_view
+from . import account_view, accounts, deal_ui, landing_fix, live_demo, market_detail, market_routes, resale_view, sell_intake, attest_view, bought_view, card_view, comps_view, glance_view, inputs_view, ux, views, wanted_view
 from .digest import figures as digest_figures, dollars as _dollars
 from .card_view import ec
 from .backend import AlreadyClosed, FollowupRefused, ItemNotFound, NoteRefused, NumbersRefused, ProfileUnavailable
@@ -80,6 +80,9 @@ header nav{display:flex;align-items:center;gap:14px}header nav>a{margin:0}
 .more-nav[open]>summary:after{content:" ▴"}.more-nav>div{position:absolute;z-index:60;top:calc(100% + 6px);left:0;min-width:220px;max-height:70vh;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px #0003;padding:6px}
 .more-nav>div a{display:block;margin:0;padding:7px 9px;border-radius:5px;white-space:nowrap}.more-nav>div a:hover{background:var(--bg)}
 .q a.rowlink{display:block;text-decoration:none;color:inherit}.bad{color:var(--no);font-weight:600}.ok{color:var(--yes);font-weight:600}
+.product-header{padding:10px 18px;background:var(--card);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.product-header>a{color:var(--ink);font-size:19px;font-weight:800;text-decoration:none}.product-header nav{display:flex;gap:16px;flex-wrap:wrap}.product-header nav a{margin:0;text-decoration:none}.product-header nav a.active{font-weight:800;border-bottom:2px solid var(--acc)}
+@media(max-width:600px){.product-header{gap:10px;padding:9px 12px}.product-header nav{gap:11px}.product-header nav a{font-size:13px}}
 """
 
 e = lambda v: html.escape("" if v is None else str(v))  # noqa: E731
@@ -106,7 +109,7 @@ def _verdict(v):
     return f'<span class="badge v-{e(v)}">System says {e(v)}</span>' if v else ""
 
 
-NAV = [("/market", "Marketplace", None), ("/queue", "Queue", None), ("/mission", "Weekly mission", None), ("/numbers", "My numbers", None), ("/wanted", "Wanted", None),
+NAV = [("/market", "Marketplace", None), ("/sell", "Sell an item", None), ("/queue", "Queue", None), ("/mission", "Weekly mission", None), ("/numbers", "My numbers", None), ("/wanted", "Wanted", None),
        ("/usage", "Usage", "usage"), ("/intake", "Intake", None), ("/assets", "My assets", None), ("/resale", "Resale", None), ("/owner-listing", "Add a listing", None), ("/gsa", "GSA lots", None), ("/preview", "Audience previews", "preview"),
        ("/digest", "Morning digest", None), ("/summary", "Daily summary", None), ("/notes", "My notes", None),
        ("/holds", "HOLD backlog", None), ("/outcomes", "Outcomes", None), ("/sources", "Source health", "sources"),
@@ -157,12 +160,28 @@ def _notices(state):
     return out
 
 
+def _customer_path(path: str) -> bool:
+    return path == "/settings" or path.startswith("/settings/") or path == "/sell" or path.startswith("/sell/") or path == "/market" or path.startswith("/market/")
+
+
+def _product_nav(path: str) -> str:
+    market = path.startswith("/market")
+    sell = path.startswith("/sell")
+    settings = path.startswith("/settings")
+    return ("<header class='product-header' id='product-header'><a href='/market'>DealSniffer</a><nav aria-label='DealSniffer'>"
+            f"<a href='/market'{' class=active aria-current=page' if market else ''}>Browse</a>"
+            "<a href='/market?quick=saved'>Saved</a><a href='/market#my-bids'>My bids</a>"
+            f"<a href='/sell'{' class=active aria-current=page' if sell else ''}>Sell</a>"
+            f"<a href='/settings'{' class=active aria-current=page' if settings else ''}>Settings</a></nav></header>")
+
+
 def page(title, body, state, flash=None, error=False):
     f = f'<div class="flash{" err" if error else ""}">{e(flash)}</div>' if flash else ""
-    marketplace = _active(getattr(_CUR, "path", "")) == "/market"
-    chrome = "" if marketplace else (f'<div class="banner">DRY-RUN · nothing leaves this machine · system {e(state)}</div>'
-                                      f'<header><b>Operator UI</b><nav>{_nav(state)}</nav></header>{_notices(state)}')
-    main_class = ' class="market-page"' if marketplace else ""
+    path = getattr(_CUR, "path", "")
+    customer = _customer_path(path)
+    chrome = _product_nav(path) if customer else (f'<div class="banner">DRY-RUN · nothing leaves this machine · system {e(state)}</div>'
+                                                     f'<header><b>Operator UI</b><nav>{_nav(state)}</nav></header>{_notices(state)}')
+    main_class = ' class="market-page"' if path.startswith("/market") else ""
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>{ec(title)}</title><style>{CSS}</style></head>
 <body>{chrome}<main{main_class}>{f}{'' if '<h1' in body else f'<h1 class="pagehead">{ec(title)}</h1>'}{body}</main></body></html>"""
@@ -528,7 +547,8 @@ class App:
     """Turns form posts into `spine.decide` calls through the backend. No side effects of its own."""
 
     def __init__(self, backend, operator_pin=None, health_file=None, mission_file=None, inventory_file=None,
-                 telemetry_dir=None, queue_file=None, campaigns_file=None, policy_path=None, comps_inbox=None):
+                 telemetry_dir=None, queue_file=None, campaigns_file=None, policy_path=None, comps_inbox=None,
+                 sell_intake_file=None):
         self.store = backend
         self.campaigns = wanted_view.CampaignStore(campaigns_file or os.environ.get("MBOS_CAMPAIGNS_FILE"))  # F-23
         self.policy_path = policy_path
@@ -546,9 +566,14 @@ class App:
         self.assets = {}  # F-34: in-memory DRY-RUN owned-asset drafts
         self.owner_listings: dict = {}  # F-46: OWNER-SUPPLIED url/photos/text, in memory, DRY-RUN
         self.intake_drafts = {}  # F-20: in-memory DRY-RUN drafts, never published
+        self.sell_intake = sell_intake.Store(sell_intake_file)
         self.csrf = secrets.token_urlsafe(32)
         self.session_id = "web-" + secrets.token_hex(4)
         self.pin_gate = ux.PinGate()  # F-77: shared by every PIN check in this process
+        # Strictly validates an all-or-nothing Google OAuth configuration.  No
+        # credentials configured means the existing loopback/local-owner mode.
+        self.google_oauth = accounts.google_oauth_config()
+        self.account_store = accounts.AccountStore()
 
     def state(self):
         st = UiState(self.store.system_state())
@@ -614,7 +639,10 @@ class App:
             raise InputError(str(ex)) from None
         return f"Outcome {o['kind']} recorded ({o['outcome_id']})."
 
-    author = "michael"  # the authenticated operator: set HERE, never taken from a form (F-14; all humans share one DB login)
+    @property
+    def author(self):
+        """Server-derived actor; never accepted from form data (F-14)."""
+        return accounts.current().audit_actor
 
     def add_note(self, item_id, f):
         """F-14: Michael's own model knowledge → spine_d.record_operator_note. Human channel only (R14): CSRF + PIN,
@@ -1083,6 +1111,11 @@ def make_handler(app):
                 return self._send(200, page("Listing detail", body, app.state(), flash))
             if u.path == "/market":
                 return self._send(200, page("DealSniffer Marketplace", market_routes.page_body(app, qs, now), app.state(), flash))
+            if u.path == "/settings":
+                return self._send(200, page("DealSniffer Settings", account_view.render(app.csrf, app.google_oauth.public_status()), app.state(), flash or err, bool(err)))
+            if u.path == "/sell":
+                body = sell_intake.render_form(app.csrf) + sell_intake.render_recent(app.sell_intake.recent())
+                return self._send(200, page("Sell with DealSniffer", body, app.state(), flash or err, bool(err)))
             if u.path == "/wanted":
                 return self._wanted_page(flash or err, bool(err))
             if u.path == "/numbers":
@@ -1496,6 +1529,29 @@ def make_handler(app):
                 app.owner_listings[secrets.token_hex(4)] = d
                 return self._send(200, page("Add a listing", live_demo.render_owner_form(app.csrf) + "".join(
                     live_demo.render_owner_listing(x) for x in app.owner_listings.values()), app.state()))
+            if parts == ["sell", "submit"]:
+                n = min(int(self.headers.get("Content-Length") or 0), 65536)
+                f = {k: v[0] for k, v in parse_qs(self.rfile.read(n).decode("utf-8", "replace"), keep_blank_values=True).items()}
+                try:
+                    app._check_csrf(f)
+                    record = sell_intake.parse(f, iso(utcnow()), "sell-" + secrets.token_hex(6))
+                    app.sell_intake.append(record)
+                except (InputError, OSError) as ex:
+                    values = {k: v for k, v in f.items() if k != "csrf"}
+                    body = sell_intake.render_form(app.csrf, values) + sell_intake.render_recent(app.sell_intake.recent())
+                    return self._send(200, page("Sell with DealSniffer", body, app.state(), str(ex), True))
+                return self._redirect("/sell?msg=" + quote("Submitted for human review. Nothing was published and nobody was contacted."))
+            if parts == ["settings", "preferences"]:
+                n = min(int(self.headers.get("Content-Length") or 0), 65536)
+                raw = parse_qs(self.rfile.read(n).decode("utf-8", "replace"), keep_blank_values=True)
+                f = {k: (v if k == "cat" else v[0]) for k, v in raw.items()}
+                try:
+                    app._check_csrf(f)
+                    msg = account_view.save_preferences(f)
+                except (InputError, OSError) as ex:
+                    body = account_view.render(app.csrf, app.google_oauth.public_status())
+                    return self._send(200, page("DealSniffer Settings", body, app.state(), str(ex), True))
+                return self._redirect("/settings?msg=" + quote(msg))
             if parts == ["intake", "start"] or (len(parts) == 3 and parts[0] == "intake" and parts[2] == "answer"):
                 return self._post_intake(parts)
             if len(parts) == 2 and parts[0] == "numbers" and parts[1] in ("mission", "capital"):

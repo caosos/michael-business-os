@@ -11,13 +11,16 @@ import re
 import tempfile
 from pathlib import Path
 
+from . import accounts
+
 ACTIONS = ("save", "unsave", "hide", "restore", "dismiss", "more", "less", "reset", "disable", "enable")
 STOP = {"with", "from", "this", "that", "used", "lot", "item", "items", "unit", "units", "only", "each", "the", "and", "for", "set", "other"}
 EMPTY = {"enabled": True, "saved": [], "dismissed": [], "hidden": {}, "more": {}, "less": {}, "last": {}, "bids": {}, "auto_stopped": [], "resale_targets": {}, "ui": {}}
 
 
 def path() -> Path:
-    return Path(os.environ.get("MBOS_MARKET_PREFS_FILE") or Path(__file__).resolve().parent.parent / "var" / "market_prefs.json")
+    local = Path(os.environ.get("MBOS_MARKET_PREFS_FILE") or Path(__file__).resolve().parent.parent / "var" / "market_prefs.json")
+    return accounts.preference_path(local)
 
 
 def load() -> dict:
@@ -35,6 +38,12 @@ def load() -> dict:
         d["resale_targets"] = {}
     if not isinstance(d["auto_stopped"], list):
         d["auto_stopped"] = []
+    # Conway is the existing local owner's starting point, not a default for
+    # every future account.  A newly authenticated user begins unlocated and
+    # supplies their own city/ZIP before a radius search can run.
+    ui = d.get("ui") if isinstance(d.get("ui"), dict) else {}
+    if accounts.current().authenticated and not isinstance(ui.get("home"), dict):
+        d["ui"] = {**ui, "home": {"state": "", "zip": "", "label": ""}}
     d["hidden"] = {**{i: "" for i in d["dismissed"]}, **d["hidden"]}      # older files kept hidden ids in `dismissed`
     d["dismissed"] = []
     return d
