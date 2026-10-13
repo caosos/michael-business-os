@@ -147,20 +147,20 @@ def test_sort_dropdown_labels_and_default(ui):
 
 
 # ---- pagination ----
-def test_paginate_24_per_page_and_clamps():
+def test_paginate_12_per_page_and_clamps():
     rows = [{"id": str(i)} for i in range(50)]
     p1, n, pages = mbr.paginate(rows, 1)
-    assert (len(p1), n, pages) == (24, 1, 3) and p1[0]["id"] == "0"
+    assert (len(p1), n, pages) == (12, 1, 5) and p1[0]["id"] == "0"
     p3, n, _ = mbr.paginate(rows, 3)
-    assert [r["id"] for r in p3] == ["48", "49"] and n == 3
-    assert mbr.paginate(rows, 99)[1] == 3 and mbr.paginate([], 5)[1:] == (1, 1)
+    assert [r["id"] for r in p3] == [str(i) for i in range(24, 36)] and n == 3
+    assert mbr.paginate(rows, 99)[1] == 5 and mbr.paginate([], 5)[1:] == (1, 1)
     assert ms.parse_query({"page": ["2"]})["page"] == 2 and ms.parse_query({"page": ["x"]})["page"] == 1
 
 
 def test_pager_links_carry_the_page_in_the_url():
     q = ms.parse_query({"go": ["1"], "loc_mode": ["state"], "state": ["AR"]})
     h = mbr.pager(q, 2, 5, 110)
-    assert "aria-current='page'>2</b>" in h and "page=3" in h and "rel='prev'" in h and "rel='next'" in h and "Showing 25-48 of 110" in h
+    assert "aria-current='page'>2</b>" in h and "page=3" in h and "rel='prev'" in h and "rel='next'" in h and "Showing 13-24 of 110" in h
     assert mbr.pager(q, 1, 1, 10) == ""
 
 
