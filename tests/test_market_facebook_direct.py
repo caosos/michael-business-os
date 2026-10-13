@@ -105,6 +105,19 @@ class FacebookDirectTests(unittest.TestCase):
             self.assertEqual(result["status"], "connected")
             self.assertEqual(result["cards"][0]["title"], "Tools")
 
+    def test_no_paid_refresh_without_explicit_search(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "facebook.json"
+
+            class MustNotRun:
+                def search(self, *args):
+                    raise AssertionError("ordinary page loads must not call the paid provider")
+
+            result = fb.load(NOW, keyword="tools", city="72032", radius=30,
+                             refresh=False, client=MustNotRun(), path=path)
+            self.assertEqual(result["status"], "offline")
+            self.assertFalse(path.exists())
+
 
 if __name__ == "__main__":
     unittest.main()
