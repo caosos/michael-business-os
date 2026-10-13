@@ -19,6 +19,23 @@
   all.addEventListener("change", function () { for (var i = 0; i < rest.length; i++) rest[i].checked = all.checked; });
   for (var i = 0; i < rest.length; i++) rest[i].addEventListener("change", function () { if (!this.checked) all.checked = false; });
 })();
+/* DealSniffer sources are genuinely multi-select. "All sources" changes every
+   checkbox immediately; excluding one source immediately clears All. */
+(function () {
+  var box = document.getElementById("sec-source");
+  if (!box) return;
+  var all = box.querySelector("input[name=source][value=all]"), rest = box.querySelectorAll("input[name=source]:not([value=all])");
+  if (!all) return;
+  all.addEventListener("change", function () { for (var i = 0; i < rest.length; i++) rest[i].checked = all.checked; });
+  for (var i = 0; i < rest.length; i++) rest[i].addEventListener("change", function () {
+    if (!this.checked) all.checked = false;
+    else {
+      var every = true;
+      for (var j = 0; j < rest.length; j++) if (!rest[j].checked) { every = false; break; }
+      all.checked = every;
+    }
+  });
+})();
 /* F-163: Sort and View apply on change (the Search button does the same without script). */
 (function () {
   var s = document.querySelectorAll("select[name=sort],select[name=view]");
