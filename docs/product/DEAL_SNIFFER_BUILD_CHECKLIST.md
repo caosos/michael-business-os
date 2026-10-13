@@ -1,6 +1,6 @@
 # DealSniffer — Active Product Checklist
 
-Updated: Tuesday, October 13, 2026 — 1:40 AM America/Chicago
+Updated: Tuesday, October 13, 2026 — 2:03 AM America/Chicago
 
 This is the short working checklist. Completed engineering/watchdog history remains intact in [the archive](archive/DEAL_SNIFFER_BUILD_CHECKLIST_through_2026-10-12.md). Receipts remain append-only in `docs/receipts/`.
 
@@ -13,6 +13,7 @@ A listings-first marketplace for Conway-area resale opportunities, with real sou
 - [x] Customer navigation is limited to **Browse, Saved, My bids, Sell, Settings**. Queue, Wanted, Intake, receipt ledger, DRY-RUN, system state, and other operator controls are absent from customer pages.
 - [x] Marketplace sources and categories use independent checkboxes; several may be selected together and applied with one control.
 - [x] Search is separate from filtering. Bright Data Facebook retrieval is configured; the latest host proof contains 20 Facebook URLs and 20 photos for the `trailer` / `72032` / 30-mile provider query.
+- [x] The large search bar now explicitly submits its current text with the selected filters on click or Enter. Loaded host proof retained a guaranteed-no-match query in the field and changed the lineup to **0 results found** instead of leaving the prior cards onscreen.
 - [x] Loaded cards show photos, readable source names, View, Save, Hide, and responsive desktop/mobile layouts. The observed owner page showed 10 listing cards from Facebook Marketplace and regional auction sources.
 - [x] Per-account preference storage and Settings UI exist for city/ZIP, radius, and categories. Local owner mode preserves Michael's existing choices; a new authenticated account does not inherit them.
 - [x] Customer-owned preferences, saved/hidden records, bid watches, mail delivery receipts, and seller submissions resolve through an opaque account storage key; customer form data cannot select another account.
@@ -25,15 +26,16 @@ A listings-first marketplace for Conway-area resale opportunities, with real sou
 
 Loaded proof:
 
-- DealSniffer UI revision: `1fc7a27321d0ccc94e76bdc98a1adecd9d72a686`
-- Deployment commit: `906d197572b43b0a47d85e0f740ce21681796e11`
-- GitHub Actions proof: https://github.com/caosos/michael-business-os/actions/runs/38357681346
-- Proof artifact: https://github.com/caosos/michael-business-os/actions/runs/38357681346/artifacts/11793407268
-- EliteDesk observation: Tuesday, October 13, 2026 — 1:39:18 AM America/Chicago
+- DealSniffer UI revision: `8e2a858d23cf4c6eda8c5e344dba77aeb073e279`
+- Deployment commit: `b17ed0f550bf9b2c5979b562e7f622b81e95be63`
+- GitHub Actions proof: https://github.com/caosos/michael-business-os/actions/runs/38360038853
+- Proof artifact: https://github.com/caosos/michael-business-os/actions/runs/38360038853/artifacts/11794048759
+- EliteDesk observation: Tuesday, October 13, 2026 — 2:02:46 AM America/Chicago
 - Host: `127.0.0.1:8766`, HTTP 200, Google Chrome available
 - Browser proof: Marketplace desktop 1440×900/mobile 390×844, Settings desktop, and My Bids mobile
 - Facebook provider proof: Bright Data credential configured; 20 original Facebook URLs and 20 photos in the provider cache
 - Focused account/OAuth/delivery/source/bid/sell/settings/market tests: 94 passed, 2 skipped
+- Search submission regression suite: 41 passed, 1 skipped
 
 ## Current work — in order
 
