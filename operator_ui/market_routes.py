@@ -84,6 +84,9 @@ def page_body(app, qs: dict, now, errors=None, values=None) -> str:
         unch, g2 = mp.hide(unch, prefs)
         res, x1 = mb.exclude(res, prefs, au)           # F-147: tracked ("I bid on this") items leave the lineup; they live in the My bids window
         unch, x2 = mb.exclude(unch, prefs, au)
+        saved_ids = set(prefs.get("saved") or [])
+        res = [{**c, "saved": c["id"] in saved_ids} for c in res]
+        unch = [{**c, "saved": c["id"] in saved_ids} for c in unch]
         return mbr.post(res, qq, now, relax), mbr.post(unch, qq, now, relax), hid, (n0, g1, g2, x1, x2)
 
     results, unchecked, hidden, (n_before, g1, g2, b1, b2) = chain(q)
@@ -107,7 +110,10 @@ def page_body(app, qs: dict, now, errors=None, values=None) -> str:
     mine = mb.window(prefs, data["cards"] if ran else [], now, tok, (auto, auto_note)) + (f"<p class='small mut' id='bids-count'>{b1 + b2} in My bids (left out of the results below)</p>" if b1 + b2 else "")
     sg = msug.suggest(results + unchecked, prefs) if ran and results + unchecked and not q["errors"] and data["status"] == "connected" else None
     sug = msug.render(sg, tok) if sg else ""      # F-155: engine-ranked panel, display only
-    fc = mbr.facets(lambda qq, relax: chain(qq, relax)[0], q, now) if live else None
+    # Facet counts describe the same combined feed the owner sees.  Listings
+    # with an unverified distance/price stay selectable and paginate normally;
+    # they must not make a category or source look empty.
+    fc = mbr.facets(lambda qq, relax: chain(qq, relax)[0] + chain(qq, relax)[1], q, now) if live else None
     back = "/market?" + "&".join(f"{k}={quote(str(v))}" for k, vs in page_qs.items() if k in FILTER_KEYS + ("page", "go") for v in (vs if isinstance(vs, list) else [vs])) if page_qs else "/market"
     return note + mv.render_page(q, data, results, hidden, saved, app.csrf, bool(app.operator_pin), edit if edit in ids else None, ran, errors, unchecked, prefs, finds, mine, mv.suggest_strip(sug, len(sg['ranked']) if sg else 0),
                                  {"fc": fc, "now": now, "back": back} if fc else None)
