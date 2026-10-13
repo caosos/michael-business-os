@@ -54,7 +54,7 @@ def test_category_counts_equal_filtered_rows(ui):
     assert set(cats) == {"all", *ms.CONTROL_CATS}
     for k, n in cats.items():
         assert total(get(ui, **{**BASE, "cat": k})) == n, k
-    assert any(n == 0 for n in cats.values()) and re.search(r"<label class='mk-cat mut' data-count='0'>", h)      # zero-count greyed
+    assert any(n == 0 for n in cats.values()) and re.search(r"<label class='mk-cat' data-count='0'>", h)      # zero-count stays selectable
 
 
 def test_source_counts_equal_filtered_rows_and_show_connection(ui, caches):
@@ -63,9 +63,14 @@ def test_source_counts_equal_filtered_rows_and_show_connection(ui, caches):
     assert {"gsa", "wooley", "wilson", "blackmon"} <= set(src)
     for k in ("gsa", "wooley", "wilson", "blackmon"):
         assert total(get(ui, **{**BASE, "source": k})) == src[k], k
-    assert total(h) == int(re.search(r"All sources <span class='mk-n'>\((\d+)\)", h).group(1))
+    assert total(h) == int(re.search(r"<b>All sources</b> <span class='mk-n'>\((\d+)\)", h).group(1))
     side = h.split("id='sec-source'")[1].split("</details>")[0]
-    assert "connected" in side and "not connected" in side            # Craigslist / Facebook etc. stay NOT CONNECTED, honestly
+    assert "type='checkbox'" in side and "value='all' checked" in side
+    assert all(f"value='{k}' checked" in side for k in ("gsa", "wooley", "wilson", "blackmon"))
+    assert "connected" in side and "not connected" in side            # unavailable sources stay visible and selectable, honestly
+    combo = get(ui, **{**BASE, "source": ["gsa", "wooley"]})
+    assert total(combo) == src["gsa"] + src["wooley"]
+    assert "value='gsa' checked" in combo and "value='wooley' checked" in combo and "value='wilson' checked" not in combo
 
 
 def test_state_counts_equal_filtered_rows(ui):
@@ -130,6 +135,7 @@ def test_sort_dropdown_labels_and_default(ui):
     sel = re.search(r"<label>Sort <select name='sort'>(.*?)</select>", h).group(1)
     assert re.findall(r">([^<]+)</option>", sel) == ["Ending soonest", "Newest", "Price: low to high", "Price: high to low", "Distance", "Suggested"]
     assert "<option value='closing' selected>" in sel and ms.parse_query({})["sort"] == "closing"
+    assert ms.DEFAULT_RADIUS == 30.0
 
 
 # ---- pagination ----
