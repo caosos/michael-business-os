@@ -235,5 +235,6 @@ def test_owner_marketplace_is_listings_first_without_operator_clutter(ui, caches
     assert all(x not in h for x in ("id='working-capital'", "id='gsa-explainer'", "id='sources-panel'", "id='your-finds'", "id='suggestions-strip'"))
     assert "id='my-marketplace'" in h and "id='admin-menu'" in h and "Saved listings" in h
     assert "No photo" not in h and "No photo from the seller" not in h
+    assert ".mk-card-src .mk-src{position:static}" in h
     card = h.split("class='mk-g mk-card'", 1)[1].split("class='mk-g mk-card'", 1)[0]
     assert "class='mk-save'" in card and card.index("class='mk-save'") < card.index("class='mk-more'")
