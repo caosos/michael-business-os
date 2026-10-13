@@ -18,6 +18,9 @@ NOW = datetime(2026, 10, 13, 1, 30, tzinfo=timezone.utc)
 
 
 class FacebookDirectTests(unittest.TestCase):
+    def test_missing_listing_location_never_breaks_the_feed(self):
+        self.assertIsNone(fb._distance((35.1, -92.4), None))
+
     def test_sync_discovery_then_listing_and_private_fields_removed(self):
         calls = []
 

@@ -251,7 +251,7 @@ def _loc(row: dict) -> tuple[str | None, str | None, str | None, float | None, f
 
 
 def _distance(origin, point) -> float | None:
-    if not origin or None in point:
+    if not origin or not point or None in point:
         return None
     a1, o1, a2, o2 = map(math.radians, (origin[0], origin[1], point[0], point[1]))
     x = math.sin((a2 - a1) / 2) ** 2 + math.cos(a1) * math.cos(a2) * math.sin((o2 - o1) / 2) ** 2
