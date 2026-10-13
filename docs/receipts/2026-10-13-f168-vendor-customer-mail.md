@@ -1,7 +1,8 @@
 # F-168 — Verified vendor/customer mailbox intake
 
 Date: 2026-10-13 13:26 America/Chicago  
-Branch: `research/agent-06-vendor-mail`  
+Worktree branch: `research/agent-06-vendor-mail`  
+Published branch: `research/agent-06-communications`  
 Base: `99de5a16` (`origin/research/agent-06-communications`)  
 Stage: IMPLEMENTED / NOT DEPLOYED / MAILBOX NOT CONNECTED
 
