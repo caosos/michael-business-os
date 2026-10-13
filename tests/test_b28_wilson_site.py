@@ -34,6 +34,15 @@ def test_all_seventeen_events_parsed_from_list_page_without_a_request():
     assert CAMPERS in ev and "lakefront-1090" in ev
 
 
+def test_all_events_capture_allowlisted_event_gallery_cover_only():
+    records = [r.payload for r in _ad().fetch(P).records]
+    assert len(records) == 17 and all("event_image_url" in r for r in records)
+    assert all(r["event_image_url"].startswith("https://d37cbsn538t2ha.cloudfront.net/") for r in records)
+    assert W._event_image_url("http://d37cbsn538t2ha.cloudfront.net/x.jpg") is None
+    assert W._event_image_url("https://evil.example/x.jpg") is None
+    assert W._event_image_url("https://wilson.bidwrangler.com/x.jpg") is None
+
+
 def test_online_only_event_fields_and_cst_is_chicago_local_inference():
     _, ev = _events()
     c = ev[CAMPERS]
@@ -46,6 +55,7 @@ def test_online_only_event_fields_and_cst_is_chicago_local_inference():
     assert c.get("highlights") == ["Bumper Pull Campers, Trucks, Jeep Wrangler, Trailers, Farm Tractor, Implements, Side-by-Side, 4-Wheeler"]
     assert c.get("category_tags") == ["personal property"]
     assert c.get("rules_url") == "https://wilsonauctioneers.com/auctions/personal-property/1082"
+    assert c.get("event_image_url").startswith("https://d37cbsn538t2ha.cloudfront.net/")
     assert c.distance_miles is not None and c.distance_miles < 100
     assert c.fields["closes_at"].source == c.get("rules_url") and c.fields["closes_at"].observed_at == "2026-10-12T01:07:00Z"
 
