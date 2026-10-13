@@ -35,6 +35,16 @@ def test_both_current_auctions_parsed_past_ones_ignored():
     assert ad.summary["events"] == 2 and ad.summary["requests"] == 0
 
 
+def test_current_events_capture_first_party_event_covers_only():
+    records = [r.payload for r in _ad().fetch(P).records]
+    assert len(records) == 2 and all("event_image_url" in r for r in records)
+    assert all(r["event_image_url"].startswith("https://wooleyauctioneers.com/wp-content/uploads/") for r in records)
+    assert records[0]["event_image_url"].endswith("/Image-11-1024x1024.jpg")
+    assert W._event_image_url("http://wooleyauctioneers.com/x.jpg") is None
+    assert W._event_image_url("https://wooleyauctioneers.com.evil.example/x.jpg") is None
+    assert W._event_image_url("https://wooleyauctioneers.hibid.com/x.jpg") is None
+
+
 def test_bruck_event_fields():
     _, ev = _events()
     b = ev[BRUCK]
@@ -50,6 +60,7 @@ def test_bruck_event_fields():
     assert {"Vehicle", "Truck", "RV", "Equipment"} <= set(b.get("category_tags")) and "Active Auctions" not in b.get("category_tags")
     assert b.get("rules_url") == f"https://wooleyauctioneers.com/{BRUCK}/"
     assert b.get("hibid_catalog_url").startswith("https://wooleyauctioneers.hibid.com/catalog/")   # link text only
+    assert b.get("event_image_url").endswith("/Image-11-1024x1024.jpg")
     assert b.fields["closes_at"].source == b.get("rules_url") and b.fields["closes_at"].observed_at == "2026-10-11T23:00:00Z"
     assert b.distance_miles is not None and b.distance_miles < 100
 
