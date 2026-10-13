@@ -1,7 +1,7 @@
 {
-  "lane06_sha": "2a8cd4d38a844b4d909f7ebad0cbdc6ec75bf3ef",
+  "lane06_sha": "1fc7a27321d0ccc94e76bdc98a1adecd9d72a686",
   "lane02_sha": "cda867347505ac8e27945b2aa1ae6a3823939ae2",
   "requested_by": "Michael",
-  "purpose": "Customer-only marketplace shell, per-account preferences, provenance-aware My Bids, honest delivery status, and review-only selling intake",
-  "verification_attempt": 16
+  "purpose": "Public site and hardened Google OAuth foundation, isolated customer records, truthful source onboarding, usable My Bids, signed delivery receipts, and reviewable selling intake",
+  "verification_attempt": 17
 }

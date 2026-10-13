@@ -58,6 +58,7 @@ jobs:
           grep -q "class='mk-grid' id='result-grid'" "$PROOF_DIR/market.html"
           grep -q "class='mk-save'" "$PROOF_DIR/market.html"
           grep -q "id='product-header'" "$PROOF_DIR/market.html"
+          grep -q "Facebook Marketplace" "$PROOF_DIR/market.html"
           ! grep -q "id='admin-menu'" "$PROOF_DIR/market.html"
           ! grep -q "DRY-RUN · nothing leaves this machine" "$PROOF_DIR/market.html"
           ! grep -q "<header><b>Operator UI</b>" "$PROOF_DIR/market.html"
@@ -77,6 +78,10 @@ jobs:
           grep -q "id='deal-preferences'" "$PROOF_DIR/settings.html"
           grep -q "Google sign-in: <b>NOT CONFIGURED" "$PROOF_DIR/settings.html"
           grep -q "Email notifications: <b>NOT ACTIVE</b>" "$PROOF_DIR/settings.html"
+          grep -q "id='source-onboarding'" "$PROOF_DIR/settings.html"
+          grep -q "DealSniffer never asks for a source password" "$PROOF_DIR/settings.html"
+          grep -q "GovDeals" "$PROOF_DIR/settings.html"
+          grep -q "Public Surplus" "$PROOF_DIR/settings.html"
           ! grep -q "id='admin-menu'" "$PROOF_DIR/settings.html"
           ! grep -q "DRY-RUN · nothing leaves this machine" "$PROOF_DIR/settings.html"
           ! grep -q "<header><b>Operator UI</b>" "$PROOF_DIR/settings.html"
@@ -88,6 +93,25 @@ jobs:
           ! grep -q "id='admin-menu'" "$PROOF_DIR/sell.html"
           ! grep -q "DRY-RUN · nothing leaves this machine" "$PROOF_DIR/sell.html"
           ! grep -q "<header><b>Operator UI</b>" "$PROOF_DIR/sell.html"
+
+          curl -fsS --max-time 30 http://127.0.0.1:8766/home > "$PROOF_DIR/home.html"
+          grep -q "Find resale inventory in one place" "$PROOF_DIR/home.html"
+          grep -q "Privacy" "$PROOF_DIR/home.html"
+          grep -q "Terms" "$PROOF_DIR/home.html"
+          curl -fsS --max-time 30 http://127.0.0.1:8766/privacy > "$PROOF_DIR/privacy.html"
+          grep -q "Privacy Policy" "$PROOF_DIR/privacy.html"
+          curl -fsS --max-time 30 http://127.0.0.1:8766/terms > "$PROOF_DIR/terms.html"
+          grep -q "Terms of Service" "$PROOF_DIR/terms.html"
+          AUTH_STATUS="$(curl -sS -o "$PROOF_DIR/auth-google.html" -w '%{http_code}' --max-time 30 http://127.0.0.1:8766/auth/google/start)"
+          [ "$AUTH_STATUS" = 503 ]
+          grep -q "Google sign-in is not configured yet" "$PROOF_DIR/auth-google.html"
+
+          curl -fsS --max-time 30 http://127.0.0.1:8766/market/bids > "$PROOF_DIR/bids.html"
+          grep -q "My Bids" "$PROOF_DIR/bids.html"
+          grep -q "Add a bid to watch" "$PROOF_DIR/bids.html"
+          grep -q "DealSniffer never asks for or signs in to a source account" "$PROOF_DIR/bids.html"
+          curl -fsS --max-time 30 http://127.0.0.1:8766/sell/submissions > "$PROOF_DIR/submissions.html"
+          grep -q "My submissions" "$PROOF_DIR/submissions.html"
           grep -q "^sha=$LANE06$" var/lanes/agent-06/ARTIFACT
           cp var/lanes/agent-06/ARTIFACT "$PROOF_DIR/ARTIFACT"
 
@@ -164,6 +188,8 @@ jobs:
           if [ -n "$CHROME" ]; then
             "$CHROME" --headless --disable-gpu --no-sandbox --window-size=1440,900 --screenshot="$PROOF_DIR/desktop.png" http://127.0.0.1:8766/market || true
             "$CHROME" --headless --disable-gpu --no-sandbox --window-size=390,844 --screenshot="$PROOF_DIR/mobile.png" http://127.0.0.1:8766/market || true
+            "$CHROME" --headless --disable-gpu --no-sandbox --window-size=1440,900 --screenshot="$PROOF_DIR/settings-desktop.png" http://127.0.0.1:8766/settings || true
+            "$CHROME" --headless --disable-gpu --no-sandbox --window-size=390,844 --screenshot="$PROOF_DIR/bids-mobile.png" http://127.0.0.1:8766/market/bids || true
           fi
           {
             date --iso-8601=seconds
