@@ -274,10 +274,11 @@ def load_gsa(path: str | None = None, now: datetime | None = None, origin=None) 
             "in_file": ad.summary.get("lots_in_file"), "in_scope": len(cards), "cards": cards}
 
 
-def load_source(source: str, now: datetime | None = None, origin=None, path: str | None = None, directory: str | None = None) -> dict:
-    """F-145: the source-agnostic card loader (gsa | govdeals | publicsurplus | all), same dict and card shape as `load_gsa`. See market_sources."""
+def load_source(source: str, now: datetime | None = None, origin=None, path: str | None = None, directory: str | None = None,
+                query: dict | None = None) -> dict:
+    """Source-agnostic card loader, including the Bright Data Facebook cache, in the common marketplace card shape."""
     from . import market_sources
-    return market_sources.load_source(source, path, now or datetime.now(timezone.utc), origin, directory)
+    return market_sources.load_source(source, path, now or datetime.now(timezone.utc), origin, directory, query)
 
 
 def tag_terms(card: dict, q: dict) -> dict | None:
