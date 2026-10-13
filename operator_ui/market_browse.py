@@ -84,6 +84,9 @@ def ltype(c: dict) -> str:
 
 
 def source_key(c: dict) -> str | None:
+    explicit = c.get("source_key")
+    if explicit in _names():
+        return explicit
     for k, n in _names().items():
         if n == c.get("source"):
             return k
@@ -106,7 +109,8 @@ def source_ok(c: dict, source: str) -> bool:
         return True
     if msrc.ALL_HOUSES in selected and c.get("source") in msrc.EVENT_NAMES:
         return True
-    return any(c.get("source") == _names().get(key, key) for key in selected)
+    key = source_key(c)
+    return key in selected or any(c.get("source") == _names().get(wanted, wanted) for wanted in selected)
 
 
 def quick_ok(c: dict, quick: str, now: datetime) -> bool:
@@ -191,9 +195,17 @@ def paginate(rows: list[dict], page: int, size: int = ms.PAGE_SIZE) -> tuple[lis
     return rows[(page - 1) * size: page * size], page, pages
 
 
-def pager(q: dict, page: int, pages: int, total: int) -> str:
-    if pages <= 1:
+def pager(q: dict, page: int, pages: int, total: int, position: str = "bottom") -> str:
+    """Render a complete, location-specific pager.
+
+    A one-page result set still gets a truthful ``Page 1 of 1`` control so the
+    result count is not mistaken for a partial or broken feed.  Boundary
+    Previous/Next controls stay visible but disabled.  The top and bottom
+    instances use unique ids while sharing the same query-preserving links.
+    """
+    if total <= 0:
         return ""
+    position = "top" if position == "top" else "bottom"
     show = sorted({1, pages, *range(max(1, page - 2), min(pages, page + 2) + 1)})
     out, prev = [], 0
     for n in show:
@@ -201,9 +213,14 @@ def pager(q: dict, page: int, pages: int, total: int) -> str:
             out.append("<span class='mut'>…</span>")
         out.append(f"<b class='mk-pg cur' aria-current='page'>{n}</b>" if n == page else f"<a class='mk-pg' href='{href(q, n)}'>{n}</a>")
         prev = n
-    nav = (f"<a class='mk-pg' rel='prev' href='{href(q, page - 1)}'>Previous</a>" if page > 1 else "") + "".join(out) + (f"<a class='mk-pg' rel='next' href='{href(q, page + 1)}'>Next</a>" if page < pages else "")
+    previous = (f"<a class='mk-pg' rel='prev' href='{href(q, page - 1)}'>Previous</a>" if page > 1
+                else "<span class='mk-pg disabled' aria-disabled='true'>Previous</span>")
+    following = (f"<a class='mk-pg' rel='next' href='{href(q, page + 1)}'>Next</a>" if page < pages
+                 else "<span class='mk-pg disabled' aria-disabled='true'>Next</span>")
+    nav = previous + "".join(out) + following
     lo, hi = (page - 1) * ms.PAGE_SIZE + 1, min(total, page * ms.PAGE_SIZE)
-    return f"<nav class='mk-pages' id='pager' aria-label='Result pages'>{nav}<span class='small mut'> Showing {lo}-{hi} of {total} · page {page} of {pages}</span></nav>"
+    return (f"<nav class='mk-pages' id='pager-{position}' data-pager='{position}' aria-label='Result pages, {position}'>"
+            f"{nav}<span class='small mut'>Showing {lo}-{hi} of {total} · Page {page} of {pages}</span></nav>")
 
 
 # ---- the card ----
@@ -241,12 +258,13 @@ def card(c: dict, tok, now: datetime, pref_buttons) -> str:
     cd = f"<span class='mk-cd{' red' if red else ''}'>{e(txt)}</span>" if txt else ""
     place = e(_where(c)) + (f" · {round(c['distance'], 1):g} mi" if c.get("distance") is not None else " · distance UNKNOWN")
     ti = c["title"] if len(c["title"]) <= 70 else c["title"][:69] + "…"
-    closes = c.get("closes_local") or msrc.local_when(c.get("closes")) or "closes UNKNOWN"
+    closes = c.get("closes_local") or msrc.local_when(c.get("closes_at") or c.get("closes")) or "UNKNOWN"
+    local = c.get("source_key") == "local_deals"
     if c.get("event"):
         money = "<div class='pr'>Auction event</div><div class='small mut'>current bid / bidders UNKNOWN (event, not a lot)</div>"
     elif ltype(c) == "fixed":
         price = c.get("price") if c.get("price") is not None else c.get("bid")
-        label = "asking price" if c.get("price_type") == "asking" else "fixed price"
+        label = "deal price" if local else "asking price" if c.get("price_type") == "asking" else "fixed price"
         unit = f" {e(c['unit'])}" if c.get("unit") else ""
         shown = f"${price:,.2f}" if c.get("unit") else f"${price:,.0f}"
         money = f"<div class='pr'>{shown}{unit}</div><div class='small mut'>{label}</div>" if price is not None else "<div class='pr'>Price not stated</div><div class='small mut'>check original listing</div>"
@@ -260,7 +278,15 @@ def card(c: dict, tok, now: datetime, pref_buttons) -> str:
     note = msvm.card_note(c)
     kind = " data-kind='auction-event'" if c.get("event") else ""
     plat = msvm._platform(c) if c.get("event") else ""
-    lbl = (f"<div class='small'>{plat}</div>" if plat else "") if c.get("event") else "<div class='small mut gal-lbl'>" + mv.gallery_labels(c) + "</div>"
+    if c.get("event"):
+        lbl = f"<div class='small'>{plat}</div>" if plat else ""
+    elif local:
+        regular = c.get("regular_price")
+        unit = f" {e(c['unit'])}" if c.get("unit") else ""
+        regular_line = f"Regular price ${regular:,.2f}{unit} · " if regular is not None else ""
+        lbl = f"<div class='small mut gal-lbl'>{regular_line}reviewed imported offer</div>"
+    else:
+        lbl = "<div class='small mut gal-lbl'>" + mv.gallery_labels(c) + "</div>"
     save = mv.save_button(c, tok)
     actions = pref_buttons(c, tok, include_save=False, include_hide=False, include_why=False) if pref_buttons is mv.pref_buttons else pref_buttons(c, tok)
     more = f"<details class='mk-more'><summary title='More actions' aria-label='More actions'>&#8943;</summary>{lbl}{actions}</details>"
@@ -269,10 +295,14 @@ def card(c: dict, tok, now: datetime, pref_buttons) -> str:
         media = media.replace("</div>", f"{cd}</div>", 1)
     elif cd:
         media += cd
+    timing = f"Expires {e(closes)}" if local else f"Closes {e(closes)}"
+    vendor = (f"<div class='small mk-vendor'><b>{e(c.get('business_name'))}</b></div>" if local and c.get("business_name") else "")
+    availability = (f"<div class='small mk-availability'><b>Available:</b> {e(c.get('availability'))}</div>" if local and c.get("availability") else "")
+    original = (f"<a class='mk-original small' href='{e(c['url'])}' target='_blank' rel='noopener noreferrer'>Original offer</a>" if local and c.get("url") else "")
     return (f"<div class='mk-g mk-card' data-lot='{e(c['id'])}'{kind}>{media}"
-            f"<div class='ti'><b>{e(ti)}</b>{flag}</div><div class='small'>{place}</div>{note}<div class='small mut'>Closes {e(closes)}{c.get('closing_badge', '')}</div>{money}"
+            f"<div class='ti'><b>{e(ti)}</b>{flag}</div>{vendor}<div class='small'>{place}</div>{note}<div class='small mut'>{timing}{c.get('closing_badge', '')}</div>{availability}{money}"
             f"{reason}<div class='mk-card-src'><span class='mk-src'>{e(c['source'])}</span></div>"
-            f"<div class='mk-vw'>{_view(c)}{save}{mv.hide_button(c, tok)}{more}</div></div>")
+            f"<div class='mk-vw'>{_view(c)}{original}{save}{mv.hide_button(c, tok)}{more}</div></div>")
 
 
 # ---- sidebar sections / top bar ----
@@ -307,7 +337,8 @@ def source_section(q: dict, fc: dict, now: datetime) -> str:
     for r in msp.rows(now):
         i, st = r["info"], r["state"]
         n = fc["source"].get(i.key, 0)
-        state = {"LIVE CONNECTED": "connected", "CONNECTED, WAITING FOR ALERTS": "connected, waiting for alerts", "MANUAL": "manual: paste finds", "BLOCKED": "blocked"}.get(st, "not connected")
+        state = {"LIVE CONNECTED": "connected", "CONNECTED, WAITING FOR ALERTS": "connected, waiting for alerts",
+                 "IMPORTED": "reviewed offers", "MANUAL": "manual: paste finds", "BLOCKED": "blocked"}.get(st, "not connected")
         if r["probe"]["status"] == "fixture":
             state = "FIXTURE, not live"
         checked = all_on or i.key in selected
@@ -343,7 +374,7 @@ def _where(c: dict) -> str:
     city, st, z = (c.get("city") or "").strip(), (c.get("state") or "").strip(), (c.get("zip") or "").strip()
     if not city:
         return "town UNKNOWN"
-    if st and not re.search(r",\s*" + re.escape(st) + r"$", city, re.I):
+    if st and not re.search(r",\s*" + re.escape(st) + r"(?:\s+\d{5}(?:-\d{4})?)?$", city, re.I):
         city += f", {st}"
     return city + (f" {z}" if z and z not in city else "")
 
@@ -380,7 +411,7 @@ CSS = """<style>
 .mk-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.mk-card{display:flex;flex-direction:column;gap:2px}.mk-ph{position:relative}.mk-ph .ph{height:130px}.mk-ph img{height:130px}
 .mk-cd{position:absolute;left:6px;bottom:6px;background:#444;color:#fff;border-radius:6px;padding:2px 8px;font-size:12px;font-weight:700}.mk-cd.red{background:#c0222c}.mk-card-src{display:flex;justify-content:flex-end;min-height:20px;margin-top:auto}.mk-src{font-size:12px;font-weight:700;color:var(--mut,#5d6470);text-align:right}
 .mk-view{display:inline-block;background:var(--acc);color:var(--bg);border-radius:6px;padding:6px 18px;font-weight:700;text-decoration:none}.mk-vw{margin:4px 0;display:flex;gap:7px;align-items:center;flex-wrap:wrap}.mk-save{display:inline}.mk-save button{width:auto;padding:6px 12px;background:var(--card);color:var(--acc);border:1px solid var(--acc)}.mk-vw .mk-x{padding:6px 10px}.mk-off{background:transparent;color:var(--mut,#777);border:1px dashed var(--line);font-weight:400}
-.mk-pages{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:14px 0}.mk-pg{border:1px solid var(--line);border-radius:6px;padding:4px 10px;text-decoration:none}.mk-pg.cur{background:#1d4ed8;color:#fff}
+.mk-pages{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0}.mk-pg{border:1px solid var(--line);border-radius:6px;padding:4px 10px;text-decoration:none}.mk-pg.cur{background:#1d4ed8;color:#fff}.mk-pg.disabled{opacity:.5;cursor:not-allowed}
 .mk-top .mk-bar{flex-wrap:nowrap;gap:10px}.mk-top .mk-bar label{margin:0;white-space:nowrap}.mk-top select{width:auto}.mk-go{width:auto;padding:10px 18px;white-space:nowrap}
 .mk-quick{padding:0}.mk-chips{display:flex;flex-wrap:nowrap;gap:4px;overflow:hidden;margin:2px 0;white-space:nowrap}.mk-chips .chip{flex:0 0 auto}
 .mk-strip{margin:2px 0;border:1px solid var(--line);border-radius:8px;padding:2px 10px}.mk-strip>summary{cursor:pointer}#fixture-banner{margin:2px 0;padding:2px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}

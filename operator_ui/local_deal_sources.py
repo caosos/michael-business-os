@@ -107,7 +107,11 @@ def normalize(payload: dict, imported_at: str, import_id: str,
     source_id = str(payload.get("source_id") or "")
     if not _SOURCE.fullmatch(source_id):
         raise ValueError("source id must be a lowercase stable key")
-    source_url = _url(payload.get("source_url"), "source URL", method == "public_offer")
+    # Every reviewed Marketplace card must retain a public place where the
+    # customer can verify the offer.  A vendor-submission receipt establishes
+    # authority, but it is not a customer-facing offer link by itself.
+    source_url = _url(payload.get("source_url"), "source URL", True)
+    image_url = _url(payload.get("image_url") or payload.get("photo_url"), "image URL", False)
     vendor_submission_id = _text(payload.get("vendor_submission_id"), "vendor submission id", 120, method == "vendor_submission") or None
     if method == "vendor_submission" and payload.get("authority_attested") is not True:
         raise ValueError("vendor submissions require recorded authority attestation")
@@ -139,10 +143,10 @@ def normalize(payload: dict, imported_at: str, import_id: str,
             "location": _text(payload.get("location"), "location", 160),
             "availability": _text(payload.get("availability"), "availability", 300),
             "terms": str(payload.get("terms") or "").strip()[:1500],
+            "image_url": image_url,
             "observed_at": observed_s,
             "starts_on": _text(payload.get("starts_on"), "starts on", 10, False) or None,
             "expires_at": expires_s,
-            "photo_url": _url(payload.get("photo_url"), "photo URL", False),
         },
         "provenance": {
             "method": method,
@@ -246,13 +250,14 @@ def card(row: dict, origin=None) -> dict:
     state_match = re.search(r"(?:,|\s)\s*([A-Za-z]{2})(?:\s+\d{5})?$", loc)
     state = state_match.group(1).upper() if state_match and state_match.group(1).upper() in ms.US_STATES else None
     provenance = row.get("provenance") or {}
-    return {"id": f"local:{row['import_id']}", "title": title, "description": desc, "text": f"{title} {desc}".lower(),
-            "url": provenance.get("original_url"), "image": offer.get("photo_url"), "bid": None, "price": offer["deal_price_usd"], "price_type": "fixed",
+    searchable = " ".join(str(x or "") for x in (title, desc, offer.get("unit"), offer.get("terms"), CATEGORIES[offer["category"]]))
+    return {"id": f"local:{row['import_id']}", "title": title, "description": desc, "text": searchable.lower(),
+            "url": provenance.get("original_url"), "image": offer.get("image_url"), "bid": None, "price": offer["deal_price_usd"], "price_type": "fixed",
             "bidders": None, "closes": offer["expires_at"][:10], "closes_at": offer["expires_at"], "city": loc, "state": state,
             "zip": zip_code, "posted": offer["observed_at"][:10], "distance": haversine_miles(origin, point) if origin and point else None,
-            "category": CATEGORIES[offer["category"]], "condition": None, "labels": ms.auction_labels({}), "source": SOURCE_NAME,
+            "category": CATEGORIES[offer["category"]], "category_key": offer["category"], "condition": None, "labels": ms.auction_labels({}), "source": SOURCE_NAME,
             "source_key": SOURCE_KEY, "fetched_at": row["imported_at"], "kind": "fixed", "stale": False,
-            "provenance": provenance, "business_name": source.get("name"), "availability": offer.get("availability"),
+            "provenance": provenance, "business_name": source.get("name"), "business_source_key": source.get("id"), "availability": offer.get("availability"),
             "terms": offer.get("terms"), "unit": offer.get("unit"), "regular_price": offer.get("regular_price_usd")}
 
 

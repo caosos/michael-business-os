@@ -87,7 +87,8 @@ def pref_buttons(c: dict, tok, include_save: bool = True, include_hide: bool = T
     return (f"<div class='mk-acts'><form method='post' action='/market/pref' class='mk-pref'>{tok()}{hid}{save if include_save else ''}"
             f"{b('dismiss', 'Not interested', 'Hides this listing and counts its title words as less like this')}{b('more', 'More like this', 'Boosts its title words in ranking')}{b('less', 'Less like this', 'Lowers its title words in ranking')}</form>"
             f"{hide_button(c, tok) if include_hide else ''}</div>"
-            + __import__('operator_ui.market_bids', fromlist=['x']).button(c, tok) + (f"<p class='small mut' data-why>{e(c['why'])}</p>" if include_why and c.get("why") else ""))
+            + ("" if c.get("source_key") == "local_deals" else __import__('operator_ui.market_bids', fromlist=['x']).button(c, tok))
+            + (f"<p class='small mut' data-why>{e(c['why'])}</p>" if include_why and c.get("why") else ""))
 
 
 def hidden_panel(d: dict, tok) -> str:
@@ -395,9 +396,12 @@ def render_page(q: dict, d: dict, results: list[dict], hidden: dict, saved: list
         if n_hid and not display_rows:
             zero = f"<p class='mut' id='zero-results'><b>0 listings left.</b> {n_hid} matching listing(s) are hidden. Open My Marketplace in the filters panel to restore them.</p>"
         unknown = f" <span class='small mut'>({len(unchecked)} with distance or price not verified)</span>" if unchecked else ""
+        top_pager = mb.pager(q, page, pages, len(display_rows), "top")
+        bottom_pager = mb.pager(q, page, pages, len(display_rows), "bottom")
         body = (f"<h2>{len(display_rows)} listing{'s' if len(display_rows) != 1 else ''}{unknown}</h2>"
+                + top_pager
                 + ((f"<div class='mk-grid' id='result-grid'>{''.join(pv.inject(render(c), prec.get(c['id'], '')) for c in page_rows)}</div>" if q.get("view") != "list" else "".join(pv.inject(render_card(c, tok), prec.get(c["id"], "")) for c in page_rows)) if display_rows else zero)
-                + mb.pager(q, page, pages, len(display_rows)))
+                + bottom_pager)
     fc = browse.get("fc") if browse else None
     offline = d["status"] not in ("connected", "fixture", "imported") and not d.get("name") and not d.get("coverage")
     banner = f"<div class='flash err' id='fixture-banner' role='note' title='{e(msv.FIXTURE_BANNER)}'><b>{e(msv.FIXTURE_BANNER)}</b></div>" if fc and d.get("fixture") else ""

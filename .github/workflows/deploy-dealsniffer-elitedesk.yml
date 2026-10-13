@@ -30,6 +30,7 @@ jobs:
           MANIFEST="$(git show "${GITHUB_SHA}:deploy/dealsniffer-elitedesk-release.json")"
           LANE06="$(printf '%s' "$MANIFEST" | .venv/bin/python -c 'import json,sys; print(json.load(sys.stdin)["lane06_sha"])')"
           LANE02="$(printf '%s' "$MANIFEST" | .venv/bin/python -c 'import json,sys; print(json.load(sys.stdin)["lane02_sha"])')"
+          REFRESH_MARKETPLACE="$(printf '%s' "$MANIFEST" | .venv/bin/python -c 'import json,sys; print(str(json.load(sys.stdin).get("refresh_marketplace", False)).lower())')"
           [[ "$LANE06" =~ ^[0-9a-f]{40}$ ]]
           [[ "$LANE02" =~ ^[0-9a-f]{40}$ ]]
           PROOF_DIR="$RUNNER_TEMP/dealsniffer-proof"
@@ -83,6 +84,20 @@ jobs:
           ! grep -q "id='working-capital'" "$PROOF_DIR/market.html"
           ! grep -q "id='gsa-explainer'" "$PROOF_DIR/market.html"
           ! grep -q "No photo" "$PROOF_DIR/market.html"
+          PYTHONPATH="var/lanes/agent-06${PYTHONPATH:+:$PYTHONPATH}" .venv/bin/python - "$PROOF_DIR/market.html" <<'PY'
+          import re, sys
+          text = open(sys.argv[1], encoding="utf-8").read()
+          match = re.search(r"id='result-count' class='mk-count'>([0-9,]+) results? found", text)
+          if not match:
+              raise SystemExit("Marketplace result count is missing")
+          total = int(match.group(1).replace(",", ""))
+          cards = re.findall(r"class='mk-g mk-card' data-lot='([^']+)'", text)
+          if len(cards) != min(total, 24) or len(cards) != len(set(cards)):
+              raise SystemExit(f"Marketplace DOM mismatch: total={total}, rendered={len(cards)}, unique={len(set(cards))}")
+          if total and not all(marker in text for marker in ("id='pager-top'", "id='pager-bottom'", "Page 1 of")):
+              raise SystemExit("Marketplace top/bottom page controls are missing")
+          print(f"market_total={total}\nmarket_rendered={len(cards)}\nmarket_dom_integrity=true")
+          PY
 
           # Prove the large search bar's server path does not leave the old
           # lineup visible when the query has no match.  No `go=1` here: this
@@ -167,12 +182,31 @@ jobs:
             CREDENTIAL_CONFIGURED=false
           fi
           printf 'credential_configured=%s\n' "$CREDENTIAL_CONFIGURED" > "$PROOF_DIR/facebook-proof.txt"
-          curl -fsS --max-time 180 'http://127.0.0.1:8766/market?go=1&keywords=trailer&base=72032&radius=30&source=facebook&cat=all' > "$PROOF_DIR/facebook-search.html"
-          for ATTEMPT in 2 3 4; do
-            [ -s "$FACEBOOK_CACHE" ] && break
-            sleep 30
-            curl -fsS --max-time 180 'http://127.0.0.1:8766/market?go=1&keywords=trailer&base=72032&radius=30&source=facebook&cat=all' > "$PROOF_DIR/facebook-search.html"
-          done
+          if [ "$REFRESH_MARKETPLACE" = true ]; then
+            DENSITY_URL='http://127.0.0.1:8766/market?go=1&base=72032&radius=30&source=facebook&cat=all'
+            for ATTEMPT in 1 2 3 4 5 6; do
+              curl -fsS --max-time 180 "$DENSITY_URL" > "$PROOF_DIR/facebook-search.html"
+              ! grep -q "id='facebook-refresh-pending'" "$PROOF_DIR/facebook-search.html" && break
+              sleep 20
+            done
+          else
+            curl -fsS --max-time 30 'http://127.0.0.1:8766/market?base=72032&radius=30&source=facebook&cat=all' > "$PROOF_DIR/facebook-search.html"
+          fi
+          PYTHONPATH="var/lanes/agent-06${PYTHONPATH:+:$PYTHONPATH}" .venv/bin/python - "$PROOF_DIR/facebook-search.html" <<'PY' | tee "$PROOF_DIR/facebook-render-proof.txt"
+          import re, sys
+          text = open(sys.argv[1], encoding="utf-8").read()
+          match = re.search(r"id='result-count' class='mk-count'>([0-9,]+) results? found", text)
+          total = int(match.group(1).replace(",", "")) if match else -1
+          cards = re.findall(r"class='mk-g mk-card' data-lot='([^']+)'", text)
+          photos = len(re.findall(r"<img[^>]+src='https://", text))
+          print(f"facebook_filtered_total={total}\nfacebook_rendered={len(cards)}\nfacebook_rendered_photos={photos}")
+          if total < 25:
+              raise SystemExit(f"Facebook density acceptance failed: expected at least 25 filtered listings, got {total}")
+          if len(cards) != 24 or len(cards) != len(set(cards)):
+              raise SystemExit(f"Facebook first-page DOM mismatch: total={total}, rendered={len(cards)}, unique={len(set(cards))}")
+          if not all(marker in text for marker in ("id='pager-top'", "id='pager-bottom'", "Page 1 of")):
+              raise SystemExit("Facebook top/bottom pagination is missing")
+          PY
           curl -fsS --max-time 30 'http://127.0.0.1:8766/market?go=1&base=72032&radius=100&source=wooley&source=blackmon&cat=tools&cat=equipment' > "$PROOF_DIR/multi-source.html"
           grep -q "name='source' value='wooley' checked" "$PROOF_DIR/multi-source.html"
           grep -q "name='source' value='blackmon' checked" "$PROOF_DIR/multi-source.html"

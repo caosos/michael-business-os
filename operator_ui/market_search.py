@@ -49,7 +49,7 @@ CONDITIONS = ("", "new", "used", "salvage", "parts", "for parts", "not working",
 STALE_H = 6
 LTYPES = ("auction", "fixed", "event")      # F-159: Auction / Buy now or fixed price / Auction event
 QUICK = ("new", "today", "soon", "saved")
-PAGE_SIZE = 12
+PAGE_SIZE = 24
 META = ("min:", "cat:", "rows:", "broad:", "cond:", "any:", "locmode:", "states:", "alsorad:")   # F-54: other saved-search criteria ride in nice_to_have the same way (the frozen schema has no field)
 EXCLUDE_PREFIX = "exclude:"            # saved inside the campaign's nice_to_have, the only free-text list the frozen schema allows
 # F-136: state names for the By State picker (50 states + DC). A lot's state is the 2-letter code the GSA cache gives; anything else stays unknown.
@@ -320,6 +320,22 @@ def _price_ok(c: dict, q: dict):
     return (q.get("min_price") is None or amt >= q["min_price"]) and (q["max_price"] is None or amt <= q["max_price"])
 
 
+def display_price(c: dict) -> float | None:
+    """The comparable price shown on a mixed Marketplace card.
+
+    Auction rows contribute their current bid; fixed-price and reviewed local
+    deals contribute their stated price.  This keeps the shared price sorts
+    truthful instead of silently putting every fixed-price deal last.
+    """
+    bid = c.get("bid")
+    if isinstance(bid, (int, float)) and not isinstance(bid, bool):
+        return float(bid)
+    price = c.get("price")
+    if c.get("price_type") in ("asking", "fixed", "buy_now") and isinstance(price, (int, float)) and not isinstance(price, bool):
+        return float(price)
+    return None
+
+
 def search(lots: list[dict], q: dict) -> tuple[list[dict], dict]:
     """The checked results and the hidden counts (see `partition` for the lots that could not be checked)."""
     res, _, hidden = partition(lots, q)
@@ -369,7 +385,7 @@ def partition(lots: list[dict], q: dict) -> tuple[list[dict], list[dict], dict]:
         else:
             why = (["state not known (not in the cache)"] if by_state and c.get("state") is None else []) + (["location not found (distance unknown)"] if radius_on and c["distance"] is None else []) + (["no bid yet (price unknown)"] if pok is None else [])
             (unchecked if why else out).append({**c, "tags": tags, "unchecked": why})
-    key = {"closing": lambda c: (c["closes"] or "9999", c["title"]), "bid": lambda c: (c["bid"] is None, c["bid"] or 0, c["title"]),
+    key = {"closing": lambda c: (c["closes"] or "9999", c["title"]), "bid": lambda c: (display_price(c) is None, display_price(c) or 0, c["title"]),
            "distance": lambda c: (c["distance"] is None, c["distance"] or 0, c["title"]), "title": lambda c: c["title"].lower(), "suggested": lambda c: (c["closes"] or "9999", c["title"]), "new": None, "price_desc": None}[q["sort"]]
     return order(out, q["sort"], key), order(unchecked, q["sort"], key), hidden
 
@@ -381,7 +397,7 @@ def order(rows: list[dict], sort: str, key) -> list[dict]:
         return sorted([c for c in base if c.get("posted")], key=lambda c: c["posted"], reverse=True) + [c for c in base if not c.get("posted")]
     if sort == "price_desc":
         base = sorted(rows, key=lambda c: c["title"].lower())
-        return sorted([c for c in base if c["bid"] is not None], key=lambda c: c["bid"], reverse=True) + [c for c in base if c["bid"] is None]
+        return sorted([c for c in base if display_price(c) is not None], key=display_price, reverse=True) + [c for c in base if display_price(c) is None]
     return sorted(rows, key=key)
 
 
@@ -395,6 +411,12 @@ def decision(card: dict, comp: dict | None = None) -> tuple[str, str]:
 
 def card_cats(c: dict) -> set[str]:
     """F-157: every category a lot matches (title + category guess); `other` is added when it matches no control category."""
+    explicit = c.get("category_key")
+    # Reviewed local deals carry the customer's approved taxonomy key.  Do
+    # not let a display label such as "Restaurants & Prepared Food" leak into
+    # the grocery facet merely because it contains the generic word "food".
+    if explicit in CONTROL_CATS:
+        return {explicit}
     got = {k for k in ROW_CATS if in_cat(c, k)}
     if "land_real_estate" in got and in_cat(c, "land_real_estate", title_only=True):      # F-158: a land/real-estate TITLE is the seller's word; the system guess (e.g. commercial_equipment) must not keep it
         got = {k for k in ROW_CATS if in_cat(c, k, title_only=True)}

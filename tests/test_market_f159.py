@@ -164,30 +164,40 @@ def test_sort_dropdown_labels_and_default(ui):
 
 
 # ---- pagination ----
-def test_paginate_12_per_page_and_clamps():
-    rows = [{"id": str(i)} for i in range(50)]
+def test_paginate_24_per_page_and_clamps():
+    rows = [{"id": str(i)} for i in range(100)]
     p1, n, pages = mbr.paginate(rows, 1)
-    assert (len(p1), n, pages) == (12, 1, 5) and p1[0]["id"] == "0"
+    assert (len(p1), n, pages) == (24, 1, 5) and p1[0]["id"] == "0"
     p3, n, _ = mbr.paginate(rows, 3)
-    assert [r["id"] for r in p3] == [str(i) for i in range(24, 36)] and n == 3
+    assert [r["id"] for r in p3] == [str(i) for i in range(48, 72)] and n == 3
     assert mbr.paginate(rows, 99)[1] == 5 and mbr.paginate([], 5)[1:] == (1, 1)
     assert ms.parse_query({"page": ["2"]})["page"] == 2 and ms.parse_query({"page": ["x"]})["page"] == 1
 
 
 def test_pager_links_carry_the_page_in_the_url():
+    q = ms.parse_query({"go": ["1"], "keywords": ["trailer"], "source": ["facebook", "gsa"], "loc_mode": ["state"], "state": ["AR"]})
+    h = mbr.pager(q, 2, 5, 110, "top")
+    assert "id='pager-top'" in h and "aria-current='page'>2</b>" in h and "page=3" in h
+    assert "rel='prev'" in h and "rel='next'" in h and "Showing 25-48 of 110 · Page 2 of 5" in h
+    assert "keywords=trailer" in h and "source=facebook%2Cgsa" in h and "state=AR" in h
+
+
+def test_one_page_pager_is_visible_and_truthful():
     q = ms.parse_query({"go": ["1"], "loc_mode": ["state"], "state": ["AR"]})
-    h = mbr.pager(q, 2, 5, 110)
-    assert "aria-current='page'>2</b>" in h and "page=3" in h and "rel='prev'" in h and "rel='next'" in h and "Showing 13-24 of 110" in h
-    assert mbr.pager(q, 1, 1, 10) == ""
+    h = mbr.pager(q, 1, 1, 11, "bottom")
+    assert "id='pager-bottom'" in h and "Page 1 of 1" in h and "Showing 1-11 of 11" in h
+    assert h.count("aria-disabled='true'") == 2 and ">Previous</span>" in h and ">Next</span>" in h
+    assert mbr.pager(q, 1, 1, 0) == ""
 
 
 def test_page_param_selects_the_slice(ui, monkeypatch):
     monkeypatch.setattr(ms, "PAGE_SIZE", 2)
     monkeypatch.setattr(mbr.paginate, "__defaults__", (2,))
-    ids = lambda h: re.findall(r"<div class='mk-g mk-card' data-lot='([^']+)'", h.split("id='result-grid'")[1].split("id='pager'")[0])  # noqa: E731
+    ids = lambda h: re.findall(r"<div class='mk-g mk-card' data-lot='([^']+)'", h.split("id='result-grid'")[1].split("id='pager-bottom'")[0])  # noqa: E731
     p1, p2 = get(ui, **BASE), get(ui, **BASE, page=2)
     assert len(ids(p1)) == 2 and len(ids(p2)) >= 1 and not set(ids(p1)) & set(ids(p2))
-    assert "id='pager'" in p1 and "page=2" in p1
+    assert "id='pager-top'" in p1 and "id='pager-bottom'" in p1 and "page=2" in p1
+    assert p1.index("id='pager-top'") < p1.index("id='result-grid'") < p1.index("id='pager-bottom'")
 
 
 # ---- collapse persistence / Land default / prefs isolation ----

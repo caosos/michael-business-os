@@ -91,17 +91,54 @@ class FacebookDirectTests(unittest.TestCase):
             self.assertEqual(second["status"], "connected")
             self.assertEqual((provider.searches, provider.resumes, provider.assert_id), (1, 1, "s_keep123"))
 
-    def test_cap_and_card_shape(self):
+    def test_merged_cap_and_card_shape(self):
         rows = [{"url": f"https://www.facebook.com/marketplace/item/{n}/", "title": f"Tool {n}", "price": n,
                  "location": {"name": "Conway, AR 72032", "latitude": 35.0887, "longitude": -92.4421},
                  "images": [{"url": f"https://img.example/{n}.jpg"}], "listing_date": "2026-10-12T10:00:00Z"}
                 for n in range(30)]
         cards = fb.cards(rows, NOW.isoformat(), (35.0887, -92.4421))
-        self.assertEqual(len(cards), fb.HARD_CAP)
+        self.assertEqual(len(cards), 30)
         self.assertEqual(cards[0]["source"], "Facebook Marketplace")
         self.assertEqual(cards[0]["kind"], "fixed")
         self.assertEqual(cards[0]["distance"], 0.0)
         self.assertEqual(cards[0]["zip"], "72032")
+
+    def test_default_density_search_uses_multiple_bounded_inputs_and_dedupes(self):
+        calls = []
+
+        def request(method, url, headers, body, timeout):
+            calls.append((url, json.loads(body)))
+            return 200, {}, json.dumps([
+                {"url": "https://www.facebook.com/marketplace/item/1/", "title": "Trailer"},
+                {"url": "https://www.facebook.com/marketplace/item/1/", "title": "Trailer duplicate"},
+                {"url": "https://www.facebook.com/marketplace/item/2/", "title": "Mower"},
+            ]).encode()
+
+        rows = fb.BrightDataClient("token", request=request).search_many(fb.DENSITY_TERMS, "72032", 30)
+        self.assertEqual([row["title"] for row in rows], ["Trailer", "Mower"])
+        self.assertEqual(len(calls[0][1]["input"]), len(fb.DENSITY_TERMS))
+        self.assertEqual(calls[0][1]["limit_per_input"], fb.HARD_CAP)
+        self.assertTrue(all(set(value) == {"keyword", "city"} for value in calls[0][1]["input"]))
+
+    def test_different_searches_accumulate_fresh_deduped_shards(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "facebook.json"
+
+            class Provider:
+                def search(self, keyword, *_):
+                    common = {"url": "https://www.facebook.com/marketplace/item/1/", "title": "Shared"}
+                    return [common, {"url": f"https://www.facebook.com/marketplace/item/{2 if keyword == 'tools' else 3}/",
+                                     "title": keyword}]
+
+            provider = Provider()
+            first = fb.load(NOW, keyword="tools", city="72032", radius=30, refresh=True, client=provider, path=path)
+            later = NOW.replace(minute=50)
+            second = fb.load(later, keyword="mower", city="72032", radius=30, refresh=True, client=provider, path=path)
+            self.assertEqual(len(first["cards"]), 2)
+            self.assertEqual({card["title"] for card in second["cards"]}, {"Shared", "tools", "mower"})
+            doc = json.loads(path.read_text())
+            self.assertEqual(len(doc["shards"]), 2)
+            self.assertEqual(len(doc["records"]), 3)
 
     def test_town_without_provider_coordinates_uses_local_gazetteer(self):
         rows = [{"url": "https://www.facebook.com/marketplace/item/1/", "title": "Mower",

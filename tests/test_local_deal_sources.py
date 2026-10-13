@@ -15,6 +15,7 @@ BASE = {
     "geography": "Conway, AR",
     "source_offer_id": "beef-2026-10-13",
     "source_url": "https://example.com/specials/beef",
+    "image_url": "https://cdn.conwaybutcher.test.invalid/beef.jpg",
     "title": "Fresh ground beef",
     "category": "food_grocery",
     "description": "Fresh daily",
@@ -45,13 +46,13 @@ def test_public_import_is_expiring_imported_and_keeps_provenance():
 
 
 def test_vendor_import_requires_authority_and_submission_provenance():
-    vendor = {**BASE, "method": "vendor_submission", "source_url": "", "vendor_submission_id": "deal-a1"}
+    vendor = {**BASE, "method": "vendor_submission", "vendor_submission_id": "deal-a1"}
     with pytest.raises(ValueError, match="authority attestation"):
         _row(vendor)
     row = _row({**vendor, "authority_attested": True})
     assert row["source"]["retrieval_path"] == "vendor submission"
     assert row["provenance"]["vendor_submission_id"] == "deal-a1"
-    assert row["provenance"]["original_url"] is None
+    assert row["provenance"]["original_url"] == BASE["source_url"]
 
 
 @pytest.mark.parametrize("change,message", [
@@ -59,6 +60,7 @@ def test_vendor_import_requires_authority_and_submission_provenance():
     ({"expires_at": "2026-10-13T17:59:59Z"}, "expired offers"),
     ({"observed_at": "2026-10-13T18:01:00Z"}, "cannot be after"),
     ({"source_url": "file:///tmp/deal"}, "public http"),
+    ({"image_url": "data:image/png;base64,nope"}, "public http"),
     ({"regular_price": "1.00"}, "cannot be lower"),
 ])
 def test_import_rejects_unsupported_stale_or_unprovable_records(change, message):
@@ -90,6 +92,8 @@ def test_imported_offer_uses_common_market_card_and_filters(tmp_path, monkeypatc
     card = data["cards"][0]
     assert data["status"] == "imported" and card["source_key"] == "local_deals"
     assert card["price"] == 1.99 and card["unit"] == "per pound"
+    assert card["image"] == BASE["image_url"] and card["business_name"] == BASE["source_name"]
+    assert card["category_key"] == "food_grocery"
     assert card["provenance"]["original_url"] == BASE["source_url"]
     q = market_search.parse_query({"cat": ["food_grocery"], "base": ["72032"], "radius": ["30"], "broad": ["1"]})
     checked, unchecked, hidden = market_search.partition(data["cards"], q)

@@ -9,7 +9,7 @@ import re
 from datetime import datetime, timezone
 from html import escape as e
 from html.parser import HTMLParser
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit
 
 from . import landing_fix
 from . import market_bids as mb
@@ -143,8 +143,14 @@ def countdown_parts(c: dict, now: datetime) -> tuple[int, str] | None:
     return s, f"{d} days {h} hrs {m} min {sec} sec"
 
 
-def _live_link(url, text: str) -> str:
-    if url and classify_url(url)[0] == "live":
+def _live_link(url, text: str, *, exact_host: bool = False) -> str:
+    hosts = None
+    if exact_host:
+        try:
+            hosts = [urlsplit(url or "").hostname or ""]
+        except ValueError:
+            hosts = []
+    if url and classify_url(url, hosts=hosts)[0] == "live":
         return f"<a class='mk-view' href='{e(url)}' rel='noopener noreferrer nofollow' target='_blank'>{e(text)}</a>"
     return "<span class='mut small'>No verified live link for the original listing</span>"
 
@@ -161,10 +167,15 @@ def _photos(c: dict) -> str | None:
     if img and landing_fix.is_gsa_image(img):
         main = landing_fix.photo_tile(img, c.get("url"))
         thumbs = ""
-    elif img and classify_url(img)[0] == "live":
+    else:
+        try:
+            image_hosts = [urlsplit(img or "").hostname or ""]
+        except ValueError:
+            image_hosts = []
+    if img and not landing_fix.is_gsa_image(img) and classify_url(img, hosts=image_hosts)[0] == "live":
         main = f"<a href='{e(img)}' target='_blank' rel='noopener noreferrer nofollow' title='Full screen'><img src='{e(img)}' alt='Listing photo' referrerpolicy='no-referrer' style='max-width:100%'></a>"
         thumbs = f"<div class='small'><a href='{e(img)}' target='_blank' rel='noopener noreferrer nofollow'><img src='{e(img)}' alt='Thumbnail 1' width='60' referrerpolicy='no-referrer'></a> <a href='{e(img)}' target='_blank' rel='noopener noreferrer nofollow'>Full screen</a></div>"
-    else:
+    elif not (img and landing_fix.is_gsa_image(img)):
         return None
     return f"<div class='dt-photos'>{main}{thumbs}</div>"
 
@@ -240,8 +251,10 @@ def local_deal_page(c: dict, now: datetime) -> str:
     method = (c.get("provenance") or {}).get("method") or "UNKNOWN"
     provenance = (f"<p class='small mut'><b>Provenance:</b> {e(method)} · state IMPORTED, not a live vendor connection. "
                   "The offer is hidden automatically after its stated expiration.</p>")
-    return (f"<table id='dt-status'>{rows}</table><h2>Offer</h2><p>{e(c.get('description') or '')}</p>{terms}"
-            f"<p>{_live_link(c.get('url'), 'Open original offer')}</p>{provenance}")
+    facts = (f"<table id='dt-status'>{rows}</table><h2>Offer</h2><p>{e(c.get('description') or '')}</p>{terms}"
+             f"<p>{_live_link(c.get('url'), 'Open original offer', exact_host=True)}</p>{provenance}")
+    photo = _photos(c)
+    return f"<div class='dt-grid'>{photo or ''}<div>{facts}</div></div>"
 
 
 def render(c: dict, raw: dict | None, pool: list[dict], prefs: dict, now: datetime, tok, q: dict | None = None) -> str:

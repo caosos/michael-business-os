@@ -2,7 +2,7 @@
 
 This module is deliberately small and dependency-free so the Marketplace UI can
 read Facebook results without depending on the discovery worker. It never stores
-seller/profile/contact fields, caps a request at 20 rows, supports Bright Data's
+seller/profile/contact fields, bounds each provider query, supports Bright Data's
 HTTP 202 snapshot flow, and writes only a local cache consumed by the existing
 unified-feed renderer.
 """
@@ -24,7 +24,12 @@ from urllib.request import Request, urlopen
 
 API = "https://api.brightdata.com/datasets/v3"
 DATASET_ID = "gd_lvt9iwuh6fbcwmx1a"
-HARD_CAP = 20
+HARD_CAP = 20                         # provider limit per discovery input
+TOTAL_CAP = 240                       # bounded merged cache, across searches
+SHARD_HOURS = 24
+DENSITY_QUERY = "tools equipment trailers lawn machinery pallets"
+DENSITY_TERMS = ("utility trailer", "equipment trailer", "tools", "lawn mower",
+                 "small equipment", "machinery", "liquidation pallet")
 STALE_HOURS = 6
 REFRESH_MINUTES = 15
 TOKEN_FILE = Path("~/.config/mbos/secrets/BRIGHTDATA_TOKEN")
@@ -236,6 +241,43 @@ class BrightDataClient:
             complete.extend(self._scrape(urls[:cap], 1))
         return [_public(row) for row in complete[:cap] if row.get("title")]
 
+    def search_many(self, keywords: list[str] | tuple[str, ...], city: str, radius_miles: float,
+                    limit_per_keyword: int = HARD_CAP) -> list[dict]:
+        """Fetch several bounded category searches in one provider snapshot.
+
+        The old default sent one six-word phrase and could never retain more
+        than 20 candidates.  A marketplace landing page needs a pool, not one
+        narrow search.  This remains explicit-search only and each input is
+        capped by ``HARD_CAP``.
+        """
+        cap = min(max(int(limit_per_keyword), 1), HARD_CAP)
+        cleaned = list(dict.fromkeys(_clean(value, 120) for value in keywords if _clean(value, 120)))
+        city = _clean(city, 80)
+        if not cleaned or not city:
+            raise BrightDataError("Facebook search needs keywords and a ZIP or city")
+        from . import gazetteer
+        provider_city = gazetteer.city_label(city)
+        found = self._scrape([{"keyword": word, "city": provider_city} for word in cleaned], cap,
+                             discover_by="keyword")
+        complete = [row for row in found if row.get("title")]
+        urls = [{"url": row["url"]} for row in found if not row.get("title") and isinstance(row.get("url"), str)]
+        if urls:
+            complete.extend(self._scrape(urls[:TOTAL_CAP], 1))
+        unique = []
+        seen = set()
+        for row in complete:
+            key = _record_key(row)
+            if row.get("title") and key not in seen:
+                seen.add(key)
+                unique.append(_public(row))
+        return unique[:TOTAL_CAP]
+
+
+def _record_key(row: dict) -> str:
+    url = _clean(row.get("url"), 2000)
+    match = _ITEM_ID.search(url)
+    return _clean(row.get("product_id"), 120) or (match.group(1) if match else url)
+
 
 def _loc(row: dict) -> tuple[str | None, str | None, str | None, float | None, float | None]:
     value = row.get("location") or row.get("location_text") or row.get("city")
@@ -271,7 +313,7 @@ def _image(row: dict) -> str | None:
 
 def cards(rows: list[dict], as_of: str, origin=None) -> list[dict]:
     out = []
-    for raw in rows[:HARD_CAP]:
+    for raw in rows[:TOTAL_CAP]:
         row = _public(raw)
         title, url = _clean(row.get("title"), 300), _clean(row.get("url"), 2000)
         if not title or not url.startswith("https://www.facebook.com/"):
@@ -294,11 +336,12 @@ def cards(rows: list[dict], as_of: str, origin=None) -> list[dict]:
         condition = _clean(row.get("condition"), 60).lower() or None
         text = f"{title} {description} {condition or ''}".lower()
         posted = _clean(row.get("listing_date"), 40)[:10] or None
+        fetched_at = _clean(row.get("_mbos_as_of"), 50) or as_of
         out.append({"id": f"facebook:{ident}", "title": title, "description": description, "text": text, "url": url,
                     "image": _image(row), "bid": price, "price": price, "price_type": "fixed", "bidders": None,
                     "closes": None, "city": f"{city}, {state}" if city and state else city, "state": state, "zip": zip_code,
                     "distance": _distance(origin, point), "category": _clean(row.get("category"), 80) or "other",
-                    "condition": condition, "labels": {}, "source": "Facebook Marketplace", "fetched_at": as_of,
+                    "condition": condition, "labels": {}, "source": "Facebook Marketplace", "fetched_at": fetched_at,
                     "kind": "fixed", "stale": False, "fixture": False, "posted": posted, "source_compliance": COMPLIANCE})
     return out
 
@@ -309,6 +352,53 @@ def _read_cache(path: Path) -> dict | None:
         return value if isinstance(value, dict) and isinstance(value.get("records"), list) and value.get("as_of") else None
     except (OSError, ValueError):
         return None
+
+
+def _shard_key(query: dict) -> str:
+    return hashlib.sha256(json.dumps(query, sort_keys=True, separators=(",", ":")).encode()).hexdigest()[:20]
+
+
+def _fresh_shards(cached: dict | None, now: datetime) -> dict[str, dict]:
+    """Return usable query shards, migrating the original one-query cache."""
+    raw = cached.get("shards") if cached else None
+    shards = dict(raw) if isinstance(raw, dict) else {}
+    if cached and cached.get("records") and cached.get("query") and not shards:
+        shards[_shard_key(cached["query"])] = {"as_of": cached["as_of"], "query": cached["query"],
+                                                "records": cached["records"]}
+    out = {}
+    for key, shard in shards.items():
+        try:
+            stamp = datetime.fromisoformat(str(shard["as_of"]).replace("Z", "+00:00"))
+            valid = isinstance(shard.get("query"), dict) and isinstance(shard.get("records"), list)
+            if valid and (now - stamp).total_seconds() <= SHARD_HOURS * 3600:
+                out[key] = shard
+        except (KeyError, TypeError, ValueError):
+            continue
+    return out
+
+
+def _cache_document(shards: dict[str, dict], latest_query: dict) -> dict:
+    """Flatten live shards for old readers while retaining per-query freshness."""
+    records = []
+    seen = set()
+    ordered = sorted(shards.values(), key=lambda value: str(value.get("as_of") or ""), reverse=True)
+    for shard in ordered:
+        for row in shard.get("records", []):
+            if not isinstance(row, dict):
+                continue
+            key = _record_key(row)
+            if key and key not in seen:
+                seen.add(key)
+                stamped = dict(row)
+                stamped.setdefault("_mbos_as_of", shard.get("as_of"))
+                records.append(stamped)
+            if len(records) >= TOTAL_CAP:
+                break
+        if len(records) >= TOTAL_CAP:
+            break
+    newest = max((str(value.get("as_of") or "") for value in shards.values()), default="")
+    return {"as_of": newest, "query": latest_query, "source_compliance": COMPLIANCE,
+            "records": records, "shards": shards}
 
 
 def _write_cache(path: Path, document: dict) -> None:
@@ -338,10 +428,14 @@ def load(now: datetime, origin=None, *, keyword: str = "", city: str = "", radiu
     error = ""
     api_token = token()
     wanted = {"keyword": keyword, "city": city, "radius": radius}
+    shards = _fresh_shards(cached, now)
+    wanted_key = _shard_key(wanted)
+    same = shards.get(wanted_key)
     recent_same = False
-    if cached and cached.get("query") == wanted:
+    if same or (cached and cached.get("query") == wanted):
         try:
-            recent_same = (now - datetime.fromisoformat(str(cached["as_of"]).replace("Z", "+00:00"))).total_seconds() < REFRESH_MINUTES * 60
+            stamp = (same or cached)["as_of"]
+            recent_same = (now - datetime.fromisoformat(str(stamp).replace("Z", "+00:00"))).total_seconds() < REFRESH_MINUTES * 60
         except ValueError:
             pass
     if refresh and not recent_same and (client or api_token):
@@ -352,10 +446,15 @@ def load(now: datetime, origin=None, *, keyword: str = "", city: str = "", radiu
         pending_file = _pending_path(path)
         pending = _read_pending(pending_file)
         try:
-            rows = active.resume(str(pending["snapshot_id"])) if pending and pending.get("query") == wanted and hasattr(active, "resume") else active.search(keyword, city, radius)
+            if pending and pending.get("query") == wanted and hasattr(active, "resume"):
+                rows = active.resume(str(pending["snapshot_id"]))
+            elif keyword == DENSITY_QUERY and hasattr(active, "search_many"):
+                rows = active.search_many(DENSITY_TERMS, city, radius)
+            else:
+                rows = active.search(keyword, city, radius)
             as_of = now.astimezone(timezone.utc).isoformat(timespec="seconds")
-            cached = {"as_of": as_of, "query": wanted,
-                      "source_compliance": COMPLIANCE, "records": rows}
+            shards[wanted_key] = {"as_of": as_of, "query": wanted, "records": rows}
+            cached = _cache_document(shards, wanted)
             _write_cache(path, cached)
             pending_file.unlink(missing_ok=True)
         except BrightDataPending as exc:
@@ -376,7 +475,11 @@ def load(now: datetime, origin=None, *, keyword: str = "", city: str = "", radiu
         age = 10**6
     result = cards(cached["records"], as_of, origin)
     for card in result:
-        card["stale"] = age > STALE_HOURS
+        try:
+            card_age = max(0.0, (now - datetime.fromisoformat(str(card["fetched_at"]).replace("Z", "+00:00"))).total_seconds() / 3600)
+        except ValueError:
+            card_age = 10**6
+        card["stale"] = card_age > STALE_HOURS
     refresh_pending = bool(error.startswith("Bright Data refresh is still running"))
     message = (f"Facebook refresh is running; showing the last successful cache. {error}" if refresh_pending else
                f"Live refresh failed; showing the last successful cache. {error}" if error else "")
