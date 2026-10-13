@@ -39,6 +39,12 @@ class BrightDataError(RuntimeError):
     pass
 
 
+class BrightDataPending(BrightDataError):
+    def __init__(self, snapshot_id: str):
+        self.snapshot_id = snapshot_id
+        super().__init__("Bright Data snapshot is still running")
+
+
 def token(path: str | Path | None = None) -> str | None:
     """Read the provider key without ever returning its location to the UI.
 
@@ -165,10 +171,7 @@ class BrightDataClient:
             raise BrightDataError("Bright Data returned HTTP 202 without a usable snapshot_id")
         return snap
 
-    def _finish(self, status: int, body: bytes) -> list[dict]:
-        if status == 200:
-            return _rows(body)
-        snap = self._snapshot(body)
+    def _poll(self, snap: str) -> list[dict]:
         progress = f"{API}/progress/{snap}"
         for attempt in range(self.max_polls):
             if attempt:
@@ -188,7 +191,18 @@ class BrightDataClient:
                 if dstatus != 200:
                     raise BrightDataError("Bright Data snapshot download did not complete")
                 return _rows(dbody)
-        raise BrightDataError("Bright Data snapshot did not become ready before the polling limit")
+        raise BrightDataPending(snap)
+
+    def resume(self, snapshot_id: str) -> list[dict]:
+        if not re.fullmatch(r"[A-Za-z0-9_-]{3,120}", snapshot_id or ""):
+            raise BrightDataError("Bright Data pending snapshot ID is invalid")
+        return self._poll(snapshot_id)
+
+    def _finish(self, status: int, body: bytes) -> list[dict]:
+        if status == 200:
+            return _rows(body)
+        snap = self._snapshot(body)
+        return self._poll(snap)
 
     def _scrape(self, inputs: list[dict], limit_per_input: int | None = None, *, discover_by: str | None = None) -> list[dict]:
         query = {"dataset_id": os.environ.get("MBOS_BRIGHTDATA_FACEBOOK_DATASET") or DATASET_ID,
@@ -305,6 +319,18 @@ def _write_cache(path: Path, document: dict) -> None:
     os.replace(temp, path)
 
 
+def _pending_path(path: Path) -> Path:
+    return path.with_suffix(path.suffix + ".pending")
+
+
+def _read_pending(path: Path) -> dict | None:
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+        return value if isinstance(value, dict) and value.get("snapshot_id") and isinstance(value.get("query"), dict) else None
+    except (OSError, ValueError):
+        return None
+
+
 def load(now: datetime, origin=None, *, keyword: str = "", city: str = "", radius: float = 30,
          refresh: bool = False, client: BrightDataClient | None = None, path: Path | None = None) -> dict:
     path = path or cache_path()
@@ -319,12 +345,20 @@ def load(now: datetime, origin=None, *, keyword: str = "", city: str = "", radiu
         except ValueError:
             pass
     if refresh and not recent_same and (client or api_token):
+        active = client or BrightDataClient(api_token)
+        pending_file = _pending_path(path)
+        pending = _read_pending(pending_file)
         try:
-            rows = (client or BrightDataClient(api_token)).search(keyword, city, radius)
+            rows = active.resume(str(pending["snapshot_id"])) if pending and pending.get("query") == wanted and hasattr(active, "resume") else active.search(keyword, city, radius)
             as_of = now.astimezone(timezone.utc).isoformat(timespec="seconds")
             cached = {"as_of": as_of, "query": wanted,
                       "source_compliance": COMPLIANCE, "records": rows}
             _write_cache(path, cached)
+            pending_file.unlink(missing_ok=True)
+        except BrightDataPending as exc:
+            _write_cache(pending_file, {"as_of": now.astimezone(timezone.utc).isoformat(timespec="seconds"),
+                                        "query": wanted, "snapshot_id": exc.snapshot_id, "records": []})
+            error = "Bright Data refresh is still running; Search again shortly to resume the same snapshot"
         except BrightDataError as exc:
             error = str(exc)
     if not cached:

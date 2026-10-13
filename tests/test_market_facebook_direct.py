@@ -62,6 +62,32 @@ class FacebookDirectTests(unittest.TestCase):
         self.assertEqual([method for method, _ in calls], ["POST", "GET", "GET", "GET"])
         self.assertTrue(calls[-1][1].endswith("/snapshot/s_abc123?format=json"))
 
+    def test_pending_snapshot_is_saved_and_resumed_without_a_second_paid_search(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "facebook.json"
+
+            class PendingThenReady:
+                def __init__(self):
+                    self.searches = 0
+                    self.resumes = 0
+
+                def search(self, *args):
+                    self.searches += 1
+                    raise fb.BrightDataPending("s_keep123")
+
+                def resume(self, snapshot_id):
+                    self.resumes += 1
+                    self.assert_id = snapshot_id
+                    return [{"url": "https://www.facebook.com/marketplace/item/9/", "title": "Utility trailer"}]
+
+            provider = PendingThenReady()
+            first = fb.load(NOW, keyword="trailer", city="72032", radius=30, refresh=True, client=provider, path=path)
+            self.assertEqual(first["status"], "offline")
+            self.assertIn("still running", first["message"])
+            second = fb.load(NOW, keyword="trailer", city="72032", radius=30, refresh=True, client=provider, path=path)
+            self.assertEqual(second["status"], "connected")
+            self.assertEqual((provider.searches, provider.resumes, provider.assert_id), (1, 1, "s_keep123"))
+
     def test_cap_and_card_shape(self):
         rows = [{"url": f"https://www.facebook.com/marketplace/item/{n}/", "title": f"Tool {n}", "price": n,
                  "location": {"name": "Conway, AR 72032", "latitude": 35.0887, "longitude": -92.4421},
