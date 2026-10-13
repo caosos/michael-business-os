@@ -1,7 +1,7 @@
 {
-  "lane06_sha": "8e2a858d23cf4c6eda8c5e344dba77aeb073e279",
+  "lane06_sha": "e4bef62c3dd217e33573e74483d7a66a403e6e00",
   "lane02_sha": "cda867347505ac8e27945b2aa1ae6a3823939ae2",
   "requested_by": "Michael",
-  "purpose": "Restore Michael's Marketplace preferences and prove deployment tests cannot persist synthetic search filters",
-  "verification_attempt": 19
+  "purpose": "Add broad everyday deal categories and a review-only local business offer intake without changing Michael's saved Marketplace defaults",
+  "verification_attempt": 20
 }
