@@ -22,19 +22,19 @@ A personalized local-deal marketplace, beginning in Conway. It covers resale inv
 - [x] Per-account opaque vendor-alert and buyer/seller-contact addresses are derived, but truthfully remain **NOT CONNECTED** until real mail-provider routing and delivery receipts exist.
 - [x] Signed raw mail-delivery receipt validation, replay protection, account routing, and delivered/failed proof storage exist. No provider is claimed connected without a genuine receipt.
 - [x] The Sell page accepts authority-attested owner/authorized-representative/scout submissions into an account-scoped, append-only review inbox. It validates public URLs and upload metadata, and does not publish, contact an owner, promise a sale, or start an auction.
-- [ ] **F-166 — broader local-deal network:** implementation `e4bef62c3dd217e33573e74483d7a66a403e6e00` adds selectable Meat & Groceries, Restaurants & Prepared Food, Fuel & Automotive, Entertainment & Tickets, and Retail & Local Services categories while preserving Michael's resale-focused defaults. It adds an account-isolated, append-only `Advertise a local deal` form for price/unit, regular price, availability, location, start/expiration, official link, business authority, contact consent, and a freshness commitment. All submissions remain `REVIEW_PENDING`, unpublished, and unverified. EliteDesk release/proof is in progress at run 38432230258; do not mark live until it succeeds and the artifact is inspected.
+- [x] **F-166 — broader local-deal network LIVE_VERIFIED:** implementation `e4bef62c3dd217e33573e74483d7a66a403e6e00` adds selectable Meat & Groceries, Restaurants & Prepared Food, Fuel & Automotive, Entertainment & Tickets, and Retail & Local Services categories while preserving Michael's resale-focused defaults. It adds an account-isolated, append-only `Advertise a local deal` form for price/unit, regular price, availability, location, start/expiration, official link, business authority, contact consent, and a freshness commitment. All submissions remain `REVIEW_PENDING`, unpublished, and unverified. Run 38433431736 succeeded; the loaded page was visually inspected at desktop 1440×1000 and mobile 390×1200. This proves the intake and controls, not a connected vendor feed.
 - [x] Public Home, Privacy, and Terms pages exist. The Google OAuth path implements state, nonce, PKCE, signed sessions, and Google ID-token/JWK validation with only `openid email profile`; it remains **NOT CONFIGURED** until the external prerequisites are supplied and proven.
 - [x] Settings now gives truthful setup/import instructions for GovDeals, Public Surplus, HiBid/Wooley, Craigslist, OfferUp, Nahlen, AuctionZip, Half Off Wholesale, NorthBay, and Bargain Brothers. Setup links never upgrade a source's evidence state.
 
 Loaded proof:
 
-- DealSniffer UI revision: `8e2a858d23cf4c6eda8c5e344dba77aeb073e279`
-- Deployment commit: `b17ed0f550bf9b2c5979b562e7f622b81e95be63`
-- GitHub Actions proof: https://github.com/caosos/michael-business-os/actions/runs/38360038853
-- Proof artifact: https://github.com/caosos/michael-business-os/actions/runs/38360038853/artifacts/11794048759
-- EliteDesk observation: Tuesday, October 13, 2026 — 2:02:46 AM America/Chicago
+- DealSniffer UI revision: `e4bef62c3dd217e33573e74483d7a66a403e6e00`
+- Deployment commit: `cec6c089f606e9598e1dafa8afd3827ecd53c5d4`
+- GitHub Actions proof: https://github.com/caosos/michael-business-os/actions/runs/38433431736
+- Proof artifact: https://github.com/caosos/michael-business-os/actions/runs/38433431736/artifacts/11830939381
+- EliteDesk observation: Tuesday, October 13, 2026 — 11:49:01 AM America/Chicago
 - Host: `127.0.0.1:8766`, HTTP 200, Google Chrome available
-- Browser proof: Marketplace desktop 1440×900/mobile 390×844, Settings desktop, and My Bids mobile
+- Browser proof: Marketplace desktop 1440×900/mobile 390×844, Settings desktop, My Bids mobile, and Advertise a local deal desktop 1440×1000/mobile 390×1200
 - Facebook provider proof: Bright Data credential configured; 20 original Facebook URLs and 20 photos in the provider cache
 - Focused account/OAuth/delivery/source/bid/sell/settings/market tests: 94 passed, 2 skipped
 - Search submission regression suite: 41 passed, 1 skipped
