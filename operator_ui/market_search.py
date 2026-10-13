@@ -320,14 +320,20 @@ def search(lots: list[dict], q: dict) -> tuple[list[dict], dict]:
 def partition(lots: list[dict], q: dict) -> tuple[list[dict], list[dict], dict]:
     """Filter + sort -> (checked results, unchecked, hidden counts). A lot whose distance (radius set) or price (price range set) is
     unknown cannot be tested, so it goes to `unchecked` with its reasons and is never counted as local or in range."""
-    hidden = {"price": 0, "radius": 0, "terms": 0, "condition": 0, "closing": 0}
+    hidden = {"price": 0, "radius": 0, "terms": 0, "condition": 0, "closing": 0, "rentals": 0}
     by_state = q.get("loc_mode") == "state"
     radius_on = q["radius"] is not None and (not by_state or q.get("also_radius"))      # F-136: By State does not apply the radius unless the owner also ticks it (shown on the page)
     if by_state:
         hidden["state"] = 0
     out, unchecked = [], []
     words = [w for w in re.split(r"\s+|,", q["keywords"].lower()) if w]
+    wants_rentals = any(w in {"rent", "rental", "rentals"} for w in words)
     for c in lots:
+        title = c.get("title") or ""
+        rental = bool(re.search(r"\b(?:for\s+rent|rentals?|rent\s+me|daily\s+rent|weekly\s+rent)\b|\$\s*\d+(?:\.\d+)?\s*/\s*(?:day|week)", title, re.I))
+        if rental and not wants_rentals:
+            hidden["rentals"] += 1
+            continue
         if any(w not in c["text"] for w in words):
             hidden["terms"] += 1
             continue

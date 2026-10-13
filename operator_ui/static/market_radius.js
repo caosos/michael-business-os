@@ -36,6 +36,13 @@
     }
   });
 })();
+/* Bright Data jobs are asynchronous.  The first request returns the cached
+   feed quickly; while the provider finishes, re-check the same snapshot
+   without freezing the Search button or starting another paid job. */
+(function () {
+  if (!document.getElementById("facebook-refresh-pending")) return;
+  window.setTimeout(function () { window.location.reload(); }, 6000);
+})();
 /* F-163: Sort and View apply on change (the Search button does the same without script). */
 (function () {
   var s = document.querySelectorAll("select[name=sort],select[name=view]");

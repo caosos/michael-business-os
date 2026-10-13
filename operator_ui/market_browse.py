@@ -228,7 +228,7 @@ def card(c: dict, tok, now: datetime, pref_buttons) -> str:
     # Empty photo data must not consume half the card.  Real source images are
     # shown; otherwise this remains a compact text listing with no fake or
     # broken placeholder.
-    media = f"<div class='mk-ph'>{img}<span class='badge mk-src'>{e(c['source'])}</span></div>" if img.startswith("<img") else f"<div class='mk-card-src'><span class='badge mk-src'>{e(c['source'])}</span></div>"
+    media = f"<div class='mk-ph'>{img}</div>" if img.startswith("<img") else ""
     txt, red = countdown(c, now)
     cd = f"<span class='mk-cd{' red' if red else ''}'>{e(txt)}</span>" if txt else ""
     place = e(_where(c)) + (f" · {round(c['distance'], 1):g} mi" if c.get("distance") is not None else " · distance UNKNOWN")
@@ -252,7 +252,7 @@ def card(c: dict, tok, now: datetime, pref_buttons) -> str:
     plat = msvm._platform(c) if c.get("event") else ""
     lbl = (f"<div class='small'>{plat}</div>" if plat else "") if c.get("event") else "<div class='small mut gal-lbl'>" + mv.gallery_labels(c) + "</div>"
     save = mv.save_button(c, tok)
-    actions = pref_buttons(c, tok, include_save=False) if pref_buttons is mv.pref_buttons else pref_buttons(c, tok)
+    actions = pref_buttons(c, tok, include_save=False, include_hide=False) if pref_buttons is mv.pref_buttons else pref_buttons(c, tok)
     more = f"<details class='mk-more'><summary title='More actions' aria-label='More actions'>&#8943;</summary>{lbl}{actions}</details>"
     if cd and img.startswith("<img"):
         media = media.replace("</div>", f"{cd}</div>", 1)
@@ -260,7 +260,8 @@ def card(c: dict, tok, now: datetime, pref_buttons) -> str:
         media += cd
     return (f"<div class='mk-g mk-card' data-lot='{e(c['id'])}'{kind}>{media}"
             f"<div class='ti'><b>{e(ti)}</b>{flag}</div><div class='small'>{place}</div>{note}<div class='small mut'>Closes {e(closes)}{c.get('closing_badge', '')}</div>{money}"
-            f"<div class='mk-vw'>{_view(c)}{save}{more}</div></div>")
+            f"<div class='mk-card-src'><span class='mk-src'>{e(c['source'])}</span></div>"
+            f"<div class='mk-vw'>{_view(c)}{save}{mv.hide_button(c, tok)}{more}</div></div>")
 
 
 # ---- sidebar sections / top bar ----
@@ -343,9 +344,9 @@ def top_bar(q: dict, total: int, sort_sel: str, view: str, csrf_tok, n_active: i
     if quick_counts is not None:
         quick = "<div class='mk-quick' id='quick-views' role='group' aria-label='Quick views'>" + "".join(
             f"<a class='mk-q{' cur' if (q.get('quick') or '') == k else ''}' data-quick='{k or 'all'}' href='{href(q, quick=k)}'>{e(lbl)} <span class='mk-n'>({quick_counts[k]})</span></a>" for k, lbl in QUICK_LABELS) + "</div>"
-    return ("<div class='mk-top' id='topbar'><form method='get' action='/market' class='mk-form mk-bar' id='mkform' novalidate><input type='hidden' name='go' value='1'>"
+    return ("<div class='mk-top' id='topbar'><form method='get' action='/market' class='mk-form mk-bar' id='mkform' novalidate>"
             f"<input class='mk-search' type='search' name='keywords' form='mkform' aria-label='Search title and description' placeholder='Search title and description' value='{e(q.get('keywords') or '')}'>"
-            "<button class='mk-go' type='submit'>Search</button>"
+            "<button class='mk-go' type='submit' name='go' value='1'>Search</button>"
             f"<span id='result-count' class='mk-count'>{total:,} result{'s' if total != 1 else ''} found</span>"
             f"<label>Sort <select name='sort'>{opts}</select></label><label>View <select name='view'>{views}</select></label>"
             "</form>"
@@ -358,10 +359,11 @@ CSS = """<style>
 .mk-fbtn{background:var(--acc);color:var(--bg);border:0;border-radius:8px;padding:8px 14px;font-size:15px;width:auto;opacity:1;cursor:pointer}.mk-fd{margin:0}.mk-fm,.mk-side .mk-fm{display:none}
 .mk-quick{flex:1 1 100%;display:flex;flex-wrap:wrap;gap:6px}.mk-q{border:1px solid var(--line);border-radius:16px;padding:4px 12px;font-size:14px;text-decoration:none}.mk-q.cur{background:#1d4ed8;color:#fff;border-color:#1d4ed8}.mk-q.cur .mk-n{color:#fff}
 .mk-n{color:var(--mut,#777);font-size:12px}.mk-sect{border:1px solid var(--line);border-radius:8px;padding:4px 8px;margin:0 0 8px}.mk-sect label{display:block;padding:2px 0}.mk-side .mk-cat,.mk-sect label{opacity:1;color:var(--ink)!important}.mk-cat,.mk-src-row{opacity:1!important;color:var(--ink)!important}.mk-src-row .small{color:var(--ink)}
+.mk-filter-head{position:sticky;top:0;z-index:3;background:var(--card);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:2px 0 7px}.mk-filter-head .mk-apply{width:auto;margin:0;padding:7px 12px}
 .mk-side.folded #mkfilters{display:none}.mk-drawer-t{position:absolute;opacity:0;pointer-events:none}
 .mk-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.mk-card{display:flex;flex-direction:column;gap:2px}.mk-ph{position:relative}.mk-ph .ph{height:130px}.mk-ph img{height:130px}
-.mk-cd{position:absolute;left:6px;bottom:6px;background:#444;color:#fff;border-radius:6px;padding:2px 8px;font-size:12px;font-weight:700}.mk-cd.red{background:#c0222c}.mk-src{position:absolute;right:6px;top:6px}.mk-card-src{display:flex;justify-content:flex-end;min-height:22px}.mk-card-src .mk-src{position:static}
-.mk-view{display:inline-block;background:var(--acc);color:var(--bg);border-radius:6px;padding:6px 18px;font-weight:700;text-decoration:none}.mk-vw{margin:4px 0;display:flex;gap:7px;align-items:center}.mk-save{display:inline}.mk-save button{width:auto;padding:6px 12px;background:var(--card);color:var(--acc);border:1px solid var(--acc)}.mk-off{background:transparent;color:var(--mut,#777);border:1px dashed var(--line);font-weight:400}
+.mk-cd{position:absolute;left:6px;bottom:6px;background:#444;color:#fff;border-radius:6px;padding:2px 8px;font-size:12px;font-weight:700}.mk-cd.red{background:#c0222c}.mk-card-src{display:flex;justify-content:flex-end;min-height:20px;margin-top:auto}.mk-src{font-size:12px;font-weight:700;color:var(--mut,#5d6470);text-align:right}
+.mk-view{display:inline-block;background:var(--acc);color:var(--bg);border-radius:6px;padding:6px 18px;font-weight:700;text-decoration:none}.mk-vw{margin:4px 0;display:flex;gap:7px;align-items:center;flex-wrap:wrap}.mk-save{display:inline}.mk-save button{width:auto;padding:6px 12px;background:var(--card);color:var(--acc);border:1px solid var(--acc)}.mk-vw .mk-x{padding:6px 10px}.mk-off{background:transparent;color:var(--mut,#777);border:1px dashed var(--line);font-weight:400}
 .mk-pages{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:14px 0}.mk-pg{border:1px solid var(--line);border-radius:6px;padding:4px 10px;text-decoration:none}.mk-pg.cur{background:#1d4ed8;color:#fff}
 .mk-top .mk-bar{flex-wrap:nowrap;gap:10px}.mk-top .mk-bar label{margin:0;white-space:nowrap}.mk-top select{width:auto}.mk-go{width:auto;padding:10px 18px;white-space:nowrap}
 .mk-quick{padding:0}.mk-chips{display:flex;flex-wrap:nowrap;gap:4px;overflow:hidden;margin:2px 0;white-space:nowrap}.mk-chips .chip{flex:0 0 auto}

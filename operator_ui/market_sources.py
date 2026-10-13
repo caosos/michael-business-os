@@ -328,7 +328,8 @@ def load_source(source: str, gsa_path: str | None, now: datetime, origin=None, d
     live = "connected" in [gsa["status"], facebook["status"]] + [h["status"] for h in houses] + [a["status"] for a in alerts]
     status = "connected" if live else "fixture" if any(a["cards"] for a in alerts) else "offline"
     return {**gsa, "status": status, "cards": cards, "in_scope": len(cards), "fixture": any(a["fixture"] and a["cards"] for a in alerts),
-            "message": gsa["message"] if status == "offline" else "", "coverage": coverage([{**gsa, "name": "GSA Auctions"}, facebook] + houses + alerts)}
+            "message": gsa["message"] if status == "offline" else "", "refresh_pending": bool(facebook.get("refresh_pending")),
+            "coverage": coverage([{**gsa, "name": "GSA Auctions"}, facebook] + houses + alerts)}
 
 
 # ---- F-156: the source registry (the one place that knows every source; /market's Sources panel only displays it) ----

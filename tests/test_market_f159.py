@@ -79,6 +79,7 @@ def test_all_sources_checkbox_updates_every_source_immediately():
     assert 'getElementById("sec-source")' in js
     assert 'input[name=source][value=all]' in js
     assert "rest[i].checked = all.checked" in js
+    assert "requestSubmit" not in js                         # choose several, then apply once; no reload between ticks
 
 
 def test_state_counts_equal_filtered_rows(ui):
@@ -218,6 +219,43 @@ def test_phone_drawer_markup_and_card_shape(ui):
     assert "class='mk-view' href='/market/item/" in card              # F-160: View opens our detail page; the original link is on it
 
 
+def test_search_is_the_only_control_that_requests_a_live_provider_refresh(ui):
+    h = get(ui, **BASE)
+    top = h.split("id='topbar'", 1)[1].split("</div>", 1)[0]
+    assert "type='hidden' name='go'" not in top
+    assert "type='submit' name='go' value='1'>Search" in top
+    assert "class='mk-apply mk-apply-top'" in h
+    assert "?go=1&amp;" not in mbr.href(ms.parse_query({"loc_mode": ["state"], "state": ["AR"]}), page=2)
+
+
+def test_card_source_and_hide_are_visible_not_buried_on_the_photo_or_in_more():
+    c = {"id": "facebook:visible", "title": "Utility trailer", "description": "", "text": "utility trailer", "url": "https://www.facebook.com/marketplace/item/1/",
+         "image": "https://example.com/trailer.jpg", "bid": 450.0, "price": 450.0, "price_type": "fixed", "bidders": None, "closes": None, "city": "Conway, AR", "state": "AR",
+         "distance": 4.2, "category": "trailer", "condition": "used", "labels": {}, "source": "Facebook Marketplace", "fetched_at": NOW.isoformat(),
+         "kind": "fixed", "stale": False, "fixture": False, "posted": "2026-10-12"}
+    h = mbr.card(c, lambda: "", NOW, __import__("operator_ui.market_view", fromlist=["x"]).pref_buttons)
+    photo = re.search(r"<div class='mk-ph'>.*?</div>", h, re.S).group(0)
+    assert "Facebook Marketplace" not in photo
+    assert h.index("mk-card-src") > h.index("</div>")
+    assert h.index("class='mk-x'") < h.index("class='mk-more'")
+    assert h.count("value='hide'") == 1
+
+
+def test_rental_ads_are_hidden_unless_the_owner_searches_for_rentals():
+    base = {"description": "", "url": "https://www.facebook.com/marketplace/item/1/", "image": None, "bid": 80.0, "price": 80.0,
+            "price_type": "fixed", "bidders": None, "closes": None, "city": "Conway, AR", "state": "AR", "distance": 4.2,
+            "category": "trailer", "condition": "used", "labels": {}, "source": "Facebook Marketplace", "fetched_at": NOW.isoformat(),
+            "kind": "fixed", "stale": False, "fixture": False, "posted": "2026-10-12"}
+    sale = {**base, "id": "sale", "title": "Utility trailer", "text": "utility trailer"}
+    rental = {**base, "id": "rental", "title": "16ft Utility Trailer Rental", "text": "16ft utility trailer rental"}
+    q = ms.parse_query({"broad": ["1"]})
+    rows, _, hidden = ms.partition([sale, rental], q)
+    assert [c["id"] for c in rows] == ["sale"] and hidden["rentals"] == 1
+    q = ms.parse_query({"broad": ["1"], "keywords": ["rental"]})
+    rows, _, _ = ms.partition([sale, rental], q)
+    assert [c["id"] for c in rows] == ["rental"]
+
+
 def test_fixed_price_card_is_not_labelled_as_an_auction_bid():
     c = {"id": "facebook:1", "title": "Utility trailer", "description": "", "text": "utility trailer", "url": "https://www.facebook.com/marketplace/item/1/",
          "image": None, "bid": 450.0, "price": 450.0, "price_type": "fixed", "bidders": None, "closes": None, "city": "Conway, AR", "state": "AR",
@@ -235,6 +273,6 @@ def test_owner_marketplace_is_listings_first_without_operator_clutter(ui, caches
     assert all(x not in h for x in ("id='working-capital'", "id='gsa-explainer'", "id='sources-panel'", "id='your-finds'", "id='suggestions-strip'"))
     assert "id='my-marketplace'" in h and "id='admin-menu'" in h and "Saved listings" in h
     assert "No photo" not in h and "No photo from the seller" not in h
-    assert ".mk-card-src .mk-src{position:static}" in h
+    assert ".mk-card-src{display:flex;justify-content:flex-end" in h
     card = h.split("class='mk-g mk-card'", 1)[1].split("class='mk-g mk-card'", 1)[0]
     assert "class='mk-save'" in card and card.index("class='mk-save'") < card.index("class='mk-more'")

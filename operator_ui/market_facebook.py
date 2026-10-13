@@ -345,7 +345,10 @@ def load(now: datetime, origin=None, *, keyword: str = "", city: str = "", radiu
         except ValueError:
             pass
     if refresh and not recent_same and (client or api_token):
-        active = client or BrightDataClient(api_token)
+        # The browser request must never sit in a minute-long polling loop.
+        # Start/resume once, return the cached feed, then let the page re-check
+        # this same snapshot.  This does not create a second paid search.
+        active = client or BrightDataClient(api_token, max_polls=1)
         pending_file = _pending_path(path)
         pending = _read_pending(pending_file)
         try:
@@ -374,11 +377,13 @@ def load(now: datetime, origin=None, *, keyword: str = "", city: str = "", radiu
     result = cards(cached["records"], as_of, origin)
     for card in result:
         card["stale"] = age > STALE_HOURS
-    message = f"Live refresh failed; showing the last successful cache. {error}" if error else ""
+    refresh_pending = bool(error.startswith("Bright Data refresh is still running"))
+    message = (f"Facebook refresh is running; showing the last successful cache. {error}" if refresh_pending else
+               f"Live refresh failed; showing the last successful cache. {error}" if error else "")
     return {"status": "connected", "name": "Facebook Marketplace", "as_of": as_of, "age_h": round(age, 1),
             "stale": age > STALE_HOURS, "in_scope": len(result), "in_file": len(cached["records"]), "cards": result,
             "fixture": False, "message": message, "query": cached.get("query"),
-            "credential_configured": bool(api_token)}
+            "credential_configured": bool(api_token), "refresh_pending": refresh_pending}
 
 
 def probe(now: datetime, path: Path | None = None) -> dict:
