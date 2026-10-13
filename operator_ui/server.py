@@ -74,6 +74,11 @@ nav a.active{font-weight:700;text-decoration:none;color:var(--ink);border-bottom
 .next{background:var(--bg);border-left:4px solid var(--acc);padding:6px 10px;border-radius:4px}.ad{white-space:pre-wrap;word-break:break-word;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px;font-size:14px}
 .fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:6px 12px}.chip{display:inline-block;margin:0 6px 4px 0;padding:2px 10px;border:1px solid var(--line);border-radius:99px;text-decoration:none}.chip.on{border-color:var(--acc);font-weight:700}
 .proof pre{max-height:320px}details>summary{cursor:pointer}
+header nav{display:flex;align-items:center;gap:14px}header nav>a{margin:0}
+.more-nav{position:relative}.more-nav>summary{color:var(--acc);list-style:none;padding:2px 8px;border:1px solid var(--line);border-radius:6px}
+.more-nav>summary::-webkit-details-marker{display:none}.more-nav>summary:after{content:" ▾";font-size:11px}
+.more-nav[open]>summary:after{content:" ▴"}.more-nav>div{position:absolute;z-index:60;top:calc(100% + 6px);left:0;min-width:220px;max-height:70vh;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px #0003;padding:6px}
+.more-nav>div a{display:block;margin:0;padding:7px 9px;border-radius:5px;white-space:nowrap}.more-nav>div a:hover{background:var(--bg)}
 .q a.rowlink{display:block;text-decoration:none;color:inherit}.bad{color:var(--no);font-weight:600}.ok{color:var(--yes);font-weight:600}
 """
 
@@ -131,9 +136,14 @@ def _active(path):
 
 
 def _nav(state):
+    """Keep the Marketplace header clean; operational pages remain available under one More menu."""
     hidden = getattr(state, "hidden", frozenset())
     cur = _active(getattr(_CUR, "path", ""))
-    return "".join(f'<a href="{h}"{" class=active aria-current=page" if h == cur else ""}>{t}</a>' for h, t, k in NAV if k not in hidden)
+    visible = [(h, t, k) for h, t, k in NAV if k not in hidden]
+    primary = next((x for x in visible if x[0] == "/market"), ("/market", "Marketplace", None))
+    main = f'<a href="{primary[0]}"{" class=active aria-current=page" if primary[0] == cur else ""}>{primary[1]}</a>'
+    extra = "".join(f'<a href="{h}"{" class=active aria-current=page" if h == cur else ""}>{t}</a>' for h, t, _ in visible if h != "/market")
+    return main + f'<details class="more-nav"><summary>More</summary><div>{extra}</div></details>'
 
 
 def _notices(state):
