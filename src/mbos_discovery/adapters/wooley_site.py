@@ -93,6 +93,17 @@ def _site_url(url: str) -> str | None:
     return url if p.scheme == "https" and p.hostname == SITE_HOST and not is_hibid(url) else None
 
 
+def _event_image_url(value: str) -> str | None:
+    """Accept only a first-party HTTPS event-cover URL. This is not a HiBid lot image."""
+    try:
+        url = html.unescape(value).strip()
+        p = urlsplit(url)
+        port = p.port
+    except (AttributeError, ValueError):
+        return None
+    return url if p.scheme == "https" and p.hostname == SITE_HOST and p.username is None and p.password is None and port in (None, 443) else None
+
+
 def parse_listing(page: str) -> list[dict]:
     """Current auctions: <article> posts in category `live-auction`. Past auctions are ignored."""
     events = []
@@ -108,8 +119,13 @@ def parse_listing(page: str) -> list[dict]:
         cats = [html.unescape(t) for slug, t in re.findall(r'<a class="([^"]+)" href="https://wooleyauctioneers\.com/auctions/[^"]+/">([^<]+)</a>', block)
                 if slug != "live-auction"]
         ex = re.search(r'<div class="excerpt">(.*?)</div>', block, re.S)
-        events.append({"url": url, "slug": _slug(url), "title": _text(link.group(2)), "categories": cats,
-                       "excerpt": _text(ex.group(1)) if ex else ""})
+        image = re.search(r'<span[^>]*class="[^"]*\bpost-featured-img\b[^"]*"[^>]*>\s*<img[^>]*\b(?:data-nectar-img-src|src)="([^"]+)"', block, re.S)
+        event = {"url": url, "slug": _slug(url), "title": _text(link.group(2)), "categories": cats,
+                 "excerpt": _text(ex.group(1)) if ex else ""}
+        event_image_url = _event_image_url(image.group(1)) if image else None
+        if event_image_url:
+            event["event_image_url"] = event_image_url
+        events.append(event)
     return events
 
 
@@ -268,6 +284,7 @@ class WooleySiteAdapter(SourceAdapter):
             "location": fld(loc or None, loc_basis), "category_tags": fld(cats), "highlights": fld(hl),
             "category_headline": fld(headline), "event_category": fld(event_category(headline), "INFERENCE"),
             "rules_url": fld(p.get("url")), "hibid_catalog_url": fld(p.get("hibid_catalog_url")),
+            "event_image_url": fld(p.get("event_image_url")),
             "category": fld(category, "INFERENCE"),
             "lot_number": Field(UNKNOWN, url, seen, "UNKNOWN", 0), "current_bid": Field(UNKNOWN, url, seen, "UNKNOWN", 0),
             "bid_count": Field(UNKNOWN, url, seen, "UNKNOWN", 0), "lot_image": Field(UNKNOWN, url, seen, "UNKNOWN", 0),
