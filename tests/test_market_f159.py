@@ -104,8 +104,8 @@ def test_listing_type_counts_and_events_are_never_lots(ui, caches):
 def test_quick_view_counts_match_their_pages(ui, caches):
     h = get(ui, **BASE)
     qv = {m.group(1): int(m.group(2)) for m in re.finditer(r"data-quick='(\w+)' href='[^']*'>[^<]+<span class='mk-n'>\((\d+)\)", h)}
-    assert set(qv) == {"all", "new", "today", "soon"} and qv["all"] == total(h)
-    for k in ("new", "today", "soon"):
+    assert set(qv) == {"all", "saved", "new", "today", "soon"} and qv["all"] == total(h) and qv["saved"] == 0
+    for k in ("saved", "new", "today", "soon"):
         assert total(get(ui, **{**BASE, "quick": k})) == qv[k], k
 
 
@@ -226,3 +226,14 @@ def test_fixed_price_card_is_not_labelled_as_an_auction_bid():
     h = mbr.card(c, lambda: "", NOW, lambda card, tok: "")
     assert "$450" in h and "fixed price" in h
     assert "current bid" not in h and "bidders UNKNOWN" not in h
+
+
+def test_owner_marketplace_is_listings_first_without_operator_clutter(ui, caches):
+    h = get(ui, **BASE)
+    assert "DRY-RUN · nothing leaves this machine" not in h and "<header><b>Operator UI</b>" not in h
+    assert "id='result-grid'" in h and "id='unchecked-section'" not in h
+    assert all(x not in h for x in ("id='working-capital'", "id='gsa-explainer'", "id='sources-panel'", "id='your-finds'", "id='suggestions-strip'"))
+    assert "id='my-marketplace'" in h and "id='admin-menu'" in h and "Saved listings" in h
+    assert "No photo" not in h and "No photo from the seller" not in h
+    card = h.split("class='mk-g mk-card'", 1)[1].split("class='mk-g mk-card'", 1)[0]
+    assert "class='mk-save'" in card and card.index("class='mk-save'") < card.index("class='mk-more'")
