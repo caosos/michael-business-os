@@ -26,7 +26,7 @@ try:  # lane C's package is optional: without it the notes form is simply unavai
 except ImportError:  # pragma: no cover
     NOTE_CATEGORIES, NOTE_KINDS = frozenset(), frozenset()
 
-from . import account_view, accounts, deal_ui, landing_fix, live_demo, market_bids, market_detail, market_routes, resale_view, sell_intake, attest_view, bought_view, card_view, comps_view, glance_view, inputs_view, ux, views, wanted_view
+from . import account_view, accounts, deal_ui, landing_fix, live_demo, market_bids, market_detail, market_routes, resale_view, sell_intake, vendor_deals, attest_view, bought_view, card_view, comps_view, glance_view, inputs_view, ux, views, wanted_view
 from .digest import figures as digest_figures, dollars as _dollars
 from .card_view import ec
 from .backend import AlreadyClosed, FollowupRefused, ItemNotFound, NoteRefused, NumbersRefused, ProfileUnavailable
@@ -553,7 +553,7 @@ class App:
 
     def __init__(self, backend, operator_pin=None, health_file=None, mission_file=None, inventory_file=None,
                  telemetry_dir=None, queue_file=None, campaigns_file=None, policy_path=None, comps_inbox=None,
-                 sell_intake_file=None):
+                 sell_intake_file=None, vendor_deals_file=None):
         self.store = backend
         self.campaigns = wanted_view.CampaignStore(campaigns_file or os.environ.get("MBOS_CAMPAIGNS_FILE"))  # F-23
         self.policy_path = policy_path
@@ -572,6 +572,7 @@ class App:
         self.owner_listings: dict = {}  # F-46: OWNER-SUPPLIED url/photos/text, in memory, DRY-RUN
         self.intake_drafts = {}  # F-20: in-memory DRY-RUN drafts, never published
         self.sell_intake = sell_intake.Store(sell_intake_file)
+        self.vendor_deals = vendor_deals.Store(vendor_deals_file)
         self.csrf = secrets.token_urlsafe(32)
         self.session_id = "web-" + secrets.token_hex(4)
         self.pin_gate = ux.PinGate()  # F-77: shared by every PIN check in this process
@@ -1213,8 +1214,13 @@ def make_handler(app):
             if u.path == "/settings":
                 return self._send(200, page("DealSniffer Settings", account_view.render(app.csrf, app.google_oauth.public_status()), app.state(), flash or err, bool(err)))
             if u.path == "/sell":
-                body = sell_intake.render_form(app.csrf) + sell_intake.render_recent(app.sell_intake.recent())
+                body = ("<div class='sell-wrap'><p><b>What do you want to do?</b> "
+                        "<a href='/sell'>Sell an item</a> · <a href='/sell/deal'>Advertise a local deal</a></p></div>" +
+                        sell_intake.render_form(app.csrf) + sell_intake.render_recent(app.sell_intake.recent()))
                 return self._send(200, page("Sell with DealSniffer", body, app.state(), flash or err, bool(err)))
+            if u.path == "/sell/deal":
+                body = vendor_deals.render_form(app.csrf) + vendor_deals.render_recent(app.vendor_deals.recent())
+                return self._send(200, page("Advertise a local deal", body, app.state(), flash or err, bool(err)))
             if u.path == "/sell/submissions":
                 body = ("<div class='sell-wrap'><p><a href='/sell'>Submit another item</a></p></div>" +
                         sell_intake.render_submissions(app.sell_intake.recent(50)))
@@ -1662,6 +1668,18 @@ def make_handler(app):
                     body = sell_intake.render_form(app.csrf, values) + sell_intake.render_recent(app.sell_intake.recent())
                     return self._send(200, page("Sell with DealSniffer", body, app.state(), str(ex), True))
                 return self._redirect("/sell?msg=" + quote("Submitted for human review. Nothing was published and nobody was contacted."))
+            if parts == ["sell", "deal", "submit"]:
+                n = min(int(self.headers.get("Content-Length") or 0), 65536)
+                f = {k: v[0] for k, v in parse_qs(self.rfile.read(n).decode("utf-8", "replace"), keep_blank_values=True).items()}
+                try:
+                    app._check_csrf(f)
+                    record = vendor_deals.parse(f, iso(utcnow()), "deal-" + secrets.token_hex(6))
+                    app.vendor_deals.append(record)
+                except (InputError, OSError) as ex:
+                    values = {k: v for k, v in f.items() if k != "csrf"}
+                    body = vendor_deals.render_form(app.csrf, values) + vendor_deals.render_recent(app.vendor_deals.recent())
+                    return self._send(200, page("Advertise a local deal", body, app.state(), str(ex), True))
+                return self._redirect("/sell/deal?msg=" + quote("Deal submitted for human review. It is not published or verified yet."))
             if parts == ["settings", "preferences"]:
                 n = min(int(self.headers.get("Content-Length") or 0), 65536)
                 raw = parse_qs(self.rfile.read(n).decode("utf-8", "replace"), keep_blank_values=True)

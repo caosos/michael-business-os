@@ -29,12 +29,21 @@ ROW_CATS = {"trailers": ("trailer",), "equipment": ("equipment", "tractor", "mow
             "lawn_garden": ("lawn", "garden", "tiller", "trimmer", "chainsaw", "blower", "mulcher", "sprayer"),
             "machinery": ("machinery", "excavator", "bulldozer", "dozer", "skid steer", "lathe", "crane", "grader", "paver", "roller", "hoist"),
             "pallets_wholesale": ("pallet", "wholesale", "bulk", "truckload", "liquidation"),
+            "food_grocery": ("beef", "ground beef", "steak", "pork", "chicken", "meat", "butcher", "grocery", "produce", "food"),
+            "restaurants": ("pizza", "restaurant", "meal", "lunch", "dinner", "breakfast", "takeout"),
+            "fuel_auto": ("gas", "gasoline", "diesel", "fuel", "oil change", "tire rotation", "automotive service"),
+            "entertainment": ("movie", "ticket", "cinema", "bowling", "museum", "admission", "event pass"),
+            "retail_services": ("retail", "coupon", "service", "discount", "special", "membership", "day pass"),
             "land_real_estate": ("land", "acre", "real estate", "real property", "parcel", "house", "home", "residence", "residential", "cabin", "building lot", "commercial building")}
 # F-157: owner-facing category controls. `other` = matches none of the named categories; `all` = every category incl. land. Land / Real Estate is off by default.
 CAT_LABELS = {"tools": "Tools", "equipment": "Equipment", "trailers": "Trailers", "vehicles": "Vehicles", "lawn_garden": "Lawn & Garden", "machinery": "Machinery",
-              "pallets_wholesale": "Pallets/Wholesale", "land_real_estate": "Land/Real Estate", "other": "Other/Unknown", "electronics": "Electronics"}
-CONTROL_CATS = ("tools", "equipment", "trailers", "vehicles", "lawn_garden", "machinery", "pallets_wholesale", "land_real_estate", "other")
-DEFAULT_CATS = tuple(c for c in CONTROL_CATS if c != "land_real_estate")
+              "pallets_wholesale": "Pallets/Wholesale", "food_grocery": "Meat & Groceries", "restaurants": "Restaurants & Prepared Food",
+              "fuel_auto": "Fuel & Automotive", "entertainment": "Entertainment & Tickets", "retail_services": "Retail & Local Services",
+              "land_real_estate": "Land/Real Estate", "other": "Other/Unknown", "electronics": "Electronics"}
+CONTROL_CATS = ("tools", "equipment", "trailers", "vehicles", "lawn_garden", "machinery", "pallets_wholesale", "food_grocery", "restaurants", "fuel_auto", "entertainment", "retail_services", "land_real_estate", "other")
+# Michael's existing default stays resale-focused. Other users can select broader
+# categories, and All categories genuinely includes every supported deal class.
+DEFAULT_CATS = ("tools", "equipment", "trailers", "vehicles", "lawn_garden", "machinery", "pallets_wholesale", "other")
 DEFAULT_ROWS = ("trailers", "equipment", "vehicles", "")
 CONDITIONS = ("", "new", "used", "salvage", "parts", "for parts", "not working", "working", "as is")
 STALE_H = 6

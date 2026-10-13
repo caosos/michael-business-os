@@ -102,17 +102,17 @@ def public_home(csrf: str, google_status: dict, next_path="/market") -> str:
         status = "The public account service is not connected yet. The local-owner Marketplace remains available on the EliteDesk."
     return f"""<style>
 .hero{{max-width:920px;margin:34px auto;padding:26px}}.hero h1{{font-size:clamp(30px,6vw,54px);line-height:1.05;margin:0 0 14px}}.hero .lead{{font-size:19px;max-width:720px}}.public-grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;max-width:920px;margin:auto}}.button-link,.button-disabled{{display:inline-block;padding:10px 18px;border-radius:7px;background:var(--acc);color:white;text-decoration:none;font-weight:800}}.button-disabled{{background:var(--mut)}}.inline-form{{display:inline-block;margin-left:10px}}.inline-form button{{background:var(--mut);width:auto}}
-</style><section class='hero'><p class='badge'>CONWAY-AREA DEAL DISCOVERY</p><h1>Find resale inventory in one place.</h1>
-<p class='lead'>DealSniffer brings public auction and marketplace listings together, then helps you filter by location, category, price, closing time, and resale potential.</p>
+</style><section class='hero'><p class='badge'>LOCAL DEAL DISCOVERY</p><h1>Find the deals worth leaving home for.</h1>
+<p class='lead'>DealSniffer brings nearby offers into one personalized feed—from tools, trailers, auctions and liquidation inventory to groceries, restaurants, fuel, oil changes, tickets, retail and local services.</p>
 <p>{action}</p><p class='small mut'>{status}</p></section><section class='public-grid'>
-<article class='card'><h2>Browse your area</h2><p>Set a city or ZIP, radius, categories, and sources. Your settings belong to your DealSniffer account.</p></article>
+<article class='card'><h2>Browse your area</h2><p>Set a city or ZIP, radius, categories, and sources. Save, hide, and rate results so your feed learns what is useful to you.</p></article>
 <article class='card'><h2>Track bids</h2><p>Keep the source, current bid, your maximum, closing time, status, and next action together. DealSniffer does not place bids for you.</p></article>
-<article class='card'><h2>Compare the numbers</h2><p>Review buy price, repair allowance, resale estimate, potential profit, distance, and uncertainty before deciding.</p></article></section>"""
+<article class='card'><h2>Advertise a real deal</h2><p>Businesses can submit current, time-limited offers for human review. Unverified or expired promotions do not become live deals.</p></article></section>"""
 
 
 def privacy() -> str:
     return """<section class='card legal'><h1>Privacy Policy</h1><p class='small mut'>Effective October 13, 2026</p>
-<h2>Information DealSniffer uses</h2><p>If you sign in with Google, DealSniffer receives your Google account identifier, name, and verified email address. It also stores the DealSniffer preferences and records you choose to create, such as location, search filters, saved listings, bid-watch entries, and selling-intake submissions.</p>
+<h2>Information DealSniffer uses</h2><p>If you sign in with Google, DealSniffer receives your Google account identifier, name, and verified email address. It also stores the DealSniffer preferences and records you choose to create, such as location, search filters, saved or hidden listings, preference feedback, bid-watch entries, selling-intake submissions, and business-deal submissions.</p>
 <h2>What Google sign-in does not authorize</h2><p>Sign-in requests only <code>openid email profile</code>. DealSniffer does not request Gmail access, a Facebook password, an auction-site password, or permission to act inside those accounts.</p>
 <h2>Listing data</h2><p>DealSniffer may display public listing information supplied by auction sources, marketplaces, and authorized data providers such as Bright Data. Original sources control their own listings and may change or remove them.</p>
 <h2>Use and sharing</h2><p>Account information is used to provide and maintain DealSniffer. DealSniffer does not sell your personal information. Information may be processed by service providers needed to operate the website, authentication, hosting, data retrieval, or notifications.</p>
@@ -122,11 +122,12 @@ def privacy() -> str:
 
 def terms() -> str:
     return """<section class='card legal'><h1>Terms of Service</h1><p class='small mut'>Effective October 13, 2026</p>
-<h2>What DealSniffer provides</h2><p>DealSniffer is a research, organization, and decision-support service for listings offered by independent sellers, marketplaces, and auction providers. DealSniffer is not the seller, auctioneer, payment processor, or owner of those listings.</p>
+<h2>What DealSniffer provides</h2><p>DealSniffer is a discovery, organization, and decision-support service for listings and promotions offered by independent sellers, businesses, marketplaces, and auction providers. DealSniffer is not the seller, auctioneer, payment processor, or owner of those offers.</p>
 <h2>Your decisions and source terms</h2><p>You are responsible for verifying price, condition, ownership, location, closing time, fees, and source rules before acting. Source links and displayed details may become stale. Your activity on another service remains subject to that service's terms.</p>
 <h2>No automatic transactions</h2><p>DealSniffer does not bid, buy, pay, contact a seller, or publish a selling-intake submission without a separate authorized action. A saved listing, bid-watch entry, estimate, or suggestion is not a completed transaction or guarantee.</p>
 <h2>Accounts</h2><p>You must use an account you are authorized to use and keep access to it secure. DealSniffer may suspend access needed to protect the service or other users.</p>
 <h2>Estimates</h2><p>Repair costs, resale values, profit, turnover, distance, and rankings are estimates with uncertainty. They are not warranties.</p>
+<h2>Promotions</h2><p>Business offers remain subject to the named vendor's inventory, eligibility, expiration, and redemption terms. A future contest, chance-based reward, or limited-claim promotion requires separate official rules and eligibility disclosures before launch.</p>
 <h2>Contact</h2><p>Questions about these terms may be sent to <a href='mailto:dealsniffer@gmail.com'>dealsniffer@gmail.com</a>.</p></section>"""
 
 
