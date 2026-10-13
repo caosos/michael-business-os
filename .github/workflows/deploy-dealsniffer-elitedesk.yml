@@ -53,6 +53,20 @@ jobs:
           # pre-test owner file captured by that release before proving again.
           PRE_TEST_PREFS="var/lanes/agent-06.prev-20261013T033042Z/var/market_prefs.json"
           if [ -f "$PRE_TEST_PREFS" ]; then cp "$PRE_TEST_PREFS" "$PREFS"; fi
+          # Every /market proof request is capable of updating remembered
+          # filters. Snapshot the real owner file before the FIRST request and
+          # restore it on success or failure so test queries never become
+          # Michael's next screen.
+          PREFS_COPY="$PROOF_DIR/market-prefs.before"
+          PREFS_EXISTED=0
+          if [ -f "$PREFS" ]; then
+            cp "$PREFS" "$PREFS_COPY"
+            PREFS_EXISTED=1
+          fi
+          restore_prefs() {
+            if [ "$PREFS_EXISTED" = 1 ]; then cp "$PREFS_COPY" "$PREFS"; else rm -f "$PREFS"; fi
+          }
+          trap restore_prefs EXIT
           curl -fsS --max-time 30 http://127.0.0.1:8766/market > "$PROOF_DIR/market.html"
           grep -q "DealSniffer Marketplace" "$PROOF_DIR/market.html"
           grep -q "class='mk-grid' id='result-grid'" "$PROOF_DIR/market.html"
@@ -126,16 +140,6 @@ jobs:
           # Exercise the real Facebook path once after release. Keep Michael's
           # remembered filters byte-for-byte unchanged and print configuration
           # state only; the Bright Data key itself must never enter the log.
-          PREFS_COPY="$PROOF_DIR/market-prefs.before"
-          PREFS_EXISTED=0
-          if [ -f "$PREFS" ]; then
-            cp "$PREFS" "$PREFS_COPY"
-            PREFS_EXISTED=1
-          fi
-          restore_prefs() {
-            if [ "$PREFS_EXISTED" = 1 ]; then cp "$PREFS_COPY" "$PREFS"; else rm -f "$PREFS"; fi
-          }
-          trap restore_prefs EXIT
           if [ -n "${BRIGHTDATA_API_KEY:-${BRIGHTDATA_TOKEN:-}}" ] || [ -s /home/michaelos/.config/mbos/secrets/BRIGHTDATA_API_KEY ] || [ -s /home/michaelos/.config/mbos/secrets/BRIGHTDATA_TOKEN ]; then
             CREDENTIAL_CONFIGURED=true
           else

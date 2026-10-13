@@ -2,6 +2,6 @@
   "lane06_sha": "8e2a858d23cf4c6eda8c5e344dba77aeb073e279",
   "lane02_sha": "cda867347505ac8e27945b2aa1ae6a3823939ae2",
   "requested_by": "Michael",
-  "purpose": "Deterministic Marketplace search submission with loaded zero-result proof, retaining the account and source foundations",
-  "verification_attempt": 18
+  "purpose": "Restore Michael's Marketplace preferences and prove deployment tests cannot persist synthetic search filters",
+  "verification_attempt": 19
 }
