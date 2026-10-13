@@ -46,14 +46,24 @@ Tested against the LOADED app at `127.0.0.1:8766`: lane 06 `72d7a02721eaf728b672
 Evidence: real clicks and typing in Claude in Chrome on the owner's desktop, plus headless Google Chrome (Playwright) at 390×844 for mobile, because the desktop Chrome window cannot shrink to phone width.
 A checkpoint counts only when browser evidence proves it. Progress = verified PASS / 21.
 
-**Status: 20/21 PASS = 95.2% (initial assessment). First defect: 06.**
+**Status: 21/21 PASS = 100% (verified on the loaded app 9f5e14a, Tuesday, October 13, 2026 — 6:47 PM America/Chicago).** Initial assessment was 20/21 (95.2%); the first defect, 06, has been fixed and deployed.
+
+- Fix: lane 06 `9f5e14ad063a7ae995d73973dfa43825d5ed4ac1`. When a radius applies, listings whose distance cannot be measured leave the grid and every facet count, and the page says "N listings with an unknown location left out … Choose Any to include them". Any radius and By State mode still show them. Files: `operator_ui/market_routes.py`, `operator_ui/market_search.py` (`radius_applies`), `operator_ui/market_view.py`, `tests/test_market_p0_distance.py` (4 tests; 2 fail on 72d7a02 and pass on the fix).
+- Lane 06 full suite: on the fix, 98 failed / 673 passed / 1 skipped. On live baseline 72d7a02 (run concurrently), 120 failed / 648 passed. No new failures: every failure on the fix also fails on the baseline. These pre-existing failures are stale UI tests and are not part of P0-06.
+- Deploy: https://github.com/caosos/michael-business-os/actions/runs/38485906872 (success, `refresh_marketplace: false`, so no paid provider call). The EliteDesk ARTIFACT shows `sha=9f5e14ad063a7ae995d73973dfa43825d5ed4ac1`; `reload_ui.sh --verify-only 8766` is OK; deploy proof: Facebook 76 filtered at 30 mi, 50 rendered, 50 photos.
+- Re-verified after deploy:
+  - **Desktop (Claude in Chrome):** Conway, 10 mi, Wooley + Facebook, Tools + Trailers gave 11 results, maximum 8.5 mi, 0 unknown cards, note "5 listings with an unknown location left out". Any radius gave 72, with the unknowns back. 50 mi, all sources, all categories gave 125, 50 per page; bottom page 2 shows 51–100, no overlap, filters kept, 0 unknown. Settings → Browse kept the filters.
+  - **Mobile (headless Chrome 390×844, touch):** Filters drawer → 10 miles → Apply gave 11 results, maximum 8.5 mi, 0 unknown, page width 390 = viewport, 1 column, bottom pager fits.
+- Michael's remembered Marketplace choices were restored byte-for-byte to the pre-test copy taken at 5:46 PM.
+
+Open P0 finding (not fixed; separate task): every deploy copies `var/lanes/agent-06.prev-20261013T033042Z/var/market_prefs.json` over the owner's preference file (the workflow's `PRE_TEST_PREFS` step). So a release resets Michael's remembered filters to a 03:30Z snapshot. Observed: after run 38485906872 the page loaded at 41 mi with the old selections until the pre-test copy was restored by hand.
 
 - [x] 01 Marketplace loads: /market HTTP 200, the grid renders, and the remembered filters are restored.
 - [x] 02 Keyword search: typing `trailer` and pressing Enter gave 25 results, every title a trailer.
 - [x] 03 Multiple sources: All unticked, Wooley + Facebook ticked: 71 results; cards from Facebook (49) and Wooley (1) only.
 - [x] 04 Multiple categories: Tools + Trailers only: 48 results, all trailers or tools.
 - [x] 05 Combined source + category: Wooley + Facebook with Tools + Trailers: Facebook only (the Wooley event is neither).
-- [ ] 06 Distance filtering: **FAIL**. Conway AR, 10 mi: 16 results, of which 5 were 'distance UNKNOWN' Facebook listings (Hot Springs National Park ×3, Cleveland, Prim). At 25 mi, 1 of 13 was unknown. Cause: a listing whose town is not in the offline gazetteer has no distance, and the page appended these 'not verified' rows to the in-radius results.
+- [x] 06 Distance filtering: **FIXED and verified** (see above). Was FAIL: Conway AR, 10 mi: 16 results, of which 5 were 'distance UNKNOWN' Facebook listings (Hot Springs National Park ×3, Cleveland, Prim). At 25 mi, 1 of 13 was unknown. Cause: a listing whose town is not in the offline gazetteer has no distance, and the page appended these 'not verified' rows to the in-radius results.
 - [x] 07 Min/max price: $100–$1,000 gave 19 results, prices from $100 to $1,000.
 - [x] 08 Listing type: Auction event: 17 (Wooley 1, Wilson 10, Blackmon 6, all events). Fixed price: 127, all Facebook fixed price.
 - [x] 09 Rentals excluded: the default lineup (132 results, 3 pages) has no rental titles. The 4 rental listings in the Facebook cache appear only when the owner searches `rent` (deliberate: `wants_rentals`).
