@@ -208,7 +208,7 @@ def render_form(csrf: str, values: dict | None = None) -> str:
     val = lambda key: e(v.get(key, ""))  # noqa: E731
     return f"""<style>
 .vendor-wrap{{max-width:920px;margin:auto}}.vendor-grid{{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px}}.vendor-grid .wide{{grid-column:1/-1}}.vendor-form fieldset{{border:1px solid var(--line);border-radius:8px;margin:0 0 14px;padding:12px}}.vendor-note{{background:var(--warn);padding:10px;border-radius:8px}}@media(max-width:650px){{.vendor-grid{{grid-template-columns:1fr}}.vendor-grid .wide{{grid-column:auto}}}}
-</style><div class='vendor-wrap'><p><a href='/sell'>Sell an item</a> · <a href='/market'>Browse deals</a></p><h1>Advertise a local deal</h1>
+</style><div class='vendor-wrap'><p><a href='/sell'>Sell an item</a> · <a href='/market'>Browse deals</a> · <a href='/sell/deal/flash'>Create a flash deal</a></p><h1>Advertise a local deal</h1>
 <p>Submit a current special for review. Examples: ground beef per pound, an oil change, pizza, movie tickets, fuel, tools, or a liquidation lot.</p>
 <p class='vendor-note'><b>Review only.</b> Submitting does not publish or advertise the offer. DealSniffer must verify the business, price, dates, and availability first.</p>
 <form method='post' action='/sell/deal/submit' class='vendor-form'><input type='hidden' name='csrf' value='{e(csrf)}'>

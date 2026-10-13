@@ -247,7 +247,9 @@ def card(c: dict, tok, now: datetime, pref_buttons) -> str:
     elif ltype(c) == "fixed":
         price = c.get("price") if c.get("price") is not None else c.get("bid")
         label = "asking price" if c.get("price_type") == "asking" else "fixed price"
-        money = f"<div class='pr'>${price:,.0f}</div><div class='small mut'>{label}</div>" if price is not None else "<div class='pr'>Price not stated</div><div class='small mut'>check original listing</div>"
+        unit = f" {e(c['unit'])}" if c.get("unit") else ""
+        shown = f"${price:,.2f}" if c.get("unit") else f"${price:,.0f}"
+        money = f"<div class='pr'>{shown}{unit}</div><div class='small mut'>{label}</div>" if price is not None else "<div class='pr'>Price not stated</div><div class='small mut'>check original listing</div>"
     else:
         bd = c.get("bidders")
         bidders = f"{bd} bidder{'s' if bd != 1 else ''}" if isinstance(bd, int) and not isinstance(bd, bool) else "bidders UNKNOWN"
@@ -260,15 +262,16 @@ def card(c: dict, tok, now: datetime, pref_buttons) -> str:
     plat = msvm._platform(c) if c.get("event") else ""
     lbl = (f"<div class='small'>{plat}</div>" if plat else "") if c.get("event") else "<div class='small mut gal-lbl'>" + mv.gallery_labels(c) + "</div>"
     save = mv.save_button(c, tok)
-    actions = pref_buttons(c, tok, include_save=False, include_hide=False) if pref_buttons is mv.pref_buttons else pref_buttons(c, tok)
+    actions = pref_buttons(c, tok, include_save=False, include_hide=False, include_why=False) if pref_buttons is mv.pref_buttons else pref_buttons(c, tok)
     more = f"<details class='mk-more'><summary title='More actions' aria-label='More actions'>&#8943;</summary>{lbl}{actions}</details>"
+    reason = f"<div class='small mut mk-why' data-why>{e(c['why'])}</div>" if c.get("why") else ""
     if cd and img.startswith("<img"):
         media = media.replace("</div>", f"{cd}</div>", 1)
     elif cd:
         media += cd
     return (f"<div class='mk-g mk-card' data-lot='{e(c['id'])}'{kind}>{media}"
             f"<div class='ti'><b>{e(ti)}</b>{flag}</div><div class='small'>{place}</div>{note}<div class='small mut'>Closes {e(closes)}{c.get('closing_badge', '')}</div>{money}"
-            f"<div class='mk-card-src'><span class='mk-src'>{e(c['source'])}</span></div>"
+            f"{reason}<div class='mk-card-src'><span class='mk-src'>{e(c['source'])}</span></div>"
             f"<div class='mk-vw'>{_view(c)}{save}{mv.hide_button(c, tok)}{more}</div></div>")
 
 
@@ -279,7 +282,11 @@ def _count(n, zero_cls="mut") -> tuple[str, str]:
 
 def category_section(q: dict, fc: dict) -> str:
     on, find = set(q.get("cats") or []), (q.get("cat_find") or "").strip().lower()
-    items = [("all", "All categories", q.get("cat_all"))] + [(k, ms.CAT_LABELS[k], k in on and not q.get("cat_all")) for k in ms.CONTROL_CATS]
+    # Keep the visible boxes truthful after a round trip.  Selecting All means
+    # every category is selected, so every category box stays checked on the
+    # rendered response (the source picker already behaves this way).
+    all_on = bool(q.get("cat_all"))
+    items = [("all", "All categories", all_on)] + [(k, ms.CAT_LABELS[k], all_on or k in on) for k in ms.CONTROL_CATS]
     rows = ""
     for k, lbl, ck in items:
         if find and find not in lbl.lower() and not ck:
@@ -367,6 +374,7 @@ CSS = """<style>
 .mk-fbtn{background:var(--acc);color:var(--bg);border:0;border-radius:8px;padding:8px 14px;font-size:15px;width:auto;opacity:1;cursor:pointer}.mk-fd{margin:0}.mk-fm,.mk-side .mk-fm{display:none}
 .mk-quick{flex:1 1 100%;display:flex;flex-wrap:wrap;gap:6px}.mk-q{border:1px solid var(--line);border-radius:16px;padding:4px 12px;font-size:14px;text-decoration:none}.mk-q.cur{background:#1d4ed8;color:#fff;border-color:#1d4ed8}.mk-q.cur .mk-n{color:#fff}
 .mk-n{color:var(--mut,#777);font-size:12px}.mk-sect{border:1px solid var(--line);border-radius:8px;padding:4px 8px;margin:0 0 8px}.mk-sect label{display:block;padding:2px 0}.mk-side .mk-cat,.mk-sect label{opacity:1;color:var(--ink)!important}.mk-cat,.mk-src-row{opacity:1!important;color:var(--ink)!important}.mk-src-row .small{color:var(--ink)}
+.mk-cat input,.mk-src-row input{accent-color:#1d4ed8}.mk-cat:has(input:checked),.mk-src-row:has(input:checked){background:color-mix(in srgb,#1d4ed8 12%,var(--card));border-color:#1d4ed8;font-weight:700}.mk-src-row{border-left:3px solid transparent;border-radius:5px;padding:4px 5px!important;margin:1px 0}
 .mk-filter-head{position:sticky;top:0;z-index:3;background:var(--card);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:2px 0 7px}.mk-filter-head .mk-apply{width:auto;margin:0;padding:7px 12px}
 .mk-side.folded #mkfilters{display:none}.mk-drawer-t{position:absolute;opacity:0;pointer-events:none}
 .mk-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.mk-card{display:flex;flex-direction:column;gap:2px}.mk-ph{position:relative}.mk-ph .ph{height:130px}.mk-ph img{height:130px}

@@ -65,6 +65,13 @@ def save_button(c: dict, tok) -> str:
     return f"<form method='post' action='/market/pref' class='mk-save'>{tok()}{hid}<button name='act' value='{action}' type='submit'>{label}</button></form>"
 
 
+def _learning_fields(c: dict) -> str:
+    """Server-derived card attributes used only after an explicit More/Less click."""
+    cats = ",".join(sorted(ms.card_cats(c)))
+    return (f"<input type='hidden' data-learning name='category' value='{e(cats)}'>"
+            f"<input type='hidden' data-learning name='source' value='{e(c.get('source') or c.get('source_key') or '')}'>")
+
+
 def hide_button(c: dict, tok) -> str:
     """The one-listing hide control, kept visible instead of buried in More."""
     hid = f"<input type='hidden' name='lot' value='{e(c['id'])}'><input type='hidden' name='title' value='{e(c['title'])}'>"
@@ -72,15 +79,15 @@ def hide_button(c: dict, tok) -> str:
             "aria-label='Hide this listing' title='Hide this listing (this one only; nothing is learned; restore it from My Marketplace)'>&#10005;<span class='mk-xt'> Hide</span></button></form>")
 
 
-def pref_buttons(c: dict, tok, include_save: bool = True, include_hide: bool = True) -> str:
+def pref_buttons(c: dict, tok, include_save: bool = True, include_hide: bool = True, include_why: bool = True) -> str:
     """Learning controls on the left (each labelled with its effect), the distinct X / Hide this listing control bottom-right (no learning)."""
     b = lambda a, lbl, tip: f"<button name='act' value='{a}' title='{tip}'>{lbl}</button>"  # noqa: E731
-    hid = f"<input type='hidden' name='lot' value='{e(c['id'])}'><input type='hidden' name='title' value='{e(c['title'])}'>"
+    hid = f"<input type='hidden' name='lot' value='{e(c['id'])}'><input type='hidden' name='title' value='{e(c['title'])}'>{_learning_fields(c)}"
     save = b('unsave', 'Unsave', 'Remove from saved') if c.get('saved') else b('save', 'Save', 'Keep this listing')
     return (f"<div class='mk-acts'><form method='post' action='/market/pref' class='mk-pref'>{tok()}{hid}{save if include_save else ''}"
             f"{b('dismiss', 'Not interested', 'Hides this listing and counts its title words as less like this')}{b('more', 'More like this', 'Boosts its title words in ranking')}{b('less', 'Less like this', 'Lowers its title words in ranking')}</form>"
             f"{hide_button(c, tok) if include_hide else ''}</div>"
-            + __import__('operator_ui.market_bids', fromlist=['x']).button(c, tok) + (f"<p class='small mut' data-why>{e(c['why'])}</p>" if c.get("why") else ""))
+            + __import__('operator_ui.market_bids', fromlist=['x']).button(c, tok) + (f"<p class='small mut' data-why>{e(c['why'])}</p>" if include_why and c.get("why") else ""))
 
 
 def hidden_panel(d: dict, tok) -> str:
@@ -373,7 +380,7 @@ def render_page(q: dict, d: dict, results: list[dict], hidden: dict, saved: list
         body = msv.gate(q, d)
     elif q["kind"] == "fixed":
         body = "<div class='card'>GSA Auctions lists auctions only; no fixed-price results from a connected source.</div>"
-    elif d["status"] not in ("connected", "fixture") or bad:
+    elif d["status"] not in ("connected", "fixture", "imported") or bad:
         body = ""
     else:
         unchecked = unchecked or []
@@ -392,7 +399,7 @@ def render_page(q: dict, d: dict, results: list[dict], hidden: dict, saved: list
                 + ((f"<div class='mk-grid' id='result-grid'>{''.join(pv.inject(render(c), prec.get(c['id'], '')) for c in page_rows)}</div>" if q.get("view") != "list" else "".join(pv.inject(render_card(c, tok), prec.get(c["id"], "")) for c in page_rows)) if display_rows else zero)
                 + mb.pager(q, page, pages, len(display_rows)))
     fc = browse.get("fc") if browse else None
-    offline = d["status"] not in ("connected", "fixture") and not d.get("name") and not d.get("coverage")
+    offline = d["status"] not in ("connected", "fixture", "imported") and not d.get("name") and not d.get("coverage")
     banner = f"<div class='flash err' id='fixture-banner' role='note' title='{e(msv.FIXTURE_BANNER)}'><b>{e(msv.FIXTURE_BANNER)}</b></div>" if fc and d.get("fixture") else ""
     refreshing = ("<div class='flash' id='facebook-refresh-pending' role='status'><b>Facebook listings are updating.</b> "
                   "Current results remain usable; this page will check again automatically.</div>") if d.get("refresh_pending") else ""
@@ -400,7 +407,7 @@ def render_page(q: dict, d: dict, results: list[dict], hidden: dict, saved: list
     folded = mb.collapsed()
     back = browse.get("back", "/market") if browse else "/market"
     total = len(results) + len(unchecked or [])
-    bar = mb.top_bar(q, total if ran and not bad and d["status"] in ("connected", "fixture") else 0, q.get("sort", "closing"), q.get("view", "gallery"), tok, mb.active_filters(q), back, (fc or {}).get("quick"), folded) if fc else _form(q, edit_id, tok, pin_html)
+    bar = mb.top_bar(q, total if ran and not bad and d["status"] in ("connected", "fixture", "imported") else 0, q.get("sort", "closing"), q.get("view", "gallery"), tok, mb.active_filters(q), back, (fc or {}).get("quick"), folded) if fc else _form(q, edit_id, tok, pin_html)
     return (CSS + mb.CSS + "<script src='/static/market_radius.js' defer></script><h1 class='pagehead'>DealSniffer Marketplace</h1><input type='checkbox' id='mkdrawer' class='mk-drawer-t' aria-label='Show filters'><div class='mk'>"
             + _sidebar(saved, csrf, pin_html, tok, q, _save(q, edit_id, tok, pin_html), bids, fc, browse.get("now") if browse else None, folded, prefs)
             + f"<section class='mk-main' id='results-top'>{bar}{err}{verr}{refreshing}{banner}{status}{body}</section></div>")

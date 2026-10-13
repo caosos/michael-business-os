@@ -202,8 +202,15 @@ def test_public_pages_complete_browser_flow_and_keep_accounts_out_of_operator_ro
         assert status == 200 and "Signed in as Browser User" in settings and "CONNECTED — identity verified by Google" in settings
         status, _, _, body = request(port, "GET", "/queue", "deals.example", cookie=session_cookie)
         assert status == 404 and body == "not found"
+        # A public token is account-bound. The loopback/local-owner token is
+        # refused for this authenticated browser.
+        local_token = app.csrf
+        status, _, _, body = request(port, "POST", "/auth/logout", "deals.example",
+                                     {"csrf": local_token}, session_cookie)
+        assert status == 400 and "invalid form token" in body
+        csrf = settings.split("name='csrf' value='", 1)[1].split("'", 1)[0]
         status, location, headers, _ = request(port, "POST", "/auth/logout", "deals.example",
-                                               {"csrf": app.csrf}, session_cookie)
+                                               {"csrf": csrf}, session_cookie)
         assert status == 303 and location.startswith("/home")
         assert any(key.lower() == "set-cookie" and value.startswith("ds_session=") and "Max-Age=0" in value
                    for key, value in headers)

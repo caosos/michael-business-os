@@ -62,7 +62,8 @@ def render(csrf: str, google_status: dict) -> str:
         oauth_action = (f"<form method='post' action='/auth/logout'><input type='hidden' name='csrf' value='{e(csrf)}'>"
                         "<button>Sign out</button></form>")
     elif google_status.get("configured"):
-        oauth = "AVAILABLE — sign in to create or open your DealSniffer account"
+        callback = google_status.get("redirect_uri") or "configured callback"
+        oauth = "CONFIGURED — live Google callback not proven yet"
         oauth_action = "<p><a class='button-link' href='/auth/google/start?next=/settings'>Continue with Google</a></p>"
     else:
         oauth = "NOT CONFIGURED — domain, HTTPS, Google client, and consent setup are still required"
@@ -77,7 +78,7 @@ def render(csrf: str, google_status: dict) -> str:
 <label>City or ZIP<input name='location' maxlength='60' value='{e(home['location'])}' placeholder='Conway, AR or 72032' required></label>
 <label>Default radius (miles)<select name='radius'>{''.join(f"<option value='{n}'{' selected' if home['radius'] == n else ''}>{n}</option>" for n in (10, 25, 30, 50, 100, 250))}</select></label>
 <fieldset style='grid-column:1/-1'><legend>What do you want to see?</legend><div class='checks'>{cats}</div></fieldset></div><button>Save my defaults</button></form></section>
-<section class='card' id='account-status'><h2>Account</h2><p><b>{identity}</b></p><p>Google sign-in: <b>{oauth}</b></p>{oauth_action}<p class='small mut'>Google sign-in identifies the DealSniffer user only. It never signs in to Facebook, Gmail, or an auction source.</p></section>
+<section class='card' id='account-status'><h2>Account</h2><p><b>{identity}</b></p><p>Google sign-in: <b>{oauth}</b></p>{oauth_action}{f"<p class='small mut'>Callback: <code>{e(callback)}</code> · authorization code + PKCE · live callback: UNVERIFIED</p>" if google_status.get('configured') and not account.authenticated else ''}<p class='small mut'>Google sign-in identifies the DealSniffer user only. It never signs in to Facebook, Gmail, or an auction source.</p></section>
 <section class='card' id='delivery-status'><h2>Mailbox & notifications</h2>
 <p>Vendor alerts: <b>{e(alerts['state'])}</b>{' · ' + e(alerts['address']) if alerts['address'] else ''}<br><span class='small mut'>{e(alerts['detail'])}</span></p>
 <p>Buyer/seller contact: <b>{e(contact['state'])}</b>{' · ' + e(contact['address']) if contact['address'] else ''}<br><span class='small mut'>{e(contact['detail'])}</span></p>

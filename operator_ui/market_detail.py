@@ -220,13 +220,39 @@ def event_page(c: dict, now: datetime) -> str:
             f"<p>{_live_link(c.get('url'), 'Auctioneer page')} {_live_link(plat, 'View and bid on ' + (c.get('platform') or 'the platform')) if plat else ''}</p>")
 
 
+def local_deal_page(c: dict, now: datetime) -> str:
+    """Relevant facts for reviewed local offers; auction-only bid fields do not apply."""
+    price = c.get("price")
+    unit = f" {c['unit']}" if c.get("unit") else ""
+    regular = c.get("regular_price")
+    rows = "".join((
+        kv("Status", status_of(c, None, now)),
+        kv("Deal price", f"${price:,.2f}{unit}" if price is not None else None),
+        kv("Regular price", f"${regular:,.2f}{unit}" if regular is not None else None),
+        kv("Business", c.get("business_name")),
+        kv("Availability", c.get("availability")),
+        kv("Location", place_line(c)),
+        kv("Expires", c.get("closes_at") or c.get("closes")),
+        kv("Observed", c.get("posted")),
+        kv("Imported", c.get("fetched_at")),
+    ))
+    terms = f"<h2>Terms</h2><p>{e(c['terms'])}</p>" if c.get("terms") else ""
+    method = (c.get("provenance") or {}).get("method") or "UNKNOWN"
+    provenance = (f"<p class='small mut'><b>Provenance:</b> {e(method)} · state IMPORTED, not a live vendor connection. "
+                  "The offer is hidden automatically after its stated expiration.</p>")
+    return (f"<table id='dt-status'>{rows}</table><h2>Offer</h2><p>{e(c.get('description') or '')}</p>{terms}"
+            f"<p>{_live_link(c.get('url'), 'Open original offer')}</p>{provenance}")
+
+
 def render(c: dict, raw: dict | None, pool: list[dict], prefs: dict, now: datetime, tok, q: dict | None = None) -> str:
-    kind = "Auction event" if c.get("event") else "Listing"
+    kind = "Auction event" if c.get("event") else "Local deal" if c.get("source_key") == "local_deals" else "Listing"
     stale = " <b class='bad'>STALE: cached data may be out of date</b>" if c.get("stale") else ""
     head = (f"<p class='small'><a href='/market'>&larr; Back to Marketplace</a></p><h1>{e(c['title'])}</h1>"
             f"<p class='small mut'>{e(c['source'])} · {kind} · cached {e(str(c.get('fetched_at') or 'UNKNOWN'))}{stale} · DRY-RUN, nothing is bid, sent or bought here</p>")
     if c.get("event"):
         return head + event_page(c, now) + _similar(c, pool, now, q)
+    if c.get("source_key") == "local_deals":
+        return head + local_deal_page(c, now) + _similar(c, pool, now, q)
     L = c.get("labels") or ms.auction_labels({})
     st = status_of(c, raw, now)
     cd = countdown_parts(c, now)
@@ -235,7 +261,11 @@ def render(c: dict, raw: dict | None, pool: list[dict], prefs: dict, now: dateti
     bd = c.get("bidders")
     inc = ms._amt((raw or {}).get("aucIncrement"))
     nxt = f"ESTIMATED ${L['est_next_bid']:,.2f}" if L.get("est_next_bid") is not None else None
-    box = ("<table id='dt-status'>" + kv("Status", st) + kv("Current bid", f"${c['bid']:,.2f}" if c["bid"] is not None else None, "" if c["bid"] is not None else " <span class='small mut'>(no bids yet)</span>")
+    fixed_price = c.get("price") if c.get("price_type") == "fixed" else None
+    price_value = (f"${fixed_price:,.2f}" + (f" {c['unit']}" if c.get("unit") else "")) if fixed_price is not None else (f"${c['bid']:,.2f}" if c["bid"] is not None else None)
+    price_label = "Deal price" if c.get("source_key") == "local_deals" else "Price" if fixed_price is not None else "Current bid"
+    no_price_note = "" if price_value is not None or fixed_price is not None else " <span class='small mut'>(no bids yet)</span>"
+    box = ("<table id='dt-status'>" + kv("Status", st) + kv(price_label, price_value, no_price_note)
            + f"<tr><th>Time left</th><td>{cd_html}</td></tr>" + kv("Next minimum bid", nxt, " <span class='small mut'>(cached bid + increment; live minimum unverified)</span>" if nxt else " <span class='small mut'>" + e(L.get("next_min_text", "")) + "</span>")
            + kv("Bid increment", f"${inc:,.2f}" if inc is not None else None) + kv("Bidders", bd if isinstance(bd, int) and not isinstance(bd, bool) else None)
            + kv("Location", place_line(c)) + kv("Reserve", L.get("reserve_text")) + kv("Closes", c.get("closes")) + kv("Opened", c.get("posted")) + "</table>")

@@ -21,10 +21,12 @@ def test_registry_has_requested_sources_and_setup_metadata():
     assert rows["craigslist"].parser == "alert parser ready"
     assert rows["hibid_email"].parser == "not implemented"
     assert rows["northbay"].setup_url is None
+    assert rows["local_deals"].parser == "normalized import ready"
 
 
 def test_onboarding_never_promotes_unproven_source(monkeypatch, tmp_path):
     monkeypatch.setenv("MBOS_MARKET_PREFS_FILE", str(tmp_path / "prefs.json"))
+    monkeypatch.setenv("MBOS_LOCAL_DEALS_FILE", str(tmp_path / "local-deals.jsonl"))
     monkeypatch.setenv("MBOS_ACCOUNT_DELIVERY_FILE", str(tmp_path / "delivery.json"))
     monkeypatch.setenv("MBOS_INTAKE_MAIL_DOMAIN", "mail.dealsniffers.com")
     monkeypatch.setenv("MBOS_INTAKE_ALIAS_SECRET_ENV", "TEST_ALIAS_SECRET")
@@ -35,6 +37,7 @@ def test_onboarding_never_promotes_unproven_source(monkeypatch, tmp_path):
     assert rows["hibid_email"]["state"] == "NOT CONNECTED"
     assert rows["offerup"]["state"] == "MANUAL"
     assert rows["northbay"]["state"] == "MANUAL"
+    assert rows["local_deals"]["state"] == "NOT CONNECTED"
     rendered = source_onboarding.render("local-owner", NOW)
     assert "alerts-" in rendered and "remains <b>NOT CONNECTED</b>" in rendered
     assert "ALERT PARSER READY" in rendered and "NOT IMPLEMENTED" in rendered
@@ -43,6 +46,7 @@ def test_onboarding_never_promotes_unproven_source(monkeypatch, tmp_path):
 
 def test_settings_exposes_setup_without_source_passwords(monkeypatch, tmp_path):
     monkeypatch.setenv("MBOS_MARKET_PREFS_FILE", str(tmp_path / "prefs.json"))
+    monkeypatch.setenv("MBOS_LOCAL_DEALS_FILE", str(tmp_path / "local-deals.jsonl"))
     monkeypatch.setenv("MBOS_ACCOUNT_DELIVERY_FILE", str(tmp_path / "delivery.json"))
     html = account_view.render("csrf", {"configured": False})
     assert "id='source-onboarding'" in html

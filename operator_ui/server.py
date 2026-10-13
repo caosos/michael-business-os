@@ -26,7 +26,7 @@ try:  # lane C's package is optional: without it the notes form is simply unavai
 except ImportError:  # pragma: no cover
     NOTE_CATEGORIES, NOTE_KINDS = frozenset(), frozenset()
 
-from . import account_view, accounts, deal_ui, landing_fix, live_demo, market_bids, market_detail, market_routes, resale_view, sell_intake, vendor_deals, attest_view, bought_view, card_view, comps_view, glance_view, inputs_view, ux, views, wanted_view
+from . import account_view, accounts, deal_ui, flash_claims, flash_claims_view, landing_fix, live_demo, market_bids, market_detail, market_routes, resale_view, sell_intake, vendor_deals, attest_view, bought_view, card_view, comps_view, glance_view, inputs_view, ux, views, wanted_view
 from .digest import figures as digest_figures, dollars as _dollars
 from .card_view import ec
 from .backend import AlreadyClosed, FollowupRefused, ItemNotFound, NoteRefused, NumbersRefused, ProfileUnavailable
@@ -168,11 +168,13 @@ def _customer_path(path: str) -> bool:
 
 def _product_nav(path: str) -> str:
     bids = path == "/market/bids"
-    market = path.startswith("/market") and not bids
+    flash = path == "/market/flash"
+    market = path.startswith("/market") and not bids and not flash
     sell = path.startswith("/sell")
     settings = path.startswith("/settings")
     return ("<header class='product-header' id='product-header'><a href='/home'>DealSniffer</a><nav aria-label='DealSniffer'>"
             f"<a href='/market'{' class=active aria-current=page' if market else ''}>Browse</a>"
+            f"<a href='/market/flash'{' class=active aria-current=page' if flash else ''}>Flash deals</a>"
             "<a href='/market?quick=saved'>Saved</a>"
             f"<a href='/market/bids'{' class=active aria-current=page' if bids else ''}>My bids</a>"
             f"<a href='/sell'{' class=active aria-current=page' if sell else ''}>Sell</a>"
@@ -553,7 +555,7 @@ class App:
 
     def __init__(self, backend, operator_pin=None, health_file=None, mission_file=None, inventory_file=None,
                  telemetry_dir=None, queue_file=None, campaigns_file=None, policy_path=None, comps_inbox=None,
-                 sell_intake_file=None, vendor_deals_file=None):
+                 sell_intake_file=None, vendor_deals_file=None, flash_claims_file=None):
         self.store = backend
         self.campaigns = wanted_view.CampaignStore(campaigns_file or os.environ.get("MBOS_CAMPAIGNS_FILE"))  # F-23
         self.policy_path = policy_path
@@ -573,7 +575,8 @@ class App:
         self.intake_drafts = {}  # F-20: in-memory DRY-RUN drafts, never published
         self.sell_intake = sell_intake.Store(sell_intake_file)
         self.vendor_deals = vendor_deals.Store(vendor_deals_file)
-        self.csrf = secrets.token_urlsafe(32)
+        self.flash_claims = flash_claims.Store(flash_claims_file)
+        self._local_csrf = secrets.token_urlsafe(32)
         self.session_id = "web-" + secrets.token_hex(4)
         self.pin_gate = ux.PinGate()  # F-77: shared by every PIN check in this process
         # Strictly validates an all-or-nothing Google OAuth configuration.  No
@@ -581,10 +584,20 @@ class App:
         self.google_oauth = accounts.google_oauth_config()
         self.account_store = accounts.AccountStore()
         self.session_signer = accounts.SessionSigner(self.google_oauth.session_secret) if self.google_oauth.enabled else None
+        self.account_csrf = accounts.AccountCsrf(self.google_oauth.session_secret) if self.google_oauth.enabled else None
         self.oauth_flow_signer = accounts.OAuthFlowSigner(self.google_oauth.session_secret) if self.google_oauth.enabled else None
         self.oauth_client = accounts.GoogleOAuthClient(self.google_oauth) if self.google_oauth.enabled else None
         callback_host = urlparse(self.google_oauth.redirect_uri).hostname if self.google_oauth.enabled else None
         self.allowed_hosts = ALLOWED_HOSTS | ({callback_host.lower()} if callback_host else set())
+
+    @property
+    def csrf(self):
+        """Return the local-owner token or a token isolated to this verified account."""
+
+        account = accounts.current()
+        if account.authenticated and self.account_csrf:
+            return self.account_csrf.issue(account)
+        return self._local_csrf
 
     def state(self):
         st = UiState(self.store.system_state())
@@ -600,7 +613,11 @@ class App:
         return st
 
     def _check_csrf(self, f):
-        if not ux.same(f.get("csrf", ""), self.csrf):
+        account = accounts.current()
+        valid = (self.account_csrf.verify(f.get("csrf", ""), account)
+                 if account.authenticated and self.account_csrf
+                 else ux.same(f.get("csrf", ""), self._local_csrf))
+        if not valid:
             raise InputError("invalid form token; reload the page")
 
     def decide(self, areq_id, f):
@@ -1209,6 +1226,9 @@ def make_handler(app):
                 return self._send(200, page("Listing detail", body, app.state(), flash))
             if u.path == "/market":
                 return self._send(200, page("DealSniffer Marketplace", market_routes.page_body(app, qs, now), app.state(), flash))
+            if u.path == "/market/flash":
+                body = flash_claims_view.customer_page(app.flash_claims.list(now), app.csrf)
+                return self._send(200, page("Flash deals", body, app.state(), flash or err, bool(err)))
             if u.path == "/market/bids":
                 return self._send(200, page("My Bids", market_bids.page_body(app, now), app.state(), flash))
             if u.path == "/settings":
@@ -1221,6 +1241,9 @@ def make_handler(app):
             if u.path == "/sell/deal":
                 body = vendor_deals.render_form(app.csrf) + vendor_deals.render_recent(app.vendor_deals.recent())
                 return self._send(200, page("Advertise a local deal", body, app.state(), flash or err, bool(err)))
+            if u.path == "/sell/deal/flash":
+                body = flash_claims_view.vendor_page(app.flash_claims.list(now), app.flash_claims.receipts(), app.csrf)
+                return self._send(200, page("Flash deal controls", body, app.state(), flash or err, bool(err)))
             if u.path == "/sell/submissions":
                 body = ("<div class='sell-wrap'><p><a href='/sell'>Submit another item</a></p></div>" +
                         sell_intake.render_submissions(app.sell_intake.recent(50)))
@@ -1680,6 +1703,38 @@ def make_handler(app):
                     body = vendor_deals.render_form(app.csrf, values) + vendor_deals.render_recent(app.vendor_deals.recent())
                     return self._send(200, page("Advertise a local deal", body, app.state(), str(ex), True))
                 return self._redirect("/sell/deal?msg=" + quote("Deal submitted for human review. It is not published or verified yet."))
+            if parts == ["sell", "deal", "flash", "create"]:
+                n = min(int(self.headers.get("Content-Length") or 0), 65536)
+                f = {k: v[0] for k, v in parse_qs(self.rfile.read(n).decode("utf-8", "replace"), keep_blank_values=True).items()}
+                try:
+                    app._check_csrf(f)
+                    definition = flash_claims.parse_deal(f, deal_id="flash-" + secrets.token_hex(6), created_at=utcnow())
+                    app.flash_claims.create(definition)
+                except (InputError, OSError) as ex:
+                    values = {k: v for k, v in f.items() if k != "csrf"}
+                    body = flash_claims_view.vendor_page(app.flash_claims.list(utcnow()), app.flash_claims.receipts(), app.csrf, values)
+                    return self._send(200, page("Flash deal controls", body, app.state(), str(ex), True))
+                return self._redirect("/sell/deal/flash?msg=" + quote("Deterministic flash deal scheduled. No message or payment was sent."))
+            if len(parts) == 4 and parts[:2] == ["market", "flash"] and parts[3] == "claim":
+                n = min(int(self.headers.get("Content-Length") or 0), 8192)
+                f = {k: v[0] for k, v in parse_qs(self.rfile.read(n).decode("utf-8", "replace"), keep_blank_values=True).items()}
+                try:
+                    app._check_csrf(f)
+                    result = app.flash_claims.claim(parts[2], utcnow(), accounts.current().storage_key)
+                    body = flash_claims_view.customer_page(app.flash_claims.list(utcnow()), app.csrf, result)
+                    return self._send(200, page("Flash claim", body, app.state()))
+                except (InputError, OSError) as ex:
+                    return self._redirect("/market/flash?err=" + quote(str(ex)))
+            if parts == ["sell", "deal", "flash", "confirm"]:
+                n = min(int(self.headers.get("Content-Length") or 0), 8192)
+                f = {k: v[0] for k, v in parse_qs(self.rfile.read(n).decode("utf-8", "replace"), keep_blank_values=True).items()}
+                try:
+                    app._check_csrf(f)
+                    result = app.flash_claims.confirm(f.get("token"), utcnow())
+                except (InputError, OSError) as ex:
+                    return self._redirect("/sell/deal/flash?err=" + quote(str(ex)))
+                word = "already confirmed" if result["idempotent"] else result["status"].lower()
+                return self._redirect("/sell/deal/flash?msg=" + quote("Redemption " + word + ". Receipt recorded."))
             if parts == ["settings", "preferences"]:
                 n = min(int(self.headers.get("Content-Length") or 0), 65536)
                 raw = parse_qs(self.rfile.read(n).decode("utf-8", "replace"), keep_blank_values=True)

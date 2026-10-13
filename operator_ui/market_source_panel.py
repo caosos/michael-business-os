@@ -29,6 +29,9 @@ def _fresh(pr: dict) -> str:
         return f"mailbox read {e(str(pr['as_of'])[:16].replace('T', ' '))} UTC ({pr['age_h']:g} h ago); no alert from this source yet"
     if pr["status"] == "manual":
         return f"{pr['n']} owner-entered find(s)"
+    if pr["status"] == "imported":
+        return (f"{pr['n']} active reviewed import(s) · last import {e(str(pr['as_of'])[:16].replace('T', ' '))} UTC"
+                + (f" · {pr.get('expired', 0)} expired and hidden" if pr.get("expired") else ""))
     if pr.get("credential_configured"):
         return "Bright Data credential configured; no successful cached read yet — press Search to run one"
     if pr.get("message"):

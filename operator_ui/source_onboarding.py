@@ -16,7 +16,7 @@ e = lambda v: html.escape("" if v is None else str(v))  # noqa: E731
 
 ONBOARD_KEYS = (
     "govdeals", "publicsurplus", "hibid_email", "wooley", "craigslist", "offerup",
-    "nahlen", "auctionzip", "half_off_wholesale", "northbay", "bargain_brothers",
+    "nahlen", "auctionzip", "half_off_wholesale", "northbay", "bargain_brothers", "local_deals",
 )
 
 
@@ -44,7 +44,7 @@ def render(account_id: str, now: datetime | None = None) -> str:
         info = r["info"]
         link = f"<a href='{e(info.setup_url)}' rel='noopener noreferrer'>Open {e(info.name)}</a> · " if info.setup_url else ""
         parser = f"<span class='badge'>{e(info.parser.upper())}</span>" if info.parser else ""
-        manual = " <a href='/market#add-find'>Paste an original link</a>." if info.import_key else ""
+        manual = " <a href='/market#add-find'>Paste an original link</a>." if info.parser == "manual only" and info.import_key else ""
         cards.append(f"<article class='card source-setup' data-source='{e(info.key)}' data-state='{e(r['state'])}'><h3>{e(info.name)} <span class='badge'>{e(r['state'])}</span></h3>"
                      f"<p>{link}{parser}</p><p>{e(info.user_setup)}{manual}</p><p class='small mut'><b>Constraint:</b> {e(info.constraint)}<br><b>Next:</b> {e(info.next_step)}</p></article>")
     return ("<section class='card' id='source-onboarding'><h2>Add sources</h2><p>DealSniffer never asks for a source password. Set up alerts in your own source account, "

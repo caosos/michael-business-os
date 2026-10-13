@@ -122,6 +122,13 @@ class GoogleOAuthConfig:
             "configured": self.enabled,
             "redirect_uri": self.redirect_uri if self.enabled else None,
             "scopes": list(self.scopes),
+            "flow": "authorization_code_pkce" if self.enabled else None,
+            "cookie_security": "secure" if self.enabled and urlparse(self.redirect_uri).scheme == "https" else
+                               "loopback-development" if self.enabled else None,
+            # Loading credentials proves only local configuration. DNS, TLS,
+            # consent configuration, and a completed browser callback need
+            # separate external evidence.
+            "live_callback": "UNVERIFIED" if self.enabled else "NOT CONFIGURED",
         }
 
 
@@ -226,6 +233,34 @@ class SessionSigner:
         if secure:
             attrs.append("Secure")
         return "; ".join(attrs)
+
+
+class AccountCsrf:
+    """Derive a CSRF token for one server-verified account, never form identity.
+
+    The loopback UI has one random local-owner token. A public multi-user
+    deployment must not render that same token to every signed-in account: one
+    customer could otherwise reuse their token in a cross-account request.
+    """
+
+    def __init__(self, secret: str | bytes):
+        self.secret = secret.encode() if isinstance(secret, str) else secret
+        if len(self.secret) < 32:
+            raise ValueError("CSRF secret must contain at least 32 bytes")
+
+    def issue(self, account: Account) -> str:
+        if not account.authenticated:
+            raise ValueError("authenticated account required")
+        message = ("dealsniffer-csrf-v1\0" + account.storage_key).encode()
+        return SessionSigner._b64(hmac.new(self.secret, message, hashlib.sha256).digest())
+
+    def verify(self, token: str, account: Account) -> bool:
+        if not isinstance(token, str) or len(token) > 256:
+            return False
+        try:
+            return hmac.compare_digest(token, self.issue(account))
+        except ValueError:
+            return False
 
 
 @dataclass(frozen=True)

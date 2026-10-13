@@ -41,6 +41,9 @@ def _row(c: dict) -> str:
     if c["status"] == "fixture":
         return (f"<li data-src='{n}' data-status='fixture'><b class='bad'>{n}: FIXTURE / not live</b> · {c['in_scope']} test listing(s) · newest test e-mail dated "
                 f"{e(str(c['as_of'])[:16].replace('T', ' '))} UTC{' · STALE' if c['stale'] else ''}</li>")
+    if c["status"] == "imported":
+        return (f"<li data-src='{n}' data-status='imported'><b>{n}: IMPORTED</b> · {c['in_scope']} active reviewed offer(s) · "
+                f"last import {e(str(c['as_of'])[:16].replace('T', ' '))} UTC · no live vendor feed</li>")
     return f"<li data-src='{n}' data-status='{e(c['status'])}'><b>{n}: NOT CONNECTED</b> · no mailbox read, nothing shown</li>"
 
 

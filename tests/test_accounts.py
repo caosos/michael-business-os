@@ -25,9 +25,17 @@ def test_google_config_is_disabled_by_default_and_never_exposes_secrets():
     assert accounts.google_oauth_config({}).public_status() == {
         "provider": "google", "configured": False, "redirect_uri": None,
         "scopes": ["openid", "email", "profile"],
+        "flow": None, "cookie_security": None, "live_callback": "NOT CONFIGURED",
     }
     cfg = accounts.google_oauth_config(configured())
     assert cfg.enabled and cfg.scopes == ("openid", "email", "profile")
+    assert cfg.public_status() == {
+        "provider": "google", "configured": True,
+        "redirect_uri": "https://deals.example/auth/google/callback",
+        "scopes": ["openid", "email", "profile"],
+        "flow": "authorization_code_pkce", "cookie_security": "secure",
+        "live_callback": "UNVERIFIED",
+    }
     assert "secret" not in json.dumps(cfg.public_status()).lower()
     assert "provider-secret" not in repr(cfg) and "s" * 32 not in repr(cfg)
 
@@ -60,6 +68,20 @@ def test_session_is_signed_expires_and_contains_no_profile_data():
         signer.verify(token, now=1_600)
     cookie = signer.cookie(token)
     assert "HttpOnly" in cookie and "SameSite=Lax" in cookie and "Secure" in cookie
+
+
+def test_csrf_tokens_are_bound_to_the_verified_account():
+    first = accounts.google_account("google-sub-1", "one@example.com")
+    second = accounts.google_account("google-sub-2", "two@example.com")
+    signer = accounts.AccountCsrf("x" * 32)
+    first_token = signer.issue(first)
+    second_token = signer.issue(second)
+    assert first_token != second_token
+    assert signer.verify(first_token, first)
+    assert not signer.verify(first_token, second)
+    assert not signer.verify("", first)
+    with pytest.raises(ValueError):
+        signer.issue(accounts.ANONYMOUS)
 
 
 def test_profiles_and_preferences_are_isolated_without_provider_tokens(tmp_path, monkeypatch):

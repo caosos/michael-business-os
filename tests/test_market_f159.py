@@ -53,6 +53,11 @@ def test_category_counts_equal_filtered_rows(ui):
     h = get(ui, **BASE)
     cats = {m.group(2): int(m.group(1)) for m in re.finditer(r"<label class='mk-cat[^']*' data-count='(\d+)'><input type='checkbox' form='mkform' name='cat' value='([^']+)'", h)}
     assert set(cats) == {"all", *ms.CONTROL_CATS}
+    # "All categories" is not a radio-like dot.  Every included category is
+    # visibly checked after the response renders, just like All sources.
+    box = h.split("id='mkcats'", 1)[1].split("</div>", 1)[0]
+    assert "value='all' checked" in box
+    assert all(f"value='{k}' checked" in box for k in ms.CONTROL_CATS)
     for k, n in cats.items():
         assert total(get(ui, **{**BASE, "cat": k})) == n, k
     assert any(n == 0 for n in cats.values()) and re.search(r"<label class='mk-cat' data-count='0'>", h)      # zero-count stays selectable

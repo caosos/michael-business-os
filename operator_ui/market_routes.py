@@ -75,7 +75,7 @@ def page_body(app, qs: dict, now, errors=None, values=None) -> str:
     prefs = mp.load()
     auto, auto_note = mba.load(now, prefs)             # F-152: bid e-mails read from the staging fixture directory only; else a one-line not-connected note
     au = mba.urls(auto)
-    live = ran and data["status"] in ("connected", "fixture") and not q["errors"]
+    live = ran and data["status"] in ("connected", "fixture", "imported") and not q["errors"]
 
     def chain(qq, relax=()):                           # F-159: ONE filter chain for the grid and for every facet count, so a count always equals the rows you get
         res, unch, hid = ms.partition(allcards, qq) if live else ([], [], {})
@@ -108,7 +108,7 @@ def page_body(app, qs: dict, now, errors=None, values=None) -> str:
         finds = fv.section(fr, fu, *fr_rest, tok, mv.pref_buttons)
     tok = lambda: f"<input type='hidden' name='csrf' value='{app.csrf}'><input type='hidden' name='nonce' value='{__import__('secrets').token_hex(8)}'>"  # noqa: E731
     mine = mb.window(prefs, data["cards"] if ran else [], now, tok, (auto, auto_note)) + (f"<p class='small mut' id='bids-count'>{b1 + b2} in My bids (left out of the results below)</p>" if b1 + b2 else "")
-    sg = msug.suggest(results + unchecked, prefs) if ran and results + unchecked and not q["errors"] and data["status"] == "connected" else None
+    sg = msug.suggest(results + unchecked, prefs) if ran and results + unchecked and not q["errors"] and data["status"] in ("connected", "imported") else None
     sug = msug.render(sg, tok) if sg else ""      # F-155: engine-ranked panel, display only
     # Facet counts describe the same combined feed the owner sees.  Listings
     # with an unverified distance/price stay selectable and paginate normally;
@@ -124,7 +124,7 @@ def post(app, parts: list[str], f: dict) -> tuple[str | None, list[str] | None]:
     try:
         if parts == ["market", "pref"]:
             app._check_csrf(f)                       # a local view preference: CSRF only, no PIN, no money or contact
-            msg = mp.act(f.get("act", ""), f.get("lot", ""), f.get("title", ""))
+            msg = mp.act(f.get("act", ""), f.get("lot", ""), f.get("title", ""), f.get("category", ""), f.get("source", ""))
         elif parts == ["market", "bid"]:
             app._check_csrf(f)                       # owner-reported bid tracking in the local prefs file: CSRF only, nothing is placed, fetched or sent
             msg = mb.act(f.get("act", ""), f, __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(timespec="seconds"))

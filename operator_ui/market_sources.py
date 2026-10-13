@@ -24,7 +24,7 @@ from mbos_discovery.auctions import place_coords
 from mbos_discovery.dedup import title_similarity
 from mbos_discovery.normalize import haversine_miles
 
-from . import gazetteer, market_facebook as mfb, market_search as ms
+from . import gazetteer, local_deal_sources as lds, market_facebook as mfb, market_search as ms
 
 ALERT_SOURCES = {"govdeals": ("govdeals_email", "GovDeals"), "publicsurplus": ("publicsurplus_email", "Public Surplus"), "craigslist": ("craigslist_email", "Craigslist")}
 CACHE_DIR = Path(__file__).resolve().parent.parent / "var" / "cache"
@@ -306,6 +306,9 @@ def load_source(source: str, gsa_path: str | None, now: datetime, origin=None, d
         d = mfb.load(now, origin, keyword=keyword, city=q.get("base") or "72032",
                      radius=q.get("radius") or ms.DEFAULT_RADIUS, refresh=refresh)
         return {**d, "coverage": coverage([d])}
+    if source == lds.SOURCE_KEY:
+        d = lds.load(now, origin)
+        return {**d, "coverage": coverage([d])}
     if source in AUCTION_SITES:
         d = load_events(AUCTION_SITES[source], None, now, origin)
         return {**d, "coverage": coverage([d])}
@@ -324,12 +327,13 @@ def load_source(source: str, gsa_path: str | None, now: datetime, origin=None, d
     alerts = [load_alerts(s, directory, now, origin) for s in ALERT_SOURCES]
     houses = [load_events(x, None, now, origin) for x in AUCTION_SITES.values()]
     facebook = load_source("facebook", gsa_path, now, origin, directory, query)
-    cards = dedupe(gsa["cards"] + facebook["cards"] + [c for h in houses for c in h["cards"]] + [c for a in alerts for c in a["cards"]])
+    local = lds.load(now, origin)
+    cards = dedupe(gsa["cards"] + facebook["cards"] + local["cards"] + [c for h in houses for c in h["cards"]] + [c for a in alerts for c in a["cards"]])
     live = "connected" in [gsa["status"], facebook["status"]] + [h["status"] for h in houses] + [a["status"] for a in alerts]
-    status = "connected" if live else "fixture" if any(a["cards"] for a in alerts) else "offline"
+    status = "connected" if live else "fixture" if any(a["cards"] for a in alerts) else "imported" if local["cards"] else "offline"
     return {**gsa, "status": status, "cards": cards, "in_scope": len(cards), "fixture": any(a["fixture"] and a["cards"] for a in alerts),
             "message": gsa["message"] if status == "offline" else "", "refresh_pending": bool(facebook.get("refresh_pending")),
-            "coverage": coverage([{**gsa, "name": "GSA Auctions"}, facebook] + houses + alerts)}
+            "coverage": coverage([{**gsa, "name": "GSA Auctions"}, facebook, local] + houses + alerts)}
 
 
 # ---- F-156: the source registry (the one place that knows every source; /market's Sources panel only displays it) ----
@@ -386,6 +390,10 @@ REGISTRY = (
     SourceInfo("facebook", "Facebook Marketplace", "classifieds", "local (ZIP/city + radius)", "provider API", "item", "none; contact sellers yourself",
                "Bright Data provider route; public listing fields only; seller/profile/contact fields are dropped before caching",
                "configure BRIGHTDATA_TOKEN; successful results are cached and merged into this feed", "facebook", "LIVE CONNECTED"),
+    SourceInfo("local_deals", "Authorized local deals", "local business offers", "city/ZIP + radius selected by the user", "reviewed import", "item offer", "redeem or purchase with the named business; DealSniffer does not transact",
+               "only reviewed public offers or authority-attested vendor submissions; expiration is enforced; imports are not a live connection",
+               "onboard one authorized Conway-area vendor and import a current, expiring offer with its original source evidence", "local_deals", "IMPORTED",
+               None, "A reviewer may import a current public offer or an authority-attested vendor submission. It stays IMPORTED until a receipt-backed feed exists.", "normalized import ready", "local_deals"),
     SourceInfo("offerup", "OfferUp", "classifieds", "local", "owner import", "item", "none; contact sellers yourself",
                "terms forbid automated access: owner pastes finds only", "paste a find on the Finds form", "finds:offerup", "MANUAL",
                "https://offerup.com/", "Copy the original OfferUp listing link and paste it into Your finds. DealSniffer does not log in or fetch the page.", "manual only", "offerup"),
@@ -428,6 +436,8 @@ def probe(info: SourceInfo, now: datetime) -> dict:
             return {**out, "status": "manual", "n": _finds_count(key or None)}
         if kind == "facebook":
             return mfb.probe(now)
+        if kind == "local_deals":
+            return lds.probe(now)
         if kind == "alerts":
             if fixture_dir():
                 return {**out, "status": "fixture"}
