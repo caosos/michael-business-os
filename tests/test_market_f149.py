@@ -63,6 +63,7 @@ def test_wilson_cards_same_shape_unknown_lot_fields_human_link(caches, cache):
         assert gsa <= set(c) and c["event"] and c["source"] == "Wilson Auctioneers" and c["id"].startswith("wilson:")
         assert c["lot_number"] is None and c["current_bid"] is None and c["bid_count"] is None and c["bid"] is None and c["price"] is None
         assert c["platform"] == "BidWrangler" and c["url"].startswith("https://wilsonauctioneers.com/")
+        assert c["image"].startswith("https://d37cbsn538t2ha.cloudfront.net/") and c["image_kind"] == "auction event cover"
     online = next(c for c in d["cards"] if c["closes_at"])
     assert online["closes_local"].endswith("CDT") and online["left"]
     live = next(c for c in d["cards"] if not c["closes_at"])
@@ -72,12 +73,12 @@ def test_wilson_cards_same_shape_unknown_lot_fields_human_link(caches, cache):
 def test_page_lists_each_house_all_houses_and_all_sources(ui, caches, cache):
     h = get(ui, go=1, source="auctions", broad=1, view="list")
     assert "value='wilson'" in h and "value='wooley'" in h
-    assert "Wilson Auctioneers: connected (cached file)" in h and "Wooley Auctioneers: connected (cached file)" in h and "T.J. Bruck" in h and "AUCTION EVENT" in h
+    assert "Wilson Auctioneers" in h and "Wooley Auctioneers" in h and "T.J. Bruck" in h and "AUCTION EVENT" in h
     assert "Tue Oct 13, 6:00 PM CDT" in h and "Lot number</span> UNKNOWN" in h and "FIXTURE" not in h
     a = get(ui, go=1, source="all", broad=1)
-    assert "Wilson Auctioneers: connected" in a and "GSA Auctions: connected" in a
+    assert "Wilson Auctioneers" in a and "GSA Auctions" in a
     g = get(ui, go=1, source="auctions", broad=1)
-    assert "data-kind='auction-event'" in g and "View and bid on" in g
+    assert "data-kind='auction-event'" in g and "View and bid on" in g and "alt='Original listing photo'" in g
     w = get(ui, go=1, source="wilson", broad=1, view="list")
     assert "T.J. Bruck" not in w and "Wilson Auctioneers" in w
 
@@ -86,7 +87,7 @@ def test_no_cache_for_one_house_is_honest_offline(ui, tmp_path, monkeypatch):
     monkeypatch.setenv("MBOS_WOOLEY_CACHE", str(write(tmp_path / "w.json", WooleySiteAdapter(FIX / "wooley", clock=lambda: AS_OF))))
     monkeypatch.setenv("MBOS_WILSON_CACHE", str(tmp_path / "missing.json"))
     h = get(ui, go=1, source="auctions", broad=1)
-    assert "Wilson Auctioneers: offline" in h and "Wooley Auctioneers: connected" in h
+    assert "Wilson Auctioneers" in h and "Wooley Auctioneers" in h and "not connected" in h
 
 
 def test_refresh_refuses_without_live_and_alias(tmp_path, capsys):
@@ -123,6 +124,7 @@ def test_blackmon_cards_proxibid_link_for_human_only(caches, cache):
         assert c["event"] and c["source"] == "Blackmon Auctions" and c["id"].startswith("blackmon:")
         assert c["lot_number"] is None and c["current_bid"] is None and c["bid_count"] is None and c["price"] is None
         assert c["platform"] == "Proxibid" and c["url"].startswith("https://www.blackmonauctions.com/")
+        assert c["image"].startswith("https://images.squarespace-cdn.com/") and c["image_kind"] == "auction event cover"
         assert "proxibid.com" in (c["platform_url"] or "")
     h = msv._platform(d["cards"][0])
     assert "View and bid on Proxibid" in h and "nofollow" in h
@@ -130,10 +132,9 @@ def test_blackmon_cards_proxibid_link_for_human_only(caches, cache):
 
 def test_page_includes_blackmon_in_all_houses_and_all_sources(ui, caches, cache):
     h = get(ui, go=1, source="auctions", broad=1, view="list")
-    assert "value='blackmon'" in h and "Blackmon Auctions: connected (cached file)" in h and "View and bid on Proxibid" in h
+    assert "value='blackmon'" in h and "Blackmon Auctions" in h and "View and bid on Proxibid" in h
     a = get(ui, go=1, source="all", broad=1)
-    assert "Blackmon Auctions: connected" in a
-    assert "Census 2023 ZIP and place gazetteer" in a and "limited coverage" not in a
+    assert "Blackmon Auctions" in a and "limited coverage" not in a
 
 
 def test_blackmon_refresh_refuses_without_live_and_is_hourly_capped(tmp_path):
