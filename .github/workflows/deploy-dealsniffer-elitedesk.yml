@@ -1,0 +1,74 @@
+name: Deploy DealSniffer to EliteDesk
+
+on:
+  push:
+    branches:
+      - research/agent-06-communications
+    paths:
+      - deploy/dealsniffer-elitedesk-release.json
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dealsniffer-elitedesk-release
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, elitedesk, dealsniffer]
+    timeout-minutes: 30
+    steps:
+      - name: Release exact revisions on the EliteDesk
+        shell: bash
+        env:
+          COORDINATOR: /home/michaelos/business-os-worktrees/agent-01-coordinator
+        run: |
+          set -euo pipefail
+          cd "$COORDINATOR"
+          git fetch -q origin research/agent-01-coordinator research/agent-06-communications research/agent-02-opportunity
+          MANIFEST="$(git show "${GITHUB_SHA}:deploy/dealsniffer-elitedesk-release.json")"
+          LANE06="$(printf '%s' "$MANIFEST" | .venv/bin/python -c 'import json,sys; print(json.load(sys.stdin)["lane06_sha"])')"
+          LANE02="$(printf '%s' "$MANIFEST" | .venv/bin/python -c 'import json,sys; print(json.load(sys.stdin)["lane02_sha"])')"
+          [[ "$LANE06" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$LANE02" =~ ^[0-9a-f]{40}$ ]]
+          tools/release_marketplace.sh "$LANE06" "$LANE02"
+
+          PROOF_DIR="$RUNNER_TEMP/dealsniffer-proof"
+          mkdir -p "$PROOF_DIR"
+          tools/reload_ui.sh --verify-only 8766 | tee "$PROOF_DIR/verify.txt"
+          curl -fsS --max-time 30 http://127.0.0.1:8766/market > "$PROOF_DIR/market.html"
+          grep -q "DealSniffer Marketplace" "$PROOF_DIR/market.html"
+          grep -q "name='source' value='all' checked" "$PROOF_DIR/market.html"
+          grep -q "class='mk-grid' id='result-grid'" "$PROOF_DIR/market.html"
+          grep -q "class='mk-save'" "$PROOF_DIR/market.html"
+          grep -q "id='admin-menu'" "$PROOF_DIR/market.html"
+          ! grep -q "DRY-RUN · nothing leaves this machine" "$PROOF_DIR/market.html"
+          ! grep -q "<header><b>Operator UI</b>" "$PROOF_DIR/market.html"
+          ! grep -q "id='unchecked-section'" "$PROOF_DIR/market.html"
+          ! grep -q "id='working-capital'" "$PROOF_DIR/market.html"
+          ! grep -q "id='gsa-explainer'" "$PROOF_DIR/market.html"
+          ! grep -q "No photo" "$PROOF_DIR/market.html"
+          grep -q "^sha=$LANE06$" var/lanes/agent-06/ARTIFACT
+          cp var/lanes/agent-06/ARTIFACT "$PROOF_DIR/ARTIFACT"
+
+          CHROME="$(command -v google-chrome-stable || command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          if [ -n "$CHROME" ]; then
+            "$CHROME" --headless --disable-gpu --no-sandbox --window-size=1440,900 --screenshot="$PROOF_DIR/desktop.png" http://127.0.0.1:8766/market || true
+            "$CHROME" --headless --disable-gpu --no-sandbox --window-size=390,844 --screenshot="$PROOF_DIR/mobile.png" http://127.0.0.1:8766/market || true
+          fi
+          {
+            date --iso-8601=seconds
+            printf 'lane06=%s\nlane02=%s\n' "$LANE06" "$LANE02"
+            ss -ltnp | grep ':8766'
+            curl -fsSI --max-time 10 http://127.0.0.1:8766/market | head -n 1
+            printf 'chrome=%s\n' "${CHROME:-NOT_FOUND}"
+          } > "$PROOF_DIR/host-proof.txt"
+
+      - name: Upload EliteDesk proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: dealsniffer-elitedesk-proof-${{ github.run_id }}
+          path: ${{ runner.temp }}/dealsniffer-proof
+          if-no-files-found: error
+          retention-days: 14
