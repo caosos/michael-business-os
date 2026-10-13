@@ -224,7 +224,8 @@ def _event_card(site: AuctionSite, ad, payload, as_of: str, now, origin) -> dict
     closes_at, begins_at = g("closes_at"), g("begins_at")
     day = str(closes_at or begins_at or "")[:10] or None
     return {"id": f"{site.key}:{lot.lot_id}", "title": g("title"), "description": desc, "text": f"{g('title')} {desc} {' '.join(hl)} {' '.join(tags)} {g('address') or ''}".lower(),
-            "url": g("rules_url"), "platform_url": g(site.platform_field), "platform": site.platform, "hibid_url": g("hibid_catalog_url"), "image": None, "bid": None,
+            "url": g("rules_url"), "platform_url": g(site.platform_field), "platform": site.platform, "hibid_url": g("hibid_catalog_url"),
+            "image": g("event_image_url"), "image_kind": "auction event cover" if g("event_image_url") else None, "bid": None,
             "price": None, "price_type": None, "bidders": None, "closes": day, "closes_at": closes_at, "begins_at": begins_at,
             "closes_local": local_when(closes_at), "left": _left(closes_at, now), "begins_local": local_when(begins_at),
             "city": f"{loc['city']}, {loc['state']}" if loc.get("city") and loc.get("state") else None,
