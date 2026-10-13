@@ -39,7 +39,7 @@ class FacebookDirectTests(unittest.TestCase):
         self.assertIn("discover_by=keyword", calls[0][1])
         self.assertIn("type=discover_new", calls[0][1])
         self.assertNotIn("secret-token", calls[0][1])
-        self.assertEqual(json.loads(calls[0][3]), {"input": [{"keyword": "utility trailer"}], "limit_per_input": 20})
+        self.assertEqual(json.loads(calls[0][3]), {"input": [{"keyword": "utility trailer", "city": "Conway, AR"}], "limit_per_input": 20})
         self.assertEqual(json.loads(calls[1][3]),
                          {"input": [{"url": "https://www.facebook.com/marketplace/item/123/"}], "limit_per_input": 1})
 

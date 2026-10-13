@@ -213,7 +213,9 @@ class BrightDataClient:
         # exactly ``keyword`` in each input object.  City/radius belong to
         # DealSniffer's local filtering and cache identity; sending them to the
         # provider makes an otherwise valid request fail schema validation.
-        found = self._scrape([{"keyword": keyword}], cap, discover_by="keyword")[:cap]
+        from . import gazetteer
+        provider_city = gazetteer.city_label(city)
+        found = self._scrape([{"keyword": keyword, "city": provider_city}], cap, discover_by="keyword")[:cap]
         complete = [row for row in found if row.get("title")]
         urls = [{"url": row["url"]} for row in found if not row.get("title") and isinstance(row.get("url"), str)]
         if urls:

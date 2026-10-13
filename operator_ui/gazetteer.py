@@ -69,3 +69,23 @@ def locate(text: str | None):
         if hit:
             return hit
     return cities.get((_norm(t), ""))
+
+
+def city_label(text: str | None) -> str:
+    """Return ``City, ST`` for a known ZIP; leave an entered city unchanged."""
+    value = " ".join(str(text or "").split())
+    if not _ZIP.match(value):
+        return value
+    configured = os.environ.get("MBOS_GAZETTEER_FILE")
+    paths = [Path(configured)] if configured else [DEFAULT, *CENSUS]
+    for path in paths:
+        try:
+            with open(path, newline="", encoding="utf-8") as fh:
+                for row in csv.DictReader(fh):
+                    if (row.get("zip") or "").strip() == value[:5] and (row.get("city") or "").strip():
+                        city = (row.get("city") or "").strip()
+                        state = (row.get("state") or "").strip().upper()
+                        return f"{city}, {state}" if state else city
+        except OSError:
+            continue
+    return value
