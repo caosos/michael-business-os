@@ -84,15 +84,22 @@ def source_key(c: dict) -> str | None:
 
 
 def _names() -> dict:
-    return {"gsa": "GSA Auctions", **{k: s.name for k, s in msrc.AUCTION_SITES.items()}, **{k: n for k, (_, n) in msrc.ALERT_SOURCES.items()}}
+    return {i.key: i.name for i in msrc.REGISTRY}
+
+
+def selected_sources(q: dict | str) -> set[str]:
+    raw = q.get("source", "all") if isinstance(q, dict) else q
+    vals = {v for v in str(raw or "all").split(",") if v}
+    return {"all"} if not vals or "all" in vals else vals
 
 
 def source_ok(c: dict, source: str) -> bool:
-    if source == "all":
+    selected = selected_sources(source)
+    if "all" in selected:
         return True
-    if source == msrc.ALL_HOUSES:
-        return c.get("source") in msrc.EVENT_NAMES
-    return c.get("source") == _names().get(source, source)
+    if msrc.ALL_HOUSES in selected and c.get("source") in msrc.EVENT_NAMES:
+        return True
+    return any(c.get("source") == _names().get(key, key) for key in selected)
 
 
 def quick_ok(c: dict, quick: str, now: datetime) -> bool:
@@ -146,7 +153,7 @@ def active_filters(q: dict) -> int:
     h = home()
     n = 0
     n += not (q.get("cat_default") or False)
-    n += q.get("source", "all") != "all"
+    n += selected_sources(q) != {"all"}
     start_loc = (q.get("loc_mode") == "state" and q.get("states") == [h["state"]] and not q.get("also_radius")) if h["state"] else \
         (q.get("loc_mode") != "state" and not q.get("base") and q.get("radius") is None)       # no home set: the empty starting location
 
@@ -263,18 +270,21 @@ def category_section(q: dict, fc: dict) -> str:
 
 
 def source_section(q: dict, fc: dict, now: datetime) -> str:
-    sel = q.get("source", "all")
-    rows = f"<label class='mk-src-row'><input type='radio' form='mkform' name='source' value='all'{' checked' if sel == 'all' else ''}> All sources <span class='mk-n'>({fc['all_sources']})</span></label>"
+    selected = selected_sources(q)
+    all_on = "all" in selected
+    rows = f"<label class='mk-src-row'><input type='checkbox' form='mkform' name='source' value='all'{' checked' if all_on else ''}> <b>All sources</b> <span class='mk-n'>({fc['all_sources']})</span></label>"
     for r in msp.rows(now):
         i, st = r["info"], r["state"]
         n = fc["source"].get(i.key, 0)
         state = {"LIVE CONNECTED": "connected", "CONNECTED, WAITING FOR ALERTS": "connected, waiting for alerts", "MANUAL": "manual: paste finds", "BLOCKED": "blocked"}.get(st, "not connected")
         if r["probe"]["status"] == "fixture":
             state = "FIXTURE, not live"
-        radio = f"<input type='radio' form='mkform' name='source' value='{e(i.key)}'{' checked' if sel == i.key else ''}>"
-        rows += (f"<label class='mk-src-row' data-src='{e(i.key)}' data-count='{n}'>{radio} {e(i.name)} <span class='mk-n'>({n})</span> "
+        checked = all_on or i.key in selected
+        box = f"<input type='checkbox' form='mkform' name='source' value='{e(i.key)}'{' checked' if checked else ''}>"
+        rows += (f"<label class='mk-src-row' data-src='{e(i.key)}' data-count='{n}'>{box} {e(i.name)} <span class='mk-n'>({n})</span> "
                  f"<span class='small {'' if state == 'connected' else 'mut'}'>{e(state)}</span></label>")
-    return f"<details open class='mk-sect' id='sec-source'><summary><b>Source</b></summary>{rows}</details>"
+    return (f"<details open class='mk-sect' id='sec-source'><summary><b>Sources</b></summary>{rows}"
+            "<p class='small mut'>Choose any combination. All sources selects every row; untick All to exclude individual sources.</p></details>")
 
 
 def ltype_section(q: dict, fc: dict) -> str:
