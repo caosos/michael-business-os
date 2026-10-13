@@ -32,6 +32,7 @@ from ..normalize import HOME_BASE, base_flags, classify, clean_text, geo_tier, h
 SOURCE = "blackmon_auctions"
 SITE_HOST = "www.blackmonauctions.com"
 SITE_HOSTS = frozenset({SITE_HOST, "blackmonauctions.com"})
+IMAGE_HOST = "images.squarespace-cdn.com"
 FEED_URL = f"https://{SITE_HOST}/auctions?format=rss"
 USER_AGENT = "DealSnifferBot/1.0 (read-only; auction events only)"
 CRAWL_DELAY_S = 10.0
@@ -82,10 +83,22 @@ def _site_url(url: str) -> str | None:
     return url if ok else None
 
 
+def _event_image_url(value: str) -> str | None:
+    """Accept only Blackmon's HTTPS Squarespace event image. This is not a Proxibid lot image."""
+    try:
+        url = html.unescape(value).strip()
+        p = urlsplit(url)
+        port = p.port
+    except (AttributeError, ValueError):
+        return None
+    return url if p.scheme == "https" and p.hostname == IMAGE_HOST and p.username is None and p.password is None and port in (None, 443) else None
+
+
 def parse_feed(xml: str) -> list[dict]:
     """One dict per feed `<item>` (title, url, slug, guid, published, Proxibid link as text). Publish dates are NOT event dates."""
     out: list[dict] = []
-    for block in xml.split("<item>")[1:]:
+    for raw_block in xml.split("<item>")[1:]:
+        block = raw_block.split("</item>", 1)[0]
         def tag(n: str) -> str:
             m = re.search(rf"<{n}>(.*?)</{n}>", block, re.S)
             return html.unescape(m.group(1)).strip() if m else ""
@@ -94,6 +107,11 @@ def parse_feed(xml: str) -> list[dict]:
         if not title or not _site_url(url) or len(seg) < 2:
             continue
         item = {"url": url, "slug": seg[-1], "title": title, "guid": tag("guid"), "published_at": tag("pubDate")}
+        media = re.search(r"<media:content\b([^>]*)>", block, re.S)
+        image = re.search(r'\burl="([^"]+)"', media.group(1)) if media else None
+        event_image_url = _event_image_url(image.group(1)) if image else None
+        if event_image_url:
+            item["event_image_url"] = event_image_url
         px = re.search(r'<a href="(https?://[^"]*proxibid\.com/[^"]*/event-catalog/[^"]*)"', html.unescape(block))   # the feed body's Bid Now button
         if px:
             item["proxibid_url"] = px.group(1)                    # text only; never requested
@@ -286,6 +304,7 @@ class BlackmonSiteAdapter(SourceAdapter):
             "address": fld(None if multi else text), "location": fld(loc or None), "location_unknown_reason": fld(loc_reason),
             "category_tags": fld([]), "highlights": fld([]),
             "rules_url": fld(p.get("url")), "proxibid_url": fld(p.get("proxibid_url")),
+            "event_image_url": fld(p.get("event_image_url")),
             "category": fld(category, "INFERENCE"),
             "lot_number": Field(UNKNOWN, url, seen, "UNKNOWN", 0), "current_bid": Field(UNKNOWN, url, seen, "UNKNOWN", 0),
             "bid_count": Field(UNKNOWN, url, seen, "UNKNOWN", 0), "lot_image": Field(UNKNOWN, url, seen, "UNKNOWN", 0),
