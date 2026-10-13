@@ -78,16 +78,21 @@ def page_body(app, qs: dict, now, errors=None, values=None) -> str:
     live = ran and data["status"] in ("connected", "fixture", "imported") and not q["errors"]
 
     def chain(qq, relax=()):                           # F-159: ONE filter chain for the grid and for every facet count, so a count always equals the rows you get
-        res, unch, hid = ms.partition(allcards, qq) if live else ([], [], {})
+        # Source/type/quick are hard filters too.  Apply them to the common
+        # pool before partitioning or counting owner-hidden rows; otherwise a
+        # GSA-only page can claim that a matching Facebook row was hidden.
+        # Saved state must be attached first because the Saved quick view is
+        # one of these pre-partition filters.
+        saved_ids = set(prefs.get("saved") or [])
+        pool = [{**c, "saved": c["id"] in saved_ids} for c in allcards]
+        pool = mbr.post(pool, qq, now, relax) if live else []
+        res, unch, hid = ms.partition(pool, qq) if live else ([], [], {})
         n0 = len(res) + len(unch)
         res, g1 = mp.hide(res, prefs)                  # a hidden listing stays hidden in BOTH sections, with suggestions on or off
         unch, g2 = mp.hide(unch, prefs)
         res, x1 = mb.exclude(res, prefs, au)           # F-147: tracked ("I bid on this") items leave the lineup; they live in the My bids window
         unch, x2 = mb.exclude(unch, prefs, au)
-        saved_ids = set(prefs.get("saved") or [])
-        res = [{**c, "saved": c["id"] in saved_ids} for c in res]
-        unch = [{**c, "saved": c["id"] in saved_ids} for c in unch]
-        return mbr.post(res, qq, now, relax), mbr.post(unch, qq, now, relax), hid, (n0, g1, g2, x1, x2)
+        return res, unch, hid, (n0, g1, g2, x1, x2)
 
     results, unchecked, hidden, (n_before, g1, g2, b1, b2) = chain(q)
     q["hidden_n"], q["hidden_checked"], q["matched_n"] = g1 + g2, g1, n_before - b1 - b2

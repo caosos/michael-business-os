@@ -98,7 +98,9 @@ def hidden_panel(d: dict, tok) -> str:
         return "<details class='card small' id='hidden-list'><summary><b>Hidden listings: 0</b></summary>Nothing hidden. Use the X on a card to hide one listing.</details>"
     rows = "".join(f"<li data-hidden='{e(i)}'>{e(t or 'title not recorded')} <span class='mut'>({e(i)})</span> <form method='post' action='/market/pref' style='display:inline' class='mk-pref'>{tok()}"
                    f"<input type='hidden' name='lot' value='{e(i)}'><button name='act' value='restore' aria-label='Undo hide: {e(t or i)}'>Undo hide</button></form></li>" for i, t in sorted(h.items()))
-    return (f"<details class='card small' id='hidden-list'><summary><b>Hidden listings: {len(h)}</b> (hidden by you; kept across restarts)</summary><ul>{rows}</ul>"
+    restore_all = (f"<form method='post' action='/market/pref' class='mk-pref'>{tok()}"
+                   f"<button name='act' value='restore_all'>Restore all {len(h)} hidden listings</button></form>")
+    return (f"<details class='card small' id='hidden-list'><summary><b>Hidden listings: {len(h)}</b> (hidden by you; kept across restarts)</summary>{restore_all}<ul>{rows}</ul>"
             "<span class='mut'>Undo restores only that listing, and only if it still passes your filters. Saves, likes and filters are untouched.</span></details>")
 
 
@@ -394,7 +396,12 @@ def render_page(q: dict, d: dict, results: list[dict], hidden: dict, saved: list
         render = (lambda c: mb.card(c, tok, now, pref_buttons)) if q.get("view") != "list" else (lambda c: render_card(c, tok))
         n_hid = q.get("hidden_checked", 0)
         if n_hid and not display_rows:
-            zero = f"<p class='mut' id='zero-results'><b>0 listings left.</b> {n_hid} matching listing(s) are hidden. Open My Marketplace in the filters panel to restore them.</p>"
+            zero = (f"<div class='card' id='zero-results'><p><b>0 listings left.</b> {n_hid} listing{'s are' if n_hid != 1 else ' is'} hidden by you.</p>"
+                    f"<form method='post' action='/market/pref' class='mk-pref'>{tok()}<button name='act' value='restore_all'>Restore all hidden listings</button></form></div>")
+        elif not display_rows and mb.selected_sources(q) != {"all"}:
+            zero = ("<div class='card' id='zero-results'><p><b>No listings from the selected source match these filters.</b> "
+                    "That source can be available without having any matching inventory right now.</p>"
+                    f"<a class='mk-view' id='search-all-sources' href='{mb.href(q, source='all', page=1)}'>Search all sources</a></div>")
         unknown = f" <span class='small mut'>({len(unchecked)} with distance or price not verified)</span>" if unchecked else ""
         top_pager = mb.pager(q, page, pages, len(display_rows), "top")
         bottom_pager = mb.pager(q, page, pages, len(display_rows), "bottom")

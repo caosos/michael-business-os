@@ -333,18 +333,16 @@ def category_section(q: dict, fc: dict) -> str:
 def source_section(q: dict, fc: dict, now: datetime) -> str:
     selected = selected_sources(q)
     all_on = "all" in selected
-    rows = f"<label class='mk-src-row'><input type='checkbox' form='mkform' name='source' value='all'{' checked' if all_on else ''}> <b>All sources</b> <span class='mk-n'>({fc['all_sources']})</span></label>"
+    rows = f"<label class='mk-src-row'><input type='checkbox' form='mkform' name='source' value='all'{' checked' if all_on else ''}> <b>All sources</b> <span class='mk-n'>({fc['all_sources']} matching)</span></label>"
     for r in msp.rows(now):
-        i, st = r["info"], r["state"]
+        i = r["info"]
         n = fc["source"].get(i.key, 0)
-        state = {"LIVE CONNECTED": "connected", "CONNECTED, WAITING FOR ALERTS": "connected, waiting for alerts",
-                 "IMPORTED": "reviewed offers", "MANUAL": "manual: paste finds", "BLOCKED": "blocked"}.get(st, "not connected")
-        if r["probe"]["status"] == "fixture":
-            state = "FIXTURE, not live"
+        state = msp.display_status(r, n)
         checked = all_on or i.key in selected
         box = f"<input type='checkbox' form='mkform' name='source' value='{e(i.key)}'{' checked' if checked else ''}>"
-        rows += (f"<label class='mk-src-row' data-src='{e(i.key)}' data-count='{n}'>{box} {e(i.name)} <span class='mk-n'>({n})</span> "
-                 f"<span class='small {'' if state == 'connected' else 'mut'}'>{e(state)}</span></label>")
+        active = msp.display_kind(r) in {"provider", "cache", "mailbox_cache", "imported"}
+        rows += (f"<label class='mk-src-row' data-src='{e(i.key)}' data-count='{n}'>{box} {e(i.name)} <span class='mk-n'>({n} matching)</span> "
+                 f"<span class='small {'' if active else 'mut'}'>{e(state)}</span></label>")
     return (f"<details open class='mk-sect' id='sec-source'><summary><b>Sources</b></summary>{rows}"
             "<p class='small mut'>Choose any combination. All sources selects every row; untick All to exclude individual sources.</p></details>")
 

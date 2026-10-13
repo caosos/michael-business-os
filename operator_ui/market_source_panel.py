@@ -11,6 +11,54 @@ from . import market_sources as msrc
 e = lambda v: html.escape("" if v is None else str(v))  # noqa: E731
 
 
+def display_kind(row: dict) -> str:
+    """Return the owner-facing availability kind without overstating inventory.
+
+    The registry's ``LIVE CONNECTED`` state is an internal provenance gate: it
+    can mean either a provider produced a successful cache or that a local
+    cache file is readable.  Those are materially different things in the
+    Marketplace source picker, especially when the current filters match zero
+    rows, so the picker never collapses both into the word ``connected``.
+    """
+    info, probe, state = row["info"], row["probe"], row["state"]
+    if probe.get("status") == "fixture":
+        return "fixture"
+    if state == "BLOCKED":
+        return "blocked"
+    if state == "IMPORTED":
+        return "imported"
+    if state == "MANUAL":
+        return "manual"
+    if state == msrc.WAITING:
+        return "waiting"
+    if state != "LIVE CONNECTED":
+        return "not_connected"
+    if info.path == "provider API":
+        return "provider"
+    if info.path == "e-mail alerts":
+        return "mailbox_cache"
+    return "cache"
+
+
+def display_status(row: dict, matching: int | None = None) -> str:
+    """Plain-language source status, optionally qualified by this search."""
+    kind = display_kind(row)
+    label = {
+        "provider": "live provider · cache ready",
+        "cache": "cache ready",
+        "mailbox_cache": "mailbox feed · cache ready",
+        "waiting": "mailbox ready · waiting for alerts",
+        "imported": "imported",
+        "manual": "manual",
+        "fixture": "FIXTURE · not live",
+        "blocked": "blocked",
+        "not_connected": "not connected",
+    }[kind]
+    if matching == 0 and kind in {"provider", "cache", "mailbox_cache", "waiting", "imported", "manual"}:
+        label += " · no matches in this search"
+    return label
+
+
 def rows(now: datetime | None = None) -> list[dict]:
     now = now or datetime.now(timezone.utc)
     out = []
@@ -40,17 +88,24 @@ def _fresh(pr: dict) -> str:
 
 
 def render(now: datetime | None = None, status: str = "") -> str:
-    """`status`: the per-source status block (F-163: shown here, collapsed, on the browse page). The summary says how many sources are connected."""
+    """Render registry detail without treating every readable cache as a live connection."""
     body = ""
     rs = rows(now)
-    n_on = sum(1 for r in rs if r["state"] == "LIVE CONNECTED")
     for r in rs:
         i, pr, st = r["info"], r["probe"], r["state"]
-        cls = "" if st == "LIVE CONNECTED" else " class='mut'"
+        kind = display_kind(r)
+        label = display_status(r)
+        cls = "" if kind in {"provider", "cache", "mailbox_cache", "imported"} else " class='mut'"
         body += (f"<tr data-src='{e(i.key)}' data-state='{e(st)}'{cls}><td><b>{e(i.name)}</b><br><span class='small'>{e(i.cls)}</span></td><td>{e(i.geography)}</td>"
                  f"<td>{e(i.path)}<br><span class='small'>{e(i.granularity)}</span></td><td class='small'>{e(i.bidding)}</td><td class='small'>{_fresh(pr)}</td>"
-                 f"<td class='small'>{e(i.constraint)}</td><td><span class='badge'>{e(st)}</span></td><td class='small'>{e(i.next_step)}</td></tr>")
+                 f"<td class='small'>{e(i.constraint)}</td><td><span class='badge'>{e(label.upper())}</span></td><td class='small'>{e(i.next_step)}</td></tr>")
     head = "".join(f"<th>{h}</th>" for h in ("Source", "Geography", "Retrieval / granularity", "Account / bid", "Freshness", "Constraints", "State", "Next step"))
-    one = f"<span class='small' id='sources-summary'>{n_on} connected, {len(rs) - n_on} not connected</span> "
+    counts = {k: sum(display_kind(r) == k for r in rs) for k in (
+        "provider", "cache", "mailbox_cache", "waiting", "imported", "manual", "fixture", "blocked", "not_connected")}
+    labels = (("provider", "live provider"), ("cache", "cache ready"), ("mailbox_cache", "mailbox cache ready"),
+              ("waiting", "mailbox waiting"), ("imported", "imported"), ("manual", "manual"),
+              ("fixture", "fixture"), ("blocked", "blocked"), ("not_connected", "not connected"))
+    summary = " · ".join(f"{counts[k]} {label}" for k, label in labels if counts[k]) or "no sources configured"
+    one = f"<span class='small' id='sources-summary'>{e(summary)}</span> "
     return (f"<details class='card' id='sources-panel'><summary><b>Sources</b> {one}<span class='small mut'>(what this page can and cannot see; fixtures never count as live)</span></summary>"
             f"{status}<table class='small' style='width:100%'><thead><tr>{head}</tr></thead><tbody>{body}</tbody></table></details>")

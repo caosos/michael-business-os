@@ -14,7 +14,7 @@ from pathlib import Path
 
 from . import accounts
 
-ACTIONS = ("save", "unsave", "hide", "restore", "dismiss", "more", "less", "reset", "disable", "enable")
+ACTIONS = ("save", "unsave", "hide", "restore", "restore_all", "dismiss", "more", "less", "reset", "disable", "enable")
 STOP = {"with", "from", "this", "that", "used", "lot", "item", "items", "unit", "units", "only", "each", "the", "and", "for", "set", "other"}
 EMPTY = {"enabled": True, "saved": [], "dismissed": [], "hidden": {}, "more": {}, "less": {},
          "more_categories": {}, "less_categories": {}, "more_sources": {}, "less_sources": {},
@@ -141,6 +141,11 @@ def act(action: str, lot_id: str, title: str = "", category: str = "", source: s
         d["enabled"] = action == "enable"
         _store(d)
         return "Suggestions are " + ("ON." if d["enabled"] else "OFF: results use your filters and sort only; your history is kept.")
+    if action == "restore_all":
+        restored = len(d["hidden"])
+        d["hidden"] = {}
+        _store(d)
+        return f"Restored {restored} hidden listing{'s' if restored != 1 else ''}. Your saves, likes and filters were not changed."
     if not lot_id:
         raise ValueError("no lot given")
     if action == "save":

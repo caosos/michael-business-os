@@ -99,6 +99,19 @@ def test_dismiss_hides_until_reset_and_disable_turns_ranking_off(ui):
     assert first["id"] in d["hidden"] and d["saved"] == [] and d["more"] == {} and d["enabled"]
 
 
+def test_restore_all_clears_only_hidden_and_is_available_in_hidden_panel(ui):
+    cards = lots()
+    for c in cards[:2]:
+        post(ui, "/market/pref", act="hide", lot=c["id"], title=c["title"])
+    mp.act("save", cards[2]["id"], cards[2]["title"])
+    h = get(ui, go=1, broad="1", radius="")
+    assert "value='restore_all'" in h and "Restore all 2 hidden listings" in h
+    st, _, _ = post(ui, "/market/pref", act="restore_all")
+    assert st == 303
+    d = mp.load()
+    assert d["hidden"] == {} and cards[2]["id"] in d["saved"]
+
+
 def test_pref_post_needs_csrf_and_rejects_unknown_actions(ui):
     from tests.test_operator_ui import req
     assert req(ui, "POST", "/market/pref", {"csrf": "wrong", "act": "reset"})[0] == 200      # re-rendered with the error, nothing stored

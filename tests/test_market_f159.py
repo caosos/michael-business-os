@@ -69,14 +69,33 @@ def test_source_counts_equal_filtered_rows_and_show_connection(ui, caches):
     assert {"gsa", "wooley", "wilson", "blackmon"} <= set(src)
     for k in ("gsa", "wooley", "wilson", "blackmon"):
         assert total(get(ui, **{**BASE, "source": k})) == src[k], k
-    assert total(h) == int(re.search(r"<b>All sources</b> <span class='mk-n'>\((\d+)\)", h).group(1))
+    assert total(h) == int(re.search(r"<b>All sources</b> <span class='mk-n'>\((\d+) matching\)", h).group(1))
     side = h.split("id='sec-source'")[1].split("</details>")[0]
     assert "type='checkbox'" in side and "value='all' checked" in side
     assert all(f"value='{k}' checked" in side for k in ("gsa", "wooley", "wilson", "blackmon"))
-    assert "connected" in side and "not connected" in side            # unavailable sources stay visible and selectable, honestly
+    assert "cache ready" in side and "not connected" in side           # availability is precise; unavailable sources stay selectable
     combo = get(ui, **{**BASE, "source": ["gsa", "wooley"]})
     assert total(combo) == src["gsa"] + src["wooley"]
     assert "value='gsa' checked" in combo and "value='wooley' checked" in combo and "value='wilson' checked" not in combo
+
+
+def test_gsa_only_query_does_not_report_a_hidden_facebook_row(ui, cache, monkeypatch):
+    loaded = ms.load_gsa(str(cache), NOW, ms._origin("Conway AR"))
+    gsa = {**loaded["cards"][0], "title": "GSA bulldozer", "text": "gsa bulldozer"}
+    facebook = {**gsa, "id": "facebook:999", "title": "SPECIALNEEDLE utility trailer", "text": "specialneedle utility trailer",
+                "source": "Facebook Marketplace", "source_key": "facebook", "url": "https://www.facebook.com/marketplace/item/999/",
+                "kind": "fixed", "event": False, "price_type": "asking", "price": 400.0, "bid": None}
+    data = {**loaded, "cards": [gsa, facebook], "in_file": 2, "in_scope": 2}
+    monkeypatch.setattr(ms, "load_source", lambda *args, **kwargs: data)
+    mp.act("hide", facebook["id"], facebook["title"])
+
+    selected = get(ui, go=1, source="gsa", broad=1, keywords="specialneedle", loc_mode="state", state="AR")
+    assert "id='zero-results'" in selected and "No listings from the selected source match these filters." in selected
+    assert "id='zero-results'><b>0 listings left.</b>" not in selected
+    assert "1 matching listing(s) are hidden" not in selected
+
+    all_sources = get(ui, go=1, source="all", broad=1, keywords="specialneedle", loc_mode="state", state="AR")
+    assert "id='zero-results'" in all_sources and "<b>0 listings left.</b> 1 listing is hidden by you." in all_sources
 
 
 def test_all_sources_checkbox_updates_every_source_immediately():
