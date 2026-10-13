@@ -26,6 +26,7 @@ API = "https://api.brightdata.com/datasets/v3"
 DATASET_ID = "gd_lvt9iwuh6fbcwmx1a"
 HARD_CAP = 20
 STALE_HOURS = 6
+REFRESH_MINUTES = 15
 TOKEN_FILE = Path("~/.config/mbos/secrets/BRIGHTDATA_TOKEN")
 DEFAULT_CACHE = Path(__file__).resolve().parent.parent / "var" / "cache" / "facebook-marketplace.json"
 COMPLIANCE = "UNKNOWN (owner-authorized Bright Data provider route; public listing data only)"
@@ -276,11 +277,18 @@ def load(now: datetime, origin=None, *, keyword: str = "", city: str = "", radiu
     cached = _read_cache(path)
     error = ""
     api_token = token()
-    if refresh and (client or api_token):
+    wanted = {"keyword": keyword, "city": city, "radius": radius}
+    recent_same = False
+    if cached and cached.get("query") == wanted:
+        try:
+            recent_same = (now - datetime.fromisoformat(str(cached["as_of"]).replace("Z", "+00:00"))).total_seconds() < REFRESH_MINUTES * 60
+        except ValueError:
+            pass
+    if refresh and not recent_same and (client or api_token):
         try:
             rows = (client or BrightDataClient(api_token)).search(keyword, city, radius)
             as_of = now.astimezone(timezone.utc).isoformat(timespec="seconds")
-            cached = {"as_of": as_of, "query": {"keyword": keyword, "city": city, "radius": radius},
+            cached = {"as_of": as_of, "query": wanted,
                       "source_compliance": COMPLIANCE, "records": rows}
             _write_cache(path, cached)
         except BrightDataError as exc:
