@@ -6,6 +6,7 @@ import json
 import re
 import socket
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from urllib.parse import urlencode
 
 import pytest
@@ -71,6 +72,13 @@ def test_source_counts_equal_filtered_rows_and_show_connection(ui, caches):
     combo = get(ui, **{**BASE, "source": ["gsa", "wooley"]})
     assert total(combo) == src["gsa"] + src["wooley"]
     assert "value='gsa' checked" in combo and "value='wooley' checked" in combo and "value='wilson' checked" not in combo
+
+
+def test_all_sources_checkbox_updates_every_source_immediately():
+    js = (Path(__file__).parent.parent / "operator_ui/static/market_radius.js").read_text()
+    assert 'getElementById("sec-source")' in js
+    assert 'input[name=source][value=all]' in js
+    assert "rest[i].checked = all.checked" in js
 
 
 def test_state_counts_equal_filtered_rows(ui):
@@ -208,3 +216,13 @@ def test_phone_drawer_markup_and_card_shape(ui):
     card = re.search(r"<div class='mk-g mk-card'.*?<div class='mk-vw'>.*?</div>", h, re.S).group(0)
     assert "mk-src'>GSA Auctions<" in card and "Closes " in card and ("current bid" in card or "bidders UNKNOWN" in card)
     assert "class='mk-view' href='/market/item/" in card              # F-160: View opens our detail page; the original link is on it
+
+
+def test_fixed_price_card_is_not_labelled_as_an_auction_bid():
+    c = {"id": "facebook:1", "title": "Utility trailer", "description": "", "text": "utility trailer", "url": "https://www.facebook.com/marketplace/item/1/",
+         "image": None, "bid": 450.0, "price": 450.0, "price_type": "fixed", "bidders": None, "closes": None, "city": "Conway, AR", "state": "AR",
+         "distance": 4.2, "category": "trailer", "condition": "used", "labels": {}, "source": "Facebook Marketplace", "fetched_at": NOW.isoformat(),
+         "kind": "fixed", "stale": False, "fixture": False, "posted": "2026-10-12"}
+    h = mbr.card(c, lambda: "", NOW, lambda card, tok: "")
+    assert "$450" in h and "fixed price" in h
+    assert "current bid" not in h and "bidders UNKNOWN" not in h
