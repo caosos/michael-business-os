@@ -50,7 +50,7 @@ US_STATES = {"AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas",
              "NV": "Nevada", "NH": "New Hampshire", "NJ": "New Jersey", "NM": "New Mexico", "NY": "New York", "NC": "North Carolina", "ND": "North Dakota", "OH": "Ohio", "OK": "Oklahoma",
              "OR": "Oregon", "PA": "Pennsylvania", "RI": "Rhode Island", "SC": "South Carolina", "SD": "South Dakota", "TN": "Tennessee", "TX": "Texas", "UT": "Utah", "VT": "Vermont",
              "VA": "Virginia", "WA": "Washington", "WV": "West Virginia", "WI": "Wisconsin", "WY": "Wyoming"}
-DEFAULT_RADIUS = 150.0                 # an editable starting radius around the base, not a budget
+DEFAULT_RADIUS = 30.0                  # owner default around Conway; editable per user, not a budget
 DEFAULT_ANY = "trailer, equipment"     # the default view: trailers/equipment; "broad" mode (explicit, off by default) drops this focus
 
 
@@ -102,6 +102,15 @@ def _states(qs: dict) -> tuple[list[str], list[str]]:
     return good, [t[:12] for t in dict.fromkeys(toks) if t not in US_STATES]
 
 
+def _source_values(qs: dict) -> str:
+    """Repeated source checkboxes -> canonical comma list; All wins and means every available source."""
+    raw = qs.get("source")
+    raw = raw if isinstance(raw, list) else [raw] if raw else []
+    vals = [v.strip().lower() for item in raw for v in str(item).split(",") if re.fullmatch(r"[a-z0-9_]+", v.strip().lower())]
+    vals = list(dict.fromkeys(vals))
+    return "all" if not vals or "all" in vals else ",".join(vals)
+
+
 def parse_query(qs: dict) -> dict:
     """Query string / saved form -> a clean filter dict. A bad number is None AND recorded in `errors` so the page says so."""
     g = lambda k: (qs.get(k) or [""])[0].strip() if isinstance(qs.get(k), list) else str(qs.get(k) or "").strip()  # noqa: E731
@@ -117,6 +126,7 @@ def parse_query(qs: dict) -> dict:
     rows = [g(f"row{i}") if g(f"row{i}") in ROW_CATS else "" for i in range(1, 5)] if any(f"row{i}" in qs for i in range(1, 5)) else list(DEFAULT_ROWS)
     fresh = not any(k in qs for k in ("keywords", "base", "radius", "max_price", "min_price", "any", "run", "edit", "cat", "state", "loc_mode"))
     states, bad_states = _states(qs)
+    sources = _source_values(qs)
     mode = "state" if g("loc_mode") == "state" else "distance"
     radius_used = (mode == "distance" or g("also_radius") == "1") and g("radius") != ""
     errs = validate(g) + (["Enter your ZIP or city (the origin the radius is measured from); no search was run without it."] if radius_used and not g("base") else []) + [f"'{t}' is not a US state code; it was ignored and no search was run with it." for t in bad_states] \
@@ -126,7 +136,7 @@ def parse_query(qs: dict) -> dict:
             "min_price": _num(g("min_price")), "max_price": _num(g("max_price")), "errors": errs, "cats": cats, "cat_all": cat_all, "cat_default": cat_default, "rows": rows,
             "view": "list" if g("view") == "list" else "gallery",
             "any": _terms(DEFAULT_ANY if ("any" not in qs and not g("broad")) else g("any")), "broad": g("broad") == "1", "condition": g("condition").lower()[:30], "required": _terms(g("required")),
-            "preferred": _terms(g("preferred")), "exclude": _terms(g("exclude")), "source": g("source") or "all",
+            "preferred": _terms(g("preferred")), "exclude": _terms(g("exclude")), "source": sources,
             "ltype": g("ltype") if g("ltype") in LTYPES else "", "quick": g("quick") if g("quick") in QUICK else "", "page": max(1, int(g("page"))) if g("page").isdigit() and int(g("page")) < 10**6 else 1,
             "kind": g("kind") or "any", "closing_by": closing if re.fullmatch(r"\d{4}-\d{2}-\d{2}", closing) else "",
             "sort": sort if sort in SORTS else "closing"}
