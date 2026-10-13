@@ -24,7 +24,7 @@ from mbos_discovery.auctions import place_coords
 from mbos_discovery.dedup import title_similarity
 from mbos_discovery.normalize import haversine_miles
 
-from . import gazetteer, market_search as ms
+from . import gazetteer, market_facebook as mfb, market_search as ms
 
 ALERT_SOURCES = {"govdeals": ("govdeals_email", "GovDeals"), "publicsurplus": ("publicsurplus_email", "Public Surplus"), "craigslist": ("craigslist_email", "Craigslist")}
 CACHE_DIR = Path(__file__).resolve().parent.parent / "var" / "cache"
@@ -292,11 +292,19 @@ def coverage(parts: list[dict]) -> list[dict]:
     return [{k: d.get(k) for k in ("name", "status", "as_of", "age_h", "stale", "in_scope", "message")} for d in parts]
 
 
-def load_source(source: str, gsa_path: str | None, now: datetime, origin=None, directory: str | None = None) -> dict:
+def load_source(source: str, gsa_path: str | None, now: datetime, origin=None, directory: str | None = None, query: dict | None = None) -> dict:
     """Dispatch on the `source` filter: gsa | govdeals | publicsurplus | all. Other sources (eBay, Craigslist, Facebook Marketplace) are NOT CONNECTED."""
     directory = directory if directory is not None else fixture_dir()
     if source == "gsa":
         return ms.load_gsa(gsa_path, now, origin)
+    if source == "facebook":
+        q = query or {}
+        selected = {v for v in str(q.get("source") or "facebook").split(",") if v}
+        refresh = bool({"all", "facebook"} & selected)
+        keyword = q.get("keywords") or "tools equipment trailers lawn machinery pallets"
+        d = mfb.load(now, origin, keyword=keyword, city=q.get("base") or "72032",
+                     radius=q.get("radius") or ms.DEFAULT_RADIUS, refresh=refresh)
+        return {**d, "coverage": coverage([d])}
     if source in AUCTION_SITES:
         d = load_events(AUCTION_SITES[source], None, now, origin)
         return {**d, "coverage": coverage([d])}
@@ -314,11 +322,12 @@ def load_source(source: str, gsa_path: str | None, now: datetime, origin=None, d
     gsa = ms.load_gsa(gsa_path, now, origin)
     alerts = [load_alerts(s, directory, now, origin) for s in ALERT_SOURCES]
     houses = [load_events(x, None, now, origin) for x in AUCTION_SITES.values()]
-    cards = dedupe(gsa["cards"] + [c for h in houses for c in h["cards"]] + [c for a in alerts for c in a["cards"]])
-    live = "connected" in [gsa["status"]] + [h["status"] for h in houses] + [a["status"] for a in alerts]
+    facebook = load_source("facebook", gsa_path, now, origin, directory, query)
+    cards = dedupe(gsa["cards"] + facebook["cards"] + [c for h in houses for c in h["cards"]] + [c for a in alerts for c in a["cards"]])
+    live = "connected" in [gsa["status"], facebook["status"]] + [h["status"] for h in houses] + [a["status"] for a in alerts]
     status = "connected" if live else "fixture" if any(a["cards"] for a in alerts) else "offline"
     return {**gsa, "status": status, "cards": cards, "in_scope": len(cards), "fixture": any(a["fixture"] and a["cards"] for a in alerts),
-            "message": gsa["message"] if status == "offline" else "", "coverage": coverage([{**gsa, "name": "GSA Auctions"}] + houses + alerts)}
+            "message": gsa["message"] if status == "offline" else "", "coverage": coverage([{**gsa, "name": "GSA Auctions"}, facebook] + houses + alerts)}
 
 
 # ---- F-156: the source registry (the one place that knows every source; /market's Sources panel only displays it) ----
@@ -327,7 +336,7 @@ STATES = ("LIVE CONNECTED", "CONNECTED, WAITING FOR ALERTS", "IMPORTED", "MANUAL
 
 @dataclass(frozen=True)
 class SourceInfo:
-    """`path` is one of: official API / own site / RSS / e-mail alerts / owner import / none. `probe` says which cache is read for freshness
+    """`path` is one of: official API / provider API / own site / RSS / e-mail alerts / owner import / none. `probe` says which cache is read for freshness
     (gsa | site:<key> | alerts:<key> | finds | None). `intended` is the state when a read exists; a fixture or a missing cache never reaches LIVE CONNECTED."""
     key: str
     name: str
@@ -361,8 +370,9 @@ REGISTRY = (
                "HiBid terms forbid scraping: lots need written permission", "get written permission from HiBid; until then nothing is read", None, "BLOCKED"),
     SourceInfo("craigslist", "Craigslist", "classifieds", "local (your saved-search regions)", "e-mail alerts", "item", "none; contact sellers yourself",
                "only saved-search alert e-mails you receive are read (never craigslist.org); a test e-mail never counts as live; owner can still paste finds", "owner decision: connect a read-only alert mailbox", "alerts:craigslist", "LIVE CONNECTED"),
-    SourceInfo("facebook", "Facebook Marketplace", "classifieds", "local", "owner import", "item", "none; contact sellers yourself",
-               "terms forbid automated access and a login is needed: owner pastes finds only", "paste a find on the Finds form", "finds", "MANUAL"),
+    SourceInfo("facebook", "Facebook Marketplace", "classifieds", "local (ZIP/city + radius)", "provider API", "item", "none; contact sellers yourself",
+               "Bright Data provider route; public listing fields only; seller/profile/contact fields are dropped before caching",
+               "configure BRIGHTDATA_TOKEN; successful results are cached and merged into this feed", "facebook", "LIVE CONNECTED"),
     SourceInfo("offerup", "OfferUp", "classifieds", "local", "owner import", "item", "none; contact sellers yourself",
                "terms forbid automated access: owner pastes finds only", "paste a find on the Finds form", "finds", "MANUAL"),
     SourceInfo("ebay", "eBay", "marketplace", "US-wide", "none", "item", "bid on ebay.com with your own account",
@@ -386,6 +396,8 @@ def probe(info: SourceInfo, now: datetime) -> dict:
     try:
         if kind == "finds":
             return {**out, "status": "manual", "n": _finds_count()}
+        if kind == "facebook":
+            return mfb.probe(now)
         if kind == "alerts":
             if fixture_dir():
                 return {**out, "status": "fixture"}
