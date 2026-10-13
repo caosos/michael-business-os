@@ -66,7 +66,10 @@ def page_body(app, qs: dict, now, errors=None, values=None) -> str:
     edit = (qs.get("edit") or [None])[0]
     ran = not qs.get("new") and not qs.get("edit")
     # Always load the unified source pool once. The browse layer applies the selected source checkboxes.
-    data = ms.load_source("all", now, ms._origin(q["base"]), os.environ.get("MBOS_GSA_CACHE") or None, query=q) if ran else \
+    # A paid provider refresh is an explicit owner action: Search/Run may refresh Facebook,
+    # ordinary page loads, filter navigation and reloads only read the last successful cache.
+    source_query = {**q, "_facebook_refresh": bool(qs.get("go") or qs.get("run"))}
+    data = ms.load_source("all", now, ms._origin(q["base"]), os.environ.get("MBOS_GSA_CACHE") or None, query=source_query) if ran else \
         {"status": "connected", "as_of": None, "age_h": 0, "stale": False, "in_scope": 0, "in_file": 0, "cards": [], "message": ""}
     allcards = data["cards"] if ran else []
     prefs = mp.load()
