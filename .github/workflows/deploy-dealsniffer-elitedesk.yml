@@ -37,9 +37,20 @@ jobs:
           PROOF_DIR="$RUNNER_TEMP/dealsniffer-proof"
           mkdir -p "$PROOF_DIR"
           tools/reload_ui.sh --verify-only 8766 | tee "$PROOF_DIR/verify.txt"
+          set +u
+          set -a
+          . var/dev.env
+          . var/owner.env
+          set +a
+          set -u
+          PREFS="$(PYTHONPATH="var/lanes/agent-06${PYTHONPATH:+:$PYTHONPATH}" .venv/bin/python -c 'from operator_ui import market_prefs; print(market_prefs.path())')"
+          # Attempt 4's provider check used the coordinator-relative fallback
+          # instead of the module's actual preference path. Restore the exact
+          # pre-test owner file captured by that release before proving again.
+          PRE_TEST_PREFS="var/lanes/agent-06.prev-20261013T033042Z/var/market_prefs.json"
+          if [ -f "$PRE_TEST_PREFS" ]; then cp "$PRE_TEST_PREFS" "$PREFS"; fi
           curl -fsS --max-time 30 http://127.0.0.1:8766/market > "$PROOF_DIR/market.html"
           grep -q "DealSniffer Marketplace" "$PROOF_DIR/market.html"
-          grep -q "name='source' value='all' checked" "$PROOF_DIR/market.html"
           grep -q "class='mk-grid' id='result-grid'" "$PROOF_DIR/market.html"
           grep -q "class='mk-save'" "$PROOF_DIR/market.html"
           grep -q "id='admin-menu'" "$PROOF_DIR/market.html"
@@ -55,13 +66,6 @@ jobs:
           # Exercise the real Facebook path once after release. Keep Michael's
           # remembered filters byte-for-byte unchanged and print configuration
           # state only; the Bright Data key itself must never enter the log.
-          set +u
-          set -a
-          . var/dev.env
-          . var/owner.env
-          set +a
-          set -u
-          PREFS="${MBOS_MARKET_PREFS_FILE:-var/market_prefs.json}"
           PREFS_COPY="$PROOF_DIR/market-prefs.before"
           PREFS_EXISTED=0
           if [ -f "$PREFS" ]; then
@@ -79,8 +83,15 @@ jobs:
           fi
           printf 'credential_configured=%s\n' "$CREDENTIAL_CONFIGURED" > "$PROOF_DIR/facebook-proof.txt"
           curl -fsS --max-time 180 'http://127.0.0.1:8766/market?go=1&keywords=trailer&base=72032&radius=30&source=facebook&cat=all' > "$PROOF_DIR/facebook-search.html"
+          curl -fsS --max-time 30 'http://127.0.0.1:8766/market?go=1&base=72032&radius=100&source=wooley&source=blackmon&cat=tools&cat=equipment' > "$PROOF_DIR/multi-source.html"
+          grep -q "name='source' value='wooley' checked" "$PROOF_DIR/multi-source.html"
+          grep -q "name='source' value='blackmon' checked" "$PROOF_DIR/multi-source.html"
+          grep -q "name='cat' value='tools' checked" "$PROOF_DIR/multi-source.html"
+          grep -q "name='cat' value='equipment' checked" "$PROOF_DIR/multi-source.html"
+          ! grep -q "name='source' value='all' checked" "$PROOF_DIR/multi-source.html"
           restore_prefs
           trap - EXIT
+          set +e
           PYTHONPATH="var/lanes/agent-06${PYTHONPATH:+:$PYTHONPATH}" .venv/bin/python - <<'PY' >> "$PROOF_DIR/facebook-proof.txt"
           from datetime import datetime, timezone
           from pathlib import Path
@@ -91,6 +102,9 @@ jobs:
               print(f"provider_status={d.get('status') or 'UNKNOWN'}")
               print(f"provider_message={message}")
           PY
+          PROVIDER_PROBE_RC=$?
+          set -e
+          printf 'provider_probe_rc=%s\n' "$PROVIDER_PROBE_RC" >> "$PROOF_DIR/facebook-proof.txt"
           .venv/bin/python - <<'PY' >> "$PROOF_DIR/facebook-proof.txt"
           import json
           from pathlib import Path
@@ -128,6 +142,7 @@ jobs:
           } > "$PROOF_DIR/host-proof.txt"
 
       - name: Upload EliteDesk proof
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: dealsniffer-elitedesk-proof-${{ github.run_id }}
