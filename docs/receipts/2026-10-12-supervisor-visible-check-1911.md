@@ -1,0 +1,17 @@
+# DealSniffer supervisor visible check — Monday, October 12, 2026 — 7:11 PM America/Chicago
+
+- **Canonical receipt ID:** DS-CHECKIN-20261012-1911-CDT@2026-10-12T19:11:37-05:00
+- **Project:** DealSniffer only.
+- **Phase and milestone:** Phase 1 morning-acceptance release hardening; F-165 remains partially live on desktop, F-161 remains staged but not loaded or live-connected, and A-73 remains the serial control-plane gate.
+- **Work completed since previous check:** NO CHANGE.
+- **Evidence and provenance:** research/agent-01-coordinator is identical to prior head 82bcac30b89dadad183ee67470786e06bd394012 before this receipt. PR #1 has no comment after checkpoint 6134666360. Slack #all-ask-aria has no message after processed timestamp 1791846155.643809. Tested F-161 remains dc0e804 with lane 02 62a1bb0: 613 passed / 2 documented known f140/f145 failures and release VERIFY passed. Loaded marketplace remains fb84d0c; exact loaded lane 02 revision remains unproven. Prior loaded desktop Claude Chrome evidence showed 16 results within 150 miles; mobile, detail, representative source links, My Bids, Suggestions and genuine-alert proof remain MISSING. Latest timestamped host observation remains Monday, October 12, 2026 — 6:20 PM America/Chicago, limited to B-43; current Agent 01/A-73/F-161 process state is UNKNOWN.
+- **ONE current bounded task:** A-73 existing-watchdog finished-artifact wake/completion-state repair; responsible coordinator: existing Agent 01; responsible worker: NONE validly proven; priority P0; stage NEED — ACK MISSED.
+- **Acceptance test:** one deduplicated provenance-bearing wake; completed/superseded items do not emit missed-DONE NEED; ACK or WORKING within 300 seconds with current timestamped host/process evidence; no duplicate coordinator, worker, queue, service, watchdog, monitor or automation.
+- **Ordered remaining steps for current milestone:** (1) publish host-backed A-73 ACK/WORKING or exact command-specific NEED; (2) reconcile at least fifteen false completion states without re-dispatch; (3) release the accepted F-161 pair only through the documented existing release path; (4) obtain one genuine alert in the dedicated label and prove its original link on the loaded page; (5) finish loaded desktop/mobile interaction evidence for search, detail, representative source links, radius persistence, My Bids and Suggestions.
+- **Ordered upcoming milestones:** (1) B-44 Facebook live smoke after the existing provider account is activated; (2) broaden truthfully connected regional auction, public-surplus, marketplace and liquidation/event sources; (3) cold-reboot persistence proof for A-68.
+- **ETA:** UNKNOWN.
+- **next_check_at:** MISSING.
+- **Blocker:** stale watchdog completion state; no current host-backed A-73 ACK/WORKING; F-161 is not loaded and lacks a genuine alert cache; B-44 remains blocked by inactive Bright Data customer status. APPEARS STALE — HOST STATE UNVERIFIED.
+- **Exactly what Michael must do:** In the already-designated DealSniffer Gmail account, create the DealSniffer/Alerts label and filter, enable genuine GovDeals, Public Surplus and Craigslist saved-search alerts, and allow the first real alert to arrive. Separately, finish Bright Data customer activation if Facebook live-source work should proceed.
+- **Cost:** B-43 smoke previously reported $0; all other cost UNKNOWN.
+- **ONE next action:** Agent 01 publishes current host/process evidence plus A-73 ACK/WORKING or exact NEED and reconciles the false completion-state set before one serial dispatch.
