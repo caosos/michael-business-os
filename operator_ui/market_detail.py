@@ -259,8 +259,7 @@ def render(c: dict, raw: dict | None, pool: list[dict], prefs: dict, now: dateti
         + kv("Sale location", _txt(r.get("saleLocation"))) + kv("Contracting officer (as published)", _txt(r.get("contractOfficer"))) + kv("Contact e-mail (as published)", _txt(r.get("coEmail"))) \
         + kv("Contact phone (as published)", _txt(r.get("coPhone"))) + "</table>"
     ph = _photos(c)
-    nop = "" if ph else "<p class='mk-nophoto small mut' id='dt-nophoto'>No photo (open the original listing)</p>"
-    return (head + nop + f"<div class='dt-grid'>{ph or ''}<div>{box}<p>{_live_link(c.get('url') or r.get('itemDescURL'), 'Bid on the original site')}</p>"
+    return (head + f"<div class='dt-grid'>{ph or ''}<div>{box}<p>{_live_link(c.get('url') or r.get('itemDescURL'), 'Bid on the original site')}</p>"
             "<p class='small mut'>Bidding happens only on the original site. This page never places a bid.</p></div></div>"
             f"<h2>Description</h2><div id='dt-desc'>{desc}</div>{spec}<h2>Condition</h2>{cond_html}<h2>Inspection and removal</h2>{insp_html}{dates}"
             f"<h2>Property address</h2><p id='dt-addr'>{e(addr) if addr else '<span class=lbl>UNKNOWN</span>'}{osm}</p><h2>Custodian and contacts</h2>{cust}"
