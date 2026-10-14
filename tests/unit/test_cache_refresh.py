@@ -38,8 +38,8 @@ def test_gsa_not_due_within_an_hour_then_refreshes_with_a_backup(tmp_path):
 
 def test_failed_or_empty_fetch_keeps_the_old_cache(tmp_path):
     r = root_with_cache(tmp_path, NOW - timedelta(hours=2))
-    for bad in (good_fetch(0), lambda tmp: tmp.write_text("not json")):
-        out = cr.refresh_gsa(r, NOW, bad)
+    for i, bad in enumerate((good_fetch(0), lambda tmp: tmp.write_text("not json"))):
+        out = cr.refresh_gsa(r, NOW + i * cr.GSA_RETRY, bad)          # S2: a retry needs the back-off interval
         assert out["result"] == "failed" and out["kept"] == "old cache"
         assert len(json.loads((r / "var/cache/gsa-active-auctions.json").read_text())["Results"]) == 3
     assert not list((r / "var/cache").glob(".gsa-refresh-*"))           # temp dirs cleaned
@@ -108,3 +108,30 @@ def test_alerts_env_needs_a_real_address_and_password(tmp_path):
     sec.write_text("")
     assert cr.alerts_env(cfg, sec) is None                                                               # no password
     assert cr.alerts_env(tmp_path / "missing.toml", sec) is None
+
+
+def test_failed_gsa_fetch_backs_off_instead_of_retrying_every_tick(tmp_path):
+    """S2: a failed fetch waits 30 min; a 429 (api.data.gov rate limit) waits an hour. It used to retry every 2-minute tick."""
+    r = root_with_cache(tmp_path, NOW - timedelta(hours=3))
+    calls = []
+
+    def empty(tmp: Path):
+        calls.append(1)
+    assert cr.refresh_gsa(r, NOW, empty)["result"] == "failed"
+    assert cr.refresh_gsa(r, NOW + timedelta(minutes=2), empty) is None
+    assert cr.refresh_gsa(r, NOW + timedelta(minutes=29), empty) is None
+    assert cr.refresh_gsa(r, NOW + timedelta(minutes=31), good_fetch())["result"] == "refreshed"
+    assert len(calls) == 1
+    att = json.loads((r / "var/cache/gsa-active-auctions.attempt").read_text())
+    assert att["result"] == "refreshed" and att["rate_limited"] is False
+
+
+def test_rate_limited_gsa_fetch_waits_a_full_hour(tmp_path, monkeypatch):
+    r = root_with_cache(tmp_path, NOW - timedelta(hours=3))
+    monkeypatch.setattr(cr, "_refresh_gsa", lambda cache, now, fetch: {"source": "gsa", "result": "failed",
+                                                                       "error": "429 from GSA Auctions: OVER_RATE_LIMIT", "kept": "old cache"})
+    assert cr.refresh_gsa(r, NOW)["result"] == "failed"
+    assert json.loads((r / "var/cache/gsa-active-auctions.attempt").read_text())["rate_limited"] is True
+    assert cr.refresh_gsa(r, NOW + timedelta(minutes=45)) is None
+    assert cr.refresh_gsa(r, NOW + timedelta(minutes=61))["result"] == "failed"
+

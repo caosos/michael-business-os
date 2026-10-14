@@ -23,6 +23,8 @@ from pathlib import Path
 from typing import Callable, Optional
 
 GSA_EVERY = timedelta(hours=1)
+GSA_RETRY = timedelta(minutes=30)          # S2: after a failed fetch, wait before trying again (was: every watchdog tick, ~2 min)
+GSA_RATE_LIMITED = timedelta(hours=1)      # after an api.data.gov 429, wait a full window: retries inside it only extend the block
 EVENTS_EVERY = timedelta(hours=1)
 KEEP_BACKUPS = 5
 
@@ -56,6 +58,22 @@ def refresh_gsa(root: Path, now: datetime, fetch: Optional[Callable[[Path], obje
     last = _asof(cache)
     if last is not None and now - last < GSA_EVERY:
         return None
+    attempt_file = cache.with_suffix(".attempt")
+    try:
+        prev = json.loads(attempt_file.read_text())
+        wait = GSA_RATE_LIMITED if prev.get("rate_limited") else GSA_RETRY
+        if prev.get("result") == "failed" and now - datetime.fromisoformat(prev["at"]) < wait:
+            return None
+    except (OSError, ValueError, KeyError, TypeError):
+        pass
+    out = _refresh_gsa(cache, now, fetch)
+    err = str(out.get("error") or "")
+    attempt_file.write_text(json.dumps({"at": now.isoformat(), "result": out["result"],
+                                        "rate_limited": "429" in err or "OVER_RATE_LIMIT" in err}))
+    return out
+
+
+def _refresh_gsa(cache: Path, now: datetime, fetch) -> dict:
     tmpdir = Path(tempfile.mkdtemp(prefix=".gsa-refresh-", dir=cache.parent))
     tmp = tmpdir / cache.name
     try:
