@@ -224,6 +224,9 @@ jobs:
           photos = len(re.findall(r"<img[^>]+src='https://", text))
           print(f"facebook_filtered_total={total}\nfacebook_rendered={len(cards)}\nfacebook_rendered_photos={photos}")
           print(f"facebook_density_note={'at least 25 historical listings' if total >= 25 else 'fewer than 25 historical listings; no paid refresh is allowed to add more'}")
+          if total == 0 and not cards:     # owner direction Oct 14: stale Facebook listings are hidden (market_facebook.SHOW_HISTORICAL = False)
+              print("facebook_hidden_by_owner=true")
+              raise SystemExit(0)
           if len(cards) != min(total, 50) or len(cards) != len(set(cards)):
               raise SystemExit(f"Facebook first-page DOM mismatch: total={total}, rendered={len(cards)}, unique={len(set(cards))}")
           if not all(marker in text for marker in ("id='pager-top'", "id='pager-bottom'", "Page 1 of")):
