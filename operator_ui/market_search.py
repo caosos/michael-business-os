@@ -128,8 +128,12 @@ def parse_query(qs: dict) -> dict:
     if closing == "soon":
         closing = (datetime.now(timezone.utc) + timedelta(days=7)).strftime("%Y-%m-%d")
     raw = [x.strip() for c in (qs.get("cat") if isinstance(qs.get("cat"), list) else [qs.get("cat")] if qs.get("cat") else []) for x in str(c).split(",")]
-    cat_all = "all" in raw
-    cats = list(CONTROL_CATS) if cat_all else [c for c in dict.fromkeys(raw) if c in ROW_CATS or c == "other"]
+    # Owner rule: property listings show only when Land/Real Estate is ticked. "All categories" therefore means every category EXCEPT
+    # Land/Real Estate unless that box is ticked too; cat_all (everything, no category focus) is true only then.
+    wants_all, land = "all" in raw, "land_real_estate" in raw
+    cat_all = wants_all and land
+    cats = list(CONTROL_CATS) if cat_all else [c for c in CONTROL_CATS if c != "land_real_estate"] if wants_all else \
+        [c for c in dict.fromkeys(raw) if c in ROW_CATS or c == "other"]
     cat_default = not cats
     cats = cats or list(DEFAULT_CATS)
     rows = [g(f"row{i}") if g(f"row{i}") in ROW_CATS else "" for i in range(1, 5)] if any(f"row{i}" in qs for i in range(1, 5)) else list(DEFAULT_ROWS)
@@ -142,7 +146,7 @@ def parse_query(qs: dict) -> dict:
         + (["By State is selected but no state is ticked; pick at least one state (or switch to By Distance). No search was run."] if mode == "state" and not states and not bad_states else [])
     return {"loc_mode": mode, "states": states, "also_radius": g("also_radius") == "1", "state_find": g("state_find")[:30], "cat_find": g("cat_find")[:30], "keywords": g("keywords")[:120], "base": g("base")[:60],
             "radius": (DEFAULT_RADIUS if g("base") else None) if fresh else _num(g("radius"), landing_fix.MAX_RADIUS),
-            "min_price": _num(g("min_price")), "max_price": _num(g("max_price")), "errors": errs, "cats": cats, "cat_all": cat_all, "cat_default": cat_default, "rows": rows,
+            "min_price": _num(g("min_price")), "max_price": _num(g("max_price")), "errors": errs, "cats": cats, "cat_all": cat_all, "cat_all_but_land": wants_all and not land, "cat_default": cat_default, "rows": rows,
             "view": "list" if g("view") == "list" else "gallery",
             "any": _terms(DEFAULT_ANY if ("any" not in qs and not g("broad")) else g("any")), "broad": g("broad") == "1", "condition": g("condition").lower()[:30], "required": _terms(g("required")),
             "preferred": _terms(g("preferred")), "exclude": _terms(g("exclude")), "source": sources,

@@ -341,8 +341,8 @@ def category_section(q: dict, fc: dict) -> str:
     # Keep the visible boxes truthful after a round trip.  Selecting All means
     # every category is selected, so every category box stays checked on the
     # rendered response (the source picker already behaves this way).
-    all_on = bool(q.get("cat_all"))
-    items = [("all", "All categories", all_on)] + [(k, ms.CAT_LABELS[k], all_on or k in on) for k in ms.CONTROL_CATS]
+    all_on = bool(q.get("cat_all") or q.get("cat_all_but_land"))
+    items = [("all", "All categories", all_on)] + [(k, ms.CAT_LABELS[k], bool(q.get("cat_all")) or k in on) for k in ms.CONTROL_CATS]
     rows = ""
     for k, lbl, ck in items:
         if find and find not in lbl.lower() and not ck:

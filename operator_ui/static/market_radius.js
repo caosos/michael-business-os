@@ -11,11 +11,12 @@
   if (n.value !== "" && isFinite(Number(n.value))) { range(Number(n.value)); r.value = Number(n.value); }
   show();
 })();
-/* F-157: "All categories" ticks/unticks every category box; unticking any one box unticks All. Without this script the server treats All as everything. */
+/* F-157: "All categories" ticks/unticks every category box EXCEPT Land/Real Estate (property shows only when the owner ticks it);
+   unticking any other box unticks All. The server applies the same rule if this script does not run. */
 (function () {
   var box = document.getElementById("mkcats");
   if (!box) return;
-  var all = box.querySelector("input[value=all]"), rest = box.querySelectorAll("input:not([value=all])");
+  var all = box.querySelector("input[value=all]"), rest = box.querySelectorAll("input:not([value=all]):not([value=land_real_estate])");
   all.addEventListener("change", function () { for (var i = 0; i < rest.length; i++) rest[i].checked = all.checked; });
   for (var i = 0; i < rest.length; i++) rest[i].addEventListener("change", function () { if (!this.checked) all.checked = false; });
 })();

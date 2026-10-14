@@ -122,7 +122,9 @@ def page_body(app, qs: dict, now, errors=None, values=None) -> str:
     # Facet counts describe the same combined feed the owner sees.  Listings
     # with an unverified distance/price stay selectable and paginate normally;
     # they must not make a category or source look empty.
-    fc = mbr.facets(lambda qq, relax: chain(qq, relax)[0] + chain(qq, relax)[1], q, now) if live else None
+    # The browse layout (search bar, filters, sources) is the same whether or not any source has listings right now; an empty pool
+    # just counts zero everywhere. Only a refused search (errors) or a not-yet-run page keeps the plain form.
+    fc = mbr.facets(lambda qq, relax: chain(qq, relax)[0] + chain(qq, relax)[1], q, now) if ran and not q["errors"] else None
     back = "/market?" + "&".join(f"{k}={quote(str(v))}" for k, vs in page_qs.items() if k in FILTER_KEYS + ("page",) for v in (vs if isinstance(vs, list) else [vs])) if page_qs else "/market"
     return note + mv.render_page(q, data, results, hidden, saved, app.csrf, bool(app.operator_pin), edit if edit in ids else None, ran, errors, unchecked, prefs, finds, mine, mv.suggest_strip(sug, len(sg['ranked']) if sg else 0),
                                  {"fc": fc, "now": now, "back": back} if fc else None)

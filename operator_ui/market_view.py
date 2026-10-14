@@ -384,7 +384,8 @@ def render_page(q: dict, d: dict, results: list[dict], hidden: dict, saved: list
     elif q["kind"] == "fixed":
         body = "<div class='card'>GSA Auctions lists auctions only; no fixed-price results from a connected source.</div>"
     elif d["status"] not in ("connected", "fixture", "imported") or bad:
-        body = ""
+        body = "" if bad else ("<div class='card' id='no-sources'><b>No listings yet.</b> None of the sources has a current copy of its listings "
+                               "on this site, so nothing is shown rather than guessed. The source list below says what each one is waiting for.</div>")
     else:
         unchecked = unchecked or []
         display_rows = results + unchecked

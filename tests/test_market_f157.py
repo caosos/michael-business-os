@@ -55,7 +55,9 @@ def test_pure_land_hidden_mixed_retained_when_land_off():
 
 
 def test_all_shows_every_category_and_land_alone_shows_only_land():
-    assert shown(["all"]) == {c["title"] for c in ALL}
+    # Owner rule (Oct 14): 'All' alone leaves out pure property; All + Land/Real Estate is everything.
+    assert shown(["all", "land_real_estate"]) == {c["title"] for c in ALL}
+    assert shown(["all"]) == {c["title"] for c in ALL} - {LAND["title"], HOUSE["title"]}
     assert shown(["land_real_estate"]) == {LAND["title"], HOUSE["title"], MIXED["title"]}
     assert shown(["other"]) == {ODD["title"]}
 
@@ -113,7 +115,9 @@ def test_f158_commercial_real_estate_hidden(cats):
 def test_f158_shown_with_land_or_all():
     q = ms.parse_query({"cat": ["land_real_estate"]})
     assert all(ms.cat_ok(c, q["cats"]) for c in COMM)
-    assert ms.parse_query({"cat": ["all"]})["cat_all"]
+    assert ms.parse_query({"cat": ["all", "land_real_estate"]})["cat_all"]
+    assert not ms.parse_query({"cat": ["all"]})["cat_all"]                 # property is opt-in even under 'All'
+    assert not any(ms.cat_ok(c, ms.parse_query({"cat": ["all"]})["cats"]) for c in COMM if ms.card_cats(c) == {"land_real_estate"})
 
 
 def test_f158_building_auction_is_land_and_mixed_kept():
