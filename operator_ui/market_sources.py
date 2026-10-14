@@ -64,6 +64,22 @@ def fixture_dir() -> str | None:
 
 
 _HOOD = re.compile(r"Neighborhood/location text \(as shown, unverified\):\s*([^\n]{2,60})")
+_SLUG_TOWN = re.compile(r"Town in listing link \(unverified\):\s*([^\n]{2,60})")
+# Seller-typed Craigslist place text -> a gazetteer name. Only spelling forms; a text that still does not resolve stays UNKNOWN.
+_TOWN_FIX = ((r"^(?:n\.?|no\.?)\s+", "north "), (r"^(?:s\.?)\s+", "south "), (r"^(?:w\.?)\s+", "west "), (r"^nlr$", "north little rock"),
+             (r"^jax$", "jacksonville"), (r"^(?:west|w)\s+little\s+rock$", "little rock"), (r"^lr$", "little rock"))
+
+
+def _town(text: str, state: str):
+    """'N little rock ar' / 'Warren Arkansas' / 'Jax' -> ('North Little Rock', coords) or None."""
+    t = " ".join(re.sub(r"[^A-Za-z .'-]", " ", text or "").split()).strip(" .,-").lower()
+    t = re.sub(r"[ ,]+(?:ar|ark|arkansas)$", "", t).strip()
+    if not t or t == "unknown":
+        return None
+    for pat, rep in _TOWN_FIX:
+        t = re.sub(pat, rep, t)
+    c = gazetteer.locate(f"{t}, {state}")
+    return (t.title(), c) if c else None
 
 
 def _coords(loc: dict):
@@ -92,10 +108,14 @@ def _card(ad, rec, now, origin, name: str, fixture: bool = True) -> dict | None:
         return None                                   # spoofed / unauthenticated / foreign mail: quarantined, never shown
     d = n.normalized
     loc = dict(d.get("location") or {})
-    hood = _HOOD.search(d.get("description") or "")
-    if hood and not loc.get("city") and loc.get("state"):                 # Craigslist: neighborhood text as shown (unverified) -> gazetteer, else unknown distance
-        loc["city"] = hood.group(1).strip()
-    c = _coords(loc) if loc else None
+    c = None
+    if not loc.get("city") and loc.get("state"):                           # Craigslist: "(Town)" as shown, else the town in the link (both unverified)
+        for m in (_HOOD.search(d.get("description") or ""), _SLUG_TOWN.search(d.get("description") or "")):
+            hit = _town(m.group(1), loc["state"]) if m else None
+            if hit:
+                loc["city"], c = hit
+                break
+    c = c or (_coords(loc) if loc.get("city") or loc.get("zip") else None)
     dist = haversine_miles(origin, c) if (c and origin) else None          # unrounded, as for GSA; unknown stays None (never local)
     price = d.get("price") or {}
     amt = price.get("amount")
