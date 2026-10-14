@@ -1,0 +1,45 @@
+# DealSniffer-managed. Public dealsniffers.com site (customer pages only, no database, no local owner).
+# Listens on 127.0.0.1:@PORT@ only; nginx is the only public entry. Logs: journalctl -u dealsniffer
+[Unit]
+Description=DealSniffer public site (dealsniffers.com)
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/etc/dealsniffer/oauth.env
+
+[Service]
+Type=simple
+User=dealsniffer
+Group=dealsniffer
+WorkingDirectory=/opt/dealsniffer/current
+EnvironmentFile=/etc/dealsniffer/dealsniffer.env
+EnvironmentFile=/etc/dealsniffer/oauth.env
+Environment=PYTHONPATH=/opt/dealsniffer/current HOME=/var/lib/dealsniffer
+ExecStart=/opt/dealsniffer/current/venv/bin/python -m operator_ui serve --port @PORT@
+Restart=on-failure
+RestartSec=5
+UMask=0077
+MemoryMax=600M
+TasksMax=256
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/lib/dealsniffer
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictSUIDSGID=yes
+RestrictRealtime=yes
+RestrictNamespaces=yes
+LockPersonality=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target
