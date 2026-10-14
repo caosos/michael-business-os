@@ -30,3 +30,9 @@ def test_fixed_price_card_without_a_price_renders():
          "source": "Craigslist", "distance": None, "city": None, "state": "AR", "labels": {}, "image": None, "kind": "auction", "fetched_at": "2026-10-14T22:00:00+00:00"}
     html = mb.card(c, lambda: "", datetime(2026, 10, 14, 23, tzinfo=timezone.utc), lambda *_: "")
     assert "Price not stated" in html
+
+
+def test_thumbnail_line_from_alert_becomes_card_image_only_for_craigslist_images():
+    ok = "x\nThumbnail: https://images.craigslist.org/00p0p_abc_300x300.jpg\nAlert received: y"
+    assert m._THUMB.search(ok).group(1) == "https://images.craigslist.org/00p0p_abc_300x300.jpg"
+    assert m._THUMB.search("Thumbnail: UNKNOWN") is None and m._THUMB.search("Thumbnail: https://evil.example/a.jpg") is None

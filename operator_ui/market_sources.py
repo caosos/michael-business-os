@@ -64,6 +64,7 @@ def fixture_dir() -> str | None:
 
 
 _HOOD = re.compile(r"Neighborhood/location text \(as shown, unverified\):\s*([^\n]{2,60})")
+_THUMB = re.compile(r"^Thumbnail: (https://images\.craigslist\.org/[A-Za-z0-9_./-]+\.jpg)$", re.M)   # from the alert e-mail itself
 _SLUG_TOWN = re.compile(r"Town in listing link \(unverified\):\s*([^\n]{2,60})")
 # Seller-typed Craigslist place text -> a gazetteer name. Only spelling forms; a text that still does not resolve stays UNKNOWN.
 _TOWN_FIX = ((r"^(?:n\.?|no\.?)\s+", "north "), (r"^(?:s\.?)\s+", "south "), (r"^(?:w\.?)\s+", "west "), (r"^nlr$", "north little rock"),
@@ -126,7 +127,7 @@ def _card(ad, rec, now, origin, name: str, fixture: bool = True) -> dict | None:
     if bid is None:
         labels["opening_text"] = (f"Asking price ${amt:,.2f} (from the alert e-mail text; unverified)" if isinstance(amt, (int, float)) and price.get("type") == "fixed" else
                                   f"Starting price ${amt:,.2f} (from the alert e-mail text; unverified)" if isinstance(amt, (int, float)) else "Price not stated in the alert — check original listing")
-    return {"id": f"{ad.source}:{n.source_listing_id}", "title": d["title"], "description": desc, "text": f"{d['title']} {desc}".lower(), "url": n.url, "image": None,
+    return {"id": f"{ad.source}:{n.source_listing_id}", "title": d["title"], "description": desc, "text": f"{d['title']} {desc}".lower(), "url": n.url, "image": (_THUMB.search(d.get("description") or "") or [None, None])[1],
             "bid": bid, "price": float(amt) if isinstance(amt, (int, float)) else None, "price_type": price.get("type"), "bidders": None,
             "closes": str(d.get("ends_at") or "")[:10] or None, "city": f"{loc['city']}, {loc['state']}" if loc.get("city") and loc.get("state") else None,
             "state": state if state in ms.US_STATES else None, "zip": str(loc.get("zip") or "")[:5] or None, "posted": None, "distance": dist, "category": n.category, "condition": None, "labels": labels, "source": name,
