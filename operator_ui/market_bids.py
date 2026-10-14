@@ -13,10 +13,11 @@ from zoneinfo import ZoneInfo
 from html import escape as e
 from urllib.parse import unquote, urlsplit, urlunsplit
 
+from . import bid_history as bh
 from . import market_autobids as mba
 from . import market_prefs as mp
 
-ACTS = ("bid", "add", "update", "unbid", "setmax")
+ACTS = ("bid", "add", "update", "unbid", "setmax", "observe")
 STATUSES = ("watching", "bid placed", "winning", "outbid", "won", "lost", "closed")
 HIBID_HOST = re.compile(r"^(?:(?P<auctioneer>[a-z0-9-]+)\.)?hibid\.com$", re.I)
 
@@ -113,11 +114,16 @@ def act(action: str, f: dict, now: str) -> str:
         rec = {"title": title, "source": source, "url": url, "closes": closes, "closes_at": closes_at,
                "bid": current, "bidders": _num(f.get("bidders")), "fetched_at": _clip(f.get("fetched_at"), 40),
                "marked_at": now, "max_bid": mx, "status": _status(f.get("status"), "bid placed" if action == "bid" else "watching"),
-               "next_action": _clip(f.get("next_action"), 200), "origin": "IMPORTED" if action == "bid" else "MANUAL",
+               "next_action": _clip(f.get("next_action"), 200), "origin": "IMPORTED" if action == "bid" else "MANUAL", "location": _clip(f.get("location"), 80),
                "provenance": {"kind": "listing_snapshot" if action == "bid" else "owner_entry",
                               "observed_at": _clip(f.get("fetched_at"), 40) or now, "source_account_access": "NONE"}}
         if (closes or closes_at) and _end(rec) is None:
             raise ValueError("closing must be an ISO date or date-time")
+        old = bids.get(lot)
+        if old and isinstance(old.get("observations"), list):    # P1-01: marking the same lot again never drops its history
+            rec["observations"] = old["observations"]
+        else:
+            rec["observations"] = bh.baseline(rec)
         bids[lot] = rec
         msg = ("Added to My bids from the link. Nothing was placed or sent. "
                + ("Add the closing time to turn on countdown alerts." if _end(rec) is None else "Countdown alerts are active while DealSniffer is open."))
@@ -131,6 +137,23 @@ def act(action: str, f: dict, now: str) -> str:
             raise ValueError("that item is not in My bids")
         bids[lot]["max_bid"] = mx
         msg = "Max bid saved on this computer only." if mx is not None else "Max bid cleared."
+    elif action == "observe":
+        if lot not in bids:
+            raise ValueError("that item is not in My bids")
+        r = bids[lot]
+        high = _num(f.get("high_bid")) if str(f.get("high_bid") or "").strip() else None
+        if str(f.get("high_bid") or "").strip() and high is None:
+            raise ValueError("high bid must be a plain number")
+        own = _num(f.get("owner_max")) if str(f.get("owner_max") or "").strip() else None
+        if str(f.get("owner_max") or "").strip() and own is None:
+            raise ValueError("your max must be a plain number")
+        status = _status(f.get("status"), "") if str(f.get("status") or "").strip() else ""
+        if _clip(f.get("location"), 80):
+            r["location"] = _clip(f.get("location"), 80)
+        item = bh.append(r, now, high_bid=high, bid_count=bh._count(f.get("bid_count")), closes_at=bh._when(f.get("closes_at"), "closing"),
+                         status=status, owner_max=own, final=str(f.get("final") or "") in ("1", "on", "true"),
+                         observed_at=bh._when(f.get("observed_at"), "seen at"), note=_clip(f.get("note"), 200))
+        msg = ("Final price recorded. " if item["final"] else "Observation added. ") + "Earlier entries were kept. Nothing was placed or sent."
     else:
         if lot not in bids:
             raise ValueError("that item is not in My bids")
@@ -142,7 +165,13 @@ def act(action: str, f: dict, now: str) -> str:
         candidate = {**r, "closes_at": closes_at, "closes": ""}
         if closes_at and _end(candidate) is None:
             raise ValueError("closing must be an ISO date or date-time")
-        r.update({"status": _status(f.get("status")), "bid": current, "max_bid": mx, "closes_at": closes_at,
+        status = _status(f.get("status"))
+        seen = {"high_bid": current if current != r.get("bid") else None, "closes_at": closes_at if closes_at != (r.get("closes_at") or r.get("closes") or "") else "",
+                "status": status if status != r.get("status") else ""}
+        if any(v not in (None, "") for v in seen.values()):            # P1-01: the earlier values stay in the history
+            bh.append(r, now, **{k: v for k, v in seen.items()}, owner_max=mx if mx != r.get("max_bid") else None,
+                      kind="watch_update", note="Update form")
+        r.update({"status": status, "bid": current, "max_bid": mx, "closes_at": closes_at,
                   "closes": "", "next_action": _clip(f.get("next_action"), 200), "updated_at": now})
         msg = "Bid watch updated. Nothing was placed and no source account was accessed."
     mp._store(d)
@@ -248,13 +277,14 @@ def window(d: dict, cards: list[dict], now: datetime, tok, auto: tuple = ((), ""
                   f"<label>Your max $ <input name='max_bid' size='7' inputmode='decimal' value='{'' if r.get('max_bid') is None else r['max_bid']:}'></label> "
                   f"<label>Closing <input name='closes_at' size='22' value='{e(r.get('closes_at') or r.get('closes') or '')}' placeholder='2026-10-15T19:00:00-05:00'></label> "
                   f"<label>Next action <input name='next_action' size='32' maxlength='200' value='{e(r.get('next_action') or '')}'></label>"
-                  "<button name='act' value='update'>Update</button></form></details></li>")
+                  "<button name='act' value='update'>Update</button></form></details>"
+                  f"{bh.render(i, d['bids'][i], tok, return_to) if expanded and i in d['bids'] else ''}</li>")
     body = f"<ul style='padding-left:16px;margin:4px 0'>{''.join(li)}</ul>" if li else "<p class='small mut'>Nothing tracked. Use 'I bid on this' on a card after you place a bid yourself.</p>"
     back = f"<input type='hidden' name='return_to' value='{e(return_to)}'>" if return_to else ""
     add = (f"<details class='small' id='add-bid-watch'{' open' if expanded and not li else ''}><summary><b>Add a bid to watch</b></summary><p class='mut'>Paste a HiBid lot link and DealSniffer fills in its title and source without signing in or fetching the site. Add the close time when known so the on-page countdown can alert you.</p>"
            f"<form method='post' action='/market/bid' class='bid-form'>{tok()}{back}<label class='bid-link'>Auction link <input name='url' type='url' maxlength='300' required placeholder='Paste the original lot link'></label> "
            "<details class='bid-more'><summary>Optional details</summary><label>Listing title <input name='title' maxlength='120'></label> "
-           "<label>Source <input name='source' maxlength='60'></label> "
+           "<label>Source <input name='source' maxlength='60'></label> <label>Location <input name='location' maxlength='80'></label> "
            "<label>Status <select name='status'>" + "".join(f"<option value='{e(s)}'>{e(s)}</option>" for s in STATUSES) + "</select></label> "
            "<label>Current bid $ <input name='current_bid' size='7' inputmode='decimal'></label> <label>Your max $ <input name='max_bid' size='7' inputmode='decimal'></label> "
            "<label>Closing <input name='closes_at' size='22' placeholder='2026-10-15T19:00:00-05:00'></label> <label>Next action <input name='next_action' maxlength='200'></label> "
@@ -275,7 +305,7 @@ def page_body(app, now: datetime) -> str:
     imported = sum(1 for r in d["bids"].values() if r.get("origin") == "IMPORTED") + len(auto[0])
     email = 0  # the only reader currently available is explicitly fixture/import mode, never a live mailbox
     return ("<style>.bid-head{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.bid-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:10px 0}"
-            ".bid-kpi,.bid-row{border:1px solid var(--line);border-radius:8px;padding:10px}.bid-row{margin:8px 0;list-style:none}.bid-row.bid-urgent{border:3px solid #c0222c;box-shadow:0 0 0 4px rgba(192,34,44,.13)}.bid-title{font-size:16px}.bid-origin{margin-left:5px}.bid-alert:not(:empty){display:block;background:#c0222c;color:#fff;font-weight:800;padding:8px;margin:6px 0;border-radius:6px}.bid-form,.bid-update form{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:6px 12px}.bid-link{grid-column:1/-1}.bid-more{grid-column:1/-1}.bid-form button,.bid-update button{align-self:end}@media(prefers-reduced-motion:no-preference){.bid-urgent{animation:bidpulse 1s ease-in-out infinite alternate}@keyframes bidpulse{to{filter:brightness(1.18)}}}</style>"
+            ".bid-kpi,.bid-row{border:1px solid var(--line);border-radius:8px;padding:10px}.bid-row{margin:8px 0;list-style:none}.bid-row.bid-urgent{border:3px solid #c0222c;box-shadow:0 0 0 4px rgba(192,34,44,.13)}.bid-title{font-size:16px}.bid-origin{margin-left:5px}.bid-alert:not(:empty){display:block;background:#c0222c;color:#fff;font-weight:800;padding:8px;margin:6px 0;border-radius:6px}.bid-form,.bid-update form{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:6px 12px}.bid-link{grid-column:1/-1}.bid-more{grid-column:1/-1}.bid-form button,.bid-update button{align-self:end}.bid-hist{list-style:none;padding-left:0;margin:8px 0}.bid-obs{border-left:3px solid var(--line);padding:4px 0 4px 10px;margin:4px 0}.bid-gap{margin:2px 0 2px 14px;padding:4px 8px;border:1px dashed var(--line);border-radius:6px;font-size:13px}.bid-hist-sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:4px 12px;margin:6px 0}.bid-hist-sum dt{font-weight:700}.bid-hist-sum dd{margin:0}.bid-obs-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:6px 12px}.bid-final{grid-column:1/-1}@media(prefers-reduced-motion:no-preference){.bid-urgent{animation:bidpulse 1s ease-in-out infinite alternate}@keyframes bidpulse{to{filter:brightness(1.18)}}}</style>"
             "<div class='bid-head'><h1 class='pagehead'>My Bids</h1><a href='/market'>Back to listings</a></div>"
             "<p>Track bids you placed on the original source. DealSniffer watches the facts you record or import; it never logs into a source or places a bid.</p>"
             f"<div class='bid-kpis'><div class='bid-kpi'><b>{manual}</b><br><span class='badge'>MANUAL</span><br><span class='small mut'>entered by you</span></div>"
@@ -288,6 +318,6 @@ def page_body(app, now: datetime) -> str:
 def button(c: dict, tok) -> str:
     f = lambda k, v: f"<input type='hidden' name='{k}' value='{e(str(v if v is not None else ''))}'>"  # noqa: E731
     hid = "".join(f(k, v) for k, v in (("lot", c["id"]), ("title", c["title"]), ("source", c.get("source")), ("url", c.get("url")), ("closes", c.get("closes")),
-                                       ("closes_at", c.get("closes_at")), ("bid", c.get("bid")), ("bidders", c.get("bidders")), ("fetched_at", c.get("fetched_at"))))
+                                       ("closes_at", c.get("closes_at")), ("bid", c.get("bid")), ("location", ", ".join(x for x in (c.get("city"), c.get("state")) if x)), ("bidders", c.get("bidders")), ("fetched_at", c.get("fetched_at"))))
     return (f"<form method='post' action='/market/bid' class='mk-pref' data-bidform>{tok()}{hid}<input name='max_bid' size='5' inputmode='decimal' aria-label='Your max bid (optional)' "
             "placeholder='my max $' title='Optional. Stays on this computer.'><button name='act' value='bid' title='You already placed this bid yourself; track it here'>I bid on this</button></form>")

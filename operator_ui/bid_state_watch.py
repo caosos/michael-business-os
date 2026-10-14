@@ -158,7 +158,7 @@ def poll_policy(watch: dict, now: datetime) -> PollPolicy:
 
 def store_path() -> Path:
     base = Path(os.environ.get("MBOS_BID_STATE_FILE") or Path(__file__).resolve().parent.parent / "var" / "bid_state.json")
-    return accounts.preference_path(base)
+    return accounts.account_file_path(base, "bid_state.json")     # its own file per account, never the account's market_prefs.json
 
 
 class BidWatchStore:
