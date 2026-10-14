@@ -140,10 +140,20 @@ def quick_ok(c: dict, quick: str, now: datetime) -> bool:
     return t <= now + timedelta(hours=SOON_H)
 
 
+def ending_ok(c: dict, key: str, now: datetime) -> bool:
+    """S7: still open and closing within the chosen window. A listing with no closing time (fixed price, or close UNKNOWN) does not match;
+    a date-only close counts as 11:59 PM Central, the same rule My Bids uses."""
+    if not key:
+        return True
+    t = mbids._end(c)
+    return t is not None and now < t <= now + timedelta(hours=ms.ENDING[key])
+
+
 def post(rows: list[dict], q: dict, now: datetime, relax=()) -> list[dict]:
     """Source, listing type and quick view on rows that already passed the market_search filters. `relax` skips a dimension (used to count it)."""
     return [c for c in rows if ("source" in relax or source_ok(c, q["source"])) and ("ltype" in relax or not q.get("ltype") or ltype(c) == q["ltype"])
-            and ("quick" in relax or quick_ok(c, q.get("quick") or "", now))]
+            and ("quick" in relax or quick_ok(c, q.get("quick") or "", now))
+            and ("ending" in relax or ending_ok(c, q.get("ending_within") or "", now))]
 
 
 # ---- facet counts ----
@@ -185,7 +195,7 @@ def active_filters(q: dict) -> int:
 
     n += not start_loc
     n += q.get("min_price") is not None or q.get("max_price") is not None
-    n += bool(q.get("ltype")) + bool(q.get("condition")) + bool(q.get("closing_by")) + bool(q.get("quick"))
+    n += bool(q.get("ltype")) + bool(q.get("condition")) + bool(q.get("closing_by")) + bool(q.get("quick")) + bool(q.get("ending_within"))
     n += sum(1 for k in ("required", "preferred", "exclude") if q.get(k))
     n += bool(q.get("any") and q["any"] != ms._terms(ms.DEFAULT_ANY)) + bool(q.get("broad"))
     return int(n)
@@ -373,6 +383,15 @@ def ltype_section(q: dict, fc: dict) -> str:
         n = fc["ltype"][k]
         rows += f"<label data-count='{n}'><input type='radio' form='mkform' name='ltype' value='{k}'{' checked' if cur == k else ''}> {e(lbl)} <span class='mk-n'>({n})</span></label>"
     return f"<details open class='mk-sect' id='sec-ltype'><summary><b>Listing type</b></summary>{rows}</details>"
+
+
+def ending_section(q: dict) -> str:
+    """S7: auctions ending within N hours or days (a hard filter; counts on the page and every facet follow it)."""
+    cur = q.get("ending_within") or ""
+    opts = "<option value=''>Any time</option>" + "".join(f"<option value='{k}'{' selected' if cur == k else ''}>{e(lbl)}</option>" for k, lbl in ms.ENDING_LABELS)
+    return (f"<details open class='mk-sect' id='sec-ending'><summary><b>Ending within</b></summary>"
+            f"<label>Auction ends within <select form='mkform' name='ending_within'>{opts}</select></label>"
+            "<p class='small mut'>Listings without a closing time are left out while this is set. A close given as a date only counts as 11:59 PM Central.</p></details>")
 
 
 def condition_section(q: dict, fc: dict) -> str:

@@ -204,7 +204,7 @@ def render_status(d: dict, banner_inline: bool = True) -> str:
 def chip_url(q: dict, drop: str | None = None) -> str:
     """F-136: a GET link that re-runs the current filters without one state (the chip's remove button). No script, no write."""
     j = lambda k: ", ".join(q[k]) if isinstance(q.get(k), list) else q.get(k)  # noqa: E731
-    pairs = [(k, j(k)) for k in ("keywords", "base", "radius", "min_price", "max_price", "any", "condition", "required", "preferred", "exclude", "source", "kind", "closing_by", "sort", "view", "ltype", "quick", "cat_find")]
+    pairs = [(k, j(k)) for k in ("keywords", "base", "radius", "min_price", "max_price", "any", "condition", "required", "preferred", "exclude", "source", "kind", "closing_by", "sort", "view", "ltype", "quick", "cat_find", "ending_within")]
     pairs += [("broad", "1")] * bool(q.get("broad")) + [("cat", c) for c in (['all'] if q.get('cat_all') else [] if q.get('cat_default') else q.get('cats') or [])] + [(f"row{i}", r) for i, r in enumerate(q.get("rows") or [], 1) if i <= 4]
     pairs += [("loc_mode", q.get("loc_mode", "distance"))] + [("also_radius", "1")] * bool(q.get("also_radius")) + [("state", s) for s in q.get("states") or [] if s != drop]
     return "/market?" + "&amp;".join(f"{k}={quote(str(v))}" for k, v in pairs if v not in (None, ""))
@@ -274,7 +274,7 @@ def _side_filters(q: dict, fc: dict, now) -> str:
             f"{mb.category_section(q, fc)}{mb.source_section(q, fc, now)}"
             f"<details open class='mk-sect' id='sec-location'><summary><b>Location</b></summary>{location_panel(q, fc['states'])}</details>"
             f"<details open class='mk-sect' id='sec-price'><summary><b>Price range</b></summary>{_slider(q, 'mkform')}</details>"
-            f"{mb.ltype_section(q, fc)}{mb.condition_section(q, fc)}{_more_filters(q)}"
+            f"{mb.ltype_section(q, fc)}{mb.ending_section(q)}{mb.condition_section(q, fc)}{_more_filters(q)}"
             "<button class='mk-apply' type='submit' form='mkform'>Apply filters</button></div>")
 
 

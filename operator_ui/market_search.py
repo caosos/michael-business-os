@@ -147,8 +147,13 @@ def parse_query(qs: dict) -> dict:
             "any": _terms(DEFAULT_ANY if ("any" not in qs and not g("broad")) else g("any")), "broad": g("broad") == "1", "condition": g("condition").lower()[:30], "required": _terms(g("required")),
             "preferred": _terms(g("preferred")), "exclude": _terms(g("exclude")), "source": sources,
             "ltype": g("ltype") if g("ltype") in LTYPES else "", "quick": g("quick") if g("quick") in QUICK else "", "page": max(1, int(g("page"))) if g("page").isdigit() and int(g("page")) < 10**6 else 1,
+            "ending_within": g("ending_within") if g("ending_within") in ENDING else "",
             "kind": g("kind") or "any", "closing_by": closing if re.fullmatch(r"\d{4}-\d{2}-\d{2}", closing) else "",
             "sort": sort if sort in SORTS else "closing"}
+
+
+ENDING = {"2h": 2, "6h": 6, "12h": 12, "1d": 24, "2d": 48, "3d": 72, "7d": 168}     # S7: "auction ending within" choices, in hours
+ENDING_LABELS = (("2h", "2 hours"), ("6h", "6 hours"), ("12h", "12 hours"), ("1d", "1 day"), ("2d", "2 days"), ("3d", "3 days"), ("7d", "7 days"))
 
 
 def criteria_to_query(doc: dict) -> dict:
