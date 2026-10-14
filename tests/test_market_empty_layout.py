@@ -19,6 +19,6 @@ def empty(tmp_path, monkeypatch):
 def test_empty_site_keeps_search_bar_filters_and_sources(ui, tmp_path, monkeypatch):
     monkeypatch.setenv("MBOS_GSA_CACHE", str(tmp_path / "still-no-gsa.json"))      # after the shared fixture set a GSA cache
     h = req(ui, "GET", "/market?" + urlencode({"base": "72032", "radius": "50", "cat": "all"}))[2]
-    for marker in ("id='mkfilters'", "id='sec-source'", "id='sec-ending'", "name='keywords'", "id='no-sources'", "No listings yet"):
+    for marker in ("GSA Auctions: offline", "id='mkfilters'", "id='sec-source'", "id='sec-ending'", "name='keywords'", "id='no-sources'", "No listings yet"):
         assert marker in h, marker
     assert "0 results found" in h or "id='result-count'" not in h

@@ -419,7 +419,8 @@ def render_page(q: dict, d: dict, results: list[dict], hidden: dict, saved: list
     banner = f"<div class='flash err' id='fixture-banner' role='note' title='{e(msv.FIXTURE_BANNER)}'><b>{e(msv.FIXTURE_BANNER)}</b></div>" if fc and d.get("fixture") else ""
     refreshing = ("<div class='flash' id='facebook-refresh-pending' role='status'><b>Facebook listings are updating.</b> "
                   "Current results remain usable; this page will check again automatically.</div>") if d.get("refresh_pending") else ""
-    status = render_status(d, not fc) if not fc or offline else ""          # F-163: on the browse page the per-source status lives in the collapsed Sources panel
+    no_data = d["status"] not in ("connected", "fixture", "imported")
+    status = render_status(d, not fc) if not fc or offline or no_data else ""   # with no source data at all, say why under the empty state          # F-163: on the browse page the per-source status lives in the collapsed Sources panel
     folded = mb.collapsed()
     back = browse.get("back", "/market") if browse else "/market"
     total = len(results) + len(unchecked or [])
