@@ -105,6 +105,34 @@ def google_account(subject: str, email: str | None = None, display_name: str | N
     return Account(subject, "google", True, email=email, display_name=name)
 
 
+OWNER_EMAIL_ENV = "MBOS_OWNER_GOOGLE_EMAIL"
+
+
+def owner_google_email(env=None) -> str | None:
+    """The owner's own Google address (host configuration, never form input). Unset = no Google login is linked to the owner."""
+    env = os.environ if env is None else env
+    value = str(env.get(OWNER_EMAIL_ENV) or "").strip().casefold()
+    if not value:
+        return None
+    if len(value) > 320 or value.count("@") != 1 or any(ch.isspace() for ch in value):
+        raise AccountConfigError(f"{OWNER_EMAIL_ENV} is not a single e-mail address")
+    return value
+
+
+def link_owner(account: Account, owner_email: str | None) -> Account:
+    """A verified Google login whose verified e-mail equals the configured owner address opens the EXISTING owner data
+    (filters, saved, hidden, bids) instead of a new empty account. Every other login keeps its own isolated account.
+    Only Google-verified e-mails reach a profile (the callback requires email_verified), so this cannot be claimed by a form."""
+    if (owner_email and account.authenticated and account.provider == "google" and account.email
+            and account.email.strip().casefold() == owner_email):
+        return Account(LOCAL_OWNER_ID, "local", True, email=account.email, display_name=account.display_name or "Michael")
+    return account
+
+
+def is_linked_owner(account: Account) -> bool:
+    return account.authenticated and account.user_id == LOCAL_OWNER_ID
+
+
 @dataclass(frozen=True)
 class GoogleOAuthConfig:
     enabled: bool

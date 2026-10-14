@@ -57,6 +57,8 @@ def render(csrf: str, google_status: dict) -> str:
     )
     identity = (f"Signed in as {e(account.display_name or account.email or 'Google user')}" if account.authenticated
                 else "Local owner mode on this EliteDesk")
+    if accounts.is_linked_owner(account):
+        identity += " · linked to the owner account (your existing filters, saved listings and bids)"
     if account.authenticated:
         oauth = "CONNECTED — identity verified by Google"
         oauth_action = (f"<form method='post' action='/auth/logout'><input type='hidden' name='csrf' value='{e(csrf)}'>"

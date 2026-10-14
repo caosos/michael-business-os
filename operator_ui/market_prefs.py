@@ -51,7 +51,7 @@ def load() -> dict:
     # every future account.  A newly authenticated user begins unlocated and
     # supplies their own city/ZIP before a radius search can run.
     ui = d.get("ui") if isinstance(d.get("ui"), dict) else {}
-    if accounts.current().authenticated and not isinstance(ui.get("home"), dict):
+    if accounts.current().authenticated and not accounts.is_linked_owner(accounts.current()) and not isinstance(ui.get("home"), dict):
         d["ui"] = {**ui, "home": {"state": "", "zip": "", "label": ""}}
     d["hidden"] = {**{i: "" for i in d["dismissed"]}, **d["hidden"]}      # older files kept hidden ids in `dismissed`
     d["dismissed"] = []

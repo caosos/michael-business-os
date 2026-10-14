@@ -591,6 +591,7 @@ class App:
         # Strictly validates an all-or-nothing Google OAuth configuration.  No
         # credentials configured means the existing loopback/local-owner mode.
         self.google_oauth = accounts.google_oauth_config()
+        self.owner_google_email = accounts.owner_google_email()      # links the owner's own Google login to the owner data
         self.account_store = accounts.AccountStore()
         self.session_signer = accounts.SessionSigner(self.google_oauth.session_secret) if self.google_oauth.enabled else None
         self.account_csrf = accounts.AccountCsrf(self.google_oauth.session_secret) if self.google_oauth.enabled else None
@@ -1079,7 +1080,7 @@ def make_handler(app):
                         subject = app.session_signer.verify(token)
                         profile = app.account_store.load_google_profile(subject)
                         if profile:
-                            return profile
+                            return accounts.link_owner(profile, app.owner_google_email)
                     except accounts.InvalidSession:
                         pass
             return accounts.LOCAL_OWNER if self._loopback() else accounts.ANONYMOUS
