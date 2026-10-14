@@ -137,7 +137,7 @@ Note: one paid Bright Data job was started during testing. Clicking **Search** (
 
 ## P1-01 — Auction history in My Bids (issue #2)
 
-Lane 06 `ef18f91` (on top of the P0 release `9f5e14a`). **Status: built and accepted on staging. NOT deployed** (owner decision pending, see the hold note below).
+Lane 06 `ef18f91`, released as `ba79e37` (with DS-SOURCE-01 and the S2 photo note). **Status: 18/18 — LIVE on the EliteDesk.** Run https://github.com/caosos/michael-business-os/actions/runs/38509446254; ARTIFACT sha=ba79e37…; owner prefs byte-identical across the deploy (1 bid, 13 hidden). Live check: the owner's real Wooley lot watch shows History (1 observation: its $800 / 6:10 PM CT snapshot, MANUAL) on desktop (Chrome) and 390 px phone (no overflow, entry form visible). Nothing was written to the owner's record.
 
 - [x] Preserve existing watch records and bids (re-marking keeps history; pre-P1 records keep their snapshot as observation 1)
 - [x] Watches stay active after OUTBID (counted in the nav)
@@ -155,10 +155,10 @@ Lane 06 `ef18f91` (on top of the P0 release `9f5e14a`). **Status: built and acce
 - [x] Account isolation (per-account prefs; BidWatchStore now uses its own per-account file)
 - [x] Regression tests: 11 new + 17 existing bid tests pass; full suite 82 failed / 700 passed / 1 skipped, every failure already in the P0 list
 - [x] Desktop + mobile browser journey on STAGING (headless Chrome 1440×900 and 390×844 touch): 3 observations, 2 gaps, +$175, no horizontal scroll. Claude in Chrome reaches only port 8766, so it cannot open staging
-- [ ] Deploy to EliteDesk
-- [ ] Loaded revision verified
+- [x] Deploy to EliteDesk
+- [x] Loaded revision verified
 
-**Hold:** the deploy workflow's `PRE_TEST_PREFS` step copies `var/lanes/agent-06.prev-20261013T033042Z/var/market_prefs.json` over the owner's prefs on every run. My Bids records live in that file, so a deploy rolls the owner's bids and history back to the 03:30Z snapshot. Removing those two lines and backing up the owner's live prefs were both refused by the auto-mode permission check, so the deploy waits for the owner.
+**Hold (resolved by DS-SOURCE-01, which removed the step):** the deploy workflow's `PRE_TEST_PREFS` step copies `var/lanes/agent-06.prev-20261013T033042Z/var/market_prefs.json` over the owner's prefs on every run. My Bids records live in that file, so a deploy rolls the owner's bids and history back to the 03:30Z snapshot. Removing those two lines and backing up the owner's live prefs were both refused by the auto-mode permission check, so the deploy waits for the owner.
 
 ## Current work — in order
 
