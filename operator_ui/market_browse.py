@@ -266,6 +266,10 @@ def card(c: dict, tok, now: datetime, pref_buttons) -> str:
     # shown; otherwise this remains a compact text listing with no fake or
     # broken placeholder.
     media = f"<div class='mk-ph'>{img}</div>" if img.startswith("<img") else ""
+    if not media and not c.get("event"):            # S2: a missing photo is said, never left blank (GSA photos need a gsaauctions.gov login)
+        from . import landing_fix
+        why = landing_fix.NO_PHOTO if landing_fix.is_gsa_image(c.get("image")) else "Photo: UNKNOWN (the source gave none)"
+        media = f"<div class='small mut mk-nophoto'>{e(why)}</div>"
     txt, red = countdown(c, now)
     cd = f"<span class='mk-cd{' red' if red else ''}'>{e(txt)}</span>" if txt else ""
     place = e(_where(c)) + (f" · {round(c['distance'], 1):g} mi" if c.get("distance") is not None else " · distance UNKNOWN")
