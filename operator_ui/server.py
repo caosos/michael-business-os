@@ -599,6 +599,13 @@ class App:
         self.oauth_client = accounts.GoogleOAuthClient(self.google_oauth) if self.google_oauth.enabled else None
         callback_host = urlparse(self.google_oauth.redirect_uri).hostname if self.google_oauth.enabled else None
         self.allowed_hosts = ALLOWED_HOSTS | ({callback_host.lower()} if callback_host else set())
+        # Public deployment (dealsniffers.com): there is NO local owner. Loopback Host names are rejected, so a request that reaches the
+        # backend port from this machine (another app, a proxy mistake) cannot become the owner or open an operator page.
+        self.public_only = os.environ.get("MBOS_PUBLIC_DEPLOYMENT") == "1"
+        if self.public_only:
+            if not (self.google_oauth.enabled and urlparse(self.google_oauth.redirect_uri).scheme == "https"):
+                raise SystemExit("MBOS_PUBLIC_DEPLOYMENT=1 needs complete Google sign-in settings with an https:// redirect URI")
+            self.allowed_hosts = {callback_host.lower()}
 
     @property
     def csrf(self):
@@ -1068,7 +1075,7 @@ def make_handler(app):
             return ((raw.split("]", 1)[0] + "]") if raw.startswith("[") else raw.rsplit(":", 1)[0]).lower()
 
         def _loopback(self):
-            return self._host_name() in ALLOWED_HOSTS
+            return not app.public_only and self._host_name() in ALLOWED_HOSTS
 
         def _request_account(self):
             """Resolve only a signed session; loopback otherwise keeps local-owner mode."""

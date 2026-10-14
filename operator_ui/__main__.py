@@ -22,6 +22,11 @@ def main(argv=None):
     a = ap.parse_args(argv)
     if a.cmd == "summary":
         return _summary(a)
+    if os.environ.get("MBOS_PUBLIC_DEPLOYMENT") == "1":           # dealsniffers.com: customer pages only, no spine, no database
+        from .public_store import PublicStore
+        from .server import App, serve
+        serve(App(PublicStore(), operator_pin=None), port=a.port)
+        return 0
 
     from mbos.db.engine import app_engine
 
