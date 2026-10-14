@@ -44,7 +44,7 @@
    "since": "2026-10-11T05:59:23Z"
   }
  ],
- "coordinator_head": "4590034",
+ "coordinator_head": "acd86e6",
  "counts": {
   "BLOCKED": [
    "ARIA-20261012-0034-dealsniffer-morning-acceptance",
@@ -128,11 +128,11 @@
  "currently_running": null,
  "delivery_interface": {
   "claude_cli": true,
-  "quota": "latest reading is 1598 min old (older than 45)",
+  "quota": "latest reading is 1608 min old (older than 45)",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-14T03:21:24Z",
+ "generated_at": "2026-10-14T03:31:27Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "no live Claude session (awaiting connection)",
@@ -144,7 +144,7 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-14T03:21:24Z",
+  "observed_at": "2026-10-14T03:31:27Z",
   "pid": 592613,
   "source": "inbox_pickup process",
   "status": "idle",
