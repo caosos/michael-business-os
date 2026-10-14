@@ -313,7 +313,7 @@ def card(c: dict, tok, now: datetime, pref_buttons) -> str:
     original = (f"<a class='mk-original small' href='{e(c['url'])}' target='_blank' rel='noopener noreferrer'>Original offer</a>" if local and c.get("url") else "")
     return (f"<div class='mk-g mk-card' data-lot='{e(c['id'])}'{kind}>{media}"
             f"<div class='ti'><b>{e(ti)}</b>{flag}</div>{vendor}<div class='small'>{place}</div>{note}<div class='small mut'>{timing}{c.get('closing_badge', '')}</div>{availability}{money}"
-            f"{reason}<div class='mk-card-src'><span class='mk-src'>{e(c['source'])}</span></div>"
+            f"{reason}<div class='mk-card-src'><span class='mk-src'>{e(c['source'])}{' · cached ' + e(str(c.get('fetched_at') or 'UNKNOWN')[:10]) if c.get('historical') else ''}</span></div>"
             f"<div class='mk-vw'>{_view(c)}{original}{save}{mv.hide_button(c, tok)}{more}</div></div>")
 
 
@@ -352,7 +352,7 @@ def source_section(q: dict, fc: dict, now: datetime) -> str:
         state = msp.display_status(r, n)
         checked = all_on or i.key in selected
         box = f"<input type='checkbox' form='mkform' name='source' value='{e(i.key)}'{' checked' if checked else ''}>"
-        active = msp.display_kind(r) in {"provider", "cache", "mailbox_cache", "imported"}
+        active = msp.display_kind(r) in {"historical", "provider", "cache", "mailbox_cache", "imported"}
         rows += (f"<label class='mk-src-row' data-src='{e(i.key)}' data-count='{n}'>{box} {e(i.name)} <span class='mk-n'>({n} matching)</span> "
                  f"<span class='small {'' if active else 'mut'}'>{e(state)}</span></label>")
         if i.key == "gsa" and n == 0 and q.get("loc_mode") != "state" and (q.get("radius") or 0) < 150:

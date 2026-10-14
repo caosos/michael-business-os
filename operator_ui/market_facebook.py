@@ -1,4 +1,9 @@
-"""Facebook Marketplace retrieval through the owner's Bright Data dataset.
+"""Facebook Marketplace listings from the HISTORICAL Bright Data cache.
+
+DS-SOURCE-01 (owner direction, 2026-10-13): DealSniffer never pays for listings. Every paid-provider request is DENIED here, at the
+transport and client, with no environment, credential, argument or caller that can turn it back on: re-enabling a paid provider
+needs a code change and a new owner decision. A configured Bright Data key authorizes nothing. The cache retrieved earlier stays
+readable as historical evidence with its original source, retrieval time and age; it is not a live connection.
 
 This module is deliberately small and dependency-free so the Marketplace UI can
 read Facebook results without depending on the discovery worker. It never stores
@@ -42,6 +47,18 @@ _ITEM_ID = re.compile(r"/marketplace/item/(\d+)")
 
 class BrightDataError(RuntimeError):
     pass
+
+
+class PaidProviderDenied(BrightDataError):
+    """Raised before any paid-provider request could be built or sent."""
+
+
+PAID_PROVIDER_REQUESTS = "DENIED"      # owner direction 2026-10-13; deliberately a constant, not configuration
+DENIED_MESSAGE = "Fresh Facebook retrieval is off: DealSniffer does not use paid listing providers (owner direction, Oct 13, 2026)"
+
+
+def deny_paid_request() -> None:
+    raise PaidProviderDenied(DENIED_MESSAGE + "; no request was sent")
 
 
 class BrightDataPending(BrightDataError):
@@ -127,6 +144,7 @@ def _rows(body: bytes) -> list[dict]:
 
 
 def _urllib(method: str, url: str, headers: dict, body: bytes | None, timeout: float):
+    deny_paid_request()                                   # DS-SOURCE-01: the network transport refuses before a Request exists
     req = Request(url, data=body, headers=headers, method=method)
     try:
         with urlopen(req, timeout=timeout) as response:  # noqa: S310 - fixed Bright Data host only
@@ -140,6 +158,7 @@ def _urllib(method: str, url: str, headers: dict, body: bytes | None, timeout: f
 class BrightDataClient:
     def __init__(self, api_token: str, *, request: Callable = _urllib, sleep: Callable = time.sleep,
                  max_polls: int = 30, poll_seconds: float = 2.0):
+        deny_paid_request()                               # DS-SOURCE-01: no client, whatever its transport or key
         self._token = api_token.strip()
         self._request = request
         self._sleep = sleep
@@ -152,6 +171,7 @@ class BrightDataClient:
                 "Content-Type": "application/json"}
 
     def _call(self, method: str, url: str, payload: dict | None = None):
+        deny_paid_request()                               # also refuses an instance built without __init__
         body = json.dumps(payload).encode() if payload is not None else None
         try:
             status, headers, response = self._request(method, url, self.headers, body, 65.0)
@@ -425,46 +445,10 @@ def load(now: datetime, origin=None, *, keyword: str = "", city: str = "", radiu
          refresh: bool = False, client: BrightDataClient | None = None, path: Path | None = None) -> dict:
     path = path or cache_path()
     cached = _read_cache(path)
-    error = ""
-    api_token = token()
-    wanted = {"keyword": keyword, "city": city, "radius": radius}
-    shards = _fresh_shards(cached, now)
-    wanted_key = _shard_key(wanted)
-    same = shards.get(wanted_key)
-    recent_same = False
-    if same or (cached and cached.get("query") == wanted):
-        try:
-            stamp = (same or cached)["as_of"]
-            recent_same = (now - datetime.fromisoformat(str(stamp).replace("Z", "+00:00"))).total_seconds() < REFRESH_MINUTES * 60
-        except ValueError:
-            pass
-    if refresh and not recent_same and (client or api_token):
-        # The browser request must never sit in a minute-long polling loop.
-        # Start/resume once, return the cached feed, then let the page re-check
-        # this same snapshot.  This does not create a second paid search.
-        active = client or BrightDataClient(api_token, max_polls=1)
-        pending_file = _pending_path(path)
-        pending = _read_pending(pending_file)
-        try:
-            if pending and pending.get("query") == wanted and hasattr(active, "resume"):
-                rows = active.resume(str(pending["snapshot_id"]))
-            elif keyword == DENSITY_QUERY and hasattr(active, "search_many"):
-                rows = active.search_many(DENSITY_TERMS, city, radius)
-            else:
-                rows = active.search(keyword, city, radius)
-            as_of = now.astimezone(timezone.utc).isoformat(timespec="seconds")
-            shards[wanted_key] = {"as_of": as_of, "query": wanted, "records": rows}
-            cached = _cache_document(shards, wanted)
-            _write_cache(path, cached)
-            pending_file.unlink(missing_ok=True)
-        except BrightDataPending as exc:
-            _write_cache(pending_file, {"as_of": now.astimezone(timezone.utc).isoformat(timespec="seconds"),
-                                        "query": wanted, "snapshot_id": exc.snapshot_id, "records": []})
-            error = "Bright Data refresh is still running; Search again shortly to resume the same snapshot"
-        except BrightDataError as exc:
-            error = str(exc)
+    api_token = token()               # reported as configured or not; a key never authorizes a request
+    del keyword, city, radius, refresh, client   # DS-SOURCE-01: Search/Run/refresh arguments and injected clients are ignored; nothing is fetched
     if not cached:
-        why = error or ("Bright Data token is not configured on this host" if not api_token else "No successful Facebook retrieval is cached")
+        why = DENIED_MESSAGE + "; no Facebook listings were retrieved earlier on this machine"
         return {"status": "offline", "name": "Facebook Marketplace", "as_of": None, "age_h": None, "stale": False,
                 "in_scope": 0, "in_file": 0, "cards": [], "fixture": False, "message": why,
                 "credential_configured": bool(api_token)}
@@ -480,17 +464,16 @@ def load(now: datetime, origin=None, *, keyword: str = "", city: str = "", radiu
         except ValueError:
             card_age = 10**6
         card["stale"] = card_age > STALE_HOURS
-    refresh_pending = bool(error.startswith("Bright Data refresh is still running"))
-    message = (f"Facebook refresh is running; showing the last successful cache. {error}" if refresh_pending else
-               f"Live refresh failed; showing the last successful cache. {error}" if error else "")
-    return {"status": "connected", "name": "Facebook Marketplace", "as_of": as_of, "age_h": round(age, 1),
+        card["historical"] = True                         # DS-SOURCE-01: retrieved earlier; the route is off, so this is never live
+    message = f"Historical cache retrieved {as_of[:16].replace('T', ' ')} UTC ({round(age, 1):g} h old). {DENIED_MESSAGE}."
+    return {"status": "connected", "historical": True, "name": "Facebook Marketplace", "as_of": as_of, "age_h": round(age, 1),
             "stale": age > STALE_HOURS, "in_scope": len(result), "in_file": len(cached["records"]), "cards": result,
             "fixture": False, "message": message, "query": cached.get("query"),
-            "credential_configured": bool(api_token), "refresh_pending": refresh_pending}
+            "credential_configured": bool(api_token), "refresh_pending": False}
 
 
 def probe(now: datetime, path: Path | None = None) -> dict:
     data = load(now, path=path)
     return {"status": data["status"], "as_of": data["as_of"], "age_h": data["age_h"],
             "stale": data["stale"], "n": data["in_scope"], "message": data.get("message", ""),
-            "credential_configured": data.get("credential_configured", False)}
+            "credential_configured": data.get("credential_configured", False), "historical": data.get("historical", False)}

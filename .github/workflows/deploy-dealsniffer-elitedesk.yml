@@ -77,11 +77,9 @@ jobs:
           fi
           PREFS="$(PYTHONPATH="var/lanes/agent-06${PYTHONPATH:+:$PYTHONPATH}" .venv/bin/python -c 'from operator_ui import market_prefs; print(market_prefs.path())')"
           FACEBOOK_CACHE="$(PYTHONPATH="var/lanes/agent-06${PYTHONPATH:+:$PYTHONPATH}" .venv/bin/python -c 'from operator_ui import market_facebook; print(market_facebook.cache_path())')"
-          # Attempt 4's provider check used the coordinator-relative fallback
-          # instead of the module's actual preference path. Restore the exact
-          # pre-test owner file captured by that release before proving again.
-          PRE_TEST_PREFS="var/lanes/agent-06.prev-20261013T033042Z/var/market_prefs.json"
-          if [ -f "$PRE_TEST_PREFS" ]; then cp "$PRE_TEST_PREFS" "$PREFS"; fi
+          # DS-SOURCE-01: the live owner file (remembered filters AND My Bids
+          # records) is never replaced by an older release snapshot. The
+          # snapshot/restore below only undoes this run's own proof requests.
           # Every /market proof request is capable of updating remembered
           # filters. Snapshot the real owner file before the FIRST request and
           # restore it on success or failure so test queries never become
@@ -206,25 +204,17 @@ jobs:
           grep -q "^sha=$LANE06$" var/lanes/agent-06/ARTIFACT
           cp var/lanes/agent-06/ARTIFACT "$PROOF_DIR/ARTIFACT"
 
-          # Exercise the real Facebook path once after release. Keep Michael's
-          # remembered filters byte-for-byte unchanged and print configuration
-          # state only; the Bright Data key itself must never enter the log.
+          # DS-SOURCE-01 (owner direction 2026-10-13): no paid provider is ever
+          # called. Facebook is proven from its historical cache only; the
+          # credential line reports configuration and authorizes nothing.
           if [ -n "${BRIGHTDATA_API_KEY:-${BRIGHTDATA_TOKEN:-}}" ] || [ -s /home/michaelos/.config/mbos/secrets/BRIGHTDATA_API_KEY ] || [ -s /home/michaelos/.config/mbos/secrets/BRIGHTDATA_TOKEN ]; then
             CREDENTIAL_CONFIGURED=true
           else
             CREDENTIAL_CONFIGURED=false
           fi
-          printf 'credential_configured=%s\n' "$CREDENTIAL_CONFIGURED" > "$PROOF_DIR/facebook-proof.txt"
-          if [ "$REFRESH_MARKETPLACE" = true ]; then
-            DENSITY_URL='http://127.0.0.1:8766/market?go=1&base=72032&radius=30&source=facebook&cat=all'
-            for ATTEMPT in 1 2 3 4 5 6; do
-              curl -fsS --max-time 180 "$DENSITY_URL" > "$PROOF_DIR/facebook-search.html"
-              ! grep -q "id='facebook-refresh-pending'" "$PROOF_DIR/facebook-search.html" && break
-              sleep 20
-            done
-          else
-            curl -fsS --max-time 30 'http://127.0.0.1:8766/market?base=72032&radius=30&source=facebook&cat=all' > "$PROOF_DIR/facebook-search.html"
-          fi
+          printf 'credential_configured=%s\npaid_provider_requests=DENIED\n' "$CREDENTIAL_CONFIGURED" > "$PROOF_DIR/facebook-proof.txt"
+          curl -fsS --max-time 30 'http://127.0.0.1:8766/market?base=72032&radius=30&source=facebook&cat=all' > "$PROOF_DIR/facebook-search.html"
+          if grep -q "id='facebook-refresh-pending'" "$PROOF_DIR/facebook-search.html"; then echo "a Facebook refresh is pending; paid retrieval must be off" >&2; exit 1; fi
           PYTHONPATH="var/lanes/agent-06${PYTHONPATH:+:$PYTHONPATH}" .venv/bin/python - "$PROOF_DIR/facebook-search.html" <<'PY' | tee "$PROOF_DIR/facebook-render-proof.txt"
           import re, sys
           text = open(sys.argv[1], encoding="utf-8").read()
@@ -233,8 +223,7 @@ jobs:
           cards = re.findall(r"class='mk-g mk-card' data-lot='([^']+)'", text)
           photos = len(re.findall(r"<img[^>]+src='https://", text))
           print(f"facebook_filtered_total={total}\nfacebook_rendered={len(cards)}\nfacebook_rendered_photos={photos}")
-          if total < 25:
-              raise SystemExit(f"Facebook density acceptance failed: expected at least 25 filtered listings, got {total}")
+          print(f"facebook_density_note={'at least 25 historical listings' if total >= 25 else 'fewer than 25 historical listings; no paid refresh is allowed to add more'}")
           if len(cards) != min(total, 50) or len(cards) != len(set(cards)):
               raise SystemExit(f"Facebook first-page DOM mismatch: total={total}, rendered={len(cards)}, unique={len(set(cards))}")
           if not all(marker in text for marker in ("id='pager-top'", "id='pager-bottom'", "Page 1 of")):
@@ -276,20 +265,6 @@ jobs:
           else
             printf 'seed=NONE\n' > "$PROOF_DIR/bid-watch-seed.txt"
           fi
-          set +e
-          PYTHONPATH="var/lanes/agent-06${PYTHONPATH:+:$PYTHONPATH}" .venv/bin/python - <<'PY' >> "$PROOF_DIR/facebook-proof.txt"
-          from datetime import datetime, timezone
-          from pathlib import Path
-          from operator_ui import market_facebook as fb
-          if not fb.cache_path().is_file():
-              d = fb.load(datetime.now(timezone.utc), keyword="trailer", city="72032", radius=30, refresh=True)
-              message = " ".join(str(d.get("message") or "NONE").split())[:800]
-              print(f"provider_status={d.get('status') or 'UNKNOWN'}")
-              print(f"provider_message={message}")
-          PY
-          PROVIDER_PROBE_RC=$?
-          set -e
-          printf 'provider_probe_rc=%s\n' "$PROVIDER_PROBE_RC" >> "$PROOF_DIR/facebook-proof.txt"
           PYTHONPATH="var/lanes/agent-06${PYTHONPATH:+:$PYTHONPATH}" .venv/bin/python - <<'PY' >> "$PROOF_DIR/facebook-proof.txt"
           import json
           from operator_ui import market_facebook as fb
