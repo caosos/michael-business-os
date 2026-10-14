@@ -98,13 +98,13 @@ def test_owner_facing_statuses_distinguish_provider_cache_and_zero_matches(monke
         {"info": info["offerup"], "probe": {"status": "manual", "as_of": None, "age_h": None, "stale": False, "n": 0}, "state": "MANUAL"},
         {"info": info["ebay"], "probe": {"status": "offline", "as_of": None, "age_h": None, "stale": False}, "state": "NOT CONNECTED"},
     ]
-    assert msp.display_status(source_rows[0], 0) == "live provider · cache ready · no matches in this search"
+    assert msp.display_status(source_rows[0], 0) == "historical cache · retrieval off · no matches in this search"   # DS-SOURCE-01
     assert msp.display_status(source_rows[1], 0) == "cache ready · no matches in this search"
     assert msp.display_status(source_rows[2], 2) == "imported"
     assert msp.display_status(source_rows[3], 0) == "manual · no matches in this search"
     assert msp.display_status(source_rows[4], 0) == "not connected"
     monkeypatch.setattr(msp, "rows", lambda now=None: source_rows)
     panel = msp.render(NOW)
-    assert "1 live provider · 1 cache ready · 1 imported · 1 manual · 1 not connected" in panel
-    assert "LIVE PROVIDER · CACHE READY" in panel and "CACHE READY" in panel
+    assert "1 historical cache · 1 cache ready · 1 imported · 1 manual · 1 not connected" in panel
+    assert "HISTORICAL CACHE · RETRIEVAL OFF" in panel and "CACHE READY" in panel
     assert " connected," not in panel

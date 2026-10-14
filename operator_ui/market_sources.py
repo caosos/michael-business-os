@@ -290,21 +290,16 @@ def dedupe(cards: list[dict]) -> list[dict]:
 
 
 def coverage(parts: list[dict]) -> list[dict]:
-    return [{k: d.get(k) for k in ("name", "status", "as_of", "age_h", "stale", "in_scope", "message")} for d in parts]
+    return [{k: d.get(k) for k in ("name", "status", "as_of", "age_h", "stale", "in_scope", "message", "historical")} for d in parts]
 
 
 def load_source(source: str, gsa_path: str | None, now: datetime, origin=None, directory: str | None = None, query: dict | None = None) -> dict:
-    """Dispatch a source or merge the unified pool; Facebook uses the Bright Data cache and refreshes only after explicit Search/Run."""
+    """Dispatch a source or merge the unified pool; Facebook is the historical Bright Data cache, never refreshed (DS-SOURCE-01: no paid provider)."""
     directory = directory if directory is not None else fixture_dir()
     if source == "gsa":
         return ms.load_gsa(gsa_path, now, origin)
     if source == "facebook":
-        q = query or {}
-        selected = {v for v in str(q.get("source") or "facebook").split(",") if v}
-        refresh = bool(q.get("_facebook_refresh")) and bool({"all", "facebook"} & selected)
-        keyword = q.get("keywords") or "tools equipment trailers lawn machinery pallets"
-        d = mfb.load(now, origin, keyword=keyword, city=q.get("base") or "72032",
-                     radius=q.get("radius") or ms.DEFAULT_RADIUS, refresh=refresh)
+        d = mfb.load(now, origin)
         return {**d, "coverage": coverage([d])}
     if source == lds.SOURCE_KEY:
         d = lds.load(now, origin)
@@ -359,6 +354,7 @@ class SourceInfo:
     user_setup: str = ""
     parser: str = "none"
     import_key: str | None = None
+    historical_only: bool = False         # DS-SOURCE-01: a readable cache of a route that is switched off; never LIVE CONNECTED
 
 
 REGISTRY = (
@@ -388,8 +384,8 @@ REGISTRY = (
                "only saved-search alert e-mails you receive are read (never craigslist.org); a test e-mail never counts as live; owner can still paste finds", "connect the DealSniffer alert address or paste an original listing link", "alerts:craigslist", "LIVE CONNECTED",
                "https://littlerock.craigslist.org/", "Create a Craigslist saved search and forward its alert e-mails, or paste an original listing link into Your finds.", "alert parser ready", "craigslist"),
     SourceInfo("facebook", "Facebook Marketplace", "classifieds", "local (ZIP/city + radius)", "provider API", "item", "none; contact sellers yourself",
-               "Bright Data provider route; public listing fields only; seller/profile/contact fields are dropped before caching",
-               "configure BRIGHTDATA_TOKEN; successful results are cached and merged into this feed", "facebook", "LIVE CONNECTED"),
+               "HISTORICAL CACHE ONLY: the paid Bright Data route is off (owner direction, Oct 13, 2026); earlier results stay readable with their retrieval time",
+               "find a permitted free route (source plan S3); no paid provider", "facebook", "LIVE CONNECTED", historical_only=True),
     SourceInfo("local_deals", "Authorized local deals", "local business offers", "city/ZIP + radius selected by the user", "reviewed import", "item offer", "redeem or purchase with the named business; DealSniffer does not transact",
                "only reviewed public offers or authority-attested vendor submissions; expiration is enforced; imports are not a live connection",
                "onboard one authorized Conway-area vendor and import a current, expiring offer with its original source evidence", "local_deals", "IMPORTED",
@@ -462,6 +458,8 @@ def source_state(info: SourceInfo, pr: dict) -> str:
     """Exactly one of STATES. LIVE CONNECTED only for a real cached read (probe status `connected`); a fixture, a missing cache or a stale-less guess never is."""
     if info.intended == "BLOCKED":
         return "BLOCKED"
+    if info.historical_only:
+        return "NOT CONNECTED"
     if info.intended == "MANUAL":
         return "MANUAL"
     if info.intended == "IMPORTED":

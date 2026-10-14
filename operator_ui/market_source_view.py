@@ -30,6 +30,9 @@ def _row(c: dict) -> str:
     n = e(c["name"])
     if c["status"] == "offline":
         return f"<li data-src='{n}' data-status='offline'><b class='bad'>{n}: offline</b> · {e(c.get('message') or 'no cached read; nothing is shown')}</li>"
+    if c["status"] == "connected" and c.get("historical"):         # DS-SOURCE-01: a cache of a switched-off route, not a connection
+        return (f"<li data-src='{n}' data-status='historical'><b>{n}: HISTORICAL CACHE (not connected)</b> · retrieved {e(str(c['as_of'])[:16].replace('T', ' '))} UTC "
+                f"({c['age_h']:g} h ago){' · <b class=bad>STALE</b>' if c['stale'] else ''} · {c['in_scope']} listings · fresh retrieval is off: no paid provider</li>")
     if c["status"] == "connected":
         unit = "auction events (not lots)" if c["name"] in msrc.EVENT_NAMES else "listings" if c["name"] == "Craigslist" else "lots"
         note = f" · {e(c['message'])}" if c.get("message") else ""

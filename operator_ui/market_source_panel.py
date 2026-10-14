@@ -21,6 +21,8 @@ def display_kind(row: dict) -> str:
     rows, so the picker never collapses both into the word ``connected``.
     """
     info, probe, state = row["info"], row["probe"], row["state"]
+    if info.historical_only:
+        return "historical" if probe.get("status") == "connected" else "not_connected"
     if probe.get("status") == "fixture":
         return "fixture"
     if state == "BLOCKED":
@@ -45,6 +47,7 @@ def display_status(row: dict, matching: int | None = None) -> str:
     kind = display_kind(row)
     label = {
         "provider": "live provider · cache ready",
+        "historical": "historical cache · retrieval off",
         "cache": "cache ready",
         "mailbox_cache": "mailbox feed · cache ready",
         "waiting": "mailbox ready · waiting for alerts",
@@ -54,7 +57,7 @@ def display_status(row: dict, matching: int | None = None) -> str:
         "blocked": "blocked",
         "not_connected": "not connected",
     }[kind]
-    if matching == 0 and kind in {"provider", "cache", "mailbox_cache", "waiting", "imported", "manual"}:
+    if matching == 0 and kind in {"historical", "provider", "cache", "mailbox_cache", "waiting", "imported", "manual"}:
         label += " · no matches in this search"
     return label
 
@@ -69,6 +72,9 @@ def rows(now: datetime | None = None) -> list[dict]:
 
 
 def _fresh(pr: dict) -> str:
+    if pr["status"] == "connected" and pr.get("historical"):
+        return (f"HISTORICAL CACHE retrieved {e(str(pr['as_of'])[:16].replace('T', ' '))} UTC ({pr['age_h']:g} h ago) · "
+                "fresh retrieval is off: no paid provider")
     if pr["status"] == "connected":
         return f"last success {e(str(pr['as_of'])[:16].replace('T', ' '))} UTC ({pr['age_h']:g} h ago){' · STALE' if pr['stale'] else ''}"
     if pr["status"] == "fixture":
@@ -80,8 +86,6 @@ def _fresh(pr: dict) -> str:
     if pr["status"] == "imported":
         return (f"{pr['n']} active reviewed import(s) · last import {e(str(pr['as_of'])[:16].replace('T', ' '))} UTC"
                 + (f" · {pr.get('expired', 0)} expired and hidden" if pr.get("expired") else ""))
-    if pr.get("credential_configured"):
-        return "Bright Data credential configured; no successful cached read yet — press Search to run one"
     if pr.get("message"):
         return e(pr["message"])
     return "never read on this machine"
@@ -95,14 +99,14 @@ def render(now: datetime | None = None, status: str = "") -> str:
         i, pr, st = r["info"], r["probe"], r["state"]
         kind = display_kind(r)
         label = display_status(r)
-        cls = "" if kind in {"provider", "cache", "mailbox_cache", "imported"} else " class='mut'"
+        cls = "" if kind in {"historical", "provider", "cache", "mailbox_cache", "imported"} else " class='mut'"
         body += (f"<tr data-src='{e(i.key)}' data-state='{e(st)}'{cls}><td><b>{e(i.name)}</b><br><span class='small'>{e(i.cls)}</span></td><td>{e(i.geography)}</td>"
                  f"<td>{e(i.path)}<br><span class='small'>{e(i.granularity)}</span></td><td class='small'>{e(i.bidding)}</td><td class='small'>{_fresh(pr)}</td>"
                  f"<td class='small'>{e(i.constraint)}</td><td><span class='badge'>{e(label.upper())}</span></td><td class='small'>{e(i.next_step)}</td></tr>")
     head = "".join(f"<th>{h}</th>" for h in ("Source", "Geography", "Retrieval / granularity", "Account / bid", "Freshness", "Constraints", "State", "Next step"))
     counts = {k: sum(display_kind(r) == k for r in rs) for k in (
-        "provider", "cache", "mailbox_cache", "waiting", "imported", "manual", "fixture", "blocked", "not_connected")}
-    labels = (("provider", "live provider"), ("cache", "cache ready"), ("mailbox_cache", "mailbox cache ready"),
+        "historical", "provider", "cache", "mailbox_cache", "waiting", "imported", "manual", "fixture", "blocked", "not_connected")}
+    labels = (("historical", "historical cache"), ("provider", "live provider"), ("cache", "cache ready"), ("mailbox_cache", "mailbox cache ready"),
               ("waiting", "mailbox waiting"), ("imported", "imported"), ("manual", "manual"),
               ("fixture", "fixture"), ("blocked", "blocked"), ("not_connected", "not connected"))
     summary = " · ".join(f"{counts[k]} {label}" for k, label in labels if counts[k]) or "no sources configured"
