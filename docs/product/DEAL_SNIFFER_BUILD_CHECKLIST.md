@@ -99,6 +99,28 @@ Recorded from Michael's DS-SOURCE-01 brief. It amends the earlier Facebook/Brigh
 - [x] **GSA pay-by / remove-by as published:** 36 → 301 of 1,072 lots. Live: the 2008 travel trailer shows "Pay by OCT 16 (as published)" and "Remove by OCT 28 (as published)". No year guessed; "within N business days" shown as written.
 - [x] **USPS town names:** Hot Springs National Park, Cleveland and Prim AR point at existing Census entries (place Hot Springs; ZIPs 72030, 72130). Live: 7 Facebook listings gained distances (53.3 / 26.8 / 45.1 mi); 9 out-of-state listings (AL, IL, KS, MO) stay distance UNKNOWN.
 
+## Overnight Oct 14 (owner asleep) — what changed and the morning steps
+
+- **Google sign-in on dealsniffers.com WORKS** (owner signed in). Fix: Google returns the email/profile grants also under their long names; the
+  scope check now treats those as the same grants (lane 06 `6dfa018`).
+- **Same Marketplace layout with no data** (the public site showed a bare status list); empty site now keeps search bar, filters and sources,
+  says "No listings yet" and lists each source's status (`7f31c65`, `92026d1`).
+- **Property is opt-in even under "All categories"** (owner rule): All = every category except Land/Real Estate unless Land is ticked
+  (server rule, sidebar script and checkboxes agree). EliteDesk check: the 4 real-estate auctions left the owner's 25-mi view.
+- **Alert e-mails (Craigslist / GovDeals / Public Surplus) were never read:** the release never copied `refresh_alert_mail.py` and the
+  config pointed at a Gmail label that was never created. Fixed (coordinator `576eb24`; config folder → INBOX, backup
+  `~/.config/mbos/discovery-alerts.toml.bak-20261014`). Live read 09:22 UTC: mailbox OK, 1 message, 0 from alert senders. All three now
+  "mailbox ready · waiting for alerts". EliteDesk loaded `92026d1` (run 38541604586); owner prefs byte-identical.
+- **Linode package** (coordinator `0e5167f`+, UI pin `92026d1`): hourly `dealsniffer-refresh` (GSA official API with DEMO_KEY or owner key,
+  auctioneers' event pages, alert e-mails when `configure_alerts.sh` is run), installed but owner-enabled; tested in test mode.
+
+**Morning (owner):**
+1. Craigslist (only permitted route = its own alert e-mails): sign in to craigslist.org as dealsniffer2026@gmail.com (create the account if
+   needed), search for-sale in Little Rock / central Arkansas for e.g. "trailer", "utility trailer", "log splitter", "outboard", "mower",
+   "tools", save each search and turn on e-mail alerts. Listings appear in DealSniffer after the first alert e-mails arrive (hourly read).
+2. Linode update block (Agent 01 provides): checkout the new package commit, install.sh, restart, then optionally configure_alerts.sh and
+   enable the refresh timer so the public site gets GSA, auction events and the same alert listings.
+
 ## Linode public site (dealsniffers.com) — status Oct 14, ~3:00 AM CT (paused by owner)
 
 Package `deploy/linode` (coordinator `91ac23b`; UI `7c47008` public mode, mbos `50c2bca`, discovery `cda8673`, economics `4bc91f3`, lock `683b1d22fdd5`).
