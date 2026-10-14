@@ -196,3 +196,16 @@ def test_deploy_workflow_has_no_paid_provider_or_owner_prefs_overwrite_path():
             assert re.search(r"source=(?!facebook|all)\w+", url) and "source=facebook" not in url and "source=all" not in url, url
     assert "PRE_TEST_PREFS" not in text                                           # never copy an old snapshot over live bids/filters
     assert "paid_provider_requests=DENIED" in text
+
+
+def test_card_without_a_usable_photo_says_why():
+    """S2: GSA image links need a GSA login (HTTP 401), so the card says so instead of showing nothing; other sources say UNKNOWN."""
+    from operator_ui import market_browse as mbr, market_view as mv
+    base = {"id": "3-1-X-1", "title": "Trailer", "url": "https://www.gsaauctions.gov/auctions/preview/1", "bid": None, "bidders": None,
+            "closes": "2026-10-20", "city": "Conway, AR", "state": "AR", "zip": "72032", "distance": 2.0, "source": "GSA Auctions",
+            "source_key": "gsa", "kind": "auction", "fetched_at": AS_OF, "stale": False, "labels": {}, "category": "trailers"}
+    tok = lambda: ""  # noqa: E731
+    gsa = mbr.card({**base, "image": "https://www.ppms.gov/gw/auction/ppms/api/v1/auction/image/1.jpg"}, tok, NOW, mv.pref_buttons)
+    assert "Photo is behind GSA&#x27;s login" in gsa and "<img" not in gsa
+    none = mbr.card({**base, "image": None, "source": "Wooley Auctioneers", "source_key": "wooley"}, tok, NOW, mv.pref_buttons)
+    assert "Photo: UNKNOWN (the source gave none)" in none
