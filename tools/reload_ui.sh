@@ -71,7 +71,7 @@ BASE_MARK=0; case "$(curl -s -m 20 "$BASE:$PORT/market" 2>/dev/null || true)" in
 echo "baseline of the current UI: /market HTTP $BASE_CODE, marketplace marker $BASE_MARK"
 
 # ---- point of no return ----
-start_ui() { tmux new-session -d -s mbos-dev-ui "cd $PWD && set -a && . var/dev.env && . var/owner.env && set +a && MBOS_OPERATOR_PIN=\$(cat var/ui.pin) exec .venv/bin/python -u -m operator_ui serve --port $PORT 2>&1 | tee -a var/ui.log"; }
+start_ui() { tmux new-session -d -s mbos-dev-ui "cd $PWD && set -a && . var/dev.env && . var/owner.env && { [ ! -f \$HOME/.config/mbos/google-oauth.env ] || . \$HOME/.config/mbos/google-oauth.env; } && set +a && MBOS_OPERATOR_PIN=\$(cat var/ui.pin) exec .venv/bin/python -u -m operator_ui serve --port $PORT 2>&1 | tee -a var/ui.log"; }
 rollback_ok() {  # the old UI must give the SAME healthy answer it gave before (a 500, a 000 or a missing marker is NOT recovery)
   local code body; code=$(curl -s -m 10 -o /dev/null -w '%{http_code}' "$BASE:$PORT/market" 2>/dev/null || echo 000)
   [ "$code" != "000" ] && [ "$code" -lt 500 ] 2>/dev/null || return 1
