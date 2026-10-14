@@ -60,9 +60,10 @@ ORIGINS = {o.source: o for o in [
     Origin("estatesales_net_email", "estatesales.net", re.compile(r"/[A-Z]{2}/[^/]+/[0-9]{5}/([0-9]+)"), "buy_item",
            event_sale=True),
     # B-36: Craigslist saved-search alerts (our own inbox only; craigslist.org pages are never fetched).
-    # Path forms: /<cat>/d/<slug>/<id>.html (current) and /<cat>/<id>.html (older). INFERENCE: real layout UNKNOWN until
-    # the first genuine alert is in DealSniffer/Alerts.
-    Origin("craigslist_email", "craigslist.org", re.compile(r"/(?:[a-z]{3}/d/[^/]+|[a-z]{3})/([0-9]{8,})\.html"),
+    # Path forms: /view/d/<town-title slug>/<opaque id> (OBSERVED in genuine alerts from alerts@alerts.craigslist.org, Oct 14 2026,
+    # links on www.craigslist.org), and the older /<cat>/d/<slug>/<id>.html and /<cat>/<id>.html on <region>.craigslist.org.
+    Origin("craigslist_email", "craigslist.org",
+           re.compile(r"^/view/d/[^/]+/([A-Za-z0-9]{10,40})$|/(?:[a-z]{3}/d/[^/]+|[a-z]{3})/([0-9]{8,})\.html"),
            "buy_item", regional=True),
 ]}
 
@@ -160,9 +161,21 @@ class ParsedListing:
     region: str = ""        # host subdomain for regional origins (Craigslist), else ""
 
 
+def _unmangle(text: str) -> str:
+    """Undo UTF-8 that was encoded twice (OBSERVED in genuine Craigslist alerts: 'Mechanic’s' arrives as 'Mechanicâ\x80\x99s').
+    Text without that pattern, or that does not round-trip cleanly, is returned unchanged."""
+    if not re.search("[\u00c2-\u00f4][\u0080-\u00bf]", text or ""):
+        return text
+    try:
+        return text.encode("latin-1").decode("utf-8")
+    except (UnicodeEncodeError, UnicodeDecodeError):
+        return text
+
+
 def _authenticated(msg, domain: str) -> bool:
     for h in msg.get_all("Authentication-Results", []) or []:
-        for m in re.finditer(r"dkim=(\w+)[^;]*?header\.d=([\w.\-]+)", str(h), re.IGNORECASE):
+        # header.d=<domain>, or Gmail's form header.i=@<domain> (OBSERVED on genuine Craigslist alerts, Oct 14 2026)
+        for m in re.finditer(r"dkim=(\w+)[^;]*?header\.(?:d=|i=[^@\s;]*@)([\w.\-]+)", str(h), re.IGNORECASE):
             if m.group(1).lower() == "pass" and (m.group(2).lower() == domain or m.group(2).lower().endswith("." + domain)):
                 return True
     return False
@@ -191,6 +204,15 @@ def parse_alert(origin: Origin, source_bytes: bytes) -> tuple[dict, list[ParsedL
         links = [tuple(x) for x in p.links]
     seen: dict[str, ParsedListing] = {}
     thumbs: dict[str, str] = {}
+    # Regional origins whose listing links are on www (Craigslist /view/d/...): the region is the saved search's own area, taken from
+    # the alert's "view all" link (/search/area/<region>). Absent -> "" (UNKNOWN).
+    area = ""
+    if origin.regional:
+        for href, *_ in links:
+            am = re.match(r"https://www\.craigslist\.org/search/area/([a-z]{2,20})\b", href or "")
+            if am:
+                area = am.group(1)
+                break
     for href, text, tail, img in links:
         u = urlsplit(href or "")
         host = (u.hostname or "").lower()
@@ -204,9 +226,13 @@ def parse_alert(origin: Origin, source_bytes: bytes) -> tuple[dict, list[ParsedL
         if (origin.regional and iu.scheme == "https" and (iu.hostname or "").lower().endswith("." + origin.domain)
                 and lid not in thumbs):
             thumbs[lid] = f"https://{iu.hostname.lower()}{iu.path}"       # tracking query dropped
-        title = clean_text(text, 300)
+        title = clean_text(_unmangle(text) if origin.regional else text, 300)
+        if origin.regional:
+            tail = _unmangle(tail)
         if lid not in seen and title:
             region = host[: -len(origin.domain) - 1] if origin.regional and host != origin.domain else ""
+            if origin.regional and region == "www":
+                region = area
             seen[lid] = ParsedListing(lid, f"https://{host}{u.path}" + (f"?{u.query}" if u.query else ""),
                                       title, clean_text(tail, 600), region=region)
     for lid, lst in list(seen.items()):
@@ -223,6 +249,20 @@ _BARE_PRICE = re.compile(r"(?<![\w$])\$\s?([0-9][0-9,]*(?:\.[0-9]{2})?)")
 _NEIGHBORHOOD = re.compile(r"\(([^()]{2,60})\)")
 _ENDS = re.compile(r"(?:ends|closes|closing|end date)\s*:?\s*(20[0-9]{2}-[0-9]{2}-[0-9]{2})", re.IGNORECASE)
 _PLACE = re.compile(r"\b([A-Z][a-zA-Z .'-]{1,30}),\s*([A-Z]{2})\b(?:\s+([0-9]{5}))?")
+
+
+def _slug_town(url: str, title: str) -> str:
+    """Craigslist /view/d/<town>-<title>/<id>: the words before the slugified title, e.g. 'redfield-log-splitter' + 'Log splitter' ->
+    'redfield'. Used only when the alert shows no '(Town)'. INFERENCE (unverified); '' when the title cannot be located in the slug."""
+    m = re.match(r"https://www\.craigslist\.org/view/d/([a-z0-9-]+)/", url or "")
+    words = re.findall(r"[a-z0-9]+", title.lower())
+    if not m or not words:
+        return ""
+    slug = m.group(1)
+    i = slug.find("-" + "-".join(words[:2]))
+    if i <= 0 and len(words) > 1:
+        i = slug.find("-" + words[0] + "-")
+    return slug[:i].replace("-", " ") if i > 0 else ""
 
 
 # ---------------------------------------------------------------- adapter
@@ -333,6 +373,7 @@ class EmailAlertAdapter(SourceAdapter):
             lines = [clean_text(ctx, MAX_DESCRIPTION - 400) if ctx else "",
                      f"Craigslist region: {lst.region or 'UNKNOWN'}",
                      f"Neighborhood/location text (as shown, unverified): {clean_text(nb.group(1), 60) if nb else 'UNKNOWN'}",
+                     f"Town in listing link (unverified): {_slug_town(lst.url, lst.title) or 'UNKNOWN'}",
                      f"Thumbnail: {lst.thumb or 'UNKNOWN'}",
                      f"Alert received: {facts['date']}"]
             normalized["description"] = "\n".join(x for x in lines if x)
