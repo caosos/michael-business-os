@@ -240,3 +240,30 @@ def test_not_configured_is_explicit_and_local_owner_mode_still_opens_market(monk
         httpd.shutdown()
         httpd.server_close()
         thread.join(timeout=5)
+
+
+@pytest.mark.parametrize("scope,ok", [
+    # exactly what Google returned on the live dealsniffers.com sign-in (2026-10-14)
+    ("email profile https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email openid", True),
+    ("openid https://www.googleapis.com/auth/userinfo.email", True),
+    ("openid email profile https://www.googleapis.com/auth/gmail.readonly", False),     # a real extra permission is still refused
+    ("email profile", False),                                                           # no openid
+])
+def test_google_long_scope_names_are_the_same_grants_but_extras_are_refused(scope, ok):
+    cfg = accounts.google_oauth_config(ENV)
+    flow = accounts.OAuthFlow("state-value-1234567890", "nonce-value-1234567890", "v" * 64, "/settings")
+    claims = {"iss": "https://accounts.google.com", "aud": cfg.client_id, "sub": "google-sub-1", "email": "owner@example.com",
+              "email_verified": True, "name": "Owner", "nonce": flow.nonce, "iat": 1_700_000_000, "exp": 1_700_003_600}
+
+    def opener(request, timeout):
+        if request.full_url == accounts.GOOGLE_TOKEN_ENDPOINT:
+            return Response({"token_type": "Bearer", "scope": scope, "access_token": "x", "id_token": jwt(claims)})
+        return Response({"keys": [{"kid": "test-key", "kty": "RSA", "use": "sig", "alg": "RS256", "n": b64int(N), "e": b64int(E)}]},
+                        {"Cache-Control": "public, max-age=3600"})
+
+    client = accounts.GoogleOAuthClient(cfg, opener=opener)
+    if ok:
+        assert client.authenticate("one-time-code", flow, now=1_700_000_010).email == "owner@example.com"
+    else:
+        with pytest.raises(accounts.OAuthError, match="unexpected permissions"):
+            client.authenticate("one-time-code", flow, now=1_700_000_010)

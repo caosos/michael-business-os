@@ -33,6 +33,8 @@ from urllib.request import Request, urlopen
 
 LOCAL_OWNER_ID = "local-owner"
 GOOGLE_SCOPES = ("openid", "email", "profile")
+GOOGLE_SCOPE_ALIASES = {"https://www.googleapis.com/auth/userinfo.email": "email",
+                        "https://www.googleapis.com/auth/userinfo.profile": "profile"}
 _SUB = re.compile(r"^[A-Za-z0-9._:@+-]{1,255}$")
 GOOGLE_AUTHORIZATION_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth"
 GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token"
@@ -441,7 +443,8 @@ class GoogleOAuthClient:
         token = self._json_request(req, "Google token exchange failed")
         if token.get("token_type", "").lower() != "bearer" or not isinstance(token.get("id_token"), str):
             raise OAuthError("Google token response was incomplete")
-        granted = set(str(token.get("scope") or " ".join(self.config.scopes)).split())
+        # Google reports email/profile under their long names too ("…/auth/userinfo.email"); those are the same grants, not extras.
+        granted = {GOOGLE_SCOPE_ALIASES.get(s, s) for s in str(token.get("scope") or " ".join(self.config.scopes)).split()}
         if "openid" not in granted or not granted.issubset(set(self.config.scopes)):
             raise OAuthError("Google granted unexpected permissions")
         claims = self.verify_id_token(token["id_token"], flow.nonce, now=now)
