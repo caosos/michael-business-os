@@ -292,7 +292,7 @@ def card(c: dict, tok, now: datetime, pref_buttons) -> str:
         price = c.get("price") if c.get("price") is not None else c.get("bid")
         label = "deal price" if local else "asking price" if c.get("price_type") == "asking" else "fixed price"
         unit = f" {e(c['unit'])}" if c.get("unit") else ""
-        shown = f"${price:,.2f}" if c.get("unit") else f"${price:,.0f}"
+        shown = "" if price is None else f"${price:,.2f}" if c.get("unit") else f"${price:,.0f}"
         money = f"<div class='pr'>{shown}{unit}</div><div class='small mut'>{label}</div>" if price is not None else "<div class='pr'>Price not stated</div><div class='small mut'>check original listing</div>"
     else:
         bd = c.get("bidders")
