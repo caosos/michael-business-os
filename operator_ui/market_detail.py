@@ -257,6 +257,26 @@ def local_deal_page(c: dict, now: datetime) -> str:
     return f"<div class='dt-grid'>{photo or ''}<div>{facts}</div></div>"
 
 
+_MONTH = r"(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?"
+_DATE = r"(\d{1,2}[/.\-]\d{1,2}(?:[/.\-]\d{2,4})?|" + _MONTH + r"\s+\d{1,2}(?:,?\s+\d{4})?)"
+_DEADLINE = {"pay": r"\bpay(?:ment)?\s*(?:is\s*)?(?:due\s*)?(?:by|on\s+or\s+before)\W{0,3}",
+             "remove": r"\bremov(?:e|ed|al)\s*(?:is\s*)?(?:by|on\s+or\s+before)\W{0,3}"}
+_WITHIN = {"pay": r"\bpa(?:y|id|yment)\b[^.;]{0,30}?\bwithin\s+(\d{1,2}\s+(?:business\s+|calendar\s+)?days?)",
+           "remove": r"\bremov(?:e|ed|al)\b[^.;]{0,30}?\bwithin\s+(\d{1,2}\s+(?:business\s+|calendar\s+)?days?)"}
+
+
+def deadline(text: str | None, kind: str) -> str | None:
+    """GSA pay-by / remove-by from the published instruction text, exactly as written (no year is guessed, nothing is computed).
+    'PAY BY: OCT 16', 'Payment is due by 10/20/26', 'REMOVAL BY 10-28-26' -> the date as published; 'removed within 10 business days'
+    -> 'within 10 business days of the sale (as published)'. None (shown UNKNOWN) when the text states neither."""
+    t = text or ""
+    m = re.search(_DEADLINE[kind] + _DATE, t, re.I)
+    if m:
+        return f"{' '.join(m.group(1).split())} (as published)"
+    m = re.search(_WITHIN[kind], t, re.I)
+    return f"within {' '.join(m.group(1).split())} of the sale (as published)" if m else None
+
+
 def render(c: dict, raw: dict | None, pool: list[dict], prefs: dict, now: datetime, tok, q: dict | None = None) -> str:
     kind = "Auction event" if c.get("event") else "Local deal" if c.get("source_key") == "local_deals" else "Listing"
     stale = " <b class='bad'>STALE: cached data may be out of date</b>" if c.get("stale") else ""
@@ -287,8 +307,7 @@ def render(c: dict, raw: dict | None, pool: list[dict], prefs: dict, now: dateti
     cond = next((v for k, v in sec.items() if k.lower().startswith("condition")), None)
     insp = next((v for k, v in sec.items() if k.lower().startswith("inspection")), None)
     ins_txt = _txt(r.get("instruction"))
-    pay = re.search(r"pay\s*by\W+([\d/.\-]+)", ins_txt or "", re.I)
-    rem = re.search(r"remove\s*by\W+([\d/.\-]+)", ins_txt or "", re.I)
+    pay, rem = deadline(ins_txt, "pay"), deadline(ins_txt, "remove")
     desc = clean_html(r.get("lotInfo")) if r.get("lotInfo") else (f"<p>{e(c['description'])}</p>" if c.get("description") else "<p class='mut'>No description from the seller</p>")
     addr = _address(c, raw)
     osm = f" <a href='{OSM}{quote(addr)}' target='_blank' rel='noopener noreferrer'>View on OpenStreetMap</a>" if addr else ""
@@ -297,7 +316,7 @@ def render(c: dict, raw: dict | None, pool: list[dict], prefs: dict, now: dateti
     insp_html = (f"<div>{clean_html(insp)}</div>" if insp else "") + (f"<p><b>Instruction (as published):</b> {e(ins_txt)}</p>" if ins_txt else "")
     if not insp_html:
         insp_html = "<p><span class='lbl'>UNKNOWN</span> no inspection or removal text in the cached record</p>"
-    dates = "<table>" + kv("Pay by", pay.group(1) if pay else None) + kv("Remove by", rem.group(1) if rem else None) + "</table>"
+    dates = "<table>" + kv("Pay by", pay) + kv("Remove by", rem) + "</table>"
     cust = "<table>" + kv("Custodian / sales office", _txt(r.get("locationOrg"))) + kv("Office address", ", ".join(x for x in (_txt(r.get("locationStAddr")), _txt(r.get("locationCity")), _txt(r.get("locationST")), _txt(r.get("locationZip"))) if x) or None) \
         + kv("Sale location", _txt(r.get("saleLocation"))) + kv("Contracting officer (as published)", _txt(r.get("contractOfficer"))) + kv("Contact e-mail (as published)", _txt(r.get("coEmail"))) \
         + kv("Contact phone (as published)", _txt(r.get("coPhone"))) + "</table>"
