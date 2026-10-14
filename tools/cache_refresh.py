@@ -159,7 +159,7 @@ def alerts_env(config: Path = MAILBOX_CONFIG, secret: Path = MAILBOX_SECRET) -> 
         return None
     return {"MBOS_ALERT_IMAP_HOST": imap.get("host", "imap.gmail.com"), "MBOS_ALERT_IMAP_USER": user,
             "MBOS_ALERT_IMAP_PASSWORD_ENV": "MBOS_IMAP_PASSWORD", "MBOS_IMAP_PASSWORD": pw,
-            "MBOS_ALERT_IMAP_FOLDER": imap.get("folder", "DealSniffer/Alerts")}
+            "MBOS_ALERT_IMAP_FOLDER": imap.get("folder", "INBOX")}     # the dedicated alerts mailbox's inbox; no Gmail label is required
 
 
 def start_alerts_refresh(root: Path, now: datetime, state: dict, ps_lines: list[str],

@@ -32,5 +32,6 @@ echo "installed lane 02 $SHA02 into the coordinator venv"
 if ! tools/reload_ui.sh "$SHA06"; then restore_pkg; echo "RELEASE NOT DONE: reload_ui.sh did not succeed (see above; it rolled the UI back); package restored"; exit 1; fi
 
 mkdir -p var/lanes/agent-06/tools && git show "$SHA06:tools/refresh_auction_events.py" > var/lanes/agent-06/tools/refresh_auction_events.py
+git show "$SHA06:tools/refresh_alert_mail.py" > var/lanes/agent-06/tools/refresh_alert_mail.py    # read by the watchdog's hourly alert-mailbox refresh (Craigslist/GovDeals/Public Surplus alerts)
 $PY var/lanes/agent-06/tools/refresh_auction_events.py --live || echo "WARNING: an auction refresh reported an error (the UI is released; an old or missing cache shows as offline honestly)"
 echo "RELEASED: UI $SHA06 with lane 02 $SHA02; auction caches refreshed. Package backup kept at $BK"
