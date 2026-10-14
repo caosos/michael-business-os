@@ -39,6 +39,8 @@ STALE_HOURS = 6
 REFRESH_MINUTES = 15
 TOKEN_FILE = Path("~/.config/mbos/secrets/BRIGHTDATA_TOKEN")
 API_KEY_FILE = Path("~/.config/mbos/secrets/BRIGHTDATA_API_KEY")
+# Owner direction (Oct 14, 2026): stale Facebook listings are never shown. The retrieved cache stays on disk, unread.
+SHOW_HISTORICAL = False
 DEFAULT_CACHE = Path(__file__).resolve().parent.parent / "var" / "cache" / "facebook-marketplace.json"
 COMPLIANCE = "UNKNOWN (owner-authorized Bright Data provider route; public listing data only)"
 _PRIVATE = re.compile(r"seller|profile|owner|user_?name|user_?id|poster|vendor|contact", re.I)
@@ -447,8 +449,9 @@ def load(now: datetime, origin=None, *, keyword: str = "", city: str = "", radiu
     cached = _read_cache(path)
     api_token = token()               # reported as configured or not; a key never authorizes a request
     del keyword, city, radius, refresh, client   # DS-SOURCE-01: Search/Run/refresh arguments and injected clients are ignored; nothing is fetched
-    if not cached:
-        why = DENIED_MESSAGE + "; no Facebook listings were retrieved earlier on this machine"
+    if not cached or not SHOW_HISTORICAL:
+        why = DENIED_MESSAGE + ("; no Facebook listings were retrieved earlier on this machine" if not cached else
+                                "; the old Facebook listings are not shown (owner direction, Oct 14, 2026: no stale listings)")
         return {"status": "offline", "name": "Facebook Marketplace", "as_of": None, "age_h": None, "stale": False,
                 "in_scope": 0, "in_file": 0, "cards": [], "fixture": False, "message": why,
                 "credential_configured": bool(api_token)}

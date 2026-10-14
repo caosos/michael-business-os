@@ -26,6 +26,12 @@ NOW = datetime(2026, 10, 13, 23, 0, tzinfo=timezone.utc)
 WORKFLOW = Path(__file__).resolve().parent.parent / ".github" / "workflows" / "deploy-dealsniffer-elitedesk.yml"
 
 
+@pytest.fixture(autouse=True)
+def _show_historical(monkeypatch):
+    """These tests exercise the historical-cache display path; the owner turned it off on Oct 14 (see test_owner_hides_stale_facebook)."""
+    monkeypatch.setattr(fb, "SHOW_HISTORICAL", True)
+
+
 @pytest.fixture()
 def attempts(monkeypatch):
     """Record and refuse every non-loopback connection and every paid-provider URL, at three layers."""
@@ -209,3 +215,16 @@ def test_card_without_a_usable_photo_says_why():
     assert "Photo is behind GSA&#x27;s login" in gsa and "<img" not in gsa
     none = mbr.card({**base, "image": None, "source": "Wooley Auctioneers", "source_key": "wooley"}, tok, NOW, mv.pref_buttons)
     assert "Photo: UNKNOWN (the source gave none)" in none
+
+
+def test_owner_hides_stale_facebook(monkeypatch, tmp_path):
+    """Owner direction (Oct 14, 2026): stale Facebook listings are never shown; the cache file is left on disk, unread and unchanged."""
+    monkeypatch.setattr(fb, "SHOW_HISTORICAL", False)
+    path = tmp_path / "facebook-marketplace.json"
+    rows = [{"listing_id": "1", "title": "QZHIST utility trailer", "final_price": "100", "location": "Conway, AR",
+             "url": "https://www.facebook.com/marketplace/item/1/"}]
+    path.write_text(json.dumps({"as_of": AS_OF, "query": {"keyword": "trailer"}, "records": rows}))
+    before = path.read_bytes()
+    d = fb.load(NOW, path=path)
+    assert d["cards"] == [] and d["in_scope"] == 0 and d["status"] == "offline" and "not shown" in d["message"]
+    assert fb.probe(NOW, path=path)["n"] == 0 and path.read_bytes() == before
