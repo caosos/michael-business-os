@@ -1,10 +1,10 @@
 {
-  "lane06_sha": "633d20188b8db922ae2fd5412db5dea6bb4be629",
+  "lane06_sha": "1ab5ffc0b3e4d07eaca95fe1665d5a7c473a6e17",
   "lane02_sha": "8e4bb4c4ac5a33493fb47a585a0fa571d85e0779",
   "requested_by": "Michael",
   "purpose": "Craigslist listings from genuine saved-search alert e-mails (real format parsed, towns to distances); stale Facebook hidden",
   "refresh_marketplace": false,
-  "verification_attempt": 33,
+  "verification_attempt": 34,
   "owner_bid_watch_seed": {
     "url": "https://wooleyauctioneers.hibid.com/lot/324232426/countyline-32-ton-towable-log-splitter?ref=lot-list",
     "closes_at": "2026-10-13T18:10:00-05:00",
