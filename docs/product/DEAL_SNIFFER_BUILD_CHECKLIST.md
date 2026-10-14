@@ -99,6 +99,21 @@ Recorded from Michael's DS-SOURCE-01 brief. It amends the earlier Facebook/Brigh
 - [x] **GSA pay-by / remove-by as published:** 36 → 301 of 1,072 lots. Live: the 2008 travel trailer shows "Pay by OCT 16 (as published)" and "Remove by OCT 28 (as published)". No year guessed; "within N business days" shown as written.
 - [x] **USPS town names:** Hot Springs National Park, Cleveland and Prim AR point at existing Census entries (place Hot Springs; ZIPs 72030, 72130). Live: 7 Facebook listings gained distances (53.3 / 26.8 / 45.1 mi); 9 out-of-state listings (AL, IL, KS, MO) stay distance UNKNOWN.
 
+## Linode public site (dealsniffers.com) — status Oct 14, ~3:00 AM CT (paused by owner)
+
+Package `deploy/linode` (coordinator `91ac23b`; UI `7c47008` public mode, mbos `50c2bca`, discovery `cda8673`, economics `4bc91f3`, lock `683b1d22fdd5`).
+Done on the Linode by Michael, each with pasted evidence: preflight 0 FAIL/0 WARN; install OK (user `dealsniffer`, /opt/dealsniffer, /var/lib/dealsniffer,
+/etc/dealsniffer); secrets saved (root:dealsniffer 640; owner link skipped); service enabled, backend verify 17/17; nginx acme phase; Let's Encrypt
+certificate for dealsniffers.com + www; nginx https phase; `verify.sh --public` 26/26 VERIFY OK. Chrome: https://dealsniffers.com/home loads;
+Continue with Google reaches Google's account chooser with redirect_uri https://dealsniffers.com/auth/google/callback (client + URI accepted).
+
+**Resume here:**
+1. Michael signs in with Google in the browser (account choice/password/consent are his). Confirm the session lands on dealsniffers.com signed in.
+2. nginx warned "protocol options redefined" for :443 because the DealSniffer site used `http2` while the other sites do not; fixed in the package
+   (no `http2`). Apply on the Linode: `git fetch origin research/agent-01-coordinator`, `git checkout --detach <new sha>`,
+   `sudo bash deploy/linode/nginx_site.sh https`, `bash deploy/linode/verify.sh --public`.
+3. Limited owner/test only: no listing source refreshes on the Linode; backups/restore and multi-user persistence not proven.
+
 ## P0 — Marketplace acceptance (authoritative progress)
 
 Task: P0 Marketplace acceptance, run by Agent 01 (DealSniffer). Started Tuesday, October 13, 2026 — 5:46 PM America/Chicago.
