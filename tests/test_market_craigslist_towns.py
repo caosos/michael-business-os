@@ -12,3 +12,12 @@ def test_town_spellings_resolve():
 def test_unknown_and_junk_stay_unknown():
     for text in ("UNKNOWN", "", "CALL 501-557-6154 FOR AVAILABILITY", "Northwest"):
         assert m._town(text, "AR") is None, text
+
+
+def test_remembered_facebook_only_view_falls_back_to_all(monkeypatch):
+    from operator_ui import market_prefs, market_facebook
+    monkeypatch.setattr(market_prefs, "load", lambda: {"last": {"source": ["facebook"], "radius": ["30"]}})
+    monkeypatch.setattr(market_facebook, "SHOW_HISTORICAL", False)
+    assert market_prefs.recall({"source", "radius"}) == {"source": ["all"], "radius": ["30"]}
+    monkeypatch.setattr(market_facebook, "SHOW_HISTORICAL", True)
+    assert market_prefs.recall({"source", "radius"})["source"] == ["facebook"]

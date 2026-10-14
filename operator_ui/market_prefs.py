@@ -86,7 +86,11 @@ def recall(keys) -> dict:
     last = load().get("last")
     if not isinstance(last, dict):
         return {}
-    return {k: [str(x)[:200] for x in v][:12] for k, v in last.items() if k in keys and isinstance(v, list)}
+    out = {k: [str(x)[:200] for x in v][:12] for k, v in last.items() if k in keys and isinstance(v, list)}
+    from . import market_facebook
+    if not market_facebook.SHOW_HISTORICAL and "source" in out:          # a remembered Facebook-only view would now be empty (owner: no stale FB)
+        out["source"] = [x for x in out["source"] if x != "facebook"] or ["all"]
+    return out
 
 
 def remember(given: dict) -> None:
