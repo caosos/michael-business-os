@@ -1,0 +1,4 @@
+city,state,target,why
+Hot Springs National Park,AR,place:Hot Springs,USPS mailing name of the Census place Hot Springs (ZIPs 71901-71903/71913)
+Cleveland,AR,zip:72030,USPS city for ZIP 72030 (Conway County); not a Census place
+Prim,AR,zip:72130,USPS city for ZIP 72130 (Cleburne County); not a Census place

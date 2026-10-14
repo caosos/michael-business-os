@@ -16,6 +16,7 @@ DEFAULT = Path(__file__).parent / "data" / "gazetteer_us.csv"
 _ZIP = re.compile(r"^\d{5}(?:-\d{4})?$")
 
 
+ALIASES = Path(__file__).parent / "data" / "usps_city_aliases.csv"   # USPS town names that point at an EXISTING Census ZIP or place (no new coordinates)
 CENSUS = (Path(__file__).parent / "data" / "zcta_ar_region.csv", Path(__file__).parent / "data" / "places_ar_region.csv")  # Census 2023, public domain
 
 
@@ -43,12 +44,31 @@ def _read(path, zips: dict, cities: dict, bare: dict) -> None:
         pass
 
 
+def _aliases(zips: dict, cities: dict, bare: dict) -> None:
+    """A mailing name the Census files lack resolves to the Census entry it names; a real Census name always wins."""
+    try:
+        with open(ALIASES, newline="", encoding="utf-8") as f:
+            rows = list(csv.DictReader(f))
+    except OSError:
+        return
+    for r in rows:
+        kind, _, ref = (r.get("target") or "").partition(":")
+        st = (r.get("state") or "").strip().lower()
+        c = zips.get(ref.strip()) if kind == "zip" else cities.get((_norm(ref), st)) if kind == "place" else None
+        name = _norm((r.get("city") or "").strip())
+        if c and name:
+            cities.setdefault((name, st), c)
+            bare.setdefault(name, {}).setdefault(st, c)
+
+
 @lru_cache(maxsize=4)
 def _load(path: str) -> tuple[dict, dict]:
     """With MBOS_GAZETTEER_FILE only that file is read; the default is the small file, then the Census ZIP and place files."""
     zips, cities, bare = {}, {}, {}
     for p in ([path] if path != str(DEFAULT) else [path, *CENSUS]):
         _read(p, zips, cities, bare)
+    if path == str(DEFAULT):
+        _aliases(zips, cities, bare)
     for city, by_state in bare.items():  # a bare name prefers Arkansas, else the first state seen
         cities[(city, "")] = by_state.get("ar") or next(iter(by_state.values()))
     return zips, cities
