@@ -135,3 +135,15 @@ def test_rate_limited_gsa_fetch_waits_a_full_hour(tmp_path, monkeypatch):
     assert cr.refresh_gsa(r, NOW + timedelta(minutes=45)) is None
     assert cr.refresh_gsa(r, NOW + timedelta(minutes=61))["result"] == "failed"
 
+
+def test_gsa_key_comes_from_env_or_host_file_else_demo(tmp_path, monkeypatch):
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.delenv("GSA_API_KEY", raising=False)
+    assert cr.gsa_api_key() == "DEMO_KEY"
+    f = tmp_path / ".config/mbos/secrets/GSA_API_KEY"
+    f.parent.mkdir(parents=True)
+    f.write_text("abcdefghijklmnopqrstuvwxyz0123456789ABCD\n")
+    assert cr.gsa_api_key() == "abcdefghijklmnopqrstuvwxyz0123456789ABCD"
+    monkeypatch.setenv("GSA_API_KEY", "not a key!")
+    assert cr.gsa_api_key() == "DEMO_KEY"                               # malformed never reaches a URL
+

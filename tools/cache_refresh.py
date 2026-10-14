@@ -44,6 +44,18 @@ def _asof(p: Path) -> Optional[datetime]:
         return None
 
 
+def gsa_api_key() -> str:
+    """The owner's free api.data.gov key (env GSA_API_KEY or ~/.config/mbos/secrets/GSA_API_KEY, mode 600), else the shared DEMO_KEY.
+    Never logged. The shared DEMO_KEY allows about 30 calls an hour and 50 a day per address, which the hourly refresh can exhaust."""
+    key = os.environ.get("GSA_API_KEY", "").strip()
+    if not key:
+        try:
+            key = Path("~/.config/mbos/secrets/GSA_API_KEY").expanduser().read_text(encoding="utf-8").strip()
+        except OSError:
+            key = ""
+    return key if re.fullmatch(r"[A-Za-z0-9]{20,64}", key) else "DEMO_KEY"
+
+
 def _valid(p: Path) -> int:
     try:
         rows = json.loads(p.read_text()).get("Results")
@@ -80,7 +92,7 @@ def _refresh_gsa(cache: Path, now: datetime, fetch) -> dict:
         if fetch is None:
             from mbos_discovery.adapter import SearchProfile
             from mbos_discovery.gsa_live import GsaLiveAdapter
-            res = GsaLiveAdapter(tmp, live=True).fetch(SearchProfile("market", "flip"))
+            res = GsaLiveAdapter(tmp, live=True, api_key=gsa_api_key()).fetch(SearchProfile("market", "flip"))
             err = getattr(res, "error", None)
             if err:
                 return {"source": "gsa", "result": "failed", "error": str(getattr(err, "message", err))[:200], "kept": "old cache"}
