@@ -82,6 +82,31 @@ Open P0 finding (not fixed; separate task): every deploy copies `var/lanes/agent
 
 Note: one paid Bright Data job was started during testing. Clicking **Search** (rather than pressing Enter) sends `go=1`, which starts a provider search, for the test query `qqzxnomatch` at 6:07 PM. The Facebook cache is sharded per query, so existing listings were not affected. Later tests used Enter or Apply filters only.
 
+## P1-01 — Auction history in My Bids (issue #2)
+
+Lane 06 `ef18f91` (on top of the P0 release `9f5e14a`). **Status: built and accepted on staging. NOT deployed** (owner decision pending, see the hold note below).
+
+- [x] Preserve existing watch records and bids (re-marking keeps history; pre-P1 records keep their snapshot as observation 1)
+- [x] Watches stay active after OUTBID (counted in the nav)
+- [x] Timestamped observed high bids (stated time, or "time you entered it" when not stated)
+- [x] Observed bid counts
+- [x] Source and provenance on every observation (MANUAL / SNAPSHOT / CONNECTED; source_account_access NONE)
+- [x] Closing-time changes and extensions ("closing extended 1m: 6:10 → 6:11 PM CT")
+- [x] Owner-entered historical observations (backdated entries sort into place and never replace current values)
+- [x] Verified final selling price
+- [x] History kept after bidding closes
+- [x] Chronological history in My Bids
+- [x] Price changes and bid-count deltas
+- [x] Gaps between observations marked (GAP rows; intermediate bids never invented)
+- [x] Manual data distinguished from connected evidence (BidWatchStore receipts, read-only)
+- [x] Account isolation (per-account prefs; BidWatchStore now uses its own per-account file)
+- [x] Regression tests: 11 new + 17 existing bid tests pass; full suite 82 failed / 700 passed / 1 skipped, every failure already in the P0 list
+- [x] Desktop + mobile browser journey on STAGING (headless Chrome 1440×900 and 390×844 touch): 3 observations, 2 gaps, +$175, no horizontal scroll. Claude in Chrome reaches only port 8766, so it cannot open staging
+- [ ] Deploy to EliteDesk
+- [ ] Loaded revision verified
+
+**Hold:** the deploy workflow's `PRE_TEST_PREFS` step copies `var/lanes/agent-06.prev-20261013T033042Z/var/market_prefs.json` over the owner's prefs on every run. My Bids records live in that file, so a deploy rolls the owner's bids and history back to the 03:30Z snapshot. Removing those two lines and backing up the owner's live prefs were both refused by the auto-mode permission check, so the deploy waits for the owner.
+
 ## Current work — in order
 
 - [ ] **Public launch prerequisites:** point `dealsniffers.com` at an HTTPS host, add the Google Search Console TXT record, configure the OAuth brand/client/callback, and prove a real Google sign-in. The domain is registered but currently resolves to GoDaddy parking; no TXT record is present.
