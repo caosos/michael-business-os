@@ -636,3 +636,6 @@ If this document conflicts with a later explicit Michael decision or accepted AD
 
 ## Current /market status pointer (ARYA-0447; 2026-10-10)
 Strict price/distance filtering and the gallery are in flight as **F-51** (amended scope: `docs/handoff/F-51-amendment.md`), with **F-52** as follow-on. Code complete: no. Staging acceptance: no. Live acceptance: no (owner-gated reload). Known defect and history: `docs/operations/AI_PROJECT_OPERATING_BLUEPRINT.md`, "Troubleshooting history".
+
+## Owner direction — October 13, 2026 (no paid listing providers)
+DealSniffer must become a useful, low-cost local buying-opportunity platform, not a paid scraping operation. Michael will not pay for listings, scraping subscriptions, third-party listing APIs or data feeds; paid-provider requests are denied in code (DS-SOURCE-01). Previously retrieved Facebook listings remain only as a labelled historical cache. The product goal, primary markets, economics, source roadmap S1–S9 and source acceptance rule are recorded in `docs/product/DEAL_SNIFFER_BUILD_CHECKLIST.md`; where this document says otherwise, that direction wins.

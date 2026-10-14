@@ -1,6 +1,6 @@
 # DealSniffer — Active Product Checklist
 
-Updated: Tuesday, October 13, 2026 — 11:40 AM America/Chicago
+Updated: Tuesday, October 13, 2026 — evening, America/Chicago (owner direction: no paid listing providers; DS-SOURCE-01)
 
 This is the short working checklist. Completed engineering/watchdog history remains intact in [the archive](archive/DEAL_SNIFFER_BUILD_CHECKLIST_through_2026-10-12.md). Receipts remain append-only in `docs/receipts/`.
 
@@ -12,9 +12,9 @@ A personalized local-deal marketplace, beginning in Conway. It covers resale inv
 
 - [x] Customer navigation is limited to **Browse, Saved, My bids, Sell, Settings**. Queue, Wanted, Intake, receipt ledger, DRY-RUN, system state, and other operator controls are absent from customer pages.
 - [x] Marketplace sources and categories use independent checkboxes; several may be selected together and applied with one control.
-- [x] Search is separate from filtering. Bright Data Facebook retrieval is configured; the latest host proof contains 20 Facebook URLs and 20 photos for the `trailer` / `72032` / 30-mile provider query.
+- [x] Search is separate from filtering. **Superseded Oct 13 (owner direction): paid Facebook retrieval through Bright Data is OFF.** The listings it retrieved earlier remain as a labelled HISTORICAL CACHE with their retrieval time; no Search, Run, refresh, deploy or credential can start a paid request (DS-SOURCE-01).
 - [x] The large search bar now explicitly submits its current text with the selected filters on click or Enter. Loaded host proof retained a guaranteed-no-match query in the field and changed the lineup to **0 results found** instead of leaving the prior cards onscreen.
-- [x] The deployment proof can no longer overwrite Michael's remembered filters. Repair run 38430391700 succeeded at 11:26 AM America/Chicago on October 13, restored the actual saved owner choices, loaded 11 listings with photos, and left the search field clear.
+- [x] The deployment proof can no longer overwrite Michael's remembered filters or My Bids. **Corrected Oct 13:** the one-time `PRE_TEST_PREFS` restore had stayed in the workflow and copied the 03:30Z snapshot over the owner file on every deploy (seen in P0). DS-SOURCE-01 removed it; run 38504661130 left the owner file byte-identical.
 - [x] Loaded cards show photos, readable source names, View, Save, Hide, and responsive desktop/mobile layouts. The observed owner page showed 10 listing cards from Facebook Marketplace and regional auction sources.
 - [x] Per-account preference storage and Settings UI exist for city/ZIP, radius, and categories. Local owner mode preserves Michael's existing choices; a new authenticated account does not inherit them.
 - [x] Customer-owned preferences, saved/hidden records, bid watches, mail delivery receipts, and seller submissions resolve through an opaque account storage key; customer form data cannot select another account.
@@ -38,6 +38,56 @@ Loaded proof:
 - Facebook provider proof: Bright Data credential configured; 20 original Facebook URLs and 20 photos in the provider cache
 - Focused account/OAuth/delivery/source/bid/sell/settings/market tests: 94 passed, 2 skipped
 - Search submission regression suite: 41 passed, 1 skipped
+
+## Owner direction — October 13, 2026: a low-cost local buying-opportunity platform
+
+Recorded from Michael's DS-SOURCE-01 brief. It amends the earlier Facebook/Bright Data plan; this checklist stays the single plan.
+
+**Cost rule.** DealSniffer does not pay for listings: no scraping subscriptions, third-party listing APIs, data feeds or provider recharges, and no new billing commitments. Conserve AI subscription usage. Paid-provider requests are denied in code (S1, below).
+
+**Goal.** Genuine local buying opportunities from several sources on one screen. Each opportunity shows, when genuinely known: source and original URL; photo where permitted; asking price or observed auction price; location and distance; observed time and freshness; estimated all-in acquisition cost (price, fees, transport); estimated repairs and their cost; likely resale range; expected profit; estimated time to sell; uncertainty and provenance. Anything missing is shown as **UNKNOWN**. Never invent photos, prices, expirations, distances, inventory, availability or sold comparables.
+
+**Primary markets.** Around Conway, AR, default about **50 miles**. First: utility and equipment trailers; donor trailer frames and boat trailers; small engines and lawn equipment; tools and machinery; outboard motors and related equipment. A farther item needs enough extra margin to pay for travel, fuel and time.
+
+**Economics.** Optimize actual expected profit, all-in acquisition cost, return on deployed capital, time to cash, repair effort and uncertainty, travel cost and capital turnover. Doubling the money is preferred, not required; a quick ~$400 profit can justify a larger purchase when capital turns fast. No rigid universal profit minimum.
+
+### Source roadmap (documented; only S1 is implemented)
+
+- [x] **S1 — Eliminate paid-provider execution** in the loaded app and the deploy (DS-SOURCE-01, below; two out-of-app paths remain listed there).
+- [ ] **S2 — Prove one free, authorized source live.** Fresh records from one existing free route visible in the loaded app; prefer the existing GSA Auctions official-API adapter if its current terms and operation allow.
+- [ ] **S3 — Permitted per-source integrations:** Craigslist, Facebook Marketplace, local auctioneers, GovDeals, Public Surplus, others. For each: verify current access terms; keep discovery, caching, display and republication separate; browser access is not API or scraping permission; never bypass logins, CAPTCHAs or blocks; owner approval before any outreach or credential.
+- [ ] **S4 — Free auctioneer data:** CSV files, catalog exports, official feeds and permission-based inventory sharing. Keep auction EVENTS distinct from individual LOTS.
+- [ ] **S5 — Reuse owner-entered finds and reviewed vendor imports,** keeping MANUAL / IMPORTED attribution. A manually saved link is not automatic discovery.
+- [ ] **S6 — Remember several selected sources, categories, location and radius per account.**
+- [ ] **S7 — "Auction ending within" filter** in hours or days.
+- [ ] **S8 — Keep observing tracked auctions after OUTBID** through a verified final outcome where legitimate evidence exists (P1-01 manual history is the start).
+- [ ] **S9 — Keep asking prices, observed high bids, estimated valuations and verified realized prices as separate fields.**
+
+**Source acceptance (every future source task).** A genuinely current record renders in the LOADED Marketplace with original URL, source identity, observed timestamp, observed price when known, and real location and photo when available; missing fields read UNKNOWN. A repeat refresh creates no duplicates. Verify remembered source filters, account isolation, the loaded revision, and desktop and mobile browser evidence. Record the source and the exact record count. A cache does not prove live discovery.
+
+### DS-SOURCE-01 — no-paid-provider enforcement (acceptance)
+
+**15/15 PASS — loaded on the EliteDesk.** Release lane 06 `a9cabb070a6ac2b625992afef3c59d8996750a0e` (built on the P0 release `c6bd4b8`; the undeployed P1-01 is NOT included), merged into the lane branch as `174cf8b`; deploy commit `7ae1672`; run https://github.com/caosos/michael-business-os/actions/runs/38504661130 (success); `var/lanes/agent-06/ARTIFACT` sha=a9cabb0…; `reload_ui.sh --verify-only 8766` VERIFY OK. Proof artifact: `credential_configured=true`, `paid_provider_requests=DENIED`, 180 historical Facebook records (last retrieved 2026-10-13 21:07 UTC, before this task), 76 within 30 mi, 50 rendered with photos. Facebook cache file unchanged (mtime 16:07:01 CDT) through the deploy and every browser test; no pending marker; no provider line in `var/ui.log`. Owner `market_prefs.json` byte-identical across the deploy (1 bid, filters kept).
+
+- [x] Initial Marketplace load — Chrome: Facebook row "historical cache · retrieval off", still selectable; test: zero attempts
+- [x] Clicking Search — Chrome, Facebook ticked, Search clicked (go=1): 13 results, 12 Facebook cards stamped "cached 2026-10-13", cache unchanged
+- [x] Pressing Enter — Chrome: "trailer" + Enter, results updated, nothing pending
+- [x] Running a saved search — HTTP test against a real test server (`?run=<id>`), zero attempts. The live account has no saved search, so no live click was possible
+- [x] Search all sources — Chrome: All sources + Search (go=1), 13 results, nothing pending
+- [x] Selecting Facebook — Chrome and test
+- [x] Refreshing — Chrome F5 on a go=1 page, unchanged; test reloads
+- [x] Direct backend refresh — `market_facebook.load(refresh=True, client=…)` and `market_sources.load_source(..., _facebook_refresh=True)` call nothing
+- [x] Direct client — `BrightDataClient(...)`, an instance that skipped `__init__`, `_call`, `search`, `search_many`, `resume` and `_urllib` all raise `PaidProviderDenied` before any request
+- [x] Deployment workflow and proof paths — density loop and provider probe removed; a static test forbids them; the real run printed `paid_provider_requests=DENIED`
+- [x] Configured credentials cannot bypass — env keys, key file and enable-style variables set in tests; host has a configured key and nothing was sent
+- [x] Historical cache read-only and attributed — bytes and mtime unchanged in tests and on the host; source, retrieval time and age shown; registry state NOT CONNECTED
+- [x] Ordinary filters still work — keyword, source, category and radius changes in Chrome; full suite has no new failures
+- [x] Account isolation — test_account_isolation, test_accounts, test_account_settings, test_account_delivery pass on the release tree
+- [x] Desktop and mobile — Chrome 1870 px desktop (screenshot `/tmp/claude-chrome-screenshots-Empe8q/screenshot-1791947457723-3.jpg`); headless Chrome 390×844 touch on the loaded app: label shown, Search tapped (go=1), page width 390 = viewport
+
+**Still able to call Bright Data on this host (not changed by this task):**
+- Lane 02 `mbos_discovery.adapters.BrightDataFbMarketplaceAdapter` through the manual `tools/b44_live_smoke.py` (another builder's lane; not imported by the app, the deploy or any scheduled job).
+- The stage server on port 8790 (tmux `mbos-stage`, another session's, older lane 06 `bbc80ec`) still has the old Search-refresh code. Stopping it is the smallest fix.
 
 ## P0 — Marketplace acceptance (authoritative progress)
 
@@ -127,4 +177,4 @@ Point `dealsniffers.com` at the chosen public HTTPS host and add the Google Sear
 
 ## Connection labels
 
-Use only: `LIVE CONNECTED`, `EMAIL CONNECTED`, `IMPORTED`, `MANUAL`, `NOT CONNECTED`, or `BLOCKED`. Fixtures, configuration, and screenshots alone never count as live.
+Use only: `LIVE CONNECTED`, `EMAIL CONNECTED`, `IMPORTED`, `MANUAL`, `HISTORICAL CACHE`, `NOT CONNECTED`, or `BLOCKED`. Fixtures, configuration, caches and screenshots alone never count as live. `HISTORICAL CACHE` means records retrieved earlier through a route that is now switched off: readable, attributed and dated, never live.

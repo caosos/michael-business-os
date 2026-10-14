@@ -19,3 +19,8 @@
 - New READY work A-22..A-27, B-20/B-21, C-21/C-22, D-18, E-17..E-19, F-18..F-20, G-11 (READY_QUEUE, section "Deal Sniffer product package").
 - Nothing here blocks the dry-run release candidate; C-19 (ADR-0012) stays P0.
 - A later explicit Michael decision or accepted ADR overrides the package; amend with provenance.
+
+## Amendment — 2026-10-13 (owner direction, DS-SOURCE-01)
+- DealSniffer does not pay for listing data: no scraping subscriptions, third-party listing APIs, data feeds or provider recharges. Paid-provider requests are denied in code; a configured credential authorizes nothing. Re-enabling one needs a new explicit Michael decision and a code change.
+- Level 1 is restated as a low-cost local buying-opportunity platform near Conway (about 50 miles first), optimized for expected profit, all-in cost, return on capital, time to cash, repair uncertainty, travel and turnover, with no rigid profit floor.
+- The source roadmap (S1–S9) and the per-source acceptance rule live in `docs/product/DEAL_SNIFFER_BUILD_CHECKLIST.md`, the single plan.
