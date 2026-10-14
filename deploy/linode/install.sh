@@ -21,7 +21,7 @@ say() { echo "== $*"; }
 [ -n "$PY" ] || die "python${PYTHON_MINOR} not found"
 for v in UI_SHA MBOS_SHA DISCOVERY_SHA ECONOMICS_SHA; do git -C "$REPO" cat-file -e "${!v}^{commit}" 2>/dev/null || die "$v ${!v} not in $REPO (git fetch origin)"; done
 LOCKHASH=$(cat "$HERE/requirements.lock" "$HERE/build-requirements.lock" | sha256sum | cut -c1-12)
-REL_ID="ui-${UI_SHA:0:12}_mbos-${MBOS_SHA:0:12}_disc-${DISCOVERY_SHA:0:12}_econ-${ECONOMICS_SHA:0:12}_lock-${LOCKHASH}"
+REL_ID="ui-${UI_SHA:0:12}_mbos-${MBOS_SHA:0:12}_disc-${DISCOVERY_SHA:0:12}_econ-${ECONOMICS_SHA:0:12}_lock-${LOCKHASH}_v3"   # v3: release also carries tools/refresh_auction_events.py and tools/refresh_alert_mail.py
 REL="$OPT/releases/$REL_ID"; VENV="$OPT/venvs/lock-$LOCKHASH"
 
 # A path we create gets the marker; a path that exists without it belongs to someone else and is never touched.
@@ -37,7 +37,9 @@ say "ownership check (nothing is created until every path is clear)"
 for p in "$OPT" "$OPT/releases" "$OPT/venvs" "$DATA" "$DATA/cache" "$DATA/accounts" "$CONF"; do
   [ ! -e "$p" ] || [ -e "$p/$MARK" ] || die "$p exists and is not DealSniffer-managed; nothing was changed"
 done
-for f in "$CONF/dealsniffer.env" "$UNIT"; do check_file_free "$f"; done
+RUNIT="$R/etc/systemd/system/dealsniffer-refresh.service"; RTIMER="$R/etc/systemd/system/dealsniffer-refresh.timer"
+for f in "$CONF/dealsniffer.env" "$UNIT" "$RUNIT" "$RTIMER"; do check_file_free "$f"; done
+[ ! -e "$OPT/bin" ] || [ -e "$OPT/bin/$MARK" ] || die "$OPT/bin exists and is not DealSniffer-managed; nothing was changed"
 if [ "$TEST" != 1 ] && id "$SVC" >/dev/null 2>&1 && [ "$(getent passwd "$SVC" | cut -d: -f6)" != /var/lib/dealsniffer ]; then
   die "user $SVC exists with another home; nothing was changed"; fi
 echo "all target paths are free or DealSniffer-managed"
@@ -54,7 +56,7 @@ if [ "$TEST" != 1 ]; then
 fi
 
 say "directories"
-claim_dir "$OPT" 755 root root; claim_dir "$OPT/releases" 755 root root; claim_dir "$OPT/venvs" 755 root root
+claim_dir "$OPT" 755 root root; claim_dir "$OPT/releases" 755 root root; claim_dir "$OPT/venvs" 755 root root; claim_dir "$OPT/bin" 755 root root
 claim_dir "$DATA" 750 "$SVC" "$SVC"; claim_dir "$DATA/cache" 750 "$SVC" "$SVC"; claim_dir "$DATA/accounts" 700 "$SVC" "$SVC"
 claim_dir "$CONF" 750 root "$SVC"
 
@@ -62,7 +64,7 @@ say "release $REL_ID"
 if [ -f "$REL/BUILD_INFO" ]; then echo "release already built (reused)"; else
   [ ! -e "$REL" ] || die "$REL exists but is incomplete (no BUILD_INFO); move it aside and re-run"
   stage="$(mktemp -d "$OPT/releases/.stage-XXXXXX")"
-  git -C "$REPO" archive "$UI_SHA" operator_ui comms_spec | tar -x -C "$stage"
+  git -C "$REPO" archive "$UI_SHA" operator_ui comms_spec tools/refresh_auction_events.py tools/refresh_alert_mail.py | tar -x -C "$stage"
   ln -s "$( [ "$TEST" = 1 ] && echo "$DATA" || echo /var/lib/dealsniffer )" "$stage/var"   # every repo-relative var/ default lands in the persistent data dir
   ln -s "$VENV" "$stage/venv"                                               # the release names its own pinned venv
   printf 'release=%s\nui=%s\nmbos=%s\ndiscovery=%s\neconomics=%s\nlock=%s\nbuilt_utc=%s\n' "$REL_ID" "$UI_SHA" "$MBOS_SHA" "$DISCOVERY_SHA" "$ECONOMICS_SHA" "$LOCKHASH" "$(date -u +%FT%TZ)" > "$stage/BUILD_INFO"
@@ -111,8 +113,10 @@ EOF
 say "systemd unit (installed, NOT started)"
 check_file_free "$UNIT"; mkdir -p "$(dirname "$UNIT")"
 sed -e "s|@PORT@|$PORT|g" "$HERE/dealsniffer.service" > "$UNIT.tmp" && mv "$UNIT.tmp" "$UNIT"; chmod 644 "$UNIT"
+install -m 644 "$HERE/dealsniffer-refresh.service" "$RUNIT"; install -m 644 "$HERE/dealsniffer-refresh.timer" "$RTIMER"
+install -m 755 "$HERE/refresh.py" "$OPT/bin/refresh.py"
 if [ "$TEST" != 1 ]; then systemctl daemon-reload; fi
-echo "unit at $UNIT"
+echo "unit at $UNIT; refresh service + timer installed (timer NOT enabled; the owner enables it)"
 
 say "activate release (symlink only)"
 CUR="$OPT/current"

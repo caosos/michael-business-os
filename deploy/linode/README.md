@@ -41,6 +41,18 @@ URIs include exactly `https://dealsniffers.com/auth/google/callback`.
 7. `sudo bash deploy/linode/nginx_site.sh https && bash deploy/linode/verify.sh --public` — HTTPS site and public checks.
 8. Google sign-in tried in a browser at https://dealsniffers.com/home.
 
+## Listings on the public site (owner decision to enable)
+The site starts with no listings. `install.sh` also installs `dealsniffer-refresh.service` + `.timer` (hourly) but does NOT enable them.
+Free, permitted routes only: GSA Auctions official API, the auctioneers' own event pages (Wooley, Wilson, Blackmon) and saved-search ALERT
+E-MAILS (Craigslist, GovDeals, Public Surplus) from the dedicated mailbox. Never scraping Craigslist/Facebook/HiBid/Proxibid; no paid provider.
+* Optional free GSA key: `read -rs k && printf %s "$k" | sudo install -o root -g dealsniffer -m 640 /dev/stdin /etc/dealsniffer/gsa.key && unset k`
+  (without it the shared DEMO_KEY is used; one call an hour, backs off on 429).
+* Optional alerts mailbox (needed for Craigslist): `sudo bash deploy/linode/configure_alerts.sh` (Gmail app password, hidden).
+* Turn on and run once now: `sudo systemctl enable --now dealsniffer-refresh.timer && sudo systemctl start dealsniffer-refresh.service`
+  then `journalctl -u dealsniffer-refresh -n 20 --no-pager`. Turn off: `sudo systemctl disable --now dealsniffer-refresh.timer`.
+* Craigslist listings appear only after Craigslist sends alert e-mails: in Craigslist (logged in as the alerts address) save searches with
+  e-mail alerts on, e.g. "trailer", "log splitter", "outboard" in the Little Rock / Central Arkansas areas.
+
 ## Rollback (data and secrets are never deleted)
 * Take the site off nginx: `sudo bash deploy/linode/rollback.sh site`
 * Stop the app: `sudo bash deploy/linode/rollback.sh stop`

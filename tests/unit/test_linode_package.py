@@ -40,3 +40,39 @@ def test_service_is_unprivileged_hardened_and_public_only():
     e = (D / "install.sh").read_text()
     assert "MBOS_PUBLIC_DEPLOYMENT=1" in e and "MBOS_GOOGLE_REDIRECT_URI=https://dealsniffers.com/auth/google/callback" in e
     assert "--require-hashes" in e and "--no-build-isolation" in e and "BRIGHTDATA" not in e
+
+
+def _refresh(tmp_path, monkeypatch):
+    import importlib.util
+    monkeypatch.setenv("MBOS_GSA_CACHE", str(tmp_path / "cache" / "gsa-active-auctions.json"))
+    monkeypatch.setenv("DS_GSA_KEY_FILE", str(tmp_path / "no-key"))
+    monkeypatch.setenv("DS_ALERTS_ENV", str(tmp_path / "no-alerts.env"))
+    spec = importlib.util.spec_from_file_location("ds_refresh", D / "refresh.py")
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m
+
+
+def test_linode_refresh_gsa_backs_off_and_only_replaces_with_a_valid_file(tmp_path, monkeypatch):
+    import json
+    from datetime import datetime, timedelta, timezone
+    m = _refresh(tmp_path, monkeypatch)
+    now = datetime(2026, 10, 14, 9, 0, tzinfo=timezone.utc)
+    assert m.gsa_key() == "DEMO_KEY"
+    assert m.refresh_gsa(now, lambda tmp: "429 OVER_RATE_LIMIT")["result"] == "failed"
+    assert m.refresh_gsa(now + timedelta(minutes=45), lambda tmp: None)["result"] == "backing off"     # 429 -> wait a full hour
+
+    def good(tmp):
+        tmp.write_text(json.dumps({"Results": [{"lotNo": 1}, {"lotNo": 2}]}))
+        tmp.with_suffix(".asof").write_text("2026-10-14T10:01:00Z")
+    out = m.refresh_gsa(now + timedelta(minutes=61), good)
+    assert out["result"] == "refreshed" and out["lots_in_file"] == 2 and out["key"] == "DEMO_KEY"
+    assert m.refresh_gsa(now + timedelta(minutes=62), good)["result"] == "not due"
+    assert not list((tmp_path / "cache").glob(".gsa-refresh-*"))
+
+
+def test_linode_refresh_alerts_stay_off_until_configured(tmp_path, monkeypatch):
+    m = _refresh(tmp_path, monkeypatch)
+    assert m.refresh_alerts()["result"] == "not set up"
+    code = (D / "refresh.py").read_text()
+    assert "market_facebook" not in code and "api.brightdata" not in code and "BrightData" not in code

@@ -1,0 +1,12 @@
+# DealSniffer-managed. Hourly listings refresh; enabled only by the owner: sudo systemctl enable --now dealsniffer-refresh.timer
+[Unit]
+Description=Hourly DealSniffer listings refresh
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=1h
+RandomizedDelaySec=5min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

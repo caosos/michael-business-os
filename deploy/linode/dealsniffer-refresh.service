@@ -1,0 +1,32 @@
+# DealSniffer-managed. One listings refresh (GSA official API + auctioneers' own event pages). Started by dealsniffer-refresh.timer.
+[Unit]
+Description=DealSniffer listings refresh (free official/own-site sources only)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=dealsniffer
+Group=dealsniffer
+WorkingDirectory=/opt/dealsniffer/current
+EnvironmentFile=/etc/dealsniffer/dealsniffer.env
+Environment=PYTHONPATH=/opt/dealsniffer/current HOME=/var/lib/dealsniffer
+ExecStart=/opt/dealsniffer/current/venv/bin/python /opt/dealsniffer/bin/refresh.py
+TimeoutStartSec=20min
+UMask=0077
+MemoryMax=400M
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/lib/dealsniffer
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+RestrictNamespaces=yes
+LockPersonality=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+SystemCallArchitectures=native
