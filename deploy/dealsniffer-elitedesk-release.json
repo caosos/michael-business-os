@@ -1,10 +1,10 @@
 {
-  "lane06_sha": "ba79e37076f84ae55103b95df0b787df5b0d85be",
+  "lane06_sha": "1e84c6c410336af7cff623067b051b9857d0e065",
   "lane02_sha": "cda867347505ac8e27945b2aa1ae6a3823939ae2",
   "requested_by": "Michael",
-  "purpose": "P1-01: auction history in My Bids (append-only observations, gaps, closing extensions, verified final price); deploy keeps the owner's bids and filters",
+  "purpose": "Owner Google login opens owner data; Ending-within filter (S7); GSA pay/remove dates as published; USPS town aliases",
   "refresh_marketplace": false,
-  "verification_attempt": 29,
+  "verification_attempt": 30,
   "owner_bid_watch_seed": {
     "url": "https://wooleyauctioneers.hibid.com/lot/324232426/countyline-32-ton-towable-log-splitter?ref=lot-list",
     "closes_at": "2026-10-13T18:10:00-05:00",
