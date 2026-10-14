@@ -62,7 +62,7 @@ Recorded from Michael's DS-SOURCE-01 brief. It amends the earlier Facebook/Brigh
 - [ ] **S4 — Free auctioneer data:** CSV files, catalog exports, official feeds and permission-based inventory sharing. Keep auction EVENTS distinct from individual LOTS.
 - [ ] **S5 — Reuse owner-entered finds and reviewed vendor imports,** keeping MANUAL / IMPORTED attribution. A manually saved link is not automatic discovery.
 - [ ] **S6 — Remember several selected sources, categories, location and radius per account.**
-- [ ] **S7 — "Auction ending within" filter** in hours or days.
+- [x] **S7 — "Auction ending within" filter** in hours or days. LIVE in lane 06 `1e84c6c` (run 38512427515): 2h/6h/12h/1d/2d/3d/7d in the sidebar; a hard filter (grid and facet counts follow it), kept in page links and remembered filters. Live: 150 mi + 1 day = 2 auctions; 2 days = 12 (GSA date-only lots included, counted to 11:59 PM CT); phone 3 days = 12, no side scroll.
 - [ ] **S8 — Keep observing tracked auctions after OUTBID** through a verified final outcome where legitimate evidence exists (P1-01 manual history is the start).
 - [ ] **S9 — Keep asking prices, observed high bids, estimated valuations and verified realized prices as separate fields.**
 
@@ -91,6 +91,13 @@ Recorded from Michael's DS-SOURCE-01 brief. It amends the earlier Facebook/Brigh
 **Still able to call Bright Data on this host (not changed by this task):**
 - Lane 02 `mbos_discovery.adapters.BrightDataFbMarketplaceAdapter` through the manual `tools/b44_live_smoke.py` (another builder's lane; not imported by the app, the deploy or any scheduled job).
 - The stage server on port 8790 (tmux `mbos-stage`, another session's, older lane 06 `bbc80ec`) still has the old Search-refresh code. Stopping it is the smallest fix.
+
+### Done Oct 14 (lane 06 `1e84c6c`, run https://github.com/caosos/michael-business-os/actions/runs/38512427515; owner prefs unchanged by the deploy)
+
+- [x] **Owner's own Google login opens the owner data.** `MBOS_OWNER_GOOGLE_EMAIL` (asked for by `tools/setup_google_oauth.sh`); a Google-verified e-mail match serves the owner storage; any other login stays isolated; Settings says "linked to the owner account". Proven by an HTTP sign-in test (owner sees owner bids; another login does not). Live sign-in waits on the owner's Google OAuth client.
+- [x] **S7 Ending within** (above).
+- [x] **GSA pay-by / remove-by as published:** 36 → 301 of 1,072 lots. Live: the 2008 travel trailer shows "Pay by OCT 16 (as published)" and "Remove by OCT 28 (as published)". No year guessed; "within N business days" shown as written.
+- [x] **USPS town names:** Hot Springs National Park, Cleveland and Prim AR point at existing Census entries (place Hot Springs; ZIPs 72030, 72130). Live: 7 Facebook listings gained distances (53.3 / 26.8 / 45.1 mi); 9 out-of-state listings (AL, IL, KS, MO) stay distance UNKNOWN.
 
 ## P0 — Marketplace acceptance (authoritative progress)
 
