@@ -180,6 +180,7 @@ def test_public_pages_complete_browser_flow_and_keep_accounts_out_of_operator_ro
         port = httpd.server_address[1]
         status, _, _, home = request(port, "GET", "/", "deals.example")
         assert status == 200 and "Continue with Google" in home and "openid email profile" not in home
+        assert "id='product-header'" in home and "Operator UI" not in home and "DRY-RUN" not in home
         for path, words in (("/privacy", "does not request Gmail access"), ("/terms", "does not bid, buy, pay")):
             status, _, _, body = request(port, "GET", path, "deals.example")
             assert status == 200 and words in body and "Privacy" in body and "Terms" in body

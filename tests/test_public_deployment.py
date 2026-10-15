@@ -72,6 +72,23 @@ def test_public_pages_and_sign_in_redirect_use_the_exact_https_callback(site):
         assert status == 200 and words in body, path
     status, location, _, _ = request(port, "GET", "/", HOST)
     assert status == 200 or (status in (302, 303) and location.startswith("/home"))
+
+
+def test_public_root_and_home_carry_the_customer_chrome_never_the_operator_shell(site):
+    """Issue #6: https://dealsniffers.com/ rendered the DRY-RUN banner and the Operator UI header around the customer homepage."""
+    _, port, _ = site
+    pages = {}
+    for path in ("/", "/home"):
+        status, _, _, body = request(port, "GET", path, HOST)
+        assert status == 200 and "Continue with Google" in body, path
+        assert "id='product-header'" in body and "href='/privacy'" in body, path
+        assert "Operator UI" not in body and "DRY-RUN" not in body and "id='admin-menu'" not in body, path
+        pages[path] = body
+    assert pages["/"] == pages["/home"]
+    cookie = sign_in(port)
+    for path in ("/", "/home"):
+        status, _, _, body = request(port, "GET", path, HOST, cookie=cookie)
+        assert status == 200 and "id='product-header'" in body and "Operator UI" not in body and "DRY-RUN" not in body, path
     status, location, headers, _ = request(port, "GET", "/auth/google/start", HOST)
     q = parse_qs(urlparse(location).query)
     assert status == 302 and location.startswith(accounts.GOOGLE_AUTHORIZATION_ENDPOINT)

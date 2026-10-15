@@ -162,7 +162,9 @@ def _notices(state):
 
 
 def _customer_path(path: str) -> bool:
-    return (path in ("/home", "/privacy", "/terms") or path.startswith("/auth/") or
+    # "/" is the customer home page on the public host (it only ever redirects on the
+    # operator host), so it carries the customer chrome, never the operator shell.
+    return (path in ("/", "/home", "/privacy", "/terms") or path.startswith("/auth/") or
             path == "/settings" or path.startswith("/settings/") or path == "/sell" or
             path.startswith("/sell/") or path == "/market" or path.startswith("/market/"))
 
