@@ -128,24 +128,24 @@
  "currently_running": null,
  "delivery_interface": {
   "claude_cli": true,
-  "quota": "latest reading is 13165 min old (older than 45)",
+  "quota": "latest reading is 21504 min old (older than 45)",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-22T04:08:16Z",
+ "generated_at": "2026-10-27T23:07:22Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "no live Claude session (awaiting connection)",
   "note": "pickup does not need the interactive session",
   "state": "STOPPED"
  },
- "pid": 592613,
+ "pid": 1066,
  "receipts": "var/pickup/receipts.jsonl (hash-chained, local) and docs/receipts/pickup/<id>.md on the coordinator branch",
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-22T04:08:16Z",
-  "pid": 592613,
+  "observed_at": "2026-10-27T23:07:22Z",
+  "pid": 1066,
   "source": "inbox_pickup process",
   "status": "idle",
   "ttl_sec": 1200
@@ -154,7 +154,7 @@
   "ack_branch": "research/agent-01-coordinator",
   "inbox_ref": "origin/liaison/aria-to-agent-01",
   "interval_s": 60,
-  "started_at": "2026-10-11T16:31:59Z",
+  "started_at": "2026-10-27T23:06:21Z",
   "status": "running"
  }
 }
