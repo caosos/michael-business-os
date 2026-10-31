@@ -128,11 +128,11 @@
  "currently_running": null,
  "delivery_interface": {
   "claude_cli": true,
-  "quota": "latest reading is 26734 min old (older than 45)",
+  "quota": "latest reading is 26744 min old (older than 45)",
   "quota_allows_a_run": true,
   "side_worktree": "/home/michaelos/business-os-worktrees/inbox-side"
  },
- "generated_at": "2026-10-31T14:17:39Z",
+ "generated_at": "2026-10-31T14:27:42Z",
  "host": "caoscare1-hp-elitedesk",
  "interactive_coordinator": {
   "decision": "session is 'waiting', not idle (it will see the work on its own sync)",
@@ -144,7 +144,7 @@
  "schema": "mbos.pickup_health/1",
  "session": {
   "name": "mbos-pickup",
-  "observed_at": "2026-10-31T14:17:39Z",
+  "observed_at": "2026-10-31T14:27:42Z",
   "pid": 1089,
   "source": "inbox_pickup process",
   "status": "idle",
